@@ -13,25 +13,54 @@ vector orig (int[ARRAY_LEN] input, int x, int t20) {
     return vec_add(vec_add(vec_mul(cast_uint8vec_to_int16vec(ramp(input, ((x*128) + t20), 1, 128)), broadcast(cast_int32_to_int16(3), 128)), vec_mul(cast_uint8vec_to_int16vec(ramp(input, (((x*128) + t20) + 1), 1, 128)), broadcast(cast_int32_to_int16(2), 128))), cast_uint8vec_to_int16vec(ramp(input, (((x*128) + t20) + 2), 1, 128)));
 }
 
-vector vtmpy (int[ARRAY_LEN] buffer, int base, int stride, int lanes, int[2] kernel) {
-    // Force sketch to unroll the loop
-    if (lanes == 128) {
-        int[128] data;
-        for (int i=0; i<128; i++)
-            data[i] = buffer[base + (i*stride)]*kernel[0] + buffer[base+ (stride * (i+1))]*kernel[1] + buffer[base + ((i+2)*stride)];//; //buffer[base + (i*stride)]*kernel[0];// + buffer[i+1]*kernel[1] + buffer[i+2];
-        return new vector(lanes=128, data=data);
-    }
-    else {
-        assert false : "Unexpected number of lanes";
-    }
+generator int index_gen ([int N], int[N] exprs) {
+    int i = ??(3);
+    int c = ??(3);
+
+    int expr = exprs[i];
+    return {| expr | expr + c | expr - c |};
 }
 
-vector synth (int[ARRAY_LEN] input, int x, int t20) {
-    int base = (x*128) + t20;
+generator vector vdmpy_gen (int[ARRAY_LEN] input, int x, int t20) {
+    int base = index_gen({((x*128) + t20), ((x*128) + t20) + 1, ((x*128) + t20) + 2});
     int stride = 1;
     int lanes = 128;
-    int[2] kernel = {3, 2};
+    int[2] kernel = {};
+    repeat(i : 2) {
+        kernel[i] = {| 3 | 2 |};
+    };
+    return vdmpy(input, base, stride, lanes, kernel);
+}
+
+generator vector vtmpy_gen (int[ARRAY_LEN] input, int x, int t20) {
+    int base = index_gen({((x*128) + t20), ((x*128) + t20) + 1, ((x*128) + t20) + 2});
+    int stride = 1;
+    int lanes = 128;
+    int[2] kernel = {};
+    repeat(i : 2) {
+        kernel[i] = {| 3 | 2 |};
+    };
     return vtmpy(input, base, stride, lanes, kernel);
+}
+
+generator vector vrmpy_gen (int[ARRAY_LEN] input, int x, int t20) {
+    int base = index_gen({((x*128) + t20), ((x*128) + t20) + 1, ((x*128) + t20) + 2});
+    int stride = 1;
+    int lanes = 128;
+    int[4] kernel = {};
+    repeat(i : 4) {
+        kernel[i] = {| 3 | 2 |};
+    };
+    return vrmpy(input, base, stride, lanes, kernel);
+}
+
+generator vector synth (int[ARRAY_LEN] input, int x, int t20) {
+    if (??)
+        return vdmpy_gen(input, x, t20);
+    else if (??)
+        return vtmpy_gen(input, x, t20);
+    else
+        return vrmpy_gen(input, x, t20);
 }
 
 harness void main (int x, int t20, int[ARRAY_LEN] input) {

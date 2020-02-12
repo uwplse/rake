@@ -82,3 +82,49 @@ bit vec_eq (vector vec1, vector vec2) {
         assert false : "Unexpected number of lanes";
     }
 }
+
+// This functions models a hexagon.vdmpy instruction
+vector vdmpy (int[ARRAY_LEN] buffer, int base, int stride, int lanes, int[2] kernel) {
+    // Force sketch to unroll the loop
+    if (lanes == 128) {
+        int[128] data;
+        for (int i=0; i<128; i++)
+            data[i] = buffer[base + (stride * i)] * kernel[0] + buffer[base + (stride * (i+1))] * kernel[1];
+        return new vector(lanes=128, data=data);
+    }
+    else {
+        assert false : "Unexpected number of lanes";
+    }
+}
+
+// This functions models a hexagon.vtmpy instruction followed by a hexagon.interleave operation
+vector vtmpy (int[ARRAY_LEN] buffer, int base, int stride, int lanes, int[2] kernel) {
+    // Force sketch to unroll the loop
+    if (lanes == 128) {
+        int[128] data;
+        for (int i=0; i<128; i++)
+            data[i] = buffer[base + (stride * i)] * kernel[0] + buffer[base + (stride * (i+1))] * kernel[1] 
+                            + buffer[base + (stride * (i+2))];
+        return new vector(lanes=128, data=data);
+    }
+    else {
+        assert false : "Unexpected number of lanes";
+    }
+}
+
+// This functions models a hexagon.vrmpy instruction
+vector vrmpy (int[ARRAY_LEN] buffer, int base, int stride, int lanes, int[4] kernel) {
+    // Force sketch to unroll the loop
+    if (lanes == 128) {
+        int[128] data;
+        for (int i=0; i<128; i++)
+            data[i] = buffer[base + (stride * i)] * kernel[0] + 
+                      buffer[base + (stride * (i+1))] * kernel[1] +
+                      buffer[base + (stride * (i+2))] * kernel[2] +
+                      buffer[base + (stride * (i+3))] * kernel[3];
+        return new vector(lanes=128, data=data);
+    }
+    else {
+        assert false : "Unexpected number of lanes";
+    }
+}
