@@ -1,0 +1,84 @@
+struct vector {
+    int lanes;
+    int[lanes] data;
+}
+
+// Constructors
+vector broadcast (int val, int lanes) {
+    // Force sketch to unroll the loop
+    if (lanes == 128) {
+        int[128] data;
+        for (int i=0; i<128; i++)
+            data[i] = val;
+        return new vector(lanes=128, data=data);
+    }
+    else {
+        assert false : "Unexpected number of lanes";
+    }
+}
+
+vector ramp ([int sz], int[sz] buffer, int base, int stride, int lanes) {
+    // Force sketch to unroll the loop
+    if (lanes == 128) {
+        int[128] data;
+        for (int i=0; i<128; i++)
+            data[i] = buffer[base + (i*stride)];
+        return new vector(lanes=128, data=data);
+    }
+    else {
+        assert false : "Unexpected number of lanes";
+    }
+}
+
+// Casting
+vector cast_uint8vec_to_int16vec (vector vec) {
+    return vec;
+}
+
+
+// Ops
+vector vec_add (vector vec1, vector vec2) {
+    assert vec1.lanes == vec2.lanes : "Cannot add vectors of different widths";
+
+    // Force sketch to unroll the loop
+    if (vec1.lanes == 128) {
+        int[128] data;
+        for (int i=0; i<128; i++)
+            data[i] = vec1.data[i] + vec2.data[i];
+        return new vector(lanes=128, data=data);
+    }
+    else {
+        assert false : "Unexpected number of lanes";
+    }
+}
+
+vector vec_mul (vector vec1, vector vec2) {
+    assert vec1.lanes == vec2.lanes : "Cannot multiply vectors of different widths";
+
+    // Force sketch to unroll the loop
+    if (vec1.lanes == 128) {
+        int[128] data;
+        for (int i=0; i<128; i++)
+            data[i] = vec1.data[i] * vec2.data[i];
+        return new vector(lanes=128, data=data);
+    }
+    else {
+        assert false : "Unexpected number of lanes";
+    }
+}
+
+bit vec_eq (vector vec1, vector vec2) {
+    if (vec1.lanes != vec2.lanes)
+        return false;
+
+    // Force sketch to unroll the loop
+    if (vec1.lanes == 128) {
+        for (int i=0; i<128; i++)
+            if (vec1.data[i] != vec2.data[i])
+                return false;
+        return true;
+    }
+    else {
+        assert false : "Unexpected number of lanes";
+    }
+}
