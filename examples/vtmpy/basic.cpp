@@ -10,9 +10,10 @@ public:
     Output<Buffer<int16_t>> output{"output", 1};
 
     Var x;
-    Func stage1("stage1"), stage2("stage2"), stage3("stage3"), stage4("stage4");
 
     void generate() {
+        Func stage1("stage1");
+
         stage1(x) = cast(Int(16), input(x)) * 2 + cast(Int(16), input(x+1)) * 3 + cast(Int(16), input(x+2));
         output(x) = cast(Int(16), stage1(x)) * 4 + cast(Int(16), stage1(x+1)) * 5 + cast(Int(16), stage1(x+2));
     }
@@ -21,9 +22,7 @@ public:
         // Hexagon schedule.
         const int vector_size = get_target().has_feature(Target::HVX_128) ? 128 : 64;
 
-        stage1
-            .hexagon()
-            .vectorize(x, vector_size);
+        stage1/
 
         output
             .hexagon()
