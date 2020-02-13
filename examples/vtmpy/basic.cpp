@@ -22,8 +22,6 @@ public:
         // Hexagon schedule.
         const int vector_size = get_target().has_feature(Target::HVX_128) ? 128 : 64;
 
-        stage1/
-
         output
             .hexagon()
             .vectorize(x, vector_size);
