@@ -121,7 +121,8 @@ vector vrmpy (int[ARRAY_LEN] buffer, int base, int stride, int lanes, int[4] ker
             data[i] = buffer[base + (stride * i)] * kernel[0] + 
                       buffer[base + (stride * (i+1))] * kernel[1] +
                       buffer[base + (stride * (i+2))] * kernel[2] +
-                      buffer[base + (stride * (i+3))] * kernel[3];
+                      buffer[base + (stride * (i+3))] * kernel[3] +
+                      buffer[base + (stride * (i+4))];;
         return new vector(lanes=128, data=data);
     }
     else {

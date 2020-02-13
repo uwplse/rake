@@ -368,6 +368,8 @@ void SketchPrinter::visit(const Broadcast *op) {
     if (true) {
         stream << "broadcast(";
         print(op->value);
+        stream << ", ";
+        print(op->lanes);
         stream << ")";
     }
     else {
@@ -736,7 +738,7 @@ void FindLiveVars::visit(const Variable *op) {
 
 void FindLiveVars::visit(const Load *op) {
     if (op->type.is_vector())
-        live_vars.insert(std::make_pair(op->name, op->value));
+        live_vars.insert(std::make_pair(op->name, op->type));
     IRVisitor::visit(op);
 }
 

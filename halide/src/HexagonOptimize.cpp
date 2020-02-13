@@ -2343,8 +2343,6 @@ Stmt optimize_hexagon_shuffles(Stmt s, int lut_alignment) {
 }
 
 Stmt vtmpy_generator(Stmt s) {
-    debug(0) << s << "\n\n\n\n\n\n";
-
     // Generate vtmpy instruction if possible
     s = substitute_in_all_lets(s);
 
@@ -2355,8 +2353,6 @@ Stmt vtmpy_generator(Stmt s) {
     debug(0) << s << "\n\n\n\n\n\n";
 
     s = common_subexpression_elimination(s);
-
-    debug(0) << s << "\n\n\n\n\n\n";
     return s;
 }
 
