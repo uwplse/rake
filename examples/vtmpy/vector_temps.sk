@@ -4,26 +4,26 @@ struct vector {
 }
 
 // Constructors
-vector broadcast (int val, int lanes) {
+|vector| broadcast (int val, int lanes) {
     // Force sketch to unroll the loop
     if (lanes == 128) {
         int[128] data;
         for (int i=0; i<128; i++)
             data[i] = val;
-        return new vector(lanes=128, data=data);
+        return |vector|(lanes=128, data=data);
     }
     else {
         assert false : "Unexpected number of lanes";
     }
 }
 
-vector ramp ([int sz], int[sz] buffer, int base, int stride, int lanes) {
+|vector| ramp ([int sz], int[sz] buffer, int base, int stride, int lanes) {
     // Force sketch to unroll the loop
     if (lanes == 128) {
         int[128] data;
         for (int i=0; i<128; i++)
             data[i] = buffer[base + (i*stride)];
-        return new vector(lanes=128, data=data);
+        return |vector|(lanes=128, data=data);
     }
     else {
         assert false : "Unexpected number of lanes";
@@ -31,13 +31,13 @@ vector ramp ([int sz], int[sz] buffer, int base, int stride, int lanes) {
 }
 
 // Casting
-vector cast_uint8vec_to_int16vec (vector vec) {
+|vector| cast_uint8vec_to_int16vec (|vector| vec) {
     return vec;
 }
 
 
 // Ops
-vector vec_add (vector vec1, vector vec2) {
+|vector| vec_add (|vector| vec1, |vector| vec2) {
     assert vec1.lanes == vec2.lanes : "Cannot add vectors of different widths";
 
     // Force sketch to unroll the loop
@@ -45,14 +45,14 @@ vector vec_add (vector vec1, vector vec2) {
         int[128] data;
         for (int i=0; i<128; i++)
             data[i] = vec1.data[i] + vec2.data[i];
-        return new vector(lanes=128, data=data);
+        return |vector|(lanes=128, data=data);
     }
     else {
         assert false : "Unexpected number of lanes";
     }
 }
 
-vector vec_mul (vector vec1, vector vec2) {
+|vector| vec_mul (|vector| vec1, |vector| vec2) {
     assert vec1.lanes == vec2.lanes : "Cannot multiply vectors of different widths";
 
     // Force sketch to unroll the loop
@@ -60,20 +60,20 @@ vector vec_mul (vector vec1, vector vec2) {
         int[128] data;
         for (int i=0; i<128; i++)
             data[i] = vec1.data[i] * vec2.data[i];
-        return new vector(lanes=128, data=data);
+        return |vector|(lanes=128, data=data);
     }
     else {
         assert false : "Unexpected number of lanes";
     }
 }
 
-bit vec_eq (vector vec1, vector vec2) {
+bit vec_eq (|vector| vec1, |vector| vec2) {
     if (vec1.lanes != vec2.lanes)
         return false;
 
     // Force sketch to unroll the loop
     if (vec1.lanes == 128) {
-        for (int i=0; i<128; i++)
+        for (int i=0; i<8; i++)
             if (vec1.data[i] != vec2.data[i])
                 return false;
         return true;
@@ -84,13 +84,14 @@ bit vec_eq (vector vec1, vector vec2) {
 }
 
 // This functions models a hexagon.vdmpy instruction
-vector vdmpy (int[ARRAY_LEN] buffer, int base, int stride, int lanes, int[2] kernel) {
+|vector| vdmpy (int[ARRAY_LEN] buffer, int base, int stride, int lanes, int[2] kernel) {
     // Force sketch to unroll the loop
     if (lanes == 128) {
         int[128] data;
         for (int i=0; i<128; i++)
-            data[i] = buffer[base + (stride * i)] * kernel[0] + buffer[base + (stride * (i+1))] * kernel[1];
-        return new vector(lanes=128, data=data);
+            data[i] = buffer[base + (stride * i)] * kernel[0] + 
+                      buffer[base + (stride * (i+1))] * kernel[1];
+        return |vector|(lanes=128, data=data);
     }
     else {
         assert false : "Unexpected number of lanes";
@@ -98,14 +99,15 @@ vector vdmpy (int[ARRAY_LEN] buffer, int base, int stride, int lanes, int[2] ker
 }
 
 // This functions models a hexagon.vtmpy instruction followed by a hexagon.interleave operation
-vector vtmpy (int[ARRAY_LEN] buffer, int base, int stride, int lanes, int[2] kernel) {
+|vector| vtmpy (int[ARRAY_LEN] buffer, int base, int stride, int lanes, int[2] kernel) {
     // Force sketch to unroll the loop
     if (lanes == 128) {
         int[128] data;
         for (int i=0; i<128; i++)
-            data[i] = buffer[base + (stride * i)] * kernel[0] + buffer[base + (stride * (i+1))] * kernel[1] 
-                            + buffer[base + (stride * (i+2))];
-        return new vector(lanes=128, data=data);
+            data[i] = buffer[base + (stride * i)] * kernel[0] + 
+                      buffer[base + (stride * (i+1))] * kernel[1] + 
+                      buffer[base + (stride * (i+2))];
+        return |vector|(lanes=128, data=data);
     }
     else {
         assert false : "Unexpected number of lanes";
@@ -113,7 +115,7 @@ vector vtmpy (int[ARRAY_LEN] buffer, int base, int stride, int lanes, int[2] ker
 }
 
 // This functions models a hexagon.vrmpy instruction
-vector vrmpy (int[ARRAY_LEN] buffer, int base, int stride, int lanes, int[4] kernel) {
+|vector| vrmpy (int[ARRAY_LEN] buffer, int base, int stride, int lanes, int[4] kernel) {
     // Force sketch to unroll the loop
     if (lanes == 128) {
         int[128] data;
@@ -123,9 +125,12 @@ vector vrmpy (int[ARRAY_LEN] buffer, int base, int stride, int lanes, int[4] ker
                       buffer[base + (stride * (i+2))] * kernel[2] +
                       buffer[base + (stride * (i+3))] * kernel[3] +
                       buffer[base + (stride * (i+4))];;
-        return new vector(lanes=128, data=data);
+        return |vector|(lanes=128, data=data);
     }
     else {
         assert false : "Unexpected number of lanes";
     }
 }
+// FIND TIME 459998 CHECK TIME 100002 TOTAL TIME 560001
+// FIND TIME 383997 CHECK TIME 125002 TOTAL TIME 509000
+// FIND TIME 560998 CHECK TIME 31002.3 TOTAL TIME 594000

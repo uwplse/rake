@@ -1,19 +1,20 @@
 pragma options "--bnd-cbits 1";
 pragma options "--bnd-inbits 2";
+pragma options "--bnd-int-range 150";
 pragma options "--bnd-arr-size 1024";
 pragma options "--bnd-unroll-amnt 10";
-pragma options "--bnd-int-range 150";
-pragma options "--slv-simiters 1500";
+pragma options "--bnd-inline-amnt 9";
+//pragma options "--slv-simiters 15";
 pragma options "--slv-parallel";
-pragma options "--slv-p-cpus 16";
+pragma options "--slv-p-cpus 28";
 pragma options "--slv-lightverif";
 
 include "casting.sk";
-include "vector.sk";
+include "vector_adt.sk";
 
 int ARRAY_LEN = 1024;
 
-vector orig (int[ARRAY_LEN] input, int x, int t51) {
+Vector orig (int[ARRAY_LEN] input, int x, int t51) {
     return vec_add(vec_add(vec_mul(cast_uint8vec_to_int16vec(ramp(input, (((x*128) + t51) + 3), 1, 128)), broadcast(cast_int32_to_int16(3), 128)), vec_add(vec_mul(cast_uint8vec_to_int16vec(ramp(input, (((x*128) + t51) + 2), 1, 128)), broadcast(cast_int32_to_int16(2), 128)), vec_add(vec_mul(vec_add(vec_add(vec_mul(cast_uint8vec_to_int16vec(ramp(input, ((x*128) + t51), 1, 128)), broadcast(cast_int32_to_int16(2), 128)), vec_mul(cast_uint8vec_to_int16vec(ramp(input, (((x*128) + t51) + 1), 1, 128)), broadcast(cast_int32_to_int16(3), 128))), cast_uint8vec_to_int16vec(ramp(input, (((x*128) + t51) + 2), 1, 128))), broadcast(cast_int32_to_int16(4), 128)), vec_mul(vec_add(vec_add(vec_mul(cast_uint8vec_to_int16vec(ramp(input, (((x*128) + t51) + 1), 1, 128)), broadcast(cast_int32_to_int16(2), 128)), vec_mul(cast_uint8vec_to_int16vec(ramp(input, (((x*128) + t51) + 2), 1, 128)), broadcast(cast_int32_to_int16(3), 128))), cast_uint8vec_to_int16vec(ramp(input, (((x*128) + t51) + 3), 1, 128))), broadcast(cast_int32_to_int16(5), 128))))), cast_uint8vec_to_int16vec(ramp(input, (((x*128) + t51) + 4), 1, 128)));
 }
 
@@ -58,7 +59,7 @@ generator int int_expr_gen ([int N], int[N] terms) {
     return exprs[idx-1];
 }
 
-generator vector vdmpy_gen (int[ARRAY_LEN] input, int x, int t20) {
+generator Vector vdmpy_gen (int[ARRAY_LEN] input, int x, int t20) {
     int base = index_gen({((x*128) + t20), ((x*128) + t20) + 1, ((x*128) + t20) + 2});
     int stride = 1;
     int lanes = 128;
@@ -69,7 +70,7 @@ generator vector vdmpy_gen (int[ARRAY_LEN] input, int x, int t20) {
     return vdmpy(input, base, stride, lanes, kernel);
 }
 
-generator vector vtmpy_gen (int[ARRAY_LEN] input, int x, int t20) {
+generator Vector vtmpy_gen (int[ARRAY_LEN] input, int x, int t20) {
     int base = index_gen({((x*128) + t20), ((x*128) + t20) + 1, ((x*128) + t20) + 2});
     int stride = 1;
     int lanes = 128;
@@ -80,7 +81,7 @@ generator vector vtmpy_gen (int[ARRAY_LEN] input, int x, int t20) {
     return vtmpy(input, base, stride, lanes, kernel);
 }
 
-generator vector vrmpy_gen (int[ARRAY_LEN] input, int x, int t20) {
+generator Vector vrmpy_gen (int[ARRAY_LEN] input, int x, int t20) {
     int base = index_gen({((x*128) + t20), ((x*128) + t20) + 1, ((x*128) + t20) + 2});
     int stride = 1;
     int lanes = 128;
@@ -91,7 +92,7 @@ generator vector vrmpy_gen (int[ARRAY_LEN] input, int x, int t20) {
     return vrmpy(input, base, stride, lanes, kernel);
 }
 
-generator vector synth (int[ARRAY_LEN] input, int x, int t20) {
+generator Vector synth (int[ARRAY_LEN] input, int x, int t20) {
     int instr = ??(2);
     //if (instr == 0)
         //return vdmpy_gen(input, x, t20);
@@ -102,8 +103,8 @@ generator vector synth (int[ARRAY_LEN] input, int x, int t20) {
 }
 
 harness void main (int x, int t20, int[ARRAY_LEN] input) {
-    vector original_expr = orig(input, x, t20);
-    vector synthesized_expr = synth(input, x, t20);
+    Vector original_expr = orig(input, x, t20);
+    Vector synthesized_expr = synth(input, x, t20);
 
     assert vec_eq(original_expr, synthesized_expr): "Original and synthesized expressions do not match.";
 }

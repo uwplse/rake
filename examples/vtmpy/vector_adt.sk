@@ -1,0 +1,103 @@
+int ARRAY_LEN = 1024;
+
+adt Vector {
+    Ramp { int[ARRAY_LEN] buf; int base; int stride; int lanes; }
+    Broadcast { int val; int lanes; }
+    ADD { Vector v1; Vector v2; }
+    MUL { Vector v1; Vector v2; }
+    VDMPY { int[ARRAY_LEN] buf; int[2] kernel; int base; int stride; int lanes; }
+    VTMPY { int[ARRAY_LEN] buf; int[2] kernel; int base; int stride; int lanes; }
+    VRMPY { int[ARRAY_LEN] buf; int[4] kernel; int base; int stride; int lanes; }
+}
+
+// Constructors
+Vector broadcast (int val, int lanes) {
+    return new Broadcast(val=val, lanes=lanes);
+}
+
+Vector ramp (int[ARRAY_LEN] buffer, int base, int stride, int lanes) {
+    return new Ramp(buf=buffer, base=base, stride=stride, lanes=lanes);
+}
+
+// Casting
+Vector cast_uint8vec_to_int16vec (Vector vec) {
+    return vec;
+}
+
+// Ops
+Vector vec_add (Vector vec1, Vector vec2) {
+    assert lanes(vec1) == lanes(vec2) : "Cannot add vectors of different widths";
+    return new ADD(v1=vec1, v2=vec2);
+}
+
+Vector vec_mul (Vector vec1, Vector vec2) {
+    assert lanes(vec1) == lanes(vec2) : "Cannot multiply vectors of different widths";
+    return new MUL(v1=vec1, v2=vec2);
+}
+
+// This functions models a hexagon.vdmpy instruction
+Vector vdmpy (int[ARRAY_LEN] buffer, int base, int stride, int lanes, int[2] kernel) {
+    return new VDMPY(buf=buffer, kernel=kernel, base=base, stride=stride, lanes=lanes);
+}
+
+// This functions models a hexagon.vtmpy instruction followed by a hexagon.interleave operation
+Vector vtmpy (int[ARRAY_LEN] buffer, int base, int stride, int lanes, int[2] kernel) {
+    return new VTMPY(buf=buffer, kernel=kernel, base=base, stride=stride, lanes=lanes);
+}
+
+// This functions models a hexagon.vrmpy instruction
+Vector vrmpy (int[ARRAY_LEN] buffer, int base, int stride, int lanes, int[4] kernel) {
+    return new VRMPY(buf=buffer, kernel=kernel, base=base, stride=stride, lanes=lanes);
+}
+
+int lanes (Vector v) {
+    switch (v) {
+        case Ramp: return v.lanes;
+        case Broadcast: return v.lanes;
+        case ADD: return lanes(v.v1);
+        case MUL: return lanes(v.v1);
+        case VDMPY: return v.lanes;
+        case VTMPY: return v.lanes;
+        case VRMPY: return v.lanes;
+    }
+}
+
+
+int get (Vector v, int i) {
+    switch (v) {
+        case Ramp: return v.buf[v.base + (v.stride * i)];
+        case Broadcast: return v.val;
+        case ADD: return get(v.v1, i) + get(v.v2, i);
+        case MUL: return get(v.v1, i) * get(v.v2, i);
+        case VDMPY: {
+            return v.buf[v.base + (v.stride * i)] * v.kernel[0] + 
+                   v.buf[v.base + (v.stride * (i+1))] * v.kernel[1];
+        }
+        case VTMPY: {
+            return v.buf[v.base + (v.stride * i)] * v.kernel[0] + 
+                   v.buf[v.base + (v.stride * (i+1))] * v.kernel[1] +
+                   v.buf[v.base + (v.stride * (i+2))];
+        }
+        case VRMPY: {
+            return v.buf[v.base + (v.stride * i)] * v.kernel[0] + 
+                   v.buf[v.base + (v.stride * (i+1))] * v.kernel[1] +
+                   v.buf[v.base + (v.stride * (i+2))] * v.kernel[2] +
+                   v.buf[v.base + (v.stride * (i+3))] * v.kernel[3] +
+                   v.buf[v.base + (v.stride * (i+4))];
+        }
+    }
+}
+
+bit vec_eq (Vector vec1, Vector vec2) {
+    if (lanes(vec1) != lanes(vec2))
+        return false;
+
+    // Force sketch to unroll the loop
+    for (int i=0; i<8; i++)
+        if (get(vec1, i) != get(vec2, i)) {
+            return false;
+        }
+    return true;
+}
+
+// FIND TIME 118000 CHECK TIME 37000.5 TOTAL TIME 156000
