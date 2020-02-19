@@ -20,7 +20,7 @@ Vector orig (int[ARRAY_LEN] input, int x, int t51) {
 
 generator int index_gen ([int N], int[N] exprs) {
     int i = ??(3);
-    int c = ??(3);
+    int c = ??(2);
 
     assert i < N;
 
@@ -33,7 +33,7 @@ generator int int_expr_gen ([int N], int[N] terms) {
 
     int[32] exprs = terms;
 
-    int steps = ??(3);
+    int steps = ??(2);
 
     int idx = N;
 

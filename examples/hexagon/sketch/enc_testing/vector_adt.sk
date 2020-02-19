@@ -1,5 +1,3 @@
-int ARRAY_LEN = 1024;
-
 adt Vector {
     Ramp { int[ARRAY_LEN] buf; int base; int stride; int lanes; }
     Broadcast { int val; int lanes; }
@@ -93,11 +91,12 @@ bit vec_eq (Vector vec1, Vector vec2) {
         return false;
 
     // Force sketch to unroll the loop
-    for (int i=0; i<8; i++)
+    for (int i=0; i<2; i++)
         if (get(vec1, i) != get(vec2, i)) {
             return false;
         }
     return true;
 }
 
+// FIND TIME 364002 CHECK TIME 66998.2 TOTAL TIME 432000
 // FIND TIME 118000 CHECK TIME 37000.5 TOTAL TIME 156000

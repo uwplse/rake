@@ -155,13 +155,20 @@ void SketchPrinter::visit(const Add *op) {
 }
 
 void SketchPrinter::visit(const Sub *op) {
-    debug(0) << "NYI: Sub\n";
-    exit(1);
-    stream << '(';
-    print(op->a);
-    stream << " - ";
-    print(op->b);
-    stream << ')';
+    if (op->a.type().is_vector() || op->b.type().is_vector()) {
+        stream << "vec_sub(";
+        print(op->a);
+        stream << ", ";
+        print(op->b);
+        stream << ')';
+    }
+    else {
+        stream << '(';
+        print(op->a);
+        stream << " - ";
+        print(op->b);
+        stream << ')';
+    }
 }
 
 void SketchPrinter::visit(const Mul *op) {

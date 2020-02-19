@@ -2013,7 +2013,7 @@ private:
 
 // Attempt to generate vtmpy, vdmpy and vrmpy instructions. This requires that all lets
 // be substituted prior to running, and so must be an IRGraphMutator.
-class VtmpySynthesizer : public IRGraphMutator {
+class ComplexInstrSynthesizer : public IRGraphMutator {
 private:
     using IRMutator::visit;
 
@@ -2345,34 +2345,15 @@ Stmt optimize_hexagon_shuffles(Stmt s, int lut_alignment) {
 Stmt vtmpy_generator(Stmt s) {
     // Generate vtmpy instruction if possible
     s = substitute_in_all_lets(s);
-
-    debug(0) << s << "\n\n\n\n\n\n";
-
     s = VtmpyGenerator().mutate(s);
-
-    debug(0) << s << "\n\n\n\n\n\n";
-
     s = common_subexpression_elimination(s);
     return s;
 }
 
 Stmt synthesize_complex_vec_isntructions(Stmt s) {
-    debug(0) << "\n\n\n>>> LIFTING <<<<\n\n\n";
-
-    debug(1) << s << "\n\n\n\n\n\n";
-
     s = substitute_in_all_lets(s);
-
-    debug(0) << s << "\n\n\n\n\n\n";
-
-    s = VtmpySynthesizer().mutate(s);
-
-    debug(1) << s << "\n\n\n\n\n\n";
-
+    s = ComplexInstrSynthesizer().mutate(s);
     s = common_subexpression_elimination(s);
-
-    debug(1) << s << "\n\n\n\n\n\n";
-
     return s;
 }
 
@@ -2385,6 +2366,8 @@ Stmt scatter_gather_generator(Stmt s) {
     return s;
 }
 
+#define USE_LIFTING_OPTIMIZER
+
 Stmt optimize_hexagon_instructions(Stmt s, Target t) {
     // Convert some expressions to an equivalent form which get better
     // optimized in later stages for hexagon
@@ -2392,7 +2375,16 @@ Stmt optimize_hexagon_instructions(Stmt s, Target t) {
 
     // Peephole optimize for Hexagon instructions. These can generate
     // interleaves and deinterleaves alongside the HVX intrinsics.
+    // Generating vdmpy, vtmpy and vrmpy using synthesis
+#ifdef USE_LIFTING_OPTIMIZER
+    debug(0) << "\nLifting to complex hexagon instructions (vdmpy, vtmpy and vrmpy)...\n\n";
+    s = synthesize_complex_vec_isntructions(s);
+    debug(1) << "\nLowering after generating complex instructions:\n" << s << "\n\n";
+#else
+    debug(0) << "\nLifting to complex hexagon instructions (vdmpy, vtmpy and vrmpy)...\n\n";
     s = OptimizePatterns(t).mutate(s);
+    debug(1) << "\nLowering after generating complex instructions:\n" << s << "\n\n";
+#endif
 
     // Try to eliminate any redundant interleave/deinterleave pairs.
     s = EliminateInterleaves(t.natural_vector_size(Int(8))).mutate(s);

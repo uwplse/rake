@@ -286,18 +286,11 @@ void CodeGen_Hexagon::compile_func(const LoweredFunc &f,
 
     // Generating vtmpy before CSE and align_loads makes it easier to match
     // patterns for vtmpy.
-    #if 1
+    #if 0
     // TODO(aankit): Re-enable this after fixing complexity issue.
     debug(1) << "Generating vtmpy...\n";
     body = vtmpy_generator(body);
     debug(2) << "Lowering after generating vtmpy:\n" << body << "\n\n";
-    #endif
-
-    // Generating vdmpy, vtmpy and vrmpy using synthesis
-    #if 0
-    debug(1) << "Lifting to complex hexagon instructions (vdmpy, vtmpy and vrmpy)...\n";
-    body = synthesize_complex_vec_isntructions(body);
-    debug(2) << "Lowering after generating complex instructions:\n" << body << "\n\n";
     #endif
 
     debug(1) << "Aligning loads for HVX....\n";
