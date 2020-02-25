@@ -293,6 +293,12 @@ void CodeGen_Hexagon::compile_func(const LoweredFunc &f,
     debug(2) << "Lowering after generating vtmpy:\n" << body << "\n\n";
     #endif
 
+    #if 1
+    debug(0) << "\nLifting to complex hexagon instructions (vdmpy, vtmpy and vrmpy)...\n\n";
+    body = synthesize_complex_vec_isntructions(body);
+    debug(1) << "\nLowering after generating complex instructions:\n" << body << "\n\n";
+    #endif
+
     debug(1) << "Aligning loads for HVX....\n";
     body = align_loads(body, target.natural_vector_size(Int(8)));
     body = common_subexpression_elimination(body);

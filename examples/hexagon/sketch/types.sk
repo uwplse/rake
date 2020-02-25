@@ -1,0 +1,6 @@
+int uint8 = 0;
+int int8 = 1;
+int uint16 = 2;
+int int16 = 3;
+int uint32 = 4;
+int int32 = 5;

@@ -143,13 +143,23 @@ public:
 class ComputeUseCounts : public IRGraphVisitor {
     GVN &gvn;
     bool lift_all;
+    bool index_only;
+    bool inside_index_expr;
 public:
-    ComputeUseCounts(GVN &g, bool l) : gvn(g), lift_all(l) {}
+    ComputeUseCounts(GVN &g, bool l, bool io) : gvn(g), lift_all(l), index_only(io), inside_index_expr(!io) {}
 
     using IRGraphVisitor::include;
     using IRGraphVisitor::visit;
 
     void include(const Expr &e) override {
+        const Load *a = e.as<Load>();
+        if (!inside_index_expr && index_only && !a) {
+            inside_index_expr = true;
+            IRGraphVisitor::include(e);
+            inside_index_expr = false;
+            return;
+        }
+
         // If it's not the sort of thing we want to extract as a let,
         // just use the generic visitor to increment use counts for
         // the children.
@@ -221,20 +231,21 @@ class RemoveLets : public IRGraphMutator {
 
 class CSEEveryExprInStmt : public IRMutator {
     bool lift_all;
+    bool lift_index_only;
 
 public:
     using IRMutator::mutate;
 
     Expr mutate(const Expr &e) override {
-        return common_subexpression_elimination(e, lift_all);
+        return common_subexpression_elimination(e, lift_all, lift_index_only);
     }
 
-    CSEEveryExprInStmt(bool l) : lift_all(l) {}
+    CSEEveryExprInStmt(bool l, bool io) : lift_all(l), lift_index_only(io) {}
 };
 
 } // namespace
 
-Expr common_subexpression_elimination(const Expr &e_in, bool lift_all) {
+Expr common_subexpression_elimination(const Expr &e_in, bool lift_all, bool lift_index_only) {
     Expr e = e_in;
 
     // Early-out for trivial cases.
@@ -249,7 +260,7 @@ Expr common_subexpression_elimination(const Expr &e_in, bool lift_all) {
     GVN gvn;
     e = gvn.mutate(e);
 
-    ComputeUseCounts count_uses(gvn, lift_all);
+    ComputeUseCounts count_uses(gvn, lift_all, lift_index_only);
     count_uses.include(e);
 
     debug(4) << "Canonical form without lets " << e << "\n";
@@ -290,8 +301,8 @@ Expr common_subexpression_elimination(const Expr &e_in, bool lift_all) {
     return e;
 }
 
-Stmt common_subexpression_elimination(const Stmt &s, bool lift_all) {
-    return CSEEveryExprInStmt(lift_all).mutate(s);
+Stmt common_subexpression_elimination(const Stmt &s, bool lift_all, bool lift_index_only) {
+    return CSEEveryExprInStmt(lift_all, lift_index_only).mutate(s);
 }
 
 

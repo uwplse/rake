@@ -1,0 +1,95 @@
+struct Buffer {
+    int[ARRAY_LEN] data;
+    int elemT;
+}
+
+adt Vector {
+    Ramp { Buffer buf; int base; int stride; int lanes; }
+    Broadcast { int val; int lanes; int elemT; }
+    Cast { Vector v; int elemT; }
+    Add { Vector v1; Vector v2; }
+    Mul { Vector v1; Vector v2; }
+    Convx { Vector v; int kwidth; int[kwidth] kernel; }
+}
+
+// Constructors
+Vector broadcast (int val, int lanes, int valT) {
+    return new Broadcast(val=val, lanes=lanes, elemT=valT);
+}
+
+Vector ramp (Buffer buffer, int base, int stride, int lanes) {
+    return new Ramp(buf=buffer, base=base, stride=stride, lanes=lanes);
+}
+
+// Methods
+int elemT (Vector v) {
+    switch (v) {
+        case Ramp: return v.buf.elemT;
+        case Broadcast: return v.elemT;
+        case Cast: return v.elemT;
+        case Add: return elemT(v.v1);
+        case Mul: return elemT(v.v1);
+        case Convx: return elemT(v.v);
+    }
+}
+
+int lanes (Vector v) {
+    switch (v) {
+        case Ramp: return v.lanes;
+        case Broadcast: return v.lanes;
+        case Cast: return lanes(v.v);
+        case Add: return lanes(v.v1);
+        case Mul: return lanes(v.v1);
+        case Convx: return lanes(v.v);
+    }
+}
+
+
+int get (Vector v, int i) {
+    switch (v) {
+        case Ramp: return v.buf.data[v.base + (v.stride * i)];
+        case Broadcast: return v.val;
+        case Cast: return get(v.v, i);
+        case Add: return get(v.v1, i) + get(v.v2, i);
+        case Mul: return get(v.v1, i) * get(v.v2, i);
+        case Convx: {
+            int r = 0;
+            for (int k=0; k<v.kwidth && k<8; k++)
+                r += get(v.v, k+i) * v.kernel[k];
+            return r;
+        }
+    }
+}
+
+// Casting
+Vector cast_uint8vec_to_int16vec (Vector vec) {
+    return new Cast(v=vec, elemT=int16);
+}
+
+// Ops
+Vector vec_add (Vector vec1, Vector vec2) {
+    return new Add(v1=vec1, v2=vec2);
+}
+
+Vector vec_mul (Vector vec1, Vector vec2) {
+    return new Mul(v1=vec1, v2=vec2);
+}
+
+Vector convolve_x (Vector v, int kwidth, int[kwidth] kernel) {
+    return new Convx(v=v, kwidth=kwidth, kernel=kernel);
+}
+
+bit vec_eq (Vector vec1, Vector vec2) {
+    if (lanes(vec1) != lanes(vec2))
+        return false;
+
+    // Only check for the first two values
+    for (int i=0; i<2; i++)
+        if (get(vec1, i) != get(vec2, i)) {
+            return false;
+        }
+    return true;
+}
+
+// FIND TIME 364002 CHECK TIME 66998.2 TOTAL TIME 432000
+// FIND TIME 118000 CHECK TIME 37000.5 TOTAL TIME 156000

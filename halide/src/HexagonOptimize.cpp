@@ -7,6 +7,7 @@
 #include "IRMatch.h"
 #include "IRMutator.h"
 #include "IROperator.h"
+#include "IRPrinter.h"
 #include "SketchPrinter.h"
 #include "Lerp.h"
 #include "Scope.h"
@@ -2011,18 +2012,154 @@ private:
     }
 };
 
+
 // Attempt to generate vtmpy, vdmpy and vrmpy instructions. This requires that all lets
 // be substituted prior to running, and so must be an IRGraphMutator.
 class ComplexInstrSynthesizer : public IRGraphMutator {
 private:
+    class ExpressionLifter : public IRGraphMutator {
+    public:
+        ExpressionLifter (std::ostream &s) : printer(s) {}
+
+    private:
+        FindLiveVars flv;
+        FindIndexExprs fie;
+        FindScalarExprs fse;
+        IRPrinter printer;
+
+        std::string skType (Type t) {
+            if (t.is_vector())
+                return skType(t.element_of()) + "[ARRAY_LEN]";
+            else if (t.is_int_or_uint())
+                return "int";
+            else {
+                debug(0) << "NYI: " << t << "\n";
+                exit(1);
+            }
+        }
+
+        std::string generateSketchQuery (Expr expr) {
+            // Find live vars in the expression
+            expr.accept(&flv);
+
+            // Find all indexing expressions (these are provided to the synthesizer as guesses,
+            // saving a lot of work if guess is true (often is)
+            expr.accept(&fie);
+
+            // Find all scalars in the expression (excluding those used for indexing)
+            fse.include(expr);
+
+            // Represent live vars in expression as symbolic inputs to the query
+            std::string symbolic_vars_decl = "";
+            std::string buffer_opts = "";
+            for (auto var : flv.getVars()) {
+                if (var.second.is_vector()) {
+                    buffer_opts += var.first + " | ";
+                    symbolic_vars_decl += skType(var.second) + " " + var.first + "_data, ";
+                }
+                else
+                    symbolic_vars_decl += skType(var.second) + " " + var.first + ", ";
+            }
+            buffer_opts = buffer_opts.substr(0, buffer_opts.length()-3);
+            symbolic_vars_decl = symbolic_vars_decl.substr(0, symbolic_vars_decl.length()-2);
+
+            // Construct buffers from symbolic vars
+            std::string buffer_decls = "";
+            for (auto var : flv.getVars()) {
+                if (var.second.is_vector())
+                    buffer_decls += "Buffer " + var.first + " = new Buffer(data=" + var.first + "_data);\n\t";
+            }
+            buffer_decls = buffer_decls.substr(0, buffer_decls.length()-2);
+
+            // Translate expression to sketch syntax
+            std::stringstream sk_expr;
+            SketchPrinter *skPrinter = new SketchPrinter(sk_expr);
+            skPrinter->print(expr);
+
+            // List of idx expressions
+            std::stringstream idx_exprs_ss;
+            skPrinter = new SketchPrinter(idx_exprs_ss);
+            for(auto e : fie.getExprs()) {
+                skPrinter->print(e);
+                idx_exprs_ss << ", ";
+            }
+            std::string idx_exprs = idx_exprs_ss.str();
+            idx_exprs = idx_exprs.substr(0, idx_exprs.length()-2);
+
+            // List of scalar expressions
+            std::stringstream sca_exprs_ss;
+            skPrinter = new SketchPrinter(sca_exprs_ss);
+            for(auto e : fse.getExprs()) {
+                skPrinter->print(e);
+                sca_exprs_ss << ", ";
+            }
+            std::string sca_exprs = sca_exprs_ss.str();
+            sca_exprs = sca_exprs.substr(0, sca_exprs.length()-2);
+
+            std::string code = "";
+            code = code +      "pragma options \"--bnd-cbits 1\";\n" +
+                               "pragma options \"--bnd-inbits 2\";\n" +
+                               "pragma options \"--bnd-int-range 150\";\n" +
+                               "pragma options \"--bnd-arr-size 1024\";\n" +
+                               "pragma options \"--bnd-unroll-amnt 10\";\n" +
+                               "pragma options \"--bnd-inline-amnt 9\";\n" +
+                               "pragma options \"--slv-parallel\";\n" +
+                               "pragma options \"--slv-p-cpus 28\";\n" +
+                               "pragma options \"--slv-lightverif\";\n" +
+                               "\n" +
+                               "include \"casting.sk\";\n" +
+                               "include \"vector.sk\";\n" +
+                               "include \"grammar.sk\";\n" +
+                               "\n" +
+                               "int ARRAY_LEN = 1024;\n" +
+                               "\n" +
+                               "harness void main (" + symbolic_vars_decl + ") {\n" +
+                               "    " + buffer_decls + "\n" +
+                               "\n" +
+                               "    Vector original_expr = " + sk_expr.str() + ";\n" +
+                               "\n" +
+                               "    Buffer _buf = {| " + buffer_opts + " |};\n" +
+                               "    int _base = index_gen({ " + idx_exprs + " });\n" +
+                               "    int _stride = \?\?(2);\n" +
+                               "    int _lanes = {| 128 | 64 | 32 | 16 |};\n" +
+                               "    Vector _v = ramp(_buf, _base, _stride, _lanes);\n" +
+                               "    Vector synthesized_expr = convolve_x_gen(_v, { " + sca_exprs + " });\n" +
+                               "\n" +
+                               "    assert vec_eq(original_expr, synthesized_expr): \"Original and synthesized expressions do not match.\";\n" +
+                               "}";
+            return code;
+        }
+
+    protected:
+        using IRMutator::visit;
+
+        Expr visit(const Add *op) override {
+            if (op && op->type.is_vector() && (op->type.bits() == 16 || op->type.bits() == 32)) {
+                debug(0) << "Trying to lift expr:\n";
+                printer.print(op);
+                debug(0) << "\n\n";
+
+                std::string code = generateSketchQuery(op);
+                debug(0) << code << "\n\n";
+
+                exit(1);
+            }
+            return IRMutator::visit(op);
+        }
+    };
+
+private:
     using IRMutator::visit;
 
     Stmt visit(const Store *stmt) override {
-        debug(0) << "Store found:\n" << stmt->name  << "[" << stmt->index << "] = " << stmt->value << "\n\n";
+        debug(0) << "Store statement found:\n" << stmt->name  << "[" << stmt->index << "] = " << stmt->value << "\n\n";
 
-        FindLiveVars flv;
-        SketchPrinter printer(std::cout);
+        debug(0) << "Searching for optimization opportunities...\n\n";
+        ExpressionLifter lifter(std::cout);
+        lifter.mutate(stmt->value);
+        debug(0) << "\nDone.\n\n";
 
+        /*
         debug(0) << "Sketch:\n";
         stmt->value.accept(&flv);
         stmt->value.accept(&printer);
@@ -2030,7 +2167,7 @@ private:
         for (auto var : flv.getVars()) {
             debug(0) << "(" << var.first << ", " << var.second << "), ";
         }
-        debug(0) << "]\n\n";
+        debug(0) << "]\n\n";*/
 
         return IRMutator::visit(stmt);
     }
@@ -2352,6 +2489,7 @@ Stmt vtmpy_generator(Stmt s) {
 
 Stmt synthesize_complex_vec_isntructions(Stmt s) {
     s = substitute_in_all_lets(s);
+    s = common_subexpression_elimination(s, true, true);
     s = ComplexInstrSynthesizer().mutate(s);
     s = common_subexpression_elimination(s);
     return s;
@@ -2366,8 +2504,6 @@ Stmt scatter_gather_generator(Stmt s) {
     return s;
 }
 
-#define USE_LIFTING_OPTIMIZER
-
 Stmt optimize_hexagon_instructions(Stmt s, Target t) {
     // Convert some expressions to an equivalent form which get better
     // optimized in later stages for hexagon
@@ -2376,15 +2512,7 @@ Stmt optimize_hexagon_instructions(Stmt s, Target t) {
     // Peephole optimize for Hexagon instructions. These can generate
     // interleaves and deinterleaves alongside the HVX intrinsics.
     // Generating vdmpy, vtmpy and vrmpy using synthesis
-#ifdef USE_LIFTING_OPTIMIZER
-    debug(0) << "\nLifting to complex hexagon instructions (vdmpy, vtmpy and vrmpy)...\n\n";
-    s = synthesize_complex_vec_isntructions(s);
-    debug(1) << "\nLowering after generating complex instructions:\n" << s << "\n\n";
-#else
-    debug(0) << "\nLifting to complex hexagon instructions (vdmpy, vtmpy and vrmpy)...\n\n";
     s = OptimizePatterns(t).mutate(s);
-    debug(1) << "\nLowering after generating complex instructions:\n" << s << "\n\n";
-#endif
 
     // Try to eliminate any redundant interleave/deinterleave pairs.
     s = EliminateInterleaves(t.natural_vector_size(Int(8))).mutate(s);

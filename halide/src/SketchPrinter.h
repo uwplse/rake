@@ -107,6 +107,31 @@ protected:
     void visit(const Load *op) override;
 };
 
+class FindIndexExprs : public IRVisitor {
+public:
+    std::set<Expr,ExprCompare> getExprs();
+
+protected:
+    using IRVisitor::visit;
+
+    std::set<Expr,ExprCompare> exprs;
+
+    void visit(const Load *op) override;
+};
+
+class FindScalarExprs : public IRGraphVisitor {
+public:
+    std::set<Expr,ExprCompare> getExprs();
+
+    using IRGraphVisitor::include;
+    using IRGraphVisitor::visit;
+
+    void include(const Expr &e) override;
+
+protected:
+    std::set<Expr,ExprCompare> exprs;
+};
+
 }  // namespace Internal
 }  // namespace Halide
 

@@ -734,9 +734,7 @@ void SketchPrinter::visit(const Shuffle *op) {
     }
 }
 
-std::set<std::pair<std::string, Type>> FindLiveVars::getVars() {
-    return live_vars;
-}
+// FindLiveVars
 
 void FindLiveVars::visit(const Variable *op) {
     live_vars.insert(std::make_pair(op->name, op->type));
@@ -747,6 +745,49 @@ void FindLiveVars::visit(const Load *op) {
     if (op->type.is_vector())
         live_vars.insert(std::make_pair(op->name, op->type));
     IRVisitor::visit(op);
+}
+
+std::set<std::pair<std::string, Type>> FindLiveVars::getVars() {
+    return live_vars;
+}
+
+// FindIndexExprs
+
+void FindIndexExprs::visit(const Load *op) {
+    Expr idx = op->index;
+    if (const Ramp* r = idx.as<Ramp>())
+        exprs.insert(r->base);
+    else
+        exprs.insert(op->index);
+    IRVisitor::visit(op);
+}
+
+std::set<Expr,ExprCompare> FindIndexExprs::getExprs() {
+    return exprs;
+}
+
+// FindScalarExprs
+
+void FindScalarExprs::include(const Expr &e) {
+    if (e.as<Load>())
+        return;
+
+    if (e.type().is_vector()) {
+        if (const Broadcast *bc = e.as<Broadcast>()) {
+            exprs.insert(bc->value);
+        }
+        else {
+            IRGraphVisitor::include(e);
+        }
+    }
+    else if (e.type().is_int_or_uint())
+        exprs.insert(e);
+    else
+        IRGraphVisitor::include(e);
+}
+
+std::set<Expr,ExprCompare> FindScalarExprs::getExprs() {
+    return exprs;
 }
 
 }  // namespace Internal

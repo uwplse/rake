@@ -1,0 +1,7 @@
+int cast_int32_to_int16 (int val) {
+    return val;
+}
+
+int cast (int val, int fromT, int toT) {
+	return val;
+}
