@@ -1,0 +1,22 @@
+#lang rosette
+
+;; Model Halide IR
+(define (broadcast val)
+  (lambda (i) val))
+
+(define (ramp input base stride)
+  (lambda (i) (input (+ base (* i stride)))))
+
+(define (int16x128 val)
+  (lambda (i) (cast (val i) 'uint8 'int16)))
+
+(define (int32x128 val)
+  (lambda (i) (cast (val i) 'uint8 'int32)))
+
+(define (vec-add v1 v2)
+  (lambda (i) (bvadd (v1 i) (v2 i))))
+
+(define (vec-mul v1 v2)
+  (lambda (i) (bvmul (v1 i) (v2 i))))
+
+(all-defined-out)
