@@ -2521,6 +2521,8 @@ Stmt optimize_hexagon_instructions(Stmt s, Target t) {
     // operations.
     s = FuseInterleaves().mutate(s);
 
+    debug(0) << s << "\n";
+
     return s;
 }
 

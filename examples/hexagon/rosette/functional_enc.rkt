@@ -39,11 +39,11 @@
 (define _buf (buf_gen get-buf-term))
 (define _base (index_gen get-index-term))
 (define _stride stride_gen)
-(define kwidth kwidth_gen)
-(define kernel (kernel_gen get-int-term kwidth))
+(define _kwidth kwidth_gen)
+(define _kernel (kernel_gen get-int-term _kwidth))
 
 (define synthesized-expr
-  (castvec (convolve-x (ramp _buf _base _stride) kernel) 'int16 'int32))
+  (castvec (convolve-x (ramp _buf _base _stride) _kernel) 'int16 'int32))
 
 ;; Verification condition
 (define (bounded-eq? oe se lanes)
@@ -55,5 +55,8 @@
                         #:guarantee (bounded-eq? original-expr synthesized-expr 2)))
 
 ;; Print solution
-(print-forms sol)
-(evaluate kernel sol)
+(evaluate _kwidth sol)
+(evaluate _kernel sol)
+(evaluate _buf sol)
+(evaluate _base sol)
+(evaluate _stride sol)

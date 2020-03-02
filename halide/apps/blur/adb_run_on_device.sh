@@ -34,3 +34,4 @@ adb shell cp /system/lib/rfsa/adsp/testsig* ${DEVICE_PATH} > /dev/null || true
 adb push ${BIN}/${APP_TARGET}/test ${DEVICE_PATH}
 adb shell chmod +x ${DEVICE_PATH}/test
 adb shell ${DEVICE_ENV} ${DEVICE_PATH}/test
+adb shell ls ${BIN}/a*
