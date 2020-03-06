@@ -5,9 +5,14 @@
 # running this script, e.g.
 #  HL_TARGET=arm-64-android adb_run_on_device.sh
 
-DEVICE_PATH=/data/local/tmp/blur
+#ANDROID_NDK_HOME=/home/maaz/Qualcomm/Hexagon_SDK/3.0/tools/android-ndk-r10d/
+#ANDROID_ARM64_TOOLCHAIN=temp
+
+#$ANDROID_NDK_HOME/build/tools/make-standalone-toolchain.sh --arch=arm64 --platform=android-21 --install-dir=$ANDROID_ARM64_TOOLCHAIN
+
+DEVICE_PATH=/data/local/tmp/$1
 DEVICE_ENV="LD_LIBRARY_PATH=${DEVICE_PATH}:/vendor/lib64 ADSP_LIBRARY_PATH=\"${DEVICE_PATH};/dsp\""
-HEXAGON_RUNTIME_PATH=../../src/runtime/hexagon_remote
+HEXAGON_RUNTIME_PATH=../../halide/src/runtime/hexagon_remote
 BIN=bin
 
 #TODO: It would be nice to just use HL_TARGET, but that means one

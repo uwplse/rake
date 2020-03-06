@@ -30,4 +30,4 @@ vec_int16 * int8  ==> int32
 
 vrmpy:-
 vec_uint8 * int8  ==> int32
-vec_uint8 * uint8 ==> uint32
+vec_uint8 * uint8 ==> uint32   
