@@ -47,7 +47,7 @@ input(x+2) * 2 +
 input(x+2) * 15
 input(x+3) * 3 +
 input(x+3) * 5 +
-input(x+4) * 5
+input(x+4)
 
 // Found by synthesizer
 input(x) * 8 +
@@ -61,46 +61,32 @@ input(x+4)
 
 halide.hexagon.interleave.vh(
     halide.hexagon.acc_add_2mpy.vh.vub.vub.b.b(
-        halide.hexagon.deinterleave.vh(
-            (
-                halide.hexagon.interleave.vh(
-                    halide.hexagon.acc_add_2mpy.vh.vub.vub.b.b(
-                        halide.hexagon.deinterleave.vh(
-                            halide.hexagon.interleave.vh(
-                                halide.hexagon.acc_add_2mpy.vh.vub.vub.b.b(
-                                    halide.hexagon.deinterleave.vh(
-                                        halide.hexagon.interleave.vh(
-                                            halide.hexagon.add_2mpy.vub.vub.b.b(
-                                                input[ramp((t66 + 2), 1, 128)], 
-                                                input[ramp((t66 + 1), 1, 128)], 
-                                                (int8)4, 
-                                                (int8)10
-                                            )
-                                        )
-                                    ), 
-                                    input[ramp(t66, 1, 128)], 
-                                    input[ramp((t66 + 1), 1, 128)], 
-                                    (int8)8, 
-                                    (int8)12
-                                )
-                            )
-                        ), 
-                        input[ramp((t66 + 3), 1, 128)], 
-                        input[ramp((t66 + 2), 1, 128)], 
-                        (int8)3, 
-                        (int8)2
-                    )
-                ) 
-                + 
-                halide.hexagon.interleave.vh(
-                    halide.hexagon.zxt.vub(
-                        input[ramp((t66 + 4), 1, 128)]
-                    )
-                )
+        (
+            halide.hexagon.acc_add_2mpy.vh.vub.vub.b.b(
+                halide.hexagon.acc_add_2mpy.vh.vub.vub.b.b(
+                    halide.hexagon.add_2mpy.vub.vub.b.b(
+                        input[ramp((((output.s0.x.x*128) + t51) + 2), 1, 128)], 
+                        input[ramp((((output.s0.x.x*128) + t51) + 1), 1, 128)], 
+                        (int8)4, 
+                        (int8)10
+                    ), 
+                    input[ramp(((output.s0.x.x*128) + t51), 1, 128)], 
+                    input[ramp((((output.s0.x.x*128) + t51) + 1), 1, 128)], 
+                    (int8)8, 
+                    (int8)12
+                ), 
+                input[ramp((((output.s0.x.x*128) + t51) + 3), 1, 128)], 
+                input[ramp((((output.s0.x.x*128) + t51) + 2), 1, 128)], 
+                (int8)3, 
+                (int8)2
+            ) 
+            + 
+            halide.hexagon.zxt.vub(
+                input[ramp((((output.s0.x.x*128) + t51) + 4), 1, 128)]
             )
         ), 
-        input[ramp((t66 + 2), 1, 128)], 
-        input[ramp((t66 + 3), 1, 128)], 
+        input[ramp((((output.s0.x.x*128) + t51) + 2), 1, 128)], 
+        input[ramp((((output.s0.x.x*128) + t51) + 3), 1, 128)], 
         (int8)15, 
         (int8)5
     )

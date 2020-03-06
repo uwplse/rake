@@ -6,8 +6,8 @@ cd $basedir
 declare -i result=0
 set -x
 
-INCLUDES="-I $HALIDE_ROOT/include -I$HALIDE_ROOT/support"
-HL_LIBS="$HALIDE_ROOT/lib/libHalide.a"
+INCLUDES="-I /home/maaz/Desktop/Research/rake/halide/distrib/include -I /home/maaz/Desktop/Research/rake/halide/distrib/tools"
+HL_LIBS="/home/maaz/Desktop/Research/rake/halide/distrib/lib/libHalide.a"
 
 #############################################################################
 cat <<EOT
@@ -17,24 +17,24 @@ EOT
 rm -fr ./bin
 mkdir -p bin/host
 
-CXX=g++-4.8
-
-${CXX} -std=c++11 $INCLUDES  -g -fno-rtti basic.cpp $HALIDE_ROOT/tools/GenGen.cpp -g $HL_LIBS -o bin/halide_blur.generator -ldl -lpthread -lz
+${CXX} -std=c++11 $INCLUDES  -g -fno-rtti basic.cpp $HALIDE_ROOT/tools/GenGen.cpp -g $HL_LIBS -o bin/basic.generator -ldl -lpthread -lz -ldl -lpthread -lz -lz -lrt -ldl -ltinfo -lpthread
 export LD_LIBRARY_PATH=$HALIDE_ROOT/lib/host:${HL_HEXAGON_TOOLS_SIM}/lib/iss/:.
 
-bin/halide_blur.generator -g basic1 -o ./bin/host target=host-hvx_128
-${CXX} -fopenmp -std=c++11 $INCLUDES -Wall -I ./bin/host -O3 test.cpp ./bin/host/basic1.a -o bin/host/test -lpthread -ldl -lm
+bin/basic.generator -g basic1 -o ./bin/host target=host-hvx_128
+bin/basic.generator -g basic7 -o ./bin/host target=host-hvx_128
+bin/basic.generator -g basic8 -o ./bin/host target=host-hvx_128
+${CXX} -fopenmp -std=c++11 $INCLUDES -Wall -I ./bin/host -O3 test.cpp ./bin/host/basic1.a ./bin/host/basic7.a ./bin/host/basic8.a -o bin/host/test -lpthread -ldl -lm
 ./bin/host/test
 if [ $? -gt 0 ]; then ((result++)); fi
 
-#bin/halide_blur.generator -g halide_blur -o ./bin/host target=host-hvx_64
-#${CXX} -fopenmp -std=c++11 $INCLUDES -Wall -I ./bin/host -O3 test.cpp ./bin/host/halide_blur.a -o bin/host/test -lpthread -ldl -lm
+#bin/basic1.generator -g basic1 -o ./bin/host target=host-hvx_64
+#${CXX} -fopenmp -std=c++11 $INCLUDES -Wall -I ./bin/host -O3 test.cpp ./bin/host/basic1.a -o bin/host/test -lpthread -ldl -lm
 #./bin/host/test
 #if [ $? -gt 0 ]; then ((result++)); fi
 
-#bin/halide_blur.generator -g halide_blur -o ./bin/host target=host
-#${CXX} -fopenmp -std=c++11 $INCLUDES -Wall -I ./bin/host -O3 test.cpp ./bin/host/halide_blur.a -o bin/host/test -lpthread -ldl -lm
+#bin/basic1.generator -g basic1 -o ./bin/host target=host
+#${CXX} -fopenmp -std=c++11 $INCLUDES -Wall -I ./bin/host -O3 test.cpp ./bin/host/basic1.a -o bin/host/test -lpthread -ldl -lm
 #./bin/host/test
 #if [ $? -gt 0 ]; then ((result++)); fi
 
-exit $result
+#exit $result

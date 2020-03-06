@@ -36,7 +36,52 @@ Buffer<int16_t> bench_basic1(Buffer<uint8_t> in) {
 //#include "basic3.h"
 //#include "basic4.h"
 //#include "basic5.h"
-//#include "basic6.h"
+
+#include "basic7.h"
+
+Buffer<int16_t> bench_basic7(Buffer<uint8_t> in) {
+    Buffer<int16_t> out(in.width()-4);
+
+    // Call it once to initialize the halide runtime stuff
+    basic7(in, out);
+
+    // Copy-out result if it's device buffer and dirty.
+    out.copy_to_host();
+
+    t = benchmark(10, 1, [&]() {
+        basic7(in, out);
+
+        // Sync device execution if any.
+        out.device_sync();
+    });
+
+    out.copy_to_host();
+
+    return out;
+}
+
+#include "basic8.h"
+
+Buffer<int32_t> bench_basic8(Buffer<uint8_t> in) {
+    Buffer<int32_t> out(in.width()-4);
+
+    // Call it once to initialize the halide runtime stuff
+    basic8(in, out);
+
+    // Copy-out result if it's device buffer and dirty.
+    out.copy_to_host();
+
+    t = benchmark(10, 1, [&]() {
+        basic8(in, out);
+
+        // Sync device execution if any.
+        out.device_sync();
+    });
+
+    out.copy_to_host();
+
+    return out;
+}
 
 void basic (int width, int height) {
     // Generate input data
@@ -50,6 +95,14 @@ void basic (int width, int height) {
     bench_basic1(input);
     double basic1_t = t;
     printf("Basic1 time: %f\n", basic1_t);
+
+    bench_basic7(input);
+    double basic7_t = t;
+    printf("Basic7 time: %f\n", basic7_t);
+
+    bench_basic8(input);
+    double basic8_t = t;
+    printf("Basic8 time: %f\n", basic8_t);
 
     //bench_basic2(input);
     //bench_basic3(input);
