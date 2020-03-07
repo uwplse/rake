@@ -21,10 +21,24 @@ ${CXX} -std=c++11 $INCLUDES  -g -fno-rtti basic.cpp $HALIDE_ROOT/tools/GenGen.cp
 export LD_LIBRARY_PATH=$HALIDE_ROOT/lib/host:${HL_HEXAGON_TOOLS_SIM}/lib/iss/:.
 
 bin/basic.generator -g basic1 -o ./bin/host target=host-hvx_128
+bin/basic.generator -g basic2 -o ./bin/host target=host-hvx_128
+bin/basic.generator -g basic3 -o ./bin/host target=host-hvx_128
+bin/basic.generator -g basic4 -o ./bin/host target=host-hvx_128
+bin/basic.generator -g basic5 -o ./bin/host target=host-hvx_128
+bin/basic.generator -g basic6 -o ./bin/host target=host-hvx_128
 bin/basic.generator -g basic7 -o ./bin/host target=host-hvx_128
-bin/basic.generator -g basic8 -o ./bin/host target=host-hvx_128
-${CXX} -fopenmp -std=c++11 $INCLUDES -Wall -I ./bin/host -O3 test.cpp ./bin/host/basic1.a ./bin/host/basic7.a ./bin/host/basic8.a -o bin/host/test -lpthread -ldl -lm
-./bin/host/test
+${CXX} -fopenmp -std=c++11 $INCLUDES -I ./bin/host -O3 \
+		test.cpp \
+		./bin/host/basic1.a \
+		./bin/host/basic2.a \
+		./bin/host/basic3.a \
+		./bin/host/basic4.a \
+		./bin/host/basic5.a \
+		./bin/host/basic6.a \
+		./bin/host/basic7.a \
+		-o bin/host/test \
+		-Wall -lpthread -ldl -lm 
+./bin/host/test $1
 if [ $? -gt 0 ]; then ((result++)); fi
 
 #bin/basic1.generator -g basic1 -o ./bin/host target=host-hvx_64

@@ -42,30 +42,6 @@ public:
     Var x;
 
     void generate() {
-        // Will use vrmpy since output vec is 32-bit
-        Func input32("input32");
-        input32(x) = cast(Int(32), input(x));
-        output(x) = input32(x) * 2 + input32(x+1) * 3 + input32(x+2) * 4 + input32(x+3) * 5;
-    }
-
-    void schedule() {
-        // Hexagon schedule.
-        const int vector_size = get_target().has_feature(Target::HVX_128) ? 128 : 64;
-        output
-            .hexagon()
-            .vectorize(x, vector_size);
-    }
-};
-HALIDE_REGISTER_GENERATOR(Gen_Basic2, basic2)
-
-class Gen_Basic3 : public Halide::Generator<Gen_Basic3> {
-public:
-    Input<Buffer<uint8_t>> input{"input", 1};
-    Output<Buffer<int32_t>> output{"output", 1};
-    
-    Var x;
-
-    void generate() {
         // Will not use vrmpy since we skip one index
         Func input32("input32");
         input32(x) = cast(Int(32), input(x));
@@ -80,9 +56,9 @@ public:
             .vectorize(x, vector_size);
     }
 };
-HALIDE_REGISTER_GENERATOR(Gen_Basic3, basic3)
+HALIDE_REGISTER_GENERATOR(Gen_Basic2, basic2)
 
-class Gen_Basic4 : public Halide::Generator<Gen_Basic4> {
+class Gen_Basic3 : public Halide::Generator<Gen_Basic3> {
 public:
     Input<Buffer<uint8_t>> input{"input", 1};
     Output<Buffer<int32_t>> output{"output", 1};
@@ -104,9 +80,9 @@ public:
             .vectorize(x, vector_size);
     }
 };
-HALIDE_REGISTER_GENERATOR(Gen_Basic4, basic4)
+HALIDE_REGISTER_GENERATOR(Gen_Basic3, basic3)
 
-class Gen_Basic5 : public Halide::Generator<Gen_Basic5> {
+class Gen_Basic4 : public Halide::Generator<Gen_Basic4> {
 public:
     Input<Buffer<uint8_t>> input{"input", 1};
     Output<Buffer<int32_t>> output{"output", 1};
@@ -128,9 +104,9 @@ public:
             .vectorize(x, vector_size);
     }
 };
-HALIDE_REGISTER_GENERATOR(Gen_Basic5, basic5)
+HALIDE_REGISTER_GENERATOR(Gen_Basic4, basic4)
 
-class Gen_Basic6 : public Halide::Generator<Gen_Basic6> {
+class Gen_Basic5 : public Halide::Generator<Gen_Basic5> {
 public:
     Input<Buffer<uint8_t>> input{"input", 1};
     Output<Buffer<int32_t>> output{"output", 1};
@@ -152,9 +128,9 @@ public:
             .vectorize(x, vector_size);
     }
 };
-HALIDE_REGISTER_GENERATOR(Gen_Basic6, basic6)
+HALIDE_REGISTER_GENERATOR(Gen_Basic5, basic5)
 
-class Gen_Basic7 : public Halide::Generator<Gen_Basic7> {
+class Gen_Basic6 : public Halide::Generator<Gen_Basic6> {
 public:
     Input<Buffer<uint8_t>> input{"input", 1};
     Output<Buffer<int16_t>> output{"output", 1};
@@ -188,9 +164,9 @@ public:
             .vectorize(x, vector_size);
     }
 };
-HALIDE_REGISTER_GENERATOR(Gen_Basic7, basic7)
+HALIDE_REGISTER_GENERATOR(Gen_Basic6, basic6)
 
-class Gen_Basic8 : public Halide::Generator<Gen_Basic8> {
+class Gen_Basic7 : public Halide::Generator<Gen_Basic7> {
 public:
     Input<Buffer<uint8_t>> input{"input", 1};
     Output<Buffer<int32_t>> output{"output", 1};
@@ -233,4 +209,4 @@ public:
     }
 };
 
-HALIDE_REGISTER_GENERATOR(Gen_Basic8, basic8)
+HALIDE_REGISTER_GENERATOR(Gen_Basic7, basic7)
