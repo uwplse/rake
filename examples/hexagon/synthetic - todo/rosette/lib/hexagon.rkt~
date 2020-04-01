@@ -1,0 +1,15 @@
+#lang rosette
+
+;; Model Hexagon Instr
+(define (convolve-x v k)
+  (lambda (i)
+    (bvadd
+     (bvmul
+      (cast (v i) 'uint8 'int16)
+      (cast (vector-ref k 0) 'int8 'int16))
+     (bvmul
+      (cast (v (+ i 1)) 'uint8 'int16)
+      (cast (vector-ref k 1) 'int8 'int16))
+     (bvmul
+      (cast (v (+ i 2)) 'uint8 'int16)
+      (cast (vector-ref k 2) 'int8 'int16)))))

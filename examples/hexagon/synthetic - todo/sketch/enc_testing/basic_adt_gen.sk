@@ -1,0 +1,109 @@
+pragma options "--bnd-cbits 1";
+pragma options "--bnd-inbits 2";
+pragma options "--bnd-int-range 150";
+pragma options "--bnd-arr-size 1024";
+pragma options "--bnd-unroll-amnt 10";
+pragma options "--bnd-inline-amnt 9";
+pragma options "--slv-parallel";
+pragma options "--slv-p-cpus 28";
+pragma options "--slv-lightverif";
+
+include "casting.sk";
+include "vector_adt_gen.sk";
+
+int ARRAY_LEN = 1024;
+
+// Try graph top-down abstraction algorithm
+// Try TASO with CEGIS optimizations
+// Spend 1 day porting C++ frontend to Metalift
+// Hanlde types properly
+
+Vector orig (Buffer input, int x, int t51) {
+    return vec_add(vec_add(vec_mul(cast_uint8vec_to_int16vec(ramp(input, (((x*128) + t51) + 3), 1, 128)), broadcast(cast_int32_to_int16(3), 128)), vec_add(vec_mul(cast_uint8vec_to_int16vec(ramp(input, (((x*128) + t51) + 2), 1, 128)), broadcast(cast_int32_to_int16(2), 128)), vec_add(vec_mul(vec_add(vec_add(vec_mul(cast_uint8vec_to_int16vec(ramp(input, ((x*128) + t51), 1, 128)), broadcast(cast_int32_to_int16(2), 128)), vec_mul(cast_uint8vec_to_int16vec(ramp(input, (((x*128) + t51) + 1), 1, 128)), broadcast(cast_int32_to_int16(3), 128))), cast_uint8vec_to_int16vec(ramp(input, (((x*128) + t51) + 2), 1, 128))), broadcast(cast_int32_to_int16(4), 128)), vec_mul(vec_add(vec_add(vec_mul(cast_uint8vec_to_int16vec(ramp(input, (((x*128) + t51) + 1), 1, 128)), broadcast(cast_int32_to_int16(2), 128)), vec_mul(cast_uint8vec_to_int16vec(ramp(input, (((x*128) + t51) + 2), 1, 128)), broadcast(cast_int32_to_int16(3), 128))), cast_uint8vec_to_int16vec(ramp(input, (((x*128) + t51) + 3), 1, 128))), broadcast(cast_int32_to_int16(5), 128))))), cast_uint8vec_to_int16vec(ramp(input, (((x*128) + t51) + 4), 1, 128)));
+}
+
+generator int index_gen ([int N], int[N] exprs) {
+    int i = ??(3);
+    int c = ??(2);
+
+    assert i < N;
+
+    int expr = exprs[i];
+    return {| expr | expr + c | expr - c |};
+}
+
+generator int int_expr_gen ([int N], int[N] terms) {
+    assert N <= 32 : "Too many terms given to the generator";
+
+    int[32] exprs = terms;
+
+    int steps = ??(2);
+
+    int idx = N;
+
+    repeat (steps) {
+        int idx_e1 = ??(4);
+        int idx_e2 = ??(4);
+
+        assert idx_e1 < idx;
+        assert idx_e2 < idx;
+        assert idx_e1 < idx_e2;
+
+        int e1 = exprs[idx_e1];
+        int e2 = exprs[idx_e2];
+        int c = ??(3);
+
+        exprs[idx] = {| e1 +- c | e1 + e2 | e1 * e2 |};
+
+        idx++;
+    }
+
+    minimize(steps);
+
+    return exprs[idx-1];
+}
+
+generator Vector convolve_x_gen (Vector v) {
+    int kwidth = ??(3);
+    assert kwidth > 1;
+
+    int[kwidth] kernel = {};
+    repeat(i : kwidth) {
+        if (??(1))
+            kernel[i] = {| 0 | 1 |};
+        else
+            kernel[i] = int_expr_gen({2, 3, 4, 5}); // Constants found in input code
+    }
+
+    int z = 0;
+    int o = 0;
+    for (int i=0; i<kwidth && i<8; i++) {
+        if (kernel[i] == 0)
+            z += 1;
+        else if (kernel[i] == 1)
+            o += 1;
+    }
+
+    assert kwidth - z > 1;
+    assert kwidth - z != 2 || o != 2;
+
+    return convolve_x(v, kwidth, kernel);
+}
+
+generator Vector synth (Buffer input, int x, int t20) {
+    // Create vec
+    int base = index_gen({((x*128) + t20), ((x*128) + t20) + 1, ((x*128) + t20) + 2});
+    int stride = 1;
+    int lanes = 128;
+    Vector v = ramp(input, base, stride, lanes);
+    return convolve_x_gen(v);
+}
+
+harness void main (int x, int t20, int[ARRAY_LEN] input_data) {
+    Buffer input = new Buffer(data=input_data);
+
+    Vector original_expr = orig(input, x, t20);
+    Vector synthesized_expr = synth(input, x, t20);
+
+    assert vec_eq(original_expr, synthesized_expr): "Original and synthesized expressions do not match.";
+}

@@ -1,9 +1,0 @@
-#lang rosette
-
-;; Grammar
-
-(define-synthax (int_expr get-int-term depth)
- #:base (get-int-term)
- #:else (choose
-         (get-term)
-         ((choose bvadd bvmul) (int_expr (- depth 1)) (int_expr (- depth 1)))))
