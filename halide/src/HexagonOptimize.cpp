@@ -2505,7 +2505,7 @@ Stmt scatter_gather_generator(Stmt s) {
 }
 
 Stmt optimize_hexagon_instructions(Stmt s, Target t) {
-    debug(0) << s << "\n\n";
+    debug(1) << s << "\n\n";
 
     // Convert some expressions to an equivalent form which get better
     // optimized in later stages for hexagon
