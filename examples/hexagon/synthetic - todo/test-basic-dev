@@ -2,7 +2,7 @@
 
 basedir=`dirname $0`
 cd $basedir
-. setup-env.sh
+. ../setup-env.sh
 declare -i result=0
 set -x
 

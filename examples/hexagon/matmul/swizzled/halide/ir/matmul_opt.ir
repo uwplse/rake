@@ -1,0 +1,106 @@
+let scalar_indices = _halide_hexagon_buffer_get_host(scalar_indices.buffer)
+assert(((reinterpret(uint64, scalar_indices) % (uint64)128) == (uint64)0), halide_error_unaligned_host_ptr("scalar_indices", 128))
+let output = _halide_hexagon_buffer_get_host(output.buffer)
+assert(((reinterpret(uint64, output) % (uint64)128) == (uint64)0), halide_error_unaligned_host_ptr("output", 128))
+let mat_b = _halide_hexagon_buffer_get_host(mat_b.buffer)
+assert(((reinterpret(uint64, mat_b) % (uint64)128) == (uint64)0), halide_error_unaligned_host_ptr("mat_b", 128))
+let mat_a = _halide_hexagon_buffer_get_host(mat_a.buffer)
+assert(((reinterpret(uint64, mat_a) % (uint64)128) == (uint64)0), halide_error_unaligned_host_ptr("mat_a", 128))
+let bias = _halide_hexagon_buffer_get_host(bias.buffer)
+assert(((reinterpret(uint64, bias) % (uint64)128) == (uint64)0), halide_error_unaligned_host_ptr("bias", 128))
+let t168 = scalar_indices[15]
+let t167 = scalar_indices[14]
+let t166 = scalar_indices[13]
+let t165 = scalar_indices[12]
+let t162 = scalar_indices[11]
+let t155 = scalar_indices[10]
+let t154 = scalar_indices[9]
+let t153 = scalar_indices[8]
+let t152 = scalar_indices[7]
+let output_offset = scalar_indices[6]
+let output_multiplier = scalar_indices[5]
+let output.stride.1 = scalar_indices[4]
+let mat_b.stride.1 = scalar_indices[3]
+let mat_a.stride.1 = scalar_indices[2]
+let mat_a.extent.1 = scalar_indices[1]
+let mat_a.extent.0 = scalar_indices[0]
+allocate column_sums_b[uint32 * (t168*128)]
+produce column_sums_b {
+  parallel (column_sums_b.s0.x.x, 0, t168) {
+    allocate sum$1[uint32 * 128 * 1]
+    produce sum$1 {
+      sum$1[ramp(0, 1, 128)] = x128((uint32)0)
+      for (sum$1.s1.fk$x, 0, mat_a.extent.0) {
+        sum$1[ramp(0, 1, 128)] = (sum$1[ramp(0, 1, 128)] + halide.hexagon.unpack.vuh(halide.hexagon.unpack.vub(mat_b[ramp(((mat_b.stride.1*sum$1.s1.fk$x) + (column_sums_b.s0.x.x*128)), 1, 128)])))
+      }
+    }
+    consume sum$1 {
+      column_sums_b[ramp((column_sums_b.s0.x.x*128), 1, 128) aligned(128, 0)] = sum$1[ramp(0, 1, 128)]
+    }
+    free sum$1
+  }
+}
+allocate row_sums_a[uint32 * t152]
+produce row_sums_a {
+  parallel (row_sums_a.s0.y.y, 0, t153) {
+    let row_sums_a.s0.y.yi.base = min((row_sums_a.s0.y.y*32), t154)
+    for (row_sums_a.s0.y.yi, 0, 32) {
+      if (((-1 <= (row_sums_a.s0.y.yi + row_sums_a.s0.y.yi.base)) && (((row_sums_a.s0.y.yi + row_sums_a.s0.y.yi.base) + 2) <= mat_a.extent.1))) {
+        prefetch(mat_a, (((row_sums_a.s0.y.yi + row_sums_a.s0.y.yi.base) + 1)*mat_a.stride.1), mat_a.extent.0, 1, 1, mat_a.stride.1)
+      }
+      allocate sum[uint32 * 1]
+      produce sum {
+        sum[0] = (uint32)0
+        for (sum.s1.fk$x, 0, mat_a.extent.0) {
+          sum[0] = (sum[0] + uint32(mat_a[(((row_sums_a.s0.y.yi + row_sums_a.s0.y.yi.base)*mat_a.stride.1) + sum.s1.fk$x)]))
+        }
+      }
+      consume sum {
+        row_sums_a[((row_sums_a.s0.y.yi.base + t155) + row_sums_a.s0.y.yi)] = sum[0]
+      }
+      free sum
+    }
+  }
+}
+consume row_sums_a {
+  consume column_sums_b {
+    parallel (output.s0.x.xo, 0, t168) {
+      allocate mat_b_swizzled[uint8 * 128 * t167 * 4]
+      produce mat_b_swizzled {
+        for (mat_b_swizzled.s0.y, 0, t167) {
+          mat_b_swizzled[ramp((mat_b_swizzled.s0.y*512), 1, 512) aligned(512, 0)] = interleave_vectors(mat_b[ramp((((mat_b.stride.1*mat_b_swizzled.s0.y) + (output.s0.x.xo*32))*4), 1, 128) aligned(4, 0)], mat_b[ramp(((((mat_b_swizzled.s0.y*4) + 1)*mat_b.stride.1) + (output.s0.x.xo*128)), 1, 128)], mat_b[ramp(((((mat_b_swizzled.s0.y*4) + 2)*mat_b.stride.1) + (output.s0.x.xo*128)), 1, 128) aligned(2, 0)], mat_b[ramp(((((mat_b_swizzled.s0.y*4) + 3)*mat_b.stride.1) + (output.s0.x.xo*128)), 1, 128)])
+        }
+      }
+      consume mat_b_swizzled {
+        for (output.s0.y.yo, 0, t165) {
+          if ((((output.s0.y.yo*4) + 8) <= mat_a.extent.1)) {
+            prefetch(mat_a, (((output.s0.y.yo + 1)*mat_a.stride.1)*4), (t167*4), 1, 4, mat_a.stride.1)
+          }
+          allocate multiplied_no_offsets[uint32 * 128 * 4]
+          produce multiplied_no_offsets {
+            multiplied_no_offsets[ramp(0, 1, 128)] = x128((uint32)0)
+            multiplied_no_offsets[ramp(128, 1, 128)] = x128((uint32)0)
+            multiplied_no_offsets[ramp(256, 1, 128)] = x128((uint32)0)
+            multiplied_no_offsets[ramp(384, 1, 128)] = x128((uint32)0)
+            for (multiplied_no_offsets.s1.k$x, 0, t167) {
+              multiplied_no_offsets[ramp(0, 1, 128)] = halide.hexagon.acc_add_4mpy.vuw.vub.ub(multiplied_no_offsets[ramp(0, 1, 128)], mat_b_swizzled[ramp((multiplied_no_offsets.s1.k$x*512), 1, 512) aligned(512, 0)], reinterpret(uint32, mat_a[ramp((((mat_a.stride.1*output.s0.y.yo) + multiplied_no_offsets.s1.k$x)*4), 1, 4) aligned(4, 0)]))
+              multiplied_no_offsets[ramp(128, 1, 128)] = (let t202 = ((multiplied_no_offsets.s1.k$x*4) + (((output.s0.y.yo*4) + 1)*mat_a.stride.1)) in halide.hexagon.acc_add_4mpy.vuw.vub.ub(multiplied_no_offsets[ramp(128, 1, 128)], mat_b_swizzled[ramp((multiplied_no_offsets.s1.k$x*512), 1, 512) aligned(512, 0)], reinterpret(uint32, mat_a[ramp(t202, 1, 4)])))
+              multiplied_no_offsets[ramp(256, 1, 128)] = (let t203 = ((multiplied_no_offsets.s1.k$x*4) + (((output.s0.y.yo*4) + 2)*mat_a.stride.1)) in halide.hexagon.acc_add_4mpy.vuw.vub.ub(multiplied_no_offsets[ramp(256, 1, 128)], mat_b_swizzled[ramp((multiplied_no_offsets.s1.k$x*512), 1, 512) aligned(512, 0)], reinterpret(uint32, mat_a[ramp(t203, 1, 4)])))
+              multiplied_no_offsets[ramp(384, 1, 128)] = (let t204 = ((multiplied_no_offsets.s1.k$x*4) + (((output.s0.y.yo*4) + 3)*mat_a.stride.1)) in halide.hexagon.acc_add_4mpy.vuw.vub.ub(multiplied_no_offsets[ramp(384, 1, 128)], mat_b_swizzled[ramp((multiplied_no_offsets.s1.k$x*512), 1, 512) aligned(512, 0)], reinterpret(uint32, mat_a[ramp(t204, 1, 4)])))
+            }
+          }
+          consume multiplied_no_offsets {
+            output[ramp((((output.s0.y.yo*output.stride.1) + (output.s0.x.xo*32))*4), 1, 128) aligned(16, 0)] = (let t205 = halide.hexagon.trunc_satdw_mpy2_rnd.vw.vw((halide.hexagon.add_mul.vw.vw.h((bias[ramp((output.s0.x.xo*128), 1, 128) aligned(128, 0)] + (int32x128(multiplied_no_offsets[ramp(0, 1, 128)]) + x128(((int32(t159)*int32(t160))*mat_a.extent.0)))), int32x128(column_sums_b[ramp((output.s0.x.xo*128), 1, 128) aligned(128, 0)]), t159) + x128((int32(t160)*int32(row_sums_a[(((output.s0.y.yo - t166)*4) + 32)])))), x128(output_multiplier)) in max(min(halide.hexagon.pack_satub.vh(halide.hexagon.pack_sath.vw((select_mask(bool_to_mask(((select_mask(bool_to_mask((t205 < x128(0))), x128(1), x128(0)) + x128(((t162 + -1)/2))) < bitwise_and(t205, x128((t162 + -1))))), x128(1), x128(0)) + halide.hexagon.add_shr.vw.vw.uw(x128(output_offset), t205, t164)))), x128(output_max)), x128(output_min)))
+            output[ramp(((((output.s0.y.yo*4) + 1)*output.stride.1) + (output.s0.x.xo*128)), 1, 128) aligned(4, 0)] = (let t206 = halide.hexagon.trunc_satdw_mpy2_rnd.vw.vw((halide.hexagon.add_mul.vw.vw.h((bias[ramp((output.s0.x.xo*128), 1, 128) aligned(128, 0)] + (int32x128(multiplied_no_offsets[ramp(128, 1, 128)]) + x128(((int32(t159)*int32(t160))*mat_a.extent.0)))), int32x128(column_sums_b[ramp((output.s0.x.xo*128), 1, 128) aligned(128, 0)]), t159) + x128((int32(t160)*int32(row_sums_a[(((output.s0.y.yo - t166)*4) + 33)])))), x128(output_multiplier)) in max(min(halide.hexagon.pack_satub.vh(halide.hexagon.pack_sath.vw((select_mask(bool_to_mask(((select_mask(bool_to_mask((t206 < x128(0))), x128(1), x128(0)) + x128(((t162 + -1)/2))) < bitwise_and(t206, x128((t162 + -1))))), x128(1), x128(0)) + halide.hexagon.add_shr.vw.vw.uw(x128(output_offset), t206, t164)))), x128(output_max)), x128(output_min)))
+            output[ramp(((((output.s0.y.yo*4) + 2)*output.stride.1) + (output.s0.x.xo*128)), 1, 128) aligned(8, 0)] = (let t207 = halide.hexagon.trunc_satdw_mpy2_rnd.vw.vw((halide.hexagon.add_mul.vw.vw.h((bias[ramp((output.s0.x.xo*128), 1, 128) aligned(128, 0)] + (int32x128(multiplied_no_offsets[ramp(256, 1, 128)]) + x128(((int32(t159)*int32(t160))*mat_a.extent.0)))), int32x128(column_sums_b[ramp((output.s0.x.xo*128), 1, 128) aligned(128, 0)]), t159) + x128((int32(t160)*int32(row_sums_a[(((output.s0.y.yo - t166)*4) + 34)])))), x128(output_multiplier)) in max(min(halide.hexagon.pack_satub.vh(halide.hexagon.pack_sath.vw((select_mask(bool_to_mask(((select_mask(bool_to_mask((t207 < x128(0))), x128(1), x128(0)) + x128(((t162 + -1)/2))) < bitwise_and(t207, x128((t162 + -1))))), x128(1), x128(0)) + halide.hexagon.add_shr.vw.vw.uw(x128(output_offset), t207, t164)))), x128(output_max)), x128(output_min)))
+            output[ramp(((((output.s0.y.yo*4) + 3)*output.stride.1) + (output.s0.x.xo*128)), 1, 128) aligned(4, 0)] = (let t208 = halide.hexagon.trunc_satdw_mpy2_rnd.vw.vw((halide.hexagon.add_mul.vw.vw.h((bias[ramp((output.s0.x.xo*128), 1, 128) aligned(128, 0)] + (int32x128(multiplied_no_offsets[ramp(384, 1, 128)]) + x128(((int32(t159)*int32(t160))*mat_a.extent.0)))), int32x128(column_sums_b[ramp((output.s0.x.xo*128), 1, 128) aligned(128, 0)]), t159) + x128((int32(t160)*int32(row_sums_a[(((output.s0.y.yo - t166)*4) + 35)])))), x128(output_multiplier)) in max(min(halide.hexagon.pack_satub.vh(halide.hexagon.pack_sath.vw((select_mask(bool_to_mask(((select_mask(bool_to_mask((t208 < x128(0))), x128(1), x128(0)) + x128(((t162 + -1)/2))) < bitwise_and(t208, x128((t162 + -1))))), x128(1), x128(0)) + halide.hexagon.add_shr.vw.vw.uw(x128(output_offset), t208, t164)))), x128(output_max)), x128(output_min)))
+            free multiplied_no_offsets
+          }
+        }
+      }
+      free mat_b_swizzled
+    }
+  }
+}
+free column_sums_b
+free row_sums_a
