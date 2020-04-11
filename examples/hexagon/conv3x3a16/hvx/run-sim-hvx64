@@ -1,0 +1,33 @@
+CXX=/home/maaz/Qualcomm/Hexagon_SDK/3.5.1/tools/HEXAGON_Tools/8.3.07/Tools/bin/hexagon-clang
+SIM=/home/maaz/Qualcomm/Hexagon_SDK/3.5.1/tools/HEXAGON_Tools/8.3.07/Tools/bin/hexagon-sim
+INPUT=/home/maaz/Qualcomm/Hexagon_SDK/3.5.1/tools/HEXAGON_Tools/8.3.07/Examples/HVX/testvectors/football1920x1080.bin
+
+rm -rf build
+mkdir build
+rm -rf ref_build
+mkdir ref_build
+
+$CXX -O2 -mv60 -mhvx -mhvx-length=128B -DLOG2VLEN=6 -I/home/maaz/Qualcomm/Hexagon_SDK/3.5.1/tools/HEXAGON_Tools/8.3.07/Examples/HVX/common/include -DQDSP6SS_PUB_BASE=0xFE200000 -c -o build/conv3x3a16.o src/conv3x3a16.c
+
+$CXX -O2 -mv60 -mhvx -mhvx-length=128B -DLOG2VLEN=6 -I/home/maaz/Qualcomm/Hexagon_SDK/3.5.1/tools/HEXAGON_Tools/8.3.07/Examples/HVX/common/include -DQDSP6SS_PUB_BASE=0xFE200000 -c -o build/test.o test.c
+
+$CXX -O2 -mv60 -mhvx -mhvx-length=128B -DLOG2VLEN=6 -I/home/maaz/Qualcomm/Hexagon_SDK/3.5.1/tools/HEXAGON_Tools/8.3.07/Examples/HVX/common/include -DQDSP6SS_PUB_BASE=0xFE200000 -c -o build/subsys.o /home/maaz/Qualcomm/Hexagon_SDK/3.5.1/tools/HEXAGON_Tools/8.3.07/Examples/HVX/common/src/subsys.c
+
+$CXX -O2 -mv60 -o build/conv3x3a16.exe ./build/conv3x3a16.o ./build/test.o ./build/subsys.o  -lhexagon
+
+gcc -Wall -O3 -I/home/maaz/Qualcomm/Hexagon_SDK/3.5.1/tools/HEXAGON_Tools/8.3.07/Examples/HVX/common/include -c -o ref_build/conv3x3a16_ref.o src/conv3x3a16_ref.c
+
+gcc -Wall -O3 -I/home/maaz/Qualcomm/Hexagon_SDK/3.5.1/tools/HEXAGON_Tools/8.3.07/Examples/HVX/common/include -c -o ref_build/test.o test.c
+
+gcc -o ref_build/conv3x3a16.exe ./ref_build/conv3x3a16_ref.o ./ref_build/test.o -lm
+
+# run reference
+./ref_build/conv3x3a16.exe 1920 1080 $INPUT ./ref_build/out.bin
+
+$SIM -mv60 --memfill 0x0 --simulated_returnval --timing --nullptr=2 -- ./build/conv3x3a16.exe 1920 1080 $INPUT ./build/out.bin
+
+# compare outputs
+cmp ./build/out.bin ./ref_build/out.bin
+
+# delete unnecessary files
+rm pa_dump.core.0 pmu_statsfile.txt stats_dump.iss.0
