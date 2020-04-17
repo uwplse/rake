@@ -1,0 +1,76 @@
++ ./tmp/gaussian5x5_generator -o tmp -e o,h,assembly,bitcode -g gaussian5x5 -f gaussian5x5_hvx64 target=hexagon-32-noos-no_bounds_query-no_asserts-hvx_64
+assert((reinterpret(uint64, output.buffer) != (uint64)0), halide_error_buffer_argument_is_null("output"))
+assert((reinterpret(uint64, input.buffer) != (uint64)0), halide_error_buffer_argument_is_null("input"))
+let input = _halide_buffer_get_host(input.buffer)
+let input.min.0 = _halide_buffer_get_min(input.buffer, 0)
+let input.stride.0 = _halide_buffer_get_stride(input.buffer, 0)
+let input.min.1 = _halide_buffer_get_min(input.buffer, 1)
+let input.stride.1 = _halide_buffer_get_stride(input.buffer, 1)
+let output = _halide_buffer_get_host(output.buffer)
+let output.min.0 = _halide_buffer_get_min(output.buffer, 0)
+let output.extent.0 = _halide_buffer_get_extent(output.buffer, 0)
+let output.stride.0 = _halide_buffer_get_stride(output.buffer, 0)
+let output.min.1 = _halide_buffer_get_min(output.buffer, 1)
+let output.extent.1 = _halide_buffer_get_extent(output.buffer, 1)
+let output.stride.1 = _halide_buffer_get_stride(output.buffer, 1)
+assert((input.stride.0 == 1), 0)
+assert((input.min.0 == 0), 0)
+assert(((input.stride.1 % 64) == 0), 0)
+assert((input.min.1 == 0), 0)
+assert((output.stride.0 == 1), 0)
+assert((output.min.0 == 0), 0)
+assert(((output.stride.1 % 64) == 0), 0)
+assert((output.min.1 == 0), 0)
+let output.s0.y.yo.loop_extent.s = ((output.extent.1 + -1)/(output.extent.1/2))
+produce output {
+  let t52 = (output.extent.1 - (output.extent.1/2))
+  let t58 = (-2 - (input.stride.1*2))
+  for<Hexagon> (output.s0.__outermost, 0, 1) {
+    parallel (output.s0.y.yo, 0, (output.s0.y.yo.loop_extent.s + 1)) {
+      let output.s0.y.y.base = min(((output.extent.1/2)*output.s0.y.yo), t52)
+      allocate rows[int16 * (((output.extent.0 + 127)/64)*64) * 4]
+      let t69 = (((output.extent.0 + 127)/64)*(output.s0.y.y.base % 4))
+      for (output.s0.y.y.y, 0, ((output.extent.1 + 6)/8)) {
+        produce rows {
+          for (rows.s0.y, ((output.s0.y.y.y*4) + output.s0.y.y.base), 4) {
+            let t79 = (((output.extent.0 + 127)/64)*(rows.s0.y % 4))
+            for (rows.s0.x.x, 0, ((output.extent.0 + 127)/64)) {
+              rows[ramp(((rows.s0.x.x + t79)*64), 1, 64) aligned(64, 0)] = halide.hexagon.interleave.vh((let t91 = ((rows.s0.x.x*64) + (input.stride.1*rows.s0.y)) in halide.hexagon.acc_add_2mpy.vh.vub.vub.b.b(halide.hexagon.acc_add_2mpy.vh.vub.vub.b.b(halide.hexagon.zxt.vub(input[ramp((((input.stride.1*2) + t91) + -2), 1, 64) aligned(64, 62)]), input[ramp(((t91 - input.stride.1) + -2), 1, 64) aligned(64, 62)], input[ramp(((input.stride.1 + t91) + -2), 1, 64) aligned(64, 62)], (int8)4, (int8)4), input[ramp((t91 + -2), 1, 64) aligned(64, 62)], input[ramp((t58 + t91), 1, 64) aligned(64, 62)], (int8)6, (int8)1)))
+            }
+          }
+        }
+        consume rows {
+          let t85 = (((output.extent.0 + 127)/64)*((((output.s0.y.y.y*4) + output.s0.y.y.base) + 3) % 4))
+          let t83 = (((output.extent.0 + 127)/64)*((((output.s0.y.y.y*4) + output.s0.y.y.base) + 2) % 4))
+          let t81 = (((output.extent.0 + 127)/64)*((((output.s0.y.y.y*4) + output.s0.y.y.base) + 1) % 4))
+          if ((0 < output.extent.0)) {
+            allocate c4[int16 * 64] in Stack
+            c4[ramp(0, 1, 32)] = rows[ramp((t85*64), 1, 32) aligned(64, 0)]
+            allocate c3[int16 * 64] in Stack
+            c3[ramp(0, 1, 32)] = rows[ramp((t83*64), 1, 32) aligned(64, 0)]
+            allocate c2[int16 * 64] in Stack
+            c2[ramp(0, 1, 32)] = rows[ramp((t81*64), 1, 32) aligned(64, 0)]
+            allocate c1[int16 * 64] in Stack
+            c1[ramp(0, 1, 32)] = rows[ramp((t69*64), 1, 32) aligned(64, 0)]
+            for (output.s0.x.x, 0, ((output.extent.0 + 63)/64)) {
+              c1[ramp(32, 1, 32)] = rows[ramp((((output.s0.x.x + t69)*64) + 64), 1, 32) aligned(64, 0)]
+              c2[ramp(32, 1, 32)] = rows[ramp((((output.s0.x.x + t81)*64) + 64), 1, 32) aligned(64, 0)]
+              c3[ramp(32, 1, 32)] = rows[ramp((((output.s0.x.x + t83)*64) + 64), 1, 32) aligned(64, 0)]
+              c4[ramp(32, 1, 32)] = rows[ramp((((output.s0.x.x + t85)*64) + 64), 1, 32) aligned(64, 0)]
+              output[ramp(((output.s0.x.x*64) + (((output.s0.y.y.y*4) + output.s0.y.y.base)*output.stride.1)), 1, 64) aligned(64, 0)] = (let t108 = rows[ramp((((output.s0.x.x + t69)*64) + 32), 1, 32) aligned(64, 32)] in (let t109.s = c1[ramp(0, 1, 32)] in (let t110.s = c1[ramp(32, 1, 32)] in halide.hexagon.packhi.vh(halide.hexagon.add_mul.vh.vh.b((concat_vectors(t109.s, t108) + halide.hexagon.add_mul.vh.vh.b(halide.hexagon.add_mul.vh.vh.b(concat_vectors(slice_vectors(concat_vectors(t109.s, t108), 4, 1, 32), slice_vectors(concat_vectors(t108, t110.s), 4, 1, 32)), concat_vectors(slice_vectors(concat_vectors(t109.s, t108), 3, 1, 32), slice_vectors(concat_vectors(t108, t110.s), 3, 1, 32)), (int8)4), concat_vectors(slice_vectors(concat_vectors(t109.s, t108), 2, 1, 32), slice_vectors(concat_vectors(t108, t110.s), 2, 1, 32)), (int8)6)), concat_vectors(slice_vectors(concat_vectors(t109.s, t108), 1, 1, 32), slice_vectors(concat_vectors(t108, t110.s), 1, 1, 32)), (int8)4)))))
+              output[ramp(((output.s0.x.x*64) + ((((output.s0.y.y.y*4) + output.s0.y.y.base) + 1)*output.stride.1)), 1, 64) aligned(64, 0)] = (let t111 = rows[ramp((((output.s0.x.x + t81)*64) + 32), 1, 32) aligned(64, 32)] in (let t112.s = c2[ramp(0, 1, 32)] in (let t113.s = c2[ramp(32, 1, 32)] in halide.hexagon.packhi.vh(halide.hexagon.add_mul.vh.vh.b((concat_vectors(t112.s, t111) + halide.hexagon.add_mul.vh.vh.b(halide.hexagon.add_mul.vh.vh.b(concat_vectors(slice_vectors(concat_vectors(t112.s, t111), 4, 1, 32), slice_vectors(concat_vectors(t111, t113.s), 4, 1, 32)), concat_vectors(slice_vectors(concat_vectors(t112.s, t111), 3, 1, 32), slice_vectors(concat_vectors(t111, t113.s), 3, 1, 32)), (int8)4), concat_vectors(slice_vectors(concat_vectors(t112.s, t111), 2, 1, 32), slice_vectors(concat_vectors(t111, t113.s), 2, 1, 32)), (int8)6)), concat_vectors(slice_vectors(concat_vectors(t112.s, t111), 1, 1, 32), slice_vectors(concat_vectors(t111, t113.s), 1, 1, 32)), (int8)4)))))
+              output[ramp(((output.s0.x.x*64) + ((((output.s0.y.y.y*4) + output.s0.y.y.base) + 2)*output.stride.1)), 1, 64) aligned(64, 0)] = (let t114 = rows[ramp((((output.s0.x.x + t83)*64) + 32), 1, 32) aligned(64, 32)] in (let t115.s = c3[ramp(0, 1, 32)] in (let t116.s = c3[ramp(32, 1, 32)] in halide.hexagon.packhi.vh(halide.hexagon.add_mul.vh.vh.b((concat_vectors(t115.s, t114) + halide.hexagon.add_mul.vh.vh.b(halide.hexagon.add_mul.vh.vh.b(concat_vectors(slice_vectors(concat_vectors(t115.s, t114), 4, 1, 32), slice_vectors(concat_vectors(t114, t116.s), 4, 1, 32)), concat_vectors(slice_vectors(concat_vectors(t115.s, t114), 3, 1, 32), slice_vectors(concat_vectors(t114, t116.s), 3, 1, 32)), (int8)4), concat_vectors(slice_vectors(concat_vectors(t115.s, t114), 2, 1, 32), slice_vectors(concat_vectors(t114, t116.s), 2, 1, 32)), (int8)6)), concat_vectors(slice_vectors(concat_vectors(t115.s, t114), 1, 1, 32), slice_vectors(concat_vectors(t114, t116.s), 1, 1, 32)), (int8)4)))))
+              output[ramp(((output.s0.x.x*64) + ((((output.s0.y.y.y*4) + output.s0.y.y.base) + 3)*output.stride.1)), 1, 64) aligned(64, 0)] = (let t117 = rows[ramp((((output.s0.x.x + t85)*64) + 32), 1, 32) aligned(64, 32)] in (let t118.s = c4[ramp(0, 1, 32)] in (let t119.s = c4[ramp(32, 1, 32)] in halide.hexagon.packhi.vh(halide.hexagon.add_mul.vh.vh.b((concat_vectors(t118.s, t117) + halide.hexagon.add_mul.vh.vh.b(halide.hexagon.add_mul.vh.vh.b(concat_vectors(slice_vectors(concat_vectors(t118.s, t117), 4, 1, 32), slice_vectors(concat_vectors(t117, t119.s), 4, 1, 32)), concat_vectors(slice_vectors(concat_vectors(t118.s, t117), 3, 1, 32), slice_vectors(concat_vectors(t117, t119.s), 3, 1, 32)), (int8)4), concat_vectors(slice_vectors(concat_vectors(t118.s, t117), 2, 1, 32), slice_vectors(concat_vectors(t117, t119.s), 2, 1, 32)), (int8)6)), concat_vectors(slice_vectors(concat_vectors(t118.s, t117), 1, 1, 32), slice_vectors(concat_vectors(t117, t119.s), 1, 1, 32)), (int8)4)))))
+              c1[ramp(0, 1, 32)] = c1[ramp(32, 1, 32)]
+              c2[ramp(0, 1, 32)] = c2[ramp(32, 1, 32)]
+              c3[ramp(0, 1, 32)] = c3[ramp(32, 1, 32)]
+              c4[ramp(0, 1, 32)] = c4[ramp(32, 1, 32)]
+            }
+          }
+        }
+      }
+      free rows
+    }
+  }
+}
+

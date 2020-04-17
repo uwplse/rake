@@ -1,0 +1,46 @@
++ ./tmp/sobel_generator -o tmp -e o,h,assembly,bitcode -g sobel -f sobel_hvx64 target=hexagon-32-noos-no_bounds_query-no_asserts-hvx_64
+assert((reinterpret(uint64, output.buffer) != (uint64)0), halide_error_buffer_argument_is_null("output"))
+assert((reinterpret(uint64, input.buffer) != (uint64)0), halide_error_buffer_argument_is_null("input"))
+let input = _halide_buffer_get_host(input.buffer)
+let input.min.0 = _halide_buffer_get_min(input.buffer, 0)
+let input.extent.0 = _halide_buffer_get_extent(input.buffer, 0)
+let input.stride.0 = _halide_buffer_get_stride(input.buffer, 0)
+let input.min.1 = _halide_buffer_get_min(input.buffer, 1)
+let input.extent.1 = _halide_buffer_get_extent(input.buffer, 1)
+let input.stride.1 = _halide_buffer_get_stride(input.buffer, 1)
+let output = _halide_buffer_get_host(output.buffer)
+let output.min.0 = _halide_buffer_get_min(output.buffer, 0)
+let output.extent.0 = _halide_buffer_get_extent(output.buffer, 0)
+let output.stride.0 = _halide_buffer_get_stride(output.buffer, 0)
+let output.min.1 = _halide_buffer_get_min(output.buffer, 1)
+let output.extent.1 = _halide_buffer_get_extent(output.buffer, 1)
+let output.stride.1 = _halide_buffer_get_stride(output.buffer, 1)
+assert((input.stride.0 == 1), 0)
+assert((input.min.0 == 0), 0)
+assert(((input.stride.1 % 64) == 0), 0)
+assert((input.min.1 == 0), 0)
+assert((output.stride.0 == 1), 0)
+assert(((output.stride.1 % 64) == 0), 0)
+let output.s0.y.yo.loop_extent.s = ((output.extent.1 + -1)/(output.extent.1/2))
+produce output {
+  let t119 = ((1 <= output.min.0) && ((((((output.extent.0 + -1)/64)*64) + output.min.0) + 65) <= input.extent.0))
+  let t116 = ((output.extent.1 + output.min.1) - (output.extent.1/2))
+  let t127 = (0 - (output.min.1*output.stride.1))
+  for<Hexagon> (output.s0.__outermost, 0, 1) {
+    parallel (output.s0.y.yo, 0, (output.s0.y.yo.loop_extent.s + 1)) {
+      let output.s0.y.y.base = min((((output.extent.1/2)*output.s0.y.yo) + output.min.1), t116)
+      for (output.s0.y.y.y, 0, ((output.extent.1 + 6)/8)) {
+        if ((((-7 <= ((output.s0.y.y.y*4) + output.s0.y.y.base)) && t119) && ((((output.s0.y.y.y*4) + output.s0.y.y.base) + 13) <= input.extent.1))) {
+          prefetch(input, (((((output.s0.y.y.y*4) + output.s0.y.y.base)*input.stride.1) + ((input.stride.1*7) + output.min.0)) + -1), ((((output.extent.0 + -1)/64)*64) + 66), 1, 6, input.stride.1)
+        }
+        for (output.s0.x.x, 0, ((output.extent.0 + 63)/64)) {
+          output[ramp(((output.s0.x.x*64) + ((((output.s0.y.y.y*4) + output.s0.y.y.base)*output.stride.1) + t127)), 1, 64) aligned(64, 0)] = (let t175 = ((output.s0.x.x*64) + ((((output.s0.y.y.y*4) + output.s0.y.y.base)*input.stride.1) + output.min.0)) in (let t177.s = input[ramp(((t175 - input.stride.1) + -1), 1, 64)] in (let t178.s = input[ramp(((t175 - input.stride.1) + 1), 1, 64)] in (let t180.s = input[ramp(((input.stride.1 + t175) + -1), 1, 64)] in (let t181.s = input[ramp(((input.stride.1 + t175) + 1), 1, 64)] in halide.hexagon.trunc.vh(min((absd((halide.hexagon.add_2mpy.vub.vub.b.b(input[ramp((t175 - input.stride.1), 1, 64)], t177.s, (int8)2, (int8)1) + halide.hexagon.zxt.vub(t178.s)), (halide.hexagon.add_2mpy.vub.vub.b.b(input[ramp((input.stride.1 + t175), 1, 64)], t180.s, (int8)2, (int8)1) + halide.hexagon.zxt.vub(t181.s))) + absd((halide.hexagon.add_2mpy.vub.vub.b.b(input[ramp((t175 + -1), 1, 64)], t177.s, (int8)2, (int8)1) + halide.hexagon.zxt.vub(t180.s)), (halide.hexagon.add_2mpy.vub.vub.b.b(input[ramp((t175 + 1), 1, 64)], t178.s, (int8)2, (int8)1) + halide.hexagon.zxt.vub(t181.s)))), x64((uint16)255))))))))
+          output[ramp(((output.s0.x.x*64) + (((((output.s0.y.y.y*4) + output.s0.y.y.base) + 1)*output.stride.1) + t127)), 1, 64) aligned(64, 0)] = (let t182 = ((output.s0.x.x*64) + (((((output.s0.y.y.y*4) + output.s0.y.y.base) + 1)*input.stride.1) + output.min.0)) in (let t184.s = input[ramp(((t182 - input.stride.1) + -1), 1, 64)] in (let t185.s = input[ramp(((t182 - input.stride.1) + 1), 1, 64)] in (let t187.s = input[ramp(((input.stride.1 + t182) + -1), 1, 64)] in (let t188.s = input[ramp(((input.stride.1 + t182) + 1), 1, 64)] in halide.hexagon.trunc.vh(min((absd((halide.hexagon.add_2mpy.vub.vub.b.b(input[ramp((t182 - input.stride.1), 1, 64)], t184.s, (int8)2, (int8)1) + halide.hexagon.zxt.vub(t185.s)), (halide.hexagon.add_2mpy.vub.vub.b.b(input[ramp((input.stride.1 + t182), 1, 64)], t187.s, (int8)2, (int8)1) + halide.hexagon.zxt.vub(t188.s))) + absd((halide.hexagon.add_2mpy.vub.vub.b.b(input[ramp((t182 + -1), 1, 64)], t184.s, (int8)2, (int8)1) + halide.hexagon.zxt.vub(t187.s)), (halide.hexagon.add_2mpy.vub.vub.b.b(input[ramp((t182 + 1), 1, 64)], t185.s, (int8)2, (int8)1) + halide.hexagon.zxt.vub(t188.s)))), x64((uint16)255))))))))
+          output[ramp(((output.s0.x.x*64) + (((((output.s0.y.y.y*4) + output.s0.y.y.base) + 2)*output.stride.1) + t127)), 1, 64) aligned(64, 0)] = (let t189 = ((output.s0.x.x*64) + (((((output.s0.y.y.y*4) + output.s0.y.y.base) + 2)*input.stride.1) + output.min.0)) in (let t191.s = input[ramp(((t189 - input.stride.1) + -1), 1, 64)] in (let t192.s = input[ramp(((t189 - input.stride.1) + 1), 1, 64)] in (let t194.s = input[ramp(((input.stride.1 + t189) + -1), 1, 64)] in (let t195.s = input[ramp(((input.stride.1 + t189) + 1), 1, 64)] in halide.hexagon.trunc.vh(min((absd((halide.hexagon.add_2mpy.vub.vub.b.b(input[ramp((t189 - input.stride.1), 1, 64)], t191.s, (int8)2, (int8)1) + halide.hexagon.zxt.vub(t192.s)), (halide.hexagon.add_2mpy.vub.vub.b.b(input[ramp((input.stride.1 + t189), 1, 64)], t194.s, (int8)2, (int8)1) + halide.hexagon.zxt.vub(t195.s))) + absd((halide.hexagon.add_2mpy.vub.vub.b.b(input[ramp((t189 + -1), 1, 64)], t191.s, (int8)2, (int8)1) + halide.hexagon.zxt.vub(t194.s)), (halide.hexagon.add_2mpy.vub.vub.b.b(input[ramp((t189 + 1), 1, 64)], t192.s, (int8)2, (int8)1) + halide.hexagon.zxt.vub(t195.s)))), x64((uint16)255))))))))
+          output[ramp(((output.s0.x.x*64) + (((((output.s0.y.y.y*4) + output.s0.y.y.base) + 3)*output.stride.1) + t127)), 1, 64) aligned(64, 0)] = (let t196 = ((output.s0.x.x*64) + (((((output.s0.y.y.y*4) + output.s0.y.y.base) + 3)*input.stride.1) + output.min.0)) in (let t198.s = input[ramp(((t196 - input.stride.1) + -1), 1, 64)] in (let t199.s = input[ramp(((t196 - input.stride.1) + 1), 1, 64)] in (let t201.s = input[ramp(((input.stride.1 + t196) + -1), 1, 64)] in (let t202.s = input[ramp(((input.stride.1 + t196) + 1), 1, 64)] in halide.hexagon.trunc.vh(min((absd((halide.hexagon.add_2mpy.vub.vub.b.b(input[ramp((t196 - input.stride.1), 1, 64)], t198.s, (int8)2, (int8)1) + halide.hexagon.zxt.vub(t199.s)), (halide.hexagon.add_2mpy.vub.vub.b.b(input[ramp((input.stride.1 + t196), 1, 64)], t201.s, (int8)2, (int8)1) + halide.hexagon.zxt.vub(t202.s))) + absd((halide.hexagon.add_2mpy.vub.vub.b.b(input[ramp((t196 + -1), 1, 64)], t198.s, (int8)2, (int8)1) + halide.hexagon.zxt.vub(t201.s)), (halide.hexagon.add_2mpy.vub.vub.b.b(input[ramp((t196 + 1), 1, 64)], t199.s, (int8)2, (int8)1) + halide.hexagon.zxt.vub(t202.s)))), x64((uint16)255))))))))
+        }
+      }
+    }
+  }
+}
+
