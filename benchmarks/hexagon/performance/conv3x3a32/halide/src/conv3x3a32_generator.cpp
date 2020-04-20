@@ -18,7 +18,7 @@ public:
         Expr sum = cast(Int(16), 0);
         for (int j = -1; j <= 1; j++) {
             for (int i = -1; i <= 1; i++) {
-                sum += cast<int32_t>(input(x+j, y+i)) * cast<int32_t>(mask(j+1, i+1));
+                sum += cast<int16_t>(input(x+i, y+j)) * cast<int16_t>(mask(i+1, j+1));
             }
         }
         output(x, y) = cast<uint8_t>(clamp(sum >> 4, 0, 255));
@@ -40,7 +40,9 @@ public:
 
             Expr output_stride = output.dim(1).stride();
             output.dim(1).set_stride((output_stride/vector_size) * vector_size);
+            
             Expr ht = output.dim(1).extent();
+            
             output
                 .hexagon()
                 .split(y, yo, y, ht/2)

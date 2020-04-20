@@ -88,7 +88,7 @@ void sobelPer2Row(
         iptr0++; iptr1++; iptr2++; iptr3++;
     }
 
-    for ( i=width; i>0; i-=VLEN)
+    for ( i=width; i>0; i-=VLEN )
     {
         sX00 = Q6_V_vlalign_VVI(sLine0v1,sLine0v0,1);
         sX10 = Q6_V_vlalign_VVI(sLine1v1,sLine1v0,1);

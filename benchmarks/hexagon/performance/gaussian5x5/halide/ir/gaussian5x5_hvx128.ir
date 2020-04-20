@@ -35,7 +35,27 @@ produce output {
           for (rows.s0.y, ((output.s0.y.y.y*4) + output.s0.y.y.base), 4) {
             let t79 = (((output.extent.0 + 255)/128)*(rows.s0.y % 4))
             for (rows.s0.x.x, 0, ((output.extent.0 + 255)/128)) {
-              rows[ramp(((rows.s0.x.x + t79)*128), 1, 128) aligned(128, 0)] = halide.hexagon.interleave.vh((let t91 = ((rows.s0.x.x*128) + (input.stride.1*rows.s0.y)) in halide.hexagon.acc_add_2mpy.vh.vub.vub.b.b(halide.hexagon.acc_add_2mpy.vh.vub.vub.b.b(halide.hexagon.zxt.vub(input[ramp((((input.stride.1*2) + t91) + -2), 1, 128) aligned(128, 126)]), input[ramp(((t91 - input.stride.1) + -2), 1, 128) aligned(128, 126)], input[ramp(((input.stride.1 + t91) + -2), 1, 128) aligned(128, 126)], (int8)4, (int8)4), input[ramp((t91 + -2), 1, 128) aligned(128, 126)], input[ramp((t58 + t91), 1, 128) aligned(128, 126)], (int8)6, (int8)1)))
+              rows[ramp(((rows.s0.x.x + t79)*128), 1, 128) aligned(128, 0)] = 
+
+              halide.hexagon.interleave.vh(
+                (let t91 = ((rows.s0.x.x*128) + (input.stride.1*rows.s0.y)) in 
+                  halide.hexagon.acc_add_2mpy.vh.vub.vub.b.b(
+                    halide.hexagon.acc_add_2mpy.vh.vub.vub.b.b(
+                      halide.hexagon.zxt.vub(
+                        input[ramp((((input.stride.1*2) + t91) + -2), 1, 128) aligned(128, 126)]
+                      ), 
+                      input[ramp(((t91 - input.stride.1) + -2), 1, 128) aligned(128, 126)], 
+                      input[ramp(((input.stride.1 + t91) + -2), 1, 128) aligned(128, 126)], 
+                      (int8)4, 
+                      (int8)4
+                    ), 
+                    input[ramp((t91 + -2), 1, 128) aligned(128, 126)], 
+                    input[ramp((t58 + t91), 1, 128) aligned(128, 126)], 
+                    (int8)6, 
+                    (int8)1
+                  )
+                )
+              )
             }
           }
         }
@@ -57,7 +77,88 @@ produce output {
               c2[ramp(64, 1, 64)] = rows[ramp((((output.s0.x.x + t81)*128) + 128), 1, 64) aligned(128, 0)]
               c3[ramp(64, 1, 64)] = rows[ramp((((output.s0.x.x + t83)*128) + 128), 1, 64) aligned(128, 0)]
               c4[ramp(64, 1, 64)] = rows[ramp((((output.s0.x.x + t85)*128) + 128), 1, 64) aligned(128, 0)]
-              output[ramp(((output.s0.x.x*128) + (((output.s0.y.y.y*4) + output.s0.y.y.base)*output.stride.1)), 1, 128) aligned(128, 0)] = (let t108 = rows[ramp((((output.s0.x.x + t69)*128) + 64), 1, 64) aligned(128, 64)] in (let t109.s = c1[ramp(0, 1, 64)] in (let t110.s = c1[ramp(64, 1, 64)] in halide.hexagon.packhi.vh(halide.hexagon.add_mul.vh.vh.b((concat_vectors(t109.s, t108) + halide.hexagon.add_mul.vh.vh.b(halide.hexagon.add_mul.vh.vh.b(concat_vectors(slice_vectors(concat_vectors(t109.s, t108), 4, 1, 64), slice_vectors(concat_vectors(t108, t110.s), 4, 1, 64)), concat_vectors(slice_vectors(concat_vectors(t109.s, t108), 3, 1, 64), slice_vectors(concat_vectors(t108, t110.s), 3, 1, 64)), (int8)4), concat_vectors(slice_vectors(concat_vectors(t109.s, t108), 2, 1, 64), slice_vectors(concat_vectors(t108, t110.s), 2, 1, 64)), (int8)6)), concat_vectors(slice_vectors(concat_vectors(t109.s, t108), 1, 1, 64), slice_vectors(concat_vectors(t108, t110.s), 1, 1, 64)), (int8)4)))))
+              
+              output[ramp(((output.s0.x.x*128) + (((output.s0.y.y.y*4) + output.s0.y.y.base)*output.stride.1)), 1, 128) aligned(128, 0)] = 
+
+              (let t108 = rows[ramp((((output.s0.x.x + t69)*128) + 64), 1, 64) aligned(128, 64)] in 
+              (let t109.s = c1[ramp(0, 1, 64)] in 
+              (let t110.s = c1[ramp(64, 1, 64)] in 
+
+              halide.hexagon.packhi.vh(                 // vpacko
+                halide.hexagon.add_mul.vh.vh.b(
+                  (
+                    concat_vectors(t109.s, t108) 
+                    + 
+                    halide.hexagon.add_mul.vh.vh.b(
+                      halide.hexagon.add_mul.vh.vh.b(
+                        concat_vectors(
+                          slice_vectors(
+                            concat_vectors(t109.s, t108), 
+                            4, 
+                            1, 
+                            64
+                          ), 
+                          slice_vectors(
+                            concat_vectors(t108, t110.s), 
+                            4, 
+                            1, 
+                            64
+                          )
+                        ),
+                        concat_vectors(
+                          slice_vectors(
+                            concat_vectors(t109.s, t108), 
+                            3, 
+                            1, 
+                            64
+                          ), 
+                          slice_vectors(
+                            concat_vectors(t108, t110.s), 
+                            3, 
+                            1, 
+                            64
+                          )
+                        ), 
+                        (int8)4
+                      ), 
+                      concat_vectors(
+                        slice_vectors(
+                          concat_vectors(t109.s, t108), 
+                          2, 
+                          1, 
+                          64
+                        ), 
+                        slice_vectors(
+                          concat_vectors(t108, t110.s), 
+                          2, 
+                          1, 
+                          64
+                        )
+                      ), 
+                      (int8)6
+                    )
+                  ),
+                  concat_vectors(
+                    slice_vectors(
+                      concat_vectors(t109.s, t108), 
+                      1, 
+                      1, 
+                      64
+                    ), 
+                    slice_vectors(
+                      concat_vectors(t108, t110.s), 
+                      1, 
+                      1, 
+                      64
+                    )
+                  ), 
+                  (int8)4
+                )
+              )
+            )
+          )
+        )
+
               output[ramp(((output.s0.x.x*128) + ((((output.s0.y.y.y*4) + output.s0.y.y.base) + 1)*output.stride.1)), 1, 128) aligned(128, 0)] = (let t111 = rows[ramp((((output.s0.x.x + t81)*128) + 64), 1, 64) aligned(128, 64)] in (let t112.s = c2[ramp(0, 1, 64)] in (let t113.s = c2[ramp(64, 1, 64)] in halide.hexagon.packhi.vh(halide.hexagon.add_mul.vh.vh.b((concat_vectors(t112.s, t111) + halide.hexagon.add_mul.vh.vh.b(halide.hexagon.add_mul.vh.vh.b(concat_vectors(slice_vectors(concat_vectors(t112.s, t111), 4, 1, 64), slice_vectors(concat_vectors(t111, t113.s), 4, 1, 64)), concat_vectors(slice_vectors(concat_vectors(t112.s, t111), 3, 1, 64), slice_vectors(concat_vectors(t111, t113.s), 3, 1, 64)), (int8)4), concat_vectors(slice_vectors(concat_vectors(t112.s, t111), 2, 1, 64), slice_vectors(concat_vectors(t111, t113.s), 2, 1, 64)), (int8)6)), concat_vectors(slice_vectors(concat_vectors(t112.s, t111), 1, 1, 64), slice_vectors(concat_vectors(t111, t113.s), 1, 1, 64)), (int8)4)))))
               output[ramp(((output.s0.x.x*128) + ((((output.s0.y.y.y*4) + output.s0.y.y.base) + 2)*output.stride.1)), 1, 128) aligned(128, 0)] = (let t114 = rows[ramp((((output.s0.x.x + t83)*128) + 64), 1, 64) aligned(128, 64)] in (let t115.s = c3[ramp(0, 1, 64)] in (let t116.s = c3[ramp(64, 1, 64)] in halide.hexagon.packhi.vh(halide.hexagon.add_mul.vh.vh.b((concat_vectors(t115.s, t114) + halide.hexagon.add_mul.vh.vh.b(halide.hexagon.add_mul.vh.vh.b(concat_vectors(slice_vectors(concat_vectors(t115.s, t114), 4, 1, 64), slice_vectors(concat_vectors(t114, t116.s), 4, 1, 64)), concat_vectors(slice_vectors(concat_vectors(t115.s, t114), 3, 1, 64), slice_vectors(concat_vectors(t114, t116.s), 3, 1, 64)), (int8)4), concat_vectors(slice_vectors(concat_vectors(t115.s, t114), 2, 1, 64), slice_vectors(concat_vectors(t114, t116.s), 2, 1, 64)), (int8)6)), concat_vectors(slice_vectors(concat_vectors(t115.s, t114), 1, 1, 64), slice_vectors(concat_vectors(t114, t116.s), 1, 1, 64)), (int8)4)))))
               output[ramp(((output.s0.x.x*128) + ((((output.s0.y.y.y*4) + output.s0.y.y.base) + 3)*output.stride.1)), 1, 128) aligned(128, 0)] = (let t117 = rows[ramp((((output.s0.x.x + t85)*128) + 64), 1, 64) aligned(128, 64)] in (let t118.s = c4[ramp(0, 1, 64)] in (let t119.s = c4[ramp(64, 1, 64)] in halide.hexagon.packhi.vh(halide.hexagon.add_mul.vh.vh.b((concat_vectors(t118.s, t117) + halide.hexagon.add_mul.vh.vh.b(halide.hexagon.add_mul.vh.vh.b(concat_vectors(slice_vectors(concat_vectors(t118.s, t117), 4, 1, 64), slice_vectors(concat_vectors(t117, t119.s), 4, 1, 64)), concat_vectors(slice_vectors(concat_vectors(t118.s, t117), 3, 1, 64), slice_vectors(concat_vectors(t117, t119.s), 3, 1, 64)), (int8)4), concat_vectors(slice_vectors(concat_vectors(t118.s, t117), 2, 1, 64), slice_vectors(concat_vectors(t117, t119.s), 2, 1, 64)), (int8)6)), concat_vectors(slice_vectors(concat_vectors(t118.s, t117), 1, 1, 64), slice_vectors(concat_vectors(t117, t119.s), 1, 1, 64)), (int8)4)))))

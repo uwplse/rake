@@ -14,7 +14,7 @@ g++ --std=c++11  -DLOG2VLEN=7 -DRUN=1 -DASSEMBLY=1 -DBITCODE=1 -I /home/maaz/Des
 g++ --std=c++11  -DLOG2VLEN=7 -DRUN=1 -DASSEMBLY=1 -DBITCODE=1 -I /home/maaz/Desktop/Research/rake/halide/distrib/include -I /home/maaz/Desktop/Research/rake/halide/distrib/tools -fno-rtti -O3 -g src/gaussian5x5_simple_generator.cpp $HALIDE_ROOT/tools/GenGen.cpp -L/home/maaz/Desktop/Research/rake/halide/distrib/lib  -lHalide -o tmp/gaussian5x5_simple_generator -ldl -lpthread -lz  -lz -lrt -ltinfo
 
 export LD_LIBRARY_PATH=$HALIDE_ROOT/lib:; (./tmp/gaussian5x5_simple_generator -o tmp -e o,h,assembly,bitcode -g gaussian5x5 -f gaussian5x5_hvx64 target=hexagon-32-noos-no_bounds_query-no_asserts-hvx_64) &> ir/gaussian5x5_simple_hvx64.ir
-export LD_LIBRARY_PATH=$HALIDE_ROOT/lib:; (./tmp/gaussian5x5_generator -o tmp -e o,h,assembly,bitcode -g gaussian5x5 -f gaussian5x5_hvx128 target=hexagon-32-noos-no_bounds_query-no_asserts-hvx_128) &> ir/gaussian5x5_simple_hvx128.ir
+export LD_LIBRARY_PATH=$HALIDE_ROOT/lib:; (./tmp/gaussian5x5_simple_generator -o tmp -e o,h,assembly,bitcode -g gaussian5x5 -f gaussian5x5_hvx128 target=hexagon-32-noos-no_bounds_query-no_asserts-hvx_128) &> ir/gaussian5x5_simple_hvx128.ir
 
 export LD_LIBRARY_PATH=$HALIDE_ROOT/lib:; (./tmp/gaussian5x5_generator -o tmp -e o,h,assembly,bitcode -g gaussian5x5 -f gaussian5x5_hvx64 target=hexagon-32-noos-no_bounds_query-no_asserts-hvx_64) &> ir/gaussian5x5_hvx64.ir
 export LD_LIBRARY_PATH=$HALIDE_ROOT/lib:; (./tmp/gaussian5x5_generator -o tmp -e o,h,assembly,bitcode -g gaussian5x5 -f gaussian5x5_hvx128 target=hexagon-32-noos-no_bounds_query-no_asserts-hvx_128) &> ir/gaussian5x5_hvx128.ir

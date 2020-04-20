@@ -152,4 +152,3 @@ void conv3x3(
        output+= 2*stride;
    }
 }
-

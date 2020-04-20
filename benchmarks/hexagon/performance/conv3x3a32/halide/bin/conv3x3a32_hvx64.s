@@ -17150,768 +17150,713 @@ _ZN6Halide7Runtime8Internal23halide_get_cpu_featuresEv: // @_ZN6Halide7Runtime8I
 conv3x3a32_hvx64:                       // @conv3x3a32_hvx64
 // %bb.0:                               // %entry
 	{
-		allocframe(r29,#512):raw
+		r17:16 = combine(r1,r2)
+		memd(r29+#-16) = r17:16
+		allocframe(#128)
+	}                               // 8-byte Folded Spill
+	{
+		r4 = memw(r16+#56)
+		r2 = memw(r0+#12)
 	}
 	{
-		r29 = and(r29,#-128)
-		r17:16 = combine(r1,r2)
-		memd(r30+#-8) = r17:16
-		memd(r30+#-16) = r19:18
+		r18 = r0
+		memd(r29+#112) = r19:18
+		memd(r29+#88) = r25:24
 	}                               // 8-byte Folded Spill
 	{
-		r19:18 = combine(#0,r0)
-		r1:0 = combine(#64,#0)
-		memd(r30+#-24) = r21:20
-		memd(r30+#-32) = r23:22
+		r2 = memw(r0+#56)
+		memw(r29+#12) = r2
+	}                               // 4-byte Folded Spill
+	{
+		r0 = memw(r1+#56)
+		memd(r29+#104) = r21:20
 	}                               // 8-byte Folded Spill
+	{
+		r24 = memw(r4+#20)
+		memd(r29+#80) = r27:26
+	}                               // 8-byte Folded Spill
+	{
+		r20 = asr(r24,#1)
+		r19 = add(r24,#-1)
+		r3 = memw(r1+#12)
+		memw(r29+#8) = r3.new
+	}                               // 4-byte Folded Spill
+	{
+		r25 = memw(r0+#0)
+		memd(r29+#96) = r23:22
+	}                               // 8-byte Folded Spill
+	{
+		r1:0 = combine(r20,r19)
+		r26 = memw(r0+#16)
+		r27 = memw(r0+#24)
+	}
+	{
+		r23 = memw(r2+#24)
+		r2 = memw(r16+#12)
+	}
+	{
+		r22 = memw(r4+#4)
+		memw(r29+#4) = r2
+	}                               // 4-byte Folded Spill
+	{
+		call ##__hexagon_divsi3
+		r25 += mpyi(r27,r26)
+		r21 = memw(r4+#24)
+	}
+	{
+		r2 = mpyi(r0,r20)
+		r5 = asl(r27,#1)
+		r4 = sub(r24,r20)
+		memw(r29+#32) = r4.new
+	}
+	{
+		r3 = asr(r24,#31)
+		r1 = sub(r5,r25)
+		r2 = sub(r19,r2)
+		memw(r29+#36) = r1.new
+	}
+	{
+		r3 = sub(#-1,r3)
+		r1 = sub(r27,r25)
+		memw(r29+#40) = r1.new
+	}
+	{
+		r3 &= asr(r2,#31)
+		r1 = sub(#2,r25)
+		r7 = and(r2,r24)
+		memw(r29+#44) = r1.new
+	}
+	{
+		r2 = add(r0,#1)
+		r1 = sub(#1,r25)
+		r0 = memw(r29+#12)
+		memw(r29+#52) = r1.new
+	}                               // 4-byte Folded Reload
+	{
+		r2 -= asr(r7,#31)
+		r6 = sub(#0,r25)
+		memw(r29+#48) = r6.new
+	}
+	{
+		r1 = add(pc,##conv3x3a32_hvx64.par_for.output.s0.y.yo@PCREL)
+		r3 = add(r2,r3)
+		memw(r29+#56) = r0
+	}
+	{
+		r2 = #0
+		r4 = add(r29,#16)
+		r0 = #0
+		r7 = memw(r29+#8)
+	}                               // 4-byte Folded Reload
+	{
+		r6 = memw(r29+#4)
+		memw(r29+#64) = r7
+	}                               // 4-byte Folded Reload
+	{
+		memw(r29+#72) = r6
+		memw(r29+#16) = r23
+	}
+	{
+		memw(r29+#20) = r22
+		memw(r29+#24) = r24
+	}
+	{
+		memw(r29+#28) = r21
+		memw(r29+#60) = r18
+	}
+	{
+		call ##halide_do_par_for
+		memw(r29+#68) = r17
+		memw(r29+#76) = r16
+	}
+	{
+		r0 = #0
+		r17:16 = memd(r29+#120)
+		r19:18 = memd(r29+#112)
+	}                               // 8-byte Folded Reload
+	{
+		r21:20 = memd(r29+#104)
+		r23:22 = memd(r29+#96)
+	}                               // 8-byte Folded Reload
+	{
+		r25:24 = memd(r29+#88)
+		r27:26 = memd(r29+#80)
+	}                               // 8-byte Folded Reload
+	{
+		r31:30 = dealloc_return(r30):raw
+	}
+.Lfunc_end120:
+	.size	conv3x3a32_hvx64, .Lfunc_end120-conv3x3a32_hvx64
+                                        // -- End function
+	.section	.text.conv3x3a32_hvx64.par_for.output.s0.y.yo,"ax",@progbits
+	.balign 32                      // -- Begin function conv3x3a32_hvx64.par_for.output.s0.y.yo
+	.type	conv3x3a32_hvx64.par_for.output.s0.y.yo,@function
+conv3x3a32_hvx64.par_for.output.s0.y.yo: // @conv3x3a32_hvx64.par_for.output.s0.y.yo
+// %bb.0:                               // %entry
+	{
+		r17 = r1
+		r1 = #64
+		memd(r29+#-16) = r17:16
+		allocframe(#136)
+	}                               // 8-byte Folded Spill
+	{
+		r19 = memw(r2+#16)
+		memd(r29+#120) = r19:18
+	}                               // 8-byte Folded Spill
+	{
+		r3 = memw(r2+#20)
+		memw(r29+#48) = r3.new
+	}                               // 4-byte Folded Spill
+	{
+		r20 = memw(r2+#0)
+		memd(r29+#112) = r21:20
+	}                               // 8-byte Folded Spill
+	{
+		r3 = memw(r2+#24)
+		memw(r29+#44) = r3.new
+	}                               // 4-byte Folded Spill
+	{
+		r3 = memw(r2+#28)
+		memw(r29+#40) = r3.new
+	}                               // 4-byte Folded Spill
+	{
+		r16 = memw(r2+#4)
+		memd(r29+#104) = r23:22
+	}                               // 8-byte Folded Spill
+	{
+		r21 = memw(r2+#8)
+		memd(r29+#96) = r25:24
+	}                               // 8-byte Folded Spill
+	{
+		r22 = memw(r2+#12)
+		memd(r29+#88) = r27:26
+	}                               // 8-byte Folded Spill
+	{
+		r3 = memw(r2+#32)
+		memw(r29+#36) = r3.new
+	}                               // 4-byte Folded Spill
+	{
+		r3 = memw(r2+#36)
+		memw(r29+#32) = r3.new
+	}                               // 4-byte Folded Spill
+	{
+		r18 = memw(r2+#40)
+		memw(r29+#0) = r0
+	}                               // 4-byte Folded Spill
 	{
 		call ##halide_qurt_hvx_lock
-		memd(r30+#-40) = r25:24
-		memd(r30+#-48) = r27:26
-	}                               // 8-byte Folded Spill
+		r23 = memw(r2+#48)
+		r24 = memw(r2+#56)
+	}
 	.falign
 // %bb.1:                               // %entry
 	{
-		r3 = memw(r16+#56)
+		r2 = asr(r21,#1)
+		p0 = cmp.gt(r21,#1); if (!p0.new) jump:nt .LBB121_8
+		r3 = add(r21,#6)
+	}
+// %bb.2:                               // %"for output.s0.y.y.y.preheader"
+	{
+		r2 = mpyi(r2,r17)
+		r4 = asr(r22,#6)
+		r21 = add(r16,#63)
+		r28 = memw(r29+#48)
+	}                               // 4-byte Folded Reload
+	{
+		r6 = extractu(r4,#24,#0)
+		r9 = asr(r3,#3)
+		r5 = sub(#-1,r2)
+		r3 = sub(#-1,r19)
 	}
 	{
-		r2 = memw(r3+#20)
+		r1:0 = vasrw(r21:20,#6)
+		r10 = add(r28,#1)
+		r28 = add(r28,#2)
+		memw(r29+#16) = r10.new
+	}                               // 4-byte Folded Spill
+	{
+		r5 = max(r5,r3)
+		r3 = asl(r6,#8)
+		p0 = cmp.gt(r16,#0)
+		memw(r29+#20) = r3.new
+	}                               // 4-byte Folded Spill
+	{
+		r6 = sub(#2,r5)
+		r7 = sub(#3,r5)
+		r12 = sub(#1,r5)
+		r15 = sub(#-2,r5)
 	}
 	{
-		p0 = cmp.gt(r2,#0); if (!p0.new) jump:nt .LBB120_10
-		if (p0.new) r9 = memw(r3+#4)
-		if (p0.new) r4 = memw(r17+#56)
-	}
-// %bb.2:                               // %"for output.s0.y.preheader"
+		r8 = mpyi(r4,r6)
+		r2 = min(r2,r19)
+		r28 = memw(r29+#44)
+		memw(r29+#12) = r28
+	}                               // 4-byte Folded Reload
 	{
-		loop1(##.LBB120_3,r2)
-		r1 = asr(r9,#6)
-		r7:6 = combine(#-2,#4)
-	}
+		r6 = mpyi(r0,r6)
+		r7 = mpyi(r0,r7)
+		memd(r29+#24) = r1:0
+	}                               // 8-byte Folded Spill
 	{
-		r2 = add(r9,#63)
-		r3 = memw(r3+#24)
-		memw(r29+#108) = r3.new
-	}                               // 4-byte Folded Spill
-	{
-		r3 = add(r9,#-64)
-		r12 = memw(r4+#0)
-		r14 = memw(r4+#16)
+		r13 = mpyi(r4,r12)
+		r14 = mpyi(r4,r5)
 	}
 	{
-		r2 = asr(r2,#6)
-		p0 = cmp.gt(r9,#63)
-		if (!p0.new) r1 = #0
-		r4 = memw(r4+#24)
+		r12 = mpyi(r0,r12)
+		r5 = mpyi(r0,r5)
 	}
 	{
-		r15 = asl(r4,#1)
-		p1 = cmp.gt(r2,r1)
-		r0 = memw(r16+#12)
-		memw(r29+#68) = r1
+		r8 = addasl(r24,r8,#6)
+		r4 = mpyi(r4,r2)
+		memw(r29+#84) = r8.new
 	}                               // 4-byte Folded Spill
 	{
-		r12 += mpyi(r4,r14)
-		r3 = add(r0,r3)
-		r5 = memw(r18+#56)
+		r2 = mpyi(r0,r2)
+		r6 = addasl(r18,r6,#6)
+		r8 = add(r28,#2)
+		memw(r29+#4) = r8.new
+	}                               // 4-byte Folded Spill
+	{
+		r15 = mpyi(r0,r15)
+		r3 = insert(r0,#24,#8)
+		r0 = add(r28,#1)
+		memw(r29+#8) = r0.new
+	}                               // 4-byte Folded Spill
+	{
+		r7 = addasl(r18,r7,#6)
+		r5 = asl(r5,#6)
+		r11 = add(r6,#3)
+		r17 = add(r6,#-1)
 	}
 	{
-		r8 = memw(r17+#12)
-		memw(r29+#56) = r3
-	}                               // 4-byte Folded Spill
-	{
-		r3 = add(r8,sub(#2,r12))
-		r4 = sub(r4,r12)
-		r13 = memw(r5+#24)
-		memw(r29+#104) = r3.new
-	}                               // 4-byte Folded Spill
-	{
-		r3 = add(r8,sub(#1,r12))
-		r5 = sub(#-1,r13)
-		r28 = memw(r18+#12)
-		memw(r29+#64) = r28.new
-	}                               // 4-byte Folded Spill
-	{
-		r21 = add(r28,r13)
-		r3 = sub(r8,r12)
-		r20 = r0
-		memw(r29+#100) = r3
-	}                               // 4-byte Folded Spill
-	{
-		r22 = add(r28,sub(#1,r13))
-		r0 = sub(r15,r12)
-		r26 = add(r28,r5)
-		memw(r29+#60) = r9
-	}                               // 4-byte Folded Spill
-	{
-		r2 = add(r8,r0)
-		r4 = add(r8,r4)
-		r27 = add(r28,#-1)
-		memw(r29+#92) = r2.new
-	}                               // 4-byte Folded Spill
-	{
-		r18 = add(r28,#1)
-		r9 = add(r21,#-1)
-		r25 = add(r21,#1)
-		memw(r29+#96) = r3
-	}                               // 4-byte Folded Spill
-	{
-		r3 = add(r26,#1)
-		r8 = r28
-		r5 = add(r2,#2)
+		r12 = addasl(r18,r12,#6)
+		r8 = addasl(r18,r15,#6)
+		r28 = sub(#-1,r5)
+		r10 = add(r7,#3)
 	}
 	{
-		r2 = add(r2,#1)
-		memw(r29+#84) = r5
+		r7 = addasl(r24,r13,#6)
+		r19 = addasl(r24,r4,#6)
+		r0 = add(r7,#-1)
+		memw(r29+#80) = r7.new
 	}                               // 4-byte Folded Spill
 	{
-		r2 = add(r4,#2)
-		memw(r29+#80) = r2
-		memw(r29+#88) = r4
+		r2 = addasl(r18,r2,#6)
+		r6 = add(r12,#-1)
+		r15 = add(r12,#3)
+		memw(r29+#76) = r6.new
 	}                               // 4-byte Folded Spill
 	{
-		r2 = add(r4,#1)
-		memw(r29+#76) = r2
-	}                               // 4-byte Folded Spill
+		r24 -= asl(r14,#6)
+		r5 = add(r18,sub(#3,r5))
+		r20 = add(r18,r28)
+		r7 = add(r8,#3)
+	}
 	{
-		memw(r29+#72) = r2
-	}                               // 4-byte Folded Spill
+		r1 = add(r8,#-1)
+		r8 = add(r2,#3)
+		r6 = add(r2,#-1)
+		r28 = r15
+	}
+	{
+		loop1(.LBB121_3,r9)
+		r4 = #4
+	}
 	.falign
 .Ltmp14:                                // Block address taken
-.LBB120_3:                              // %"for output.s0.y"
+.LBB121_3:                              // %"for output.s0.y.y.y"
                                         // =>This Loop Header: Depth=1
-                                        //     Child Loop BB120_5 Depth 2
+                                        //     Child Loop BB121_5 Depth 2
 	{
-		if (!p0) jump:nt .LBB120_7
-		if (p0) r4 = memw(r29+#76)
-		if (p0) memw(r29+#124) = r19
+		if (!p0) jump:nt .LBB121_7
+		if (p0) r16 = add(r20,#0)
+		if (p0) r27:26 = combine(r5,r6)
+		if (p0) r2 = memw(r29+#48)
 	}                               // 4-byte Folded Reload
 // %bb.4:                               // %"for output.s0.x.x.preheader"
-                                        //   in Loop: Header=BB120_3 Depth=1
+                                        //   in Loop: Header=BB121_3 Depth=1
 	{
-		r5 = memw(r29+#104)
-		memw(r29+#116) = r18
+		r25 = r8
+		r12 = memw(r29+#44)
+		memw(r29+#64) = r0
 	}                               // 4-byte Folded Reload
 	{
-		r2 = memw(r29+#84)
-		memw(r29+#112) = r22
+		r14 = memw(r29+#36)
+		r9 = memw(r29+#16)
 	}                               // 4-byte Folded Reload
 	{
-		r12 = memb(r5+#0)
-		memw(r29+#120) = r27
+		r13 = memw(r29+#8)
+		memw(r29+#52) = r28
+	}                               // 4-byte Folded Reload
+	{
+		r15 = memw(r29+#32)
+		memw(r29+#68) = r10
+	}                               // 4-byte Folded Reload
+	{
+		memw(r29+#60) = r11
 	}                               // 4-byte Folded Spill
 	{
-		r11 = combine(r12.l,r12.l)
-		r12 = r18
-		r2 = memb(r2+#0)
-		r5 = memw(r29+#80)
+		r2 = memub(r23+r2<<#0)
+		memw(r29+#72) = r24
+	}                               // 4-byte Folded Spill
+	{
+		r9 = memub(r23+r9<<#0)
+		memw(r29+#56) = r17
+	}                               // 4-byte Folded Spill
+	{
+		r2 = insert(r9,#24,#8)
+		r12 = memub(r23+r12<<#0)
+		r13 = memub(r23+r13<<#0)
+	}
+	{
+		r12 = insert(r13,#24,#8)
+		r9 = memw(r29+#12)
+		r13 = memw(r29+#4)
 	}                               // 4-byte Folded Reload
 	{
-		r2 = combine(r2.l,r2.l)
-		r19:18 = combine(r27,r3)
-		v2 = vmemu(r12++#1)
+		r14 = memub(r23+r14<<#0)
+		r15 = memub(r23+r15<<#0)
 	}
 	{
-		r14 = memb(r5+#0)
-		r5 = memw(r29+#72)
+		r14 = insert(r15,#24,#8)
+		r15 = memw(r29+#40)
+		r9 = memub(r23+r9<<#0)
 	}                               // 4-byte Folded Reload
 	{
-		r16 = combine(r14.l,r14.l)
-		v11:10.uh = vunpack(v2.ub)
-		r27 = memw(r29+#68)
-		r4 = memb(r4+#0)
-	}                               // 4-byte Folded Reload
-	{
-		p2 = cmp.gtu(r27,#1)
-		r15 = memb(r5+#0)
-		r5 = memw(r29+#100)
-	}                               // 4-byte Folded Reload
-	{
-		r17 = combine(r15.l,r15.l)
-		r15:14 = combine(r22,r21)
-		r22 = r8
-	}
-	{
-		r28 = memb(r5+#0)
-		r5 = memw(r29+#92)
-	}                               // 4-byte Folded Reload
-	{
-		r24 = combine(r28.l,r28.l)
-		r28 = r9
-		v4 = vmemu(r15++#1)
-	}
-	{
-		r0 = memb(r5+#0)
-		r5 = memw(r29+#96)
-	}                               // 4-byte Folded Reload
-	{
-		r23 = combine(r0.l,r0.l)
-		r0 = r25
-		v19:18.uh = vunpack(v4.ub)
-		r1 = memb(r5+#0)
-	}
-	{
-		v1 = vmemu(r0++#1)
-	}
-	{
-		v13:12.w = vmpy(v18.h,r11.h)
-		r5 = memw(r29+#88)
-	}                               // 4-byte Folded Reload
-	{
-		r27 = add(r27,#-1)
-		v7:6.uh = vunpack(v1.ub)
-		r10 = memb(r5+#0)
-	}
-	{
-		loop0(.LBB120_5,r27)
-		r5 = combine(r4.l,r4.l)
-		r4 = combine(r1.l,r1.l)
-		r1 = combine(r10.l,r10.l)
-	}
-	{
-		v9:8.w = vmpy(v6.h,r2.h)
-		r10 = r26
-		v16 = vmemu(r18++#1)
-	}
-	{
-		v31:30.w = vmpy(v7.h,r2.h)
-		v18 = vmemu(r28++#1)
-	}
-	{
-		r27 = r20
-		v27:26.uh = vunpack(v16.ub)
-		vmem(r29+#4) = v8
-	}                               // 128-byte Folded Spill
-	{
-		v9:8.w = vmpy(v10.h,r5.h)
-		vmem(r29+#5) = v9
-	}                               // 128-byte Folded Spill
-	{
-		v5:4.w = vmpy(v11.h,r5.h)
-		v10 = vmemu(r22++#1)
-	}
-	{
-		v6 = vmemu(r14++#1)
-	}
-	{
-		v25:24.uh = vunpack(v10.ub)
-		vmem(r29+#2) = v30
-	}                               // 128-byte Folded Spill
-	{
-		v20 = vmemu(r10++#1)
-	}
-	{
-		v31:30.uh = vunpack(v6.ub)
-		vmem(r29+#3) = v31
-	}                               // 128-byte Folded Spill
-	{
-		v7:6.w = vmpy(v19.h,r11.h)
-		v29:28.uh = vunpack(v18.ub)
-	}
-	{
-		v15:14.w = vmpy(v30.h,r16.h)
-		v21:20.uh = vunpack(v20.ub)
-	}
-	{
-		v19:18.w = vmpy(v26.h,r24.h)
-		v30 = vmemu(r19++#1)
-	}
-	{
-		v11:10.w = vmpy(v31.h,r16.h)
-	}
-	{
-		v17:16.w = vmpy(v24.h,r17.h)
-	}
-	{
-		v23:22.w = vmpy(v25.h,r17.h)
-	}
-	{
-		v27:26.w = vmpy(v27.h,r24.h)
-	}
-	{
-		if (!p2) jump:nt .LBB120_6
-		v25:24.w = vmpy(v28.h,r23.h)
-	}
-	.falign
-.LBB120_5:                              // %"for output.s0.x.x"
-                                        //   Parent Loop BB120_3 Depth=1
-                                        // =>  This Inner Loop Header: Depth=2
-	{
-		v1:0.w = vmpy(v21.h,r4.h)
-		v31:30.uh = vunpack(v30.ub)
-	}
-	{
-		v21:20.w = vmpy(v20.h,r4.h)
-		v1.h = vshuffe(v1.h,v0.h)
-		v27.h = vshuffe(v27.h,v26.h)
-	}
-	{
-		v3:2.w = vmpy(v31.h,r1.h)
-		v0.h = vshuffe(v21.h,v20.h)
-		v26.h = vshuffe(v19.h,v18.h)
-	}
-	{
-		v31:30.w = vmpy(v30.h,r1.h)
-		v3.h = vshuffe(v3.h,v2.h)
-		v23.h = vshuffe(v23.h,v22.h)
-	}
-	{
-		v29:28.w = vmpy(v29.h,r23.h)
-		v2.h = vshuffe(v31.h,v30.h)
-		v22.h = vshuffe(v17.h,v16.h)
-	}
-	{
-		v25:24.h = vadd(v1:0.h,v3:2.h)
-		v29.h = vshuffe(v29.h,v28.h)
-		v28.h = vshuffe(v25.h,v24.h)
-	}
-	{
-		v19:18.h = vadd(v29:28.h,v25:24.h)
-		v17.h = vshuffe(v7.h,v6.h)
-		v11.h = vshuffe(v11.h,v10.h)
-	}
-	{
-		v7:6.h = vadd(v27:26.h,v19:18.h)
-		v10.h = vshuffe(v15.h,v14.h)
-		v16.h = vshuffe(v13.h,v12.h)
-	}
-	{
-		v13:12.h = vadd(v23:22.h,v7:6.h)
-		v5.h = vshuffe(v5.h,v4.h)
-		v21 = vmemu(r0++#1)
-	}
-	{
-		v23:22.h = vadd(v11:10.h,v13:12.h)
-		v4.h = vshuffe(v9.h,v8.h)
-		v14 = vmem(r29+#2)
-	}                               // 128-byte Folded Reload
-	{
-		v9:8.h = vadd(v17:16.h,v23:22.h)
-		v15 = vmem(r29+#3)
-	}                               // 128-byte Folded Reload
-	{
-		v27:26.uh = vunpack(v21.ub)
-		v15.h = vshuffe(v15.h,v14.h)
-		v24 = vmem(r29+#4)
-	}                               // 128-byte Folded Reload
-	{
-		v29:28.h = vadd(v5:4.h,v9:8.h)
-		v14.h = vshuffe(v25.h,v24.h)
-		v25.cur = vmem(r29+#5)
-	}                               // 128-byte Folded Reload
-	{
-		v21:20.w = vmpy(v26.h,r2.h)
-		v31:30.h = vadd(v15:14.h,v29:28.h)
-	}
-	{
-		v13:12.w = vmpy(v27.h,r2.h)
-		vmem(r29+#4) = v20
-	}                               // 128-byte Folded Spill
-	{
-		v21:20 = vdeal(v31,v30,r7)
-		vmem(r29+#5) = v21
-	}                               // 128-byte Folded Spill
-	{
-		v11 = vmemu(r14++#1)
-	}
-	{
-		v15.ub = vasr(v21.h,v20.h,r6):sat
-		v14 = vmemu(r22++#1)
-	}
-	{
-		v25:24.uh = vunpack(v11.ub)
-		vmem(r29+#2) = v12
-	}                               // 128-byte Folded Spill
-	{
-		v3 = vmemu(r12++#1)
-	}
-	{
-		v11:10.w = vmpy(v25.h,r16.h)
-		v7 = vmemu(r15++#1)
-	}
-	{
-		vmemu(r27++#1) = v15
-	}
-	{
-		v15:14.w = vmpy(v24.h,r16.h)
-		v19:18.uh = vunpack(v14.ub)
-	}
-	{
-		v17 = vmemu(r18++#1)
-	}
-	{
-		v23:22.w = vmpy(v19.h,r17.h)
-		v24 = vmemu(r28++#1)
-	}
-	{
-		v3:2.uh = vunpack(v3.ub)
-		vmem(r29+#3) = v13
-	}                               // 128-byte Folded Spill
-	{
-		v1:0.uh = vunpack(v7.ub)
-	}
-	{
-		v9:8.w = vmpy(v2.h,r5.h)
-		v29:28.uh = vunpack(v24.ub)
-	}
-	{
-		v17:16.w = vmpy(v18.h,r17.h)
-		v27:26.uh = vunpack(v17.ub)
-	}
-	{
-		v5:4.w = vmpy(v3.h,r5.h)
-		v31 = vmemu(r10++#1)
-	}
-	{
-		v19:18.w = vmpy(v26.h,r24.h)
-		v30 = vmemu(r19++#1)
-	}
-	{
-		v13:12.w = vmpy(v0.h,r11.h)
-		v21:20.uh = vunpack(v31.ub)
-	}
-	{
-		v7:6.w = vmpy(v1.h,r11.h)
-	}
-	{
-		v27:26.w = vmpy(v27.h,r24.h)
-	}
-	{
-		v25:24.w = vmpy(v28.h,r23.h)
-		nop
-	} :endloop0
-	.falign
-.LBB120_6:                              //   in Loop: Header=BB120_3 Depth=1
-	{
-		v3:2.uh = vunpack(v30.ub)
-		v18.h = vshuffe(v19.h,v18.h)
-		v16.h = vshuffe(v17.h,v16.h)
-		r18 = memw(r29+#116)
-	}                               // 4-byte Folded Reload
-	{
-		v1:0.w = vmpy(v20.h,r4.h)
-		v19.h = vshuffe(v27.h,v26.h)
-		v17.h = vshuffe(v23.h,v22.h)
-		r19 = memw(r29+#124)
-	}                               // 4-byte Folded Reload
-	{
-		v21:20.w = vmpy(v21.h,r4.h)
-		v30.h = vshuffe(v15.h,v14.h)
-		v14.h = vshuffe(v1.h,v0.h)
-		r22 = memw(r29+#112)
-	}                               // 4-byte Folded Reload
-	{
-		v27:26.w = vmpy(v2.h,r1.h)
-		v15.h = vshuffe(v21.h,v20.h)
-		v24.h = vshuffe(v25.h,v24.h)
-	}
-	{
-		v23:22.w = vmpy(v3.h,r1.h)
-		v20.h = vshuffe(v27.h,v26.h)
-		v31.h = vshuffe(v11.h,v10.h)
-	}
-	{
-		v29:28.w = vmpy(v29.h,r23.h)
-		v21.h = vshuffe(v23.h,v22.h)
-		v12.h = vshuffe(v13.h,v12.h)
-	}
-	{
-		v11:10.h = vadd(v15:14.h,v21:20.h)
-		v25.h = vshuffe(v29.h,v28.h)
-		v13.h = vshuffe(v7.h,v6.h)
-	}
-	{
-		v15:14.h = vadd(v25:24.h,v11:10.h)
-		v8.h = vshuffe(v9.h,v8.h)
-		v26 = vmem(r29+#4)
-	}                               // 128-byte Folded Reload
-	{
-		v25:24.h = vadd(v19:18.h,v15:14.h)
-		v9.h = vshuffe(v5.h,v4.h)
-		v10 = vmem(r29+#2)
-	}                               // 128-byte Folded Reload
-	{
-		v17:16.h = vadd(v17:16.h,v25:24.h)
-		v27 = vmem(r29+#5)
-	}                               // 128-byte Folded Reload
-	{
-		v7:6.h = vadd(v31:30.h,v17:16.h)
-		v31.h = vshuffe(v11.h,v10.h)
-		v11.cur = vmem(r29+#3)
-	}                               // 128-byte Folded Reload
-	{
-		v13:12.h = vadd(v13:12.h,v7:6.h)
-		v30.h = vshuffe(v27.h,v26.h)
-	}
-	{
-		v5:4.h = vadd(v9:8.h,v13:12.h)
-	}
-	{
-		v9:8.h = vadd(v31:30.h,v5:4.h)
-	}
-	{
-		v19:18 = vdeal(v9,v8,r7)
-	}
-	{
-		v5.ub = vasr(v19.h,v18.h,r6):sat
-	}
-	{
-		vmemu(r27++#1) = v5
-	}
-	{
-		r27 = memw(r29+#120)
-	}                               // 4-byte Folded Reload
-	.falign
-.LBB120_7:                              // %"end for output.s0.x.x"
-                                        //   in Loop: Header=BB120_3 Depth=1
-	{
-		if (p1) r15 = add(r19,#-1)
-		if (p1) r5 = add(r19,#1)
-		if (p1) r1 = memw(r29+#92)
-		if (p1) r2 = memw(r29+#64)
-	}                               // 4-byte Folded Reload
-	{
-		if (p1) r4 = memw(r29+#60)
-	}                               // 4-byte Folded Reload
-	{
-		if (p1) r14 = add(r2,r4)
-	}
-	{
-		if (p1) r4 = add(r14,#0)
-		if (p1) r2 = memw(r29+#84)
-	}                               // 4-byte Folded Reload
-	{
-		if (!p1) jump:nt .LBB120_9
-		if (p1) r2 = memb(r2+#0)
-	}
-// %bb.8:                               // %true_bb
-                                        //   in Loop: Header=BB120_3 Depth=1
-	{
-		r4 += mpyi(r19,r13)
-	}
-	{
-		r14 += mpyi(r5,r13)
-		r12 = combine(r2.l,r2.l)
-		r2 = r14
-		r5 = memb(r1+#0)
-	}
-	{
-		r2 += mpyi(r15,r13)
-		r11 = add(r14,#-63)
-		v19 = vmemu(r4+#-1)
-	}
-	{
-		r0 = add(r4,#-63)
-		r1 = add(r2,#-65)
-		v0 = vmemu(r11+#0)
-	}
-	{
-		r4 = add(r4,#-65)
-		r5 = combine(r5.l,r5.l)
-		v13 = vmemu(r1+#0)
-	}
-	{
-		v29:28.uh = vunpack(v0.ub)
-		r1 = memw(r29+#80)
-	}                               // 4-byte Folded Reload
-	{
-		r14 = add(r14,#-65)
-		v8 = vmemu(r14+#-1)
-	}
-	{
-		v3:2.w = vmpy(v28.h,r12.h)
-		v12 = vmemu(r0+#0)
-	}
-	{
-		v1:0.w = vmpy(v29.h,r12.h)
-		v27:26.uh = vunpack(v19.ub)
-		r12 = memw(r29+#72)
-		r0 = memw(r29+#96)
-	}                               // 4-byte Folded Reload
-	{
-		v2.h = vshuffe(v3.h,v2.h)
-		v3.h = vshuffe(v1.h,v0.h)
-		v9 = vmemu(r14+#0)
-	}
-	{
-		v25:24.uh = vunpack(v13.ub)
-		r12 = memb(r12+#0)
-	}
-	{
-		r12 = combine(r12.l,r12.l)
-		r2 = add(r2,#-63)
-		v22 = vmemu(r2+#-1)
-	}
-	{
-		v17:16.w = vmpy(v26.h,r12.h)
-		v23 = vmemu(r4+#0)
-	}
-	{
-		v7:6.w = vmpy(v27.h,r12.h)
-		v21:20.uh = vunpack(v9.ub)
-		r4 = memb(r0+#0)
-		r0 = memw(r29+#104)
-	}                               // 4-byte Folded Reload
-	{
-		r4 = combine(r4.l,r4.l)
-		v16.h = vshuffe(v17.h,v16.h)
-		v26 = vmemu(r2+#0)
-	}
-	{
-		v5:4.w = vmpy(v24.h,r4.h)
-		v31:30.uh = vunpack(v23.ub)
-		r2 = memw(r29+#88)
-	}                               // 4-byte Folded Reload
-	{
-		v19:18.w = vmpy(v25.h,r4.h)
-		v23:22.uh = vunpack(v22.ub)
-		r4 = memb(r1+#0)
-		r1 = memw(r29+#100)
-	}                               // 4-byte Folded Reload
-	{
-		v11:10.w = vmpy(v20.h,r5.h)
-		v4.h = vshuffe(v5.h,v4.h)
-		v5.h = vshuffe(v19.h,v18.h)
-		r2 = memb(r2+#0)
-	}
-	{
-		v15:14.w = vmpy(v21.h,r5.h)
-		r2 = combine(r2.l,r2.l)
-		v21:20.uh = vunpack(v26.ub)
-		r5 = memb(r0+#0)
+		r22 = combine(r9.l,r2.l)
+		r9 = r10
+		r13 = memub(r23+r13<<#0)
 	}
 	{
-		v29:28.w = vmpy(v30.h,r2.h)
-		r4 = combine(r4.l,r4.l)
-		v9:8.uh = vunpack(v8.ub)
+		r18 = combine(r13.l,r12.l)
+		r12 = r0
+		r13 = r24
 		r0 = memw(r29+#76)
 	}                               // 4-byte Folded Reload
 	{
-		v27:26.w = vmpy(v31.h,r2.h)
-		r2 = combine(r5.l,r5.l)
-		v28.h = vshuffe(v29.h,v28.h)
-		r5 = memb(r1+#0)
-	}
-	{
-		r5 = combine(r5.l,r5.l)
-		v29.h = vshuffe(v27.h,v26.h)
-		v10.h = vshuffe(v11.h,v10.h)
-		v11.h = vshuffe(v15.h,v14.h)
-	}
-	{
-		v15:14.w = vmpy(v22.h,r5.h)
-		v19:18.h = vadd(v5:4.h,v29:28.h)
-	}
-	{
-		v23:22.w = vmpy(v23.h,r5.h)
-		v17.h = vshuffe(v7.h,v6.h)
-		v6.h = vshuffe(v15.h,v14.h)
-		r5 = memb(r0+#0)
-	}
-	{
-		v25:24.w = vmpy(v8.h,r4.h)
-		r1 = combine(r5.l,r5.l)
-		v13:12.uh = vunpack(v12.ub)
-		r0 = memw(r29+#108)
+		r15 = memub(r23+r15<<#0)
+		r24 = memw(r29+#80)
 	}                               // 4-byte Folded Reload
 	{
-		v27:26.h = vadd(v11:10.h,v19:18.h)
-		v7.h = vshuffe(v23.h,v22.h)
+		r21 = combine(r15.l,r14.l)
+		r15:14 = combine(r17,r11)
+		v26 = vmemu(r12++#1)
 	}
 	{
-		v31:30.w = vmpy(v20.h,r2.h)
-		v20.h = vshuffe(v25.h,v24.h)
+		r17 = r1
+		v27 = vmemu(r9++#1)
 	}
 	{
-		v9:8.w = vmpy(v9.h,r4.h)
-		v25:24.h = vadd(v7:6.h,v27:26.h)
+		v10 = vmemu(r16++#1)
 	}
 	{
-		v11:10.w = vmpy(v12.h,r1.h)
-		v12.h = vshuffe(v31.h,v30.h)
+		v13:12.w = vrmpy(v27:26.ub,r22.b,#0)
+		v11 = vmemu(r27++#1)
 	}
 	{
-		v15:14.w = vmpy(v21.h,r2.h)
-		v31:30.h = vadd(v17:16.h,v25:24.h)
-		r2 = memw(r29+#56)
+		v19:18.w = vrmpy(v27:26.ub,r22.b,#1)
+		v20 = vmemu(r0++#1)
+	}
+	{
+		v1:0.w = vrmpy(v11:10.ub,r22.b,#0)
+		v21 = vmemu(r28++#1)
+	}
+	{
+		v3:2.w = vrmpy(v11:10.ub,r22.b,#1)
+		v24 = vmemu(r15++#1)
+	}
+	{
+		v5:4.w = vrmpy(v21:20.ub,r22.b,#0)
+		v25 = vmemu(r14++#1)
+	}
+	{
+		v9:8.w = vrmpy(v21:20.ub,r22.b,#1)
+		r11:10 = memd(r29+#24)
+	}                               // 8-byte Folded Reload
+	{
+		v15:14.w = vrmpy(v25:24.ub,r22.b,#0)
+		r2 = add(r11,#-1)
+		v16 = vmemu(r26++#1)
+	}
+	{
+		v7:6.w = vrmpy(v25:24.ub,r22.b,#1)
+		p1 = cmp.gtu(r11,#1)
+		v17 = vmemu(r25++#1)
+	}
+	{
+		loop0(.LBB121_5,r2)
+		v13:12.w += vrmpy(v25:24.ub,r18.b,#0)
+		r11:10 = combine(r7,r19)
+		r2 = memw(r29+#84)
 	}                               // 4-byte Folded Reload
 	{
-		r2 += mpyi(r19,r0)
-		v17:16.w = vmpy(v13.h,r1.h)
-		v21.h = vshuffe(v9.h,v8.h)
-		v13.h = vshuffe(v15.h,v14.h)
+		v19:18.w += vrmpy(v25:24.ub,r18.b,#1)
 	}
 	{
-		v29:28.h = vadd(v21:20.h,v31:30.h)
-		v4.h = vshuffe(v11.h,v10.h)
-		v5.h = vshuffe(v17.h,v16.h)
+		v1:0.w += vrmpy(v17:16.ub,r18.b,#0)
 	}
 	{
-		v23:22.h = vadd(v13:12.h,v29:28.h)
+		v3:2.w += vrmpy(v17:16.ub,r18.b,#1)
 	}
 	{
-		v1:0.h = vadd(v5:4.h,v23:22.h)
+		v5:4.w += vrmpy(v11:10.ub,r18.b,#0)
 	}
 	{
-		v7:6.h = vadd(v3:2.h,v1:0.h)
+		v9:8.w += vrmpy(v11:10.ub,r18.b,#1)
 	}
 	{
-		v19:18 = vdeal(v7,v6,r7)
+		v15:14.w += vrmpy(v21:20.ub,r18.b,#0)
 	}
 	{
-		v25.ub = vasr(v19.h,v18.h,r6):sat
+		v7:6.w += vrmpy(v21:20.ub,r18.b,#1)
 	}
 	{
-		vmemu(r2+#0) = v25
+		v13:12.w += vrmpy(v21:20.ub,r21.b,#0)
+	}
+	{
+		if (!p1) jump:nt .LBB121_6
+		v19:18.w += vrmpy(v21:20.ub,r21.b,#1)
 	}
 	.falign
-.LBB120_9:                              // %after_bb
-                                        //   in Loop: Header=BB120_3 Depth=1
+.LBB121_5:                              // %"for output.s0.x.x"
+                                        //   Parent Loop BB121_3 Depth=1
+                                        // =>  This Inner Loop Header: Depth=2
 	{
-		r9 = add(r9,r13)
-		r21 = add(r21,r13)
-		r19 = add(r19,#1)
-		r2 = memw(r29+#108)
-	}                               // 4-byte Folded Reload
-	{
-		r20 = add(r20,r2)
-		r25 = add(r25,r13)
-		r27 = add(r27,r13)
-		r8 = add(r8,r13)
+		v7:6.w += vrmpy(v11:10.ub,r21.b,#1)
+		v20.h = vasr(v13.w,v12.w,r4):sat
+		v30 = vmemu(r12++#1)
 	}
 	{
-		r18 = add(r18,r13)
-		r26 = add(r26,r13)
-		r3 = add(r3,r13)
-		r22 = add(r22,r13)
-	} :endloop1
+		v15:14.w += vrmpy(v11:10.ub,r21.b,#0)
+		v10 = vmemu(r17++#1)
+	}
+	{
+		v5:4.w += vrmpy(v17:16.ub,r21.b,#0)
+		v21.h = vasr(v7.w,v6.w,r4):sat
+		v11 = vmemu(r11++#1)
+	}
+	{
+		v9:8.w += vrmpy(v17:16.ub,r21.b,#1)
+		v17.h = vasr(v15.w,v14.w,r4):sat
+		v31 = vmemu(r9++#1)
+	}
+	{
+		v1:0.w += vrmpy(v11:10.ub,r21.b,#0)
+		v24.h = vasr(v5.w,v4.w,r4):sat
+		v28 = vmemu(r15++#1)
+	}
+	{
+		v3:2.w += vrmpy(v11:10.ub,r21.b,#1)
+		v16.h = vasr(v19.w,v18.w,r4):sat
+		v29 = vmemu(r14++#1)
+	}
+	{
+		v13:12.w = vrmpy(v31:30.ub,r22.b,#0)
+		v0.h = vasr(v1.w,v0.w,r4):sat
+		v22 = vmemu(r0++#1)
+	}
+	{
+		v19:18.w = vrmpy(v31:30.ub,r22.b,#1)
+		v1.h = vasr(v3.w,v2.w,r4):sat
+		v23 = vmemu(r28++#1)
+	}
+	{
+		v15:14.w = vrmpy(v29:28.ub,r22.b,#0)
+		v2.h = vasr(v9.w,v8.w,r4):sat
+		v10 = vmemu(r16++#1)
+	}
+	{
+		v7:6.w = vrmpy(v29:28.ub,r22.b,#1)
+		v3.ub = vsat(v1.h,v0.h)
+		v11 = vmemu(r27++#1)
+	}
+	{
+		v5:4.w = vrmpy(v23:22.ub,r22.b,#0)
+		v25.ub = vsat(v2.h,v24.h)
+	}
+	{
+		v9:8.w = vrmpy(v23:22.ub,r22.b,#1)
+		v26.ub = vsat(v21.h,v17.h)
+		vmemu(r10++#1) = v3
+	}
+	{
+		v13:12.w += vrmpy(v29:28.ub,r18.b,#0)
+		v27.ub = vsat(v16.h,v20.h)
+		vmemu(r13++#1) = v25
+	}
+	{
+		v19:18.w += vrmpy(v29:28.ub,r18.b,#1)
+		vmemu(r24++#1) = v26
+	}
+	{
+		v1:0.w = vrmpy(v11:10.ub,r22.b,#0)
+		vmemu(r2++#1) = v27
+	}
+	{
+		v3:2.w = vrmpy(v11:10.ub,r22.b,#1)
+		v16 = vmemu(r26++#1)
+	}
+	{
+		v15:14.w += vrmpy(v23:22.ub,r18.b,#0)
+		v17 = vmemu(r25++#1)
+	}
+	{
+		v7:6.w += vrmpy(v23:22.ub,r18.b,#1)
+	}
+	{
+		v5:4.w += vrmpy(v11:10.ub,r18.b,#0)
+	}
+	{
+		v9:8.w += vrmpy(v11:10.ub,r18.b,#1)
+	}
+	{
+		v1:0.w += vrmpy(v17:16.ub,r18.b,#0)
+	}
+	{
+		v3:2.w += vrmpy(v17:16.ub,r18.b,#1)
+	}
+	{
+		v13:12.w += vrmpy(v23:22.ub,r21.b,#0)
+	}
+	{
+		v19:18.w += vrmpy(v23:22.ub,r21.b,#1)
+		nop
+	} :endloop0
 	.falign
-.LBB120_10:                             // %call_destructor.exit
+.LBB121_6:                              //   in Loop: Header=BB121_3 Depth=1
+	{
+		v5:4.w += vrmpy(v17:16.ub,r21.b,#0)
+		v12.h = vasr(v13.w,v12.w,r4):sat
+		v21 = vmemu(r11++#1)
+	}
+	{
+		v7:6.w += vrmpy(v11:10.ub,r21.b,#1)
+		v13.h = vasr(v19.w,v18.w,r4):sat
+		v20 = vmemu(r17++#1)
+	}
+	{
+		v9:8.w += vrmpy(v17:16.ub,r21.b,#1)
+		v4.h = vasr(v5.w,v4.w,r4):sat
+		r11 = memw(r29+#60)
+		r28 = memw(r29+#52)
+	}                               // 4-byte Folded Reload
+	{
+		v15:14.w += vrmpy(v11:10.ub,r21.b,#0)
+		v6.h = vasr(v7.w,v6.w,r4):sat
+		r17 = memw(r29+#56)
+	}                               // 4-byte Folded Reload
+	{
+		v3:2.w += vrmpy(v21:20.ub,r21.b,#1)
+		v5.h = vasr(v9.w,v8.w,r4):sat
+	}
+	{
+		v1:0.w += vrmpy(v21:20.ub,r21.b,#0)
+		v8.h = vasr(v15.w,v14.w,r4):sat
+	}
+	{
+		v10.h = vasr(v3.w,v2.w,r4):sat
+	}
+	{
+		v9.h = vasr(v1.w,v0.w,r4):sat
+	}
+	{
+		v14.ub = vsat(v6.h,v8.h)
+	}
+	{
+		v7.ub = vsat(v10.h,v9.h)
+	}
+	{
+		v15.ub = vsat(v13.h,v12.h)
+	}
+	{
+		v11.ub = vsat(v5.h,v4.h)
+		vmemu(r10++#1) = v7
+	}
+	{
+		r10 = memw(r29+#68)
+	}                               // 4-byte Folded Reload
+	{
+		vmemu(r13++#1) = v11
+	}
+	{
+		vmemu(r24++#1) = v14
+	}
+	{
+		r24 = memw(r29+#72)
+		r0 = memw(r29+#64)
+	}                               // 4-byte Folded Reload
+	{
+		vmemu(r2++#1) = v15
+	}
+	.falign
+.LBB121_7:                              // %"end for output.s0.x.x"
+                                        //   in Loop: Header=BB121_3 Depth=1
+	{
+		r10 = add(r10,r3)
+		r11 = add(r11,r3)
+		r0 = add(r0,r3)
+		r2 = memw(r29+#20)
+	}                               // 4-byte Folded Reload
+	{
+		r17 = add(r17,r3)
+		r24 = add(r24,r2)
+		r28 = add(r28,r3)
+		r9 = memw(r29+#84)
+	}                               // 4-byte Folded Reload
+	{
+		r9 = add(r9,r2)
+		r19 = add(r19,r2)
+		r7 = add(r7,r3)
+		memw(r29+#84) = r9.new
+	}                               // 4-byte Folded Spill
+	{
+		r1 = add(r1,r3)
+		r8 = add(r8,r3)
+		r6 = add(r6,r3)
+		r9 = memw(r29+#80)
+	}                               // 4-byte Folded Reload
+	{
+		r9 = add(r9,r2)
+		r5 = add(r5,r3)
+		r20 = add(r20,r3)
+		memw(r29+#80) = r9.new
+	}                               // 4-byte Folded Spill
+	{
+		r9 = memw(r29+#76)
+	}                               // 4-byte Folded Reload
+	{
+		r9 = add(r9,r3)
+		nop
+		memw(r29+#76) = r9.new
+	} :endloop1                     // 4-byte Folded Spill
+	.falign
+.LBB121_8:                              // %call_destructor.exit
 	{
 		call ##halide_qurt_hvx_unlock_as_destructor
-		r1:0 = combine(#1,#0)
-	}
+		r1 = #1
+		r0 = memw(r29+#0)
+	}                               // 4-byte Folded Reload
 	.falign
-// %bb.11:                              // %call_destructor.exit
+// %bb.9:                               // %call_destructor.exit
 	{
 		r0 = #0
-		r17:16 = memd(r30+#-8)
-		r19:18 = memd(r30+#-16)
+		r17:16 = memd(r29+#128)
+		r19:18 = memd(r29+#120)
 	}                               // 8-byte Folded Reload
 	{
-		r21:20 = memd(r30+#-24)
-		r23:22 = memd(r30+#-32)
+		r21:20 = memd(r29+#112)
+		r23:22 = memd(r29+#104)
 	}                               // 8-byte Folded Reload
 	{
-		r25:24 = memd(r30+#-40)
-		r27:26 = memd(r30+#-48)
+		r25:24 = memd(r29+#96)
+		r27:26 = memd(r29+#88)
 	}                               // 8-byte Folded Reload
 	{
 		r31:30 = dealloc_return(r30):raw
 	}
 .Ltmp15:                                // Address of block that was removed by CodeGen
-.Lfunc_end120:
-	.size	conv3x3a32_hvx64, .Lfunc_end120-conv3x3a32_hvx64
+.Lfunc_end121:
+	.size	conv3x3a32_hvx64.par_for.output.s0.y.yo, .Lfunc_end121-conv3x3a32_hvx64.par_for.output.s0.y.yo
                                         // -- End function
 	.section	.text.conv3x3a32_hvx64_argv,"ax",@progbits
 	.globl	conv3x3a32_hvx64_argv   // -- Begin function conv3x3a32_hvx64_argv
@@ -17935,8 +17880,8 @@ conv3x3a32_hvx64_argv:                  // @conv3x3a32_hvx64_argv
 		r0 = #0
 		dealloc_return
 	}
-.Lfunc_end121:
-	.size	conv3x3a32_hvx64_argv, .Lfunc_end121-conv3x3a32_hvx64_argv
+.Lfunc_end122:
+	.size	conv3x3a32_hvx64_argv, .Lfunc_end122-conv3x3a32_hvx64_argv
                                         // -- End function
 	.section	.text.conv3x3a32_hvx64_metadata,"ax",@progbits
 	.globl	conv3x3a32_hvx64_metadata // -- Begin function conv3x3a32_hvx64_metadata
@@ -17950,8 +17895,8 @@ conv3x3a32_hvx64_metadata:              // @conv3x3a32_hvx64_metadata
 	{
 		jumpr r31
 	}
-.Lfunc_end122:
-	.size	conv3x3a32_hvx64_metadata, .Lfunc_end122-conv3x3a32_hvx64_metadata
+.Lfunc_end123:
+	.size	conv3x3a32_hvx64_metadata, .Lfunc_end123-conv3x3a32_hvx64_metadata
                                         // -- End function
 	.type	malloc_tracing,@object  // @malloc_tracing
 	.section	.bss,"aw",@nobits
