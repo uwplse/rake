@@ -120,7 +120,7 @@ int main(int argc, char* argv[])
     DUMP_PMU();
 
 #if defined(__hexagon__)
-    printf("AppReported (HVX%db-mode): Image %dx%d - Gaussian5x5u8: %lld cycles (%0.4f cycles/pixel)\n", VLEN, (int)width, (int)height, total_cycles, (float)total_cycles/width/height);
+    printf("AppReported (HVX%dB-mode): Image %dx%d - gaussian5x5: %lld cycles (%0.4f cycles/pixel)\n", VLEN, (int)width, (int)height, total_cycles, (float)total_cycles/width/height);
 #endif
 
 

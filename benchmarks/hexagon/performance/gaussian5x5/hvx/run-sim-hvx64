@@ -1,20 +1,24 @@
 #!/bin/bash
 
-CXX=/home/maaz/Qualcomm/Hexagon_SDK/3.5.1/tools/HEXAGON_Tools/8.3.07/Tools/bin/hexagon-clang
-SIM=/home/maaz/Qualcomm/Hexagon_SDK/3.5.1/tools/HEXAGON_Tools/8.3.07/Tools/bin/hexagon-sim
+basedir=`dirname $0`
+cd $basedir
+. ../../setup-env.sh
 
 rm -rf build
 mkdir build
 rm -rf ref_build
 mkdir ref_build
+mkdir -p profile
 
-$CXX -O2 -mv66 -mhvx -mhvx-length=128B -DLOG2VLEN=6 -I/home/maaz/Qualcomm/Hexagon_SDK/3.5.1/tools/HEXAGON_Tools/8.3.07/Examples/HVX/common/include -DQDSP6SS_PUB_BASE=0xFE200000 -c -o build/gaussian.o src/gaussian.c
+hexagon-clang -O2 -mv66 -mhvx -mhvx-length=128B -DLOG2VLEN=6 -I/home/maaz/Qualcomm/Hexagon_SDK/3.5.1/tools/HEXAGON_Tools/8.3.07/Examples/HVX/common/include -DQDSP6SS_PUB_BASE=0xFE200000 -c -S -emit-llvm src/gaussian.c -o build/gaussian.ll
 
-$CXX -O2 -mv66 -mhvx -mhvx-length=128B -DLOG2VLEN=6 -I/home/maaz/Qualcomm/Hexagon_SDK/3.5.1/tools/HEXAGON_Tools/8.3.07/Examples/HVX/common/include -DQDSP6SS_PUB_BASE=0xFE200000 -c -o build/test.o src/test.c
+hexagon-clang -O2 -mv66 -mhvx -mhvx-length=128B -DLOG2VLEN=6 -I/home/maaz/Qualcomm/Hexagon_SDK/3.5.1/tools/HEXAGON_Tools/8.3.07/Examples/HVX/common/include -DQDSP6SS_PUB_BASE=0xFE200000 -c -o build/gaussian.o src/gaussian.c
 
-$CXX -O2 -mv66 -mhvx -mhvx-length=128B -DLOG2VLEN=6 -I/home/maaz/Qualcomm/Hexagon_SDK/3.5.1/tools/HEXAGON_Tools/8.3.07/Examples/HVX/common/include -DQDSP6SS_PUB_BASE=0xFE200000 -c -o build/subsys.o /home/maaz/Qualcomm/Hexagon_SDK/3.5.1/tools/HEXAGON_Tools/8.3.07/Examples/HVX/common/src/subsys.c
+hexagon-clang -O2 -mv66 -mhvx -mhvx-length=128B -DLOG2VLEN=6 -I/home/maaz/Qualcomm/Hexagon_SDK/3.5.1/tools/HEXAGON_Tools/8.3.07/Examples/HVX/common/include -DQDSP6SS_PUB_BASE=0xFE200000 -c -o build/test.o src/test.c
 
-$CXX -O2 -mv66 -o build/gaussian.exe ./build/gaussian.o ./build/test.o ./build/subsys.o  -lhexagon
+hexagon-clang -O2 -mv66 -mhvx -mhvx-length=128B -DLOG2VLEN=6 -I/home/maaz/Qualcomm/Hexagon_SDK/3.5.1/tools/HEXAGON_Tools/8.3.07/Examples/HVX/common/include -DQDSP6SS_PUB_BASE=0xFE200000 -c -o build/subsys.o /home/maaz/Qualcomm/Hexagon_SDK/3.5.1/tools/HEXAGON_Tools/8.3.07/Examples/HVX/common/src/subsys.c
+
+hexagon-clang -O2 -mv66 -o build/gaussian.exe ./build/gaussian.o ./build/test.o ./build/subsys.o  -lhexagon
 
 gcc -Wall -O3 -I/home/maaz/Qualcomm/Hexagon_SDK/3.5.1/tools/HEXAGON_Tools/8.3.07/Examples/HVX/common/include -c -o ref_build/gaussian_ref.o src/gaussian_ref.c
 
@@ -25,11 +29,15 @@ gcc -o ref_build/gaussian.exe ./ref_build/gaussian_ref.o ./ref_build/test.o -lm
 # run reference
 ./ref_build/gaussian.exe 1920 1080 ../../testvectors/football1920x1080.bin ./ref_build/out.bin
 
-printf "\nRunning simulator without --timing flag...\n"
-$SIM -mv66 --memfill 0x0 --simulated_returnval --nullptr=2 -- ./build/gaussian.exe 1920 1080 ../../testvectors/football1920x1080.bin ./build/out.bin
+if [ ! -z "${RUN_WITHOUT_TIMING}" ]; then
+	printf "\nRunning simulator without --timing flag...\n"
+	hexagon-sim -mv66 --memfill 0x0 --simulated_returnval --nullptr=2 -- ./build/gaussian.exe 1920 1080 ../../testvectors/football1920x1080.bin ./build/out.bin
+fi
 
 printf "\nRunning simulator with --timing flag...\n"
-$SIM -mv66 --memfill 0x0 --simulated_returnval --nullptr=2 --timing -- ./build/gaussian.exe 1920 1080 ../../testvectors/football1920x1080.bin ./build/out.bin
+hexagon-sim -mv66 --memfill 0x0 --simulated_returnval --nullptr=2 --timing --packet_analyze profile/gaussian_hvx64.json -- ./build/gaussian.exe 1920 1080 ../../testvectors/football1920x1080.bin ./build/out.bin
+
+hexagon-profiler --packet_analyze --elf=build/gaussian.exe --json=profile/gaussian_hvx64.json -o profile/gaussian_hvx64.html
 
 # compare outputs
 cmp ./build/out.bin ./ref_build/out.bin

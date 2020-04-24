@@ -15,7 +15,7 @@ public:
     GeneratorParam<bool> use_prefetch_sched{"use_prefetch_sched", true};
 
     void generate() {
-        Expr sum = cast(Int(16), 0);
+        Expr sum = cast(Int(32), 0);
         for (int j = -1; j <= 1; j++) {
             for (int i = -1; i <= 1; i++) {
                 sum += cast<int16_t>(input(x+i, y+j)) * cast<int16_t>(mask(i+1, j+1));

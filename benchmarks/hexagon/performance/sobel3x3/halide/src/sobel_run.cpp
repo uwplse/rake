@@ -101,7 +101,7 @@ int main(int argc, char **argv) {
       });
     SIM_RELEASE_HVX;
 
-    printf("AppReported (HVX64B-mode): Image %dx%d - sobel(64B): %lld cycles (%0.4f cycles/pixel)\n", (int)width, (int)height, cycles_hvx64, (float)cycles_hvx64/width/height);
+    printf("AppReported (HVX64B-mode): Image %dx%d - sobel3x3(64B): %lld cycles (%0.4f cycles/pixel)\n", (int)width, (int)height, cycles_hvx64, (float)cycles_hvx64/width/height);
     /* -----------------------------------------------------*/
     /*  Write image output to file                          */
     /* -----------------------------------------------------*/
@@ -130,7 +130,7 @@ int main(int argc, char **argv) {
       });
     SIM_RELEASE_HVX;
 
-    printf("AppReported (HVX128B-mode): Image %dx%d - sobel(128B):  %lld cycles (%0.4f cycles/pixel)\n", (int)width, (int)height, cycles_hvx128, (float)cycles_hvx128/width/height);
+    printf("AppReported (HVX128B-mode): Image %dx%d - sobel3x3(128B): %lld cycles (%0.4f cycles/pixel)\n", (int)width, (int)height, cycles_hvx128, (float)cycles_hvx128/width/height);
     strcpy(filename, "out/sobel_hvx128_");
     strcat(filename, argv[4]);
     if((fp_hvx128 = open(filename, O_CREAT_WRONLY_TRUNC, 0777)) < 0)

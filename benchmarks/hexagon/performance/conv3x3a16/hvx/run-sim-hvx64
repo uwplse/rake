@@ -1,20 +1,24 @@
 #!/bin/bash
 
-CXX=/home/maaz/Qualcomm/Hexagon_SDK/3.5.1/tools/HEXAGON_Tools/8.3.07/Tools/bin/hexagon-clang
-SIM=/home/maaz/Qualcomm/Hexagon_SDK/3.5.1/tools/HEXAGON_Tools/8.3.07/Tools/bin/hexagon-sim
+basedir=`dirname $0`
+cd $basedir
+. ../../setup-env.sh
 
 rm -rf build
 mkdir build
 rm -rf ref_build
 mkdir ref_build
+mkdir -p profile
 
-$CXX -O2 -mv66 -mhvx -mhvx-length=128B -DLOG2VLEN=6 -I/home/maaz/Qualcomm/Hexagon_SDK/3.5.1/tools/HEXAGON_Tools/8.3.07/Examples/HVX/common/include -DQDSP6SS_PUB_BASE=0xFE200000 -c -o build/conv3x3a16.o src/conv3x3a16.c
+hexagon-clang -O2 -mv66 -mhvx -mhvx-length=128B -DLOG2VLEN=6 -I/home/maaz/Qualcomm/Hexagon_SDK/3.5.1/tools/HEXAGON_Tools/8.3.07/Examples/HVX/common/include -DQDSP6SS_PUB_BASE=0xFE200000 -c -S -emit-llvm src/conv3x3a16.c -o build/conv3x3a16.ll
 
-$CXX -O2 -mv66 -mhvx -mhvx-length=128B -DLOG2VLEN=6 -I/home/maaz/Qualcomm/Hexagon_SDK/3.5.1/tools/HEXAGON_Tools/8.3.07/Examples/HVX/common/include -DQDSP6SS_PUB_BASE=0xFE200000 -c -o build/test.o src/test.c
+hexagon-clang -O2 -mv66 -mhvx -mhvx-length=128B -DLOG2VLEN=6 -I/home/maaz/Qualcomm/Hexagon_SDK/3.5.1/tools/HEXAGON_Tools/8.3.07/Examples/HVX/common/include -DQDSP6SS_PUB_BASE=0xFE200000 -c -o build/conv3x3a16.o src/conv3x3a16.c
 
-$CXX -O2 -mv66 -mhvx -mhvx-length=128B -DLOG2VLEN=6 -I/home/maaz/Qualcomm/Hexagon_SDK/3.5.1/tools/HEXAGON_Tools/8.3.07/Examples/HVX/common/include -DQDSP6SS_PUB_BASE=0xFE200000 -c -o build/subsys.o /home/maaz/Qualcomm/Hexagon_SDK/3.5.1/tools/HEXAGON_Tools/8.3.07/Examples/HVX/common/src/subsys.c
+hexagon-clang -O2 -mv66 -mhvx -mhvx-length=128B -DLOG2VLEN=6 -I/home/maaz/Qualcomm/Hexagon_SDK/3.5.1/tools/HEXAGON_Tools/8.3.07/Examples/HVX/common/include -DQDSP6SS_PUB_BASE=0xFE200000 -c -o build/test.o src/test.c
 
-$CXX -O2 -mv66 -o build/conv3x3a16.exe ./build/conv3x3a16.o ./build/test.o ./build/subsys.o  -lhexagon
+hexagon-clang -O2 -mv66 -mhvx -mhvx-length=128B -DLOG2VLEN=6 -I/home/maaz/Qualcomm/Hexagon_SDK/3.5.1/tools/HEXAGON_Tools/8.3.07/Examples/HVX/common/include -DQDSP6SS_PUB_BASE=0xFE200000 -c -o build/subsys.o /home/maaz/Qualcomm/Hexagon_SDK/3.5.1/tools/HEXAGON_Tools/8.3.07/Examples/HVX/common/src/subsys.c
+
+hexagon-clang -O2 -mv66 -o build/conv3x3a16.exe ./build/conv3x3a16.o ./build/test.o ./build/subsys.o  -lhexagon
 
 gcc -Wall -O3 -I/home/maaz/Qualcomm/Hexagon_SDK/3.5.1/tools/HEXAGON_Tools/8.3.07/Examples/HVX/common/include -c -o ref_build/conv3x3a16_ref.o src/conv3x3a16_ref.c
 
@@ -25,11 +29,15 @@ gcc -o ref_build/conv3x3a16.exe ./ref_build/conv3x3a16_ref.o ./ref_build/test.o 
 # run reference
 ./ref_build/conv3x3a16.exe 1920 1080 ../../testvectors/football1920x1080.bin ./ref_build/out.bin
 
-printf "\nRunning simulator without --timing flag...\n"
-$SIM -mv66 --memfill 0x0 --simulated_returnval --nullptr=2 -- ./build/conv3x3a16.exe 1920 1080 ../../testvectors/football1920x1080.bin ./build/out.bin
+if [ ! -z "${RUN_WITHOUT_TIMING}" ]; then
+	printf "\nRunning simulator without --timing flag...\n"
+	hexagon-sim -mv66 --memfill 0x0 --simulated_returnval --nullptr=2 -- ./build/conv3x3a16.exe 1920 1080 ../../testvectors/football1920x1080.bin ./build/out.bin
+fi
 
 printf "\nRunning simulator with --timing flag...\n"
-$SIM -mv66 --memfill 0x0 --simulated_returnval --nullptr=2 --timing -- ./build/conv3x3a16.exe 1920 1080 ../../testvectors/football1920x1080.bin ./build/out.bin
+hexagon-sim -mv66 --memfill 0x0 --simulated_returnval --nullptr=2 --timing --packet_analyze profile/conv3x3a16_hvx64.json -- ./build/conv3x3a16.exe 1920 1080 ../../testvectors/football1920x1080.bin ./build/out.bin
+
+hexagon-profiler --packet_analyze --elf=build/conv3x3a16.exe --json=profile/conv3x3a16_hvx64.json -o profile/conv3x3a16_hvx64.html
 
 # compare outputs
 cmp ./build/out.bin ./ref_build/out.bin
