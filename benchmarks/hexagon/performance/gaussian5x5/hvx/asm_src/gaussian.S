@@ -100,12 +100,12 @@ Gaussian5x5u8PerRow:
     { sLine0 = VMEM(iptr0++#1)                      //[1]
       sVsum0 = VLALIGN(sVsumv1E,sVsumv0E,#2)        //[2]
       sVsum2a4.h = VADD(sVsum2.h,sVsum4.h)          //[3]
-      sSumE.w += VMPYI(sVsum2.w,const6.b)           //[3]
+      sSumE.h += VMPYI(sVsum2.h,const6.b)           //[3]
     }
     { sLine1 = VMEM(iptr1++#1)                      //[1]
       sVsum1 = VLALIGN(sVsumv1O,sVsumv0O,#2)        //[2]
       sSumO.w += VMPYI(sVsum3.w,const6.b)           //[3]
-      sSumE.w += VMPYI(sVsum1a3.w,const4.b)         //[3]
+      sSumE.h += VMPYI(sVsum1a3.h,const4.b)         //[3]
     }
     { sLine4 = VMEM(iptr4++#1)                      //[1]
       sVsumv0E = sVsumv1E                           //[1]

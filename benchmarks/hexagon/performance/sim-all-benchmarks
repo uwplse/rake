@@ -33,14 +33,4 @@ for benchmark in "${benchmarks[@]}"; do
   $bm_dir/hvx/run-sim-hvx128-llvm |& python $basedir/parseSimulatorOutput.py "${outF}" "${benchmark}" "Manual LLVM"
 done
 
-# 1. Email Shoaib (30 minutes) 10-10.30
-# 2. Parse output to csv (1 hour) 10.30 - 11.30
-# 3. Sim asm version (1 hour) 12.30 - 1.30
-# 4. Generate simulation analysis html file of each benchmark (1 hour)
-#----
-# 6. Review 3 other benchmarks (3-5 hours) 1.30 - 5
-#----
-# 6. Run benchmarks on device to confirm numbers (1 hour) 6-7
-# 7. Re-write interesting algorithms in new IR (2 hours)
-
 echo "done"

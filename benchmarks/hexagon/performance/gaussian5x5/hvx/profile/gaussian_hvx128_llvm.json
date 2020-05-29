@@ -29595,8 +29595,12 @@
       "count": 16140,
       "syntax": "Vxx32.h+=vmpa(Vuu32.ub,Rt32.b)"
     },
+    "V6_vmpyihb_acc": {
+      "count": 32280,
+      "syntax": "Vx32.h+=vmpyi(Vu32.h,Rt32.b)"
+    },
     "V6_vmpyiwb_acc": {
-      "count": 77472,
+      "count": 45192,
       "syntax": "Vx32.w+=vmpyi(Vu32.w,Rt32.b)"
     },
     "V6_vshuffob": {

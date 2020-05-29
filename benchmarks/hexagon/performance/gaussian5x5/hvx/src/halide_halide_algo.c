@@ -185,8 +185,8 @@ void Gaussian5x5u8PerRow(
         sVsum1 = Q6_V_vlalign_VVI(Q6_V_hi_W(dVsumv1),Q6_V_hi_W(dVsumv0),2);
         sVsum2 = Q6_V_lo_W(dVsumv1);
         sVsum3 = Q6_V_hi_W(dVsumv1);
-        sVsum4 = Q6_V_valign_VVI( Q6_V_lo_W(dVsumv2),Q6_V_lo_W(dVsumv1),2);
-        sVsum5 = Q6_V_valign_VVI( Q6_V_hi_W(dVsumv2),Q6_V_hi_W(dVsumv1),2);
+        sVsum4 = Q6_V_valign_VVI(Q6_V_lo_W(dVsumv2),Q6_V_lo_W(dVsumv1),2);
+        sVsum5 = Q6_V_valign_VVI(Q6_V_hi_W(dVsumv2),Q6_V_hi_W(dVsumv1),2);
 
         //sVsum1a3 = Q6_Vh_vadd_VhVh(sVsum1,sVsum3);
         //sVsum2a4 = Q6_Vh_vadd_VhVh(sVsum2,sVsum4);

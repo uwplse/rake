@@ -1,0 +1,20 @@
+produce output {
+  for<Hexagon> (output.s0.__outermost, 0, 1) {
+    for (output.s0.y, 0, output.extent.1) {
+      allocate rows[int16 * 256 * 1]
+      for (output.s0.x.x, 0, ((output.extent.0 + 127)/128)) {
+        let rows.s0.x.min_2 = (select((0 < output.s0.x.x), 2, -2) + (output.s0.x.x*128))
+        produce rows {
+          let t110.s = (select((0 < output.s0.x.x), 2, -2) + (output.s0.x.x*128))
+          for (rows.s0.x.x, 0, ((((t110.s*-1) + 257)/128) + output.s0.x.x)) {
+            rows[(ramp(((rows.s0.x.x*128) + rows.s0.x.min_2), 1, 128) % x128(256))] = halide.hexagon.interleave.vh((let t117 = ((rows.s0.x.x*128) + ((input.stride.1*output.s0.y) + rows.s0.x.min_2)) in halide.hexagon.acc_add_2mpy.vh.vub.vub.b.b(halide.hexagon.acc_add_2mpy.vh.vub.vub.b.b(halide.hexagon.zxt.vub(input[ramp(((input.stride.1*2) + t117), 1, 128) aligned(4, 2)]), input[ramp((t117 - input.stride.1), 1, 128) aligned(4, 2)], input[ramp((input.stride.1 + t117), 1, 128) aligned(4, 2)], (int8)4, (int8)4), input[ramp(t117, 1, 128) aligned(4, 2)], input[ramp((t117 - (input.stride.1*2)), 1, 128) aligned(4, 2)], (int8)6, (int8)1)))
+          }
+        }
+        consume rows {
+          output[ramp(((output.s0.x.x*128) + (output.s0.y*output.stride.1)), 1, 128) aligned(128, 0)] = (let t118 = rows[ramp(0, 1, 256)] in halide.hexagon.packhi.vh(halide.hexagon.add_mul.vh.vh.b((dynamic_shuffle(t118, halide.hexagon.pack.vh(halide.hexagon.pack.vw((ramp(((output.s0.x.x*128) + 254), 1, 128) % x128(256)))), 0, 255) + halide.hexagon.add_mul.vh.vh.b(halide.hexagon.add_mul.vh.vh.b(dynamic_shuffle(t118, halide.hexagon.pack.vh(halide.hexagon.pack.vw((ramp(((output.s0.x.x*128) + 2), 1, 128) % x128(256)))), 0, 255), dynamic_shuffle(t118, halide.hexagon.pack.vh(halide.hexagon.pack.vw((ramp(((output.s0.x.x*128) + 1), 1, 128) % x128(256)))), 0, 255), (int8)4), rows[ramp(((output.s0.x.x % 2)*128), 1, 128) aligned(128, 0)], (int8)6)), dynamic_shuffle(t118, halide.hexagon.pack.vh(halide.hexagon.pack.vw((ramp(((output.s0.x.x*128) + 255), 1, 128) % x128(256)))), 0, 255), (int8)4)))
+        }
+      }
+      free rows
+    }
+  }
+}

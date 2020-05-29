@@ -1,4 +1,5 @@
 #include "Halide.h"
+#include "utils.h"
 
 using namespace Halide;
 
@@ -7,7 +8,6 @@ public:
     Input<Buffer<uint8_t>> input{"input", 2};
     Output<Buffer<uint8_t>> output{"output", 2};
 
-    GeneratorParam<bool> use_parallel_sched{"use_parallel_sched", true};
     GeneratorParam<bool> use_prefetch_sched{"use_prefetch_sched", true};
 
     void generate() {
@@ -20,7 +20,7 @@ public:
     }
 
     void schedule() {
-        Var xi{"xi"}, yi{"yi"}, yo{"yo"};
+        Var xi{"xi"}, yi{"yi"};
 
         input.dim(0).set_min(0);
         input.dim(1).set_min(0);
@@ -38,24 +38,29 @@ public:
 
             Expr ht = output.dim(1).extent();
 
+            // 0.5328 cycles/pixel
+            //output
+                //.hexagon()
+                //.tile(x, y, xi, yi, vector_size, 4, TailStrategy::RoundUp)
+                //.vectorize(xi);
+                //.unroll(yi);
+            
+            // HALIDE: 0.4231 cycles/pixel
+            // SDK :   0.18 cyckes/pixel
             output
                 .hexagon()
-                .split(y, yo, y, ht/2)
-                .tile(x, y, xi, yi, vector_size, 4, TailStrategy::RoundUp)
-                .vectorize(xi)
-                .unroll(yi);
+                .split(y, y, yi, 4, TailStrategy::RoundUp)
+                .vectorize(x, vector_size, TailStrategy::RoundUp);
 
             rows
-                .store_at(Func(output), yo)
-                .compute_at(Func(output), y)
+                .compute_at(Func(output), x)
+                .store_at(Func(output), yi)
+                .fold_storage(x, 384) // 128 * 3 (so that we dont need dynamic shuffles)
                 .align_storage(x, vector_size)
                 .vectorize(x, vector_size, TailStrategy::RoundUp);
 
             if (use_prefetch_sched) {
-                output.prefetch(input, y, 2);
-            }
-            if (use_parallel_sched) {
-                output.parallel(yo);
+                output.prefetch(input, y, 2, PrefetchBoundStrategy::NonFaulting);
             }
         } else {
             const int vector_size = natural_vector_size<uint8_t>();
@@ -67,7 +72,7 @@ public:
 private:
     Var x{"x"}, y{"y"};
     Func rows{"rows"}, cols{"cols"};
-    Func input_16{"input_16"};
+    Func input_16{"input_16"}, bounded_input{"bounded_input"};
 };
 
 HALIDE_REGISTER_GENERATOR(Gaussian5x5, gaussian5x5);
