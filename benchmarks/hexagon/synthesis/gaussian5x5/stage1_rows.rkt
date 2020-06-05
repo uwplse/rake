@@ -44,7 +44,7 @@
   (vshuff
    (vmpa_acc_2
     (vmpy_acc
-     (vadd
+     (vadd_w
       (ramp input (- t126 (* input.stride.1 2)) 1)
       (ramp input (+ t126 (* input.stride.1 2)) 1))
      (ramp input t126 1)

@@ -30,7 +30,7 @@
   (vshuff
    (vmpa_acc
     (vmpa_acc
-     (vzxt (ramp input (+ (* input.stride.1 2) t126) 1) 'int16)
+     (vzxt (ramp input (+ (* input.stride.1 2) t126) 1))
      (ramp input (- t126 input.stride.1) 1)
      (ramp input (+ input.stride.1 t126) 1)
      (bv 4 8)
@@ -40,32 +40,42 @@
     (bv 6 8)
     (bv 1 8))))
 
-;; Define synthesized expression
-(define _buf (buf_gen get-buf-term))
-(define _base (index_gen get-index-term))
-(define _stride stride_gen)
-(define _kwidth kwidth_gen)
-(define _kernel (kernel_gen get-int-term _kwidth))
-
 (define synthesized-expr
-  ;(castvec (convolve-x (ramp _buf _base _stride) _kernel) 'int16 'int32))
-  )
+  (vshuff
+   (vmpa_acc_2
+    (vmpy_acc
+     (vadd
+      (ramp input (- t126 (* input.stride.1 2)) 1)
+      (ramp input (+ t126 (* input.stride.1 2)) 1))
+     (ramp input t126 1)
+     (bv 6 8))
+    (vcombine
+     (ramp input (+ t126 (* input.stride.1 1)) 1)
+     (ramp input (- t126 (* input.stride.1 1)) 1))
+    (bv 4 8)
+    (bv 4 8))))
 
 ;; Verification condition
 (define (bounded-eq? oe se lanes)
-  (for ([i lanes])
-    (assert (eq? (oe i) (se i)))))
+  (if (pair? oe)
+      (for ([i lanes])
+        (and
+         (assert (eq? ((car oe) i) ((car se) i)))
+         (assert (eq? ((cdr oe) i) ((cdr se) i)))))
+      (for ([i lanes])
+        (assert (eq? (oe i) (se i))))))
 
 ;; Synthesize
 (define sol (synthesize #:forall (list input t126)
                         #:guarantee (bounded-eq? original-expr synthesized-expr 2)))
 
 ;; Print solution
-(cond
- [(unsat? sol) (printf "Unable to express computation in IR")]
- [#t
-  (evaluate _kwidth sol)
-  (evaluate _kernel sol)
-  (evaluate _buf sol)
-  (evaluate _base sol)
-  (evaluate _stride sol)])
+(print sol)
+;(cond
+ ;[(unsat? sol) (printf "Unable to express computation in IR")]
+ ;[#t
+  ;(evaluate _kwidth sol)
+  ;(evaluate _kernel sol)
+  ;(evaluate _buf sol)
+  ;(evaluate _base sol)
+  ;(evaluate _stride sol)])

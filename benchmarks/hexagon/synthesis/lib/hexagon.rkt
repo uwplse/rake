@@ -11,6 +11,10 @@
 (define (vcombine v1 v2)
   (cons v2 v1))
 
+(define (vpacko v)
+  (cond
+    [((bitvector 16) (v 0)) (lambda (i) (extract 15 8 (v i)))]))
+
 (define (vshuffo o e)
   (lambda (i)
     (if
@@ -64,6 +68,12 @@
 
 ;; Processing instructions
 (define (vadd v1 v2)
+  (lambda (i)
+    (bvadd
+     (cast (v1 i) 'uint8 'int16)
+     (cast (v2 i) 'uint8 'int16))))
+
+(define (vadd_w v1 v2)
   (cons 
    (lambda (i)
      (bvadd
@@ -73,6 +83,14 @@
      (bvadd
       (cast (v1 (+ (* i 2) 1)) 'uint8 'int16)
       (cast (v2 (+ (* i 2) 1)) 'uint8 'int16)))))
+
+(define (vmpyi_acc acc v s)
+  (lambda (i)
+    (bvadd
+     (acc i)
+     (bvmul
+      (v i)
+      (cast s 'int8 'int16)))))
 
 (define (vmpy_acc acc v s)
   (cons 
