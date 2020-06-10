@@ -17220,7 +17220,7 @@ _ZN6Halide7Runtime8Internal23halide_get_cpu_featuresEv: // @_ZN6Halide7Runtime8I
 gaussian5x5_hvx64:                      // @gaussian5x5_hvx64
 // %bb.0:                               // %entry
 	{
-		allocframe(r29,#3712):raw
+		allocframe(r29,#8832):raw
 	}
 	{
 		r17:16 = combine(r0,r1)
@@ -17248,7 +17248,7 @@ gaussian5x5_hvx64:                      // @gaussian5x5_hvx64
 	}
 	{
 		r3 = memw(r2+#20)
-		if (!cmp.gt(r3.new,#0)) jump:nt ##.LBB120_12
+		if (!cmp.gt(r3.new,#0)) jump:nt ##.LBB120_332
 	}
 // %bb.2:                               // %"for output.s0.y.y.preheader"
 	{
@@ -17261,88 +17261,97 @@ gaussian5x5_hvx64:                      // @gaussian5x5_hvx64
 		r3 = asr(r3,#2)
 		r7 = add(r5,#-1)
 		r6 = add(r5,#63)
-		memw(r29+#68) = r3.new
+		memw(r29+#36) = r3.new
 	}                               // 4-byte Folded Spill
 	{
 		r12 = asr(r6,#6)
-		p0 = cmp.gt(r5,#64)
+		p1 = cmp.gt(r5,#64)
 		r7 = and(r7,#-64)
-		memw(r29+#116) = r12.new
+		memw(r29+#120) = r12.new
 	}                               // 4-byte Folded Spill
 	{
 		r3 = and(r6,#-64)
-		r8 = mux(p0,#2,#-2)
-		r4 = memw(r4+#24)
+		r21 = ##17039620
 		r2 = memw(r2+#24)
 	}
 	{
 		r2 = asr(r2,#6)
-		r6 = add(r7,r8)
-		r9 = memw(r17+#12)
-		memw(r29+#112) = r2.new
+		r8 = mux(p1,#2,#-2)
+		r4 = memw(r4+#24)
+		memw(r29+#80) = r2.new
 	}                               // 4-byte Folded Spill
 	{
-		r2 = lsr(r4,#6)
-		r8 = and(r4,#-64)
-		p0 = cmp.gt(r5,#0)
-		memw(r29+#124) = r8.new
+		r6 = add(r7,r8)
+		r12 = and(r4,#-64)
+		r8 = memw(r16+#12)
+		memw(r29+#116) = r8.new
 	}                               // 4-byte Folded Spill
 	{
 		r7 = add(r6,add(r3,##66))
-		r13:12 = combine(r9,r9)
-		r22 = add(r29,#2304)
+		r8 = #384
+		r9 = memw(r17+#12)
 	}
 	{
 		r6 = lsr(r7,#16)
-		r3 = asr(r7,#31)
-		r19 = ##100926980
-	}
+		v5 = vsplat(r8)
+		r13 = r9
+		memw(r29+#48) = r9
+	}                               // 4-byte Folded Spill
 	{
-		r0 = insert(r7,#16,#16)
-		r20 = ##17039620
+		r2 = lsr(r4,#6)
+		r3 = asr(r7,#31)
+		r14 = r9
 		r4 = or(r4,r6)
 	}
 	{
-		r7 = insert(r8,#30,#2)
-		r4 |= asl(r3,#16)
-		r21 = add(r29,#2624)
-		memw(r29+#64) = r7.new
-	}                               // 4-byte Folded Spill
-	{
+		r0 = insert(r7,#16,#16)
+		r7 = insert(r12,#30,#2)
 		r6 = ##65536
-		r7 = memw(r16+#12)
-		memw(r29+#600) = r7.new
+	}
+	{
+		r4 |= asl(r3,#16)
+		r7 = extractu(r12,#25,#6)
+		p1 = cmp.gt(r5,#0)
+		memw(r29+#32) = r7
 	}                               // 4-byte Folded Spill
 	{
-		r12 -= asl(r2,#7)
-		r7 = extractu(r8,#25,#6)
-		r8 = add(r9,r8)
-		memw(r29+#84) = r9
-	}                               // 4-byte Folded Spill
-	{
-		r13 -= asl(r2,#6)
-		r4 = addasl(r9,r7,#7)
+		r17 = ##100926980
+		r22 = add(r29,#7168)
 		r1 = or(r4,r6)
 	}
 	{
-		r2 = #512
-		r3 = #1
+		r13 -= asl(r2,#7)
+		r14 -= asl(r2,#6)
+		r23 = add(r29,#7296)
+		r4 = add(r9,r12)
 	}
 	{
-		v13 = vsplat(r2)
-		v17 = vsplat(r3)
-		r0 = add(r29,#512)
-		memd(r29+#72) = r1:0
+		r6 = addasl(r9,r7,#7)
+		r27:26 = combine(#31,#32)
+		r24 = add(r29,#7040)
+		r25 = add(r29,#7424)
+	}
+	{
+		r1 = p1
+		r0 = add(r29,#1408)
+		memd(r29+#40) = r1:0
 	}                               // 8-byte Folded Spill
 	{
-		v6 = vxor(v6,v6)
-		vmem(r29+#3) = v17
-	}                               // 128-byte Folded Spill
+		r1 = add(r29,#4672)
+		v17.w = vabs(v5.w)
+		memw(r29+#76) = r1
+	}                               // 4-byte Folded Spill
 	{
-		vmem(r29+#5) = v13
-	}                               // 128-byte Folded Spill
+		r0 = add(r29,#1472)
+		v19 = vxor(v19,v19)
+		memw(r29+#88) = r12
+		vmem(r0+#0) = v17
+	}                               // 64-byte Folded Spill
 	{
-		vmem(r0+#0) = v6
+		vmem(r1+#0) = v19
+	}                               // 64-byte Folded Spill
+	{
+		vmem(r0+#0) = v5
 	}                               // 64-byte Folded Spill
 	.falign
 .LBB120_3:                              // %"for output.s0.y.y"
@@ -17353,47 +17362,48 @@ gaussian5x5_hvx64:                      // @gaussian5x5_hvx64
 	{
 		r0 = asl(r18,#2)
 		r2 = #6
-		r3 = memw(r29+#124)
-		memw(r29+#120) = r0.new
+		r3 = memw(r29+#88)
+		memw(r29+#84) = r0.new
 	}                               // 4-byte Folded Reload
 	{
 		r2 = addasl(r2,r18,#2)
-		r1 = memw(r29+#84)
-		memw(r29+#108) = r18
+		r1 = memw(r29+#48)
+		memw(r29+#72) = r18
 	}                               // 4-byte Folded Reload
 	{
 		r2 = mpyi(r3,r2)
 	}
 	{
 		r2 = add(r1,add(r2,#-2))
-		r1:0 = memd(r29+#72)
+		r1:0 = memd(r29+#40)
 	}                               // 8-byte Folded Reload
 	//# InlineAsm Start
 	l2fetch(r2,r1:0)
 	//# InlineAsm End
 	{
+		r18 = add(r29,#8000)
 		r2 = #0
-		memw(r29+#508) = r2.new
+		memw(r29+#112) = r2.new
 	}                               // 4-byte Folded Spill
 	{
-		memw(r29+#92) = r4
-		memw(r29+#504) = r4
+		memw(r29+#56) = r6
+		memw(r29+#108) = r6
 	}                               // 4-byte Folded Spill
 	{
-		memw(r29+#96) = r8
-		memw(r29+#500) = r8
+		memw(r29+#60) = r4
+		memw(r29+#104) = r4
 	}                               // 4-byte Folded Spill
 	{
-		memw(r29+#88) = r9
-		memw(r29+#496) = r9
+		memw(r29+#52) = r9
+		memw(r29+#100) = r9
 	}                               // 4-byte Folded Spill
 	{
-		memw(r29+#100) = r13
-		memw(r29+#492) = r13
+		memw(r29+#64) = r14
+		memw(r29+#96) = r14
 	}                               // 4-byte Folded Spill
 	{
-		memw(r29+#104) = r12
-		memw(r29+#488) = r12
+		memw(r29+#68) = r13
+		memw(r29+#92) = r13
 	}                               // 4-byte Folded Spill
 	.falign
 .LBB120_4:                              // %"for output.s0.y.yi"
@@ -17402,98 +17412,69 @@ gaussian5x5_hvx64:                      // @gaussian5x5_hvx64
                                         //       Child Loop BB120_6 Depth 3
                                         //         Child Loop BB120_8 Depth 4
 	{
-		if (!p0) jump:nt .LBB120_10
-		if (p0) r4 = #0
-		if (p0) r2 = memw(r29+#120)
+		r2 = memw(r29+#76)
+	}                               // 4-byte Folded Reload
+	{
+		p0 = r2
+		if (!p0.new) jump:nt .LBB120_330
+		if (p0.new) r16 = #0
+		if (p0.new) r2 = memw(r29+#84)
 	}                               // 4-byte Folded Reload
 // %bb.5:                               // %"for output.s0.x.x.preheader"
                                         //   in Loop: Header=BB120_4 Depth=2
 	{
-		r3 = memw(r29+#508)
-		v15 = vmem(r29+#5)
-	}                               // 128-byte Folded Reload
-	{
-		vmem(r29+#5) = v15
-	}                               // 128-byte Folded Spill
+		r3 = memw(r29+#112)
+	}                               // 4-byte Folded Reload
 	{
 		r2 = add(r3,r2)
 		r3 = #0
-		v19 = vmem(r29+#3)
-		memw(r29+#636) = r3.new
-	}                               // 128-byte Folded Reload
+		memw(r29+#380) = r3.new
+	}                               // 4-byte Folded Spill
 	{
-		r3 = memw(r29+#116)
-		vmem(r29+#3) = v19
+		r3 = memw(r29+#108)
+		memw(r29+#376) = r3.new
 	}                               // 4-byte Folded Reload
 	{
-		v14 = vmem(r29+#4)
-	}                               // 128-byte Folded Reload
-	{
-		loop1(.LBB120_6,r3)
-		v14 = v15
-		r3 = memw(r29+#504)
-		memw(r29+#632) = r3.new
+		r3 = memw(r29+#104)
+		memw(r29+#372) = r3.new
 	}                               // 4-byte Folded Reload
 	{
-		r3 = memw(r29+#500)
-		memw(r29+#628) = r3.new
+		r3 = memw(r29+#100)
+		memw(r29+#368) = r3.new
 	}                               // 4-byte Folded Reload
 	{
-		v18 = vmem(r29+#2)
-		vmem(r29+#4) = v14
-	}                               // 128-byte Folded Reload
-	{
-		v18 = v19
-		r3 = memw(r29+#496)
-		vmem(r29+#2) = v18.new
+		r3 = memw(r29+#96)
+		memw(r29+#364) = r3.new
 	}                               // 4-byte Folded Reload
 	{
-		v1:0.w = vsub(v15:14.w,v19:18.w)
-		r3 = memw(r29+#492)
-		memw(r29+#624) = r3
+		r3 = memw(r29+#92)
+		memw(r29+#360) = r3.new
 	}                               // 4-byte Folded Reload
 	{
-		r3 = memw(r29+#488)
-		memw(r29+#620) = r3
-	}                               // 4-byte Folded Reload
-	{
-		r3 = memw(r29+#112)
-		memw(r29+#616) = r3
+		r3 = memw(r29+#80)
 	}                               // 4-byte Folded Reload
 	{
 		r2 = mpyi(r2,r3)
-		memw(r29+#604) = r2.new
+		memw(r29+#124) = r2.new
 	}                               // 4-byte Folded Spill
-	{
-		r2 = add(r29,#640)
-	}
-	{
-		r2 = add(r29,#704)
-		vmem(r2+#0) = v0
-	}                               // 128-byte Folded Spill
-	{
-		vmem(r2+#0) = v1
-	}                               // 128-byte Folded Spill
 	.falign
-.Ltmp14:                                // Block address taken
 .LBB120_6:                              // %"for output.s0.x.x"
                                         //   Parent Loop BB120_3 Depth=1
                                         //     Parent Loop BB120_4 Depth=2
                                         // =>    This Loop Header: Depth=3
                                         //         Child Loop BB120_8 Depth 4
 	{
-		r0 = asl(r4,#6)
-		p1 = cmp.eq(r4,#0)
+		p1 = cmp.eq(r16,#0)
 		r7 = #-2
-		r6 = add(r29,#2432)
+		r19 = add(r29,#7808)
+		r20 = add(r29,#7552)
 	}
 	{
 		r2 = mux(p1,#-2,#2)
-		memw(r29+#612) = r4
-		memw(r29+#608) = r0
+		memw(r29+#356) = r16
 	}                               // 4-byte Folded Spill
 	{
-		r3 = addasl(r2,r4,#6)
+		r3 = addasl(r2,r16,#6)
 	}
 	{
 		r3 = sub(#129,r3)
@@ -17502,2408 +17483,9105 @@ gaussian5x5_hvx64:                      // @gaussian5x5_hvx64
 		r3 = asr(r3,#6)
 	}
 	{
-		r3 = add(r3,r4)
-	}
+		r3 = asl(r16,#6)
+		r4 = add(r3,r16)
+		memw(r29+#344) = r3.new
+	}                               // 4-byte Folded Spill
 	{
-		p1 = cmp.gt(r3,#0); if (!p1.new) jump:nt .LBB120_9
-		if (p1.new) r0 = memw(r29+##616)
+		p0 = cmp.gt(r4,#0); if (!p0.new) jump:nt .LBB120_73
+		if (p0.new) r3 = memw(r29+##380)
 	}                               // 4-byte Folded Reload
 // %bb.7:                               // %"for rows.s0.x.x.preheader"
                                         //   in Loop: Header=BB120_6 Depth=3
 	{
-		loop0(.LBB120_8,r3)
-		r4 = memw(r29+#636)
-		r1 = memw(r29+#620)
+		r5 = add(r2,r3)
+		r3 = memw(r29+#360)
 	}                               // 4-byte Folded Reload
 	{
-		r27 = add(r0,r2)
-		r9 = add(r2,r4)
-		r0 = memw(r29+#624)
+		r6 = add(r3,r2)
+		r3 = memw(r29+#364)
 	}                               // 4-byte Folded Reload
 	{
-		r10 = add(r1,r2)
-		r23 = add(r0,r2)
-		r1 = memw(r29+#628)
-		r0 = memw(r29+#632)
+		r8 = add(r3,r2)
+		r3 = memw(r29+#368)
 	}                               // 4-byte Folded Reload
 	{
-		r24 = add(r1,r2)
-		r26 = add(r0,r2)
+		r9 = add(r3,r2)
+		r3 = memw(r29+#372)
+	}                               // 4-byte Folded Reload
+	{
+		r12 = add(r3,r2)
+		r3 = memw(r29+#376)
+	}                               // 4-byte Folded Reload
+	{
+		r2 = add(r3,r2)
 	}
 	.falign
-.Ltmp15:                                // Block address taken
 .LBB120_8:                              // %"for rows.s0.x.x"
                                         //   Parent Loop BB120_3 Depth=1
                                         //     Parent Loop BB120_4 Depth=2
                                         //       Parent Loop BB120_6 Depth=3
                                         // =>      This Inner Loop Header: Depth=4
 	{
-		r2 = add(pc,##.LCPI120_0@PCREL)
-		v9 = vsplat(r9)
-	}
-	{
-		r3 = add(pc,##.LCPI120_1@PCREL)
-		v2 = vmemu(r26++#1)
-	}
-	{
-		r0 = setbit(r22,#6)
-		v13:12.uh = vzxt(v2.ub)
-		v8 = v9
-		v16 = vmem(r2+#0)
+		r3 = setbit(r22,#6)
+		v17 = vsplat(r5)
+		v19 = vmemu(r2++#1)
 	}
 	{
 		r2 = add(pc,##.LCPI120_2@PCREL)
-		r5 = setbit(r6,#6)
-		r9 = add(r9,#64)
-	}
-	{
-		r4 = add(pc,##.LCPI120_3@PCREL)
-		v17 = vmem(r3+#0)
-	}
-	{
-		v19:18.w = vadd(v9:8.w,v17:16.w)
-		v4 = vmemu(r24++#1)
-	}
-	{
-		v25 = vand(v18,v0)
-		v26 = vand(v19,v1)
-		v5 = vmemu(r23++#1)
-	}
-	{
-		v14 = vmemu(r10++#1)
-	}
-	{
-		v13:12.h += vmpa(v5:4.ub,r19.b)
-		v15 = vmemu(r27++#1)
-	}
-	{
-		v10 = vmem(r2+#0)
-		vmem(r22+#0) = v25
-	}
-	{
-		v13:12.h += vmpa(v15:14.ub,r20.b)
-		r13 = memw(r29+#2304)
-		vmem(r0+#0) = v26
-	}
-	{
-		r1 = memw(r29+#2376)
-		memw(r29+#784) = r1.new
-	}
-	{
-		v21:20 = vshuff(v13,v12,r7)
-		r22 = memw(r29+#2368)
-		r0 = memw(r29+#2380)
-	}
-	{
-		r1 = memw(r29+#2384)
-		memw(r29+#792) = r1.new
-	}
-	{
-		r3 = memw(r29+#2372)
-		memw(r29+#780) = r3.new
-	}
-	{
-		r0 = memw(r29+#2388)
-		memw(r29+#788) = r0
-	}
-	{
-		r1 = memw(r29+#2392)
-		memw(r29+#800) = r1.new
-	}
-	{
-		r0 = memw(r29+#2396)
-		memw(r29+#796) = r0
-	}
-	{
-		r1 = memw(r29+#2400)
-		memw(r29+#812) = r1.new
-	}
-	{
-		r0 = memw(r29+#2404)
-		memw(r29+#808) = r0
-	}
-	{
-		r1 = memw(r29+#2408)
-		memw(r29+#820) = r1.new
-	}
-	{
-		r0 = memw(r29+#2412)
-		memw(r29+#816) = r0
-	}
-	{
-		r1 = memw(r29+#2416)
-		memw(r29+#828) = r1.new
-	}
-	{
-		r0 = memw(r29+#2420)
-		memw(r29+#824) = r0
-	}
-	{
-		r1 = memw(r29+#2424)
-		memw(r29+#840) = r1.new
-	}
-	{
-		r0 = memw(r29+#2428)
-		memw(r29+#832) = r0
-	}
-	{
-		memw(r29+#836) = r0
-		vmem(r5+#0) = v21
+		v16 = v17
+		memw(r29+#4084) = r2
 	}                               // 4-byte Folded Spill
 	{
-		r1 = memuh(r29+##2528)
-		vmem(r6+#0) = v20
-	}
-	{
-		r0 = memuh(r29+##2530)
-		memw(r29+#912) = r0.new
-	}
-	{
-		r1 = memuh(r29+##2532)
-		memw(r29+#908) = r1
-	}
-	{
-		r0 = memuh(r29+##2534)
-		memw(r29+#916) = r1
-	}
-	{
-		r1 = memuh(r29+##2536)
-		memw(r29+#924) = r1.new
-	}
-	{
-		r0 = memuh(r29+##2538)
-		memw(r29+#920) = r0
-	}
-	{
-		r1 = memuh(r29+##2540)
-		memw(r29+#932) = r1.new
-	}
-	{
-		r0 = memuh(r29+##2542)
-		memw(r29+#928) = r0
-	}
-	{
-		r1 = memuh(r29+##2544)
-		memw(r29+#940) = r1.new
-	}
-	{
-		r0 = memuh(r29+##2546)
-		memw(r29+#936) = r0
-	}
-	{
-		r1 = memuh(r29+##2548)
-		memw(r29+#948) = r1.new
-	}
-	{
-		r0 = memuh(r29+##2550)
-		memw(r29+#944) = r0
-	}
-	{
-		r1 = memuh(r29+##2552)
-		memw(r29+#956) = r1.new
-	}
-	{
-		r0 = memuh(r29+##2554)
-		memw(r29+#952) = r0
-	}
-	{
-		r1 = memuh(r29+##2556)
-		memw(r29+#1024) = r1.new
-	}
-	{
-		r0 = memuh(r29+##2558)
-		memw(r29+#960) = r0
-	}
-	{
-		r1 = memuh(r29+##2494)
-		memw(r29+#1088) = r0
-	}
-	{
-		r0 = memuh(r29+##2496)
-		memw(r29+#844) = r0.new
-	}
-	{
-		r1 = memuh(r29+##2498)
-		memw(r29+#804) = r1
-	}
-	{
-		r0 = memuh(r29+##2500)
-		memw(r29+#852) = r0.new
-	}
-	{
-		r1 = memuh(r29+##2502)
-		memw(r29+#848) = r1
-	}
-	{
-		r0 = memuh(r29+##2504)
-		memw(r29+#860) = r0.new
-	}
-	{
-		r1 = memuh(r29+##2506)
-		memw(r29+#856) = r1
-	}
-	{
-		r0 = memuh(r29+##2508)
-		memw(r29+#868) = r0.new
-	}
-	{
-		r1 = memuh(r29+##2510)
-		memw(r29+#864) = r1
-	}
-	{
-		r0 = memuh(r29+##2512)
-		memw(r29+#876) = r0.new
-	}
-	{
-		r1 = memuh(r29+##2514)
-		memw(r29+#872) = r1
-	}
-	{
-		r0 = memuh(r29+##2516)
-		memw(r29+#884) = r0.new
-	}
-	{
-		r1 = memuh(r29+##2518)
-		memw(r29+#880) = r1
-	}
-	{
-		r0 = memuh(r29+##2520)
-		memw(r29+#892) = r0.new
-	}
-	{
-		r1 = memuh(r29+##2522)
-		memw(r29+#888) = r1
-	}
-	{
-		r0 = memuh(r29+##2524)
-		memw(r29+#900) = r0.new
-	}
-	{
-		r1 = memuh(r29+##2526)
-		memw(r29+#896) = r1
-	}
-	{
-		r3 = memuh(r29+##2460)
-		r6 = memuh(r29+##2464)
-	}
-	{
-		r5 = memuh(r29+##2462)
-		memw(r29+#904) = r1
-	}
-	{
-		r7 = memuh(r29+##2466)
-		r14 = memuh(r29+##2472)
-	}
-	{
-		r1 = memuh(r29+##2480)
-		r8 = memuh(r29+##2468)
-	}
-	{
-		r15 = memuh(r29+##2474)
-		r11 = memuh(r29+##2482)
-	}
-	{
-		r18 = memuh(r29+##2488)
-		r12 = memuh(r29+##2470)
-	}
-	{
-		r28 = memuh(r29+##2476)
-		r16 = memuh(r29+##2484)
-	}
-	{
-		r19 = memuh(r29+##2490)
-		r0 = memuh(r29+##2478)
-	}
-	{
-		r17 = memuh(r29+##2486)
-		r20 = memuh(r29+##2492)
-	}
-	{
-		r25 = memuh(r29+##2432)
-		memh(r21+r13<<#1) = r25.new
-	}
-	{
-		r2 = memw(r29+#2308)
-		v11 = vmem(r4+#0)
-	}
-	{
-		v23:22.w = vadd(v9:8.w,v11:10.w)
-		r13 = memuh(r29+##2434)
-		memh(r21+r2<<#1) = r13.new
-	}
-	{
-		v28 = vand(v23,v1)
-		v27 = vand(v22,v0)
-		r2 = memw(r29+#2312)
-	}
-	{
-		r4 = memuh(r29+##2436)
-		memh(r21+r2<<#1) = r4.new
-	}
-	{
-		r2 = memw(r29+#2316)
-		r4 = memuh(r29+##2438)
-	}
-	{
-		memh(r21+r2<<#1) = r4
-	}
-	{
-		r2 = memw(r29+#2320)
-		r4 = memuh(r29+##2440)
-	}
-	{
-		memh(r21+r2<<#1) = r4
-	}
-	{
-		r2 = memw(r29+#2324)
-		r4 = memuh(r29+##2442)
-	}
-	{
-		memh(r21+r2<<#1) = r4
-	}
-	{
-		r2 = memw(r29+#2328)
-		r4 = memuh(r29+##2444)
-	}
-	{
-		memh(r21+r2<<#1) = r4
-	}
-	{
-		r2 = memw(r29+#2332)
-		r4 = memuh(r29+##2446)
-	}
-	{
-		memh(r21+r2<<#1) = r4
-	}
-	{
-		r2 = memw(r29+#2336)
-		r4 = memuh(r29+##2448)
-	}
-	{
-		memh(r21+r2<<#1) = r4
-	}
-	{
-		r2 = memw(r29+#2340)
-		r4 = memuh(r29+##2450)
-	}
-	{
-		memh(r21+r2<<#1) = r4
-	}
-	{
-		r2 = memw(r29+#2344)
-		r4 = memuh(r29+##2452)
-	}
-	{
-		memh(r21+r2<<#1) = r4
-	}
-	{
-		r2 = memw(r29+#2348)
-		r4 = memuh(r29+##2454)
-	}
-	{
-		memh(r21+r2<<#1) = r4
-	}
-	{
-		r2 = memw(r29+#2352)
-		r4 = memuh(r29+##2456)
-	}
-	{
-		memh(r21+r2<<#1) = r4
-	}
-	{
-		r2 = memw(r29+#2356)
-		r4 = memuh(r29+##2458)
-	}
-	{
-		memh(r21+r2<<#1) = r4
-	}
-	{
-		r2 = memw(r29+#2360)
-	}
-	{
-		r3 = add(r29,#2176)
-		memh(r21+r2<<#1) = r3
-	}
-	{
-		r2 = memw(r29+#2364)
-	}
-	{
-		r2 = memw(r29+#780)
-		memh(r21+r2<<#1) = r5
-	}                               // 4-byte Folded Reload
-	{
-		r22 = add(r29,#2304)
-		memh(r21+r22<<#1) = r6
-	}
-	{
-		r2 = memw(r29+#784)
-		memh(r21+r2<<#1) = r7
-	}                               // 4-byte Folded Reload
-	{
-		r2 = memw(r29+#788)
-		memh(r21+r2<<#1) = r8
-	}                               // 4-byte Folded Reload
-	{
-		r2 = memw(r29+#792)
-		memh(r21+r2<<#1) = r12
-	}                               // 4-byte Folded Reload
-	{
-		r2 = memw(r29+#796)
-		memh(r21+r2<<#1) = r14
-	}                               // 4-byte Folded Reload
-	{
-		r2 = memw(r29+#800)
-		memh(r21+r2<<#1) = r15
-	}                               // 4-byte Folded Reload
-	{
-		r2 = memw(r29+#808)
-		memh(r21+r2<<#1) = r28
-	}                               // 4-byte Folded Reload
-	{
-		r2 = setbit(r3,#6)
-		r0 = memw(r29+#812)
-		memh(r21+r2<<#1) = r0
-	}                               // 4-byte Folded Reload
-	{
-		r1 = memw(r29+#816)
-		memh(r21+r0<<#1) = r1
-	}                               // 4-byte Folded Reload
-	{
-		r0 = memw(r29+#820)
-	}                               // 4-byte Folded Reload
-	{
-		r1 = memw(r29+#824)
-		memh(r21+r1<<#1) = r11
-	}                               // 4-byte Folded Reload
-	{
-		r0 = memw(r29+#828)
-		memh(r21+r0<<#1) = r16
-	}                               // 4-byte Folded Reload
-	{
-		r1 = memw(r29+#832)
-		memh(r21+r1<<#1) = r17
-	}                               // 4-byte Folded Reload
-	{
-		r0 = memw(r29+#840)
-		memh(r21+r0<<#1) = r18
-	}                               // 4-byte Folded Reload
-	{
-		r19 = ##100926980
-		r1 = memw(r29+#836)
-		memh(r21+r1<<#1) = r19
-	}                               // 4-byte Folded Reload
-	{
-		r20 = ##17039620
-		r0 = memw(r29+#804)
-		memh(r21+r0<<#1) = r20
-	}                               // 4-byte Folded Reload
-	{
-		memh(r21+r1<<#1) = r0
-		vmem(r2+#0) = v28
-	}
-	{
-		r2 = memw(r29+#2240)
-		vmem(r3+#0) = v27
-	}
-	{
-		r3 = memw(r29+#2244)
-		r4 = memw(r29+#2248)
-	}
-	{
-		r13 = memw(r29+#2272)
-		r5 = memw(r29+#2252)
-	}
-	{
-		r6 = memw(r29+#2256)
-		r8 = memw(r29+#2264)
-	}
-	{
-		r14 = memw(r29+#2276)
-		r7 = memw(r29+#2260)
-	}
-	{
-		r12 = memw(r29+#2268)
-		r15 = memw(r29+#2280)
-	}
-	{
-		r0 = memw(r29+#2176)
-		r28 = memw(r29+#2284)
-	}
-	{
-		r1 = memw(r29+#2288)
-		r16 = memw(r29+#2296)
-	}
-	{
-		r11 = memw(r29+#2292)
-		r17 = memw(r29+#2300)
-	}
-	{
-		r18 = memw(r29+#844)
-		memh(r21+r0<<#1) = r18.new
-	}                               // 4-byte Folded Reload
-	{
-		r0 = memw(r29+#2180)
-		r18 = memw(r29+#848)
-	}
-	{
-		r18 = memw(r29+#852)
-		memh(r21+r0<<#1) = r18
-	}                               // 4-byte Folded Reload
-	{
-		r0 = memw(r29+#2184)
-	}
-	{
-		r18 = memw(r29+#856)
-		memh(r21+r0<<#1) = r18
-	}                               // 4-byte Folded Reload
-	{
-		r0 = memw(r29+#2188)
-	}
-	{
-		r18 = memw(r29+#860)
-		memh(r21+r0<<#1) = r18
-	}                               // 4-byte Folded Reload
-	{
-		r0 = memw(r29+#2192)
-	}
-	{
-		r18 = memw(r29+#864)
-		memh(r21+r0<<#1) = r18
-	}                               // 4-byte Folded Reload
-	{
-		r0 = memw(r29+#2196)
-	}
-	{
-		r18 = memw(r29+#868)
-		memh(r21+r0<<#1) = r18
-	}                               // 4-byte Folded Reload
-	{
-		r0 = memw(r29+#2200)
-	}
-	{
-		r18 = memw(r29+#872)
-		memh(r21+r0<<#1) = r18
-	}                               // 4-byte Folded Reload
-	{
-		r0 = memw(r29+#2204)
-	}
-	{
-		r18 = memw(r29+#876)
-		memh(r21+r0<<#1) = r18
-	}                               // 4-byte Folded Reload
-	{
-		r0 = memw(r29+#2208)
-	}
-	{
-		r18 = memw(r29+#880)
-		memh(r21+r0<<#1) = r18
-	}                               // 4-byte Folded Reload
-	{
-		r0 = memw(r29+#2212)
-	}
-	{
-		r18 = memw(r29+#884)
-		memh(r21+r0<<#1) = r18
-	}                               // 4-byte Folded Reload
-	{
-		r0 = memw(r29+#2216)
-	}
-	{
-		r18 = memw(r29+#888)
-		memh(r21+r0<<#1) = r18
-	}                               // 4-byte Folded Reload
-	{
-		r0 = memw(r29+#2220)
-	}
-	{
-		r18 = memw(r29+#892)
-		memh(r21+r0<<#1) = r18
-	}                               // 4-byte Folded Reload
-	{
-		r0 = memw(r29+#2224)
-	}
-	{
-		r18 = memw(r29+#896)
-		memh(r21+r0<<#1) = r18
-	}                               // 4-byte Folded Reload
-	{
-		r0 = memw(r29+#2228)
-	}
-	{
-		r18 = memw(r29+#900)
-		memh(r21+r0<<#1) = r18
-	}                               // 4-byte Folded Reload
-	{
-		r0 = memw(r29+#2232)
-	}
-	{
-		r18 = memw(r29+#904)
-		memh(r21+r0<<#1) = r18
-	}                               // 4-byte Folded Reload
-	{
-		r0 = memw(r29+#2236)
-	}
-	{
-		r0 = memw(r29+#908)
-		memh(r21+r0<<#1) = r18
-	}                               // 4-byte Folded Reload
-	{
-		r0 = memw(r29+#912)
-		memh(r21+r2<<#1) = r0
-	}                               // 4-byte Folded Reload
-	{
-		r0 = memw(r29+#916)
-		memh(r21+r3<<#1) = r0
-	}                               // 4-byte Folded Reload
-	{
-		r0 = memw(r29+#920)
-		memh(r21+r4<<#1) = r0
-	}                               // 4-byte Folded Reload
-	{
-		r0 = memw(r29+#924)
-		memh(r21+r5<<#1) = r0
-	}                               // 4-byte Folded Reload
-	{
-		r6 = add(r29,#2432)
-		r0 = memw(r29+#928)
-		memh(r21+r6<<#1) = r0
-	}                               // 4-byte Folded Reload
-	{
-		r7 = #-2
-		r0 = memw(r29+#932)
-		memh(r21+r7<<#1) = r0
-	}                               // 4-byte Folded Reload
-	{
-		r0 = memw(r29+#936)
-		memh(r21+r8<<#1) = r0
-	}                               // 4-byte Folded Reload
-	{
-		r0 = memw(r29+#940)
-		memh(r21+r12<<#1) = r0
-	}                               // 4-byte Folded Reload
-	{
-		r0 = memw(r29+#944)
-		memh(r21+r13<<#1) = r0
-	}                               // 4-byte Folded Reload
-	{
-		r0 = memw(r29+#948)
-		memh(r21+r14<<#1) = r0
-	}                               // 4-byte Folded Reload
-	{
-		r0 = memw(r29+#952)
-		memh(r21+r15<<#1) = r0
-	}                               // 4-byte Folded Reload
-	{
-		r0 = memw(r29+#956)
-		memh(r21+r28<<#1) = r0
-	}                               // 4-byte Folded Reload
-	{
-		r0 = memw(r29+#960)
-		memh(r21+r1<<#1) = r0
-	}                               // 4-byte Folded Reload
-	{
-		r1 = memw(r29+#1024)
-		memh(r21+r11<<#1) = r0
-	}                               // 4-byte Folded Reload
-	{
-		r0 = memw(r29+#1088)
-		memh(r21+r16<<#1) = r1
-	}                               // 4-byte Folded Reload
-	{
-		nop
-		memh(r21+r17<<#1) = r0
-	} :endloop0
-	.falign
-.LBB120_9:                              // %"consume rows"
-                                        //   in Loop: Header=BB120_6 Depth=3
-	{
-		r3 = add(pc,##.LCPI120_0@PCREL)
-		r2 = add(r29,#512)
-		r8 = memw(r29+#608)
-	}                               // 4-byte Folded Reload
-	{
-		r6 = add(pc,##.LCPI120_1@PCREL)
-		r7 = add(r29,#2048)
-		v24 = vmem(r2+#0)
-	}                               // 64-byte Folded Reload
-	{
-		r4 = setbit(r7,#6)
-		r5 = r8
-		r15 = add(r29,#640)
-		r2 = memw(r29+#636)
-	}                               // 4-byte Folded Reload
-	{
-		r2 = add(r2,#64)
-		r28 = add(r29,#1920)
-		v8 = vmem(r3+#0)
-		memw(r29+#636) = r2.new
+		memw(r29+##4224) = r5
 	}                               // 4-byte Folded Spill
 	{
-		r5 = and(##896,asl(r5,#1))
-		r2 = memw(r29+#616)
-	}                               // 4-byte Folded Reload
+		v19:18.uh = vzxt(v19.ub)
+		v8 = vmemu(r12++#1)
+	}
 	{
-		r23 = add(r21,r5)
-		r2 = add(r2,#64)
-		v9 = vmem(r6+#0)
-		memw(r29+#616) = r2.new
+		r2 = add(pc,##.LCPI120_3@PCREL)
+		v14 = vmem(r2+#0)
+	}
+	{
+		memw(r29+##4352) = r4
 	}                               // 4-byte Folded Spill
 	{
-		r3 = add(pc,##.LCPI120_2@PCREL)
-		r2 = add(r29,#1024)
-		v16 = v24
+		v9 = vmemu(r9++#1)
 	}
 	{
-		v23 = v24
-		v10 = v24
-		v19 = v24
-		vmem(r2+#0) = v24
-	}                               // 64-byte Folded Spill
+		r2 = add(pc,##.LCPI120_0@PCREL)
+		v15 = vmem(r2+#0)
+		memw(r29+#4088) = r12
+	}                               // 4-byte Folded Spill
 	{
-		r2 = add(r29,#1088)
-		v17 = v24
-		v18 = v24
+		v21:20.w = vadd(v17:16.w,v15:14.w)
+		v12 = vmemu(r8++#1)
 	}
 	{
-		r2 = add(r8,#510)
-		v15 = v24
-		v29 = v24
-		vmem(r2+#0) = v24
-	}                               // 64-byte Folded Spill
-	{
-		v31 = vsplat(r2)
-		r2 = add(r8,#511)
-		v26 = v24
-		v28 = v24
-	}
-	{
-		r2 = setbit(r5,#6)
-		v25 = vsplat(r2)
-		v30 = v31
-		v20 = v24
-	}
-	{
-		r5 = add(pc,##.LCPI120_3@PCREL)
-		v3:2.w = vadd(v31:30.w,v9:8.w)
-		v21 = v24
-	}
-	{
-		v22 = v24
-		v13 = vand(v2,v0)
-		v14 = vand(v3,v1)
-		vmem(r7+#0) = v13.new
-	}
-	{
-		v27 = v24
-		v24 = v25
-		r4 = memw(r29+#2048)
-		vmem(r4+#0) = v14
-	}
-	{
-		r7 = setbit(r8,#0)
-		v5:4.w = vadd(v25:24.w,v9:8.w)
-		r5 = memw(r29+#2112)
-		v7 = vmem(r5+#0)
-	}
-	{
-		r8 = setbit(r8,#1)
-		v11 = vand(v4,v0)
-		r6 = memw(r29+#2116)
-		v6 = vmem(r3+#0)
-	}
-	{
-		v31:30.w = vadd(v31:30.w,v7:6.w)
-		v25:24.w = vadd(v25:24.w,v7:6.w)
-		r5 = memuh(r21+r5<<#1)
-		r14 = memw(r29+#2152)
-	}
-	{
-		v5 = vsplat(r7)
-		v12 = vand(v30,v0)
-		v30 = vand(v5,v1)
-		r7 = memw(r29+#2120)
-	}
-	{
-		r24 = add(r21,r2)
-		v4 = v5
-		r6 = memuh(r21+r6<<#1)
-		r9 = memw(r29+#2124)
-	}
-	{
-		r5 = combine(r6.l,r5.l)
-		v13 = vand(v24,v0)
-		r7 = memuh(r21+r7<<#1)
-		r6 = memw(r29+#2128)
-	}
-	{
-		v23.w = vinsert(r5)
-		v14 = vand(v25,v1)
-		r9 = memuh(r21+r9<<#1)
-		r13 = memw(r29+#2140)
-	}
-	{
-		r7 = combine(r9.l,r7.l)
-		v25:24.w = vadd(v5:4.w,v9:8.w)
-		r12 = memw(r29+#2132)
-		r5 = memw(r29+#2136)
-	}
-	{
-		r2 = setbit(r28,#6)
-		v3 = vand(v31,v1)
-		r6 = memuh(r21+r6<<#1)
-		r11 = memw(r29+#2148)
-	}
-	{
-		v2 = valign(v23,v23,#4)
-		v31 = vand(v24,v0)
-		r12 = memuh(r21+r12<<#1)
-		r5 = memuh(r21+r5<<#1)
-	}
-	{
-		v2.w = vinsert(r7)
-		r6 = combine(r12.l,r6.l)
-		v5:4.w = vadd(v5:4.w,v7:6.w)
-		r7 = memw(r29+#2144)
-	}
-	{
-		v23 = vand(v25,v1)
-		v5 = vand(v5,v1)
-		r7 = memuh(r21+r7<<#1)
-		r12 = memuh(r21+r11<<#1)
-	}
-	{
-		v1 = vsplat(r8)
-		r7 = combine(r12.l,r7.l)
-		v24 = valign(v2,v2,#4)
-		r13 = memuh(r21+r13<<#1)
-	}
-	{
-		v24.w = vinsert(r6)
-		r5 = combine(r13.l,r5.l)
-		v25 = vand(v4,v0)
-		r12 = memw(r29+#2160)
-	}
-	{
-		r0 = add(r29,#1792)
-		v0 = v1
-		r6 = memw(r29+#2156)
-		r11 = memw(r29+#2164)
-	}
-	{
-		v24 = valign(v24,v24,#4)
-		v9:8.w = vadd(v1:0.w,v9:8.w)
-		r14 = memuh(r21+r14<<#1)
-		r12 = memuh(r21+r12<<#1)
-	}
-	{
-		v24.w = vinsert(r5)
-		v7:6.w = vadd(v1:0.w,v7:6.w)
-		r8 = memuh(r21+r11<<#1)
-		v0 = vmem(r15+#0)
-	}                               // 128-byte Folded Reload
-	{
-		r3 = setbit(r0,#6)
-		r11 = add(r29,#704)
-		r6 = memuh(r21+r6<<#1)
-		r5 = memw(r29+#2168)
-	}
-	{
-		r11 = add(r29,#640)
-		v2 = valign(v24,v24,#4)
-		v24 = vand(v8,v0)
-		v1 = vmem(r11+#0)
-	}                               // 128-byte Folded Reload
-	{
-		r11 = add(r29,#704)
-		r8 = combine(r8.l,r12.l)
-		r12 = memw(r29+#2052)
-		v0 = vmem(r11+#0)
-	}                               // 128-byte Folded Reload
-	{
-		v2.w = vinsert(r7)
-		r11 = add(r29,#640)
-		r7 = memw(r29+#2056)
-		v1 = vmem(r11+#0)
-	}                               // 128-byte Folded Reload
-	{
-		r11 = add(r29,#704)
-		v1 = vand(v9,v1)
-		r4 = memuh(r21+r4<<#1)
-		v8 = vmem(r11+#0)
-	}                               // 128-byte Folded Reload
-	{
-		r11 = add(r29,#640)
-		r6 = combine(r6.l,r14.l)
-		r14 = memw(r29+#2172)
-		v4 = vmem(r11+#0)
-	}                               // 128-byte Folded Reload
-	{
-		r11 = add(r29,#704)
-		v6 = vand(v6,v8)
-		r12 = memuh(r21+r12<<#1)
-		v4 = vmem(r11+#0)
-	}                               // 128-byte Folded Reload
-	{
-		r11 = add(r29,#960)
-		r4 = combine(r12.l,r4.l)
-		r1 = add(r29,#1664)
-		v9 = vmem(r11+#0)
-	}                               // 128-byte Folded Reload
-	{
-		r26 = setbit(r1,#6)
-		v7 = valign(v2,v2,#4)
-		v9 = vand(v7,v9)
-		vmem(r11+#0) = v9.new
-	}                               // 64-byte Folded Spill
-	{
-		v7.w = vinsert(r6)
-		r17 = add(r29,#1536)
-		r11 = memw(r29+#2060)
-		r5 = memuh(r21+r5<<#1)
-	}
-	{
-		r10 = setbit(r17,#6)
-		v16.w = vinsert(r4)
-		r4 = memw(r29+#2064)
-		r14 = memuh(r21+r14<<#1)
-	}
-	{
-		r5 = combine(r14.l,r5.l)
-		v8 = valign(v7,v7,#4)
-		r7 = memuh(r21+r7<<#1)
-		r12 = memuh(r21+r11<<#1)
-	}
-	{
-		r7 = combine(r12.l,r7.l)
-		v4 = valign(v16,v16,#4)
-		r14 = memw(r29+#2068)
-		r15 = memw(r29+#2072)
-	}
-	{
-		v4.w = vinsert(r7)
-		v8.w = vinsert(r8)
-		r11 = memw(r29+#2076)
-		r4 = memuh(r21+r4<<#1)
-	}
-	{
-		r18 = add(r29,#1408)
-		r25 = add(r29,#1280)
-		r14 = memuh(r21+r14<<#1)
-		r7 = memw(r29+#2080)
-	}
-	{
-		r4 = combine(r14.l,r4.l)
-		v7 = valign(v4,v4,#4)
-		r12 = memuh(r21+r11<<#1)
-		r11 = memw(r29+#2088)
-	}
-	{
-		v7.w = vinsert(r4)
-		v2 = valign(v8,v8,#4)
-		r15 = memuh(r21+r15<<#1)
-		r8 = memw(r29+#2084)
-	}
-	{
-		v2.w = vinsert(r5)
-		r4 = combine(r12.l,r15.l)
-		r15 = memw(r29+#2096)
-		r7 = memuh(r21+r7<<#1)
-	}
-	{
-		r9 = setbit(r18,#6)
-		v9 = valign(v7,v7,#4)
-		r14 = memuh(r21+r11<<#1)
-		r11 = memw(r29+#2100)
-	}
-	{
-		r13 = setbit(r25,#6)
-		v9.w = vinsert(r4)
-		r4 = memw(r29+#2104)
-		r8 = memuh(r21+r8<<#1)
-	}
-	{
-		r6 = add(r29,#1152)
-		r12 = memw(r29+#2092)
-		r5 = memuh(r21+r15<<#1)
-	}
-	{
-		r7 = combine(r8.l,r7.l)
-		v16 = valign(v9,v9,#4)
-		r8 = memuh(r21+r11<<#1)
-		r11 = memw(r29+#2108)
-	}
-	{
-		v16.w = vinsert(r7)
-		r5 = combine(r8.l,r5.l)
-		r12 = memuh(r21+r12<<#1)
-		r4 = memuh(r21+r4<<#1)
-	}
-	{
-		r6 = setbit(r6,#6)
-		r12 = combine(r12.l,r14.l)
-		r7 = memuh(r21+r11<<#1)
-	}
-	{
-		r4 = combine(r7.l,r4.l)
-		v3 = valign(v16,v16,#4)
-		vmem(r2+#0) = v3
-	}
-	{
-		v3.w = vinsert(r12)
-		r2 = memw(r29+#1984)
-		vmem(r28+#0) = v12
-	}
-	{
-		v2 = valign(v2,v2,#4)
-		r7 = memw(r29+#1988)
-		r8 = memw(r29+#1992)
-	}
-	{
-		v4 = valign(v3,v3,#4)
-		r2 = memuh(r21+r2<<#1)
-		r12 = memw(r29+#1996)
-	}
-	{
-		v4.w = vinsert(r5)
-		r7 = memuh(r21+r7<<#1)
-		r11 = memw(r29+#2000)
-	}
-	{
-		r2 = combine(r7.l,r2.l)
-		r8 = memuh(r21+r8<<#1)
-		r12 = memuh(r21+r12<<#1)
-	}
-	{
-		v19.w = vinsert(r2)
-		r8 = combine(r12.l,r8.l)
-		r5 = memw(r29+#2008)
-		r15 = memw(r29+#2004)
-	}
-	{
-		v8 = valign(v4,v4,#4)
-		r7 = memw(r29+#2012)
-		r14 = memuh(r21+r11<<#1)
-	}
-	{
-		v8.w = vinsert(r4)
-		v19 = valign(v19,v19,#4)
-		r11 = memw(r29+#2016)
-		r15 = memuh(r21+r15<<#1)
-	}
-	{
-		v19.w = vinsert(r8)
-		r14 = combine(r15.l,r14.l)
-		r2 = memw(r29+#2020)
-		r5 = memuh(r21+r5<<#1)
-	}
-	{
-		v8 = valign(v8,v8,#4)
-		r7 = memuh(r21+r7<<#1)
-		r12 = memuh(r21+r11<<#1)
-	}
-	{
-		r5 = combine(r7.l,r5.l)
-		v7 = valign(v19,v19,#4)
-		r11 = memw(r29+#2032)
-		r2 = memuh(r21+r2<<#1)
-	}
-	{
-		v7.w = vinsert(r14)
-		r2 = combine(r2.l,r12.l)
-		r7 = memw(r29+#2036)
-		r12 = memw(r29+#2040)
-	}
-	{
-		r14 = memw(r29+#2044)
-		r8 = memuh(r21+r11<<#1)
-	}
-	{
-		v12 = valign(v7,v7,#4)
-		r11 = memw(r29+#1920)
-		r7 = memuh(r21+r7<<#1)
-	}
-	{
-		v12.w = vinsert(r5)
-		r5 = combine(r7.l,r8.l)
-		r4 = memw(r29+#2024)
-		r7 = memw(r29+#1924)
-	}
-	{
-		r15 = memw(r29+#2028)
-		r12 = memuh(r21+r12<<#1)
-	}
-	{
-		v16 = valign(v12,v12,#4)
-		r14 = memuh(r21+r14<<#1)
-		r8 = memuh(r21+r11<<#1)
-	}
-	{
-		v16.w = vinsert(r2)
-		r12 = combine(r14.l,r12.l)
-		r7 = memuh(r21+r7<<#1)
-		r14 = memw(r29+#1928)
-	}
-	{
-		r7 = combine(r7.l,r8.l)
-		r11 = memw(r29+#1932)
-		r28 = memw(r29+#1936)
-	}
-	{
-		v10.w = vinsert(r7)
-		v19 = valign(v16,v16,#4)
-		r2 = memw(r29+#1940)
-		r4 = memuh(r21+r4<<#1)
-	}
-	{
-		r15 = memuh(r21+r15<<#1)
-		r8 = memuh(r21+r11<<#1)
-	}
-	{
-		r4 = combine(r15.l,r4.l)
-		v10 = valign(v10,v10,#4)
-		r14 = memuh(r21+r14<<#1)
-		r7 = memw(r29+#1944)
-	}
-	{
-		v19.w = vinsert(r4)
-		r8 = combine(r8.l,r14.l)
-		r11 = memuh(r21+r28<<#1)
-		r2 = memuh(r21+r2<<#1)
-	}
-	{
-		v10.w = vinsert(r8)
-		r2 = combine(r2.l,r11.l)
-		r14 = memw(r29+#1952)
-		r4 = memw(r29+#1948)
-	}
-	{
-		v3 = valign(v19,v19,#4)
-		r11 = memw(r29+#1956)
-		r8 = memw(r29+#1960)
-	}
-	{
-		v3.w = vinsert(r5)
-		v7 = valign(v10,v10,#4)
-		r5 = memuh(r21+r14<<#1)
-		r7 = memuh(r21+r7<<#1)
-	}
-	{
-		v7.w = vinsert(r2)
-		r2 = memw(r29+#1968)
-		r4 = memuh(r21+r4<<#1)
-	}
-	{
-		r7 = combine(r4.l,r7.l)
-		v9 = valign(v3,v3,#4)
-		r14 = memuh(r21+r11<<#1)
-		r11 = memw(r29+#1964)
-	}
-	{
-		r4 = combine(r14.l,r5.l)
-		v12 = valign(v7,v7,#4)
-		r5 = memw(r29+#1972)
-		r8 = memuh(r21+r8<<#1)
-	}
-	{
-		v12.w = vinsert(r7)
-		v9.w = vinsert(r12)
-		r15 = memuh(r21+r11<<#1)
-		r14 = memw(r29+#1976)
-	}
-	{
-		r5 = combine(r15.l,r8.l)
-		r11 = memuh(r21+r5<<#1)
-		r15 = memw(r29+#1980)
-	}
-	{
-		v19 = valign(v12,v12,#4)
-		r2 = memuh(r21+r2<<#1)
-		r7 = memuh(r21+r14<<#1)
-	}
-	{
-		v19.w = vinsert(r4)
-		r2 = combine(r11.l,r2.l)
-		r8 = memuh(r21+r15<<#1)
-		vmem(r3+#0) = v30
-	}
-	{
-		r12 = combine(r8.l,r7.l)
-		v9 = valign(v9,v9,#4)
-		r0 = memw(r29+#1856)
-		vmem(r0+#0) = v11
-	}
-	{
-		v7 = valign(v19,v19,#4)
-		r8 = memw(r29+#1860)
-		r14 = memw(r29+#1864)
-	}
-	{
-		v7.w = vinsert(r5)
-		r0 = memuh(r21+r0<<#1)
-		r11 = memw(r29+#1868)
-	}
-	{
-		r8 = memuh(r21+r8<<#1)
-		r27 = memw(r29+#1872)
-	}
-	{
-		r0 = combine(r8.l,r0.l)
-		v11 = valign(v7,v7,#4)
-		r14 = memuh(r21+r14<<#1)
-		r15 = memuh(r21+r11<<#1)
-	}
-	{
-		v18.w = vinsert(r0)
-		r14 = combine(r15.l,r14.l)
-		r3 = memw(r29+#1876)
-		r7 = memw(r29+#1888)
-	}
-	{
-		v11.w = vinsert(r2)
-		r2 = memw(r29+#1892)
-		r28 = memuh(r21+r27<<#1)
-	}
-	{
-		v18 = valign(v18,v18,#4)
-		r3 = memuh(r21+r3<<#1)
-		r5 = memw(r29+#1880)
-	}
-	{
-		v18.w = vinsert(r14)
-		r3 = combine(r3.l,r28.l)
-		v10 = valign(v11,v11,#4)
-		r7 = memuh(r21+r7<<#1)
-	}
-	{
-		v10.w = vinsert(r12)
-		r2 = memuh(r21+r2<<#1)
-		r8 = memw(r29+#1896)
-	}
-	{
-		r2 = combine(r2.l,r7.l)
-		v12 = valign(v18,v18,#4)
-		r4 = memw(r29+#1884)
-		r0 = memw(r29+#1904)
-	}
-	{
-		v12.w = vinsert(r3)
-		v10 = valign(v10,v10,#4)
-		r3 = memw(r29+#1792)
-		r12 = memw(r29+#1900)
-	}
-	{
-		r7 = memw(r29+#1796)
-		r11 = memw(r29+#1908)
-	}
-	{
-		v19 = valign(v12,v12,#4)
-		r15 = memuh(r21+r0<<#1)
-		r5 = memuh(r21+r5<<#1)
-	}
-	{
-		r4 = memuh(r21+r4<<#1)
-		r0 = memw(r29+#1800)
-	}
-	{
-		r4 = combine(r4.l,r5.l)
-		r3 = memuh(r21+r3<<#1)
-		r7 = memuh(r21+r7<<#1)
-	}
-	{
-		v19.w = vinsert(r4)
-		r3 = combine(r7.l,r3.l)
-		r28 = memuh(r21+r11<<#1)
-		r11 = memw(r29+#1804)
-	}
-	{
-		v17.w = vinsert(r3)
-		r4 = combine(r28.l,r15.l)
-		r8 = memuh(r21+r8<<#1)
-		r12 = memuh(r21+r12<<#1)
-	}
-	{
-		r8 = combine(r12.l,r8.l)
-		v30 = valign(v19,v19,#4)
-		r5 = memw(r29+#1912)
-		r12 = memuh(r21+r0<<#1)
-	}
-	{
-		v30.w = vinsert(r2)
-		v17 = valign(v17,v17,#4)
-		r3 = memuh(r21+r11<<#1)
-		r16 = memw(r29+#1808)
-	}
-	{
-		r3 = combine(r3.l,r12.l)
-		r14 = memw(r29+#1916)
-		r0 = memw(r29+#1812)
-	}
-	{
-		v17.w = vinsert(r3)
-		v3 = valign(v30,v30,#4)
-		r2 = memw(r29+#1816)
-		r11 = memuh(r21+r16<<#1)
-	}
-	{
-		v3.w = vinsert(r8)
-		r7 = memuh(r21+r0<<#1)
-		r0 = memw(r29+#1820)
-	}
-	{
-		r3 = combine(r7.l,r11.l)
-		v4 = valign(v17,v17,#4)
-		r7 = memw(r29+#1824)
-		r11 = memw(r29+#1832)
-	}
-	{
-		v4.w = vinsert(r3)
-		v7 = valign(v3,v3,#4)
-		r5 = memuh(r21+r5<<#1)
-		r14 = memuh(r21+r14<<#1)
-	}
-	{
-		v7.w = vinsert(r4)
-		r5 = combine(r14.l,r5.l)
-		r14 = memw(r29+#1828)
-		r12 = memuh(r21+r0<<#1)
+		v19:18.h += vmpa(v9:8.ub,r17.b)
+		v13 = vmemu(r6++#1)
 	}
 	{
-		v4 = valign(v4,v4,#4)
-		r0 = memw(r29+#1836)
-		r2 = memuh(r21+r2<<#1)
-	}
-	{
-		r2 = combine(r12.l,r2.l)
-		v17 = valign(v7,v7,#4)
-		r3 = memuh(r21+r14<<#1)
-		r14 = memw(r29+#1840)
-	}
-	{
-		v4.w = vinsert(r2)
-		v17.w = vinsert(r5)
-		r7 = memuh(r21+r7<<#1)
-		r8 = memuh(r21+r0<<#1)
-	}
-	{
-		r3 = combine(r3.l,r7.l)
-		r0 = memw(r29+#1848)
-		r11 = memuh(r21+r11<<#1)
-	}
-	{
-		r2 = combine(r8.l,r11.l)
-		v11 = valign(v4,v4,#4)
-		r7 = memw(r29+#1844)
-		r11 = memw(r29+#1852)
-	}
-	{
-		v11.w = vinsert(r3)
-		v17 = valign(v17,v17,#4)
-		r14 = memuh(r21+r14<<#1)
-		r0 = memuh(r21+r0<<#1)
-	}
-	{
-		r4 = memuh(r21+r7<<#1)
-		r8 = memuh(r21+r11<<#1)
-	}
-	{
-		r3 = combine(r4.l,r14.l)
-		r7 = combine(r8.l,r0.l)
-		v7 = valign(v11,v11,#4)
-		vmem(r26+#0) = v14
-	}
-	{
-		v7.w = vinsert(r2)
-		r4 = memw(r29+#1728)
-		vmem(r1+#0) = v13
-	}
-	{
-		r8 = memw(r29+#1732)
-		r5 = memw(r29+#1736)
-	}
-	{
-		v12 = valign(v7,v7,#4)
-		r4 = memuh(r21+r4<<#1)
-		r2 = memw(r29+#1740)
-	}
-	{
-		v12.w = vinsert(r3)
-		r8 = memuh(r21+r8<<#1)
-		r12 = memw(r29+#1744)
-	}
-	{
-		r4 = combine(r8.l,r4.l)
-		r14 = memw(r29+#1748)
-		r0 = memw(r29+#1760)
-	}
-	{
-		v29.w = vinsert(r4)
-		v18 = valign(v12,v12,#4)
-		r15 = memw(r29+#1752)
-		r5 = memuh(r21+r5<<#1)
-	}
-	{
-		v18.w = vinsert(r7)
-		r2 = memuh(r21+r2<<#1)
-		r3 = memw(r29+#1764)
-	}
-	{
-		r2 = combine(r2.l,r5.l)
-		v29 = valign(v29,v29,#4)
-		r24 = memw(r29+#1756)
-		v13 = vmem(r24+#0)
-	}
-	{
-		v29.w = vinsert(r2)
-		v18 = valign(v18,v18,#4)
-		r4 = memuh(r21+r14<<#1)
-		r12 = memuh(r21+r12<<#1)
-	}
-	{
-		r2 = combine(r4.l,r12.l)
-		r1 = memw(r29+#1768)
-		r4 = memw(r29+#1664)
-	}
-	{
-		v29 = valign(v29,v29,#4)
-		r14 = memuh(r21+r15<<#1)
-		r15 = memuh(r21+r24<<#1)
-	}
-	{
-		v29.w = vinsert(r2)
-		r14 = combine(r15.l,r14.l)
-		r11 = memw(r29+#1772)
-		r12 = memw(r29+#1668)
-	}
-	{
-		r26 = memuh(r21+r0<<#1)
-		r3 = memuh(r21+r3<<#1)
-	}
-	{
-		r2 = combine(r3.l,r26.l)
-		v30 = valign(v29,v29,#4)
-		r15 = memw(r29+#1672)
-		r3 = memuh(r21+r12<<#1)
-	}
-	{
-		v30.w = vinsert(r14)
-		r4 = memuh(r21+r4<<#1)
-		r7 = memw(r29+#1776)
-	}
-	{
-		r3 = combine(r3.l,r4.l)
-		r12 = memuh(r21+r15<<#1)
-		r15 = memw(r29+#1676)
-	}
-	{
-		v15.w = vinsert(r3)
-		v3 = valign(v30,v30,#4)
-		r8 = memw(r29+#1780)
-		r0 = memuh(r21+r1<<#1)
-	}
-	{
-		v3.w = vinsert(r2)
-		r27 = memw(r29+#1680)
-		r1 = memuh(r21+r11<<#1)
-	}
-	{
-		r15 = combine(r1.l,r0.l)
-		v15 = valign(v15,v15,#4)
-		r11 = memuh(r21+r15<<#1)
-		r4 = memw(r29+#1684)
-	}
-	{
-		r12 = combine(r11.l,r12.l)
-		v7 = valign(v3,v3,#4)
-		r5 = memw(r29+#1784)
-		r28 = memuh(r21+r27<<#1)
-	}
-	{
-		v15.w = vinsert(r12)
-		v7.w = vinsert(r15)
-		r16 = memw(r29+#1788)
-		r4 = memuh(r21+r4<<#1)
-	}
-	{
-		r4 = combine(r4.l,r28.l)
-		r3 = memw(r29+#1688)
-		r12 = memw(r29+#1696)
-	}
-	{
-		v4 = valign(v15,v15,#4)
-		r14 = memw(r29+#1692)
-		r0 = memw(r29+#1704)
-	}
-	{
-		v4.w = vinsert(r4)
-		v16 = valign(v7,v7,#4)
-		r11 = memw(r29+#1700)
-		r3 = memuh(r21+r3<<#1)
-	}
-	{
-		r14 = memuh(r21+r14<<#1)
-		r24 = memw(r29+#1712)
-	}
-	{
-		r3 = combine(r14.l,r3.l)
-		v15 = valign(v4,v4,#4)
-		r2 = memw(r29+#1708)
-		r4 = memuh(r21+r11<<#1)
-	}
-	{
-		v15.w = vinsert(r3)
-		r11 = memuh(r21+r0<<#1)
-		r0 = memw(r29+#1716)
-	}
-	{
-		r1 = memw(r29+#1720)
-		r12 = memuh(r21+r12<<#1)
-	}
-	{
-		r12 = combine(r4.l,r12.l)
-		v29 = valign(v15,v15,#4)
-		r3 = memw(r29+#1724)
-		r2 = memuh(r21+r2<<#1)
-	}
-	{
-		v29.w = vinsert(r12)
-		r2 = combine(r2.l,r11.l)
-		r14 = memuh(r21+r24<<#1)
-		r0 = memuh(r21+r0<<#1)
-	}
-	{
-		r3 = combine(r0.l,r14.l)
-		r26 = memuh(r21+r3<<#1)
-		v14 = vmem(r23+#0)
-	}
-	{
-		v11 = valign(v29,v29,#4)
-		r4 = memuh(r21+r7<<#1)
-		r14 = memuh(r21+r8<<#1)
-	}
-	{
-		v11.w = vinsert(r2)
-		r4 = combine(r14.l,r4.l)
-		r11 = memuh(r21+r1<<#1)
-		r0 = memuh(r21+r5<<#1)
-	}
-	{
-		v16.w = vinsert(r4)
-		r5 = combine(r26.l,r11.l)
-		r15 = memuh(r21+r16<<#1)
-		vmem(r10+#0) = v23
-	}
-	{
-		r2 = combine(r15.l,r0.l)
-		v19 = valign(v11,v11,#4)
-		r7 = memw(r29+#1600)
-		vmem(r17+#0) = v31
-	}
-	{
-		v19.w = vinsert(r3)
-		v23 = valign(v16,v16,#4)
-		r27 = memw(r29+#1604)
-		r8 = memw(r29+#1608)
-	}
-	{
-		v23.w = vinsert(r2)
-		r7 = memuh(r21+r7<<#1)
-		r0 = memw(r29+#1612)
-	}
-	{
-		v31 = valign(v19,v19,#4)
-		r28 = memuh(r21+r27<<#1)
-		r1 = memw(r29+#1616)
-	}
-	{
-		v31.w = vinsert(r5)
-		r7 = combine(r28.l,r7.l)
-		r12 = memw(r29+#1620)
-		r4 = memw(r29+#1632)
-	}
-	{
-		v28.w = vinsert(r7)
-		v23 = valign(v23,v23,#4)
-		r3 = memw(r29+#1636)
-		r8 = memuh(r21+r8<<#1)
-	}
-	{
-		v31 = valign(v31,v31,#4)
-		r0 = memuh(r21+r0<<#1)
-		r14 = memw(r29+#1624)
-	}
-	{
-		r8 = combine(r0.l,r8.l)
-		v28 = valign(v28,v28,#4)
-		r0 = memw(r29+#1536)
-		r1 = memuh(r21+r1<<#1)
-	}
-	{
-		v28.w = vinsert(r8)
-		r12 = memuh(r21+r12<<#1)
-		r15 = memw(r29+#1628)
-	}
+		memw(r29+##4096) = r8
+		memw(r29+#4092) = r9
+	}                               // 4-byte Folded Spill
 	{
-		r8 = combine(r12.l,r1.l)
-		r2 = memw(r29+#1640)
-		r12 = memw(r29+#1540)
-	}
-	{
-		v29 = valign(v28,v28,#4)
-		r5 = memw(r29+#1644)
-		r14 = memuh(r21+r14<<#1)
-	}
-	{
-		v29.w = vinsert(r8)
-		r15 = memuh(r21+r15<<#1)
-		r1 = memw(r29+#1544)
-	}
-	{
-		r14 = combine(r15.l,r14.l)
-		r0 = memuh(r21+r0<<#1)
-		r12 = memuh(r21+r12<<#1)
-	}
-	{
-		r12 = combine(r12.l,r0.l)
-		v29 = valign(v29,v29,#4)
-		r15 = memw(r29+#1548)
-		r4 = memuh(r21+r4<<#1)
-	}
-	{
-		v26.w = vinsert(r12)
-		v29.w = vinsert(r14)
-		r3 = memuh(r21+r3<<#1)
-		r8 = memuh(r21+r1<<#1)
-	}
-	{
-		r3 = combine(r3.l,r4.l)
-		r15 = memuh(r21+r15<<#1)
-		r4 = memw(r29+#1552)
-	}
-	{
-		r8 = combine(r15.l,r8.l)
-		v26 = valign(v26,v26,#4)
-		r0 = memw(r29+#1556)
-		r16 = memw(r29+#1656)
-	}
-	{
-		v26.w = vinsert(r8)
-		v30 = valign(v29,v29,#4)
-		r7 = memw(r29+#1660)
-		r4 = memuh(r21+r4<<#1)
-	}
-	{
-		v30.w = vinsert(r3)
-		r12 = memw(r29+#1560)
-		r0 = memuh(r21+r0<<#1)
-	}
-	{
-		r4 = combine(r0.l,r4.l)
-		v16 = valign(v26,v26,#4)
-		r15 = memw(r29+#1564)
-		r0 = memw(r29+#1576)
-	}
-	{
-		v16.w = vinsert(r4)
-		v3 = valign(v30,v30,#4)
-		r1 = memw(r29+#1568)
-		r12 = memuh(r21+r12<<#1)
-	}
-	{
-		r8 = memuh(r21+r15<<#1)
-		r14 = memw(r29+#1572)
-	}
-	{
-		r8 = combine(r8.l,r12.l)
-		v19 = valign(v16,v16,#4)
-		r12 = memw(r29+#1580)
-		r15 = memuh(r21+r1<<#1)
-	}
-	{
-		v19.w = vinsert(r8)
-		r4 = memuh(r21+r14<<#1)
-		r1 = memw(r29+#1584)
-	}
-	{
-		r4 = combine(r4.l,r15.l)
-		r0 = memuh(r21+r0<<#1)
-		r12 = memuh(r21+r12<<#1)
-	}
-	{
-		r8 = combine(r12.l,r0.l)
-		v28 = valign(v19,v19,#4)
-		r10 = memw(r29+#1648)
-		r0 = memw(r29+#1592)
-	}
-	{
-		v28.w = vinsert(r4)
-		r2 = memuh(r21+r2<<#1)
-		r5 = memuh(r21+r5<<#1)
-	}
-	{
-		r2 = combine(r5.l,r2.l)
-		r3 = memw(r29+#1588)
-		r11 = memw(r29+#1652)
-	}
-	{
-		v3.w = vinsert(r2)
-		v29 = valign(v28,v28,#4)
-		r15 = memuh(r21+r1<<#1)
-		r1 = memw(r29+#1596)
-	}
-	{
-		v29.w = vinsert(r8)
-		r3 = memuh(r21+r3<<#1)
-		r10 = memuh(r21+r10<<#1)
-	}
-	{
-		r3 = combine(r3.l,r15.l)
-		v30 = valign(v3,v3,#4)
-		r5 = memuh(r21+r11<<#1)
-		r12 = memuh(r21+r0<<#1)
-	}
-	{
-		r5 = combine(r5.l,r10.l)
-		v12 = valign(v29,v29,#4)
-		r4 = memuh(r21+r1<<#1)
-		r2 = memuh(r21+r16<<#1)
-	}
-	{
-		v30.w = vinsert(r5)
-		v12.w = vinsert(r3)
-		r7 = memuh(r21+r7<<#1)
-		vmem(r9+#0) = v5
-	}
-	{
-		r2 = combine(r7.l,r2.l)
-		r4 = combine(r4.l,r12.l)
-		r8 = memw(r29+#1472)
-		vmem(r18+#0) = v25
-	}
-	{
-		v29 = valign(v30,v30,#4)
-		r5 = memw(r29+#1476)
-		r7 = memw(r29+#1480)
-	}
-	{
-		v29.w = vinsert(r2)
-		v30 = valign(v12,v12,#4)
-		r9 = memw(r29+#1484)
-		r15 = memw(r29+#1504)
-	}
-	{
-		v30.w = vinsert(r4)
-		r8 = memuh(r21+r8<<#1)
-		r5 = memuh(r21+r5<<#1)
-	}
-	{
-		r5 = combine(r5.l,r8.l)
-		v29 = valign(v29,v29,#4)
-		r17 = memw(r29+#1508)
-		r12 = memw(r29+#1488)
-	}
-	{
-		v21.w = vinsert(r5)
-		v30 = valign(v30,v30,#4)
-		r5 = memw(r29+#1408)
-		r7 = memuh(r21+r7<<#1)
-	}
-	{
-		r9 = memuh(r21+r9<<#1)
-		r3 = memw(r29+#1492)
-	}
-	{
-		r7 = combine(r9.l,r7.l)
-		v21 = valign(v21,v21,#4)
-		r0 = memw(r29+#1512)
-		r9 = memw(r29+#1412)
-	}
-	{
-		v21.w = vinsert(r7)
-		r14 = memw(r29+#1496)
-		r4 = memw(r29+#1516)
-	}
-	{
-		r2 = memw(r29+#1500)
-		r7 = memuh(r21+r9<<#1)
-	}
-	{
-		v11 = valign(v21,v21,#4)
-		r5 = memuh(r21+r5<<#1)
-		r9 = memw(r29+#1416)
-	}
-	{
-		r5 = combine(r7.l,r5.l)
-		r12 = memuh(r21+r12<<#1)
-		r3 = memuh(r21+r3<<#1)
-	}
-	{
-		v20.w = vinsert(r5)
-		r3 = combine(r3.l,r12.l)
-		r1 = memw(r29+#1520)
-		r12 = memw(r29+#1420)
-	}
-	{
-		v11.w = vinsert(r3)
-		r10 = memw(r29+#1524)
-		r14 = memuh(r21+r14<<#1)
-	}
-	{
-		v20 = valign(v20,v20,#4)
-		r2 = memuh(r21+r2<<#1)
-		r9 = memuh(r21+r9<<#1)
-	}
-	{
-		r2 = combine(r2.l,r14.l)
-		v28 = valign(v11,v11,#4)
-		r5 = memuh(r21+r12<<#1)
-		r14 = memw(r29+#1424)
-	}
-	{
-		v28.w = vinsert(r2)
-		r5 = combine(r5.l,r9.l)
-		r7 = memw(r29+#1428)
-		r11 = memw(r29+#1528)
-	}
-	{
-		v20.w = vinsert(r5)
-		r8 = memw(r29+#1532)
-		r14 = memuh(r21+r14<<#1)
-	}
-	{
-		v19 = valign(v28,v28,#4)
-		r3 = memw(r29+#1432)
-		r7 = memuh(r21+r7<<#1)
-	}
-	{
-		r5 = combine(r7.l,r14.l)
-		v15 = valign(v20,v20,#4)
-		r9 = memw(r29+#1436)
-		r7 = memw(r29+#1440)
-	}
-	{
-		v15.w = vinsert(r5)
-		r3 = memuh(r21+r3<<#1)
-		r12 = memw(r29+#1444)
-	}
-	{
-		r9 = memuh(r21+r9<<#1)
-		r14 = memw(r29+#1448)
-	}
-	{
-		r3 = combine(r9.l,r3.l)
-		v26 = valign(v15,v15,#4)
-		r2 = memw(r29+#1452)
-		r5 = memuh(r21+r12<<#1)
-	}
-	{
-		v26.w = vinsert(r3)
-		r7 = memuh(r21+r7<<#1)
-		r9 = memuh(r21+r14<<#1)
-	}
-	{
-		r5 = combine(r5.l,r7.l)
-		r14 = memw(r29+#1464)
-		r2 = memuh(r21+r2<<#1)
-	}
-	{
-		r9 = combine(r2.l,r9.l)
-		v21 = valign(v26,v26,#4)
-		r12 = memw(r29+#1456)
-		r2 = memw(r29+#1468)
-	}
-	{
-		v21.w = vinsert(r5)
-		r7 = memw(r29+#1460)
-		r14 = memuh(r21+r14<<#1)
-	}
+		r3 = setbit(r23,#6)
+		memw(r29+##4160) = r6
+		vmem(r3+#0) = v5
+	}                               // 4-byte Folded Spill
 	{
-		r2 = memuh(r21+r2<<#1)
-		r3 = memuh(r21+r12<<#1)
+		r3 = add(pc,##.LCPI120_1@PCREL)
+		v19:18.h += vmpa(v13:12.ub,r21.b)
+		vmem(r3+#0) = v21
 	}
 	{
-		r2 = combine(r2.l,r14.l)
-		v25 = valign(v21,v21,#4)
-		r12 = memuh(r21+r15<<#1)
-		r5 = memuh(r21+r17<<#1)
+		r2 = setbit(r24,#6)
+		v22 = vmem(r2+#0)
+		vmem(r22+#0) = v5
 	}
 	{
-		v25.w = vinsert(r9)
-		r7 = memuh(r21+r7<<#1)
-		r15 = memuh(r21+r0<<#1)
+		v7:6 = vshuff(v19,v18,r7)
+		v23 = vmem(r3+#0)
+		vmem(r23+#0) = v20
 	}
 	{
-		r3 = combine(r7.l,r3.l)
-		r1 = combine(r5.l,r12.l)
-		r4 = memuh(r21+r4<<#1)
-		r14 = memuh(r21+r1<<#1)
+		r2 = setbit(r25,#6)
+		v25:24.w = vadd(v17:16.w,v23:22.w)
+		vmem(r2+#0) = v5
 	}
 	{
-		v19.w = vinsert(r1)
-		r4 = combine(r4.l,r15.l)
-		r10 = memuh(r21+r10<<#1)
-		r5 = memuh(r21+r11<<#1)
+		r2 = add(r29,#3840)
+		vmem(r2+#0) = v25
 	}
 	{
-		r10 = combine(r10.l,r14.l)
-		v1 = valign(v25,v25,#4)
-		r0 = memuh(r21+r8<<#1)
-		vmem(r13+#0) = v1
+		vmem(r24+#0) = v5
 	}
 	{
-		v1.w = vinsert(r3)
-		r23 = combine(r0.l,r5.l)
-		r5 = memw(r29+#1344)
 		vmem(r25+#0) = v24
 	}
 	{
-		v0 = valign(v19,v19,#4)
-		r3 = memw(r29+#1348)
-		r7 = memw(r29+#1352)
+		r1 = memw(r29+##7236)
+		r0 = memw(r29+##7364)
 	}
 	{
-		v0.w = vinsert(r4)
-		r4 = add(r29,#1152)
-		r5 = memuh(r21+r5<<#1)
-		r8 = memw(r29+#1356)
+		r2 = add(r29,#3904)
+		vmem(r2+#0) = v6
+	}                               // 128-byte Folded Spill
+	{
+		call ##__hexagon_modsi3
+		vmem(r2+#0) = v7
+	}                               // 128-byte Folded Spill
+	.falign
+// %bb.9:                               // %"for rows.s0.x.x"
+                                        //   in Loop: Header=BB120_8 Depth=4
+	{
+		r16 = r0
+		r1 = memw(r29+##7232)
 	}
 	{
-		v11 = valign(v1,v1,#4)
-		r3 = memuh(r21+r3<<#1)
-		r9 = memw(r29+#1360)
+		call ##__hexagon_modsi3
+		r0 = memw(r29+##7360)
+	}
+	.falign
+// %bb.10:                              // %"for rows.s0.x.x"
+                                        //   in Loop: Header=BB120_8 Depth=4
+	{
+		r2 = add(r29,#4672)
+		r1 = memw(r29+##7240)
 	}
 	{
-		v11.w = vinsert(r2)
-		r3 = combine(r3.l,r5.l)
-		r12 = memw(r29+#1364)
-		r7 = memuh(r21+r7<<#1)
+		r2 = add(r29,#4480)
+		v20 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v20.w = vinsert(r0)
+		r0 = memw(r29+##7368)
 	}
 	{
-		v27.w = vinsert(r3)
-		v20 = valign(v0,v0,#4)
-		r8 = memuh(r21+r8<<#1)
-		r15 = memw(r29+#1376)
+		v21 = valign(v20,v20,#4)
 	}
 	{
-		v20.w = vinsert(r10)
-		r7 = combine(r8.l,r7.l)
-		r5 = memw(r29+#1392)
-		r24 = memw(r29+#1380)
+		v21.w = vinsert(r16)
 	}
 	{
-		v27 = valign(v27,v27,#4)
-		r3 = memw(r29+#1396)
-		r13 = memw(r29+#1368)
+		call ##__hexagon_modsi3
+		v10 = valign(v21,v21,#4)
+		vmem(r2+#0) = v10.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.11:                              // %"for rows.s0.x.x"
+                                        //   in Loop: Header=BB120_8 Depth=4
+	{
+		r2 = add(r29,#4480)
+		r1 = memw(r29+##7244)
 	}
 	{
-		v27.w = vinsert(r7)
-		v19 = valign(v20,v20,#4)
-		r16 = memuh(r21+r9<<#1)
-		r12 = memuh(r21+r12<<#1)
+		r2 = add(r29,#4480)
+		v24 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v24.w = vinsert(r0)
+		r0 = memw(r29+##7372)
 	}
 	{
-		v19.w = vinsert(r23)
-		v11 = valign(v11,v11,#4)
-		r14 = memw(r29+#1372)
-		r1 = memw(r29+#1384)
+		call ##__hexagon_modsi3
+		v11 = valign(v24,v24,#4)
+		vmem(r2+#0) = v11.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.12:                              // %"for rows.s0.x.x"
+                                        //   in Loop: Header=BB120_8 Depth=4
+	{
+		r2 = add(r29,#4480)
+		r1 = memw(r29+##7248)
 	}
 	{
-		v12 = valign(v27,v27,#4)
-		r0 = memuh(r21+r24<<#1)
-		r24 = memuh(r21+r5<<#1)
+		r2 = add(r29,#4480)
+		v6 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v6.w = vinsert(r0)
+		r0 = memw(r29+##7376)
 	}
 	{
-		r3 = combine(r12.l,r16.l)
-		v19 = valign(v19,v19,#4)
-		r5 = memw(r29+#1280)
-		r26 = memuh(r21+r3<<#1)
+		call ##__hexagon_modsi3
+		v13 = valign(v6,v6,#4)
+		vmem(r2+#0) = v13.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.13:                              // %"for rows.s0.x.x"
+                                        //   in Loop: Header=BB120_8 Depth=4
+	{
+		r2 = add(r29,#4480)
+		r1 = memw(r29+##7252)
 	}
 	{
-		v12.w = vinsert(r3)
-		r18 = memuh(r21+r13<<#1)
-		r3 = memw(r29+#1284)
+		r2 = add(r29,#4480)
+		v2 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v2.w = vinsert(r0)
+		r0 = memw(r29+##7380)
 	}
 	{
-		r13 = memw(r29+#1400)
-		r11 = memw(r29+#1388)
+		call ##__hexagon_modsi3
+		v14 = valign(v2,v2,#4)
+		vmem(r2+#0) = v14.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.14:                              // %"for rows.s0.x.x"
+                                        //   in Loop: Header=BB120_8 Depth=4
+	{
+		r2 = add(r29,#4480)
+		r1 = memw(r29+##7256)
 	}
 	{
-		r27 = memuh(r21+r1<<#1)
-		r1 = memw(r29+#1404)
+		r2 = add(r29,#4480)
+		v25 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v25.w = vinsert(r0)
+		r0 = memw(r29+##7384)
 	}
 	{
-		r7 = memw(r29+#1288)
-		r14 = memuh(r21+r14<<#1)
+		call ##__hexagon_modsi3
+		v18 = valign(v25,v25,#4)
+		vmem(r2+#0) = v18.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.15:                              // %"for rows.s0.x.x"
+                                        //   in Loop: Header=BB120_8 Depth=4
+	{
+		r2 = add(r29,#4480)
+		r1 = memw(r29+##7260)
 	}
 	{
-		r5 = memuh(r21+r5<<#1)
-		r3 = memuh(r21+r3<<#1)
+		r2 = add(r29,#4480)
+		v26 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v26.w = vinsert(r0)
+		r0 = memw(r29+##7388)
 	}
 	{
-		r3 = combine(r3.l,r5.l)
-		r17 = memuh(r21+r15<<#1)
-		r15 = memuh(r21+r11<<#1)
+		call ##__hexagon_modsi3
+		v19 = valign(v26,v26,#4)
+		vmem(r2+#0) = v19.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.16:                              // %"for rows.s0.x.x"
+                                        //   in Loop: Header=BB120_8 Depth=4
+	{
+		r2 = add(r29,#4480)
+		r1 = memw(r29+##7268)
 	}
 	{
-		v22.w = vinsert(r3)
-		r1 = combine(r14.l,r18.l)
-		r9 = memuh(r21+r13<<#1)
-		r13 = memuh(r21+r1<<#1)
+		r2 = add(r29,#4480)
+		v8 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v8.w = vinsert(r0)
+		r0 = memw(r29+##7396)
 	}
 	{
-		r0 = combine(r0.l,r17.l)
-		r9 = combine(r13.l,r9.l)
-		r14 = memw(r29+#1296)
-		r11 = memw(r29+#1292)
+		v22 = valign(v8,v8,#4)
 	}
 	{
-		v22 = valign(v22,v22,#4)
-		r5 = memw(r29+#1300)
-		r7 = memuh(r21+r7<<#1)
+		call ##__hexagon_modsi3
+		v7 = vror(v22,r26)
+		vmem(r2+#0) = v7.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.17:                              // %"for rows.s0.x.x"
+                                        //   in Loop: Header=BB120_8 Depth=4
+	{
+		r16 = r0
+		r1 = memw(r29+##7264)
 	}
 	{
-		r8 = memuh(r21+r11<<#1)
-		r12 = memuh(r21+r14<<#1)
+		call ##__hexagon_modsi3
+		r0 = memw(r29+##7392)
+	}
+	.falign
+// %bb.18:                              // %"for rows.s0.x.x"
+                                        //   in Loop: Header=BB120_8 Depth=4
+	{
+		r2 = add(r29,#4672)
+		r1 = memw(r29+##7272)
 	}
 	{
-		r3 = combine(r8.l,r7.l)
-		r14 = memw(r29+#1312)
-		r5 = memuh(r21+r5<<#1)
+		r2 = add(r29,#3776)
+		v23 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v23.w = vinsert(r0)
+		r0 = memw(r29+##7400)
 	}
 	{
-		v22.w = vinsert(r3)
-		r3 = combine(r5.l,r12.l)
-		r7 = memw(r29+#1304)
-		r25 = memw(r29+#1316)
+		v24 = valign(v23,v23,#4)
 	}
 	{
-		r5 = memw(r29+#1320)
-		r8 = memw(r29+#1308)
+		v24.w = vinsert(r16)
 	}
 	{
-		v28 = valign(v22,v22,#4)
-		r11 = memw(r29+#1324)
-		r14 = memuh(r21+r14<<#1)
+		call ##__hexagon_modsi3
+		v5 = valign(v24,v24,#4)
+		vmem(r2+#0) = v5.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.19:                              // %"for rows.s0.x.x"
+                                        //   in Loop: Header=BB120_8 Depth=4
+	{
+		r2 = add(r29,#3776)
+		r1 = memw(r29+##7276)
 	}
 	{
-		v28.w = vinsert(r3)
-		r28 = memuh(r21+r25<<#1)
-		r3 = memw(r29+#1328)
+		r2 = add(r29,#3776)
+		v0 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v0.w = vinsert(r0)
+		r0 = memw(r29+##7404)
 	}
 	{
-		r11 = combine(r28.l,r14.l)
-		r14 = add(r29,#1088)
-		r12 = memuh(r21+r11<<#1)
-		r28 = memw(r29+#1336)
+		call ##__hexagon_modsi3
+		v15 = valign(v0,v0,#4)
+		vmem(r2+#0) = v15.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.20:                              // %"for rows.s0.x.x"
+                                        //   in Loop: Header=BB120_8 Depth=4
+	{
+		r2 = add(r29,#3776)
+		r1 = memw(r29+##7280)
 	}
 	{
-		v5 = valign(v28,v28,#4)
-		r7 = memuh(r21+r7<<#1)
-		r8 = memuh(r21+r8<<#1)
+		r2 = add(r29,#3776)
+		v27 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v27.w = vinsert(r0)
+		r0 = memw(r29+##7408)
 	}
 	{
-		r7 = combine(r8.l,r7.l)
-		v28 = valign(v12,v12,#4)
-		r8 = memw(r29+#1332)
-		r16 = memw(r29+#1340)
+		call ##__hexagon_modsi3
+		v16 = valign(v27,v27,#4)
+		vmem(r2+#0) = v16.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.21:                              // %"for rows.s0.x.x"
+                                        //   in Loop: Header=BB120_8 Depth=4
+	{
+		r2 = add(r29,#3776)
+		r1 = memw(r29+##7284)
 	}
 	{
-		v5.w = vinsert(r7)
-		v28.w = vinsert(r1)
-		r5 = memuh(r21+r5<<#1)
-		r25 = memuh(r21+r3<<#1)
+		r2 = add(r29,#3776)
+		v3 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v3.w = vinsert(r0)
+		r0 = memw(r29+##7412)
 	}
 	{
-		r3 = combine(r12.l,r5.l)
-		r8 = memuh(r21+r8<<#1)
-		r5 = memuh(r21+r28<<#1)
+		call ##__hexagon_modsi3
+		v12 = valign(v3,v3,#4)
+		vmem(r2+#0) = v12.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.22:                              // %"for rows.s0.x.x"
+                                        //   in Loop: Header=BB120_8 Depth=4
+	{
+		r2 = add(r29,#3776)
+		r1 = memw(r29+##7288)
 	}
 	{
-		r4 = add(r29,#960)
-		v7 = valign(v5,v5,#4)
-		r16 = memuh(r21+r16<<#1)
-		vmem(r4+#0) = v6
+		r2 = add(r29,#3776)
+		v28 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v28.w = vinsert(r0)
+		r0 = memw(r29+##7416)
 	}
 	{
-		v7.w = vinsert(r11)
-		v16 = valign(v28,v28,#4)
-		v6.cur = vmem(r4+#0)
-		vmem(r6+#0) = v6
+		call ##__hexagon_modsi3
+		v17 = valign(v28,v28,#4)
+		vmem(r2+#0) = v17.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.23:                              // %"for rows.s0.x.x"
+                                        //   in Loop: Header=BB120_8 Depth=4
+	{
+		r2 = add(r29,#3776)
+		r1 = memw(r29+##7292)
+	}
+	{
+		r2 = add(r29,#3776)
+		v1 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v1.w = vinsert(r0)
+		r0 = memw(r29+##7420)
+	}
+	{
+		call ##__hexagon_modsi3
+		v20 = valign(v1,v1,#4)
+		vmem(r2+#0) = v20.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.24:                              // %"for rows.s0.x.x"
+                                        //   in Loop: Header=BB120_8 Depth=4
+	{
+		r2 = add(r29,#3776)
+		r1 = memw(r29+##7172)
+	}
+	{
+		r2 = add(r29,#4480)
+		v10 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v10.w = vinsert(r0)
+		r0 = memw(r29+##7300)
+		v24 = vmem(r2+#0)
+	}
+	{
+		r2 = add(r29,#4544)
+	}
+	{
+		v25 = valign(v10,v10,#4)
+	}
+	{
+		call ##__hexagon_modsi3
+		v17 = vor(v24,v25)
+		vmem(r2+#0) = v17.new
+	}                               // 128-byte Folded Spill
+	.falign
+// %bb.25:                              // %"for rows.s0.x.x"
+                                        //   in Loop: Header=BB120_8 Depth=4
+	{
+		r16 = r0
+		r1 = memw(r29+##7168)
+	}
+	{
+		call ##__hexagon_modsi3
+		r0 = memw(r29+##7296)
+	}
+	.falign
+// %bb.26:                              // %"for rows.s0.x.x"
+                                        //   in Loop: Header=BB120_8 Depth=4
+	{
+		r2 = add(r29,#4672)
+		r1 = memw(r29+##7176)
+	}
+	{
+		r2 = add(r29,#3776)
+		v26 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v26.w = vinsert(r0)
+		r0 = memw(r29+##7304)
+	}
+	{
+		v27 = valign(v26,v26,#4)
+	}
+	{
+		v27.w = vinsert(r16)
+	}
+	{
+		call ##__hexagon_modsi3
+		v19 = valign(v27,v27,#4)
+		vmem(r2+#0) = v19.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.27:                              // %"for rows.s0.x.x"
+                                        //   in Loop: Header=BB120_8 Depth=4
+	{
+		r2 = add(r29,#3776)
+		r1 = memw(r29+##7180)
+	}
+	{
+		r2 = add(r29,#3776)
+		v29 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v29.w = vinsert(r0)
+		r0 = memw(r29+##7308)
+	}
+	{
+		call ##__hexagon_modsi3
+		v20 = valign(v29,v29,#4)
+		vmem(r2+#0) = v20.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.28:                              // %"for rows.s0.x.x"
+                                        //   in Loop: Header=BB120_8 Depth=4
+	{
+		r2 = add(r29,#3776)
+		r1 = memw(r29+##7184)
+	}
+	{
+		r2 = add(r29,#3776)
+		v30 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v30.w = vinsert(r0)
+		r0 = memw(r29+##7312)
+	}
+	{
+		call ##__hexagon_modsi3
+		v21 = valign(v30,v30,#4)
+		vmem(r2+#0) = v21.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.29:                              // %"for rows.s0.x.x"
+                                        //   in Loop: Header=BB120_8 Depth=4
+	{
+		r2 = add(r29,#3776)
+		r1 = memw(r29+##7188)
+	}
+	{
+		r2 = add(r29,#3776)
+		v31 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v31.w = vinsert(r0)
+		r0 = memw(r29+##7316)
+	}
+	{
+		call ##__hexagon_modsi3
+		v22 = valign(v31,v31,#4)
+		vmem(r2+#0) = v22.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.30:                              // %"for rows.s0.x.x"
+                                        //   in Loop: Header=BB120_8 Depth=4
+	{
+		r2 = add(r29,#3776)
+		r1 = memw(r29+##7192)
+	}
+	{
+		r2 = add(r29,#3776)
+		v4 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v4.w = vinsert(r0)
+		r0 = memw(r29+##7320)
+	}
+	{
+		call ##__hexagon_modsi3
+		v23 = valign(v4,v4,#4)
+		vmem(r2+#0) = v23.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.31:                              // %"for rows.s0.x.x"
+                                        //   in Loop: Header=BB120_8 Depth=4
+	{
+		r2 = add(r29,#3776)
+		r1 = memw(r29+##7196)
+	}
+	{
+		r2 = add(r29,#3776)
+		v8 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v8.w = vinsert(r0)
+		r0 = memw(r29+##7324)
+	}
+	{
+		call ##__hexagon_modsi3
+		v21 = valign(v8,v8,#4)
+		vmem(r2+#0) = v21.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.32:                              // %"for rows.s0.x.x"
+                                        //   in Loop: Header=BB120_8 Depth=4
+	{
+		r2 = add(r29,#3776)
+		r1 = memw(r29+##7204)
+	}
+	{
+		r2 = add(r29,#3776)
+		v11 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v11.w = vinsert(r0)
+		r0 = memw(r29+##7332)
+	}
+	{
+		v28 = valign(v11,v11,#4)
+	}
+	{
+		call ##__hexagon_modsi3
+		v19 = vror(v28,r26)
+		vmem(r2+#0) = v19.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.33:                              // %"for rows.s0.x.x"
+                                        //   in Loop: Header=BB120_8 Depth=4
+	{
+		r16 = r0
+		r1 = memw(r29+##7200)
+	}
+	{
+		call ##__hexagon_modsi3
+		r0 = memw(r29+##7328)
+	}
+	.falign
+// %bb.34:                              // %"for rows.s0.x.x"
+                                        //   in Loop: Header=BB120_8 Depth=4
+	{
+		r2 = add(r29,#4672)
+		r1 = memw(r29+##7208)
+	}
+	{
+		r2 = add(r29,#3712)
+		v29 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v29.w = vinsert(r0)
+		r0 = memw(r29+##7336)
+	}
+	{
+		v30 = valign(v29,v29,#4)
+	}
+	{
+		v30.w = vinsert(r16)
+	}
+	{
+		call ##__hexagon_modsi3
+		v7 = valign(v30,v30,#4)
+		vmem(r2+#0) = v7.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.35:                              // %"for rows.s0.x.x"
+                                        //   in Loop: Header=BB120_8 Depth=4
+	{
+		r2 = add(r29,#3712)
+		r1 = memw(r29+##7212)
+	}
+	{
+		r2 = add(r29,#3712)
+		v9 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v9.w = vinsert(r0)
+		r0 = memw(r29+##7340)
+	}
+	{
+		call ##__hexagon_modsi3
+		v24 = valign(v9,v9,#4)
+		vmem(r2+#0) = v24.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.36:                              // %"for rows.s0.x.x"
+                                        //   in Loop: Header=BB120_8 Depth=4
+	{
+		r2 = add(r29,#3712)
+		r1 = memw(r29+##7216)
+	}
+	{
+		r2 = add(r29,#3712)
+		v10 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v10.w = vinsert(r0)
+		r0 = memw(r29+##7344)
+	}
+	{
+		call ##__hexagon_modsi3
+		v6 = valign(v10,v10,#4)
+		vmem(r2+#0) = v6.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.37:                              // %"for rows.s0.x.x"
+                                        //   in Loop: Header=BB120_8 Depth=4
+	{
+		r2 = add(r29,#3712)
+		r1 = memw(r29+##7220)
+	}
+	{
+		r2 = add(r29,#3712)
+		v11 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v11.w = vinsert(r0)
+		r0 = memw(r29+##7348)
+	}
+	{
+		call ##__hexagon_modsi3
+		v2 = valign(v11,v11,#4)
+		vmem(r2+#0) = v2.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.38:                              // %"for rows.s0.x.x"
+                                        //   in Loop: Header=BB120_8 Depth=4
+	{
+		r2 = add(r29,#3712)
+		r1 = memw(r29+##7224)
+	}
+	{
+		r2 = add(r29,#3712)
+		v13 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v13.w = vinsert(r0)
+		r0 = memw(r29+##7352)
+	}
+	{
+		call ##__hexagon_modsi3
+		v25 = valign(v13,v13,#4)
+		vmem(r2+#0) = v25.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.39:                              // %"for rows.s0.x.x"
+                                        //   in Loop: Header=BB120_8 Depth=4
+	{
+		r2 = add(r29,#3712)
+		r1 = memw(r29+##7228)
+	}
+	{
+		r2 = add(r29,#3712)
+		v14 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v14.w = vinsert(r0)
+		r0 = memw(r29+##7356)
+	}
+	{
+		call ##__hexagon_modsi3
+		v22 = valign(v14,v14,#4)
+		vmem(r2+#0) = v22.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.40:                              // %"for rows.s0.x.x"
+                                        //   in Loop: Header=BB120_8 Depth=4
+	{
+		r2 = add(r29,#3712)
+		r1 = memw(r29+##7108)
+	}
+	{
+		r2 = add(r29,#4480)
+		v13 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v13.w = vinsert(r0)
+		r2 = add(r29,#4544)
+		v14 = vmem(r2+#0)
+	}                               // 128-byte Folded Reload
+	{
+		r2 = add(r29,#3776)
+		r0 = memw(r29+##7492)
+		v15 = vmem(r2+#0)
+	}
+	{
+		r2 = add(r29,#4480)
+		v31 = valign(v13,v13,#4)
+		v17 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		r2 = add(r29,#4544)
+		v14 = vor(v17,v31)
+		vmem(r2+#0) = v14.new
+	}                               // 128-byte Folded Spill
+	{
+		call ##__hexagon_modsi3
+		vmem(r2+#0) = v15
+	}                               // 128-byte Folded Spill
+	.falign
+// %bb.41:                              // %"for rows.s0.x.x"
+                                        //   in Loop: Header=BB120_8 Depth=4
+	{
+		r16 = r0
+		r1 = memw(r29+##7104)
+	}
+	{
+		call ##__hexagon_modsi3
+		r0 = memw(r29+##7488)
+	}
+	.falign
+// %bb.42:                              // %"for rows.s0.x.x"
+                                        //   in Loop: Header=BB120_8 Depth=4
+	{
+		r2 = add(r29,#4672)
+		r1 = memw(r29+##7112)
+	}
+	{
+		r2 = add(r29,#3776)
+		v0 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v0.w = vinsert(r0)
+		r0 = memw(r29+##7496)
+	}
+	{
+		v1 = valign(v0,v0,#4)
+	}
+	{
+		v1.w = vinsert(r16)
+	}
+	{
+		call ##__hexagon_modsi3
+		v26 = valign(v1,v1,#4)
+		vmem(r2+#0) = v26.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.43:                              // %"for rows.s0.x.x"
+                                        //   in Loop: Header=BB120_8 Depth=4
+	{
+		r2 = add(r29,#3776)
+		r1 = memw(r29+##7116)
+	}
+	{
+		r2 = add(r29,#3776)
+		v18 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v18.w = vinsert(r0)
+		r0 = memw(r29+##7500)
+	}
+	{
+		call ##__hexagon_modsi3
+		v0 = valign(v18,v18,#4)
+		vmem(r2+#0) = v0.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.44:                              // %"for rows.s0.x.x"
+                                        //   in Loop: Header=BB120_8 Depth=4
+	{
+		r2 = add(r29,#3776)
+		r1 = memw(r29+##7120)
+	}
+	{
+		r2 = add(r29,#3776)
+		v5 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v5.w = vinsert(r0)
+		r0 = memw(r29+##7504)
+	}
+	{
+		call ##__hexagon_modsi3
+		v27 = valign(v5,v5,#4)
+		vmem(r2+#0) = v27.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.45:                              // %"for rows.s0.x.x"
+                                        //   in Loop: Header=BB120_8 Depth=4
+	{
+		r2 = add(r29,#3776)
+		r1 = memw(r29+##7124)
+	}
+	{
+		r2 = add(r29,#3776)
+		v15 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v15.w = vinsert(r0)
+		r0 = memw(r29+##7508)
+	}
+	{
+		call ##__hexagon_modsi3
+		v3 = valign(v15,v15,#4)
+		vmem(r2+#0) = v3.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.46:                              // %"for rows.s0.x.x"
+                                        //   in Loop: Header=BB120_8 Depth=4
+	{
+		r2 = add(r29,#3776)
+		r1 = memw(r29+##7128)
+	}
+	{
+		r2 = add(r29,#3776)
+		v16 = vmem(r2+#0)
 	}                               // 64-byte Folded Reload
 	{
 		v16.w = vinsert(r0)
-		r6 = memw(r29+#1152)
-		r1 = memw(r29+#1176)
+		r0 = memw(r29+##7512)
 	}
 	{
-		v21 = valign(v7,v7,#4)
-		r4 = memw(r29+#1156)
-		r11 = memw(r29+#1224)
+		call ##__hexagon_modsi3
+		v28 = valign(v16,v16,#4)
+		vmem(r2+#0) = v28.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.47:                              // %"for rows.s0.x.x"
+                                        //   in Loop: Header=BB120_8 Depth=4
+	{
+		r2 = add(r29,#3776)
+		r1 = memw(r29+##7132)
 	}
 	{
-		v21.w = vinsert(r3)
-		r3 = combine(r8.l,r25.l)
-		r6 = memuh(r21+r6<<#1)
-		r0 = memw(r29+#1220)
-	}
-	{
-		r2 = memuh(r21+r4<<#1)
-		r4 = memw(r29+#1160)
-	}
-	{
-		r2 = combine(r2.l,r6.l)
-		r6 = add(r29,#1024)
-		v7 = valign(v21,v21,#4)
-		r8 = memuh(r21+r11<<#1)
-	}
-	{
-		v7.w = vinsert(r3)
-		r3 = combine(r16.l,r5.l)
-		r4 = memuh(r21+r4<<#1)
-		v22 = vmem(r6+#0)
+		r2 = add(r29,#3776)
+		v12 = vmem(r2+#0)
 	}                               // 64-byte Folded Reload
 	{
-		v22.w = vinsert(r2)
-		r5 = combine(r15.l,r27.l)
-		r2 = memw(r29+#1164)
-		r6 = memuh(r21+r1<<#1)
+		v12.w = vinsert(r0)
+		r0 = memw(r29+##7516)
 	}
 	{
-		r1 = combine(r26.l,r24.l)
-		v5 = valign(v7,v7,#4)
-		r2 = memuh(r21+r2<<#1)
-		r15 = memw(r29+#1248)
+		call ##__hexagon_modsi3
+		v23 = valign(v12,v12,#4)
+		vmem(r2+#0) = v23.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.48:                              // %"for rows.s0.x.x"
+                                        //   in Loop: Header=BB120_8 Depth=4
+	{
+		r2 = add(r29,#3776)
+		r1 = memw(r29+##7140)
 	}
 	{
-		v5.w = vinsert(r3)
-		r2 = combine(r2.l,r4.l)
-		v3 = valign(v22,v22,#4)
-		r3 = memw(r29+#1184)
-	}
-	{
-		v7 = valign(v16,v16,#4)
-		r4 = memw(r29+#1168)
-	}
-	{
-		v3.w = vinsert(r2)
-		v7.w = vinsert(r5)
-		v5 = valign(v5,v5,#4)
-		r2 = memw(r29+#1172)
-	}
-	{
-		r4 = memuh(r21+r4<<#1)
-		r3 = memuh(r21+r3<<#1)
-	}
-	{
-		v28 = valign(v3,v3,#4)
-		r2 = memuh(r21+r2<<#1)
-		v3 = vmem(r14+#0)
+		r2 = add(r29,#3776)
+		v14 = vmem(r2+#0)
 	}                               // 64-byte Folded Reload
 	{
-		r2 = combine(r2.l,r4.l)
-		v16 = valign(v7,v7,#4)
-		r4 = memw(r29+#1180)
-		r5 = memw(r29+#1188)
+		v14.w = vinsert(r0)
+		r0 = memw(r29+##7524)
 	}
 	{
-		v28.w = vinsert(r2)
-		v16.w = vinsert(r1)
-		r2 = memw(r29+#1216)
-		r1 = memw(r29+#1236)
+		v2 = valign(v14,v14,#4)
 	}
 	{
-		r4 = memuh(r21+r4<<#1)
-		r5 = memuh(r21+r5<<#1)
+		call ##__hexagon_modsi3
+		v6 = vror(v2,r26)
+		vmem(r2+#0) = v6.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.49:                              // %"for rows.s0.x.x"
+                                        //   in Loop: Header=BB120_8 Depth=4
+	{
+		r16 = r0
+		r1 = memw(r29+##7136)
 	}
 	{
-		r4 = combine(r4.l,r6.l)
-		r3 = combine(r5.l,r3.l)
-		v28 = valign(v28,v28,#4)
-		r2 = memuh(r21+r2<<#1)
+		call ##__hexagon_modsi3
+		r0 = memw(r29+##7520)
+	}
+	.falign
+// %bb.50:                              // %"for rows.s0.x.x"
+                                        //   in Loop: Header=BB120_8 Depth=4
+	{
+		r2 = add(r29,#4672)
+		r1 = memw(r29+##7144)
 	}
 	{
-		v28.w = vinsert(r4)
-		v24 = valign(v16,v16,#4)
-		r4 = memw(r29+#1228)
-		r6 = memuh(r21+r0<<#1)
+		r2 = add(r29,#3712)
+		v3 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v3.w = vinsert(r0)
+		r0 = memw(r29+##7528)
 	}
 	{
-		v24.w = vinsert(r9)
-		r2 = combine(r6.l,r2.l)
-		r4 = memuh(r21+r4<<#1)
-		r0 = memw(r29+#1232)
+		v4 = valign(v3,v3,#4)
 	}
 	{
-		r4 = combine(r4.l,r8.l)
-		v26 = valign(v28,v28,#4)
-		r5 = memw(r29+#1240)
-		r6 = memuh(r21+r1<<#1)
+		v4.w = vinsert(r16)
 	}
 	{
-		v26.w = vinsert(r3)
-		v3.w = vinsert(r2)
-		r7 = memuh(r21+r0<<#1)
-		r3 = memw(r29+#1192)
+		call ##__hexagon_modsi3
+		v1 = valign(v4,v4,#4)
+		vmem(r2+#0) = v1.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.51:                              // %"for rows.s0.x.x"
+                                        //   in Loop: Header=BB120_8 Depth=4
+	{
+		r2 = add(r29,#3712)
+		r1 = memw(r29+##7148)
 	}
 	{
-		r6 = combine(r6.l,r7.l)
-		v27 = valign(v26,v26,#4)
-		r2 = memw(r29+#1244)
-		r0 = memw(r29+#1200)
+		r2 = add(r29,#3712)
+		v17 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v17.w = vinsert(r0)
+		r0 = memw(r29+##7532)
 	}
 	{
-		v12 = valign(v3,v3,#4)
-		r3 = memuh(r21+r3<<#1)
-		r1 = memw(r29+#1204)
+		call ##__hexagon_modsi3
+		v29 = valign(v17,v17,#4)
+		vmem(r2+#0) = v29.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.52:                              // %"for rows.s0.x.x"
+                                        //   in Loop: Header=BB120_8 Depth=4
+	{
+		r2 = add(r29,#3712)
+		r1 = memw(r29+##7152)
 	}
 	{
-		v12.w = vinsert(r4)
-		r4 = memw(r29+#1196)
-		r5 = memuh(r21+r5<<#1)
+		r2 = add(r29,#3712)
+		v19 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v19.w = vinsert(r0)
+		r0 = memw(r29+##7536)
 	}
 	{
-		r2 = memuh(r21+r2<<#1)
-		r8 = memuh(r21+r15<<#1)
+		call ##__hexagon_modsi3
+		v30 = valign(v19,v19,#4)
+		vmem(r2+#0) = v30.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.53:                              // %"for rows.s0.x.x"
+                                        //   in Loop: Header=BB120_8 Depth=4
+	{
+		r2 = add(r29,#3712)
+		r1 = memw(r29+##7156)
 	}
 	{
-		r2 = combine(r2.l,r5.l)
-		v1 = valign(v12,v12,#4)
-		r4 = memuh(r21+r4<<#1)
-		r7 = memuh(r21+r0<<#1)
+		r2 = add(r29,#3712)
+		v20 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v20.w = vinsert(r0)
+		r0 = memw(r29+##7540)
 	}
 	{
-		v1.w = vinsert(r6)
-		r3 = combine(r4.l,r3.l)
-		r4 = memw(r29+#1252)
-		r5 = memw(r29+#1256)
+		call ##__hexagon_modsi3
+		v31 = valign(v20,v20,#4)
+		vmem(r2+#0) = v31.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.54:                              // %"for rows.s0.x.x"
+                                        //   in Loop: Header=BB120_8 Depth=4
+	{
+		r2 = add(r29,#3712)
+		r1 = memw(r29+##7160)
 	}
 	{
-		v27.w = vinsert(r3)
-		r4 = memuh(r21+r4<<#1)
-		r0 = memw(r29+#1264)
+		r2 = add(r29,#3712)
+		v21 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v21.w = vinsert(r0)
+		r0 = memw(r29+##7544)
 	}
 	{
-		r4 = combine(r4.l,r8.l)
-		v0 = valign(v1,v1,#4)
-		r6 = memuh(r21+r1<<#1)
-		r1 = memw(r29+#1260)
+		call ##__hexagon_modsi3
+		v4 = valign(v21,v21,#4)
+		vmem(r2+#0) = v4.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.55:                              // %"for rows.s0.x.x"
+                                        //   in Loop: Header=BB120_8 Depth=4
+	{
+		r2 = add(r29,#3712)
+		r1 = memw(r29+##7164)
 	}
 	{
-		v0.w = vinsert(r2)
-		r6 = combine(r6.l,r7.l)
-		r2 = memw(r29+#1208)
-		r3 = memw(r29+#1212)
+		r2 = add(r29,#3712)
+		v22 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v22.w = vinsert(r0)
+		r0 = memw(r29+##7548)
+	}
+	{
+		call ##__hexagon_modsi3
+		v7 = valign(v22,v22,#4)
+		vmem(r2+#0) = v7.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.56:                              // %"for rows.s0.x.x"
+                                        //   in Loop: Header=BB120_8 Depth=4
+	{
+		r2 = add(r29,#3712)
+		r1 = memw(r29+##7044)
+	}
+	{
+		r2 = add(r29,#3776)
+		v18 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v18.w = vinsert(r0)
+		r0 = memw(r29+##7428)
+		v2 = vmem(r2+#0)
+	}
+	{
+		r2 = add(r29,#3776)
+	}
+	{
+		v5 = valign(v18,v18,#4)
+	}
+	{
+		call ##__hexagon_modsi3
+		v10 = vor(v2,v5)
+		vmem(r2+#0) = v10.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.57:                              // %"for rows.s0.x.x"
+                                        //   in Loop: Header=BB120_8 Depth=4
+	{
+		r16 = r0
+		r1 = memw(r29+##7040)
+	}
+	{
+		call ##__hexagon_modsi3
+		r0 = memw(r29+##7424)
+	}
+	.falign
+// %bb.58:                              // %"for rows.s0.x.x"
+                                        //   in Loop: Header=BB120_8 Depth=4
+	{
+		r2 = add(r29,#4672)
+		r1 = memw(r29+##7048)
+	}
+	{
+		r2 = add(r29,#3712)
+		v6 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v6.w = vinsert(r0)
+		r0 = memw(r29+##7432)
+	}
+	{
+		v7 = valign(v6,v6,#4)
+	}
+	{
+		v7.w = vinsert(r16)
+	}
+	{
+		call ##__hexagon_modsi3
+		v9 = valign(v7,v7,#4)
+		vmem(r2+#0) = v9.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.59:                              // %"for rows.s0.x.x"
+                                        //   in Loop: Header=BB120_8 Depth=4
+	{
+		r2 = add(r29,#3712)
+		r1 = memw(r29+##7052)
+	}
+	{
+		r2 = add(r29,#3712)
+		v23 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v23.w = vinsert(r0)
+		r0 = memw(r29+##7436)
+	}
+	{
+		call ##__hexagon_modsi3
+		v8 = valign(v23,v23,#4)
+		vmem(r2+#0) = v8.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.60:                              // %"for rows.s0.x.x"
+                                        //   in Loop: Header=BB120_8 Depth=4
+	{
+		r2 = add(r29,#3712)
+		r1 = memw(r29+##7056)
+	}
+	{
+		r2 = add(r29,#3712)
+		v7 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v7.w = vinsert(r0)
+		r0 = memw(r29+##7440)
+	}
+	{
+		call ##__hexagon_modsi3
+		v10 = valign(v7,v7,#4)
+		vmem(r2+#0) = v10.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.61:                              // %"for rows.s0.x.x"
+                                        //   in Loop: Header=BB120_8 Depth=4
+	{
+		r2 = add(r29,#3712)
+		r1 = memw(r29+##7060)
+	}
+	{
+		r2 = add(r29,#3712)
+		v24 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v24.w = vinsert(r0)
+		r0 = memw(r29+##7444)
+	}
+	{
+		call ##__hexagon_modsi3
+		v11 = valign(v24,v24,#4)
+		vmem(r2+#0) = v11.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.62:                              // %"for rows.s0.x.x"
+                                        //   in Loop: Header=BB120_8 Depth=4
+	{
+		r2 = add(r29,#3712)
+		r1 = memw(r29+##7064)
+	}
+	{
+		r2 = add(r29,#3712)
+		v6 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v6.w = vinsert(r0)
+		r0 = memw(r29+##7448)
+	}
+	{
+		call ##__hexagon_modsi3
+		v13 = valign(v6,v6,#4)
+		vmem(r2+#0) = v13.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.63:                              // %"for rows.s0.x.x"
+                                        //   in Loop: Header=BB120_8 Depth=4
+	{
+		r2 = add(r29,#3712)
+		r1 = memw(r29+##7068)
+	}
+	{
+		r2 = add(r29,#3712)
+		v2 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v2.w = vinsert(r0)
+		r0 = memw(r29+##7452)
+	}
+	{
+		call ##__hexagon_modsi3
+		v24 = valign(v2,v2,#4)
+		vmem(r2+#0) = v24.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.64:                              // %"for rows.s0.x.x"
+                                        //   in Loop: Header=BB120_8 Depth=4
+	{
+		r2 = add(r29,#3712)
+		r1 = memw(r29+##7076)
+	}
+	{
+		r2 = add(r29,#3712)
+		v5 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v5.w = vinsert(r0)
+		r0 = memw(r29+##7460)
+	}
+	{
+		v8 = valign(v5,v5,#4)
+	}
+	{
+		call ##__hexagon_modsi3
+		v27 = vror(v8,r26)
+		vmem(r2+#0) = v27.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.65:                              // %"for rows.s0.x.x"
+                                        //   in Loop: Header=BB120_8 Depth=4
+	{
+		r16 = r0
+		r1 = memw(r29+##7072)
+	}
+	{
+		call ##__hexagon_modsi3
+		r0 = memw(r29+##7456)
+	}
+	.falign
+// %bb.66:                              // %"for rows.s0.x.x"
+                                        //   in Loop: Header=BB120_8 Depth=4
+	{
+		r2 = add(r29,#4672)
+		r1 = memw(r29+##7080)
+	}
+	{
+		r2 = add(r29,#3648)
+		v9 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v9.w = vinsert(r0)
+		r0 = memw(r29+##7464)
+	}
+	{
+		v10 = valign(v9,v9,#4)
+	}
+	{
+		v10.w = vinsert(r16)
+	}
+	{
+		call ##__hexagon_modsi3
+		v14 = valign(v10,v10,#4)
+		vmem(r2+#0) = v14.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.67:                              // %"for rows.s0.x.x"
+                                        //   in Loop: Header=BB120_8 Depth=4
+	{
+		r2 = add(r29,#3648)
+		r1 = memw(r29+##7084)
+	}
+	{
+		r2 = add(r29,#3648)
+		v25 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v25.w = vinsert(r0)
+		r0 = memw(r29+##7468)
+	}
+	{
+		call ##__hexagon_modsi3
+		v18 = valign(v25,v25,#4)
+		vmem(r2+#0) = v18.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.68:                              // %"for rows.s0.x.x"
+                                        //   in Loop: Header=BB120_8 Depth=4
+	{
+		r2 = add(r29,#3648)
+		r1 = memw(r29+##7088)
+	}
+	{
+		r2 = add(r29,#3648)
+		v26 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v26.w = vinsert(r0)
+		r0 = memw(r29+##7472)
+	}
+	{
+		call ##__hexagon_modsi3
+		v5 = valign(v26,v26,#4)
+		vmem(r2+#0) = v5.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.69:                              // %"for rows.s0.x.x"
+                                        //   in Loop: Header=BB120_8 Depth=4
+	{
+		r2 = add(r29,#3648)
+		r1 = memw(r29+##7092)
+	}
+	{
+		r2 = add(r29,#3648)
+		v0 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v0.w = vinsert(r0)
+		r0 = memw(r29+##7476)
+	}
+	{
+		call ##__hexagon_modsi3
+		v15 = valign(v0,v0,#4)
+		vmem(r2+#0) = v15.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.70:                              // %"for rows.s0.x.x"
+                                        //   in Loop: Header=BB120_8 Depth=4
+	{
+		r2 = add(r29,#3648)
+		r1 = memw(r29+##7096)
+	}
+	{
+		r2 = add(r29,#3648)
+		v27 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v27.w = vinsert(r0)
+		r0 = memw(r29+##7480)
+	}
+	{
+		call ##__hexagon_modsi3
+		v16 = valign(v27,v27,#4)
+		vmem(r2+#0) = v16.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.71:                              // %"for rows.s0.x.x"
+                                        //   in Loop: Header=BB120_8 Depth=4
+	{
+		r2 = add(r29,#3648)
+		r1 = memw(r29+##7100)
+	}
+	{
+		r2 = add(r29,#3648)
+		v3 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v3.w = vinsert(r0)
+		r0 = memw(r29+##7484)
+	}
+	{
+		call ##__hexagon_modsi3
+		v17 = valign(v3,v3,#4)
+		vmem(r2+#0) = v17.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.72:                              // %"for rows.s0.x.x"
+                                        //   in Loop: Header=BB120_8 Depth=4
+	{
+		r10 = setbit(r20,#6)
+		r2 = add(r29,#3648)
+		r3 = add(r29,#3712)
+		r4 = add(r29,#3840)
+	}
+	{
+		r2 = add(r29,#3776)
+		v9 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v9.w = vinsert(r0)
+		r3 = add(r29,#1408)
+		v0 = vmem(r3+#0)
+	}                               // 64-byte Folded Reload
+	{
+		r2 = setbit(r19,#6)
+		v11.w = vasr(v8.w,r27)
+		v8.cur = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		r3 = add(r29,#7552)
+		v12 = valign(v9,v9,#4)
+		v27 = v8
+		v20 = vmem(r3+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v26 = vor(v0,v12)
+		v29 = vand(v11,v20)
+	}
+	{
+		v13.w = vasr(v26.w,r27)
+	}
+	{
+		v28 = vand(v13,v20)
+	}
+	{
+		v31:30.w = vadd(v27:26.w,v29:28.w)
+		vmem(r2+#0) = v31.new
+	}
+	{
+		r2 = memw(r29+##7872)
+		vmem(r19+#0) = v30
+	}
+	{
+		r2 = memw(r29+##7876)
+		memw(r29+#2044) = r2
+	}
+	{
+		r2 = memw(r29+##7880)
+		memw(r29+#2040) = r2
+	}
+	{
+		r20 = memw(r29+##7888)
+		memw(r29+#1920) = r2
+	}
+	{
+		r2 = memw(r29+##7884)
+		memw(r29+#1856) = r2.new
+	}
+	{
+		r21 = memw(r29+##7892)
+		r22 = memw(r29+##7896)
+	}
+	{
+		r2 = memw(r29+##7920)
+		memw(r29+#1792) = r2.new
+	}
+	{
+		r2 = memw(r29+##7924)
+		memw(r29+#1728) = r2.new
+	}
+	{
+		r23 = memw(r29+##7900)
+		r24 = memw(r29+##7904)
+	}
+	{
+		r2 = memw(r29+##7928)
+		memw(r29+#1664) = r2.new
+	}
+	{
+		r26 = memw(r29+##7912)
+		r2 = memw(r29+##7932)
+	}
+	{
+		r4 = add(r29,#3904)
+		r25 = memw(r29+##7908)
+		v0 = vmem(r4+#0)
+	}                               // 128-byte Folded Reload
+	{
+		r27 = memw(r29+##7916)
+		memw(r29+#2112) = r2
+	}
+	{
+		r2 = memw(r29+##7808)
+		v1 = vmem(r4+#0)
+	}
+	{
+		vmem(r10+#0) = v1
+	}
+	{
+		r3 = memuh(r29+##7648)
+		vmem(r3+#0) = v0
+	}
+	{
+		r3 = memuh(r29+##7650)
+		memw(r29+#3584) = r3
+	}
+	{
+		r3 = memuh(r29+##7652)
+		memw(r29+#3520) = r3
+	}
+	{
+		r3 = memuh(r29+##7654)
+		memw(r29+#3456) = r3
+	}
+	{
+		r3 = memuh(r29+##7656)
+		memw(r29+#3452) = r3
+	}
+	{
+		r3 = memuh(r29+##7658)
+		memw(r29+#3448) = r3
+	}
+	{
+		r3 = memuh(r29+##7660)
+		memw(r29+#3328) = r3
+	}
+	{
+		r3 = memuh(r29+##7662)
+		memw(r29+#3264) = r3
+	}
+	{
+		r3 = memuh(r29+##7664)
+		memw(r29+#3200) = r3
+	}
+	{
+		r3 = memuh(r29+##7666)
+		memw(r29+#3136) = r3
+	}
+	{
+		r3 = memuh(r29+##7668)
+		memw(r29+#3072) = r3
+	}
+	{
+		r3 = memuh(r29+##7670)
+		memw(r29+#3008) = r3
+	}
+	{
+		r3 = memuh(r29+##7672)
+		memw(r29+#3004) = r3
+	}
+	{
+		r3 = memuh(r29+##7674)
+		memw(r29+#3840) = r3
+	}
+	{
+		r3 = memuh(r29+##7676)
+		memw(r29+#3712) = r3
+	}
+	{
+		r3 = memuh(r29+##7678)
+		memw(r29+#3776) = r3
+	}
+	{
+		r3 = memuh(r29+##7616)
+		memw(r29+#3648) = r3
+	}
+	{
+		r3 = memuh(r29+##7618)
+		memw(r29+#1600) = r3
+	}
+	{
+		r3 = memuh(r29+##7620)
+		memw(r29+#1536) = r3
+	}
+	{
+		r3 = memuh(r29+##7622)
+		memw(r29+#2048) = r3
+	}
+	{
+		r3 = memuh(r29+##7624)
+		memw(r29+#2176) = r3
+	}
+	{
+		r3 = memuh(r29+##7626)
+		memw(r29+#2240) = r3
+	}
+	{
+		r3 = memuh(r29+##7628)
+		memw(r29+#2304) = r3
+	}
+	{
+		r3 = memuh(r29+##7630)
+		memw(r29+#2368) = r3
+	}
+	{
+		r3 = memuh(r29+##7632)
+		memw(r29+#2492) = r3
+	}
+	{
+		r3 = memuh(r29+##7634)
+		memw(r29+#2496) = r3
+	}
+	{
+		r3 = memuh(r29+##7636)
+		memw(r29+#2560) = r3
+	}
+	{
+		r3 = memuh(r29+##7638)
+		memw(r29+#2624) = r3
+	}
+	{
+		r19 = memuh(r29+##7614)
+		memw(r29+#2688) = r3
+	}
+	{
+		r3 = memuh(r29+##7640)
+		memw(r29+#2752) = r3.new
+	}
+	{
+		r3 = memuh(r29+##7642)
+		memw(r29+#2816) = r3.new
+	}
+	{
+		r3 = memuh(r29+##7644)
+		memw(r29+#2880) = r3.new
+	}
+	{
+		r3 = memuh(r29+##7646)
+		memw(r29+#3000) = r3.new
+	}
+	{
+		r4 = memuh(r29+##7580)
+		r5 = memuh(r29+##7584)
+	}
+	{
+		r3 = add(r29,#8000)
+		r17 = memuh(r29+##7582)
+	}
+	{
+		r6 = memuh(r29+##7586)
+		r9 = memuh(r29+##7592)
+	}
+	{
+		r15 = memuh(r29+##7600)
+		r7 = memuh(r29+##7588)
+	}
+	{
+		r12 = memuh(r29+##7594)
+		r28 = memuh(r29+##7602)
+	}
+	{
+		r10 = memuh(r29+##7608)
+		r8 = memuh(r29+##7590)
+	}
+	{
+		r13 = memuh(r29+##7596)
+		r0 = memuh(r29+##7604)
+	}
+	{
+		r11 = memuh(r29+##7610)
+		r14 = memuh(r29+##7598)
+	}
+	{
+		r1 = memuh(r29+##7606)
+		r16 = memuh(r29+##7612)
+	}
+	{
+		r18 = memuh(r29+##7552)
+		memh(r3+r2<<#1) = r18.new
+	}
+	{
+		r2 = memw(r29+##7812)
+		r18 = memuh(r29+##7554)
+	}
+	{
+		memh(r3+r2<<#1) = r18
+	}
+	{
+		r2 = memw(r29+##7816)
+		r18 = memuh(r29+##7556)
+	}
+	{
+		memh(r3+r2<<#1) = r18
+	}
+	{
+		r2 = memw(r29+##7820)
+		r18 = memuh(r29+##7558)
+	}
+	{
+		memh(r3+r2<<#1) = r18
+	}
+	{
+		r2 = memw(r29+##7824)
+		r18 = memuh(r29+##7560)
+	}
+	{
+		memh(r3+r2<<#1) = r18
+	}
+	{
+		r2 = memw(r29+##7828)
+		r18 = memuh(r29+##7562)
+	}
+	{
+		memh(r3+r2<<#1) = r18
+	}
+	{
+		r2 = memw(r29+##7832)
+		r18 = memuh(r29+##7564)
+	}
+	{
+		memh(r3+r2<<#1) = r18
+	}
+	{
+		r2 = memw(r29+##7836)
+		r18 = memuh(r29+##7566)
+	}
+	{
+		memh(r3+r2<<#1) = r18
+	}
+	{
+		r2 = memw(r29+##7840)
+		r18 = memuh(r29+##7568)
+	}
+	{
+		memh(r3+r2<<#1) = r18
+	}
+	{
+		r2 = memw(r29+##7844)
+		r18 = memuh(r29+##7570)
+	}
+	{
+		memh(r3+r2<<#1) = r18
+	}
+	{
+		r2 = memw(r29+##7848)
+		r18 = memuh(r29+##7572)
+	}
+	{
+		memh(r3+r2<<#1) = r18
+	}
+	{
+		r2 = memw(r29+##7852)
+		r18 = memuh(r29+##7574)
+	}
+	{
+		memh(r3+r2<<#1) = r18
+	}
+	{
+		r2 = memw(r29+##7856)
+		r18 = memuh(r29+##7576)
+	}
+	{
+		memh(r3+r2<<#1) = r18
+	}
+	{
+		r2 = memw(r29+##7860)
+		r18 = memuh(r29+##7578)
+	}
+	{
+		r18 = add(r29,#8000)
+		r3 = add(r29,#4480)
+		memh(r3+r2<<#1) = r18
+	}
+	{
+		r3 = add(r29,#4544)
+		r2 = memw(r29+##7864)
+		v4 = vmem(r3+#0)
+	}
+	{
+		r3 = add(r29,#7680)
+		v5 = vmem(r3+#0)
+	}                               // 128-byte Folded Reload
+	{
+		memh(r18+r2<<#1) = r4
+	}
+	{
+		r2 = memw(r29+##7868)
+	}
+	{
+		r17 = ##100926980
+		r2 = memw(r29+#2044)
+		memh(r18+r2<<#1) = r17
+	}                               // 4-byte Folded Reload
+	{
+		r2 = memw(r29+#2040)
+		memh(r18+r2<<#1) = r5
+	}                               // 4-byte Folded Reload
+	{
+		r2 = memw(r29+#1920)
+		memh(r18+r2<<#1) = r6
+	}                               // 4-byte Folded Reload
+	{
+		r2 = memw(r29+#1856)
+		memh(r18+r2<<#1) = r7
+	}                               // 4-byte Folded Reload
+	{
+		r2 = #31
+		r20 = add(r29,#7552)
+		memh(r18+r2<<#1) = r8
+		memh(r18+r20<<#1) = r9
+	}
+	{
+		v14.w = vasr(v4.w,r2)
+		r2 = memw(r29+#1792)
+		memh(r18+r21<<#1) = r12
+	}                               // 4-byte Folded Reload
+	{
+		r21 = ##17039620
+		memh(r18+r22<<#1) = r13
+		memh(r18+r23<<#1) = r14
+	}
+	{
+		r22 = add(r29,#7168)
+		v0 = vand(v14,v20)
+		memh(r18+r24<<#1) = r15
+		memh(r18+r25<<#1) = r28
+	}
+	{
+		r23 = add(r29,#7296)
+		r24 = add(r29,#7040)
+		memh(r18+r26<<#1) = r0
+		memh(r18+r27<<#1) = r1
+	}
+	{
+		r27:26 = combine(#31,#32)
+		r25 = add(r29,#7424)
+		r2 = memw(r29+#1728)
+		memh(r18+r2<<#1) = r10
+	}                               // 4-byte Folded Reload
+	{
+		v15.w = vasr(v5.w,r27)
+	}
+	{
+		v1 = vand(v15,v20)
+		r2 = memw(r29+#1664)
+		memh(r18+r2<<#1) = r11
+	}                               // 4-byte Folded Reload
+	{
+		v5:4.w = vadd(v5:4.w,v1:0.w)
+		r4 = memw(r29+#2112)
+	}                               // 4-byte Folded Reload
+	{
+		r2 = setbit(r3,#6)
+		memh(r18+r2<<#1) = r16
+	}
+	{
+		r2 = add(r29,#1472)
+		r19 = add(r29,#7808)
+		memh(r18+r4<<#1) = r19
+		vmem(r2+#0) = v5
+	}
+	{
+		v5 = vmem(r2+#0)
+		vmem(r3+#0) = v4
+	}                               // 64-byte Folded Reload
+	{
+		r2 = memw(r29+##7744)
+		r4 = memw(r29+##7752)
+	}
+	{
+		r3 = memw(r29+##7748)
+		r6 = memw(r29+##7760)
+	}
+	{
+		r12 = memw(r29+##7776)
+		r8 = memw(r29+##7768)
+	}
+	{
+		r13 = memw(r29+##7780)
+		r5 = memw(r29+##7756)
+	}
+	{
+		r7 = memw(r29+##7764)
+		r9 = memw(r29+##7772)
+	}
+	{
+		r28 = memw(r29+##7680)
+		r14 = memw(r29+##7784)
+	}
+	{
+		r0 = memw(r29+##7792)
+		r10 = memw(r29+##7800)
+	}
+	{
+		r15 = memw(r29+##7788)
+		r1 = memw(r29+##7796)
+	}
+	{
+		r11 = memw(r29+##7804)
+		r16 = memw(r29+#1600)
+	}
+	{
+		memh(r18+r28<<#1) = r16
+	}
+	{
+		r28 = memw(r29+##7684)
+		r16 = memw(r29+#1536)
+	}
+	{
+		r16 = memw(r29+#2048)
+		memh(r18+r28<<#1) = r16
+	}                               // 4-byte Folded Reload
+	{
+		r28 = memw(r29+##7688)
+	}
+	{
+		r16 = memw(r29+#2176)
+		memh(r18+r28<<#1) = r16
+	}                               // 4-byte Folded Reload
+	{
+		r28 = memw(r29+##7692)
+	}
+	{
+		r16 = memw(r29+#2240)
+		memh(r18+r28<<#1) = r16
+	}                               // 4-byte Folded Reload
+	{
+		r28 = memw(r29+##7696)
+	}
+	{
+		r16 = memw(r29+#2304)
+		memh(r18+r28<<#1) = r16
+	}                               // 4-byte Folded Reload
+	{
+		r28 = memw(r29+##7700)
+	}
+	{
+		r16 = memw(r29+#2368)
+		memh(r18+r28<<#1) = r16
+	}                               // 4-byte Folded Reload
+	{
+		r28 = memw(r29+##7704)
+	}
+	{
+		memh(r18+r28<<#1) = r16
+	}
+	{
+		r28 = memw(r29+##7708)
+		r16 = memw(r29+#2492)
+	}
+	{
+		memh(r18+r28<<#1) = r16
+	}
+	{
+		r28 = memw(r29+##7712)
+		r16 = memw(r29+#2496)
+	}
+	{
+		memh(r18+r28<<#1) = r16
+	}
+	{
+		r28 = memw(r29+##7716)
+		r16 = memw(r29+#2560)
+	}
+	{
+		r16 = memw(r29+#2624)
+		memh(r18+r28<<#1) = r16
+	}                               // 4-byte Folded Reload
+	{
+		r28 = memw(r29+##7720)
+	}
+	{
+		r16 = memw(r29+#2688)
+		memh(r18+r28<<#1) = r16
+	}                               // 4-byte Folded Reload
+	{
+		r28 = memw(r29+##7724)
+	}
+	{
+		r16 = memw(r29+#2752)
+		memh(r18+r28<<#1) = r16
+	}                               // 4-byte Folded Reload
+	{
+		r28 = memw(r29+##7728)
+	}
+	{
+		r16 = memw(r29+#2816)
+		memh(r18+r28<<#1) = r16
+	}                               // 4-byte Folded Reload
+	{
+		r28 = memw(r29+##7732)
+	}
+	{
+		r16 = memw(r29+#2880)
+		memh(r18+r28<<#1) = r16
+	}                               // 4-byte Folded Reload
+	{
+		r28 = memw(r29+##7736)
+	}
+	{
+		memh(r18+r28<<#1) = r16
+	}
+	{
+		r28 = memw(r29+##7740)
+		r16 = memw(r29+#3000)
+	}
+	{
+		r28 = memw(r29+#3584)
+		memh(r18+r28<<#1) = r16
+	}                               // 4-byte Folded Reload
+	{
+		r28 = memw(r29+#3520)
+		memh(r18+r2<<#1) = r28
+	}                               // 4-byte Folded Reload
+	{
+		r3 = memw(r29+#3456)
+		memh(r18+r3<<#1) = r28
+	}                               // 4-byte Folded Reload
+	{
+		r4 = memw(r29+##4352)
+		memh(r18+r4<<#1) = r3
+	}                               // 4-byte Folded Reload
+	{
+		r4 = add(r4,#-1)
+		r3 = memw(r29+#3452)
+		memh(r18+r5<<#1) = r3.new
+	}                               // 4-byte Folded Reload
+	{
+		p0 = cmp.eq(r4,#0)
+		r5 = memw(r29+##4224)
+		r3 = memw(r29+#3448)
+	}                               // 4-byte Folded Reload
+	{
+		r5 = add(r5,#64)
+		r6 = memw(r29+##4160)
+		memh(r18+r6<<#1) = r3
+	}                               // 4-byte Folded Reload
+	{
+		r7 = #-2
+		r3 = memw(r29+#3328)
+		memh(r18+r7<<#1) = r3.new
+	}                               // 4-byte Folded Reload
+	{
+		r3 = memw(r29+#3264)
+		memh(r18+r8<<#1) = r3.new
+	}                               // 4-byte Folded Reload
+	{
+		r8 = memw(r29+##4096)
+		r2 = memw(r29+#4084)
+	}                               // 4-byte Folded Reload
+	{
+		r3 = memw(r29+#3200)
+		memh(r18+r9<<#1) = r3.new
+	}                               // 4-byte Folded Reload
+	{
+		r3 = memw(r29+#3136)
+		memh(r18+r12<<#1) = r3.new
+	}                               // 4-byte Folded Reload
+	{
+		r9 = memw(r29+#4092)
+		r3 = memw(r29+#3072)
+	}                               // 4-byte Folded Reload
+	{
+		r12 = memw(r29+#4088)
+		memh(r18+r13<<#1) = r3
+	}                               // 4-byte Folded Reload
+	{
+		r3 = memw(r29+#3008)
+		memh(r18+r14<<#1) = r3.new
+	}                               // 4-byte Folded Reload
+	{
+		r3 = memw(r29+#3004)
+		memh(r18+r15<<#1) = r3.new
+	}                               // 4-byte Folded Reload
+	{
+		r3 = memw(r29+#3840)
+		memh(r18+r0<<#1) = r3.new
+	}                               // 4-byte Folded Reload
+	{
+		r3 = memw(r29+#3712)
+		memh(r18+r1<<#1) = r3.new
+	}                               // 4-byte Folded Reload
+	{
+		r3 = memw(r29+#3776)
+		memh(r18+r10<<#1) = r3.new
+	}                               // 4-byte Folded Reload
+	{
+		if (!p0) jump:nt .LBB120_8
+		r3 = memw(r29+#3648)
+		memh(r18+r11<<#1) = r3.new
+	}                               // 4-byte Folded Reload
+	.falign
+.LBB120_73:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(pc,##.LCPI120_2@PCREL)
+		r7 = add(r29,#4352)
+		r20 = memw(r29+#344)
+	}                               // 4-byte Folded Reload
+	{
+		r4 = add(pc,##.LCPI120_3@PCREL)
+		r5 = add(r29,#5760)
+		r3 = add(r20,#382)
+	}
+	{
+		r1 = setbit(r5,#6)
+		v7 = vsplat(r3)
+		r6 = add(r29,#4416)
+		v16 = vmem(r2+#0)
+	}
+	{
+		r2 = add(pc,##.LCPI120_1@PCREL)
+		v17 = vmem(r4+#0)
+		vmem(r7+#0) = v16
+	}                               // 128-byte Folded Spill
+	{
+		r3 = add(pc,##.LCPI120_0@PCREL)
+		v6 = v7
+		vmem(r6+#0) = v17
+	}                               // 128-byte Folded Spill
+	{
+		r2 = add(r29,#4224)
+		r0 = add(r29,#5888)
+		v3:2.w = vadd(v7:6.w,v17:16.w)
+		v13 = vmem(r2+#0)
+	}
+	{
+		r3 = setbit(r0,#6)
+		r19 = add(r29,#4864)
+		v12 = vmem(r3+#0)
+		vmem(r1+#0) = v3
+	}
+	{
+		v11:10.w = vadd(v7:6.w,v13:12.w)
+		vmem(r5+#0) = v2
+	}
+	{
+		r2 = add(r29,#4288)
+		vmem(r2+#0) = v12
+	}                               // 128-byte Folded Spill
+	{
+		r2 = setbit(r19,#6)
+		vmem(r2+#0) = v13
+	}                               // 128-byte Folded Spill
+	{
+		vmem(r3+#0) = v11
+	}
+	{
+		vmem(r0+#0) = v10
+	}
+	{
+		r0 = memw(r29+##5828)
+		vmem(r2+#0) = v5
+	}
+	{
+		r1 = memw(r29+##4932)
+		memw(r29+#568) = r1.new
+	}
+	{
+		call ##__hexagon_modsi3
+	}
+	.falign
+// %bb.74:                              // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r16 = r0
+		r0 = memw(r29+##5824)
+	}
+	{
+		r1 = memw(r29+##4928)
+		memw(r29+#348) = r1.new
+	}
+	{
+		call ##__hexagon_modsi3
+	}
+	.falign
+// %bb.75:                              // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#4672)
+	}
+	{
+		r2 = add(r29,#4480)
+		v16 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v16.w = vinsert(r0)
+		r0 = memw(r29+##5832)
+	}
+	{
+		r1 = memw(r29+##4936)
+		memw(r29+#564) = r1.new
+	}
+	{
+		v17 = valign(v16,v16,#4)
+	}
+	{
+		v17.w = vinsert(r16)
+	}
+	{
+		call ##__hexagon_modsi3
+		v12 = valign(v17,v17,#4)
+		vmem(r2+#0) = v12.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.76:                              // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#4480)
+	}
+	{
+		r2 = add(r29,#4480)
+		v28 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v28.w = vinsert(r0)
+		r0 = memw(r29+##5836)
+	}
+	{
+		r1 = memw(r29+##4940)
+		memw(r29+#572) = r1.new
+	}
+	{
+		call ##__hexagon_modsi3
+		v17 = valign(v28,v28,#4)
+		vmem(r2+#0) = v17.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.77:                              // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#4480)
+	}
+	{
+		r2 = add(r29,#4480)
+		v1 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v1.w = vinsert(r0)
+		r0 = memw(r29+##5840)
+	}
+	{
+		r1 = memw(r29+##4944)
+		memw(r29+#352) = r1.new
+	}
+	{
+		call ##__hexagon_modsi3
+		v19 = valign(v1,v1,#4)
+		vmem(r2+#0) = v19.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.78:                              // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#4480)
+	}
+	{
+		r2 = add(r29,#4480)
+		v29 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v29.w = vinsert(r0)
+		r0 = memw(r29+##5844)
+	}
+	{
+		r1 = memw(r29+##4948)
+		memw(r29+##4160) = r1.new
+	}
+	{
+		call ##__hexagon_modsi3
+		v20 = valign(v29,v29,#4)
+		vmem(r2+#0) = v20.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.79:                              // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#4480)
+	}
+	{
+		r2 = add(r29,#4480)
+		v30 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v30.w = vinsert(r0)
+		r0 = memw(r29+##5848)
+	}
+	{
+		r1 = memw(r29+##4952)
+		memw(r29+##4096) = r1.new
+	}
+	{
+		call ##__hexagon_modsi3
+		v21 = valign(v30,v30,#4)
+		vmem(r2+#0) = v21.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.80:                              // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#4480)
+	}
+	{
+		r2 = add(r29,#4480)
+		v31 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v31.w = vinsert(r0)
+		r0 = memw(r29+##5852)
+	}
+	{
+		r1 = memw(r29+##4956)
+		memw(r29+#4092) = r1.new
+	}
+	{
+		call ##__hexagon_modsi3
+		v6 = valign(v31,v31,#4)
+		vmem(r2+#0) = v6.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.81:                              // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#4480)
+	}
+	{
+		r2 = add(r29,#4480)
+		v15 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v15.w = vinsert(r0)
+		r0 = memw(r29+##5860)
+	}
+	{
+		r1 = memw(r29+##4964)
+		memw(r29+#4088) = r1.new
+	}
+	{
+		v18 = valign(v15,v15,#4)
+	}
+	{
+		call ##__hexagon_modsi3
+		v21 = vror(v18,r26)
+		vmem(r2+#0) = v21.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.82:                              // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r16 = r0
+		r0 = memw(r29+##5856)
+	}
+	{
+		r1 = memw(r29+##4960)
+		memw(r29+#4084) = r1.new
+	}
+	{
+		call ##__hexagon_modsi3
+	}
+	.falign
+// %bb.83:                              // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#4672)
+	}
+	{
+		r2 = add(r29,#3776)
+		v19 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v19.w = vinsert(r0)
+		r0 = memw(r29+##5864)
+	}
+	{
+		r1 = memw(r29+##4968)
+		memw(r29+#3840) = r1.new
+	}
+	{
+		v20 = valign(v19,v19,#4)
+	}
+	{
+		v20.w = vinsert(r16)
+	}
+	{
+		call ##__hexagon_modsi3
+		v22 = valign(v20,v20,#4)
+		vmem(r2+#0) = v22.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.84:                              // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#3776)
+	}
+	{
+		r2 = add(r29,#3712)
+		v4 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v4.w = vinsert(r0)
+		r0 = memw(r29+##5868)
+	}
+	{
+		r1 = memw(r29+##4972)
+		memw(r29+#3776) = r1.new
+	}
+	{
+		call ##__hexagon_modsi3
+		v23 = valign(v4,v4,#4)
+		vmem(r2+#0) = v23.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.85:                              // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#3712)
+	}
+	{
+		r2 = add(r29,#3648)
+		v8 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v8.w = vinsert(r0)
+		r0 = memw(r29+##5872)
+	}
+	{
+		r1 = memw(r29+##4976)
+		memw(r29+#3712) = r1.new
+	}
+	{
+		call ##__hexagon_modsi3
+		v7 = valign(v8,v8,#4)
+		vmem(r2+#0) = v7.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.86:                              // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#3648)
+	}
+	{
+		r2 = add(r29,#3584)
+		v9 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v9.w = vinsert(r0)
+		r0 = memw(r29+##5876)
+	}
+	{
+		r1 = memw(r29+##4980)
+		memw(r29+#3648) = r1.new
+	}
+	{
+		call ##__hexagon_modsi3
+		v24 = valign(v9,v9,#4)
+		vmem(r2+#0) = v24.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.87:                              // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#3584)
+	}
+	{
+		r2 = add(r29,#3520)
+		v10 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v10.w = vinsert(r0)
+		r0 = memw(r29+##5880)
+	}
+	{
+		r1 = memw(r29+##4984)
+		memw(r29+#3584) = r1.new
+	}
+	{
+		call ##__hexagon_modsi3
+		v6 = valign(v10,v10,#4)
+		vmem(r2+#0) = v6.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.88:                              // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#3520)
+	}
+	{
+		r2 = add(r29,#3456)
+		v11 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v11.w = vinsert(r0)
+		r0 = memw(r29+##5884)
+	}
+	{
+		r1 = memw(r29+##4988)
+		memw(r29+#3520) = r1.new
+	}
+	{
+		call ##__hexagon_modsi3
+		v14 = valign(v11,v11,#4)
+		vmem(r2+#0) = v14.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.89:                              // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#3456)
+	}
+	{
+		r2 = add(r29,#1472)
+		v27 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v27.w = vinsert(r0)
+		r0 = memw(r29+##5764)
+		v15 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		r2 = add(r29,#4480)
+		vmem(r19+#0) = v15
 	}
 	{
 		v21 = valign(v27,v27,#4)
-		r8 = memuh(r21+r1<<#1)
-		r5 = memuh(r21+r5<<#1)
+		r1 = memw(r29+##4868)
+		memw(r29+#3456) = r1.new
 	}
 	{
-		r5 = combine(r8.l,r5.l)
-		v15 = valign(v0,v0,#4)
-		r2 = memuh(r21+r2<<#1)
-		r3 = memuh(r21+r3<<#1)
+		r2 = add(r29,#4544)
+		v9 = vor(v20,v21)
+		v20.cur = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		call ##__hexagon_modsi3
+		vmem(r2+#0) = v9
+	}                               // 128-byte Folded Spill
+	.falign
+// %bb.90:                              // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r16 = r0
+		r0 = memw(r29+##5760)
+	}
+	{
+		r1 = memw(r29+##4864)
+		memw(r29+#3452) = r1.new
+	}
+	{
+		call ##__hexagon_modsi3
+	}
+	.falign
+// %bb.91:                              // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#4672)
+	}
+	{
+		r2 = add(r29,#3328)
+		v22 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v22.w = vinsert(r0)
+		r0 = memw(r29+##5768)
+	}
+	{
+		r1 = memw(r29+##4872)
+		memw(r29+#3448) = r1.new
+	}
+	{
+		v23 = valign(v22,v22,#4)
+	}
+	{
+		v23.w = vinsert(r16)
+	}
+	{
+		call ##__hexagon_modsi3
+		v2 = valign(v23,v23,#4)
+		vmem(r2+#0) = v2.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.92:                              // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#3328)
+	}
+	{
+		r2 = add(r29,#3264)
+		v13 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v13.w = vinsert(r0)
+		r0 = memw(r29+##5772)
+	}
+	{
+		r1 = memw(r29+##4876)
+		memw(r29+#3328) = r1.new
+	}
+	{
+		call ##__hexagon_modsi3
+		v25 = valign(v13,v13,#4)
+		vmem(r2+#0) = v25.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.93:                              // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#3264)
+	}
+	{
+		r2 = add(r29,#3200)
+		v14 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v14.w = vinsert(r0)
+		r0 = memw(r29+##5776)
+	}
+	{
+		r1 = memw(r29+##4880)
+		memw(r29+#3264) = r1.new
+	}
+	{
+		call ##__hexagon_modsi3
+		v26 = valign(v14,v14,#4)
+		vmem(r2+#0) = v26.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.94:                              // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#3200)
+	}
+	{
+		r2 = add(r29,#3136)
+		v18 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v18.w = vinsert(r0)
+		r0 = memw(r29+##5780)
+	}
+	{
+		r1 = memw(r29+##4884)
+		memw(r29+#3200) = r1.new
+	}
+	{
+		call ##__hexagon_modsi3
+		v0 = valign(v18,v18,#4)
+		vmem(r2+#0) = v0.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.95:                              // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#3136)
+	}
+	{
+		r2 = add(r29,#3072)
+		v5 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v5.w = vinsert(r0)
+		r0 = memw(r29+##5784)
+	}
+	{
+		r1 = memw(r29+##4888)
+		memw(r29+#3136) = r1.new
+	}
+	{
+		call ##__hexagon_modsi3
+		v27 = valign(v5,v5,#4)
+		vmem(r2+#0) = v27.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.96:                              // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#3072)
+	}
+	{
+		r2 = add(r29,#3008)
+		v15 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v15.w = vinsert(r0)
+		r0 = memw(r29+##5788)
+	}
+	{
+		r1 = memw(r29+##4892)
+		memw(r29+#3072) = r1.new
+	}
+	{
+		call ##__hexagon_modsi3
+		v2 = valign(v15,v15,#4)
+		vmem(r2+#0) = v2.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.97:                              // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#3008)
+	}
+	{
+		r2 = add(r29,#2496)
+		v16 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v16.w = vinsert(r0)
+		r0 = memw(r29+##5796)
+	}
+	{
+		r1 = memw(r29+##4900)
+		memw(r29+#3008) = r1.new
+	}
+	{
+		v24 = valign(v16,v16,#4)
+	}
+	{
+		call ##__hexagon_modsi3
+		v12 = vror(v24,r26)
+		vmem(r2+#0) = v12.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.98:                              // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r16 = r0
+		r0 = memw(r29+##5792)
+	}
+	{
+		r1 = memw(r29+##4896)
+		memw(r29+#3004) = r1.new
+	}
+	{
+		call ##__hexagon_modsi3
+	}
+	.falign
+// %bb.99:                              // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#4672)
+	}
+	{
+		r2 = add(r29,#2880)
+		v25 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v25.w = vinsert(r0)
+		r0 = memw(r29+##5800)
+	}
+	{
+		r1 = memw(r29+##4904)
+		memw(r29+#3000) = r1.new
+	}
+	{
+		v26 = valign(v25,v25,#4)
+	}
+	{
+		v26.w = vinsert(r16)
+	}
+	{
+		call ##__hexagon_modsi3
+		v3 = valign(v26,v26,#4)
+		vmem(r2+#0) = v3.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.100:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#2880)
+	}
+	{
+		r2 = add(r29,#2816)
+		v16 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v16.w = vinsert(r0)
+		r0 = memw(r29+##5804)
+	}
+	{
+		r1 = memw(r29+##4908)
+		memw(r29+#2880) = r1.new
+	}
+	{
+		call ##__hexagon_modsi3
+		v28 = valign(v16,v16,#4)
+		vmem(r2+#0) = v28.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.101:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#2816)
+	}
+	{
+		r2 = add(r29,#2752)
+		v12 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v12.w = vinsert(r0)
+		r0 = memw(r29+##5808)
+	}
+	{
+		r1 = memw(r29+##4912)
+		memw(r29+#2816) = r1.new
+	}
+	{
+		call ##__hexagon_modsi3
+		v1 = valign(v12,v12,#4)
+		vmem(r2+#0) = v1.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.102:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#2752)
+	}
+	{
+		r2 = add(r29,#2688)
+		v17 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v17.w = vinsert(r0)
+		r0 = memw(r29+##5812)
+	}
+	{
+		r1 = memw(r29+##4916)
+		memw(r29+#2752) = r1.new
+	}
+	{
+		call ##__hexagon_modsi3
+		v29 = valign(v17,v17,#4)
+		vmem(r2+#0) = v29.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.103:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#2688)
+	}
+	{
+		r2 = add(r29,#2624)
+		v19 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v19.w = vinsert(r0)
+		r0 = memw(r29+##5816)
+	}
+	{
+		r1 = memw(r29+##4920)
+		memw(r29+#2688) = r1.new
+	}
+	{
+		call ##__hexagon_modsi3
+		v30 = valign(v19,v19,#4)
+		vmem(r2+#0) = v30.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.104:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#2624)
+	}
+	{
+		r2 = add(r29,#2560)
+		v20 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v20.w = vinsert(r0)
+		r0 = memw(r29+##5820)
+	}
+	{
+		r1 = memw(r29+##4924)
+		memw(r29+#2624) = r1.new
+	}
+	{
+		call ##__hexagon_modsi3
+		v8 = valign(v20,v20,#4)
+		vmem(r2+#0) = v8.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.105:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#2560)
+		r19 = add(r29,#4736)
+		r3 = add(r29,#1472)
+	}
+	{
+		r2 = setbit(r19,#6)
+		v7 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v7.w = vinsert(r0)
+		r0 = memw(r29+##5956)
+		v12 = vmem(r3+#0)
+	}
+	{
+		r2 = add(r29,#4480)
+		vmem(r2+#0) = v12
+	}
+	{
+		r2 = add(r29,#4544)
+		v27 = valign(v7,v7,#4)
+		v12 = vmem(r2+#0)
+	}                               // 128-byte Folded Reload
+	{
+		r2 = add(r29,#2496)
+		r1 = memw(r29+##4804)
+		v13 = vmem(r2+#0)
+	}
+	{
+		r2 = add(r29,#4480)
+		v12 = vor(v16,v27)
+		v16.cur = vmem(r2+#0)
+		memw(r29+#2560) = r1
+	}                               // 64-byte Folded Reload
+	{
+		r2 = add(r29,#4544)
+		vmem(r2+#0) = v12
+	}                               // 128-byte Folded Spill
+	{
+		call ##__hexagon_modsi3
+		vmem(r2+#0) = v13
+	}                               // 128-byte Folded Spill
+	.falign
+// %bb.106:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r16 = r0
+		r0 = memw(r29+##5952)
+	}
+	{
+		r1 = memw(r29+##4800)
+		memw(r29+#2496) = r1.new
+	}
+	{
+		call ##__hexagon_modsi3
+	}
+	.falign
+// %bb.107:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#4672)
+	}
+	{
+		r2 = add(r29,#2368)
+		v28 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v28.w = vinsert(r0)
+		r0 = memw(r29+##5960)
+	}
+	{
+		r1 = memw(r29+##4808)
+		memw(r29+#2492) = r1.new
+	}
+	{
+		v29 = valign(v28,v28,#4)
+	}
+	{
+		v29.w = vinsert(r16)
+	}
+	{
+		call ##__hexagon_modsi3
+		v31 = valign(v29,v29,#4)
+		vmem(r2+#0) = v31.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.108:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#2368)
+	}
+	{
+		r2 = add(r29,#2304)
+		v21 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v21.w = vinsert(r0)
+		r0 = memw(r29+##5964)
+	}
+	{
+		r1 = memw(r29+##4812)
+		memw(r29+#2368) = r1.new
+	}
+	{
+		call ##__hexagon_modsi3
+		v4 = valign(v21,v21,#4)
+		vmem(r2+#0) = v4.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.109:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#2304)
+	}
+	{
+		r2 = add(r29,#2240)
+		v22 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v22.w = vinsert(r0)
+		r0 = memw(r29+##5968)
+	}
+	{
+		r1 = memw(r29+##4816)
+		memw(r29+#2304) = r1.new
+	}
+	{
+		call ##__hexagon_modsi3
+		v9 = valign(v22,v22,#4)
+		vmem(r2+#0) = v9.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.110:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#2240)
+	}
+	{
+		r2 = add(r29,#2176)
+		v23 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v23.w = vinsert(r0)
+		r0 = memw(r29+##5972)
+	}
+	{
+		r1 = memw(r29+##4820)
+		memw(r29+#2240) = r1.new
+	}
+	{
+		call ##__hexagon_modsi3
+		v8 = valign(v23,v23,#4)
+		vmem(r2+#0) = v8.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.111:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#2176)
+	}
+	{
+		r2 = add(r29,#2112)
+		v7 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v7.w = vinsert(r0)
+		r0 = memw(r29+##5976)
+	}
+	{
+		r1 = memw(r29+##4824)
+		memw(r29+#2176) = r1.new
+	}
+	{
+		call ##__hexagon_modsi3
+		v10 = valign(v7,v7,#4)
+		vmem(r2+#0) = v10.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.112:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#2112)
+	}
+	{
+		r2 = add(r29,#2048)
+		v24 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v24.w = vinsert(r0)
+		r0 = memw(r29+##5980)
+	}
+	{
+		r1 = memw(r29+##4828)
+		memw(r29+#2112) = r1.new
+	}
+	{
+		call ##__hexagon_modsi3
+		v25 = valign(v24,v24,#4)
+		vmem(r2+#0) = v25.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.113:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#2048)
+	}
+	{
+		r2 = add(r29,#1536)
+		v12 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v12.w = vinsert(r0)
+		r0 = memw(r29+##5988)
+	}
+	{
+		r1 = memw(r29+##4836)
+		memw(r29+#2048) = r1.new
+	}
+	{
+		v30 = valign(v12,v12,#4)
+	}
+	{
+		call ##__hexagon_modsi3
+		v23 = vror(v30,r26)
+		vmem(r2+#0) = v23.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.114:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r16 = r0
+		r0 = memw(r29+##5984)
+	}
+	{
+		r1 = memw(r29+##4832)
+		memw(r29+#2044) = r1.new
+	}
+	{
+		call ##__hexagon_modsi3
+	}
+	.falign
+// %bb.115:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#4672)
+	}
+	{
+		r2 = add(r29,#1920)
+		v31 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v31.w = vinsert(r0)
+		r0 = memw(r29+##5992)
+	}
+	{
+		r1 = memw(r29+##4840)
+		memw(r29+#2040) = r1.new
+	}
+	{
+		v0 = valign(v31,v31,#4)
+	}
+	{
+		v0.w = vinsert(r16)
+	}
+	{
+		call ##__hexagon_modsi3
+		v11 = valign(v0,v0,#4)
+		vmem(r2+#0) = v11.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.116:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#1920)
+	}
+	{
+		r2 = add(r29,#1856)
+		v6 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v6.w = vinsert(r0)
+		r0 = memw(r29+##5996)
+	}
+	{
+		r1 = memw(r29+##4844)
+		memw(r29+#1920) = r1.new
+	}
+	{
+		call ##__hexagon_modsi3
+		v13 = valign(v6,v6,#4)
+		vmem(r2+#0) = v13.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.117:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#1856)
+	}
+	{
+		r2 = add(r29,#1792)
+		v2 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v2.w = vinsert(r0)
+		r0 = memw(r29+##6000)
+	}
+	{
+		r1 = memw(r29+##4848)
+		memw(r29+#1856) = r1.new
+	}
+	{
+		call ##__hexagon_modsi3
+		v14 = valign(v2,v2,#4)
+		vmem(r2+#0) = v14.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.118:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#1792)
+	}
+	{
+		r2 = add(r29,#1728)
+		v25 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v25.w = vinsert(r0)
+		r0 = memw(r29+##6004)
+	}
+	{
+		r1 = memw(r29+##4852)
+		memw(r29+#1792) = r1.new
+	}
+	{
+		call ##__hexagon_modsi3
+		v18 = valign(v25,v25,#4)
+		vmem(r2+#0) = v18.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.119:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#1728)
+	}
+	{
+		r2 = add(r29,#1664)
+		v26 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v26.w = vinsert(r0)
+		r0 = memw(r29+##6008)
+	}
+	{
+		r1 = memw(r29+##4856)
+		memw(r29+#1728) = r1.new
+	}
+	{
+		call ##__hexagon_modsi3
+		v5 = valign(v26,v26,#4)
+		vmem(r2+#0) = v5.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.120:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#1664)
+	}
+	{
+		r2 = add(r29,#1600)
+		v0 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v0.w = vinsert(r0)
+		r0 = memw(r29+##6012)
+	}
+	{
+		r1 = memw(r29+##4860)
+		memw(r29+#1664) = r1.new
+	}
+	{
+		call ##__hexagon_modsi3
+		v18 = valign(v0,v0,#4)
+		vmem(r2+#0) = v18.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.121:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#1600)
+	}
+	{
+		r2 = add(r29,#1472)
+		v3 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v3.w = vinsert(r0)
+		r0 = memw(r29+##5892)
+		v16 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		r2 = add(r29,#1536)
+		vmem(r19+#0) = v16
+	}
+	{
+		v1 = valign(v3,v3,#4)
+		r1 = memw(r29+##4740)
+		memw(r29+#1600) = r1.new
+	}
+	{
+		v9 = vor(v22,v1)
+		v22.cur = vmem(r2+#0)
+		vmem(r29+#6) = v9.new
+	}                               // 64-byte Folded Reload
+	{
+		call ##__hexagon_modsi3
+	}
+	.falign
+// %bb.122:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r16 = r0
+		r0 = memw(r29+##5888)
+	}
+	{
+		r1 = memw(r29+##4736)
+		memw(r29+#1536) = r1.new
+	}
+	{
+		call ##__hexagon_modsi3
+	}
+	.falign
+// %bb.123:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#4672)
+	}
+	{
+		r2 = add(r29,#1280)
+		v2 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v2.w = vinsert(r0)
+		r0 = memw(r29+##5896)
+	}
+	{
+		r1 = memw(r29+##4744)
+		memw(r29+#1404) = r1.new
+	}
+	{
+		v3 = valign(v2,v2,#4)
+	}
+	{
+		v3.w = vinsert(r16)
+	}
+	{
+		call ##__hexagon_modsi3
+		v15 = valign(v3,v3,#4)
+		vmem(r2+#0) = v15.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.124:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#1280)
+	}
+	{
+		r2 = add(r29,#1216)
+		v27 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v27.w = vinsert(r0)
+		r0 = memw(r29+##5900)
+	}
+	{
+		r1 = memw(r29+##4748)
+		memw(r29+#1280) = r1.new
+	}
+	{
+		call ##__hexagon_modsi3
+		v16 = valign(v27,v27,#4)
+		vmem(r2+#0) = v16.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.125:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#1216)
+	}
+	{
+		r2 = add(r29,#1152)
+		v3 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v3.w = vinsert(r0)
+		r0 = memw(r29+##5904)
+	}
+	{
+		r1 = memw(r29+##4752)
+		memw(r29+#1216) = r1.new
+	}
+	{
+		call ##__hexagon_modsi3
+		v12 = valign(v3,v3,#4)
+		vmem(r2+#0) = v12.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.126:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#1152)
+	}
+	{
+		r2 = add(r29,#1088)
+		v28 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v28.w = vinsert(r0)
+		r0 = memw(r29+##5908)
+	}
+	{
+		r1 = memw(r29+##4756)
+		memw(r29+#1152) = r1.new
+	}
+	{
+		call ##__hexagon_modsi3
+		v17 = valign(v28,v28,#4)
+		vmem(r2+#0) = v17.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.127:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#1088)
+	}
+	{
+		r2 = add(r29,#1024)
+		v1 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v1.w = vinsert(r0)
+		r0 = memw(r29+##5912)
+	}
+	{
+		r1 = memw(r29+##4760)
+		memw(r29+#1088) = r1.new
+	}
+	{
+		call ##__hexagon_modsi3
+		v19 = valign(v1,v1,#4)
+		vmem(r2+#0) = v19.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.128:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#1024)
+	}
+	{
+		r2 = add(r29,#960)
+		v29 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v29.w = vinsert(r0)
+		r0 = memw(r29+##5916)
+	}
+	{
+		r1 = memw(r29+##4764)
+		memw(r29+#1024) = r1.new
+	}
+	{
+		call ##__hexagon_modsi3
+		v26 = valign(v29,v29,#4)
+		vmem(r2+#0) = v26.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.129:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#960)
+	}
+	{
+		v17 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v17.w = vinsert(r0)
+		r0 = memw(r29+##5924)
+	}
+	{
+		r1 = memw(r29+##4772)
+		memw(r29+#960) = r1.new
+	}
+	{
+		v4 = valign(v17,v17,#4)
+	}
+	{
+		call ##__hexagon_modsi3
+		v26 = vror(v4,r26)
+		vmem(r29+#4) = v26.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.130:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r16 = r0
+		r0 = memw(r29+##5920)
+	}
+	{
+		r1 = memw(r29+##4768)
+		memw(r29+#956) = r1.new
+	}
+	{
+		call ##__hexagon_modsi3
+	}
+	.falign
+// %bb.131:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#4672)
+	}
+	{
+		r2 = add(r29,#832)
+		v5 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v5.w = vinsert(r0)
+		r0 = memw(r29+##5928)
+	}
+	{
+		r1 = memw(r29+##4776)
+		memw(r29+#952) = r1.new
+	}
+	{
+		v6 = valign(v5,v5,#4)
+	}
+	{
+		v6.w = vinsert(r16)
+	}
+	{
+		call ##__hexagon_modsi3
+		v20 = valign(v6,v6,#4)
+		vmem(r2+#0) = v20.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.132:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#832)
+	}
+	{
+		r2 = add(r29,#768)
+		v30 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v30.w = vinsert(r0)
+		r0 = memw(r29+##5932)
+	}
+	{
+		r1 = memw(r29+##4780)
+		memw(r29+#832) = r1.new
+	}
+	{
+		call ##__hexagon_modsi3
+		v21 = valign(v30,v30,#4)
+		vmem(r2+#0) = v21.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.133:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#768)
+	}
+	{
+		r2 = add(r29,#704)
+		v31 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v31.w = vinsert(r0)
+		r0 = memw(r29+##5936)
+	}
+	{
+		r1 = memw(r29+##4784)
+		memw(r29+#768) = r1.new
+	}
+	{
+		call ##__hexagon_modsi3
+		v22 = valign(v31,v31,#4)
+		vmem(r2+#0) = v22.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.134:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#704)
+	}
+	{
+		r2 = add(r29,#640)
+		v4 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v4.w = vinsert(r0)
+		r0 = memw(r29+##5940)
+	}
+	{
+		r1 = memw(r29+##4788)
+		memw(r29+#704) = r1.new
+	}
+	{
+		call ##__hexagon_modsi3
+		v23 = valign(v4,v4,#4)
+		vmem(r2+#0) = v23.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.135:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#640)
+	}
+	{
+		r2 = add(r29,#576)
+		v8 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v8.w = vinsert(r0)
+		r0 = memw(r29+##5944)
+	}
+	{
+		r1 = memw(r29+##4792)
+		memw(r29+#640) = r1.new
+	}
+	{
+		call ##__hexagon_modsi3
+		v7 = valign(v8,v8,#4)
+		vmem(r2+#0) = v7.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.136:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#576)
+	}
+	{
+		v9 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v9.w = vinsert(r0)
+		r0 = memw(r29+##5948)
+	}
+	{
+		r1 = memw(r29+##4796)
+		memw(r29+#576) = r1.new
+	}
+	{
+		call ##__hexagon_modsi3
+		v5 = valign(v9,v9,#4)
+		vmem(r29+#3) = v5.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.137:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#4672)
+		r4 = add(r29,#6912)
+		r10 = add(r29,#6784)
+		v28 = vmem(r29+#3)
+	}                               // 64-byte Folded Reload
+	{
+		r3 = setbit(r4,#6)
+		v28.w = vinsert(r0)
+		r2 = add(r29,#4480)
+		v1 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		r2 = add(r29,#4544)
+		v9.w = vasr(v20.w,r27)
+		v13 = v1
+		v20.cur = vmem(r2+#0)
+	}                               // 128-byte Folded Reload
+	{
+		r2 = add(r29,#1408)
+		v10 = valign(v28,v28,#4)
+		v11.w = vasr(v21.w,r27)
+		v21.cur = vmem(r2+#0)
+	}                               // 128-byte Folded Reload
+	{
+		r15 = setbit(r10,#6)
+		v16 = vor(v25,v10)
+		v12 = v1
+		v25.cur = vmem(r29+#4)
+	}                               // 64-byte Folded Reload
+	{
+		r2 = add(r20,#383)
+		v14 = vand(v9,v29)
+		v7 = v1
+		v29.cur = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		r16 = r20
+		v8.w = vasr(v4.w,r27)
+		v15 = vand(v11,v29)
+		v4.cur = vmem(r29+#6)
+	}                               // 64-byte Folded Reload
+	{
+		v18.w = vasr(v16.w,r27)
+		v11:10.w = vadd(v21:20.w,v15:14.w)
+		v17 = v4
+	}
+	{
+		v20 = vand(v18,v29)
+		v21 = vand(v8,v29)
+	}
+	{
+		v9:8.w = vadd(v17:16.w,v21:20.w)
+		vmem(r3+#0) = v9.new
+	}
+	{
+		r3 = memw(r29+##6976)
+		vmem(r4+#0) = v8
+	}
+	{
+		r1 = memw(r29+##6980)
+		r5 = memw(r29+##6984)
+	}
+	{
+		r3 = memuh(r18+r3<<#1)
+		r6 = memw(r29+##6988)
+	}
+	{
+		r4 = memuh(r18+r1<<#1)
+		r7 = memw(r29+##6992)
+	}
+	{
+		r3 = combine(r4.l,r3.l)
+		r5 = memuh(r18+r5<<#1)
+		r6 = memuh(r18+r6<<#1)
+	}
+	{
+		v13.w = vinsert(r3)
+		r5 = combine(r6.l,r5.l)
+		r0 = memw(r29+##6996)
+	}
+	{
+		r3 = memw(r29+##7000)
+		r1 = memw(r29+##7004)
+	}
+	{
+		v14 = valign(v13,v13,#4)
+		r7 = memuh(r18+r7<<#1)
+		r4 = memuh(r18+r0<<#1)
+	}
+	{
+		v14.w = vinsert(r5)
+		r4 = combine(r4.l,r7.l)
+		r8 = memw(r29+##7008)
+	}
+	{
+		r6 = memuh(r18+r1<<#1)
+		r1 = memw(r29+##7024)
+	}
+	{
+		v15 = valign(v14,v14,#4)
+		r9 = memw(r29+##7012)
+		r3 = memuh(r18+r3<<#1)
+	}
+	{
+		r3 = combine(r6.l,r3.l)
+		r0 = memw(r29+##7016)
+		r5 = memuh(r18+r1<<#1)
 	}
 	{
 		v15.w = vinsert(r4)
-		v21.w = vinsert(r6)
-		r4 = memw(r29+#1268)
+		r8 = memuh(r18+r8<<#1)
+		r1 = memw(r29+##6912)
 	}
 	{
-		r4 = memuh(r21+r4<<#1)
+		r7 = memw(r29+##7020)
+		r12 = memuh(r18+r0<<#1)
 	}
 	{
-		r2 = combine(r3.l,r2.l)
-		v28 = valign(v15,v15,#4)
-		r3 = memuh(r21+r0<<#1)
+		v16 = valign(v15,v15,#4)
+		r7 = memuh(r18+r7<<#1)
+		r0 = memw(r29+##7032)
 	}
 	{
-		v28.w = vinsert(r5)
+		r14 = memw(r29+##6916)
+		r13 = memw(r29+##7036)
+	}
+	{
+		v16.w = vinsert(r3)
+		r7 = combine(r7.l,r12.l)
+		r11 = memuh(r18+r14<<#1)
+		r9 = memuh(r18+r9<<#1)
+	}
+	{
+		r8 = combine(r9.l,r8.l)
+		r3 = memuh(r18+r0<<#1)
+		r9 = memuh(r18+r1<<#1)
+	}
+	{
+		v9 = valign(v16,v16,#4)
+		r4 = memuh(r18+r13<<#1)
+		r0 = memw(r29+##6920)
+	}
+	{
+		v9.w = vinsert(r8)
+		r8 = combine(r11.l,r9.l)
+		r13 = memw(r29+##6924)
+	}
+	{
 		r3 = combine(r4.l,r3.l)
-		v6 = valign(v21,v21,#4)
-		r5 = memw(r29+#1272)
+		r6 = memw(r29+##7028)
+		r12 = memuh(r18+r0<<#1)
 	}
 	{
-		v6.w = vinsert(r2)
-		r4 = memw(r29+#1276)
+		v12.w = vinsert(r8)
+		r1 = memw(r29+##6928)
+		r13 = memuh(r18+r13<<#1)
 	}
 	{
-		v3 = valign(v28,v28,#4)
-		r4 = memuh(r21+r4<<#1)
-		r5 = memuh(r21+r5<<#1)
+		v23 = valign(v9,v9,#4)
+		r14 = memuh(r18+r1<<#1)
+		r11 = memw(r29+##6932)
+	}
+	{
+		v23.w = vinsert(r7)
+		r12 = combine(r13.l,r12.l)
+		v17 = valign(v12,v12,#4)
+		r6 = memuh(r18+r6<<#1)
+	}
+	{
+		r5 = combine(r6.l,r5.l)
+		r0 = memw(r29+##6936)
+		r9 = memuh(r18+r11<<#1)
+	}
+	{
+		v17.w = vinsert(r12)
+		v26 = valign(v23,v23,#4)
+		r12 = memw(r29+##6944)
+	}
+	{
+		r9 = combine(r9.l,r14.l)
+		r1 = memw(r29+##6940)
+		r8 = memuh(r18+r0<<#1)
+	}
+	{
+		v23 = vsplat(r2)
+		r11 = memw(r29+##6948)
+		r12 = memuh(r18+r12<<#1)
+	}
+	{
+		v19 = valign(v17,v17,#4)
+		r28 = memw(r29+##6952)
+		r13 = memuh(r18+r1<<#1)
+	}
+	{
+		v19.w = vinsert(r9)
+		r0 = memw(r29+##6956)
+		r1 = memuh(r18+r11<<#1)
+	}
+	{
+		r8 = combine(r13.l,r8.l)
+		r14 = memw(r29+##6960)
+		r13 = memuh(r18+r28<<#1)
+	}
+	{
+		v20 = valign(v19,v19,#4)
+		r11 = memuh(r18+r0<<#1)
+		r9 = memw(r29+##6964)
+	}
+	{
+		v20.w = vinsert(r8)
+		r0 = combine(r1.l,r12.l)
+		r1 = memw(r29+##6968)
+	}
+	{
+		r13 = combine(r11.l,r13.l)
+		r11 = memw(r29+##6972)
+		r12 = memuh(r18+r14<<#1)
+	}
+	{
+		v13 = valign(v20,v20,#4)
+		r8 = memuh(r18+r1<<#1)
+		r14 = memuh(r18+r9<<#1)
+	}
+	{
+		v13.w = vinsert(r0)
+		r12 = combine(r14.l,r12.l)
+	}
+	{
+		v26.w = vinsert(r5)
+		r9 = memuh(r18+r11<<#1)
+		vmem(r10+#0) = v10
+	}
+	{
+		v21 = valign(v13,v13,#4)
+		r10 = memw(r29+##6784)
+		vmem(r15+#0) = v11
+	}
+	{
+		v21.w = vinsert(r13)
+		r8 = combine(r9.l,r8.l)
+		r11 = memw(r29+##6788)
+	}
+	{
+		v5 = valign(v26,v26,#4)
+		r1 = memw(r29+##6792)
+		r15 = memuh(r18+r10<<#1)
+	}
+	{
+		v5.w = vinsert(r3)
+		r0 = memw(r29+##6796)
+		r28 = memuh(r18+r11<<#1)
+	}
+	{
+		r15 = combine(r28.l,r15.l)
+		v22 = valign(v21,v21,#4)
+		r11 = memuh(r18+r0<<#1)
+		r28 = memuh(r18+r1<<#1)
+	}
+	{
+		v22.w = vinsert(r12)
+		v7.w = vinsert(r15)
+		r11 = combine(r11.l,r28.l)
+	}
+	{
+		r0 = memw(r29+##6800)
+		r15 = memw(r29+##6816)
+	}
+	{
+		r10 = memw(r29+##6804)
+	}
+	{
+		v25 = valign(v22,v22,#4)
+		v22 = v23
+		r13 = memuh(r18+r10<<#1)
+		r1 = memuh(r18+r0<<#1)
+	}
+	{
+		v25.w = vinsert(r8)
+		r0 = combine(r13.l,r1.l)
+		v7 = valign(v7,v7,#4)
+		r8 = memuh(r18+r15<<#1)
+	}
+	{
+		v7.w = vinsert(r11)
+		r10 = memw(r29+##6808)
+	}
+	{
+		v3 = valign(v25,v25,#4)
+		r11 = memw(r29+##6812)
+	}
+	{
+		v24 = valign(v7,v7,#4)
+		r1 = memuh(r18+r10<<#1)
+		r10 = memw(r29+##6848)
+	}
+	{
+		v24.w = vinsert(r0)
+		v12 = vror(v3,r26)
+		r0 = memw(r29+##6820)
+	}
+	{
+		r14 = memuh(r18+r11<<#1)
+		r9 = memuh(r18+r10<<#1)
+	}
+	{
+		r7 = combine(r14.l,r1.l)
+		r6 = memuh(r18+r0<<#1)
+		r14 = memw(r29+##6888)
+	}
+	{
+		r4 = combine(r6.l,r8.l)
+		v27 = valign(v24,v24,#4)
+		r1 = memw(r29+##6852)
+	}
+	{
+		v27.w = vinsert(r7)
+		r7 = memw(r29+##6856)
+	}
+	{
+		r5 = memuh(r18+r1<<#1)
+		r11 = memw(r29+##6824)
+	}
+	{
+		r5 = combine(r5.l,r9.l)
+		v28 = valign(v27,v27,#4)
+		r0 = memw(r29+##6860)
+	}
+	{
+		v1.w = vinsert(r5)
+		r7 = memuh(r18+r7<<#1)
+		r1 = memw(r29+##6828)
+	}
+	{
+		v28.w = vinsert(r4)
+		r6 = memuh(r18+r0<<#1)
+		r4 = memw(r29+##6864)
+	}
+	{
+		r6 = combine(r6.l,r7.l)
+		r4 = memuh(r18+r4<<#1)
+		r8 = memuh(r18+r11<<#1)
+	}
+	{
+		v29 = valign(v1,v1,#4)
+		r0 = memw(r29+##6868)
+		r5 = memuh(r18+r1<<#1)
+	}
+	{
+		v29.w = vinsert(r6)
+		r5 = combine(r5.l,r8.l)
+		v31 = valign(v28,v28,#4)
+		r7 = memuh(r18+r0<<#1)
+	}
+	{
+		r4 = combine(r7.l,r4.l)
+		r1 = memw(r29+##6872)
+	}
+	{
+		v30 = valign(v29,v29,#4)
+		r6 = memuh(r18+r1<<#1)
+		r12 = memw(r29+##6876)
+	}
+	{
+		v31.w = vinsert(r5)
+		v30.w = vinsert(r4)
+		r1 = memw(r29+##6880)
+	}
+	{
+		r8 = memuh(r18+r12<<#1)
+		r7 = memw(r29+##6832)
+	}
+	{
+		r6 = combine(r8.l,r6.l)
+		r5 = memuh(r18+r1<<#1)
+		r13 = memw(r29+##6884)
+	}
+	{
+		v24 = valign(v31,v31,#4)
+		r7 = memuh(r18+r7<<#1)
+		r1 = memw(r29+##6892)
+	}
+	{
+		v0 = valign(v30,v30,#4)
+		r8 = memuh(r18+r13<<#1)
+		r0 = memw(r29+##6836)
+	}
+	{
+		v0.w = vinsert(r6)
+		r5 = combine(r8.l,r5.l)
+		r6 = memw(r29+##6840)
+	}
+	{
+		r6 = memuh(r18+r6<<#1)
+		r4 = memuh(r18+r0<<#1)
+	}
+	{
+		r4 = combine(r4.l,r7.l)
+		v2 = valign(v0,v0,#4)
+		r8 = memuh(r18+r14<<#1)
+	}
+	{
+		v2.w = vinsert(r5)
+		r0 = memw(r29+##6844)
+	}
+	{
+		v24.w = vinsert(r4)
+		r5 = memw(r29+##6896)
+		r4 = memuh(r18+r1<<#1)
+	}
+	{
+		r4 = combine(r4.l,r8.l)
+		r7 = memuh(r18+r0<<#1)
+		r15 = memw(r29+##6900)
+	}
+	{
+		r6 = combine(r7.l,r6.l)
+		r7 = add(r29,#4352)
+		v4 = valign(v2,v2,#4)
+		r5 = memuh(r18+r5<<#1)
+	}
+	{
+		v6 = valign(v24,v24,#4)
+		r8 = memuh(r18+r15<<#1)
+		r1 = memw(r29+##6908)
+	}
+	{
+		v4.w = vinsert(r4)
+		v6.w = vinsert(r6)
+		r0 = memw(r29+##6904)
+	}
+	{
+		r6 = add(r29,#4416)
+		r3 = combine(r8.l,r5.l)
+		r1 = add(r29,#4224)
+		r4 = memuh(r18+r1<<#1)
+	}
+	{
+		v8 = valign(v4,v4,#4)
+	}
+	{
+		v8.w = vinsert(r3)
+		v9 = valign(v6,v6,#4)
+		r3 = memuh(r18+r0<<#1)
+	}
+	{
+		r3 = combine(r4.l,r3.l)
+		r0 = add(r29,#5504)
+		v6 = vmem(r7+#0)
+	}                               // 128-byte Folded Reload
+	{
+		r2 = setbit(r0,#6)
+		v7 = vmem(r6+#0)
+	}                               // 128-byte Folded Reload
+	{
+		v13 = valign(v8,v8,#4)
+		v25:24.w = vadd(v23:22.w,v7:6.w)
+	}
+	{
+		v13.w = vinsert(r3)
+		r3 = add(r29,#5632)
+		vmem(r2+#0) = v25
+	}
+	{
+		r2 = setbit(r3,#6)
+		r0 = add(r29,#4288)
+		v2 = valign(v5,v5,#4)
+		vmem(r0+#0) = v24
+	}
+	{
+		v3 = vror(v9,r26)
+		v26 = vor(v12,v2)
+		v20 = vmem(r1+#0)
+	}                               // 128-byte Folded Reload
+	{
+		v21 = vmem(r0+#0)
+	}                               // 128-byte Folded Reload
+	{
+		r2 = add(r29,#4480)
+		v19:18.w = vadd(v23:22.w,v21:20.w)
+		vmem(r2+#0) = v19.new
+	}
+	{
+		v18 = valign(v13,v13,#4)
+		vmem(r3+#0) = v18
+	}
+	{
+		r2 = add(r29,#4544)
+		r0 = memw(r29+##5572)
+		vmem(r2+#0) = v26
+	}
+	{
+		v27 = vor(v3,v18)
+		r1 = memw(r29+#568)
+		vmem(r2+#0) = v27.new
+	}                               // 4-byte Folded Reload
+	{
+		call ##__hexagon_modsi3
+	}
+	.falign
+// %bb.138:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r20 = r0
+		r19 = memw(r29+#348)
+		r0 = memw(r29+##5568)
+	}                               // 4-byte Folded Reload
+	{
+		call ##__hexagon_modsi3
+		r1 = r19
+	}
+	.falign
+// %bb.139:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#4672)
+		r1 = memw(r29+#564)
+	}                               // 4-byte Folded Reload
+	{
+		v14 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v14.w = vinsert(r0)
+		r0 = memw(r29+##5576)
+	}
+	{
+		v15 = valign(v14,v14,#4)
+	}
+	{
+		v15.w = vinsert(r20)
+	}
+	{
+		call ##__hexagon_modsi3
+		v22 = valign(v15,v15,#4)
+		vmem(r29+#6) = v22.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.140:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r1 = memw(r29+#572)
+		v30 = vmem(r29+#6)
+	}                               // 64-byte Folded Reload
+	{
+		v30.w = vinsert(r0)
+		r0 = memw(r29+##5580)
+	}
+	{
+		call ##__hexagon_modsi3
+		v19 = valign(v30,v30,#4)
+		vmem(r29+#6) = v19.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.141:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r1 = memw(r29+#352)
+		v10 = vmem(r29+#6)
+	}                               // 64-byte Folded Reload
+	{
+		v10.w = vinsert(r0)
+		r0 = memw(r29+##5584)
+	}
+	{
+		call ##__hexagon_modsi3
+		v24 = valign(v10,v10,#4)
+		vmem(r29+#6) = v24.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.142:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r1 = memw(r29+##4160)
+		v11 = vmem(r29+#6)
+	}                               // 64-byte Folded Reload
+	{
+		v11.w = vinsert(r0)
+		r0 = memw(r29+##5588)
+	}
+	{
+		call ##__hexagon_modsi3
+		v6 = valign(v11,v11,#4)
+		vmem(r29+#6) = v6.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.143:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r1 = memw(r29+##4096)
+		v13 = vmem(r29+#6)
+	}                               // 64-byte Folded Reload
+	{
+		v13.w = vinsert(r0)
+		r0 = memw(r29+##5592)
+	}
+	{
+		call ##__hexagon_modsi3
+		v2 = valign(v13,v13,#4)
+		vmem(r29+#6) = v2.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.144:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r1 = memw(r29+#4092)
+		v14 = vmem(r29+#6)
+	}                               // 64-byte Folded Reload
+	{
+		v14.w = vinsert(r0)
+		r0 = memw(r29+##5596)
+	}
+	{
+		call ##__hexagon_modsi3
+		v0 = valign(v14,v14,#4)
+		vmem(r29+#6) = v0.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.145:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r1 = memw(r29+#4088)
+		v19 = vmem(r29+#6)
+	}                               // 64-byte Folded Reload
+	{
+		v19.w = vinsert(r0)
+		r0 = memw(r29+##5604)
+	}
+	{
+		v16 = valign(v19,v19,#4)
+	}
+	{
+		call ##__hexagon_modsi3
+		v4 = vror(v16,r26)
+		vmem(r29+#6) = v4.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.146:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r20 = r0
+		r0 = memw(r29+##5600)
+		r1 = memw(r29+#4084)
+	}
+	{
+		call ##__hexagon_modsi3
+	}
+	.falign
+// %bb.147:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#4672)
+		r1 = memw(r29+#3840)
+	}                               // 4-byte Folded Reload
+	{
+		v17 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v17.w = vinsert(r0)
+		r0 = memw(r29+##5608)
+	}
+	{
+		v19 = valign(v17,v17,#4)
+	}
+	{
+		v19.w = vinsert(r20)
+	}
+	{
+		call ##__hexagon_modsi3
+		v25 = valign(v19,v19,#4)
+		vmem(r29+#4) = v25.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.148:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r1 = memw(r29+#3776)
+		v18 = vmem(r29+#4)
+	}                               // 64-byte Folded Reload
+	{
+		v18.w = vinsert(r0)
+		r0 = memw(r29+##5612)
+	}
+	{
+		call ##__hexagon_modsi3
+		v26 = valign(v18,v18,#4)
+		vmem(r29+#4) = v26.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.149:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r1 = memw(r29+#3712)
+		v5 = vmem(r29+#4)
+	}                               // 64-byte Folded Reload
+	{
+		v5.w = vinsert(r0)
+		r0 = memw(r29+##5616)
+	}
+	{
+		call ##__hexagon_modsi3
+		v0 = valign(v5,v5,#4)
+		vmem(r29+#4) = v0.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.150:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r1 = memw(r29+#3648)
+		v15 = vmem(r29+#4)
+	}                               // 64-byte Folded Reload
+	{
+		v15.w = vinsert(r0)
+		r0 = memw(r29+##5620)
+	}
+	{
+		call ##__hexagon_modsi3
+		v27 = valign(v15,v15,#4)
+		vmem(r29+#4) = v27.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.151:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r1 = memw(r29+#3584)
+		v16 = vmem(r29+#4)
+	}                               // 64-byte Folded Reload
+	{
+		v16.w = vinsert(r0)
+		r0 = memw(r29+##5624)
+	}
+	{
+		call ##__hexagon_modsi3
+		v3 = valign(v16,v16,#4)
+		vmem(r29+#4) = v3.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.152:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r1 = memw(r29+#3520)
+		v12 = vmem(r29+#4)
+	}                               // 64-byte Folded Reload
+	{
+		v12.w = vinsert(r0)
+		r0 = memw(r29+##5628)
+	}
+	{
+		call ##__hexagon_modsi3
+		v27 = valign(v12,v12,#4)
+		vmem(r29+#4) = v27.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.153:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r1 = memw(r29+#3456)
+		v20 = vmem(r29+#4)
+	}                               // 64-byte Folded Reload
+	{
+		v20.w = vinsert(r0)
+		r0 = memw(r29+##5508)
+		v8 = vmem(r29+#6)
+	}
+	{
+		v20 = valign(v20,v20,#4)
+	}
+	{
+		call ##__hexagon_modsi3
+		v27 = vor(v8,v20)
+		vmem(r29+#7) = v27.new
+	}                               // 128-byte Folded Spill
+	.falign
+// %bb.154:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r20 = r0
+		r0 = memw(r29+##5504)
+		r1 = memw(r29+#3452)
+	}
+	{
+		call ##__hexagon_modsi3
+	}
+	.falign
+// %bb.155:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#4672)
+		r1 = memw(r29+#3448)
+	}                               // 4-byte Folded Reload
+	{
+		v21 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v21.w = vinsert(r0)
+		r0 = memw(r29+##5512)
+	}
+	{
+		v7 = valign(v21,v21,#4)
+	}
+	{
+		v7.w = vinsert(r20)
+	}
+	{
+		call ##__hexagon_modsi3
+		v28 = valign(v7,v7,#4)
+		vmem(r29+#4) = v28.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.156:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r1 = memw(r29+#3328)
+		v17 = vmem(r29+#4)
+	}                               // 64-byte Folded Reload
+	{
+		v17.w = vinsert(r0)
+		r0 = memw(r29+##5516)
+	}
+	{
+		call ##__hexagon_modsi3
+		v1 = valign(v17,v17,#4)
+		vmem(r29+#4) = v1.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.157:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r1 = memw(r29+#3264)
+		v19 = vmem(r29+#4)
+	}                               // 64-byte Folded Reload
+	{
+		v19.w = vinsert(r0)
+		r0 = memw(r29+##5520)
+	}
+	{
+		call ##__hexagon_modsi3
+		v29 = valign(v19,v19,#4)
+		vmem(r29+#4) = v29.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.158:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r1 = memw(r29+#3200)
+		v20 = vmem(r29+#4)
+	}                               // 64-byte Folded Reload
+	{
+		v20.w = vinsert(r0)
+		r0 = memw(r29+##5524)
+	}
+	{
+		call ##__hexagon_modsi3
+		v30 = valign(v20,v20,#4)
+		vmem(r29+#4) = v30.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.159:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r1 = memw(r29+#3136)
+		v21 = vmem(r29+#4)
+	}                               // 64-byte Folded Reload
+	{
+		v21.w = vinsert(r0)
+		r0 = memw(r29+##5528)
+	}
+	{
+		call ##__hexagon_modsi3
+		v31 = valign(v21,v21,#4)
+		vmem(r29+#4) = v31.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.160:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r1 = memw(r29+#3072)
+		v22 = vmem(r29+#4)
+	}                               // 64-byte Folded Reload
+	{
+		v22.w = vinsert(r0)
+		r0 = memw(r29+##5532)
+	}
+	{
+		call ##__hexagon_modsi3
+		v3 = valign(v22,v22,#4)
+		vmem(r29+#4) = v3.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.161:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r1 = memw(r29+#3008)
+		v21 = vmem(r29+#4)
+	}                               // 64-byte Folded Reload
+	{
+		v21.w = vinsert(r0)
+		r0 = memw(r29+##5540)
+	}
+	{
+		v22 = valign(v21,v21,#4)
+	}
+	{
+		call ##__hexagon_modsi3
+		v28 = vror(v22,r26)
+		vmem(r29+#4) = v28.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.162:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r20 = r0
+		r0 = memw(r29+##5536)
+		r1 = memw(r29+#3004)
+	}
+	{
+		call ##__hexagon_modsi3
+	}
+	.falign
+// %bb.163:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#4672)
+		r1 = memw(r29+#3000)
+	}                               // 4-byte Folded Reload
+	{
+		v23 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v23.w = vinsert(r0)
+		r0 = memw(r29+##5544)
+	}
+	{
+		v24 = valign(v23,v23,#4)
+	}
+	{
+		v24.w = vinsert(r20)
+	}
+	{
+		call ##__hexagon_modsi3
+		v4 = valign(v24,v24,#4)
+		vmem(r29+#3) = v4.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.164:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r1 = memw(r29+#2880)
+		v23 = vmem(r29+#3)
+	}                               // 64-byte Folded Reload
+	{
+		v23.w = vinsert(r0)
+		r0 = memw(r29+##5548)
+	}
+	{
+		call ##__hexagon_modsi3
+		v9 = valign(v23,v23,#4)
+		vmem(r29+#3) = v9.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.165:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r1 = memw(r29+#2816)
+		v7 = vmem(r29+#3)
+	}                               // 64-byte Folded Reload
+	{
+		v7.w = vinsert(r0)
+		r0 = memw(r29+##5552)
+	}
+	{
+		call ##__hexagon_modsi3
+		v8 = valign(v7,v7,#4)
+		vmem(r29+#3) = v8.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.166:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r1 = memw(r29+#2752)
+		v24 = vmem(r29+#3)
+	}                               // 64-byte Folded Reload
+	{
+		v24.w = vinsert(r0)
+		r0 = memw(r29+##5556)
+	}
+	{
+		call ##__hexagon_modsi3
+		v10 = valign(v24,v24,#4)
+		vmem(r29+#3) = v10.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.167:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r1 = memw(r29+#2688)
+		v6 = vmem(r29+#3)
+	}                               // 64-byte Folded Reload
+	{
+		v6.w = vinsert(r0)
+		r0 = memw(r29+##5560)
+	}
+	{
+		call ##__hexagon_modsi3
+		v11 = valign(v6,v6,#4)
+		vmem(r29+#3) = v11.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.168:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r1 = memw(r29+#2624)
+		v2 = vmem(r29+#3)
+	}                               // 64-byte Folded Reload
+	{
+		v2.w = vinsert(r0)
+		r0 = memw(r29+##5564)
+	}
+	{
+		call ##__hexagon_modsi3
+		v28 = valign(v2,v2,#4)
+		vmem(r29+#3) = v28.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.169:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r1 = memw(r29+#2560)
+		v22 = vmem(r29+#3)
+	}                               // 64-byte Folded Reload
+	{
+		v22.w = vinsert(r0)
+		r0 = memw(r29+##5700)
+		v10 = vmem(r29+#6)
+	}
+	{
+		v3 = vmem(r29+#4)
+	}                               // 64-byte Folded Reload
+	{
+		v25 = valign(v22,v22,#4)
+		v11.cur = vmem(r29+#7)
+		vmem(r29+#7) = v11
+	}                               // 128-byte Folded Reload
+	{
+		call ##__hexagon_modsi3
+		v10 = vor(v3,v25)
+		vmem(r29+#6) = v10.new
+	}                               // 128-byte Folded Spill
+	.falign
+// %bb.170:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r20 = r0
+		r0 = memw(r29+##5696)
+		r1 = memw(r29+#2496)
+	}
+	{
+		call ##__hexagon_modsi3
+	}
+	.falign
+// %bb.171:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#4672)
+		r1 = memw(r29+#2492)
+	}                               // 4-byte Folded Reload
+	{
+		v26 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v26.w = vinsert(r0)
+		r0 = memw(r29+##5704)
+	}
+	{
+		v27 = valign(v26,v26,#4)
+	}
+	{
+		v27.w = vinsert(r20)
+	}
+	{
+		call ##__hexagon_modsi3
+		v13 = valign(v27,v27,#4)
+		vmem(r29+#4) = v13.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.172:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r1 = memw(r29+#2368)
+		v25 = vmem(r29+#4)
+	}                               // 64-byte Folded Reload
+	{
+		v25.w = vinsert(r0)
+		r0 = memw(r29+##5708)
+	}
+	{
+		call ##__hexagon_modsi3
+		v14 = valign(v25,v25,#4)
+		vmem(r29+#4) = v14.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.173:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r1 = memw(r29+#2304)
+		v26 = vmem(r29+#4)
+	}                               // 64-byte Folded Reload
+	{
+		v26.w = vinsert(r0)
+		r0 = memw(r29+##5712)
+	}
+	{
+		call ##__hexagon_modsi3
+		v18 = valign(v26,v26,#4)
+		vmem(r29+#4) = v18.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.174:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r1 = memw(r29+#2240)
+		v0 = vmem(r29+#4)
+	}                               // 64-byte Folded Reload
+	{
+		v0.w = vinsert(r0)
+		r0 = memw(r29+##5716)
+	}
+	{
+		call ##__hexagon_modsi3
+		v5 = valign(v0,v0,#4)
+		vmem(r29+#4) = v5.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.175:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r1 = memw(r29+#2176)
+		v27 = vmem(r29+#4)
+	}                               // 64-byte Folded Reload
+	{
+		v27.w = vinsert(r0)
+		r0 = memw(r29+##5720)
+	}
+	{
+		call ##__hexagon_modsi3
+		v15 = valign(v27,v27,#4)
+		vmem(r29+#4) = v15.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.176:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r1 = memw(r29+#2112)
+		v3 = vmem(r29+#4)
+	}                               // 64-byte Folded Reload
+	{
+		v3.w = vinsert(r0)
+		r0 = memw(r29+##5724)
+	}
+	{
+		call ##__hexagon_modsi3
+		v1 = valign(v3,v3,#4)
+		vmem(r29+#4) = v1.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.177:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r1 = memw(r29+#2048)
+		v23 = vmem(r29+#4)
+	}                               // 64-byte Folded Reload
+	{
+		v23.w = vinsert(r0)
+		r0 = memw(r29+##5732)
+	}
+	{
+		v28 = valign(v23,v23,#4)
+	}
+	{
+		call ##__hexagon_modsi3
+		v9 = vror(v28,r26)
+		vmem(r29+#4) = v9.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.178:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r20 = r0
+		r0 = memw(r29+##5728)
+		r1 = memw(r29+#2044)
+	}
+	{
+		call ##__hexagon_modsi3
+	}
+	.falign
+// %bb.179:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#4672)
+		r1 = memw(r29+#2040)
+	}                               // 4-byte Folded Reload
+	{
+		v29 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v29.w = vinsert(r0)
+		r0 = memw(r29+##5736)
+	}
+	{
+		v30 = valign(v29,v29,#4)
+	}
+	{
+		v30.w = vinsert(r20)
+	}
+	{
+		call ##__hexagon_modsi3
+		v16 = valign(v30,v30,#4)
+		vmem(r29+#3) = v16.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.180:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r1 = memw(r29+#1920)
+		v28 = vmem(r29+#3)
+	}                               // 64-byte Folded Reload
+	{
+		v28.w = vinsert(r0)
+		r0 = memw(r29+##5740)
+	}
+	{
+		call ##__hexagon_modsi3
+		v12 = valign(v28,v28,#4)
+		vmem(r29+#3) = v12.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.181:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r1 = memw(r29+#1856)
+		v1 = vmem(r29+#3)
+	}                               // 64-byte Folded Reload
+	{
+		v1.w = vinsert(r0)
+		r0 = memw(r29+##5744)
+	}
+	{
+		call ##__hexagon_modsi3
+		v17 = valign(v1,v1,#4)
+		vmem(r29+#3) = v17.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.182:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r1 = memw(r29+#1792)
+		v29 = vmem(r29+#3)
+	}                               // 64-byte Folded Reload
+	{
+		v29.w = vinsert(r0)
+		r0 = memw(r29+##5748)
+	}
+	{
+		call ##__hexagon_modsi3
+		v19 = valign(v29,v29,#4)
+		vmem(r29+#3) = v19.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.183:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r1 = memw(r29+#1728)
+		v30 = vmem(r29+#3)
+	}                               // 64-byte Folded Reload
+	{
+		v30.w = vinsert(r0)
+		r0 = memw(r29+##5752)
+	}
+	{
+		call ##__hexagon_modsi3
+		v20 = valign(v30,v30,#4)
+		vmem(r29+#3) = v20.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.184:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r1 = memw(r29+#1664)
+		v31 = vmem(r29+#3)
+	}                               // 64-byte Folded Reload
+	{
+		v31.w = vinsert(r0)
+		r0 = memw(r29+##5756)
+	}
+	{
+		call ##__hexagon_modsi3
+		v29 = valign(v31,v31,#4)
+		vmem(r29+#3) = v29.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.185:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r1 = memw(r29+#1600)
+		v7 = vmem(r29+#3)
+	}                               // 64-byte Folded Reload
+	{
+		v7.w = vinsert(r0)
+		r0 = memw(r29+##5636)
+		v10 = vmem(r29+#4)
+	}
+	{
+		v31 = valign(v7,v7,#4)
+	}
+	{
+		call ##__hexagon_modsi3
+		v18 = vor(v10,v31)
+		vmem(r29+#4) = v18.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.186:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r20 = r0
+		r0 = memw(r29+##5632)
+		r1 = memw(r29+#1536)
+	}
+	{
+		call ##__hexagon_modsi3
+	}
+	.falign
+// %bb.187:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#4672)
+		r1 = memw(r29+#1404)
+	}                               // 4-byte Folded Reload
+	{
+		v0 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v0.w = vinsert(r0)
+		r0 = memw(r29+##5640)
+	}
+	{
+		v1 = valign(v0,v0,#4)
+	}
+	{
+		v1.w = vinsert(r20)
+	}
+	{
+		call ##__hexagon_modsi3
+		v21 = valign(v1,v1,#4)
+		vmem(r29+#3) = v21.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.188:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r1 = memw(r29+#1280)
+		v4 = vmem(r29+#3)
+	}                               // 64-byte Folded Reload
+	{
+		v4.w = vinsert(r0)
+		r0 = memw(r29+##5644)
+	}
+	{
+		call ##__hexagon_modsi3
+		v22 = valign(v4,v4,#4)
+		vmem(r29+#3) = v22.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.189:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r1 = memw(r29+#1216)
+		v8 = vmem(r29+#3)
+	}                               // 64-byte Folded Reload
+	{
+		v8.w = vinsert(r0)
+		r0 = memw(r29+##5648)
+	}
+	{
+		call ##__hexagon_modsi3
+		v23 = valign(v8,v8,#4)
+		vmem(r29+#3) = v23.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.190:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r1 = memw(r29+#1152)
+		v9 = vmem(r29+#3)
+	}                               // 64-byte Folded Reload
+	{
+		v9.w = vinsert(r0)
+		r0 = memw(r29+##5652)
+	}
+	{
+		call ##__hexagon_modsi3
+		v7 = valign(v9,v9,#4)
+		vmem(r29+#3) = v7.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.191:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r1 = memw(r29+#1088)
+		v10 = vmem(r29+#3)
+	}                               // 64-byte Folded Reload
+	{
+		v10.w = vinsert(r0)
+		r0 = memw(r29+##5656)
+	}
+	{
+		call ##__hexagon_modsi3
+		v24 = valign(v10,v10,#4)
+		vmem(r29+#3) = v24.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.192:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r1 = memw(r29+#1024)
+		v11 = vmem(r29+#3)
+	}                               // 64-byte Folded Reload
+	{
+		v11.w = vinsert(r0)
+		r0 = memw(r29+##5660)
+	}
+	{
+		call ##__hexagon_modsi3
+		v30 = valign(v11,v11,#4)
+		vmem(r29+#3) = v30.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.193:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r1 = memw(r29+#960)
+		v24 = vmem(r29+#3)
+	}                               // 64-byte Folded Reload
+	{
+		v24.w = vinsert(r0)
+		r0 = memw(r29+##5668)
+	}
+	{
+		v2 = valign(v24,v24,#4)
+	}
+	{
+		call ##__hexagon_modsi3
+		v19 = vror(v2,r26)
+		vmem(r29+#3) = v19.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.194:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r20 = r0
+		r0 = memw(r29+##5664)
+		r1 = memw(r29+#956)
+	}
+	{
+		call ##__hexagon_modsi3
+	}
+	.falign
+// %bb.195:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#4672)
+		r1 = memw(r29+#952)
+	}                               // 4-byte Folded Reload
+	{
+		v3 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v3.w = vinsert(r0)
+		r0 = memw(r29+##5672)
+	}
+	{
+		v4 = valign(v3,v3,#4)
+	}
+	{
+		v4.w = vinsert(r20)
+	}
+	{
+		call ##__hexagon_modsi3
+		v6 = valign(v4,v4,#4)
+		vmem(r29+#2) = v6.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.196:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r1 = memw(r29+#832)
+		v13 = vmem(r29+#2)
+	}                               // 64-byte Folded Reload
+	{
+		v13.w = vinsert(r0)
+		r0 = memw(r29+##5676)
+	}
+	{
+		call ##__hexagon_modsi3
+		v2 = valign(v13,v13,#4)
+		vmem(r29+#2) = v2.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.197:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r1 = memw(r29+#768)
+		v14 = vmem(r29+#2)
+	}                               // 64-byte Folded Reload
+	{
+		v14.w = vinsert(r0)
+		r0 = memw(r29+##5680)
+	}
+	{
+		call ##__hexagon_modsi3
+		v25 = valign(v14,v14,#4)
+		vmem(r29+#2) = v25.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.198:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r1 = memw(r29+#704)
+		v18 = vmem(r29+#2)
+	}                               // 64-byte Folded Reload
+	{
+		v18.w = vinsert(r0)
+		r0 = memw(r29+##5684)
+	}
+	{
+		call ##__hexagon_modsi3
+		v26 = valign(v18,v18,#4)
+		vmem(r29+#2) = v26.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.199:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r1 = memw(r29+#640)
+		v5 = vmem(r29+#2)
+	}                               // 64-byte Folded Reload
+	{
+		v5.w = vinsert(r0)
+		r0 = memw(r29+##5688)
+	}
+	{
+		call ##__hexagon_modsi3
+		v0 = valign(v5,v5,#4)
+		vmem(r29+#2) = v0.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.200:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r1 = memw(r29+#576)
+		v15 = vmem(r29+#2)
+	}                               // 64-byte Folded Reload
+	{
+		v15.w = vinsert(r0)
+		r0 = memw(r29+##5692)
+	}
+	{
+		call ##__hexagon_modsi3
+		v15 = valign(v15,v15,#4)
+		vmem(r29+#2) = v15.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.201:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#4672)
+		r4 = add(r29,#6656)
+		r5 = memw(r29+#356)
+		v1 = vmem(r29+#2)
+	}                               // 64-byte Folded Reload
+	{
+		r3 = setbit(r4,#6)
+		v1.w = vinsert(r0)
+		r11 = add(r29,#6528)
+		v17 = vmem(r29+#3)
+	}                               // 64-byte Folded Reload
+	{
+		r8 = setbit(r11,#6)
+		r2 = add(r29,#1408)
+		v8 = v2
+		v2.cur = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v9 = valign(v1,v1,#4)
+		v5.w = vasr(v11.w,r27)
+		v12 = v2
+		v11.cur = vmem(r29+#4)
+	}                               // 64-byte Folded Reload
+	{
+		v28 = vor(v17,v9)
+		v29 = v11
+		v25 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		r2 = ##715827883
+		v31 = vand(v5,v25)
+		v22 = vmem(r29+#6)
+	}                               // 128-byte Folded Reload
+	{
+		r1:0 = mpyu(r5,r2)
+		r2 = r5
+		v10.w = vasr(v28.w,r27)
+		v23 = vmem(r29+#7)
+	}                               // 128-byte Folded Reload
+	{
+		r2 -= mpyi(r1,#6)
+		v6.w = vasr(v22.w,r27)
+		v4 = v2
+		v30 = vand(v10,v25)
+	}
+	{
+		r1 = add(r29,#4224)
+		v13.w = vasr(v23.w,r27)
+		v1:0.w = vadd(v29:28.w,v31:30.w)
+	}
+	{
+		v26 = vand(v6,v25)
+		v27 = vand(v13,v25)
+		vmem(r3+#0) = v1
+	}
+	{
+		v7:6.w = vadd(v23:22.w,v27:26.w)
+		r3 = memw(r29+##6720)
+		vmem(r4+#0) = v0
+	}
+	{
+		r4 = memw(r29+##6724)
+		r0 = memw(r29+##6728)
+	}
+	{
+		r3 = memuh(r18+r3<<#1)
+		r6 = memw(r29+##6732)
+	}
+	{
+		r4 = memuh(r18+r4<<#1)
+		r7 = memw(r29+##6736)
+	}
+	{
+		r3 = combine(r4.l,r3.l)
+		r5 = memuh(r18+r0<<#1)
+		r6 = memuh(r18+r6<<#1)
+	}
+	{
+		v12.w = vinsert(r3)
+		r5 = combine(r6.l,r5.l)
+		r0 = memw(r29+##6740)
+	}
+	{
+		r3 = memw(r29+##6744)
+		r7 = memuh(r18+r7<<#1)
+	}
+	{
+		v31 = valign(v12,v12,#4)
+		r6 = memw(r29+##6748)
+		r4 = memuh(r18+r0<<#1)
+	}
+	{
+		v31.w = vinsert(r5)
+		r3 = memuh(r18+r3<<#1)
+		r9 = memw(r29+##6752)
+	}
+	{
+		r4 = combine(r4.l,r7.l)
+		r9 = memuh(r18+r9<<#1)
+		r5 = memw(r29+##6760)
+	}
+	{
+		r12 = memw(r29+##6756)
+		r0 = memw(r29+##6764)
+	}
+	{
+		v18 = valign(v31,v31,#4)
+		r5 = memuh(r18+r5<<#1)
+		r6 = memuh(r18+r6<<#1)
+	}
+	{
+		v18.w = vinsert(r4)
+		r3 = combine(r6.l,r3.l)
+		r7 = memw(r29+##6656)
+	}
+	{
+		r0 = memuh(r18+r0<<#1)
+		r4 = memw(r29+##6768)
+	}
+	{
+		v3 = valign(v18,v18,#4)
+		r7 = memuh(r18+r7<<#1)
+		r12 = memuh(r18+r12<<#1)
 	}
 	{
 		v3.w = vinsert(r3)
-		r2 = combine(r4.l,r5.l)
-		v1 = valign(v6,v6,#4)
+		r3 = combine(r0.l,r5.l)
+		r5 = memw(r29+##6660)
 	}
 	{
-		r3 = ##67372036
-		r5 = #32
+		r9 = combine(r12.l,r9.l)
+		r13 = memw(r29+##6772)
 	}
 	{
-		r4 = ##101058054
-		v7 = vror(v18,r5)
+		r0 = memw(r29+##6664)
+		r5 = memuh(r18+r5<<#1)
 	}
 	{
-		v15 = vror(v31,r5)
-		v26 = vor(v7,v17)
+		r5 = combine(r5.l,r7.l)
+		v19 = valign(v3,v3,#4)
+		r15 = memw(r29+##6668)
+	}
+	{
+		r15 = memuh(r18+r15<<#1)
+		r12 = memw(r29+##6776)
+	}
+	{
+		v19.w = vinsert(r9)
+		v8.w = vinsert(r5)
+		r28 = memw(r29+##6672)
+	}
+	{
+		r14 = memw(r29+##6780)
+		r6 = memuh(r18+r0<<#1)
+	}
+	{
+		r15 = combine(r15.l,r6.l)
+		v21 = valign(v19,v19,#4)
+		r5 = memw(r29+##6680)
+	}
+	{
+		v14 = valign(v8,v8,#4)
+		r6 = memuh(r18+r4<<#1)
+		r7 = memw(r29+##6676)
+	}
+	{
+		v14.w = vinsert(r15)
+		r28 = memuh(r18+r28<<#1)
+		r0 = memw(r29+##6684)
+	}
+	{
+		v21.w = vinsert(r3)
+		r10 = memuh(r18+r0<<#1)
+		r4 = memuh(r18+r7<<#1)
+	}
+	{
+		r13 = combine(r4.l,r28.l)
+		r7 = memuh(r18+r13<<#1)
+		r28 = memw(r29+##6688)
+	}
+	{
+		r6 = combine(r7.l,r6.l)
+		v15 = valign(v14,v14,#4)
+		r4 = memuh(r18+r12<<#1)
+		r5 = memuh(r18+r5<<#1)
+	}
+	{
+		v15.w = vinsert(r13)
+		r28 = memuh(r18+r28<<#1)
+		r0 = memw(r29+##6692)
+	}
+	{
+		r12 = combine(r10.l,r5.l)
+		r0 = memuh(r18+r0<<#1)
+		r10 = memw(r29+##6696)
+	}
+	{
+		v22 = valign(v21,v21,#4)
+		r10 = memuh(r18+r10<<#1)
+		r13 = memw(r29+##6700)
+	}
+	{
+		v22.w = vinsert(r6)
+		r28 = combine(r0.l,r28.l)
+		v16 = valign(v15,v15,#4)
+		r13 = memuh(r18+r13<<#1)
+	}
+	{
+		v16.w = vinsert(r12)
+		r15 = combine(r13.l,r10.l)
+		r10 = memw(r29+##6712)
+	}
+	{
+		v1 = valign(v22,v22,#4)
+		r0 = memw(r29+##6704)
+		r5 = memuh(r18+r14<<#1)
+	}
+	{
+		v14 = valign(v16,v16,#4)
+		r13 = memuh(r18+r0<<#1)
+		r12 = memw(r29+##6708)
+	}
+	{
+		v14.w = vinsert(r28)
+		r4 = combine(r5.l,r4.l)
+	}
+	{
+		r0 = memw(r29+##6716)
+	}
+	{
+		v17 = valign(v14,v14,#4)
+		r14 = memuh(r18+r12<<#1)
+		r12 = memuh(r18+r10<<#1)
+	}
+	{
+		v17.w = vinsert(r15)
+		r13 = combine(r14.l,r13.l)
+		r28 = memuh(r18+r0<<#1)
+		vmem(r11+#0) = v6
+	}
+	{
+		r12 = combine(r28.l,r12.l)
+		r0 = memw(r29+##6528)
+	}
+	{
+		v1.w = vinsert(r4)
+		r10 = memw(r29+##6532)
+		vmem(r8+#0) = v7
+	}
+	{
+		v20 = valign(v17,v17,#4)
+		r8 = memuh(r18+r0<<#1)
+		r11 = memw(r29+##6548)
+	}
+	{
+		v20.w = vinsert(r13)
+		v12 = valign(v1,v1,#4)
+		r0 = memw(r29+##6536)
+	}
+	{
+		r15 = memuh(r18+r10<<#1)
+		r10 = memw(r29+##6540)
+	}
+	{
+		r8 = combine(r15.l,r8.l)
+		v17 = valign(v20,v20,#4)
+		r3 = memuh(r18+r0<<#1)
+	}
+	{
+		v4.w = vinsert(r8)
+		r0 = memw(r29+##6544)
+		r8 = memuh(r18+r10<<#1)
+	}
+	{
+		v17.w = vinsert(r12)
+		r3 = combine(r8.l,r3.l)
+		r13 = memw(r29+##6552)
+	}
+	{
+		v7 = valign(v4,v4,#4)
+		r7 = memuh(r18+r0<<#1)
+		r8 = memuh(r18+r11<<#1)
+	}
+	{
+		v7.w = vinsert(r3)
+		r7 = combine(r8.l,r7.l)
+		r0 = memw(r29+##6556)
+	}
+	{
+		r3 = memw(r29+##6592)
+		r9 = memuh(r18+r13<<#1)
+	}
+	{
+		v4 = valign(v17,v17,#4)
+		r14 = memw(r29+##6596)
+		r6 = memuh(r18+r0<<#1)
+	}
+	{
+		r6 = combine(r6.l,r9.l)
+		v23 = valign(v7,v7,#4)
+		r8 = memuh(r18+r14<<#1)
+		r3 = memuh(r18+r3<<#1)
+	}
+	{
+		v23.w = vinsert(r7)
+		r3 = combine(r8.l,r3.l)
+		r10 = memw(r29+##6608)
+	}
+	{
+		v6 = vror(v4,r26)
+		r8 = memuh(r18+r10<<#1)
+		r7 = memw(r29+##6600)
+	}
+	{
+		v27 = vor(v6,v12)
+		r7 = memuh(r18+r7<<#1)
+		r0 = memw(r29+##6604)
+	}
+	{
+		v2.w = vinsert(r3)
+		v24 = valign(v23,v23,#4)
+		r5 = memw(r29+##6560)
+	}
+	{
+		v24.w = vinsert(r6)
+		r5 = memuh(r18+r5<<#1)
+		r3 = memw(r29+##6612)
+	}
+	{
+		r6 = memuh(r18+r0<<#1)
+		r15 = memw(r29+##6564)
+	}
+	{
+		r6 = combine(r6.l,r7.l)
+		v25 = valign(v2,v2,#4)
+		r11 = memw(r29+##6616)
+	}
+	{
+		v25.w = vinsert(r6)
+		v11 = valign(v24,v24,#4)
+		r3 = memuh(r18+r3<<#1)
+		r9 = memuh(r18+r15<<#1)
+	}
+	{
+		r3 = combine(r3.l,r8.l)
+		r7 = memw(r29+##6568)
+	}
+	{
+		v2 = valign(v25,v25,#4)
+		r0 = memw(r29+##6620)
+	}
+	{
+		r5 = combine(r9.l,r5.l)
+		r9 = memuh(r18+r11<<#1)
+		r12 = memw(r29+##6624)
+	}
+	{
+		v2.w = vinsert(r3)
+		r7 = memuh(r18+r7<<#1)
+		r6 = memw(r29+##6572)
+	}
+	{
+		v11.w = vinsert(r5)
+		r5 = memuh(r18+r0<<#1)
+		r3 = memw(r29+##6628)
+	}
+	{
+		r5 = combine(r5.l,r9.l)
+		v28 = valign(v2,v2,#4)
+		r6 = memuh(r18+r6<<#1)
+		r8 = memuh(r18+r12<<#1)
+	}
+	{
+		r3 = memuh(r18+r3<<#1)
+		r13 = memw(r29+##6576)
+	}
+	{
+		v28.w = vinsert(r5)
+		r6 = combine(r6.l,r7.l)
+		r7 = memw(r29+##6632)
+	}
+	{
+		r3 = combine(r3.l,r8.l)
+		v29 = valign(v11,v11,#4)
+		r7 = memuh(r18+r7<<#1)
+		r9 = memuh(r18+r13<<#1)
+	}
+	{
+		v29.w = vinsert(r6)
+		r5 = memw(r29+##6580)
+	}
+	{
+		v3 = valign(v28,v28,#4)
+		r0 = memw(r29+##6636)
+	}
+	{
+		v3.w = vinsert(r3)
+		r6 = memuh(r18+r0<<#1)
+		r14 = memw(r29+##6640)
+	}
+	{
+		r6 = combine(r6.l,r7.l)
+		v10 = valign(v29,v29,#4)
+		r3 = memw(r29+##6584)
 	}
 	{
 		v0 = valign(v3,v3,#4)
-		v17 = vor(v15,v23)
+		r8 = memuh(r18+r14<<#1)
+		r15 = memw(r29+##6588)
 	}
 	{
-		v0.w = vinsert(r2)
-		r2 = add(r29,#640)
-		v4 = vror(v8,r5)
+		v0.w = vinsert(r6)
+		r3 = memuh(r18+r3<<#1)
+		r0 = memw(r29+##6644)
 	}
 	{
-		v25 = vror(v10,r5)
-		v10 = vor(v4,v2)
+		r5 = memuh(r18+r5<<#1)
+		r6 = memw(r29+##6652)
 	}
 	{
-		v10.h += vmpyi(v26.h,r3.b)
-		v28 = vror(v30,r5)
+		r5 = combine(r5.l,r9.l)
+		r7 = memuh(r18+r0<<#1)
+		r9 = memuh(r18+r15<<#1)
 	}
 	{
-		v10.h += vmpyi(v14.h,r4.b)
-		v31 = vror(v11,r5)
-		v11 = vor(v25,v9)
-		v18 = vor(v28,v29)
+		v10.w = vinsert(r5)
+		r3 = combine(r9.l,r3.l)
+		v11 = valign(v0,v0,#4)
 	}
 	{
-		v11.h += vmpyi(v17.h,r3.b)
-		v30 = valign(v0,v0,#4)
-		v28 = vor(v31,v19)
-		v0 = vmem(r2+#0)
+		r0 = combine(r7.l,r8.l)
+		r5 = memw(r29+##6648)
+	}
+	{
+		v11.w = vinsert(r0)
+	}
+	{
+		v3 = valign(v10,v10,#4)
+		r7 = memuh(r18+r5<<#1)
+	}
+	{
+		r6 = ##67372036
+		r0 = memuh(r18+r6<<#1)
+	}
+	{
+		v3.w = vinsert(r3)
+		r3 = combine(r0.l,r7.l)
+		r7 = add(r29,#5248)
+		v5 = valign(v11,v11,#4)
+	}
+	{
+		r3 = setbit(r16,#0)
+		v5.w = vinsert(r3)
+		r0 = add(r29,#4288)
+	}
+	{
+		r3 = asl(r2,#7)
+		v13 = vsplat(r3)
+		v8 = valign(v3,v3,#4)
+	}
+	{
+		r2 = addasl(r18,r2,#7)
+		r3 = setbit(r3,#6)
+		v26 = valign(v5,v5,#4)
+		v12 = v13
+	}
+	{
+		r3 = add(r18,r3)
+		v9 = vror(v8,r26)
+	}
+	{
+		r3 = add(r29,#4352)
+		v14 = vor(v9,v26)
+		v15 = vmem(r3+#0)
+	}
+	{
+		r3 = add(r29,#4416)
+		v4 = vmem(r3+#0)
 	}                               // 128-byte Folded Reload
 	{
-		v11.h += vmpyi(v13.h,r4.b)
-		v10.h += vmpyi(v18.h,r3.b)
-		r2 = add(r29,#704)
-		v27 = vror(v5,r5)
+		r3 = add(r29,#5376)
+		v5 = vmem(r3+#0)
+	}                               // 128-byte Folded Reload
+	{
+		r2 = setbit(r7,#6)
+		v5:4.w = vadd(v13:12.w,v5:4.w)
+		v18 = vmem(r2+#0)
 	}
 	{
-		v11.h += vmpyi(v28.h,r3.b)
-		v25 = valign(v24,v24,#4)
-		r4 = memw(r29+#612)
-		r3 = memw(r29+#600)
+		r2 = add(r29,#4480)
+		vmem(r2+#0) = v5
+	}
+	{
+		r2 = add(r29,#4544)
+		v28 = vmem(r2+#0)
+	}                               // 128-byte Folded Reload
+	{
+		r2 = setbit(r3,#6)
+		v28.h += vmpyi(v27.h,r6.b)
+		v29 = vmem(r2+#0)
+		vmem(r7+#0) = v4
+	}                               // 128-byte Folded Reload
+	{
+		v29.h += vmpyi(v14.h,r6.b)
+		v8 = vmem(r1+#0)
+	}                               // 128-byte Folded Reload
+	{
+		v9 = vmem(r0+#0)
+	}                               // 128-byte Folded Reload
+	{
+		r2 = ##101058054
+		v7:6.w = vadd(v13:12.w,v9:8.w)
+		vmem(r2+#0) = v7.new
+	}
+	{
+		v28.h += vmpyi(v18.h,r2.b)
+		v29.h += vmpyi(v15.h,r2.b)
+		r2 = add(r29,#4480)
+		vmem(r3+#0) = v6
+	}
+	{
+		r2 = add(r29,#4544)
+		r0 = memw(r29+##5316)
+		vmem(r2+#0) = v28
+	}
+	{
+		call ##__hexagon_modsi3
+		r1 = memw(r29+#568)
+		vmem(r2+#0) = v29
+	}                               // 4-byte Folded Reload
+	.falign
+// %bb.202:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r20 = r0
+		r1 = r19
+		r0 = memw(r29+##5312)
+	}
+	{
+		call ##__hexagon_modsi3
+	}
+	.falign
+// %bb.203:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#4672)
+		r1 = memw(r29+#564)
 	}                               // 4-byte Folded Reload
 	{
-		v29 = vror(v1,r5)
-		v26 = vor(v27,v25)
-		r2 = memw(r29+#604)
-		v1 = vmem(r2+#0)
+		v13 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v13.w = vinsert(r0)
+		r0 = memw(r29+##5320)
+	}
+	{
+		v16 = valign(v13,v13,#4)
+	}
+	{
+		v16.w = vinsert(r20)
+	}
+	{
+		call ##__hexagon_modsi3
+		v21 = valign(v16,v16,#4)
+		vmem(r29+#6) = v21.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.204:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r1 = memw(r29+#572)
+		v16 = vmem(r29+#6)
+	}                               // 64-byte Folded Reload
+	{
+		v16.w = vinsert(r0)
+		r0 = memw(r29+##5324)
+	}
+	{
+		call ##__hexagon_modsi3
+		v20 = valign(v16,v16,#4)
+		vmem(r29+#6) = v20.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.205:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r19 = memw(r29+#352)
+		v12 = vmem(r29+#6)
+	}                               // 64-byte Folded Reload
+	{
+		v12.w = vinsert(r0)
+		r1 = r19
+		r0 = memw(r29+##5328)
+	}
+	{
+		call ##__hexagon_modsi3
+		v27 = valign(v12,v12,#4)
+		vmem(r29+#6) = v27.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.206:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r1 = memw(r29+##4160)
+		v17 = vmem(r29+#6)
+	}                               // 64-byte Folded Reload
+	{
+		v17.w = vinsert(r0)
+		r0 = memw(r29+##5332)
+	}
+	{
+		call ##__hexagon_modsi3
+		v3 = valign(v17,v17,#4)
+		vmem(r29+#6) = v3.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.207:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r1 = memw(r29+##4096)
+		v19 = vmem(r29+#6)
+	}                               // 64-byte Folded Reload
+	{
+		v19.w = vinsert(r0)
+		r0 = memw(r29+##5336)
+	}
+	{
+		call ##__hexagon_modsi3
+		v28 = valign(v19,v19,#4)
+		vmem(r29+#6) = v28.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.208:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r1 = memw(r29+#4092)
+		v20 = vmem(r29+#6)
+	}                               // 64-byte Folded Reload
+	{
+		v20.w = vinsert(r0)
+		r0 = memw(r29+##5340)
+	}
+	{
+		call ##__hexagon_modsi3
+		v31 = valign(v20,v20,#4)
+		vmem(r29+#6) = v31.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.209:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r1 = memw(r29+#4088)
+		v6 = vmem(r29+#6)
+	}                               // 64-byte Folded Reload
+	{
+		v6.w = vinsert(r0)
+		r0 = memw(r29+##5348)
+	}
+	{
+		v17 = valign(v6,v6,#4)
+	}
+	{
+		call ##__hexagon_modsi3
+		v11 = vror(v17,r26)
+		vmem(r29+#6) = v11.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.210:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r20 = r0
+		r0 = memw(r29+##5344)
+		r1 = memw(r29+#4084)
+	}
+	{
+		call ##__hexagon_modsi3
+	}
+	.falign
+// %bb.211:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#4672)
+		r1 = memw(r29+#3840)
+	}                               // 4-byte Folded Reload
+	{
+		v19 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v19.w = vinsert(r0)
+		r0 = memw(r29+##5352)
+	}
+	{
+		v20 = valign(v19,v19,#4)
+	}
+	{
+		v20.w = vinsert(r20)
+	}
+	{
+		call ##__hexagon_modsi3
+		v1 = valign(v20,v20,#4)
+		vmem(r29+#4) = v1.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.212:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r1 = memw(r29+#3776)
+		v21 = vmem(r29+#4)
+	}                               // 64-byte Folded Reload
+	{
+		v21.w = vinsert(r0)
+		r0 = memw(r29+##5356)
+	}
+	{
+		call ##__hexagon_modsi3
+		v29 = valign(v21,v21,#4)
+		vmem(r29+#4) = v29.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.213:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r1 = memw(r29+#3712)
+		v22 = vmem(r29+#4)
+	}                               // 64-byte Folded Reload
+	{
+		v22.w = vinsert(r0)
+		r0 = memw(r29+##5360)
+	}
+	{
+		call ##__hexagon_modsi3
+		v30 = valign(v22,v22,#4)
+		vmem(r29+#4) = v30.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.214:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r1 = memw(r29+#3648)
+		v23 = vmem(r29+#4)
+	}                               // 64-byte Folded Reload
+	{
+		v23.w = vinsert(r0)
+		r0 = memw(r29+##5364)
+	}
+	{
+		call ##__hexagon_modsi3
+		v31 = valign(v23,v23,#4)
+		vmem(r29+#4) = v31.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.215:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r1 = memw(r29+#3584)
+		v7 = vmem(r29+#4)
+	}                               // 64-byte Folded Reload
+	{
+		v7.w = vinsert(r0)
+		r0 = memw(r29+##5368)
+	}
+	{
+		call ##__hexagon_modsi3
+		v4 = valign(v7,v7,#4)
+		vmem(r29+#4) = v4.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.216:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r1 = memw(r29+#3520)
+		v24 = vmem(r29+#4)
+	}                               // 64-byte Folded Reload
+	{
+		v24.w = vinsert(r0)
+		r0 = memw(r29+##5372)
+	}
+	{
+		call ##__hexagon_modsi3
+		v4 = valign(v24,v24,#4)
+		vmem(r29+#4) = v4.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.217:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r1 = memw(r29+#3456)
+		v2 = vmem(r29+#4)
+	}                               // 64-byte Folded Reload
+	{
+		v2.w = vinsert(r0)
+		r0 = memw(r29+##5252)
+		v13 = vmem(r29+#6)
+	}
+	{
+		v21 = valign(v2,v2,#4)
+	}
+	{
+		call ##__hexagon_modsi3
+		v31 = vor(v13,v21)
+		vmem(r29+#7) = v31.new
+	}                               // 128-byte Folded Spill
+	.falign
+// %bb.218:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r20 = r0
+		r0 = memw(r29+##5248)
+		r1 = memw(r29+#3452)
+	}
+	{
+		call ##__hexagon_modsi3
+	}
+	.falign
+// %bb.219:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#4672)
+		r1 = memw(r29+#3448)
+	}                               // 4-byte Folded Reload
+	{
+		v7 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v7.w = vinsert(r0)
+		r0 = memw(r29+##5256)
+	}
+	{
+		v22 = valign(v7,v7,#4)
+	}
+	{
+		v22.w = vinsert(r20)
+	}
+	{
+		call ##__hexagon_modsi3
+		v9 = valign(v22,v22,#4)
+		vmem(r29+#4) = v9.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.220:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r1 = memw(r29+#3328)
+		v6 = vmem(r29+#4)
+	}                               // 64-byte Folded Reload
+	{
+		v6.w = vinsert(r0)
+		r0 = memw(r29+##5260)
+	}
+	{
+		call ##__hexagon_modsi3
+		v8 = valign(v6,v6,#4)
+		vmem(r29+#4) = v8.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.221:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r1 = memw(r29+#3264)
+		v2 = vmem(r29+#4)
+	}                               // 64-byte Folded Reload
+	{
+		v2.w = vinsert(r0)
+		r0 = memw(r29+##5264)
+	}
+	{
+		call ##__hexagon_modsi3
+		v10 = valign(v2,v2,#4)
+		vmem(r29+#4) = v10.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.222:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r1 = memw(r29+#3200)
+		v25 = vmem(r29+#4)
+	}                               // 64-byte Folded Reload
+	{
+		v25.w = vinsert(r0)
+		r0 = memw(r29+##5268)
+	}
+	{
+		call ##__hexagon_modsi3
+		v11 = valign(v25,v25,#4)
+		vmem(r29+#4) = v11.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.223:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r1 = memw(r29+#3136)
+		v26 = vmem(r29+#4)
+	}                               // 64-byte Folded Reload
+	{
+		v26.w = vinsert(r0)
+		r0 = memw(r29+##5272)
+	}
+	{
+		call ##__hexagon_modsi3
+		v13 = valign(v26,v26,#4)
+		vmem(r29+#4) = v13.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.224:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r1 = memw(r29+#3072)
+		v0 = vmem(r29+#4)
+	}                               // 64-byte Folded Reload
+	{
+		v0.w = vinsert(r0)
+		r0 = memw(r29+##5276)
+	}
+	{
+		call ##__hexagon_modsi3
+		v9 = valign(v0,v0,#4)
+		vmem(r29+#4) = v9.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.225:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r1 = memw(r29+#3008)
+		v25 = vmem(r29+#4)
+	}                               // 64-byte Folded Reload
+	{
+		v25.w = vinsert(r0)
+		r0 = memw(r29+##5284)
+	}
+	{
+		v23 = valign(v25,v25,#4)
+	}
+	{
+		call ##__hexagon_modsi3
+		v29 = vror(v23,r26)
+		vmem(r29+#4) = v29.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.226:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r20 = r0
+		r0 = memw(r29+##5280)
+		r1 = memw(r29+#3004)
+	}
+	{
+		call ##__hexagon_modsi3
+	}
+	.falign
+// %bb.227:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#4672)
+		r1 = memw(r29+#3000)
+	}                               // 4-byte Folded Reload
+	{
+		v24 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v24.w = vinsert(r0)
+		r0 = memw(r29+##5288)
+	}
+	{
+		v25 = valign(v24,v24,#4)
+	}
+	{
+		v25.w = vinsert(r20)
+	}
+	{
+		call ##__hexagon_modsi3
+		v14 = valign(v25,v25,#4)
+		vmem(r29+#3) = v14.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.228:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r1 = memw(r29+#2880)
+		v27 = vmem(r29+#3)
+	}                               // 64-byte Folded Reload
+	{
+		v27.w = vinsert(r0)
+		r0 = memw(r29+##5292)
+	}
+	{
+		call ##__hexagon_modsi3
+		v18 = valign(v27,v27,#4)
+		vmem(r29+#3) = v18.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.229:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r1 = memw(r29+#2816)
+		v3 = vmem(r29+#3)
+	}                               // 64-byte Folded Reload
+	{
+		v3.w = vinsert(r0)
+		r0 = memw(r29+##5296)
+	}
+	{
+		call ##__hexagon_modsi3
+		v5 = valign(v3,v3,#4)
+		vmem(r29+#3) = v5.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.230:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r1 = memw(r29+#2752)
+		v28 = vmem(r29+#3)
+	}                               // 64-byte Folded Reload
+	{
+		v28.w = vinsert(r0)
+		r0 = memw(r29+##5300)
+	}
+	{
+		call ##__hexagon_modsi3
+		v15 = valign(v28,v28,#4)
+		vmem(r29+#3) = v15.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.231:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r1 = memw(r29+#2688)
+		v1 = vmem(r29+#3)
+	}                               // 64-byte Folded Reload
+	{
+		v1.w = vinsert(r0)
+		r0 = memw(r29+##5304)
+	}
+	{
+		call ##__hexagon_modsi3
+		v16 = valign(v1,v1,#4)
+		vmem(r29+#3) = v16.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.232:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r1 = memw(r29+#2624)
+		v29 = vmem(r29+#3)
+	}                               // 64-byte Folded Reload
+	{
+		v29.w = vinsert(r0)
+		r0 = memw(r29+##5308)
+	}
+	{
+		call ##__hexagon_modsi3
+		v8 = valign(v29,v29,#4)
+		vmem(r29+#3) = v8.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.233:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r1 = memw(r29+#2560)
+		v26 = vmem(r29+#3)
+	}                               // 64-byte Folded Reload
+	{
+		v26.w = vinsert(r0)
+		r0 = memw(r29+##5444)
+		v28 = vmem(r29+#6)
+	}
+	{
+		v1 = vmem(r29+#4)
+	}                               // 64-byte Folded Reload
+	{
+		v26 = valign(v26,v26,#4)
+		v29.cur = vmem(r29+#7)
+		vmem(r29+#7) = v29
 	}                               // 128-byte Folded Reload
 	{
-		r2 = add(r4,r2)
-		r4 = add(r4,#1)
-		v27 = vor(v29,v30)
+		call ##__hexagon_modsi3
+		v28 = vor(v1,v26)
+		vmem(r29+#6) = v28.new
+	}                               // 128-byte Folded Spill
+	.falign
+// %bb.234:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r20 = r0
+		r0 = memw(r29+##5440)
+		r1 = memw(r29+#2496)
+	}
+	{
+		call ##__hexagon_modsi3
+	}
+	.falign
+// %bb.235:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#4672)
+		r1 = memw(r29+#2492)
+	}                               // 4-byte Folded Reload
+	{
+		v27 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v27.w = vinsert(r0)
+		r0 = memw(r29+##5448)
+	}
+	{
+		v28 = valign(v27,v27,#4)
+	}
+	{
+		v28.w = vinsert(r20)
+	}
+	{
+		call ##__hexagon_modsi3
+		v12 = valign(v28,v28,#4)
+		vmem(r29+#4) = v12.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.236:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r1 = memw(r29+#2368)
+		v30 = vmem(r29+#4)
+	}                               // 64-byte Folded Reload
+	{
+		v30.w = vinsert(r0)
+		r0 = memw(r29+##5452)
+	}
+	{
+		call ##__hexagon_modsi3
+		v17 = valign(v30,v30,#4)
+		vmem(r29+#4) = v17.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.237:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r1 = memw(r29+#2304)
+		v31 = vmem(r29+#4)
+	}                               // 64-byte Folded Reload
+	{
+		v31.w = vinsert(r0)
+		r0 = memw(r29+##5456)
+	}
+	{
+		call ##__hexagon_modsi3
+		v19 = valign(v31,v31,#4)
+		vmem(r29+#4) = v19.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.238:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r1 = memw(r29+#2240)
+		v4 = vmem(r29+#4)
+	}                               // 64-byte Folded Reload
+	{
+		v4.w = vinsert(r0)
+		r0 = memw(r29+##5460)
+	}
+	{
+		call ##__hexagon_modsi3
+		v20 = valign(v4,v4,#4)
+		vmem(r29+#4) = v20.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.239:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r1 = memw(r29+#2176)
+		v8 = vmem(r29+#4)
+	}                               // 64-byte Folded Reload
+	{
+		v8.w = vinsert(r0)
+		r0 = memw(r29+##5464)
+	}
+	{
+		call ##__hexagon_modsi3
+		v21 = valign(v8,v8,#4)
+		vmem(r29+#4) = v21.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.240:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r1 = memw(r29+#2112)
+		v9 = vmem(r29+#4)
+	}                               // 64-byte Folded Reload
+	{
+		v9.w = vinsert(r0)
+		r0 = memw(r29+##5468)
+	}
+	{
+		call ##__hexagon_modsi3
+		v10 = valign(v9,v9,#4)
+		vmem(r29+#4) = v10.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.241:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r1 = memw(r29+#2048)
+		v0 = vmem(r29+#4)
+	}                               // 64-byte Folded Reload
+	{
+		v0.w = vinsert(r0)
+		r0 = memw(r29+##5476)
+	}
+	{
+		v29 = valign(v0,v0,#4)
+	}
+	{
+		call ##__hexagon_modsi3
+		v14 = vror(v29,r26)
+		vmem(r29+#4) = v14.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.242:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r20 = r0
+		r0 = memw(r29+##5472)
+		r1 = memw(r29+#2044)
+	}
+	{
+		call ##__hexagon_modsi3
+	}
+	.falign
+// %bb.243:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#4672)
+		r1 = memw(r29+#2040)
+	}                               // 4-byte Folded Reload
+	{
+		v30 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v30.w = vinsert(r0)
+		r0 = memw(r29+##5480)
+	}
+	{
+		v31 = valign(v30,v30,#4)
+	}
+	{
+		v31.w = vinsert(r20)
+	}
+	{
+		call ##__hexagon_modsi3
+		v22 = valign(v31,v31,#4)
+		vmem(r29+#3) = v22.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.244:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r1 = memw(r29+#1920)
+		v10 = vmem(r29+#3)
+	}                               // 64-byte Folded Reload
+	{
+		v10.w = vinsert(r0)
+		r0 = memw(r29+##5484)
+	}
+	{
+		call ##__hexagon_modsi3
+		v23 = valign(v10,v10,#4)
+		vmem(r29+#3) = v23.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.245:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r1 = memw(r29+#1856)
+		v11 = vmem(r29+#3)
+	}                               // 64-byte Folded Reload
+	{
+		v11.w = vinsert(r0)
+		r0 = memw(r29+##5488)
+	}
+	{
+		call ##__hexagon_modsi3
+		v7 = valign(v11,v11,#4)
+		vmem(r29+#3) = v7.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.246:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r1 = memw(r29+#1792)
+		v13 = vmem(r29+#3)
+	}                               // 64-byte Folded Reload
+	{
+		v13.w = vinsert(r0)
+		r0 = memw(r29+##5492)
+	}
+	{
+		call ##__hexagon_modsi3
+		v24 = valign(v13,v13,#4)
+		vmem(r29+#3) = v24.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.247:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r1 = memw(r29+#1728)
+		v14 = vmem(r29+#3)
+	}                               // 64-byte Folded Reload
+	{
+		v14.w = vinsert(r0)
+		r0 = memw(r29+##5496)
+	}
+	{
+		call ##__hexagon_modsi3
+		v6 = valign(v14,v14,#4)
+		vmem(r29+#3) = v6.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.248:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r1 = memw(r29+#1664)
+		v18 = vmem(r29+#3)
+	}                               // 64-byte Folded Reload
+	{
+		v18.w = vinsert(r0)
+		r0 = memw(r29+##5500)
+	}
+	{
+		call ##__hexagon_modsi3
+		v11 = valign(v18,v18,#4)
+		vmem(r29+#3) = v11.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.249:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r1 = memw(r29+#1600)
+		v27 = vmem(r29+#3)
+	}                               // 64-byte Folded Reload
+	{
+		v27.w = vinsert(r0)
+		r0 = memw(r29+##5380)
+		v18 = vmem(r29+#4)
+	}
+	{
+		v0 = valign(v27,v27,#4)
+	}
+	{
+		call ##__hexagon_modsi3
+		v5 = vor(v18,v0)
+		vmem(r29+#4) = v5.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.250:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r20 = r0
+		r0 = memw(r29+##5376)
+		r1 = memw(r29+#1536)
+	}
+	{
+		call ##__hexagon_modsi3
+	}
+	.falign
+// %bb.251:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#4672)
+		r1 = memw(r29+#1404)
+	}                               // 4-byte Folded Reload
+	{
+		v1 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v1.w = vinsert(r0)
+		r0 = memw(r29+##5384)
+	}
+	{
+		v2 = valign(v1,v1,#4)
+	}
+	{
+		v2.w = vinsert(r20)
+	}
+	{
+		call ##__hexagon_modsi3
+		v2 = valign(v2,v2,#4)
+		vmem(r29+#3) = v2.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.252:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r1 = memw(r29+#1280)
+		v5 = vmem(r29+#3)
+	}                               // 64-byte Folded Reload
+	{
+		v5.w = vinsert(r0)
+		r0 = memw(r29+##5388)
+	}
+	{
+		call ##__hexagon_modsi3
+		v25 = valign(v5,v5,#4)
+		vmem(r29+#3) = v25.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.253:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r1 = memw(r29+#1216)
+		v15 = vmem(r29+#3)
+	}                               // 64-byte Folded Reload
+	{
+		v15.w = vinsert(r0)
+		r0 = memw(r29+##5392)
+	}
+	{
+		call ##__hexagon_modsi3
+		v26 = valign(v15,v15,#4)
+		vmem(r29+#3) = v26.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.254:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r1 = memw(r29+#1152)
+		v16 = vmem(r29+#3)
+	}                               // 64-byte Folded Reload
+	{
+		v16.w = vinsert(r0)
+		r0 = memw(r29+##5396)
+	}
+	{
+		call ##__hexagon_modsi3
+		v0 = valign(v16,v16,#4)
+		vmem(r29+#3) = v0.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.255:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r1 = memw(r29+#1088)
+		v12 = vmem(r29+#3)
+	}                               // 64-byte Folded Reload
+	{
+		v12.w = vinsert(r0)
+		r0 = memw(r29+##5400)
+	}
+	{
+		call ##__hexagon_modsi3
+		v27 = valign(v12,v12,#4)
+		vmem(r29+#3) = v27.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.256:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r1 = memw(r29+#1024)
+		v17 = vmem(r29+#3)
+	}                               // 64-byte Folded Reload
+	{
+		v17.w = vinsert(r0)
+		r0 = memw(r29+##5404)
+	}
+	{
+		call ##__hexagon_modsi3
+		v13 = valign(v17,v17,#4)
+		vmem(r29+#3) = v13.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.257:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r1 = memw(r29+#960)
+		v3 = vmem(r29+#3)
+	}                               // 64-byte Folded Reload
+	{
+		v3.w = vinsert(r0)
+		r0 = memw(r29+##5412)
+	}
+	{
+		v3 = valign(v3,v3,#4)
+	}
+	{
+		call ##__hexagon_modsi3
+		v21 = vror(v3,r26)
+		vmem(r29+#3) = v21.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.258:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r20 = r0
+		r0 = memw(r29+##5408)
+		r1 = memw(r29+#956)
+	}
+	{
+		call ##__hexagon_modsi3
+	}
+	.falign
+// %bb.259:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#4672)
+		r1 = memw(r29+#952)
+	}                               // 4-byte Folded Reload
+	{
+		v4 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v4.w = vinsert(r0)
+		r0 = memw(r29+##5416)
+	}
+	{
+		v5 = valign(v4,v4,#4)
+	}
+	{
+		v5.w = vinsert(r20)
+	}
+	{
+		call ##__hexagon_modsi3
+		v3 = valign(v5,v5,#4)
+		vmem(r29+#2) = v3.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.260:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r1 = memw(r29+#832)
+		v19 = vmem(r29+#2)
+	}                               // 64-byte Folded Reload
+	{
+		v19.w = vinsert(r0)
+		r0 = memw(r29+##5420)
+	}
+	{
+		call ##__hexagon_modsi3
+		v28 = valign(v19,v19,#4)
+		vmem(r29+#2) = v28.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.261:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r1 = memw(r29+#768)
+		v20 = vmem(r29+#2)
+	}                               // 64-byte Folded Reload
+	{
+		v20.w = vinsert(r0)
+		r0 = memw(r29+##5424)
+	}
+	{
+		call ##__hexagon_modsi3
+		v1 = valign(v20,v20,#4)
+		vmem(r29+#2) = v1.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.262:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r1 = memw(r29+#704)
+		v21 = vmem(r29+#2)
+	}                               // 64-byte Folded Reload
+	{
+		v21.w = vinsert(r0)
+		r0 = memw(r29+##5428)
+	}
+	{
+		call ##__hexagon_modsi3
+		v29 = valign(v21,v21,#4)
+		vmem(r29+#2) = v29.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.263:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r1 = memw(r29+#640)
+		v22 = vmem(r29+#2)
+	}                               // 64-byte Folded Reload
+	{
+		v22.w = vinsert(r0)
+		r0 = memw(r29+##5432)
+	}
+	{
+		call ##__hexagon_modsi3
+		v30 = valign(v22,v22,#4)
+		vmem(r29+#2) = v30.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.264:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r1 = memw(r29+#576)
+		v23 = vmem(r29+#2)
+	}                               // 64-byte Folded Reload
+	{
+		v23.w = vinsert(r0)
+		r0 = memw(r29+##5436)
+	}
+	{
+		call ##__hexagon_modsi3
+		v16 = valign(v23,v23,#4)
+		vmem(r29+#2) = v16.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.265:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r5 = add(r29,#1408)
+		r4 = add(r29,#6400)
+		r2 = add(r29,#4672)
+		v29 = vmem(r29+#2)
+	}                               // 64-byte Folded Reload
+	{
+		r3 = setbit(r4,#6)
+		v29.w = vinsert(r0)
+		r0 = add(r29,#6272)
+		v20 = vmem(r29+#3)
+	}                               // 64-byte Folded Reload
+	{
+		r1 = add(r29,#4992)
+		v8.w = vasr(v13.w,r27)
+		v13.cur = vmem(r29+#4)
+	}                               // 64-byte Folded Reload
+	{
+		r5 = setbit(r0,#6)
+		v11 = valign(v29,v29,#4)
+		v17 = v13
+		v28 = vmem(r5+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v9.w = vasr(v24.w,r27)
+		v16 = vor(v20,v11)
+		v21 = vand(v8,v28)
+		v24.cur = vmem(r29+#6)
+	}                               // 128-byte Folded Reload
+	{
+		r2 = setbit(r16,#1)
+		v14 = vand(v9,v28)
+		v12 = v3
+		v3.cur = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v2.w = vasr(v16.w,r27)
+		v10 = v3
+		v6 = v3
+		v25 = vmem(r29+#7)
+	}                               // 128-byte Folded Reload
+	{
+		r2 = setbit(r1,#6)
+		v1 = vsplat(r2)
+		v18.w = vasr(v25.w,r27)
+		v20 = vand(v2,v28)
+	}
+	{
+		v9:8.w = vadd(v17:16.w,v21:20.w)
+		v15 = vand(v18,v28)
+		vmem(r3+#0) = v9.new
+	}
+	{
+		v5:4.w = vadd(v25:24.w,v15:14.w)
+		r3 = memw(r29+##6464)
+		vmem(r4+#0) = v8
+	}
+	{
+		r4 = memw(r29+##6468)
+		r6 = memw(r29+##6472)
+	}
+	{
+		r3 = memuh(r18+r3<<#1)
+		r7 = memw(r29+##6476)
+	}
+	{
+		r4 = memuh(r18+r4<<#1)
+		r8 = memw(r29+##6480)
+	}
+	{
+		r3 = combine(r4.l,r3.l)
+		r6 = memuh(r18+r6<<#1)
+		r7 = memuh(r18+r7<<#1)
+	}
+	{
+		v10.w = vinsert(r3)
+		r6 = combine(r7.l,r6.l)
+		r4 = memw(r29+##6484)
+	}
+	{
+		r3 = memw(r29+##6488)
+		r9 = memw(r29+##6496)
+	}
+	{
+		v14 = valign(v10,v10,#4)
+		r8 = memuh(r18+r8<<#1)
+		r4 = memuh(r18+r4<<#1)
+	}
+	{
+		v14.w = vinsert(r6)
+		r3 = memuh(r18+r3<<#1)
+		r7 = memw(r29+##6492)
+	}
+	{
+		r4 = combine(r4.l,r8.l)
+		r7 = memuh(r18+r7<<#1)
+		r12 = memw(r29+##6500)
+	}
+	{
+		r14 = memw(r29+##6520)
+		r15 = memw(r29+##6400)
+	}
+	{
+		r3 = combine(r7.l,r3.l)
+		v15 = valign(v14,v14,#4)
+		r6 = memw(r29+##6504)
+	}
+	{
+		v15.w = vinsert(r4)
+		r8 = memuh(r18+r6<<#1)
+		r4 = memw(r29+##6512)
+	}
+	{
+		r11 = memw(r29+##6524)
+		r10 = memw(r29+##6404)
+	}
+	{
+		r13 = memw(r29+##6508)
+		r6 = memuh(r18+r4<<#1)
+	}
+	{
+		v8 = valign(v15,v15,#4)
+		r4 = memuh(r18+r11<<#1)
+		r11 = memuh(r18+r10<<#1)
+	}
+	{
+		v8.w = vinsert(r3)
+		r3 = memuh(r18+r14<<#1)
+		r14 = memuh(r18+r15<<#1)
+	}
+	{
+		r3 = combine(r4.l,r3.l)
+		r28 = memw(r29+##6408)
+		r9 = memuh(r18+r9<<#1)
+	}
+	{
+		r14 = combine(r11.l,r14.l)
+		r7 = memw(r29+##6516)
+	}
+	{
+		v10 = valign(v8,v8,#4)
+		r15 = memuh(r18+r28<<#1)
+		r10 = memw(r29+##6412)
+	}
+	{
+		v12.w = vinsert(r14)
+		r7 = memuh(r18+r7<<#1)
+		r11 = memw(r29+##6416)
+	}
+	{
+		r6 = combine(r7.l,r6.l)
+	}
+	{
+		r12 = memuh(r18+r12<<#1)
+		r14 = memuh(r18+r11<<#1)
+	}
+	{
+		r12 = combine(r12.l,r9.l)
+		v12 = valign(v12,v12,#4)
+		r9 = memuh(r18+r13<<#1)
+		r13 = memuh(r18+r10<<#1)
+	}
+	{
+		v10.w = vinsert(r12)
+		r8 = combine(r9.l,r8.l)
+		r10 = memw(r29+##6420)
+	}
+	{
+		r13 = combine(r13.l,r15.l)
+		r11 = memw(r29+##6428)
+	}
+	{
+		v12.w = vinsert(r13)
+		v22 = valign(v10,v10,#4)
+		r13 = memuh(r18+r10<<#1)
+	}
+	{
+		r13 = combine(r13.l,r14.l)
+		r10 = memw(r29+##6424)
+	}
+	{
+		v22.w = vinsert(r8)
+		v9 = valign(v12,v12,#4)
+		r15 = memw(r29+##6456)
+	}
+	{
+		v9.w = vinsert(r13)
+		r14 = memuh(r18+r10<<#1)
+		r10 = memw(r29+##6436)
+	}
+	{
+		v18 = valign(v22,v22,#4)
+		r13 = memuh(r18+r11<<#1)
+		r11 = memw(r29+##6432)
+	}
+	{
+		v18.w = vinsert(r6)
+		r13 = combine(r13.l,r14.l)
+	}
+	{
+		v19 = valign(v9,v9,#4)
+		r14 = memuh(r18+r11<<#1)
+		r11 = memw(r29+##6444)
+	}
+	{
+		v19.w = vinsert(r13)
+		r13 = memuh(r18+r10<<#1)
+		r10 = memw(r29+##6440)
+	}
+	{
+		r13 = combine(r13.l,r14.l)
+	}
+	{
+		v11 = valign(v19,v19,#4)
+		r14 = memuh(r18+r10<<#1)
+		r10 = memw(r29+##6452)
+	}
+	{
+		v11.w = vinsert(r13)
+		r13 = memuh(r18+r11<<#1)
+		r11 = memw(r29+##6448)
+	}
+	{
+		r13 = combine(r13.l,r14.l)
+		r10 = memuh(r18+r10<<#1)
+	}
+	{
+		v12 = valign(v11,v11,#4)
+		r14 = memuh(r18+r11<<#1)
+		r11 = memw(r29+##6460)
+	}
+	{
+		v12.w = vinsert(r13)
+	}
+	{
+		r13 = combine(r10.l,r14.l)
+		r14 = memuh(r18+r15<<#1)
+		r15 = memuh(r18+r11<<#1)
+	}
+	{
+		r0 = combine(r15.l,r14.l)
+		v7 = valign(v12,v12,#4)
+		vmem(r0+#0) = v4
+	}
+	{
+		v7.w = vinsert(r13)
+		r10 = memw(r29+##6272)
+		vmem(r5+#0) = v5
+	}
+	{
+		r11 = memw(r29+##6276)
+		r5 = memw(r29+##6280)
+	}
+	{
+		v13 = valign(v7,v7,#4)
+		r14 = memuh(r18+r10<<#1)
+		r15 = memw(r29+##6284)
+	}
+	{
+		v13.w = vinsert(r0)
+		r12 = memuh(r18+r11<<#1)
+		r0 = memw(r29+##6288)
+	}
+	{
+		r9 = combine(r12.l,r14.l)
+		r10 = memw(r29+##6336)
+		r5 = memuh(r18+r5<<#1)
+	}
+	{
+		v6.w = vinsert(r9)
+		v2 = valign(v13,v13,#4)
+		r8 = memuh(r18+r15<<#1)
+		r7 = memuh(r18+r0<<#1)
+	}
+	{
+		r5 = combine(r8.l,r5.l)
+		r12 = memuh(r18+r10<<#1)
+		r0 = memw(r29+##6340)
+	}
+	{
+		v6 = valign(v6,v6,#4)
+		r11 = memw(r29+##6292)
+	}
+	{
+		v6.w = vinsert(r5)
+		r14 = memw(r29+##6344)
+		r5 = memuh(r18+r0<<#1)
+	}
+	{
+		r5 = combine(r5.l,r12.l)
+		r13 = memw(r29+##6296)
+		r9 = memuh(r18+r11<<#1)
+	}
+	{
+		r0 = memw(r29+##6348)
+		r6 = memw(r29+##6300)
+	}
+	{
+		v3.w = vinsert(r5)
+		r7 = combine(r9.l,r7.l)
+		v23 = valign(v6,v6,#4)
+		r8 = memuh(r18+r13<<#1)
+	}
+	{
+		v23.w = vinsert(r7)
+		r15 = memw(r29+##6352)
+		r7 = memuh(r18+r0<<#1)
+	}
+	{
+		v25 = valign(v3,v3,#4)
+		r6 = memuh(r18+r6<<#1)
+		r9 = memuh(r18+r14<<#1)
+	}
+	{
+		r6 = combine(r6.l,r8.l)
+		r7 = combine(r7.l,r9.l)
+		r0 = memw(r29+##6356)
+	}
+	{
+		v24 = valign(v23,v23,#4)
+		r10 = memw(r29+##6304)
+		r8 = memuh(r18+r15<<#1)
+	}
+	{
+		v25.w = vinsert(r7)
+		r12 = memuh(r18+r10<<#1)
+		r11 = memw(r29+##6360)
+	}
+	{
+		v24.w = vinsert(r6)
+		r5 = memw(r29+##6308)
+		r6 = memuh(r18+r0<<#1)
+	}
+	{
+		v3 = valign(v18,v18,#4)
+		r5 = memuh(r18+r5<<#1)
+		r7 = memw(r29+##6364)
+	}
+	{
+		v3.w = vinsert(r3)
+		r5 = combine(r5.l,r12.l)
+		v26 = valign(v25,v25,#4)
+		r9 = memuh(r18+r11<<#1)
+	}
+	{
+		r6 = combine(r6.l,r8.l)
+		v27 = valign(v24,v24,#4)
+		r14 = memw(r29+##6368)
+	}
+	{
+		v26.w = vinsert(r6)
+		r7 = memuh(r18+r7<<#1)
+		r15 = memw(r29+##6372)
+	}
+	{
+		v27.w = vinsert(r5)
+		v11 = valign(v3,v3,#4)
+		r0 = memw(r29+##6312)
+	}
+	{
+		v28 = valign(v26,v26,#4)
+		r12 = memuh(r18+r14<<#1)
+		r5 = memw(r29+##6376)
+	}
+	{
+		r7 = combine(r7.l,r9.l)
+		v30 = valign(v27,v27,#4)
+		r10 = memw(r29+##6316)
+	}
+	{
+		v28.w = vinsert(r7)
+		r9 = memuh(r18+r10<<#1)
+		r7 = memw(r29+##6320)
+	}
+	{
+		r8 = memuh(r18+r15<<#1)
+		r6 = memuh(r18+r0<<#1)
+	}
+	{
+		r8 = combine(r8.l,r12.l)
+		v29 = valign(v28,v28,#4)
+		r7 = memuh(r18+r7<<#1)
+		r5 = memuh(r18+r5<<#1)
+	}
+	{
+		r4 = combine(r9.l,r6.l)
+		r0 = memw(r29+##6380)
+	}
+	{
+		v29.w = vinsert(r8)
+		r6 = memuh(r18+r0<<#1)
+		r11 = memw(r29+##6324)
+	}
+	{
+		v30.w = vinsert(r4)
+		r5 = combine(r6.l,r5.l)
+		r4 = memw(r29+##6384)
+	}
+	{
+		v31 = valign(v29,v29,#4)
+		r14 = memuh(r18+r11<<#1)
+		r15 = memw(r29+##6328)
+	}
+	{
+		v31.w = vinsert(r5)
+		r7 = combine(r14.l,r7.l)
+		r0 = memw(r29+##6388)
+	}
+	{
+		v0 = valign(v30,v30,#4)
+		r6 = memuh(r18+r0<<#1)
+		r5 = memw(r29+##6332)
+	}
+	{
+		v30 = vror(v2,r26)
+		r8 = memuh(r18+r15<<#1)
+		r4 = memuh(r18+r4<<#1)
+	}
+	{
+		v0.w = vinsert(r7)
+		r4 = combine(r6.l,r4.l)
+		v4 = valign(v31,v31,#4)
+		r5 = memuh(r18+r5<<#1)
+	}
+	{
+		r3 = combine(r5.l,r8.l)
+		r7 = memw(r29+##6392)
+	}
+	{
+		v18 = vor(v30,v11)
+		r0 = memw(r29+##6396)
+	}
+	{
+		v4.w = vinsert(r4)
+		v5 = valign(v0,v0,#4)
+		v0 = v1
+	}
+	{
+		r0 = add(r29,#4288)
+		r6 = memuh(r18+r0<<#1)
+	}
+	{
+		v5.w = vinsert(r3)
+		v31 = valign(v4,v4,#4)
+		r3 = memuh(r18+r7<<#1)
+	}
+	{
+		r3 = combine(r6.l,r3.l)
+	}
+	{
+		v31.w = vinsert(r3)
+		r3 = add(r29,#4352)
+		v10 = valign(v5,v5,#4)
+	}
+	{
+		r3 = add(r29,#4416)
+		v14 = vmem(r3+#0)
+	}                               // 128-byte Folded Reload
+	{
+		r3 = add(r29,#5120)
+		v20 = valign(v31,v31,#4)
+		v15 = vmem(r3+#0)
+	}                               // 128-byte Folded Reload
+	{
+		r2 = setbit(r3,#6)
+		v17 = vror(v10,r26)
+		v3:2.w = vadd(v1:0.w,v15:14.w)
+		vmem(r2+#0) = v3.new
+	}
+	{
+		r1 = add(r29,#4224)
+		v21 = vor(v17,v20)
+		vmem(r1+#0) = v2
+	}
+	{
+		v2 = vmem(r1+#0)
+	}                               // 128-byte Folded Reload
+	{
+		v3 = vmem(r0+#0)
+	}                               // 128-byte Folded Reload
+	{
+		r2 = add(r29,#4480)
+		v31:30.w = vadd(v1:0.w,v3:2.w)
+		vmem(r2+#0) = v31.new
+	}
+	{
+		vmem(r3+#0) = v30
+	}
+	{
+		r2 = add(r29,#4544)
+		r0 = memw(r29+##5060)
+		v26 = vmem(r2+#0)
+	}                               // 128-byte Folded Reload
+	{
+		r2 = ##67372036
+		r1 = memw(r29+#568)
+		v27 = vmem(r2+#0)
+	}                               // 128-byte Folded Reload
+	{
+		v26.h += vmpyi(v18.h,r2.b)
+		v27.h += vmpyi(v21.h,r2.b)
+		r2 = add(r29,#4480)
+	}
+	{
+		r2 = add(r29,#4544)
+		vmem(r2+#0) = v26
+	}                               // 128-byte Folded Spill
+	{
+		call ##__hexagon_modsi3
+		vmem(r2+#0) = v27
+	}                               // 128-byte Folded Spill
+	.falign
+// %bb.266:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r20 = r0
+		r0 = memw(r29+##5056)
+		r1 = memw(r29+#348)
+	}
+	{
+		call ##__hexagon_modsi3
+	}
+	.falign
+// %bb.267:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#4672)
+		r1 = memw(r29+#564)
+	}                               // 4-byte Folded Reload
+	{
+		r2 = add(r29,#4352)
+		v15 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v15.w = vinsert(r0)
+		r0 = memw(r29+##5064)
+	}
+	{
+		v16 = valign(v15,v15,#4)
+	}
+	{
+		v16.w = vinsert(r20)
+	}
+	{
+		call ##__hexagon_modsi3
+		v23 = valign(v16,v16,#4)
+		vmem(r2+#0) = v23.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.268:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#4352)
+		r1 = memw(r29+#572)
+	}                               // 4-byte Folded Reload
+	{
+		r2 = add(r29,#4352)
+		v31 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v31.w = vinsert(r0)
+		r0 = memw(r29+##5068)
+	}
+	{
+		call ##__hexagon_modsi3
+		v31 = valign(v31,v31,#4)
+		vmem(r2+#0) = v31.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.269:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#4352)
+		r1 = r19
+	}
+	{
+		r2 = add(r29,#4352)
+		v7 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v7.w = vinsert(r0)
+		r0 = memw(r29+##5072)
+	}
+	{
+		call ##__hexagon_modsi3
+		v4 = valign(v7,v7,#4)
+		vmem(r2+#0) = v4.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.270:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#4352)
+		r1 = memw(r29+##4160)
+	}                               // 4-byte Folded Reload
+	{
+		r2 = add(r29,#4352)
+		v24 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v24.w = vinsert(r0)
+		r0 = memw(r29+##5076)
+	}
+	{
+		call ##__hexagon_modsi3
+		v9 = valign(v24,v24,#4)
+		vmem(r2+#0) = v9.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.271:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#4352)
+		r1 = memw(r29+##4096)
+	}                               // 4-byte Folded Reload
+	{
+		r2 = add(r29,#4352)
+		v6 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v6.w = vinsert(r0)
+		r0 = memw(r29+##5080)
+	}
+	{
+		call ##__hexagon_modsi3
+		v8 = valign(v6,v6,#4)
+		vmem(r2+#0) = v8.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.272:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#4352)
+		r1 = memw(r29+#4092)
+	}                               // 4-byte Folded Reload
+	{
+		r2 = add(r29,#4352)
+		v2 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v2.w = vinsert(r0)
+		r0 = memw(r29+##5084)
+	}
+	{
+		call ##__hexagon_modsi3
+		v14 = valign(v2,v2,#4)
+		vmem(r2+#0) = v14.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.273:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#4352)
+		r1 = memw(r29+#4088)
+	}                               // 4-byte Folded Reload
+	{
+		r2 = add(r29,#4352)
+		v28 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v28.w = vinsert(r0)
+		r0 = memw(r29+##5092)
+	}
+	{
+		v12 = valign(v28,v28,#4)
+	}
+	{
+		call ##__hexagon_modsi3
+		v5 = vror(v12,r26)
+		vmem(r2+#0) = v5.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.274:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r20 = r0
+		r0 = memw(r29+##5088)
+		r1 = memw(r29+#4084)
+	}
+	{
+		call ##__hexagon_modsi3
+	}
+	.falign
+// %bb.275:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#4672)
+		r1 = memw(r29+#3840)
+	}                               // 4-byte Folded Reload
+	{
+		r2 = add(r29,#4224)
+		v17 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v17.w = vinsert(r0)
+		r0 = memw(r29+##5096)
+	}
+	{
+		v19 = valign(v17,v17,#4)
+	}
+	{
+		v19.w = vinsert(r20)
+	}
+	{
+		call ##__hexagon_modsi3
+		v10 = valign(v19,v19,#4)
+		vmem(r2+#0) = v10.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.276:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#4224)
+		r1 = memw(r29+#3776)
+	}                               // 4-byte Folded Reload
+	{
+		r2 = add(r29,#4224)
+		v25 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v25.w = vinsert(r0)
+		r0 = memw(r29+##5100)
+	}
+	{
+		call ##__hexagon_modsi3
+		v11 = valign(v25,v25,#4)
+		vmem(r2+#0) = v11.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.277:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#4224)
+		r1 = memw(r29+#3712)
+	}                               // 4-byte Folded Reload
+	{
+		r2 = add(r29,#4224)
+		v26 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v26.w = vinsert(r0)
+		r0 = memw(r29+##5104)
+	}
+	{
+		call ##__hexagon_modsi3
+		v13 = valign(v26,v26,#4)
+		vmem(r2+#0) = v13.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.278:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#4224)
+		r1 = memw(r29+#3648)
+	}                               // 4-byte Folded Reload
+	{
+		r2 = add(r29,#4224)
+		v0 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v0.w = vinsert(r0)
+		r0 = memw(r29+##5108)
+	}
+	{
+		call ##__hexagon_modsi3
+		v14 = valign(v0,v0,#4)
+		vmem(r2+#0) = v14.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.279:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#4224)
+		r1 = memw(r29+#3584)
+	}                               // 4-byte Folded Reload
+	{
+		r2 = add(r29,#4224)
+		v27 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v27.w = vinsert(r0)
+		r0 = memw(r29+##5112)
+	}
+	{
+		call ##__hexagon_modsi3
+		v18 = valign(v27,v27,#4)
+		vmem(r2+#0) = v18.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.280:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#4224)
+		r1 = memw(r29+#3520)
+	}                               // 4-byte Folded Reload
+	{
+		r2 = add(r29,#4224)
+		v3 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v3.w = vinsert(r0)
+		r0 = memw(r29+##5116)
+	}
+	{
+		call ##__hexagon_modsi3
+		v18 = valign(v3,v3,#4)
+		vmem(r2+#0) = v18.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.281:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#4224)
+		r1 = memw(r29+#3456)
+	}                               // 4-byte Folded Reload
+	{
+		r2 = add(r29,#4352)
+		v1 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v1.w = vinsert(r0)
+		r0 = memw(r29+##4996)
+		v15 = vmem(r2+#0)
+	}
+	{
+		r2 = add(r29,#4416)
+	}
+	{
+		v20 = valign(v1,v1,#4)
+	}
+	{
+		call ##__hexagon_modsi3
+		v1 = vor(v15,v20)
+		vmem(r2+#0) = v1.new
+	}                               // 128-byte Folded Spill
+	.falign
+// %bb.282:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r20 = r0
+		r0 = memw(r29+##4992)
+		r1 = memw(r29+#3452)
+	}
+	{
+		call ##__hexagon_modsi3
+	}
+	.falign
+// %bb.283:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#4672)
+		r1 = memw(r29+#3448)
+	}                               // 4-byte Folded Reload
+	{
+		r2 = add(r29,#4224)
+		v21 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v21.w = vinsert(r0)
+		r0 = memw(r29+##5000)
+	}
+	{
+		v7 = valign(v21,v21,#4)
+	}
+	{
+		v7.w = vinsert(r20)
+	}
+	{
+		call ##__hexagon_modsi3
+		v5 = valign(v7,v7,#4)
+		vmem(r2+#0) = v5.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.284:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#4224)
+		r1 = memw(r29+#3328)
+	}                               // 4-byte Folded Reload
+	{
+		r2 = add(r29,#4224)
+		v28 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v28.w = vinsert(r0)
+		r0 = memw(r29+##5004)
+	}
+	{
+		call ##__hexagon_modsi3
+		v15 = valign(v28,v28,#4)
+		vmem(r2+#0) = v15.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.285:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#4224)
+		r1 = memw(r29+#3264)
+	}                               // 4-byte Folded Reload
+	{
+		r2 = add(r29,#4224)
+		v1 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v1.w = vinsert(r0)
+		r0 = memw(r29+##5008)
+	}
+	{
+		call ##__hexagon_modsi3
+		v16 = valign(v1,v1,#4)
+		vmem(r2+#0) = v16.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.286:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#4224)
+		r1 = memw(r29+#3200)
+	}                               // 4-byte Folded Reload
+	{
+		r2 = add(r29,#4224)
+		v29 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v29.w = vinsert(r0)
+		r0 = memw(r29+##5012)
+	}
+	{
+		call ##__hexagon_modsi3
+		v12 = valign(v29,v29,#4)
+		vmem(r2+#0) = v12.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.287:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#4224)
+		r1 = memw(r29+#3136)
+	}                               // 4-byte Folded Reload
+	{
+		r2 = add(r29,#4224)
+		v30 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v30.w = vinsert(r0)
+		r0 = memw(r29+##5016)
+	}
+	{
+		call ##__hexagon_modsi3
+		v17 = valign(v30,v30,#4)
+		vmem(r2+#0) = v17.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.288:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#4224)
+		r1 = memw(r29+#3072)
+	}                               // 4-byte Folded Reload
+	{
+		r2 = add(r29,#4224)
+		v31 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v31.w = vinsert(r0)
+		r0 = memw(r29+##5020)
+	}
+	{
+		call ##__hexagon_modsi3
+		v5 = valign(v31,v31,#4)
+		vmem(r2+#0) = v5.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.289:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#4224)
+		r1 = memw(r29+#3008)
+	}                               // 4-byte Folded Reload
+	{
+		r2 = add(r29,#4224)
+		v29 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v29.w = vinsert(r0)
+		r0 = memw(r29+##5028)
+	}
+	{
+		v22 = valign(v29,v29,#4)
+	}
+	{
+		call ##__hexagon_modsi3
+		v31 = vror(v22,r26)
+		vmem(r2+#0) = v31.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.290:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r20 = r0
+		r0 = memw(r29+##5024)
+		r1 = memw(r29+#3004)
+	}
+	{
+		call ##__hexagon_modsi3
+	}
+	.falign
+// %bb.291:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#4672)
+		r1 = memw(r29+#3000)
+	}                               // 4-byte Folded Reload
+	{
+		r2 = add(r29,#4160)
+		v6 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v6.w = vinsert(r0)
+		r0 = memw(r29+##5032)
+	}
+	{
+		v23 = valign(v6,v6,#4)
+	}
+	{
+		v23.w = vinsert(r20)
+	}
+	{
+		call ##__hexagon_modsi3
+		v19 = valign(v23,v23,#4)
+		vmem(r2+#0) = v19.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.292:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#4160)
+		r1 = memw(r29+#2880)
+	}                               // 4-byte Folded Reload
+	{
+		r2 = add(r29,#4160)
+		v4 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v4.w = vinsert(r0)
+		r0 = memw(r29+##5036)
+	}
+	{
+		call ##__hexagon_modsi3
+		v20 = valign(v4,v4,#4)
+		vmem(r2+#0) = v20.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.293:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#4160)
+		r1 = memw(r29+#2816)
+	}                               // 4-byte Folded Reload
+	{
+		r2 = add(r29,#4160)
+		v8 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v8.w = vinsert(r0)
+		r0 = memw(r29+##5040)
+	}
+	{
+		call ##__hexagon_modsi3
+		v21 = valign(v8,v8,#4)
+		vmem(r2+#0) = v21.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.294:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#4160)
+		r1 = memw(r29+#2752)
+	}                               // 4-byte Folded Reload
+	{
+		r2 = add(r29,#4160)
+		v9 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v9.w = vinsert(r0)
+		r0 = memw(r29+##5044)
+	}
+	{
+		call ##__hexagon_modsi3
+		v22 = valign(v9,v9,#4)
+		vmem(r2+#0) = v22.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.295:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#4160)
+		r1 = memw(r29+#2688)
+	}                               // 4-byte Folded Reload
+	{
+		r2 = add(r29,#4160)
+		v10 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v10.w = vinsert(r0)
+		r0 = memw(r29+##5048)
+	}
+	{
+		call ##__hexagon_modsi3
+		v23 = valign(v10,v10,#4)
+		vmem(r2+#0) = v23.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.296:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#4160)
+		r1 = memw(r29+#2624)
+	}                               // 4-byte Folded Reload
+	{
+		r2 = add(r29,#4160)
+		v11 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v11.w = vinsert(r0)
+		r0 = memw(r29+##5052)
+	}
+	{
+		call ##__hexagon_modsi3
+		v15 = valign(v11,v11,#4)
+		vmem(r2+#0) = v15.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.297:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#4160)
+		r1 = memw(r29+#2560)
+	}                               // 4-byte Folded Reload
+	{
+		r2 = add(r29,#4352)
+		v30 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v30.w = vinsert(r0)
+		r2 = add(r29,#4416)
+		v18 = vmem(r2+#0)
+	}                               // 128-byte Folded Reload
+	{
+		r2 = add(r29,#4224)
+		r0 = memw(r29+##5188)
+		v19 = vmem(r2+#0)
+	}
+	{
+		r2 = add(r29,#4352)
+		v24 = valign(v30,v30,#4)
+		v27 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		r2 = add(r29,#4416)
+		v18 = vor(v27,v24)
+		vmem(r2+#0) = v18.new
+	}                               // 128-byte Folded Spill
+	{
+		call ##__hexagon_modsi3
+		vmem(r2+#0) = v19
+	}                               // 128-byte Folded Spill
+	.falign
+// %bb.298:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r20 = r0
+		r0 = memw(r29+##5184)
+		r1 = memw(r29+#2496)
+	}
+	{
+		call ##__hexagon_modsi3
+	}
+	.falign
+// %bb.299:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#4672)
+		r1 = memw(r29+#2492)
+	}                               // 4-byte Folded Reload
+	{
+		r2 = add(r29,#4224)
+		v25 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v25.w = vinsert(r0)
+		r0 = memw(r29+##5192)
+	}
+	{
+		v26 = valign(v25,v25,#4)
+	}
+	{
+		v26.w = vinsert(r20)
+	}
+	{
+		call ##__hexagon_modsi3
+		v7 = valign(v26,v26,#4)
+		vmem(r2+#0) = v7.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.300:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#4224)
+		r1 = memw(r29+#2368)
+	}                               // 4-byte Folded Reload
+	{
+		r2 = add(r29,#4224)
+		v13 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v13.w = vinsert(r0)
+		r0 = memw(r29+##5196)
+	}
+	{
+		call ##__hexagon_modsi3
+		v24 = valign(v13,v13,#4)
+		vmem(r2+#0) = v24.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.301:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#4224)
+		r1 = memw(r29+#2304)
+	}                               // 4-byte Folded Reload
+	{
+		r2 = add(r29,#4224)
+		v14 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v14.w = vinsert(r0)
+		r0 = memw(r29+##5200)
+	}
+	{
+		call ##__hexagon_modsi3
+		v6 = valign(v14,v14,#4)
+		vmem(r2+#0) = v6.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.302:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#4224)
+		r1 = memw(r29+#2240)
+	}                               // 4-byte Folded Reload
+	{
+		r2 = add(r29,#4224)
+		v18 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v18.w = vinsert(r0)
+		r0 = memw(r29+##5204)
+	}
+	{
+		call ##__hexagon_modsi3
+		v2 = valign(v18,v18,#4)
+		vmem(r2+#0) = v2.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.303:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#4224)
+		r1 = memw(r29+#2176)
+	}                               // 4-byte Folded Reload
+	{
+		r2 = add(r29,#4224)
+		v5 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v5.w = vinsert(r0)
+		r0 = memw(r29+##5208)
+	}
+	{
+		call ##__hexagon_modsi3
+		v25 = valign(v5,v5,#4)
+		vmem(r2+#0) = v25.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.304:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#4224)
+		r1 = memw(r29+#2112)
+	}                               // 4-byte Folded Reload
+	{
+		r2 = add(r29,#4224)
+		v15 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v15.w = vinsert(r0)
+		r0 = memw(r29+##5212)
+	}
+	{
+		call ##__hexagon_modsi3
+		v16 = valign(v15,v15,#4)
+		vmem(r2+#0) = v16.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.305:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#4224)
+		r1 = memw(r29+#2048)
+	}                               // 4-byte Folded Reload
+	{
+		r2 = add(r29,#4224)
+		v31 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v31.w = vinsert(r0)
+		r0 = memw(r29+##5220)
+	}
+	{
+		v27 = valign(v31,v31,#4)
+	}
+	{
+		call ##__hexagon_modsi3
+		v16 = vror(v27,r26)
+		vmem(r2+#0) = v16.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.306:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r20 = r0
+		r0 = memw(r29+##5216)
+		r1 = memw(r29+#2044)
+	}
+	{
+		call ##__hexagon_modsi3
+	}
+	.falign
+// %bb.307:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#4672)
+		r1 = memw(r29+#2040)
+	}                               // 4-byte Folded Reload
+	{
+		r2 = add(r29,#4160)
+		v28 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v28.w = vinsert(r0)
+		r0 = memw(r29+##5224)
+	}
+	{
+		v29 = valign(v28,v28,#4)
+	}
+	{
+		v29.w = vinsert(r20)
+	}
+	{
+		call ##__hexagon_modsi3
+		v26 = valign(v29,v29,#4)
+		vmem(r2+#0) = v26.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.308:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#4160)
+		r1 = memw(r29+#1920)
+	}                               // 4-byte Folded Reload
+	{
+		r2 = add(r29,#4160)
+		v16 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v16.w = vinsert(r0)
+		r0 = memw(r29+##5228)
+	}
+	{
+		call ##__hexagon_modsi3
+		v0 = valign(v16,v16,#4)
+		vmem(r2+#0) = v0.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.309:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#4160)
+		r1 = memw(r29+#1856)
+	}                               // 4-byte Folded Reload
+	{
+		r2 = add(r29,#4160)
+		v12 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v12.w = vinsert(r0)
+		r0 = memw(r29+##5232)
+	}
+	{
+		call ##__hexagon_modsi3
+		v27 = valign(v12,v12,#4)
+		vmem(r2+#0) = v27.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.310:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#4160)
+		r1 = memw(r29+#1792)
+	}                               // 4-byte Folded Reload
+	{
+		r2 = add(r29,#4160)
+		v17 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v17.w = vinsert(r0)
+		r0 = memw(r29+##5236)
+	}
+	{
+		call ##__hexagon_modsi3
+		v3 = valign(v17,v17,#4)
+		vmem(r2+#0) = v3.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.311:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#4160)
+		r1 = memw(r29+#1728)
+	}                               // 4-byte Folded Reload
+	{
+		r2 = add(r29,#4160)
+		v19 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v19.w = vinsert(r0)
+		r0 = memw(r29+##5240)
+	}
+	{
+		call ##__hexagon_modsi3
+		v28 = valign(v19,v19,#4)
+		vmem(r2+#0) = v28.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.312:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#4160)
+		r1 = memw(r29+#1664)
+	}                               // 4-byte Folded Reload
+	{
+		r2 = add(r29,#4160)
+		v20 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v20.w = vinsert(r0)
+		r0 = memw(r29+##5244)
+	}
+	{
+		call ##__hexagon_modsi3
+		v12 = valign(v20,v20,#4)
+		vmem(r2+#0) = v12.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.313:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#4160)
+		r1 = memw(r29+#1600)
+	}                               // 4-byte Folded Reload
+	{
+		r2 = add(r29,#4224)
+		v4 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v4.w = vinsert(r0)
+		r0 = memw(r29+##5124)
+		v12 = vmem(r2+#0)
+	}
+	{
+		r2 = add(r29,#4224)
+	}
+	{
+		v30 = valign(v4,v4,#4)
+	}
+	{
+		call ##__hexagon_modsi3
+		v15 = vor(v12,v30)
+		vmem(r2+#0) = v15.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.314:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r20 = r0
+		r0 = memw(r29+##5120)
+		r1 = memw(r29+#1536)
+	}
+	{
+		call ##__hexagon_modsi3
+	}
+	.falign
+// %bb.315:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#4672)
+		r1 = memw(r29+#1404)
+	}                               // 4-byte Folded Reload
+	{
+		r2 = add(r29,#4160)
+		v31 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v31.w = vinsert(r0)
+		r0 = memw(r29+##5128)
+	}
+	{
+		v0 = valign(v31,v31,#4)
+	}
+	{
+		v0.w = vinsert(r20)
+	}
+	{
+		call ##__hexagon_modsi3
+		v1 = valign(v0,v0,#4)
+		vmem(r2+#0) = v1.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.316:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#4160)
+		r1 = memw(r29+#1280)
+	}                               // 4-byte Folded Reload
+	{
+		r2 = add(r29,#4160)
+		v21 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v21.w = vinsert(r0)
+		r0 = memw(r29+##5132)
+	}
+	{
+		call ##__hexagon_modsi3
+		v29 = valign(v21,v21,#4)
+		vmem(r2+#0) = v29.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.317:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#4160)
+		r1 = memw(r29+#1216)
+	}                               // 4-byte Folded Reload
+	{
+		r2 = add(r29,#4160)
+		v22 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v22.w = vinsert(r0)
+		r0 = memw(r29+##5136)
+	}
+	{
+		call ##__hexagon_modsi3
+		v30 = valign(v22,v22,#4)
+		vmem(r2+#0) = v30.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.318:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#4160)
+		r1 = memw(r29+#1152)
+	}                               // 4-byte Folded Reload
+	{
+		r2 = add(r29,#4160)
+		v23 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v23.w = vinsert(r0)
+		r0 = memw(r29+##5140)
+	}
+	{
+		call ##__hexagon_modsi3
+		v31 = valign(v23,v23,#4)
+		vmem(r2+#0) = v31.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.319:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#4160)
+		r1 = memw(r29+#1088)
+	}                               // 4-byte Folded Reload
+	{
+		r2 = add(r29,#4160)
+		v7 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v7.w = vinsert(r0)
+		r0 = memw(r29+##5144)
+	}
+	{
+		call ##__hexagon_modsi3
+		v4 = valign(v7,v7,#4)
+		vmem(r2+#0) = v4.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.320:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#4160)
+		r1 = memw(r29+#1024)
+	}                               // 4-byte Folded Reload
+	{
+		r2 = add(r29,#4160)
+		v24 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v24.w = vinsert(r0)
+		r0 = memw(r29+##5148)
+	}
+	{
+		call ##__hexagon_modsi3
+		v17 = valign(v24,v24,#4)
+		vmem(r2+#0) = v17.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.321:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#4160)
+		r1 = memw(r29+#960)
+	}                               // 4-byte Folded Reload
+	{
+		r2 = add(r29,#4160)
+		v9 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v9.w = vinsert(r0)
+		r0 = memw(r29+##5156)
+	}
+	{
+		v2 = valign(v9,v9,#4)
+	}
+	{
+		call ##__hexagon_modsi3
+		v23 = vror(v2,r26)
+		vmem(r2+#0) = v23.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.322:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r20 = r0
+		r0 = memw(r29+##5152)
+		r1 = memw(r29+#956)
+	}
+	{
+		call ##__hexagon_modsi3
+	}
+	.falign
+// %bb.323:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#4672)
+		r1 = memw(r29+#952)
+	}                               // 4-byte Folded Reload
+	{
+		r2 = add(r29,#4096)
+		v3 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v3.w = vinsert(r0)
+		r0 = memw(r29+##5160)
+	}
+	{
+		v4 = valign(v3,v3,#4)
+	}
+	{
+		v4.w = vinsert(r20)
+	}
+	{
+		call ##__hexagon_modsi3
+		v9 = valign(v4,v4,#4)
+		vmem(r2+#0) = v9.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.324:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#4096)
+		r1 = memw(r29+#832)
+	}                               // 4-byte Folded Reload
+	{
+		r2 = add(r29,#4096)
+		v6 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v6.w = vinsert(r0)
+		r0 = memw(r29+##5164)
+	}
+	{
+		call ##__hexagon_modsi3
+		v8 = valign(v6,v6,#4)
+		vmem(r2+#0) = v8.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.325:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#4096)
+		r1 = memw(r29+#768)
+	}                               // 4-byte Folded Reload
+	{
+		r2 = add(r29,#4096)
+		v2 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v2.w = vinsert(r0)
+		r0 = memw(r29+##5168)
+	}
+	{
+		call ##__hexagon_modsi3
+		v10 = valign(v2,v2,#4)
+		vmem(r2+#0) = v10.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.326:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#4096)
+		r1 = memw(r29+#704)
+	}                               // 4-byte Folded Reload
+	{
+		r2 = add(r29,#4096)
+		v25 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v25.w = vinsert(r0)
+		r0 = memw(r29+##5172)
+	}
+	{
+		call ##__hexagon_modsi3
+		v11 = valign(v25,v25,#4)
+		vmem(r2+#0) = v11.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.327:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#4096)
+		r1 = memw(r29+#640)
+	}                               // 4-byte Folded Reload
+	{
+		r2 = add(r29,#4096)
+		v26 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v26.w = vinsert(r0)
+		r0 = memw(r29+##5176)
+	}
+	{
+		call ##__hexagon_modsi3
+		v13 = valign(v26,v26,#4)
+		vmem(r2+#0) = v13.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.328:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#4096)
+		r1 = memw(r29+#576)
+	}                               // 4-byte Folded Reload
+	{
+		r2 = add(r29,#4096)
+		v0 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v0.w = vinsert(r0)
+		r0 = memw(r29+##5180)
+	}
+	{
+		call ##__hexagon_modsi3
+		v12 = valign(v0,v0,#4)
+		vmem(r2+#0) = v12.new
+	}                               // 64-byte Folded Spill
+	.falign
+// %bb.329:                             // %"consume rows"
+                                        //   in Loop: Header=BB120_6 Depth=3
+	{
+		r2 = add(r29,#4096)
+		r6 = add(r29,#4416)
+		r1 = add(r29,#4672)
+		r4 = add(r29,#4352)
+	}
+	{
+		r2 = add(r29,#4224)
+		r3 = add(r29,#6144)
+		r7 = memw(r29+#360)
+		v4 = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v4.w = vinsert(r0)
+		r6 = add(r29,#4160)
+		r0 = memw(r29+#380)
+		v3 = vmem(r6+#0)
+	}                               // 128-byte Folded Reload
+	{
+		r10 = add(r29,#6016)
+		v13.w = vasr(v3.w,r27)
+		v22 = vmem(r6+#0)
+	}                               // 64-byte Folded Reload
+	{
+		r1 = add(r29,#1408)
+		v18 = valign(v4,v4,#4)
+		v10 = v26
+		v26.cur = vmem(r1+#0)
+	}                               // 64-byte Folded Reload
+	{
+		r2 = setbit(r3,#6)
+		v8.w = vasr(v14.w,r27)
+		v22 = vor(v22,v18)
+		v14.cur = vmem(r2+#0)
+	}                               // 64-byte Folded Reload
+	{
+		v23 = v14
+		v11 = v26
+		v5 = v26
+		v27 = vmem(r1+#0)
+	}                               // 64-byte Folded Reload
+	{
+		r4 = add(r0,#64)
+		v31.w = vasr(v22.w,r27)
+		v19 = vand(v8,v27)
+		v2 = vmem(r4+#0)
+	}                               // 128-byte Folded Reload
+	{
+		v9.w = vasr(v2.w,r27)
+		v18 = vand(v31,v27)
+		v0 = v26
+		v25 = vand(v13,v27)
+	}
+	{
+		r4 = add(r7,#64)
+		v27:26.w = vadd(v23:22.w,v19:18.w)
+		v24 = vand(v9,v27)
+		memw(r29+#380) = r4
+	}                               // 4-byte Folded Spill
+	{
+		r9 = setbit(r10,#6)
+		v3:2.w = vadd(v3:2.w,v25:24.w)
+		memw(r29+#360) = r4
+		vmem(r2+#0) = v27
+	}                               // 4-byte Folded Spill
+	{
+		r2 = memw(r29+##6208)
+		vmem(r3+#0) = v26
+	}
+	{
+		r3 = memw(r29+##6212)
+		r0 = memw(r29+##6216)
+	}
+	{
+		r2 = memuh(r18+r2<<#1)
+		r5 = memw(r29+##6220)
+	}
+	{
+		r3 = memuh(r18+r3<<#1)
+		r6 = memw(r29+##6224)
+	}
+	{
+		r2 = combine(r3.l,r2.l)
+		r4 = memuh(r18+r0<<#1)
+		r5 = memuh(r18+r5<<#1)
+	}
+	{
+		v11.w = vinsert(r2)
+		r4 = combine(r5.l,r4.l)
+		r3 = memw(r29+##6228)
+	}
+	{
+		r2 = memw(r29+##6232)
+		r6 = memuh(r18+r6<<#1)
+	}
+	{
+		v1 = valign(v11,v11,#4)
+		r1 = memw(r29+##6236)
+		r3 = memuh(r18+r3<<#1)
+	}
+	{
+		v1.w = vinsert(r4)
+		r3 = combine(r3.l,r6.l)
+		r7 = memw(r29+##6240)
+	}
+	{
+		r8 = memw(r29+##6244)
+		r5 = memuh(r18+r1<<#1)
+	}
+	{
+		v15 = valign(v1,v1,#4)
+		r2 = memuh(r18+r2<<#1)
+		r0 = memw(r29+##6248)
+	}
+	{
+		r2 = combine(r5.l,r2.l)
+		r8 = memuh(r18+r8<<#1)
+		r14 = memw(r29+##6144)
+	}
+	{
+		v15.w = vinsert(r3)
+		r6 = memuh(r18+r0<<#1)
+		r12 = memw(r29+##6252)
+	}
+	{
+		r3 = memw(r29+##6256)
+		r13 = memw(r29+##6264)
+	}
+	{
+		r1 = memw(r29+##6260)
+		r7 = memuh(r18+r7<<#1)
+	}
+	{
+		v16 = valign(v15,v15,#4)
+		r5 = memuh(r18+r1<<#1)
+		r11 = memw(r29+##6152)
+	}
+	{
+		v16.w = vinsert(r2)
+		r8 = combine(r8.l,r7.l)
+		r1 = memw(r29+##6148)
+	}
+	{
+		r7 = memuh(r18+r12<<#1)
+		r2 = memuh(r18+r13<<#1)
+	}
+	{
+		r6 = combine(r7.l,r6.l)
+		v1 = valign(v16,v16,#4)
+		r13 = memuh(r18+r14<<#1)
+		r12 = memuh(r18+r1<<#1)
+	}
+	{
+		r12 = combine(r12.l,r13.l)
+		r15 = memw(r29+##6156)
+		r14 = memuh(r18+r11<<#1)
+	}
+	{
+		v1.w = vinsert(r8)
+		v10.w = vinsert(r12)
+		r0 = memw(r29+##6268)
+	}
+	{
+		r28 = memw(r29+##6160)
+		r1 = memuh(r18+r15<<#1)
+	}
+	{
+		r13 = combine(r1.l,r14.l)
+		r4 = memuh(r18+r3<<#1)
+		r3 = memuh(r18+r0<<#1)
+	}
+	{
+		r4 = combine(r5.l,r4.l)
+		r2 = combine(r3.l,r2.l)
+		v12 = valign(v10,v10,#4)
+		r15 = memuh(r18+r28<<#1)
+	}
+	{
+		v12.w = vinsert(r13)
+		r0 = memw(r29+##6164)
+	}
+	{
+		r12 = memw(r29+##6168)
+		r14 = memw(r29+##6172)
+	}
+	{
+		r11 = memuh(r18+r0<<#1)
+		r28 = memw(r29+##6180)
+	}
+	{
+		r15 = combine(r11.l,r15.l)
+		v11 = valign(v12,v12,#4)
+		r0 = memw(r29+##6176)
+	}
+	{
+		v12 = valign(v1,v1,#4)
+		r12 = memuh(r18+r12<<#1)
+		r14 = memuh(r18+r14<<#1)
+	}
+	{
+		v11.w = vinsert(r15)
+		v12.w = vinsert(r6)
+		r14 = combine(r14.l,r12.l)
+		r1 = memuh(r18+r0<<#1)
+	}
+	{
+		r11 = memw(r29+##6184)
+		r15 = memw(r29+##6196)
+	}
+	{
+		r28 = memuh(r18+r28<<#1)
+	}
+	{
+		r13 = combine(r28.l,r1.l)
+		v17 = valign(v11,v11,#4)
+		r28 = memw(r29+##6192)
+	}
+	{
+		r1 = memw(r29+##6200)
+		r0 = memw(r29+##6188)
+	}
+	{
+		v17.w = vinsert(r14)
+		v31 = valign(v12,v12,#4)
+		r28 = memuh(r18+r28<<#1)
+		r15 = memuh(r18+r15<<#1)
+	}
+	{
+		v31.w = vinsert(r4)
+		r12 = memuh(r18+r11<<#1)
+		r11 = memw(r29+##6204)
+	}
+	{
+		v19 = valign(v17,v17,#4)
+		r0 = memuh(r18+r0<<#1)
+		r1 = memuh(r18+r1<<#1)
+	}
+	{
+		v19.w = vinsert(r13)
+		r12 = combine(r0.l,r12.l)
+	}
+	{
+		v4 = valign(v31,v31,#4)
+		r14 = memuh(r18+r11<<#1)
+		vmem(r10+#0) = v2
+	}
+	{
+		v20 = valign(v19,v19,#4)
+		r13 = memw(r29+##6016)
+		vmem(r9+#0) = v3
+	}
+	{
+		v20.w = vinsert(r12)
+		r14 = combine(r14.l,r1.l)
+		r10 = memw(r29+##6020)
+	}
+	{
+		v4.w = vinsert(r2)
+		r16 = memw(r29+#356)
+		r0 = memuh(r18+r13<<#1)
+	}                               // 4-byte Folded Reload
+	{
+		r10 = combine(r15.l,r28.l)
+		v21 = valign(v20,v20,#4)
+		r11 = memuh(r18+r10<<#1)
+	}
+	{
+		v21.w = vinsert(r10)
+		r9 = combine(r11.l,r0.l)
+		r0 = memw(r29+##6024)
+	}
+	{
+		r10 = memw(r29+##6040)
+		r11 = memw(r29+##6028)
+	}
+	{
+		v5.w = vinsert(r9)
+		v18 = valign(v4,v4,#4)
+		r6 = memw(r29+##6044)
+	}
+	{
+		v7 = valign(v21,v21,#4)
+		r15 = memuh(r18+r0<<#1)
+		r0 = memw(r29+##6032)
+	}
+	{
+		v5 = valign(v5,v5,#4)
+		r9 = memuh(r18+r11<<#1)
+		r1 = memw(r29+##6036)
+	}
+	{
+		v7.w = vinsert(r14)
+		r8 = combine(r9.l,r15.l)
+		r11 = add(r29,#1472)
+		r7 = memuh(r18+r0<<#1)
+	}
+	{
+		v5.w = vinsert(r8)
+		r9 = memuh(r18+r1<<#1)
+		r15 = memw(r29+##6056)
+	}
+	{
+		r7 = combine(r9.l,r7.l)
+		v22 = valign(v7,v7,#4)
+		r8 = memw(r29+##6080)
+	}
+	{
+		r14 = memw(r29+##6048)
+		r12 = memuh(r18+r10<<#1)
+	}
+	{
+		v6 = valign(v5,v5,#4)
+		r1 = memw(r29+##6052)
+		r8 = memuh(r18+r8<<#1)
+	}
+	{
+		v6.w = vinsert(r7)
+		r0 = memw(r29+##6084)
+		r6 = memuh(r18+r6<<#1)
+	}
+	{
+		r6 = combine(r6.l,r12.l)
+		v24 = vror(v22,r26)
+		r7 = memuh(r18+r0<<#1)
+		r5 = memuh(r18+r1<<#1)
+	}
+	{
+		r7 = combine(r7.l,r8.l)
+		v13 = valign(v6,v6,#4)
+		r1 = memw(r29+##6088)
+	}
+	{
+		r10 = memw(r29+##6060)
+		v5 = vmem(r11+#0)
+	}
+	{
+		v13.w = vinsert(r6)
+		v0.w = vinsert(r7)
+		r11 = memw(r29+##6092)
+	}
+	{
+		r0 = memw(r29+##6096)
+		r6 = memuh(r18+r1<<#1)
+	}
+	{
+		v14 = valign(v13,v13,#4)
+		r8 = memuh(r18+r11<<#1)
+		r9 = memuh(r18+r14<<#1)
+	}
+	{
+		r6 = combine(r8.l,r6.l)
+		v15 = valign(v0,v0,#4)
+		r1 = memw(r29+##6100)
+	}
+	{
+		v15.w = vinsert(r6)
+		r5 = combine(r5.l,r9.l)
+		r7 = memuh(r18+r0<<#1)
+		r9 = memuh(r18+r10<<#1)
+	}
+	{
+		v14.w = vinsert(r5)
+		r14 = memw(r29+##6104)
+		r5 = memuh(r18+r1<<#1)
+	}
+	{
+		r5 = combine(r5.l,r7.l)
+		r12 = memuh(r18+r15<<#1)
+		r15 = memw(r29+##6108)
+	}
+	{
+		r9 = combine(r9.l,r12.l)
+		v17 = valign(v15,v15,#4)
+		r6 = memw(r29+##6112)
+	}
+	{
+		v17.w = vinsert(r5)
+		r8 = memuh(r18+r14<<#1)
+		r12 = memuh(r18+r15<<#1)
+	}
+	{
+		r8 = combine(r12.l,r8.l)
+		v16 = valign(v14,v14,#4)
+		r10 = memw(r29+##6064)
+	}
+	{
+		v28 = valign(v17,v17,#4)
+		r0 = memw(r29+##6116)
+		r6 = memuh(r18+r6<<#1)
+	}
+	{
+		v16.w = vinsert(r9)
+		v28.w = vinsert(r8)
+		r9 = memuh(r18+r10<<#1)
+	}
+	{
+		r7 = memuh(r18+r0<<#1)
+		r15 = memw(r29+##6120)
+	}
+	{
+		r6 = combine(r7.l,r6.l)
+		r1 = memw(r29+##6068)
+	}
+	{
+		v29 = valign(v16,v16,#4)
+		r7 = memw(r29+##6124)
+	}
+	{
+		v30 = valign(v28,v28,#4)
+		v28 = vor(v24,v18)
+		r11 = memw(r29+##6072)
+	}
+	{
+		v30.w = vinsert(r6)
+		r5 = memuh(r18+r1<<#1)
+		r1 = memuh(r18+r15<<#1)
+	}
+	{
+		r5 = combine(r5.l,r9.l)
+		r7 = memuh(r18+r7<<#1)
+		r14 = memw(r29+##6076)
+	}
+	{
+		r3 = combine(r7.l,r1.l)
+		r6 = memw(r29+##6128)
+	}
+	{
+		v20 = valign(v30,v30,#4)
+		r1 = memw(r29+##6136)
+	}
+	{
+		v20.w = vinsert(r3)
+		r3 = memw(r29+##6132)
+	}
+	{
+		v29.w = vinsert(r5)
+		r5 = memuh(r18+r11<<#1)
+		r2 = memuh(r18+r1<<#1)
+	}
+	{
+		r0 = memuh(r18+r14<<#1)
+		r3 = memuh(r18+r3<<#1)
+	}
+	{
+		r7 = combine(r0.l,r5.l)
+		v23 = valign(v20,v20,#4)
+		r5 = memuh(r18+r6<<#1)
+	}
+	{
+		r3 = combine(r3.l,r5.l)
+		v21 = valign(v29,v29,#4)
+		r0 = memw(r29+##6140)
+	}
+	{
+		v23.w = vinsert(r3)
+		v21.w = vinsert(r7)
+	}
+	{
+		r3 = memuh(r18+r0<<#1)
+	}
+	{
+		r2 = combine(r3.l,r2.l)
+		v26 = valign(v23,v23,#4)
+		r3 = memw(r29+#116)
+	}                               // 4-byte Folded Reload
+	{
+		v26.w = vinsert(r2)
+		r2 = add(r29,#4480)
+		v25 = valign(v21,v21,#4)
+	}
+	{
+		r2 = add(r29,#4544)
+		v18 = vmem(r2+#0)
+	}                               // 128-byte Folded Reload
+	{
+		v27 = vror(v25,r26)
+		r2 = memw(r29+#124)
+		v19 = vmem(r2+#0)
+	}                               // 128-byte Folded Reload
+	{
+		r2 = add(r16,r2)
+		r16 = add(r16,#1)
+		v30 = valign(v26,v26,#4)
 	}
 	{
 		r2 = addasl(r3,r2,#6)
-		v27:26.h = vadd(v11:10.h,v27:26.h)
+		v29 = vor(v27,v30)
+	}
+	{
+		v27:26.h = vadd(v19:18.h,v29:28.h)
 	}
 	{
 		v31.b = vpacko(v27.h,v26.h)
@@ -19912,109 +26590,113 @@ gaussian5x5_hvx64:                      // @gaussian5x5_hvx64
 		vmemu(r2+#0) = v31
 	}
 	{
-		r2 = memw(r29+#620)
+		r2 = memw(r29+#120)
+	}                               // 4-byte Folded Reload
+	{
+		p1 = cmp.eq(r16,r2)
+		r2 = memw(r29+#364)
 	}                               // 4-byte Folded Reload
 	{
 		r2 = add(r2,#64)
-		memw(r29+#620) = r2.new
+		memw(r29+#364) = r2.new
 	}                               // 4-byte Folded Spill
 	{
-		r2 = memw(r29+#624)
+		r2 = memw(r29+#368)
 	}                               // 4-byte Folded Reload
 	{
 		r2 = add(r2,#64)
-		memw(r29+#624) = r2.new
+		memw(r29+#368) = r2.new
 	}                               // 4-byte Folded Spill
 	{
-		r2 = memw(r29+#628)
+		r2 = memw(r29+#372)
 	}                               // 4-byte Folded Reload
 	{
 		r2 = add(r2,#64)
-		memw(r29+#628) = r2.new
+		memw(r29+#372) = r2.new
 	}                               // 4-byte Folded Spill
 	{
-		r2 = memw(r29+#632)
+		r2 = memw(r29+#376)
 	}                               // 4-byte Folded Reload
 	{
+		if (!p1) jump:nt .LBB120_6
 		r2 = add(r2,#64)
-		nop
-		memw(r29+#632) = r2.new
-	} :endloop1                     // 4-byte Folded Spill
+		memw(r29+#376) = r2.new
+	}                               // 4-byte Folded Spill
 	.falign
-.LBB120_10:                             // %"end for output.s0.x.x"
+.LBB120_330:                            // %"end for output.s0.x.x"
                                         //   in Loop: Header=BB120_4 Depth=2
 	{
-		r3 = memw(r29+#508)
-		r4 = memw(r29+#488)
+		r3 = memw(r29+#112)
+		r2 = memw(r29+#88)
 	}                               // 4-byte Folded Reload
 	{
 		r3 = add(r3,#1)
-		r2 = memw(r29+#124)
-		memw(r29+#508) = r3.new
+		r1 = memw(r29+#96)
+		memw(r29+#112) = r3.new
 	}                               // 4-byte Folded Reload
 	{
 		p1 = cmp.eq(r3,#4)
+		r3 = add(r1,r2)
+		r0 = memw(r29+#100)
+		memw(r29+#96) = r3.new
+	}                               // 4-byte Folded Reload
+	{
+		r3 = add(r0,r2)
+		r1 = memw(r29+#104)
+		memw(r29+#100) = r3.new
+	}                               // 4-byte Folded Reload
+	{
+		r3 = add(r1,r2)
+		r4 = memw(r29+#92)
+		memw(r29+#104) = r3.new
+	}                               // 4-byte Folded Reload
+	{
 		r4 = add(r4,r2)
-		r1 = memw(r29+#492)
-		r0 = memw(r29+#496)
-	}                               // 4-byte Folded Reload
-	{
-		r3 = add(r1,r2)
-		r1 = memw(r29+#500)
-		memw(r29+#492) = r3.new
-	}                               // 4-byte Folded Reload
-	{
-		r3 = add(r0,r2)
-		r0 = memw(r29+#504)
-		memw(r29+#496) = r3.new
-	}                               // 4-byte Folded Reload
-	{
-		r3 = add(r1,r2)
-		if (p1) r9 = memw(r29+#88)
-		memw(r29+#500) = r3.new
-	}                               // 4-byte Folded Reload
-	{
-		r3 = add(r0,r2)
-		if (p1) r2 = memw(r29+#68)
-		memw(r29+#488) = r4
+		r0 = memw(r29+#108)
+		memw(r29+#92) = r4.new
 	}                               // 4-byte Folded Reload
 	{
 		if (!p1) jump:nt .LBB120_4
-		if (p1) r13 = memw(r29+#100)
-		memw(r29+#504) = r3
+		r3 = add(r0,r2)
+		if (p1) r13 = memw(r29+#68)
+		memw(r29+#108) = r3.new
 	}                               // 4-byte Folded Reload
-// %bb.11:                              // %"end for output.s0.y.yi"
+// %bb.331:                             // %"end for output.s0.y.yi"
                                         //   in Loop: Header=BB120_3 Depth=1
 	{
-		r3 = memw(r29+#64)
-		r18 = memw(r29+#108)
-	}                               // 4-byte Folded Reload
-	{
-		r9 = add(r9,r3)
-		r12 = memw(r29+#104)
-		r8 = memw(r29+#96)
-	}                               // 4-byte Folded Reload
-	{
-		r12 = add(r12,r3)
-		r13 = add(r13,r3)
-		r8 = add(r8,r3)
-		r4 = memw(r29+#92)
+		r3 = memw(r29+#32)
+		r4 = memw(r29+#60)
 	}                               // 4-byte Folded Reload
 	{
 		r4 = add(r4,r3)
+		r18 = memw(r29+#72)
+	}                               // 4-byte Folded Reload
+	{
+		r13 = add(r13,r3)
+		r2 = memw(r29+#36)
+		r9 = memw(r29+#52)
+	}                               // 4-byte Folded Reload
+	{
+		r9 = add(r9,r3)
+		r14 = memw(r29+#64)
+		r6 = memw(r29+#56)
+	}                               // 4-byte Folded Reload
+	{
+		r14 = add(r14,r3)
+		r6 = add(r6,r3)
 	}
 	{
 		r18 = add(r18,#1)
 		if (!cmp.eq(r18.new,r2)) jump:t ##.LBB120_3
 	}
 	.falign
-.LBB120_12:                             // %call_destructor.exit
+.LBB120_332:                            // %call_destructor.exit
 	{
 		call ##halide_qurt_hvx_unlock_as_destructor
 		r1:0 = combine(#1,#0)
 	}
 	.falign
-// %bb.13:                              // %call_destructor.exit
+// %bb.333:                             // %call_destructor.exit
 	{
 		r0 = #0
 		r17:16 = memd(r30+#-8)

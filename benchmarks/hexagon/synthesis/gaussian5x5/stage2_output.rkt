@@ -14,13 +14,13 @@
 (define-symbolic output.s0.x.x integer?)
 
 ;; Declare scope vars
-(define-symbolic t126 integer?)
+;(define-symbolic t126 integer?)
 
 ;; Declare list of integer terms
-(define (get-int-term) (choose* (cast (bv 2 32) 'int32 'int16) (cast (bv 3 32) 'int32 'int16)))
+;(define (get-int-term) (choose* (cast (bv 2 32) 'int32 'int16) (cast (bv 3 32) 'int32 'int16)))
 
 ;; Declare list of index terms
-(define (get-index-term) (choose* t126))
+;(define (get-index-term) (choose* t126))
 
 ;; Declare list of buffers
 (define (get-buf-term) (choose* rows))
@@ -33,27 +33,24 @@
      ;(ramp rows 126 1)
      ;(vmpyi-acc
       (vmpyi-acc
-       (ramp rows 130 1)
-       (ramp rows 129 1)
+       (interpret-halide (ramp rows 130 1 128))
+       (interpret-halide (ramp rows 129 1 128))
        (bv 4 8)))
       ;(ramp rows 128 1)
       ;(bv 6 8)))
     ;(ramp rows 127  1)
     ;(bv 4 8))))
 
-(define (hvx-expr-man)
-  (define Vu (swizzle rows))
-  (define Vv (swizzle rows))
-  (choose*
-   Vu
-   (vadd Vu Vv)
-   (vmpyi-acc Vu Vv (bv 4 8))))
-
 (define-synthax (hxv-expr depth)
   #:base (choose
-          (swizzle rows))
+          (get-from rows))
   #:else (choose
-          (swizzle rows)
+          (get-from rows)
+          (vpacko
+           (hxv-expr (- depth 1)))
+          (vadd
+           (hxv-expr (- depth 1))
+           (hxv-expr (- depth 1)))
           (vmpyi-acc
            (hxv-expr (- depth 1))
            (hxv-expr (- depth 1))
@@ -74,14 +71,13 @@
 
 ;; Synthesize
 (define st (current-seconds))
-(define sol (synthesize #:forall (list rows t126)
+(define sol (synthesize #:forall (list rows)
                         #:guarantee (bounded-eq? (interpret original-expr) (interpret synthesized-expr) 1)))
+(define runtime (- (current-seconds) st))
 
 ;; Print solution
+(error-print-width 10000)
 (println sol)
-;((interpret original-expr) 0)
-;((interpret synthesized-expr) 0)
-(evaluate synthesized-expr sol)
-
-(printf "\n\nRuntime in seconds: ")
-(- (current-seconds) st)
+(evaluate (interpret synthesized-expr) sol)
+((interpret synthesized-expr) 0)
+(printf "\n\nRuntime in seconds: ~a" runtime)

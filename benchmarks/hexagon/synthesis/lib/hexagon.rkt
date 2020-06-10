@@ -3,6 +3,7 @@
 (require "cpp.rkt")
 (require data/bit-vector)
 (require rosette/lib/match)
+(require rosette/lib/angelic)
 
 ;; Define DSL for data swizzling
 (struct vcombine (Vu Vv) #:transparent)
