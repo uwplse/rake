@@ -2,151 +2,67 @@
 
 (require "cpp.rkt")
 (require data/bit-vector)
+(require rosette/lib/match)
 
-;; Utility definitions
-(define even-vec car)
-(define odd-vec cdr)
+;; Define DSL for data swizzling
+(struct vcombine (Vu Vv) #:transparent)
+(struct vshuffe (Vu Vv) #:transparent)
+(struct vshuffo (Vu Vv) #:transparent)
+(struct vshuffoe (Vu Vv) #:transparent)
+(struct vswap (Qt Vu Vv) #:transparent)
+(struct vmux (Qt Vu Vv) #:transparent)
+(struct vzxt (Vu) #:transparent)
+(struct vsxt (Vu) #:transparent)
+(struct vsat (Vu Vv) #:transparent)
+(struct valign (Vu Vv Rt) #:transparent)
+(struct vror (Vu Rt) #:transparent)
+(struct vrotr (Vu Vv) #:transparent)
+(struct vdeal (Vu) #:transparent)
+(struct vdeale (Vu Vv) #:transparent)
+(struct vshuff (Vu) #:transparent)
+(struct vtranspose (Vu Vv Rt) #:transparent)
+(struct vpack (Vu Vv) #:transparent)
+(struct vpacke (Vu Vv) #:transparent)
+;(struct vpacko (Vu Vv) #:transparent)
+(struct vunpack (Vu) #:transparent)
+(struct vunpacko (Vu) #:transparent)
+(struct vgather (Rt Mu Vv) #:transparent)
 
-;; Swizzling / casting instructions
-(define (vcombine v1 v2)
-  (cons v2 v1))
+;; Define DSL for data processing
+(struct vadd (lhs rhs) #:transparent)
+(struct vmpyi (v s) #:transparent)
+(struct vmpyi-acc (acc v s) #:transparent)
+(struct vpacko (v) #:transparent)
 
-(define (vpacko v)
-  (cond
-    [((bitvector 16) (v 0)) (lambda (i) (extract 15 8 (v i)))]))
+(struct swizzle (v) #:transparent)
 
-(define (vshuffo o e)
+(define (get-from buf)
   (lambda (i)
-    (if
-     (even? i)
-     (e (+ 1 i))
-     (o i))))
+    (define-symbolic* idx integer?)
+    (buf idx)))
 
-(define (vshuffe o e)
-  (lambda (i)
-    (if
-     (even? i)
-     (e i)
-     (o (- i 1)))))
+(define (interpret p)
+  (match p
+    [(swizzle buf) (get-from buf)]
+    
+    [(vpacko v) (cond
+                  [((bitvector 16) ((interpret v) 0)) (lambda (i) (extract 15 8 ((interpret v) i)))])]
+    
+    ;; Todo: finish implementations for other types
+    [(vadd a b)
+     (lambda (i)
+       (bvadd
+        (cast ((interpret a) i) 'uint8 'int16)
+        (cast ((interpret b) i) 'uint8 'int16)))]
 
-(define (vshuffoe o e)
-  (cons
-   (lambda (i)
-    (if
-     (even? i)
-     (e i)
-     (o (- i 1))))
-   (lambda (i)
-    (if
-     (even? i)
-     (e (+ i 1))
-     (o i)))))
-
-(define (vshuff vdd)
-  (cons
-   (lambda (i)
-    (if
-     (even? i)
-     ((even-vec vdd) (quotient i 2))
-     ((odd-vec vdd) (quotient i 2))))
-   (lambda (i)
-    (if
-     (even? i)
-     ((even-vec vdd) (quotient (+ i 64) 2))
-     ((odd-vec vdd) (quotient (+ i 64) 2))))))
-
-(define (vzxt v)
-  (cond
-    [((bitvector 8) (v 0))
-     (cons
-      (lambda (i) (zero-extend (v (* i 2)) (bitvector 16)))
-      (lambda (i) (zero-extend (v (+ (* i 2) 1)) (bitvector 16))))]
-    [((bitvector 16) (v 0))
-     (cons
-      (lambda (i) (zero-extend (v (* i 2)) (bitvector 32)))
-      (lambda (i) (zero-extend (v (+ (* i 2) 1)) (bitvector 32))))]))
-
-;; Processing instructions
-(define (vadd v1 v2)
-  (lambda (i)
-    (bvadd
-     (cast (v1 i) 'uint8 'int16)
-     (cast (v2 i) 'uint8 'int16))))
-
-(define (vadd_w v1 v2)
-  (cons 
-   (lambda (i)
-     (bvadd
-      (cast (v1 (* i 2)) 'uint8 'int16)
-      (cast (v2 (* i 2)) 'uint8 'int16)))
-   (lambda (i)
-     (bvadd
-      (cast (v1 (+ (* i 2) 1)) 'uint8 'int16)
-      (cast (v2 (+ (* i 2) 1)) 'uint8 'int16)))))
-
-(define (vmpyi_acc acc v s)
-  (lambda (i)
-    (bvadd
-     (acc i)
-     (bvmul
-      (v i)
-      (cast s 'int8 'int16)))))
-
-(define (vmpy_acc acc v s)
-  (cons 
-   (lambda (i)
-     (bvadd
-      ((car acc) i)
-      (bvmul
-       (cast (v (* i 2)) 'uint8 'int16)
-       (cast s 'int8 'int16))))
-   (lambda (i)
-     (bvadd
-      ((cdr acc) i)
-      (bvmul
-       (cast (v (+ (* i 2) 1)) 'uint8 'int16)
-       (cast s 'int8 'int16))))))
-
-(define (vmpa_acc acc v1 v2 s1 s2)
-  (cons 
-   (lambda (i)
-     (bvadd
-      ((car acc) i)
-      (bvmul
-       (cast (v1 (* i 2)) 'uint8 'int16)
-       (cast s1 'int8 'int16))
-      (bvmul
-       (cast (v2 (* i 2)) 'uint8 'int16)
-       (cast s2 'int8 'int16))))
-   (lambda (i)
-     (bvadd
-      ((cdr acc) i)
-      (bvmul
-       (cast (v1 (+ (* i 2) 1)) 'uint8 'int16)
-       (cast s1 'int8 'int16))
-      (bvmul
-       (cast (v2 (+ (* i 2) 1)) 'uint8 'int16)
-       (cast s2 'int8 'int16))))))
-
-(define (vmpa_acc_2 acc vdd s1 s2)
-  (cons 
-   (lambda (i)
-     (bvadd
-      ((car acc) i)
-      (bvmul
-       (cast ((car vdd) (* i 2)) 'uint8 'int16)
-       (cast s1 'int8 'int16))
-      (bvmul
-       (cast ((cdr vdd) (* i 2)) 'uint8 'int16)
-       (cast s2 'int8 'int16))))
-   (lambda (i)
-     (bvadd
-      ((cdr acc) i)
-      (bvmul
-       (cast ((car vdd) (+ (* i 2) 1)) 'uint8 'int16)
-       (cast s1 'int8 'int16))
-      (bvmul
-       (cast ((cdr vdd) (+ (* i 2) 1)) 'uint8 'int16)
-       (cast s2 'int8 'int16))))))
+    [(vmpyi-acc acc v s)
+     (lambda (i)
+       (bvadd
+        ((interpret acc) i)
+        (bvmul
+         ((interpret v) i)
+         (cast (interpret s) 'int8 'int16))))]
+    
+    [_ p]))
     
 (provide (all-defined-out))

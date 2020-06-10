@@ -27,54 +27,40 @@
 
 ;; Define original expression
 (define original-expr
-  (vpacko
-   (vmpyi_acc
-    (vadd
-     (ramp rows 126 1)
-     (vmpyi_acc
-      (vmpyi_acc
+  ;(vpacko
+   ;(vmpyi-acc
+    ;(vadd
+     ;(ramp rows 126 1)
+     ;(vmpyi-acc
+      (vmpyi-acc
        (ramp rows 130 1)
        (ramp rows 129 1)
-       (bv 4 8))
-      (ramp rows 128 1)
-      (bv 6 8)))
-    (ramp rows 127  1)
-    (bv 4 8))))
+       (bv 4 8)))
+      ;(ramp rows 128 1)
+      ;(bv 6 8)))
+    ;(ramp rows 127  1)
+    ;(bv 4 8))))
+
+(define (hvx-expr-man)
+  (define Vu (swizzle rows))
+  (define Vv (swizzle rows))
+  (choose*
+   Vu
+   (vadd Vu Vv)
+   (vmpyi-acc Vu Vv (bv 4 8))))
+
+(define-synthax (hxv-expr depth)
+  #:base (choose
+          (swizzle rows))
+  #:else (choose
+          (swizzle rows)
+          (vmpyi-acc
+           (hxv-expr (- depth 1))
+           (hxv-expr (- depth 1))
+           (?? (bitvector 8)))))
 
 (define synthesized-expr
-  (vpacko
-   (vmpyi_acc
-      (vmpyi_acc
-       (vadd
-        (ramp rows 126 1)
-        (ramp rows 130 1))
-       (vadd
-        (ramp rows 127  1)
-        (ramp rows 129 1))
-       (bv 4 8))
-      (ramp rows 128 1)
-      (bv 6 8))))
-
-(define synthesized-expr-alt
-  (Q6_Vb_vshuffo_VbVb
-   (Q6_Vh_vmpyiacc_VhVhRb
-    (Q6_Vh_vmpyiacc_VhVhRb
-     (Q6_Vh_vadd_VhVh
-      sVsum1
-      sVsum5)
-     sVsum3
-     const6)
-    sVsum2a4
-    const4)
-   (Q6_Vh_vmpyiacc_VhVhRb
-    (Q6_Vh_vmpyiacc_VhVhRb
-     (Q6_Vh_vadd_VhVh
-      sVsum0
-      sVsum4)
-     sVsum2
-     const6)
-    sVsum1a3
-    const4)))
+  (hxv-expr 1))
 
 ;; Verification condition
 (define (bounded-eq? oe se lanes)
@@ -87,8 +73,15 @@
         (assert (eq? (oe i) (se i))))))
 
 ;; Synthesize
+(define st (current-seconds))
 (define sol (synthesize #:forall (list rows t126)
-                        #:guarantee (bounded-eq? original-expr synthesized-expr 2)))
+                        #:guarantee (bounded-eq? (interpret original-expr) (interpret synthesized-expr) 1)))
 
 ;; Print solution
-(print sol)
+(println sol)
+;((interpret original-expr) 0)
+;((interpret synthesized-expr) 0)
+(evaluate synthesized-expr sol)
+
+(printf "\n\nRuntime in seconds: ")
+(- (current-seconds) st)
