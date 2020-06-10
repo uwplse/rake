@@ -10,8 +10,8 @@
 (require "../lib/grammar.rkt")
 
 ;; Model buffers as uninterpreted functions
-(define-symbolic input (~> integer? (bitvector 8)))
-(define-symbolic input.stride.1 integer?)
+(define-symbolic rows (~> integer? (bitvector 16)))
+(define-symbolic output.s0.x.x integer?)
 
 ;; Declare scope vars
 (define-symbolic t126 integer?)
@@ -23,37 +23,58 @@
 (define (get-index-term) (choose* t126))
 
 ;; Declare list of buffers
-(define (get-buf-term) (choose* input))
+(define (get-buf-term) (choose* rows))
 
 ;; Define original expression
 (define original-expr
-  (vshuff
-   (vmpa_acc
-    (vmpa_acc
-     (vzxt (ramp input (+ (* input.stride.1 2) t126) 1))
-     (ramp input (- t126 input.stride.1) 1)
-     (ramp input (+ input.stride.1 t126) 1)
-     (bv 4 8)
-     (bv 4 8))
-    (ramp input t126 1)
-    (ramp input (- t126 (* input.stride.1 2)) 1)
-    (bv 6 8)
-    (bv 1 8))))
+  (vpacko
+   (vmpyi_acc
+    (vadd
+     (ramp rows 126 1)
+     (vmpyi_acc
+      (vmpyi_acc
+       (ramp rows 130 1)
+       (ramp rows 129 1)
+       (bv 4 8))
+      (ramp rows 128 1)
+      (bv 6 8)))
+    (ramp rows 127  1)
+    (bv 4 8))))
 
 (define synthesized-expr
-  (vshuff
-   (vmpa_acc_2
-    (vmpy_acc
-     (vadd
-      (ramp input (- t126 (* input.stride.1 2)) 1)
-      (ramp input (+ t126 (* input.stride.1 2)) 1))
-     (ramp input t126 1)
-     (bv 6 8))
-    (vcombine
-     (ramp input (+ t126 (* input.stride.1 1)) 1)
-     (ramp input (- t126 (* input.stride.1 1)) 1))
-    (bv 4 8)
-    (bv 4 8))))
+  (vpacko
+   (vmpyi_acc
+      (vmpyi_acc
+       (vadd
+        (ramp rows 126 1)
+        (ramp rows 130 1))
+       (vadd
+        (ramp rows 127  1)
+        (ramp rows 129 1))
+       (bv 4 8))
+      (ramp rows 128 1)
+      (bv 6 8))))
+
+(define synthesized-expr-alt
+  (Q6_Vb_vshuffo_VbVb
+   (Q6_Vh_vmpyiacc_VhVhRb
+    (Q6_Vh_vmpyiacc_VhVhRb
+     (Q6_Vh_vadd_VhVh
+      sVsum1
+      sVsum5)
+     sVsum3
+     const6)
+    sVsum2a4
+    const4)
+   (Q6_Vh_vmpyiacc_VhVhRb
+    (Q6_Vh_vmpyiacc_VhVhRb
+     (Q6_Vh_vadd_VhVh
+      sVsum0
+      sVsum4)
+     sVsum2
+     const6)
+    sVsum1a3
+    const4)))
 
 ;; Verification condition
 (define (bounded-eq? oe se lanes)
@@ -66,16 +87,8 @@
         (assert (eq? (oe i) (se i))))))
 
 ;; Synthesize
-(define sol (synthesize #:forall (list input t126)
+(define sol (synthesize #:forall (list rows t126)
                         #:guarantee (bounded-eq? original-expr synthesized-expr 2)))
 
 ;; Print solution
 (print sol)
-;(cond
- ;[(unsat? sol) (printf "Unable to express computation in IR")]
- ;[#t
-  ;(evaluate _kwidth sol)
-  ;(evaluate _kernel sol)
-  ;(evaluate _buf sol)
-  ;(evaluate _base sol)
-  ;(evaluate _stride sol)])
