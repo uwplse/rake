@@ -2,7 +2,7 @@
 
 (require "cpp.rkt")
 
-;; Model Hexagon Instr
+;; Model IR Instr
 (define (convolve-x v k)
   (lambda (i)
     (convolve-x-inner v k i 0)))

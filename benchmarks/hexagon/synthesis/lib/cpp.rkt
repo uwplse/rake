@@ -1,7 +1,9 @@
 #lang rosette
 
+(require rosette/lib/match)
+
 ;; Model C++ casting
-(define (cast val from to)
+(define (cpp_cast val from to)
   (match from
     ['int8
      (match to
@@ -36,4 +38,6 @@
        ['int32 val]
        ['uint32 val])]))
 
-(provide cast)
+(define-symbolic extlow (~> (bitvector 16) (bitvector 8)))
+
+(provide cpp_cast extlow)

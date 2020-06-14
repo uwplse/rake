@@ -4000,7 +4000,13 @@ produce output {
             }
           }
           consume rows {
-            output[ramp(((output.s0.x.x + t95)*64), 1, 64)] = halide.hexagon.packhi.vh((halide.hexagon.add_mul.vh.vh.b(halide.hexagon.add_mul.vh.vh.b(halide.hexagon.add_mul.vh.vh.b(rows[(ramp(((output.s0.x.x*64) + 382), 1, 64) % x64(384))], rows[(ramp(((output.s0.x.x*64) + 383), 1, 64) % x64(384))], (int8)4), rows[ramp(((output.s0.x.x % 6)*64), 1, 64)], (int8)6), rows[(ramp(((output.s0.x.x*64) + 1), 1, 64) % x64(384))], (int8)4) + rows[(ramp(((output.s0.x.x*64) + 2), 1, 64) % x64(384))]))
+            output[ramp(((output.s0.x.x + t95)*64), 1, 64)] = 
+
+            halide.hexagon.packhi.vh(
+              (
+                halide.hexagon.add_mul.vh.vh.b(halide.hexagon.add_mul.vh.vh.b(halide.hexagon.add_mul.vh.vh.b(rows[(ramp(((output.s0.x.x*64) + 382), 1, 64) % x64(384))], rows[(ramp(((output.s0.x.x*64) + 383), 1, 64) % x64(384))], (int8)4), rows[ramp(((output.s0.x.x % 6)*64), 1, 64)], (int8)6), rows[(ramp(((output.s0.x.x*64) + 1), 1, 64) % x64(384))], (int8)4)
+                + 
+                rows[(ramp(((output.s0.x.x*64) + 2), 1, 64) % x64(384))]))
           }
         }
         free rows
@@ -16886,7 +16892,27 @@ produce output {
             }
           }
           consume rows {
-            output[ramp(((output.s0.x.x + t95)*128), 1, 128)] = halide.hexagon.packhi.vh((halide.hexagon.add_mul.vh.vh.b(halide.hexagon.add_mul.vh.vh.b(halide.hexagon.add_mul.vh.vh.b(rows[(ramp(((output.s0.x.x*128) + 382), 1, 128) % x128(384))], rows[(ramp(((output.s0.x.x*128) + 383), 1, 128) % x128(384))], (int8)4), rows[ramp(((output.s0.x.x % 3)*128), 1, 128)], (int8)6), rows[(ramp(((output.s0.x.x*128) + 1), 1, 128) % x128(384))], (int8)4) + rows[(ramp(((output.s0.x.x*128) + 2), 1, 128) % x128(384))]))
+            output[ramp(((output.s0.x.x + t95)*128), 1, 128)] = 
+
+            halide.hexagon.packhi.vh(
+              (
+                halide.hexagon.add_mul.vh.vh.b(
+                  halide.hexagon.add_mul.vh.vh.b(
+                    halide.hexagon.add_mul.vh.vh.b(
+                      rows[(ramp(((output.s0.x.x*128) + 382), 1, 128) % x128(384))], 
+                      rows[(ramp(((output.s0.x.x*128) + 383), 1, 128) % x128(384))], 
+                      (int8)4
+                    ), 
+                    rows[ramp(((output.s0.x.x % 3)*128), 1, 128)], 
+                    (int8)6
+                  ), 
+                  rows[(ramp(((output.s0.x.x*128) + 1), 1, 128) % x128(384))], 
+                  (int8)4
+                ) 
+                + 
+                rows[(ramp(((output.s0.x.x*128) + 2), 1, 128) % x128(384))]
+              )
+            )
           }
         }
         free rows

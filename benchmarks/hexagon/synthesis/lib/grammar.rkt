@@ -4,77 +4,105 @@
 (require rosette/lib/angelic)
 
 (require "cpp.rkt")
+(require "hexagon.rkt")
+(require "ir.rkt")
 
-;; Grannar to generate buffer
-(define (buf_gen get-buf-term)
-  (get-buf-term))
+(define-synthax (hxv-expr-recursive depth)
+  #:base (choose
+          (gather rows))
+  #:else (choose
+          ;(gather rows)
+          (vpacko
+           (hxv-expr (- depth 1)))
+          (vadd
+           (hxv-expr (- depth 1))
+           (hxv-expr (- depth 1)))
+          (vmpyi-acc
+           (hxv-expr (- depth 1))
+           (hxv-expr (- depth 1))
+           (?? (bitvector 8)))))
 
-;; Grammar to generate stride
-(define stride_gen (choose 0 1 2 3))
+(define (??hvx-instr buffers registers)
+  (define-symbolic* r0_idx integer?)
+  (define-symbolic* r1_idx integer?)
+  (choose*
+   (gather (apply choose* buffers))
+   (list-ref registers r0_idx)
+   (vpacko (list-ref registers r0_idx))
+   (vadd (list-ref registers r0_idx) (list-ref registers r1_idx))
+   (vmpyi-acc (list-ref registers r0_idx) (list-ref registers r1_idx) (?? (bitvector 8)))))
 
-;; Grammar to generate index expressions
-(define c
-  (choose 1 2 3))
+(define (hxv-expr-linear-dynamic buffers)
+  (define r0 (gather (apply choose* buffers)))
+  (define r1 (??hvx-instr buffers (list r0)))
+  (define r2 (??hvx-instr buffers (list r0 r1)))
+  (define r3 (??hvx-instr buffers (list r0 r1 r2)))
+  (define r4 (??hvx-instr buffers (list r0 r1 r2 r3)))
+  r4)
 
-(define (opt-gen get-index-term)
-  (define idx-term (get-index-term))
-  (choose idx-term (+ idx-term 1) (+ idx-term 2)))
+;(define (gen-idx-map) (define-symbolic* idxm (~> integer? integer?)) idxm)
 
-(define (index_gen get-index-term)
-  (define opt (opt-gen get-index-term))
-  (choose opt (+ opt c) (- opt c)))
+(define (??hvx-instr1 buffers registers)
+  (define t0 (apply choose* registers))
+  (define t1 (apply choose* registers))
+  (choose
+   (gather (apply choose* buffers))
+   t0
+   (swizzle t0)
+   (vpacko t0)
+   (vadd t0 t1)
+   (vmpyi-acc t0 t1 (?? (bitvector 8)))))
 
-;; Grammar to generate elements in the convolution kernel
-(define-synthax (int_expr get-int-term depth)
- #:base (get-int-term)
- #:else (choose
-         (get-int-term)
-         ((choose bvadd bvmul) (int_expr get-int-term (- depth 1)) (int_expr get-int-term (- depth 1)))))
+(define (??hvx-instr2 buffers registers)
+  (define t0 (apply choose* registers))
+  (define t1 (apply choose* registers))
+  (choose
+   (gather (apply choose* buffers))
+   t0
+   (swizzle t0)
+   (vpacko t0)
+   (vadd t0 t1)
+   (vmpyi-acc t0 t1 (?? (bitvector 8)))))
 
-;; Kernel width grammar
-(define kwidth_gen (??))
+(define (??hvx-instr3 buffers registers)
+  (define t0 (apply choose* registers))
+  (define t1 (apply choose* registers))
+  (choose
+   (gather (apply choose* buffers))
+   t0
+   (swizzle t0)
+   (vpacko t0)
+   (vadd t0 t1)
+   (vmpyi-acc t0 t1 (?? (bitvector 8)))))
 
-;; Convolution kernel grammar
-(define (kernel_element_gen get-int-term)
-  (choose* (bv 0 8) (bv 1 8) (cast (int_expr get-int-term 3) 'int16 'int8)))
-(define (kernel_nz_element_gen get-int-term)
-  (choose* (bv 1 8) (cast (int_expr get-int-term 3) 'int16 'int8)))
+(define (??hvx-instr4 buffers registers)
+  (define t0 (apply choose* registers))
+  (define t1 (apply choose* registers))
+  (choose
+   (gather (apply choose* buffers))
+   t0
+   (swizzle t0)
+   (vpacko t0)
+   (vadd t0 t1)
+   (vmpyi-acc t0 t1 (?? (bitvector 8)))))
 
-(define (kernel_gen get-int-term kwidth)
-  (cond 
-    [(eq? kwidth 2)  (vector-immutable
-                      (kernel_nz_element_gen get-int-term)
-                      (kernel_nz_element_gen get-int-term))]
-    [(eq? kwidth 3)  (vector-immutable
-                      (kernel_nz_element_gen get-int-term)
-                      (kernel_element_gen get-int-term)
-                      (kernel_nz_element_gen get-int-term))]
-    [(eq? kwidth 4)  (vector-immutable
-                      (kernel_nz_element_gen get-int-term)
-                      (kernel_element_gen get-int-term)
-                      (kernel_element_gen get-int-term)
-                      (kernel_nz_element_gen get-int-term))]
-    [(eq? kwidth 5)  (vector-immutable
-                      (kernel_nz_element_gen get-int-term)
-                      (kernel_element_gen get-int-term)
-                      (kernel_element_gen get-int-term)
-                      (kernel_element_gen get-int-term)
-                      (kernel_nz_element_gen get-int-term))]
-    [(eq? kwidth 6)  (vector-immutable
-                      (kernel_nz_element_gen get-int-term)
-                      (kernel_element_gen get-int-term)
-                      (kernel_element_gen get-int-term)
-                      (kernel_element_gen get-int-term)
-                      (kernel_element_gen get-int-term)
-                      (kernel_nz_element_gen get-int-term))]
-    [(eq? kwidth 7)  (vector-immutable
-                      (kernel_nz_element_gen get-int-term)
-                      (kernel_element_gen get-int-term)
-                      (kernel_element_gen get-int-term)
-                      (kernel_element_gen get-int-term)
-                      (kernel_element_gen get-int-term)
-                      (kernel_element_gen get-int-term)
-                      (kernel_nz_element_gen get-int-term))]
-    [else (vector-immutable)]))
+(define (??hvx-instr5 buffers registers)
+  (define t0 (apply choose* registers))
+  (define t1 (apply choose* registers))
+  (choose
+   (gather (apply choose* buffers))
+   t0
+   (swizzle t0)
+   (vpacko t0)
+   (vadd t0 t1)
+   (vmpyi-acc t0 t1 (?? (bitvector 8)))))
+
+(define (hxv-expr-linear-static buffers)
+  (define r0 (gather (apply choose* buffers)))
+  (define r1 (??hvx-instr1 buffers (list r0)))
+  (define r2 (??hvx-instr2 buffers (list r0 r1)))
+  (define r3 (??hvx-instr3 buffers (list r0 r1 r2)))
+  (define r4 (??hvx-instr4 buffers (list r0 r1 r2 r3)))
+  r4)
 
 (provide (all-defined-out))

@@ -1,6 +1,7 @@
 #lang rosette
 
 (require "cpp.rkt")
+
 (require data/bit-vector)
 (require rosette/lib/match)
 (require rosette/lib/angelic)
@@ -35,6 +36,9 @@
 (struct vmpyi-acc (acc v s) #:transparent)
 (struct vpacko (v) #:transparent)
 
+(struct read (buf) #:transparent)
+;(struct swizzle (v m) #:transparent)
+(struct gather (v) #:transparent)
 (struct swizzle (v) #:transparent)
 
 (define (get-from buf)
@@ -42,19 +46,35 @@
     (define-symbolic* idx integer?)
     (buf idx)))
 
+(define (get-from-buf buf)
+  (lambda (i)
+    (choose*
+     (buf 126)
+     (buf 127)
+     (buf 128)
+     (buf 129)
+     (buf 130))))
+    ;(buf (apply choose* (list 126 127 128 129 130)))))
+
+(define (get-from-vec vec)
+  (lambda (i)
+    (vec (apply choose* (build-list 128 values)))))
+
 (define (interpret p)
   (match p
-    [(swizzle buf) (get-from buf)]
+    ;[(swizzle buf idxm) (get-from buf idxm)]
+    [(gather buf) (get-from buf)]
+    [(swizzle vec) (get-from (interpret vec))]
     
-    [(vpacko v) (cond
-                  [((bitvector 16) ((interpret v) 0)) (lambda (i) (extract 15 8 ((interpret v) i)))])]
+    ;[(vpacko v) (lambda (i) (extract 15 8 ((interpret v) i)))]
+    [(vpacko v) (lambda (i) (extlow ((interpret v) i)))]
     
     ;; Todo: finish implementations for other types
     [(vadd a b)
      (lambda (i)
        (bvadd
-        (cast ((interpret a) i) 'uint8 'int16)
-        (cast ((interpret b) i) 'uint8 'int16)))]
+        ((interpret a) i)
+        ((interpret b) i)))]
 
     [(vmpyi-acc acc v s)
      (lambda (i)
@@ -62,8 +82,8 @@
         ((interpret acc) i)
         (bvmul
          ((interpret v) i)
-         (cast (interpret s) 'int8 'int16))))]
+         (cpp_cast (interpret s) 'int8 'int16))))]
     
     [_ p]))
     
-(provide (all-defined-out))
+(provide (except-out (all-defined-out) interpret) (rename-out [interpret interpret-hvx]))

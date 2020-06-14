@@ -12,8 +12,8 @@
     [(< offset (vector-length k))
      (bvadd
       (bvmul
-       (cast (v (+ i offset)) 'uint8 'int16)
-       (cast (vector-ref k offset) 'int8 'int16))
+       (cpp_cast (v (+ i offset)) 'uint8 'int16)
+       (cpp_cast (vector-ref k offset) 'int8 'int16))
       (convolve-x-inner v k i (+ offset 1)))]
     [else
      (bv 0 16)]))

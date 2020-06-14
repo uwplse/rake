@@ -38,6 +38,10 @@
 (struct vec-sdiv (v1 v2) #:transparent)
 (struct vec-udiv (v1 v2) #:transparent)
 
+;; Hexagon instructions
+(struct halide.hexagon.packhi.vh (vec) #:transparent)
+(struct halide.hexagon.add_mul.vh.vh.b (acc v s) #:transparent)
+
 (define (interpret p)
   (match p
     ;; Constructors
@@ -73,6 +77,11 @@
     [(vec-sdiv v1 v2) (lambda (i) (bvsdiv ((interpret v1) i) ((interpret v2) i)))]
     [(vec-udiv v1 v2) (lambda (i) (bvudiv ((interpret v1) i) ((interpret v2) i)))]
 
+    ;; Hexagon instructions
+    ;[(halide.hexagon.packhi.vh vec) (lambda (i) (extract 15 8 ((interpret vec) i)))]
+    [(halide.hexagon.packhi.vh vec) (lambda (i) (extlow ((interpret vec) i)))]
+    [(halide.hexagon.add_mul.vh.vh.b acc v s) (lambda (i) (bvadd ((interpret acc) i) (bvmul ((interpret v) i) (cpp_cast (interpret s) 'int8 'int16))))]
+    
     ;; Base case
     [_ p]))
 
@@ -82,33 +91,33 @@
     ['int8
      (match to
        ['int8 val]
-       ['int16 (lambda (i) (cast (val i) 'int8 'int16))]
-       ['int32 (lambda (i) (cast (val i) 'int8 'int32))]
+       ['int16 (lambda (i) (cpp_cast (val i) 'int8 'int16))]
+       ['int32 (lambda (i) (cpp_cast (val i) 'int8 'int32))]
        ['uint8 val]
-       ['uint16 (lambda (i) (cast (val i) 'int8 'uint16))]
-       ['uint32 (lambda (i) (cast (val i) 'int8 'uint32))])]
+       ['uint16 (lambda (i) (cpp_cast (val i) 'int8 'uint16))]
+       ['uint32 (lambda (i) (cpp_cast (val i) 'int8 'uint32))])]
     ['uint8
      (match to
        ['int8 val]
-       ['int16 (lambda (i) (cast (val i) 'uint8 'int16))]
-       ['int32 (lambda (i) (cast (val i) 'uint8 'int32))]
+       ['int16 (lambda (i) (cpp_cast (val i) 'uint8 'int16))]
+       ['int32 (lambda (i) (cpp_cast (val i) 'uint8 'int32))]
        ['uint8 val]
-       ['uint16 (lambda (i) (cast (val i) 'uint8 'uint16))]
-       ['uint32 (lambda (i) (cast (val i) 'uint8 'uint32))])]
+       ['uint16 (lambda (i) (cpp_cast (val i) 'uint8 'uint16))]
+       ['uint32 (lambda (i) (cpp_cast (val i) 'uint8 'uint32))])]
     ['int16
      (match to
-       ['int8 (lambda (i) (cast (val i) 'int16 'int8))]
-       ['uint8 (lambda (i) (cast (val i) 'int16 'uint8))]
+       ['int8 (lambda (i) (cpp_cast (val i) 'int16 'int8))]
+       ['uint8 (lambda (i) (cpp_cast (val i) 'int16 'uint8))]
        ['int16 val]
        ['uint16 val]
-       ['int32 (lambda (i) (cast (val i) 'int16 'int32))]
-       ['uint32 (lambda (i) (cast (val i) 'int16 'uint32))])]
+       ['int32 (lambda (i) (cpp_cast (val i) 'int16 'int32))]
+       ['uint32 (lambda (i) (cpp_cast (val i) 'int16 'uint32))])]
     ['int32
      (match to
-       ['int8 (lambda (i) (cast (val i) 'int32 'int8))]
-       ['uint8 (lambda (i) (cast (val i) 'int32 'uint8))]
-       ['int16 (lambda (i) (cast (val i) 'int32 'int16))]
-       ['uint16 (lambda (i) (cast (val i) 'int32 'uint16))]
+       ['int8 (lambda (i) (cpp_cast (val i) 'int32 'int8))]
+       ['uint8 (lambda (i) (cpp_cast (val i) 'int32 'uint8))]
+       ['int16 (lambda (i) (cpp_cast (val i) 'int32 'int16))]
+       ['uint16 (lambda (i) (cpp_cast (val i) 'int32 'uint16))]
        ['int32 val]
        ['uint32 val])]))
 
