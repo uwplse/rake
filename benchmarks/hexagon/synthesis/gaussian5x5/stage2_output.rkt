@@ -74,4 +74,5 @@
 (error-print-width 10000)
 (println sol)
 (evaluate synthesized-expr sol)
+(evaluate (interpret-hvx synthesized-expr) sol)
 (printf "\n\nRuntime in seconds: ~a" runtime)
