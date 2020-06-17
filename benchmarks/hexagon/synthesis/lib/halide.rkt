@@ -10,6 +10,8 @@
 (struct x64 (sca) #:transparent)
 (struct x128 (sca) #:transparent)
 (struct ramp (buf base stride len) #:transparent)
+(struct slice_vectors (vec base stride len) #:transparent)
+(struct concat_vectors (v1 v2) #:transparent)
 
 ;; Type Casts
 (struct uint8x32 (vec vtype) #:transparent)
@@ -50,6 +52,9 @@
     [(x128 sca) (lambda (i) (interpret sca))]
     [(ramp buf base stride len) (lambda (i) ((interpret buf) (+ (interpret base) (* i (interpret stride)))))]
 
+    [(slice_vectors vec base stride len) (lambda (i) ((interpret vec) (+ (interpret base) (* i (interpret stride)))))]
+    [(concat_vectors v1 v2) (lambda (i) ((interpret vec) (+ (interpret base) (* i (interpret stride)))))]
+
     ;; Type Casts
     [(uint8x32 vec vtype) (castvec (interpret vec) vtype 'uint8)]
     [(uint16x32 vec vtype) (castvec (interpret vec) vtype 'uint16)]
@@ -78,8 +83,7 @@
     [(vec-udiv v1 v2) (lambda (i) (bvudiv ((interpret v1) i) ((interpret v2) i)))]
 
     ;; Hexagon instructions
-    ;[(halide.hexagon.packhi.vh vec) (lambda (i) (extract 15 8 ((interpret vec) i)))]
-    [(halide.hexagon.packhi.vh vec) (lambda (i) (extlow ((interpret vec) i)))]
+    [(halide.hexagon.packhi.vh vec) (lambda (i) (extract 15 8 ((interpret vec) i)))]
     [(halide.hexagon.add_mul.vh.vh.b acc v s) (lambda (i) (bvadd ((interpret acc) i) (bvmul ((interpret v) i) (cpp_cast (interpret s) 'int8 'int16))))]
     
     ;; Base case

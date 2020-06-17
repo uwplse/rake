@@ -38,6 +38,4 @@
        ['int32 val]
        ['uint32 val])]))
 
-(define-symbolic extlow (~> (bitvector 16) (bitvector 8)))
-
-(provide cpp_cast extlow)
+(provide cpp_cast)

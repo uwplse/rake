@@ -1,0 +1,83 @@
++ ./tmp/gaussian5x5_simple_generator -o tmp -e o,h,assembly,bitcode -g gaussian5x5 -f gaussian5x5_hvx64 target=hexagon-32-noos-no_bounds_query-no_asserts-hvx_64
+assert((reinterpret(uint64, output.buffer) != (uint64)0), halide_error_buffer_argument_is_null("output"))
+assert((reinterpret(uint64, input.buffer) != (uint64)0), halide_error_buffer_argument_is_null("input"))
+let input = _halide_buffer_get_host(input.buffer)
+let input.min.0 = _halide_buffer_get_min(input.buffer, 0)
+let input.extent.0 = _halide_buffer_get_extent(input.buffer, 0)
+let input.stride.0 = _halide_buffer_get_stride(input.buffer, 0)
+let input.min.1 = _halide_buffer_get_min(input.buffer, 1)
+let input.extent.1 = _halide_buffer_get_extent(input.buffer, 1)
+let input.stride.1 = _halide_buffer_get_stride(input.buffer, 1)
+let output = _halide_buffer_get_host(output.buffer)
+let output.min.0 = _halide_buffer_get_min(output.buffer, 0)
+let output.extent.0 = _halide_buffer_get_extent(output.buffer, 0)
+let output.stride.0 = _halide_buffer_get_stride(output.buffer, 0)
+let output.min.1 = _halide_buffer_get_min(output.buffer, 1)
+let output.extent.1 = _halide_buffer_get_extent(output.buffer, 1)
+let output.stride.1 = _halide_buffer_get_stride(output.buffer, 1)
+assert((input.stride.0 == 1), 0)
+assert((input.min.0 == 0), 0)
+assert(((input.stride.1 % 64) == 0), 0)
+assert((input.min.1 == 0), 0)
+assert((output.stride.0 == 1), 0)
+assert((output.min.0 == 0), 0)
+assert(((output.stride.1 % 64) == 0), 0)
+assert((output.min.1 == 0), 0)
+produce output {
+  let t56.s = min(((((output.extent.0 + 63)/64)*64) + 62), input.extent.0)
+  let t44 = (max(t56.s, 1) <= input.extent.0)
+  let t48 = (-64 < output.extent.0)
+  let t47 = max(min(((output.extent.0 + 127)/64), 1), ((min((output.extent.0 + 125), input.extent.0) + 2)/64))
+  for<Hexagon> (output.s0.__outermost, 0, 1) {
+    for (output.s0.y, 0, output.extent.1) {
+      let bounded_input.s0.y.max_1.s = min((output.s0.y + 2), input.extent.1)
+      let bounded_input.s0.y.min_1.s = min((output.s0.y + -2), input.extent.1)
+      if ((((max(bounded_input.s0.y.max_1.s, 0) + 1) <= input.extent.1) && t44)) {
+        prefetch(input, (max(bounded_input.s0.y.min_1.s, 0)*input.stride.1), max(t56.s, 1), 1, ((max(min((output.s0.y + 2), input.extent.1), 0) - max(min((output.s0.y + -2), input.extent.1), 0)) + 1), input.stride.1)
+      }
+      let bounded_input.y.extent_realized.s = (max(bounded_input.s0.y.max_1.s, 0) - max(bounded_input.s0.y.min_1.s, 0))
+      allocate bounded_input[uint8 * (((output.extent.0 + 127)/64)*64) * (bounded_input.y.extent_realized.s + 1)]
+      let bounded_input.s0.y.loop_extent.s = (max(bounded_input.s0.y.max_1.s, 0) - max(bounded_input.s0.y.min_1.s, 0))
+      produce bounded_input {
+        for (bounded_input.s0.y, max(bounded_input.s0.y.min_1.s, 0), (bounded_input.s0.y.loop_extent.s + 1)) {
+          if (t48) {
+            bounded_input[ramp(((((output.extent.0 + 127)/64)*(bounded_input.s0.y - max(bounded_input.s0.y.min_1.s, 0)))*64), 1, 64) aligned(64, 0)] = dynamic_shuffle(input[ramp((bounded_input.s0.y*input.stride.1), 1, 64) aligned(64, 0)], halide.hexagon.pack.vh(halide.hexagon.pack.vw(max(min(ramp(-2, 1, 64), x64((input.extent.0 + -1))), x64(0)))), 0, 63)
+          }
+          let t87 = (((output.extent.0 + 127)/64)*(bounded_input.s0.y - max(bounded_input.s0.y.min_1.s, 0)))
+          let t64 = (t47 - min(((output.extent.0 + 127)/64), 1))
+          for (bounded_input.s0.x.x, min(((output.extent.0 + 127)/64), 1), t64) {
+            bounded_input[ramp(((bounded_input.s0.x.x + t87)*64), 1, 64) aligned(64, 0)] = input[ramp((((bounded_input.s0.x.x*64) + (bounded_input.s0.y*input.stride.1)) + -2), 1, 64) aligned(64, 62)]
+          }
+          for (bounded_input.s0.x.x, t47, (((output.extent.0 + 127)/64) - t47)) {
+            bounded_input[ramp(((bounded_input.s0.x.x + t87)*64), 1, 64) aligned(64, 0)] = (let t80.s = (max(min((bounded_input.s0.x.x*64), (input.extent.0 + 1)), 2) + (bounded_input.s0.y*input.stride.1)) in dynamic_shuffle(input[ramp((t80.s + -2), 1, 64)], halide.hexagon.pack.vh(halide.hexagon.pack.vw(((max(min(ramp(((bounded_input.s0.x.x*64) + -2), 1, 64), x64((input.extent.0 + -1))), x64(0)) + x64((bounded_input.s0.y*input.stride.1))) - x64((t80.s + -2))))), 0, 63))
+          }
+        }
+      }
+      allocate rows[int16 * (((output.extent.0 + 127)/64)*64) * 1]
+      produce rows {
+        consume bounded_input {
+          let t71.s = min((output.s0.y + 1), input.extent.1)
+          let t73.s = min((output.s0.y + -1), input.extent.1)
+          let t72.s = min(input.extent.1, output.s0.y)
+          for (rows.s0.x.x, 0, ((output.extent.0 + 127)/64)) {
+            rows[ramp((rows.s0.x.x*64), 1, 64) aligned(64, 0)] = halide.hexagon.interleave.vh(halide.hexagon.acc_add_2mpy.vh.vub.vub.b.b(halide.hexagon.acc_add_2mpy.vh.vub.vub.b.b(halide.hexagon.zxt.vub(bounded_input[ramp((((((output.extent.0 + 127)/64)*(max(bounded_input.s0.y.max_1.s, 0) - max(bounded_input.s0.y.min_1.s, 0))) + rows.s0.x.x)*64), 1, 64) aligned(64, 0)]), bounded_input[ramp((((((output.extent.0 + 127)/64)*(max(t73.s, 0) - max(bounded_input.s0.y.min_1.s, 0))) + rows.s0.x.x)*64), 1, 64) aligned(64, 0)], bounded_input[ramp((((((output.extent.0 + 127)/64)*(max(t71.s, 0) - max(bounded_input.s0.y.min_1.s, 0))) + rows.s0.x.x)*64), 1, 64) aligned(64, 0)], (int8)4, (int8)4), bounded_input[ramp((((((output.extent.0 + 127)/64)*(max(t72.s, 0) - max(bounded_input.s0.y.min_1.s, 0))) + rows.s0.x.x)*64), 1, 64) aligned(64, 0)], bounded_input[ramp((rows.s0.x.x*64), 1, 64) aligned(64, 0)], (int8)6, (int8)1))
+          }
+        }
+      }
+      free bounded_input
+      consume rows {
+        if ((0 < output.extent.0)) {
+          allocate c2[int16 * 64] in Stack
+          c2[ramp(0, 1, 32)] = rows[ramp(0, 1, 32)]
+          for (output.s0.x.x, 0, ((output.extent.0 + 63)/64)) {
+            c2[ramp(32, 1, 32)] = rows[ramp(((output.s0.x.x*64) + 64), 1, 32) aligned(64, 0)]
+            output[ramp(((output.s0.x.x*64) + (output.s0.y*output.stride.1)), 1, 64) aligned(64, 0)] = (let t84 = rows[ramp(((output.s0.x.x*64) + 32), 1, 32) aligned(64, 32)] in (let t85.s = c2[ramp(0, 1, 32)] in (let t86.s = c2[ramp(32, 1, 32)] in halide.hexagon.packhi.vh(halide.hexagon.add_mul.vh.vh.b((concat_vectors(t85.s, t84) + halide.hexagon.add_mul.vh.vh.b(halide.hexagon.add_mul.vh.vh.b(concat_vectors(slice_vectors(concat_vectors(t85.s, t84), 4, 1, 32), slice_vectors(concat_vectors(t84, t86.s), 4, 1, 32)), concat_vectors(slice_vectors(concat_vectors(t85.s, t84), 3, 1, 32), slice_vectors(concat_vectors(t84, t86.s), 3, 1, 32)), (int8)4), concat_vectors(slice_vectors(concat_vectors(t85.s, t84), 2, 1, 32), slice_vectors(concat_vectors(t84, t86.s), 2, 1, 32)), (int8)6)), concat_vectors(slice_vectors(concat_vectors(t85.s, t84), 1, 1, 32), slice_vectors(concat_vectors(t84, t86.s), 1, 1, 32)), (int8)4)))))
+            c2[ramp(0, 1, 32)] = c2[ramp(32, 1, 32)]
+          }
+        }
+      }
+      free rows
+    }
+  }
+}
+

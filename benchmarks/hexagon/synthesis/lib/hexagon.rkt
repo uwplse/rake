@@ -66,8 +66,7 @@
     [(gather buf) (get-from buf)]
     [(swizzle vec) (get-from (interpret vec))]
     
-    ;[(vpacko v) (lambda (i) (extract 15 8 ((interpret v) i)))]
-    [(vpacko v) (lambda (i) (extlow ((interpret v) i)))]
+    [(vpacko v) (lambda (i) (extract 15 8 ((interpret v) i)))]
     
     ;; Todo: finish implementations for other types
     [(vadd a b)
