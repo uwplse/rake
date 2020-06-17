@@ -5,3 +5,5 @@ examples/**/*.a
 examples/**/*.o
 examples/**/*.generator
 examples/**/*.exe
+examples/**/*~
+examples/**/compiled/**/*
