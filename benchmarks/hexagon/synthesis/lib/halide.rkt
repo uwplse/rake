@@ -53,7 +53,7 @@
     [(ramp buf base stride len) (lambda (i) ((interpret buf) (+ (interpret base) (* i (interpret stride)))))]
 
     [(slice_vectors vec base stride len) (lambda (i) ((interpret vec) (+ (interpret base) (* i (interpret stride)))))]
-    [(concat_vectors v1 v2) (lambda (i) ((interpret vec) (+ (interpret base) (* i (interpret stride)))))]
+    [(concat_vectors v1 v2) (lambda (i) (if (< i (vec-len v1)) ((interpret v1) i) ((interpret v2) (- i (vec-len v1)))))]
 
     ;; Type Casts
     [(uint8x32 vec vtype) (castvec (interpret vec) vtype 'uint8)]
@@ -88,6 +88,51 @@
     
     ;; Base case
     [_ p]))
+
+(define (vec-len p)
+  (match p
+    ;; Constructors
+    [(x32 sca) 32]
+    [(x64 sca) 64]
+    [(x128 sca) 128]
+    [(ramp buf base stride len) len]
+
+    [(slice_vectors vec base stride len) len]
+    [(concat_vectors v1 v2) (+ (vec-len v1) (vec-len v2))]
+
+    ;; Type Casts
+    [(uint8x32 vec vtype) 32]
+    [(uint16x32 vec vtype) 32]
+    [(uint32x32 vec vtype) 32]
+    [(int8x32 vec vtype) 32]
+    [(int16x32 vec vtype) 32]
+    [(int32x32 vec vtype) 32]
+    [(uint8x64 vec vtype) 64]
+    [(uint16x64 vec vtype) 64]
+    [(uint32x64 vec vtype) 64]
+    [(int8x64 vec vtype) 64]
+    [(int16x64 vec vtype) 64]
+    [(int32x64 vec vtype) 64]
+    [(uint8x128 vec vtype) 128]
+    [(uint16x128 vec vtype) 128]
+    [(uint32x128 vec vtype) 128]
+    [(int8x128 vec vtype) 128]
+    [(int16x128 vec vtype) 128]
+    [(int32x128 vec vtype) 128]
+
+    ;; Operations
+    [(vec-add v1 v2) (vec-len v1)]
+    [(vec-sub v1 v2) (vec-len v1)]
+    [(vec-mul v1 v2) (vec-len v1)]
+    [(vec-sdiv v1 v2) (vec-len v1)]
+    [(vec-udiv v1 v2) (vec-len v1)]
+
+    ;; Hexagon instructions
+    [(halide.hexagon.packhi.vh vec) (vec-len vec)]
+    [(halide.hexagon.add_mul.vh.vh.b acc v s) (vec-len acc)]
+    
+    ;; Base case
+    [_ (error "Don't know how to get vector length from:" p)]))
 
 ;; Model vector casts
 (define (castvec val from to)

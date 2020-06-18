@@ -2,10 +2,11 @@
 benchmarks/hexagon/bin/**/*
 benchmarks/hexagon/bin/*
 benchmarks/**/*.a
+benchmarks/**/*.bak
 benchmarks/**/*.dep
 benchmarks/**/*.zo
 benchmarks/**/*.o
 benchmarks/**/*.generator
 benchmarks/**/*.exe
 benchmarks/**/*~
-benchmarks/**/compiled/*
+benchmarks/**/compiled/**/*

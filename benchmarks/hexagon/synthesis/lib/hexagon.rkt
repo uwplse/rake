@@ -30,31 +30,21 @@
 (struct vunpacko (Vu) #:transparent)
 (struct vgather (Rt Mu Vv) #:transparent)
 
+;; New constructs to abstract away data movement
+(struct gather (opts) #:transparent)
+(struct swizzle (opts) #:transparent)
+(struct broadcast (v) #:transparent)
+
 ;; Define DSL for data processing
 (struct vadd (lhs rhs) #:transparent)
 (struct vmpyi (v s) #:transparent)
 (struct vmpyi-acc (acc v s) #:transparent)
 (struct vpacko (v) #:transparent)
 
-(struct read (buf) #:transparent)
-;(struct swizzle (v m) #:transparent)
-(struct gather (v) #:transparent)
-(struct swizzle (v) #:transparent)
-
 (define (get-from buf)
   (lambda (i)
     (define-symbolic* idx integer?)
     (buf idx)))
-
-(define (get-from-buf buf)
-  (lambda (i)
-    (choose*
-     (buf 126)
-     (buf 127)
-     (buf 128)
-     (buf 129)
-     (buf 130))))
-    ;(buf (apply choose* (list 126 127 128 129 130)))))
 
 (define (get-from-vec vec)
   (lambda (i)
@@ -62,9 +52,10 @@
 
 (define (interpret p)
   (match p
-    ;[(swizzle buf idxm) (get-from buf idxm)]
-    [(gather buf) (get-from buf)]
+    [(gather opts) (lambda (i) (apply choose* opts))]
     [(swizzle vec) (get-from (interpret vec))]
+
+    [(broadcast val) (lambda (i) val)]
     
     [(vpacko v) (lambda (i) (extract 15 8 ((interpret v) i)))]
     

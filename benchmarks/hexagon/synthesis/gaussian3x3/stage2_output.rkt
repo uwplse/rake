@@ -8,14 +8,19 @@
 (require "../lib/hexagon.rkt")
 (require "../lib/ir.rkt")
 (require "../lib/grammar.rkt")
+(require "../lib/analysis.rkt")
+
+;; Synthesis parameters
+(define MC_BND 1)
 
 ;; Model buffers as uninterpreted functions
 (define-symbolic rows (~> integer? (bitvector 16)))
 (define-symbolic c1 (~> integer? (bitvector 16)))
 
-(define-symbolic output.s0.x.x integer?)
+(define buffers (list rows c1))
 
-(define buffers (list rows))
+;; Model indexing variables as integers
+(define-symbolic output.s0.x.x integer?)
 
 ;; Define original expression
 (define original-expr-post-hvx
@@ -34,10 +39,10 @@
     (ramp rows 130 1 128))))
 
 (define original-expr-pre-hvx
-  (uint8x128
-   (bvsdiv
-    (bvadd
-     (bvadd
+  ;(uint8x128
+   ;(bvsdiv
+    (vec-add
+     (vec-add
       (concat_vectors
        (slice_vectors
         (concat_vectors
@@ -47,8 +52,8 @@
         (concat_vectors
          (ramp rows (+ (* output.s0.x.x 128) 64) 1 64)
          (ramp c1 64 1 64)) 2 1 64))
-      (bvadd 
-       (bvmul
+      (vec-add 
+       (vec-mul
         (concat_vectors
          (slice_vectors
           (concat_vectors
@@ -62,11 +67,18 @@
        (concat_vectors
         (ramp c1 0 1 64)
         (ramp rows (+ (* output.s0.x.x 128) 64) 1 64))))
-     (x128 (bv 8 16)))
-    (x128 (bv 16 16)))))
+     (x128 (bv 8 16))))
+    ;(x128 (bv 16 16)))))
+
+;; Perform analysis to extract the set of buffer reads
+(define buff-reads (list))
+(for ([i MC_BND])
+  (set! buff-reads (append buff-reads (extract-buf-reads ((interpret-halide original-expr-pre-hvx) 0)))))
+(println ((interpret-halide original-expr-pre-hvx) 0))
+(println buff-reads)
 
 (define synthesized-expr
-  (hxv-expr-linear-static buffers))
+  (??hxv-expr-linear-static buff-reads))
 
 ;; Verification condition
 (define (bounded-eq? oe se lanes)
@@ -78,15 +90,17 @@
       (for ([i lanes])
         (assert (eq? (oe i) (se i))))))
 
-;; Synthesize
+;; Synthesize expression
 (define st (current-seconds))
-(define sol (synthesize #:forall (list rows)
-                        #:guarantee (bounded-eq? (interpret-halide original-expr-post-hvx) (interpret-hvx synthesized-expr) 1)))
+(define sol (synthesize #:forall (list rows output.s0.x.x c1)
+                        #:guarantee (bounded-eq? (interpret-halide original-expr-pre-hvx) (interpret-hvx synthesized-expr) 1)))
 (define runtime (- (current-seconds) st))
+
+;; Synthesize 
 
 ;; Print solution
 (error-print-width 10000)
 (println sol)
 (evaluate synthesized-expr sol)
-(evaluate (interpret-hvx synthesized-expr) sol)
+(evaluate ((interpret-hvx synthesized-expr) 0) sol)
 (printf "\n\nRuntime in seconds: ~a" runtime)

@@ -46,6 +46,7 @@
   (define t0 (apply choose* registers))
   (define t1 (apply choose* registers))
   (choose
+   (broadcast (?? (bitvector 16)))
    (gather (apply choose* buffers))
    t0
    (swizzle t0)
@@ -57,6 +58,7 @@
   (define t0 (apply choose* registers))
   (define t1 (apply choose* registers))
   (choose
+   (broadcast (?? (bitvector 16)))
    (gather (apply choose* buffers))
    t0
    (swizzle t0)
@@ -68,6 +70,7 @@
   (define t0 (apply choose* registers))
   (define t1 (apply choose* registers))
   (choose
+   (broadcast (?? (bitvector 16)))
    (gather (apply choose* buffers))
    t0
    (swizzle t0)
@@ -79,6 +82,7 @@
   (define t0 (apply choose* registers))
   (define t1 (apply choose* registers))
   (choose
+   (broadcast (?? (bitvector 16)))
    (gather (apply choose* buffers))
    t0
    (swizzle t0)
@@ -90,6 +94,7 @@
   (define t0 (apply choose* registers))
   (define t1 (apply choose* registers))
   (choose
+   (broadcast (?? (bitvector 16)))
    (gather (apply choose* buffers))
    t0
    (swizzle t0)
@@ -97,12 +102,12 @@
    (vadd t0 t1)
    (vmpyi-acc t0 t1 (?? (bitvector 8)))))
 
-(define (hxv-expr-linear-static buffers)
-  (define r0 (gather (apply choose* buffers)))
+(define (??hxv-expr-linear-static buffers)
+  (define r0 (gather buffers))
   (define r1 (??hvx-instr1 buffers (list r0)))
   (define r2 (??hvx-instr2 buffers (list r0 r1)))
   (define r3 (??hvx-instr3 buffers (list r0 r1 r2)))
   (define r4 (??hvx-instr4 buffers (list r0 r1 r2 r3)))
-  r4)
+  r3)
 
 (provide (all-defined-out))
