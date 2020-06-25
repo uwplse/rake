@@ -5,7 +5,6 @@
 (define (extract-buf-reads expr)
   (match expr
     [(expression op operands ...)
-     ;(println expr)
 
      ;; Silly workaround -- ask rosette folks how to do this properly
      (define-symbolic hack (~> integer? (bitvector 16)))
@@ -18,12 +17,15 @@
        [(eq? op app) expr]
        [else (error "NYI")])]
      
-     ;(match op
-       ;[bvadd (for/list ([operand operands]) (extract-buf-reads operand))]
-       ;[bvmul (for/list ([operand operands]) (extract-buf-reads operand))])]
-       ;[bvmul (println "found-bvmul")]
-       ;[_ (println expr)])]
-     
     [_ (list)]))
 
-(provide extract-buf-reads)
+(define (extract-live-bufs vec)
+  (define bufs (list))
+
+  (for ([v (in-dict-values vec)])
+    (match v
+      [(expression op operands ...) (set! bufs (append bufs (list (list-ref operands 0))))]))
+
+  (remove-duplicates bufs))
+
+(provide (all-defined-out))

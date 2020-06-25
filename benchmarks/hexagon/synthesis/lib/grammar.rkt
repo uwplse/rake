@@ -3,6 +3,7 @@
 (require rosette/lib/synthax)
 (require rosette/lib/angelic)
 
+(require "analysis.rkt")
 (require "cpp.rkt")
 (require "hexagon.rkt")
 (require "ir.rkt")
@@ -20,7 +21,7 @@
           (vmpyi-acc
            (hxv-expr (- depth 1))
            (hxv-expr (- depth 1))
-           (?? (bitvector 8)))))
+           (bvadd (bv 2 8) (?? (bitvector 8))))))
 
 (define (??hvx-instr buffers registers)
   (define-symbolic* r0_idx integer?)
@@ -46,61 +47,56 @@
   (define t0 (apply choose* registers))
   (define t1 (apply choose* registers))
   (choose
-   (broadcast (?? (bitvector 16)))
-   (gather (apply choose* buffers))
+   ;(gather (apply choose* buffers))
    t0
    (swizzle t0)
    (vpacko t0)
    (vadd t0 t1)
-   (vmpyi-acc t0 t1 (?? (bitvector 8)))))
+   (vmpyi-acc t0 t1 (bvadd (bv 2 8) (?? (bitvector 8))))))
 
 (define (??hvx-instr2 buffers registers)
   (define t0 (apply choose* registers))
   (define t1 (apply choose* registers))
   (choose
-   (broadcast (?? (bitvector 16)))
-   (gather (apply choose* buffers))
+   ;(gather (apply choose* buffers))
    t0
    (swizzle t0)
    (vpacko t0)
    (vadd t0 t1)
-   (vmpyi-acc t0 t1 (?? (bitvector 8)))))
+   (vmpyi-acc t0 t1 (bvadd (bv 2 8) (?? (bitvector 8))))))
 
 (define (??hvx-instr3 buffers registers)
   (define t0 (apply choose* registers))
   (define t1 (apply choose* registers))
   (choose
-   (broadcast (?? (bitvector 16)))
-   (gather (apply choose* buffers))
+   ;(gather (apply choose* buffers))
    t0
    (swizzle t0)
    (vpacko t0)
    (vadd t0 t1)
-   (vmpyi-acc t0 t1 (?? (bitvector 8)))))
+   (vmpyi-acc t0 t1 (bvadd (bv 2 8) (?? (bitvector 8))))))
 
 (define (??hvx-instr4 buffers registers)
   (define t0 (apply choose* registers))
   (define t1 (apply choose* registers))
   (choose
-   (broadcast (?? (bitvector 16)))
-   (gather (apply choose* buffers))
+   ;(gather (apply choose* buffers))
    t0
    (swizzle t0)
    (vpacko t0)
    (vadd t0 t1)
-   (vmpyi-acc t0 t1 (?? (bitvector 8)))))
+   (vmpyi-acc t0 t1 (bvadd (bv 2 8) (?? (bitvector 8))))))
 
 (define (??hvx-instr5 buffers registers)
   (define t0 (apply choose* registers))
   (define t1 (apply choose* registers))
   (choose
-   (broadcast (?? (bitvector 16)))
-   (gather (apply choose* buffers))
+   ;(gather (apply choose* buffers))
    t0
    (swizzle t0)
    (vpacko t0)
    (vadd t0 t1)
-   (vmpyi-acc t0 t1 (?? (bitvector 8)))))
+   (vmpyi-acc t0 t1 (bvadd (bv 2 8) (?? (bitvector 8))))))
 
 (define (??hxv-expr-linear-static buffers)
   (define r0 (gather buffers))
@@ -108,6 +104,20 @@
   (define r2 (??hvx-instr2 buffers (list r0 r1)))
   (define r3 (??hvx-instr3 buffers (list r0 r1 r2)))
   (define r4 (??hvx-instr4 buffers (list r0 r1 r2 r3)))
-  r3)
+  r2)
+
+(define (gen-final-sketch expr vecs)
+  (for ([vec_id (in-dict-keys vecs)])
+    (define live_bufs (extract-live-bufs (hash-ref vecs 0)))
+    (println live_bufs)
+    (println (plug-swizzle-grammar expr live_bufs vec))
+    
+    ))
+  ;(match expr
+    ;[(gather opts) (??hvx-swizzle)]
+    ;[(swizzle vec) (??hvx-swizzle)]
+   ; [(vadd a b) (vadd (plug-swizzle-grammar a) (plug-swizzle-grammar b))]
+    ;[(vmpyi-acc acc v s) (vmpyi-acc (plug-swizzle-grammar acc) (plug-swizzle-grammar v) s)]
+    ;[_ expr]))
 
 (provide (all-defined-out))

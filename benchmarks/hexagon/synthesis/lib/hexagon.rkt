@@ -31,9 +31,8 @@
 (struct vgather (Rt Mu Vv) #:transparent)
 
 ;; New constructs to abstract away data movement
-(struct gather (opts) #:transparent)
+(struct gather (opts))
 (struct swizzle (opts) #:transparent)
-(struct broadcast (v) #:transparent)
 
 ;; Define DSL for data processing
 (struct vadd (lhs rhs) #:transparent)
@@ -52,10 +51,8 @@
 
 (define (interpret p)
   (match p
-    [(gather opts) (lambda (i) (apply choose* opts))]
+    [(gather opts) (lambda (i) (define-symbolic* idx integer?) (list-ref (list-ref opts i) idx))]
     [(swizzle vec) (get-from (interpret vec))]
-
-    [(broadcast val) (lambda (i) val)]
     
     [(vpacko v) (lambda (i) (extract 15 8 ((interpret v) i)))]
     

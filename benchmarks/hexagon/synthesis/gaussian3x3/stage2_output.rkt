@@ -3,6 +3,7 @@
 (require rosette/lib/synthax)
 (require rosette/lib/angelic)
 
+(require "../lib/util.rkt")
 (require "../lib/cpp.rkt")
 (require "../lib/halide.rkt")
 (require "../lib/hexagon.rkt")
@@ -10,8 +11,11 @@
 (require "../lib/grammar.rkt")
 (require "../lib/analysis.rkt")
 
+(error-print-width 100000)
+
 ;; Synthesis parameters
 (define MC_BND 1)
+(define VEC_LANES 128)
 
 ;; Model buffers as uninterpreted functions
 (define-symbolic rows (~> integer? (bitvector 16)))
@@ -41,7 +45,7 @@
 (define original-expr-pre-hvx
   ;(uint8x128
    ;(bvsdiv
-    (vec-add
+    ;(vec-add
      (vec-add
       (concat_vectors
        (slice_vectors
@@ -66,16 +70,16 @@
         (x128 (bv 2 16)))
        (concat_vectors
         (ramp c1 0 1 64)
-        (ramp rows (+ (* output.s0.x.x 128) 64) 1 64))))
-     (x128 (bv 8 16))))
+        (ramp rows (+ (* output.s0.x.x 128) 64) 1 64)))))
+     ;(x128 (bv 8 16))))
     ;(x128 (bv 16 16)))))
 
 ;; Perform analysis to extract the set of buffer reads
 (define buff-reads (list))
-(for ([i MC_BND])
-  (set! buff-reads (append buff-reads (extract-buf-reads ((interpret-halide original-expr-pre-hvx) 0)))))
-(println ((interpret-halide original-expr-pre-hvx) 0))
-(println buff-reads)
+(for ([i VEC_LANES])
+  (set! buff-reads (append buff-reads (list (extract-buf-reads ((interpret-halide original-expr-pre-hvx) i))))))
+;(println ((interpret-halide original-expr-pre-hvx) 0))
+;(println buff-reads)
 
 (define synthesized-expr
   (??hxv-expr-linear-static buff-reads))
@@ -90,17 +94,36 @@
       (for ([i lanes])
         (assert (eq? (oe i) (se i))))))
 
+(define (lane-eq? oe se lane)
+  (assert (eq? (oe lane) (se lane))))
+
 ;; Synthesize expression
 (define st (current-seconds))
 (define sol (synthesize #:forall (list rows output.s0.x.x c1)
-                        #:guarantee (bounded-eq? (interpret-halide original-expr-pre-hvx) (interpret-hvx synthesized-expr) 1)))
+                        #:guarantee (bounded-eq? (interpret-halide original-expr-pre-hvx) (interpret-hvx synthesized-expr) MC_BND)))
 (define runtime (- (current-seconds) st))
 
-;; Synthesize 
+;; Print solution
+(evaluate synthesized-expr sol)
+(printf "\nRuntime (stage 1): ~a seconds\n\n" runtime)
+
+;; Synthesize swizzles spec (+ full verification)
+(set! st (current-seconds))
+(define sols (list))
+(for ([lane VEC_LANES])
+  (define lane-sol (synthesize #:forall (list rows output.s0.x.x c1)
+                               #:guarantee (lane-eq? (interpret-halide original-expr-pre-hvx) (interpret-hvx (evaluate synthesized-expr sol)) lane)))
+  (set! sols (append sols (list lane-sol))))
+(set! runtime (- (current-seconds) st))
+
+;; Parse stage 2 output
+(define vecs (parse-swizzle-spec buff-reads sols))
+
+;; Replace gathers and swizzles with hvx data-movement instruction grammar
+(define program_sketch (gen-final-sketch (evaluate synthesized-expr sol) vecs))
+
+;; Synthesize swizzle instructions
+
 
 ;; Print solution
-(error-print-width 10000)
-(println sol)
-(evaluate synthesized-expr sol)
-(evaluate ((interpret-hvx synthesized-expr) 0) sol)
-(printf "\n\nRuntime in seconds: ~a" runtime)
+(printf "Runtime (stage 2): ~a seconds" runtime)
