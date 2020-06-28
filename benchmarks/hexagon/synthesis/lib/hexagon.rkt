@@ -6,6 +6,9 @@
 (require rosette/lib/match)
 (require rosette/lib/angelic)
 
+;; Define DSL for data loading
+(struct vread (buf loc) #:transparent)
+
 ;; Define DSL for data swizzling
 (struct vcombine (Vu Vv) #:transparent)
 (struct vshuffe (Vu Vv) #:transparent)
@@ -33,9 +36,11 @@
 ;; New constructs to abstract away data movement
 (struct gather (opts))
 (struct swizzle (opts) #:transparent)
+(struct serve (vec))
 
 ;; Define DSL for data processing
 (struct vadd (lhs rhs) #:transparent)
+(struct vtmpy (v1 v2 s1 s2) #:transparent)
 (struct vmpyi (v s) #:transparent)
 (struct vmpyi-acc (acc v s) #:transparent)
 (struct vpacko (v) #:transparent)
@@ -51,18 +56,32 @@
 
 (define (interpret p)
   (match p
+    [(vread buf loc) (lambda (i) (buf (+ loc i)))]
+    
     [(gather opts) (lambda (i) (define-symbolic* idx integer?) (list-ref (list-ref opts i) idx))]
     [(swizzle vec) (get-from (interpret vec))]
+    [(serve vec) (lambda (i) (hash-ref vec i))]
     
     [(vpacko v) (lambda (i) (extract 15 8 ((interpret v) i)))]
     
     ;; Todo: finish implementations for other types
+    [(vtmpy v1 v2 s1 s2)
+     (lambda (i)
+       (bvadd
+        (bvmul
+         ((interpret v1) (* i 2))
+         (cpp_cast (interpret s1) 'int8 'int16))
+        (bvmul
+         ((interpret v1) (+ (* i 2) 1))
+         (cpp_cast (interpret s2) 'int8 'int16))
+        ((interpret v2) (* i 2))))]
+
     [(vadd a b)
      (lambda (i)
        (bvadd
         ((interpret a) i)
         ((interpret b) i)))]
-
+    
     [(vmpyi-acc acc v s)
      (lambda (i)
        (bvadd

@@ -28,4 +28,13 @@
 
   (remove-duplicates bufs))
 
+;(define (extract-vec-reads expr)
+ ; (define vreads (make-hash))
+  ;(match expr
+    ;; Constructors
+    ;[(ramp buf base stride len) (hash-set! vreads buf (append (list expr) (hash-ref vreads buf (list))))]
+    
+    ;; Base case
+   ; [_ expr]))
+
 (provide (all-defined-out))

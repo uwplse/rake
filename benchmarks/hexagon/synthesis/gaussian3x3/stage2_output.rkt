@@ -79,7 +79,7 @@
 (for ([i VEC_LANES])
   (set! buff-reads (append buff-reads (list (extract-buf-reads ((interpret-halide original-expr-pre-hvx) i))))))
 ;(println ((interpret-halide original-expr-pre-hvx) 0))
-;(println buff-reads)
+;(println (list-ref buff-reads 0))
 
 (define synthesized-expr
   (??hxv-expr-linear-static buff-reads))
@@ -119,11 +119,24 @@
 ;; Parse stage 2 output
 (define vecs (parse-swizzle-spec buff-reads sols))
 
-;; Replace gathers and swizzles with hvx data-movement instruction grammar
-(define program_sketch (gen-final-sketch (evaluate synthesized-expr sol) vecs))
+;; Print solution
+(printf "Runtime (stage 2): ~a seconds\n\n" runtime)
 
 ;; Synthesize swizzle instructions
-
+(set! st (current-seconds))
+(for ([vec_id (in-dict-keys vecs)])
+  (println vec_id)
+  ;; Replace gathers and swizzles with hvx data-movement instruction grammar
+  (define vreads (list (vread c1 0) (vread rows (+ (* output.s0.x.x 128) 64)) (vread c1 64)))
+  (define program_sketch (gen-final-sketch vecs vec_id vreads (evaluate synthesized-expr sol)))
+  (define sol2 (synthesize #:forall (list rows output.s0.x.x c1)
+                           #:guarantee (bounded-eq? (interpret-halide original-expr-pre-hvx) (interpret-hvx program_sketch) VEC_LANES)))
+  (println program_sketch)
+  (println (evaluate program_sketch sol2)))
+  ;(println (interpret-hvx program_sketch))
+  ;(println ((interpret-hvx (evaluate program_sketch sol2)) 0))
+  ;(evaluate program_sketch sol2)
+(set! runtime (- (current-seconds) st))
 
 ;; Print solution
-(printf "Runtime (stage 2): ~a seconds" runtime)
+(printf "Runtime (stage 3): ~a seconds" runtime)

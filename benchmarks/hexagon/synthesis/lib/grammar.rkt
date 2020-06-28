@@ -51,8 +51,8 @@
    t0
    (swizzle t0)
    (vpacko t0)
-   (vadd t0 t1)
-   (vmpyi-acc t0 t1 (bvadd (bv 2 8) (?? (bitvector 8))))))
+   (vadd t0 t1)))
+   ;(vmpyi-acc t0 t1 (bvadd (bv 2 8) (?? (bitvector 8))))))
 
 (define (??hvx-instr2 buffers registers)
   (define t0 (apply choose* registers))
@@ -62,7 +62,7 @@
    t0
    (swizzle t0)
    (vpacko t0)
-   (vadd t0 t1)
+   ;(vadd t0 t1)
    (vmpyi-acc t0 t1 (bvadd (bv 2 8) (?? (bitvector 8))))))
 
 (define (??hvx-instr3 buffers registers)
@@ -106,18 +106,30 @@
   (define r4 (??hvx-instr4 buffers (list r0 r1 r2 r3)))
   r2)
 
-(define (gen-final-sketch expr vecs)
-  (for ([vec_id (in-dict-keys vecs)])
-    (define live_bufs (extract-live-bufs (hash-ref vecs 0)))
-    (println live_bufs)
-    (println (plug-swizzle-grammar expr live_bufs vec))
-    
-    ))
-  ;(match expr
-    ;[(gather opts) (??hvx-swizzle)]
-    ;[(swizzle vec) (??hvx-swizzle)]
-   ; [(vadd a b) (vadd (plug-swizzle-grammar a) (plug-swizzle-grammar b))]
-    ;[(vmpyi-acc acc v s) (vmpyi-acc (plug-swizzle-grammar acc) (plug-swizzle-grammar v) s)]
-    ;[_ expr]))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; STAGE 2 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(define (??hvx-swizzle vreads)
+  (define r0 (apply choose* vreads))
+  r0)
+
+(define curr_id -1)
+
+(define (plug-swizzle-grammar expr vreads vecs vec_id)
+  (match expr
+    [(gather opts) (set! curr_id (+ curr_id 1))
+                   (if (eq? curr_id vec_id) (??hvx-swizzle vreads) (serve (hash-ref vecs curr_id)))]
+    [(swizzle vec) (??hvx-swizzle vreads)]
+    [(vadd a b) (vadd (plug-swizzle-grammar a vreads vecs vec_id) (plug-swizzle-grammar b vreads vecs vec_id))]
+    [(vmpyi-acc acc v s) (vmpyi-acc (plug-swizzle-grammar acc vreads vecs vec_id) (plug-swizzle-grammar v vreads vecs vec_id) s)]
+    [_ expr]))
+
+(define (gen-final-sketch vecs vec_id vreads expr)
+  (set! curr_id -1)
+  ;(define live_bufs (extract-live-bufs (hash-ref vecs 0)))
+  ;(define vreads (extract-vec-reads original-expr-post-hvx))
+  ;(define vreads (list (vread c1 0) (vread c1 64) 
+  (plug-swizzle-grammar expr vreads vecs vec_id))
 
 (provide (all-defined-out))

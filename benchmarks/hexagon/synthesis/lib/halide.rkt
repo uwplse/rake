@@ -89,8 +89,8 @@
     ;; Base case
     [_ p]))
 
-(define (vec-len p)
-  (match p
+(define (vec-len expr)
+  (match expr
     ;; Constructors
     [(x32 sca) 32]
     [(x64 sca) 64]
@@ -132,7 +132,7 @@
     [(halide.hexagon.add_mul.vh.vh.b acc v s) (vec-len acc)]
     
     ;; Base case
-    [_ (error "Don't know how to get vector length from:" p)]))
+    [_ (error "Don't know how to get vector length from:" expr)]))
 
 ;; Model vector casts
 (define (castvec val from to)
