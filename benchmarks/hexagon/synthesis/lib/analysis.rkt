@@ -10,10 +10,13 @@
      (define-symbolic hack (~> integer? (bitvector 16)))
      (define hack2 (hack 0))
      (define app (match hack2 [(expression op2 ops2 ...) op2]))
-     
+
      (cond
        [(eq? op bvadd) (flatten (for/list ([operand operands]) (extract-buf-reads operand)))]
        [(eq? op bvmul) (flatten (for/list ([operand operands]) (extract-buf-reads operand)))]
+       [(eq? op bvsdiv) (flatten (for/list ([operand operands]) (extract-buf-reads operand)))]
+       [(eq? op bvudiv) (flatten (for/list ([operand operands]) (extract-buf-reads operand)))]
+       [(eq? op extract) (flatten (for/list ([operand operands]) (extract-buf-reads operand)))]
        [(eq? op app) expr]
        [else (error "NYI: ~a" expr)])]
      

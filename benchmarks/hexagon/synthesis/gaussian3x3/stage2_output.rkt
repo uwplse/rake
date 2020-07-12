@@ -43,9 +43,9 @@
     (ramp rows 130 1 128))))
 
 (define original-expr-pre-hvx
-  ;(uint8x128
-   ;(bvsdiv
-    ;(vec-add
+  (uint8x128
+   (vec-sdiv
+    (vec-add
      (vec-add
       (concat_vectors
        (slice_vectors
@@ -70,9 +70,10 @@
         (x128 (bv 2 16)))
        (concat_vectors
         (ramp c1 0 1 64)
-        (ramp rows (+ (* output.s0.x.x 128) 64) 1 64)))))
-     ;(x128 (bv 8 16))))
-    ;(x128 (bv 16 16)))))
+        (ramp rows (+ (* output.s0.x.x 128) 64) 1 64))))
+     (x128 (bv 8 16)))
+    (x128 (bv 16 16)))
+   'int16))
 
 ;; Perform analysis to extract the set of buffer reads
 (define buff-reads (list))
@@ -81,8 +82,27 @@
 ;(println ((interpret-halide original-expr-pre-hvx) 0))
 ;(println (list-ref buff-reads 0))
 
+;; Try encoding inputs as non-uninterpreted
+;; Try encoding axioms
+;; Try udiv
+;; Confirm halide impl
+
 (define synthesized-expr
-  (??hxv-expr-linear-static buff-reads))
+  ;(??hxv-expr buff-reads)
+  (vasr-rnd-sat
+   (vmpyi-acc
+    (vadd
+     (gather buff-reads)
+     (gather buff-reads))
+    (gather buff-reads)
+    (bv 2 8))
+   (vmpyi-acc
+    (vadd
+     (gather buff-reads)
+     (gather buff-reads))
+    (gather buff-reads)
+    (bv 2 8))
+   (bv 4 16)))
 
 ;; Verification condition
 (define (bounded-eq? oe se lanes)
@@ -126,19 +146,21 @@
 
 ;; Synthesize swizzle instructions
 (set! st (current-seconds))
-(for ([vec_id (in-dict-keys vecs)])
-  (println vec_id)
-  ;; Replace gathers and swizzles with hvx data-movement instruction grammar
-  (define vreads (list (vread c1 0) (vread rows (+ (* output.s0.x.x 128) 64)) (vread c1 64)))
-  (define program_sketch (gen-final-sketch vecs vec_id vreads (evaluate synthesized-expr sol)))
-  (define sol2 (synthesize #:forall (list rows output.s0.x.x c1)
-                           #:guarantee (bounded-eq? (interpret-halide original-expr-pre-hvx) (interpret-hvx program_sketch) VEC_LANES)))
-  (println program_sketch)
-  (println (evaluate program_sketch sol2)))
+;(define vreads (list (vread c1 0) (vread rows (+ (* output.s0.x.x 128) 64)) (vread c1 64)))
+(define vreads (list
+                (valign (vcombine (vread c1 0) (vread rows (+ (* output.s0.x.x 128) 64))) 1)
+                
+                (vread c1 64)))
+(define program_sketch (gen-final-sketch (evaluate synthesized-expr sol) vreads))
+(define sol2 (synthesize #:forall (list rows output.s0.x.x c1)
+                         #:guarantee (bounded-eq? (interpret-halide original-expr-pre-hvx) (interpret-hvx program_sketch) 8)))
+(set! runtime (- (current-seconds) st))
+
+;  (println program_sketch)
+;  (println (evaluate program_sketch sol2)))
   ;(println (interpret-hvx program_sketch))
   ;(println ((interpret-hvx (evaluate program_sketch sol2)) 0))
   ;(evaluate program_sketch sol2)
-(set! runtime (- (current-seconds) st))
 
 ;; Print solution
 (printf "Runtime (stage 3): ~a seconds" runtime)

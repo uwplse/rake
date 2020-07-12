@@ -28,7 +28,7 @@
 (struct vtranspose (Vu Vv Rt) #:transparent)
 (struct vpack (Vu Vv) #:transparent)
 (struct vpacke (Vu Vv) #:transparent)
-;(struct vpacko (Vu Vv) #:transparent)
+(struct vpacko (Vu Vv) #:transparent)
 (struct vunpack (Vu) #:transparent)
 (struct vunpacko (Vu) #:transparent)
 (struct vgather (Rt Mu Vv) #:transparent)
@@ -43,7 +43,8 @@
 (struct vtmpy (v1 v2 s1 s2) #:transparent)
 (struct vmpyi (v s) #:transparent)
 (struct vmpyi-acc (acc v s) #:transparent)
-(struct vpacko (v) #:transparent)
+(struct vasr-rnd-sat (Vu Vv Rt) #:transparent)
+(struct vpackhi (v) #:transparent)
 
 (define (get-from buf)
   (lambda (i)
@@ -56,15 +57,19 @@
 
 (define (interpret p)
   (match p
+    ;; Define DSL for data loading
     [(vread buf loc) (lambda (i) (buf (+ loc i)))]
+
+    ;; Define DSL for data swizzling
+    [(vcombine v1 v2) (lambda (i) (if (< i 64) (v1 i) (v2 i)))]
+    [(valign v1 v2 Rt) (lambda (i) (if (< i 64) (v1 (+ i Rt)) (v2 (+ i Rt))))]
     
+    ;; New constructs to abstract away data movement
     [(gather opts) (lambda (i) (define-symbolic* idx integer?) (list-ref (list-ref opts i) idx))]
     [(swizzle vec) (get-from (interpret vec))]
     [(serve vec) (lambda (i) (hash-ref vec i))]
     
-    [(vpacko v) (lambda (i) (extract 15 8 ((interpret v) i)))]
-    
-    ;; Todo: finish implementations for other types
+    ;; Define DSL for data processing
     [(vtmpy v1 v2 s1 s2)
      (lambda (i)
        (bvadd
@@ -89,6 +94,14 @@
         (bvmul
          ((interpret v) i)
          (cpp_cast (interpret s) 'int8 'int16))))]
+
+    [(vasr-rnd-sat Vu Vv Rt)
+     (lambda (i)
+       (if (even? i)
+           (usat8 (bvashr (bvadd ((interpret Vv) (quotient i 2)) (bvshl (bv 1 16) (bvsub Rt (bv 1 16)))) Rt))
+           (usat8 (bvashr (bvadd ((interpret Vu) (quotient i 2)) (bvshl (bv 1 16) (bvsub Rt (bv 1 16)))) Rt))))]
+
+    [(vpackhi v) (lambda (i) (extract 15 8 ((interpret v) i)))]
     
     [_ p]))
     
