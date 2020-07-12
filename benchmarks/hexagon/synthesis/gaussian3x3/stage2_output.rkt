@@ -97,6 +97,8 @@
 (define (lane-eq? oe se lane)
   (assert (eq? (oe lane) (se lane))))
 
+(assert (forall (list output.s0.x.x) (and (bvslt (rows output.s0.x.x) (bv 1020 16)) (bvsge (rows output.s0.x.x) (bv 0 16)))))
+
 ;; Synthesize expression
 (define st (current-seconds))
 (define sol (synthesize #:forall (list rows output.s0.x.x c1)

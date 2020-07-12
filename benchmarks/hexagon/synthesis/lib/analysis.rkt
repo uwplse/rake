@@ -15,7 +15,7 @@
        [(eq? op bvadd) (flatten (for/list ([operand operands]) (extract-buf-reads operand)))]
        [(eq? op bvmul) (flatten (for/list ([operand operands]) (extract-buf-reads operand)))]
        [(eq? op app) expr]
-       [else (error "NYI")])]
+       [else (error "NYI: ~a" expr)])]
      
     [_ (list)]))
 
