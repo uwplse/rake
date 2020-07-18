@@ -29,16 +29,20 @@
            (bvadd (bv 2 8) (?? (bitvector 8))))))
 
 ;; Best encoding
+(define (const)
+  (?? (bitvector 4)))
+
 (define (??hvx-instr registers)
   (define t0 (apply choose* registers))
   (define t1 (apply choose* registers))
   (choose*
-   t0
    (swizzle t0)
-   (vpackhi t0)
    (vadd t0 t1)
-   (vmpyi-acc t0 t1 (?? (bitvector 8)))
-   (vasr-rnd-sat t0 t1 (bv 4 16))))
+   (vmpyi t0 (sign-extend  (?? (bitvector 4)) (bitvector 8)))
+   (vmpyi-acc t0 t1 (sign-extend  (?? (bitvector 4)) (bitvector 8)))
+   (vdmpy-acc t0 t1 (sign-extend  (?? (bitvector 4)) (bitvector 8)) (sign-extend  (?? (bitvector 4)) (bitvector 8)))
+   (vtmpy (vpair t0 t1) (sign-extend  (?? (bitvector 4)) (bitvector 8)) (sign-extend  (?? (bitvector 4)) (bitvector 8)))
+   (vasr-rnd-sat t0 t1 (zero-extend (?? (bitvector 4)) (bitvector 16)))))
 
 (define (??hxv-expr buffers)
   (define r0 (gather buffers))
@@ -46,66 +50,48 @@
   (define r2 (??hvx-instr (list r0 r1)))
   (define r3 (??hvx-instr (list r0 r1 r2)))
   (define r4 (??hvx-instr (list r0 r1 r2 r3)))
-  r4)
+  (define r5 (??hvx-instr (list r0 r1 r2 r3 r4)))
+  r3)
 
 ;; Best encoding (unrolled, useful for testing)
-(define (??hvx-instr1 registers)
-  (define t0 (apply choose* registers))
-  (define t1 (apply choose* registers))
-  (choose
-   t0
-   (swizzle t0)
-   (vpacko t0)
-   (vadd t0 t1)
-   (vmpyi-acc t0 t1 (?? (bitvector 8)))))
-
-(define (??hvx-instr2 registers)
-  (define t0 (apply choose* registers))
-  (define t1 (apply choose* registers))
-  (choose
-   t0
-   (swizzle t0)
-   (vpacko t0)
-   (vadd t0 t1)
-   (vmpyi-acc t0 t1 (?? (bitvector 8)))))
-
-(define (??hvx-instr3 registers)
-  (define t0 (apply choose* registers))
-  (define t1 (apply choose* registers))
-  (choose
-   t0
-   (swizzle t0)
-   (vpacko t0)
-   (vadd t0 t1)
-   (vmpyi-acc t0 t1 (?? (bitvector 8)))))
-
-(define (??hvx-instr4 registers)
-  (define t0 (apply choose* registers))
-  (define t1 (apply choose* registers))
-  (choose
-   t0
-   (swizzle t0)
-   (vpacko t0)
-   (vadd t0 t1)
-   (vmpyi-acc t0 t1 (?? (bitvector 8)))))
-
-(define (??hvx-instr5 buffers registers)
-  (define t0 (apply choose* registers))
-  (define t1 (apply choose* registers))
-  (choose
-   t0
-   (swizzle t0)
-   (vpacko t0)
-   (vadd t0 t1)
-   (vmpyi-acc t0 t1 (?? (bitvector 8)))))
-
-(define (??hxv-expr-linear-static buffers)
+(define (??hxv-expr-unrolled buffers)
   (define r0 (gather buffers))
-  (define r1 (??hvx-instr1 (list r0)))
-  (define r2 (??hvx-instr2 (list r0 r1)))
-  (define r3 (??hvx-instr3 (list r0 r1 r2)))
-  (define r4 (??hvx-instr4 (list r0 r1 r2 r3)))
-  r4)
+
+  (define r1 (choose
+              r0
+              (swizzle r0)
+              (vadd r0 r0)
+              (vmpyi-acc r0 r0 (sign-extend (?? (bitvector 4)) (bitvector 8)))
+              (vasr-rnd-sat r0 r0 (zero-extend (?? (bitvector 4)) (bitvector 16)))))
+
+  (define t0 (choose r0 r1))
+  (define t1 (choose r0 r1))
+  (define r2 (choose
+              t0
+              (swizzle t0)
+              (vadd t0 t1)
+              (vmpyi-acc t0 t1 (sign-extend (?? (bitvector 4)) (bitvector 8)))
+              (vasr-rnd-sat t0 t1 (zero-extend (?? (bitvector 4)) (bitvector 16)))))
+
+  (define t2 (choose r0 r1 r2))
+  (define t3 (choose r0 r1 r2))
+  (define r3 (choose
+              t2
+              (swizzle t2)
+              (vadd t2 t3)
+              (vmpyi-acc t2 t3 (sign-extend (?? (bitvector 4)) (bitvector 8)))
+              (vasr-rnd-sat t2 t3 (zero-extend (?? (bitvector 4)) (bitvector 16)))))
+
+  (define t4 (choose r0 r1 r2 r3))
+  (define t5 (choose r0 r1 r2 r3))
+  (define r4 (choose
+              t4
+              (swizzle t4)
+              (vadd t4 t5)
+              (vmpyi-acc t4 t5 (sign-extend (?? (bitvector 4)) (bitvector 8)))
+              (vasr-rnd-sat t4 t5 (zero-extend (?? (bitvector 4)) (bitvector 16)))))
+
+  r3)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; STAGE 2 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

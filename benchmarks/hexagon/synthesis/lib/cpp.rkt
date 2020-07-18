@@ -38,17 +38,24 @@
        ['int32 val]
        ['uint32 val])]))
 
-;; Model saturation
+;(define (sxt32 val)
+  ;(cpp_cast val 'int16 'int32))
+
 (define (sat8 val)
   (cond
-    [((bitvector 8) val) (if (bvslt val (bv -128 8)) (bv -128 8) (if (bvsgt val (bv 127 8)) (bv 127 8) (extract 7 0 val)))]
+    [((bitvector 8) val) (if (bvslt val (bv -128 8)) (bv -128 8) (if (bvsgt val (bv 127 8)) (bv 127 8) val))]
     [((bitvector 16) val) (if (bvslt val (bv -128 16)) (bv -128 8) (if (bvsgt val (bv 127 16)) (bv 127 8) (extract 7 0 val)))]
     [((bitvector 32) val) (if (bvslt val (bv -128 32)) (bv -128 8) (if (bvsgt val (bv 127 32)) (bv 127 8) (extract 7 0 val)))]))
 
+(define (sat16 val)
+  (cond
+    [((bitvector 16) val) (if (bvslt val (bv -32768 32)) (bv -32768 16) (if (bvsgt val (bv 32767 32)) (bv 32767 16) val))]
+    [((bitvector 32) val) (if (bvslt val (bv -32768 32)) (bv -32768 16) (if (bvsgt val (bv 32767 32)) (bv 32767 16) (extract 15 0 val)))]))
+
 (define (usat8 val)
   (cond
-    [((bitvector 8) val) (if (bvslt val (bv 0 8)) (bv 0 8) (if (bvsgt val (bv 255 8)) (bv 255 8) (extract 7 0 val)))]
+    [((bitvector 8) val) (if (bvslt val (bv 0 8)) (bv 0 8) (if (bvsgt val (bv 255 8)) (bv 255 8) val))]
     [((bitvector 16) val) (if (bvslt val (bv 0 16)) (bv 0 8) (if (bvsgt val (bv 255 16)) (bv 255 8) (extract 7 0 val)))]
     [((bitvector 32) val) (if (bvslt val (bv 0 32)) (bv 0 8) (if (bvsgt val (bv 255 32)) (bv 255 8) (extract 7 0 val)))]))
 
-(provide cpp_cast sat8 usat8)
+(provide (all-defined-out))

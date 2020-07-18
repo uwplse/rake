@@ -21,28 +21,18 @@
 (define-symbolic rows (~> integer? (bitvector 16)))
 (define-symbolic c1 (~> integer? (bitvector 16)))
 
+;; Axioms describing value range for intermediates
+(define-symbolic idx integer?)
+(assert (forall (list idx) (and (bvslt (rows idx) (bv 1021 16)) (bvsge (rows idx) (bv 0 16)))))
+(assert (forall (list idx) (and (bvslt (c1 idx) (bv 1021 16)) (bvsge (c1 idx) (bv 0 16)))))
+
 (define buffers (list rows c1))
 
 ;; Model indexing variables as integers
 (define-symbolic output.s0.x.x integer?)
 
 ;; Define original expression
-(define original-expr-post-hvx
-  (halide.hexagon.packhi.vh
-   (vec-add
-    (halide.hexagon.add_mul.vh.vh.b
-     (halide.hexagon.add_mul.vh.vh.b
-      (halide.hexagon.add_mul.vh.vh.b
-       (ramp rows 126 1 128)
-       (ramp rows 127 1 128)
-       (bv 4 8))
-      (ramp rows 128 1 128)
-      (bv 6 8))
-     (ramp rows 129 1 128) 
-     (bv 4 8))
-    (ramp rows 130 1 128))))
-
-(define original-expr-pre-hvx
+(define original-expr
   (uint8x128
    (vec-sdiv
     (vec-add
@@ -78,31 +68,10 @@
 ;; Perform analysis to extract the set of buffer reads
 (define buff-reads (list))
 (for ([i VEC_LANES])
-  (set! buff-reads (append buff-reads (list (extract-buf-reads ((interpret-halide original-expr-pre-hvx) i))))))
-;(println ((interpret-halide original-expr-pre-hvx) 0))
-;(println (list-ref buff-reads 0))
-
-;; Try encoding inputs as non-uninterpreted
-;; Try encoding axioms
-;; Try udiv
-;; Confirm halide impl
+  (set! buff-reads (append buff-reads (list (extract-buf-reads ((interpret-halide original-expr) i))))))
 
 (define synthesized-expr
-  ;(??hxv-expr buff-reads)
-  (vasr-rnd-sat
-   (vmpyi-acc
-    (vadd
-     (gather buff-reads)
-     (gather buff-reads))
-    (gather buff-reads)
-    (bv 2 8))
-   (vmpyi-acc
-    (vadd
-     (gather buff-reads)
-     (gather buff-reads))
-    (gather buff-reads)
-    (bv 2 8))
-   (bv 4 16)))
+  (??hxv-expr buff-reads))
 
 ;; Verification condition
 (define (bounded-eq? oe se lanes)
@@ -112,20 +81,22 @@
          (assert (eq? ((car oe) i) ((car se) i)))
          (assert (eq? ((cdr oe) i) ((cdr se) i)))))
       (for ([i lanes])
-        (assert (eq? (oe i) (se i))))))
+        (set-curr-cn i)
+        (assert (eq? (oe i) (se i)))
+        (set-curr-cn (+ i 65))
+        (assert (eq? (oe (+ i 65)) (se (+ i 65)))))))
 
 (define (lane-eq? oe se lane)
   (assert (eq? (oe lane) (se lane))))
 
-(assert (forall (list output.s0.x.x) (and (bvslt (rows output.s0.x.x) (bv 1020 16)) (bvsge (rows output.s0.x.x) (bv 0 16)))))
-
 ;; Synthesize expression
 (define st (current-seconds))
 (define sol (synthesize #:forall (list rows output.s0.x.x c1)
-                        #:guarantee (bounded-eq? (interpret-halide original-expr-pre-hvx) (interpret-hvx synthesized-expr) MC_BND)))
+                        #:guarantee (bounded-eq? (interpret-halide original-expr) (interpret-hvx synthesized-expr) MC_BND)))
 (define runtime (- (current-seconds) st))
 
 ;; Print solution
+(println sol)
 (evaluate synthesized-expr sol)
 (printf "\nRuntime (stage 1): ~a seconds\n\n" runtime)
 
@@ -133,8 +104,9 @@
 (set! st (current-seconds))
 (define sols (list))
 (for ([lane VEC_LANES])
+  (set-curr-cn lane)
   (define lane-sol (synthesize #:forall (list rows output.s0.x.x c1)
-                               #:guarantee (lane-eq? (interpret-halide original-expr-pre-hvx) (interpret-hvx (evaluate synthesized-expr sol)) lane)))
+                               #:guarantee (lane-eq? (interpret-halide original-expr) (interpret-hvx (evaluate synthesized-expr sol)) lane)))
   (set! sols (append sols (list lane-sol))))
 (set! runtime (- (current-seconds) st))
 
@@ -149,11 +121,10 @@
 ;(define vreads (list (vread c1 0) (vread rows (+ (* output.s0.x.x 128) 64)) (vread c1 64)))
 (define vreads (list
                 (valign (vcombine (vread c1 0) (vread rows (+ (* output.s0.x.x 128) 64))) 1)
-                
                 (vread c1 64)))
 (define program_sketch (gen-final-sketch (evaluate synthesized-expr sol) vreads))
 (define sol2 (synthesize #:forall (list rows output.s0.x.x c1)
-                         #:guarantee (bounded-eq? (interpret-halide original-expr-pre-hvx) (interpret-hvx program_sketch) 8)))
+                         #:guarantee (bounded-eq? (interpret-halide original-expr) (interpret-hvx program_sketch) 8)))
 (set! runtime (- (current-seconds) st))
 
 ;  (println program_sketch)

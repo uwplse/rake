@@ -39,7 +39,7 @@ public:
             Expr ht = output.dim(1).extent();
 
             // HALIDE: 0.3233 cycles/pixel
-            // SDK :   0.14 cyckes/pixel
+            // Best Manual Implementation :   0.14 cyckes/pixel
             output
                 .hexagon()
                 .split(y, y, yi, 4, TailStrategy::RoundUp)
