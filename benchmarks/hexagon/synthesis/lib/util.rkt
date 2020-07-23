@@ -1,5 +1,49 @@
 #lang rosette
 
+(require "cpp.rkt")
+
+;; For tracking types of variables
+(define type-dict (make-hash))
+(define (init-var-types td) (set! type-dict td))
+(define (var-type var) (hash-ref type-dict var))
+
+;; Creating typed expressions
+(define (get-type bw signed?)
+  (if (signed?)
+      (cond
+        [(eq? bw 8) 'int8]
+        [(eq? bw 16) 'int16]
+        [(eq? bw 32) 'int32]
+        [else (error "Cannot handle signed ints of bw: ~a" bw)])
+      (cond
+        [(eq? bw 8) 'uint8]
+        [(eq? bw 16) 'uint16]
+        [(eq? bw 32) 'uint32]
+        [else (error "Cannot handle unsigned ints of bw: ~a" bw)])))
+  
+(define (mk-typed-expr expr type)
+  (match type
+    ['int8 (int8_t expr)]
+    ['int16 (int16_t expr)]
+    ['int32 (int32_t expr)]
+    ['uint32 (uint8_t expr)]
+    ['uint32 (uint16_t expr)]
+    ['uint32 (uint32_t expr)]
+    [_ (error "NYI. Creating exprs of type: ~a" type)]))
+
+;; Custom buffer read function. Wraps the read value
+;; in the appropriate type struct
+(define (get buf loc)
+  (define bufType (hash-ref type-dict buf))
+  (cond
+    [(eq? bufType 'int8) (int8_t (buf loc))]
+    [(eq? bufType 'int16) (int16_t (buf loc))]
+    [(eq? bufType 'int32) (int32_t (buf loc))]
+    [(eq? bufType 'uint8) (uint8_t (buf loc))]
+    [(eq? bufType 'uint16) (uint16_t (buf loc))]
+    [(eq? bufType 'uint32) (uint32_t (buf loc))]
+  ))
+
 (define (parse-swizzle-spec buff-reads sols)
   (define vecs (make-hash))
   (define vec_id 0)
