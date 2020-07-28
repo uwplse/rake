@@ -3,8 +3,9 @@
 (require rosette/lib/synthax)
 (require rosette/lib/angelic)
 
-(require "../lib/util.rkt")
 (require "../lib/cpp.rkt")
+(require "../lib/util.rkt")
+(require "../lib/axioms.rkt")
 (require "../lib/halide.rkt")
 (require "../lib/hexagon.rkt")
 (require "../lib/ir.rkt")
@@ -21,21 +22,22 @@
 (define-symbolic rows (~> integer? (bitvector 16)))
 (define-symbolic c1 (~> integer? (bitvector 16)))
 
-;; Axioms describing value range for intermediates
-(define-symbolic idx integer?)
-(assert (forall (list idx) (and (bvslt (rows idx) (bv 1021 16)) (bvsge (rows idx) (bv 0 16)))))
-(assert (forall (list idx) (and (bvslt (c1 idx) (bv 1021 16)) (bvsge (c1 idx) (bv 0 16)))))
+(init-var-types (make-hash (list (cons rows 'int16) (cons c1 'int16))))
 
 (define buffers (list rows c1))
+
+;; Axioms describing value range for intermediates
+(assert (values-range-from rows (bv 0 16) (bv 1021 16)))
+(assert (values-range-from c1 (bv 0 16) (bv 1021 16)))
 
 ;; Model indexing variables as integers
 (define-symbolic output.s0.x.x integer?)
 
 ;; Define original expression
 (define original-expr
-  (uint8x128
-   (vec-sdiv
-    (vec-add
+  ;(uint8x128
+   ;(vec-div
+;    (vec-add
      (vec-add
       (concat_vectors
        (slice_vectors
@@ -57,18 +59,21 @@
           (concat_vectors
            (ramp rows (+ (* output.s0.x.x 128) 64) 1 64)
            (ramp c1 64 1 64)) 1 1 64))
-        (x128 (bv 2 16)))
+        (x128 (int16_t (bv 2 16))))
        (concat_vectors
         (ramp c1 0 1 64)
-        (ramp rows (+ (* output.s0.x.x 128) 64) 1 64))))
-     (x128 (bv 8 16)))
-    (x128 (bv 16 16)))
-   'int16))
+        (ramp rows (+ (* output.s0.x.x 128) 64) 1 64)))))
+     ;(x128 (int16_t (bv 8 16))))
+    ;(x128 (int16_t (bv 16 16))))
+   ;'int16))
 
 ;; Perform analysis to extract the set of buffer reads
 (define buff-reads (list))
 (for ([i VEC_LANES])
   (set! buff-reads (append buff-reads (list (extract-buf-reads ((interpret-halide original-expr) i))))))
+
+;(println ((interpret-halide original-expr) 0))
+;(println (list-ref buff-reads 0))
 
 (define synthesized-expr
   (??hxv-expr buff-reads))
@@ -82,9 +87,9 @@
          (assert (eq? ((cdr oe) i) ((cdr se) i)))))
       (for ([i lanes])
         (set-curr-cn i)
-        (assert (eq? (oe i) (se i)))
+        (assert (eq? (eval (oe i)) (eval (se i))))
         (set-curr-cn (+ i 65))
-        (assert (eq? (oe (+ i 65)) (se (+ i 65)))))))
+        (assert (eq? (eval (oe (+ i 65))) (eval (se (+ i 65))))))))
 
 (define (lane-eq? oe se lane)
   (assert (eq? (oe lane) (se lane))))
@@ -99,6 +104,8 @@
 (println sol)
 (evaluate synthesized-expr sol)
 (printf "\nRuntime (stage 1): ~a seconds\n\n" runtime)
+
+(exit)
 
 ;; Synthesize swizzles spec (+ full verification)
 (set! st (current-seconds))
@@ -119,13 +126,13 @@
 ;; Synthesize swizzle instructions
 (set! st (current-seconds))
 ;(define vreads (list (vread c1 0) (vread rows (+ (* output.s0.x.x 128) 64)) (vread c1 64)))
-(define vreads (list
-                (valign (vcombine (vread c1 0) (vread rows (+ (* output.s0.x.x 128) 64))) 1)
-                (vread c1 64)))
-(define program_sketch (gen-final-sketch (evaluate synthesized-expr sol) vreads))
-(define sol2 (synthesize #:forall (list rows output.s0.x.x c1)
-                         #:guarantee (bounded-eq? (interpret-halide original-expr) (interpret-hvx program_sketch) 8)))
-(set! runtime (- (current-seconds) st))
+;(define vreads (list
+;                (valign (vcombine (vread c1 0) (vread rows (+ (* output.s0.x.x 128) 64))) 1)
+;                (vread c1 64)))
+;(define program_sketch (gen-final-sketch (evaluate synthesized-expr sol) vreads))
+;(define sol2 (synthesize #:forall (list rows output.s0.x.x c1)
+;                         #:guarantee (bounded-eq? (interpret-halide original-expr) (interpret-hvx program_sketch) 8)))
+;(set! runtime (- (current-seconds) st))
 
 ;  (println program_sketch)
 ;  (println (evaluate program_sketch sol2)))

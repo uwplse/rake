@@ -52,10 +52,6 @@
 (struct vec-mul (v1 v2) #:transparent)
 (struct vec-div (v1 v2) #:transparent)
 
-;; Hexagon instructions
-(struct halide.hexagon.packhi.vh (vec) #:transparent)
-(struct halide.hexagon.add_mul.vh.vh.b (acc v s) #:transparent)
-
 (define (interpret p)
   (match p
     ;; Constructors
@@ -101,10 +97,6 @@
     [(vec-sub v1 v2) (lambda (i) (do-sub ((interpret v1) i) ((interpret v2) i)))]
     [(vec-mul v1 v2) (lambda (i) (do-mul ((interpret v1) i) ((interpret v2) i)))]
     [(vec-div v1 v2) (lambda (i) (do-div ((interpret v1) i) ((interpret v2) i)))]
-
-    ;; Hexagon instructions
-    ;[(halide.hexagon.packhi.vh vec) (lambda (i) (extract 15 8 ((interpret vec) i)))]
-    ;[(halide.hexagon.add_mul.vh.vh.b acc v s) (lambda (i) (bvadd ((interpret acc) i) (bvmul ((interpret v) i) (cpp_cast (interpret s) 'int8 'int16))))]
     
     ;; Base case
     [_ p]))
@@ -145,10 +137,6 @@
     [(vec-sub v1 v2) (vec-len v1)]
     [(vec-mul v1 v2) (vec-len v1)]
     [(vec-div v1 v2) (vec-len v1)]
-
-    ;; Hexagon instructions
-    [(halide.hexagon.packhi.vh vec) (vec-len vec)]
-    [(halide.hexagon.add_mul.vh.vh.b acc v s) (vec-len acc)]
     
     ;; Base case
     [_ (error "Don't know how to get vector length from:" expr)]))
