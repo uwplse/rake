@@ -72,9 +72,6 @@
 (for ([i VEC_LANES])
   (set! buff-reads (append buff-reads (list (extract-buf-reads ((interpret-halide original-expr) i))))))
 
-;(println ((interpret-halide original-expr) 0))
-;(println (list-ref buff-reads 0))
-
 (define synthesized-expr
   (??hxv-expr buff-reads))
 
