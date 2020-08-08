@@ -1,6 +1,7 @@
 #lang rosette
 
 (require "cpp.rkt")
+(require rosette/lib/match)
 
 ;; For tracking types of variables
 (define type-dict (make-hash))
@@ -26,10 +27,20 @@
     ['int8 (int8_t expr)]
     ['int16 (int16_t expr)]
     ['int32 (int32_t expr)]
-    ['uint32 (uint8_t expr)]
-    ['uint32 (uint16_t expr)]
+    ['uint8 (uint8_t expr)]
+    ['uint16 (uint16_t expr)]
     ['uint32 (uint32_t expr)]
     [_ (error "NYI. Creating exprs of type: ~a" type)]))
+
+(define (promote var)
+  (match var
+    [(int8_t v) (int16_t (sign-extend v (bitvector 16)))]
+    [(uint8_t v) (uint16_t (zero-extend v (bitvector 16)))]
+    [(int16_t v) (int32_t (sign-extend v (bitvector 32)))]
+    [(uint16_t v) (uint32_t (zero-extend v (bitvector 32)))]
+    [(int32_t v) (int64_t (sign-extend v (bitvector 64)))]
+    [(uint32_t v) (uint64_t (zero-extend v (bitvector 64)))]
+    [_ (error "NYI. Promoting : ~a" var)]))
 
 ;; Custom buffer read function. Wraps the read value
 ;; in the appropriate type struct

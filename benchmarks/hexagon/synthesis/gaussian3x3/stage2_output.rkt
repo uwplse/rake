@@ -8,7 +8,6 @@
 (require "../lib/axioms.rkt")
 (require "../lib/halide.rkt")
 (require "../lib/hexagon.rkt")
-(require "../lib/ir.rkt")
 (require "../lib/grammar.rkt")
 (require "../lib/analysis.rkt")
 
@@ -73,7 +72,7 @@
   (set! buff-reads (append buff-reads (list (extract-buf-reads ((interpret-halide original-expr) i))))))
 
 (define synthesized-expr
-  (??hxv-expr buff-reads))
+  (??hvx-expr buff-reads))
 
 ;; Verification condition
 (define (bounded-eq? oe se lanes)
