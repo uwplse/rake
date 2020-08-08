@@ -19,7 +19,6 @@
   (when (not (hash-has-key? mem-map value))
     (hash-set! mem-map value (get-new-var))))
     
-
 (define (encode p)
   (match p
     ;; Gather instruction

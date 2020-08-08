@@ -6,13 +6,9 @@
 (require "analysis.rkt")
 (require "cpp.rkt")
 (require "hexagon.rkt")
-(require "ir.rkt")
 
 ; Cast to uint8
 ; Signed div
-; Vec-Sca multiply
-
-; Add
 
 (define (bool-const)
   (define-symbolic b boolean?)
@@ -31,10 +27,16 @@
   (define t0 (apply choose* registers))
   (define t1 (apply choose* registers))
   (define t2 (apply choose* registers))
-  (define c (int-const))
+  (define c0 (int-const))
+  (define c1 (int-const))
+  (define Rt (cons c0 c1))
+  (define Rt4 (list c0 c1 (int-const) (int-const)))
   (choose*
    ;; Swizzle
    ;(swizzle t0)
+
+   ;; Broadcast
+   (vsplat c0)
 
    ;; Addition
    (vadd t0 t1 (bool-const))
@@ -42,20 +44,41 @@
    (vadd-w-acc t0 t1 t2)
 
    ;; Vec-Sca multiplies
-   (vmpy t0 c)
-   (vmpyi t0 c)
-   (vmpye t0 c)
+   (vmpy t0 c0)
+   (vmpyi t0 c0)
+   (vmpye t0 c0)
 
-   (vmpy-acc t0 t1 c)
-   (vmpyi-acc t0 t1 c)
-   (vmpye-acc t0 t1 c)))
+   (vmpy-acc t0 t1 c0)
+   (vmpyi-acc t0 t1 c0)
+   (vmpye-acc t0 t1 c0)
 
-   ;(vmpyi-acc t0 t1 (sign-extend  (?? (bitvector 4)) (bitvector 8)))
-   ;(vdmpy-acc t0 t1 (sign-extend  (?? (bitvector 4)) (bitvector 8)) (sign-extend  (?? (bitvector 4)) (bitvector 8)))
-   ;(vtmpy (vpair t0 t1) (sign-extend  (?? (bitvector 4)) (bitvector 8)) (sign-extend  (?? (bitvector 4)) (bitvector 8)))
+   (vmpa t1 Rt)
+   (vmpa-acc t0 t1 Rt)
+
+   (vdmpy t0 Rt)
+   (vdmpy-sw t0 Rt)
+   (vdmpy-acc t0 t1 Rt)
+   (vdmpy-sw-acc t0 t1 Rt)
+
+   (vtmpy t0 Rt)
+   (vtmpy-acc t0 t1 Rt)
+
+   (vrmpy t0 Rt4)
+   (vrmpy-acc t0 t1 Rt4)
+
+   (vrmpy-p t0 Rt4 (bool-const))
+   (vrmpy-p-acc t0 t1 Rt4 (bool-const))
+
+   ;; Division
+   (vavg t0 t1 (bool-const))
+   (vasr t0 t1)
+   ;(vlsr t0 t1)
+   ;(vround t0)
+   )) ;; 42 seconds
+
    ;(vasr-rnd-sat t0 t1 (zero-extend (?? (bitvector 4)) (bitvector 16)))))
 
-(define (??hxv-expr buffers)
+(define (??hvx-expr buffers)
   (define r0 (gather buffers))
   (define r1 (??hvx-instr (list r0)))
   (define r2 (??hvx-instr (list r0 r1)))
