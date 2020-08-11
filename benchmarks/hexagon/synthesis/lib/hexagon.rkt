@@ -349,8 +349,8 @@
            (define w1 (car (interpret Rt)))
            (define w2 (cdr (interpret Rt)))
            (cond
-             [(and (eq? (type x1) 'int16) (eq? (type w1) 'int16)) (int32_t (sat32 (eval (multiply-add x1 w1 x2 w2 'int64))))]
-             [(and (eq? (type x1) 'int16) (eq? (type w1) 'uint16)) (int32_t (sat32 (eval (multiply-add x1 w1 x2 w2 'int64))))]))
+             [(and (eq? (type x1) 'int16) (eq? (type w1) 'int16)) (sat32 (multiply-add x1 w1 x2 w2 'int64))]
+             [(and (eq? (type x1) 'int16) (eq? (type w1) 'uint16)) (sat32 (multiply-add x1 w1 x2 w2 'int64))]))
          (lambda (i)
            (define x1 ((interpret Vu) (* i 2)))
            (define x2 ((interpret Vu) (+ (* i 2) 1)))
