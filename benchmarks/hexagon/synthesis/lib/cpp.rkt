@@ -39,32 +39,32 @@
     [(uint64_t v) 'uint64]
     [_ (error "Cannot infer type: ~a" e)]))
 
-(define (signed? type)
-  (match type
-    ['int8 #t]
-    ['int16 #t]
-    ['int32 #t]
-    ['int64 #t]
-    ['uint8 #f]
-    ['uint16 #f]
-    ['uint32 #f]
-    ['uint64 #f]
-    [_ (error "Cannot infer signed-ness: ~a" type)]))
+(define (signed? e)
+  (match e
+    [(int8_t v) #t]
+    [(int16_t v) #t]
+    [(int32_t v) #t]
+    [(int64_t v) #t]
+    [(uint8_t v) #f]
+    [(uint16_t v) #f]
+    [(uint32_t v) #f]
+    [(uint64_t v) #f]
+    [_ (error "Cannot infer type: ~a" e)]))
 
-(define (unsigned? type)
-  (not (signed? type)))
+(define (unsigned? e)
+  (not (signed? e)))
 
-(define (bw type)
-  (match type
-    ['int8 8]
-    ['int16 16]
-    ['int32 32]
-    ['int64 64]
-    ['uint8 8]
-    ['uint16 16]
-    ['uint32 32]
-    ['uint64 64]
-    [_ (error "Cannot infer bit-width: ~a" type)]))
+(define (bw e)
+  (match e
+    [(int8_t v) 8]
+    [(int16_t v) 16]
+    [(int32_t v) 32]
+    [(int64_t v) 64]
+    [(uint8_t v) 8]
+    [(uint16_t v) 16]
+    [(uint32_t v) 32]
+    [(uint64_t v) 64]
+    [_ (error "Cannot infer bit-width: ~a" e)]))
 
 ;; Model C++ casting
 (define (cpp_cast v type)
@@ -147,52 +147,86 @@
 (define MIN_UINT 0)
 (define MAX_UINT 4294967295)
 
-(define (sat8 v)
-  (define val (if (signed? (type v)) (bitvector->integer (eval v)) (bitvector->natural (eval v))))
-  (if (< val MIN_CHAR)
-      (int8_t (bv MIN_CHAR 8))
-      (if (> val MAX_CHAR)
-          (int8_t (bv MAX_CHAR 8))
-          (int8_t (bv val 8)))))
+(define (sat8 e)
+  (match e
+    [(int8_t val) e]
+    [(int16_t val) (cond
+                     [(bvslt val (bv MIN_CHAR 16)) (int8_t (bv MIN_CHAR 8))]
+                     [(bvsgt val (bv MAX_CHAR 16)) (int8_t (bv MAX_CHAR 8))]
+                     [else (int8_t (extract 7 0 val))])]
+    [(int32_t val) (cond
+                     [(bvslt val (bv MIN_CHAR 32)) (int8_t (bv MIN_CHAR 8))]
+                     [(bvsgt val (bv MAX_CHAR 32)) (int8_t (bv MAX_CHAR 8))]
+                     [else (int8_t (extract 7 0 val))])]
+    [(uint8_t val) (if (bvugt val (bv MAX_CHAR 8)) (int8_t (bv MAX_CHAR 8)) (int8_t val))]
+    [(uint16_t val) (if (bvugt val (bv MAX_CHAR 16)) (int8_t (bv MAX_CHAR 8)) (int8_t (extract 7 0 val)))]
+    [(uint32_t val) (if (bvugt val (bv MAX_CHAR 32)) (int8_t (bv MAX_CHAR 8)) (int8_t (extract 7 0 val)))]))
 
-(define (sat16 v)
-  (define val (if (signed? (type v)) (bitvector->integer (eval v)) (bitvector->natural (eval v))))
-  (if (< val MIN_SHORT)
-      (int16_t (bv MIN_SHORT 16))
-      (if (> val MAX_SHORT)
-          (int16_t (bv MAX_SHORT 16))
-          (int16_t (bv val 16)))))
+(define (sat16 e)
+  (match e
+    [(int8_t val) (int16_t (sign-extend val (bitvector 16)))]
+    [(int16_t val) e]
+    [(int32_t val) (cond
+                     [(bvslt val (bv MIN_SHORT 32)) (int16_t (bv MIN_SHORT 16))]
+                     [(bvsgt val (bv MAX_SHORT 32)) (int16_t (bv MAX_SHORT 16))]
+                     [else (int16_t (extract 15 0 val))])]
+    [(uint8_t val) (int16_t (zero-extend val (bitvector 16)))]
+    [(uint16_t val) (if (bvugt val (bv MAX_SHORT 16)) (int16_t (bv MAX_SHORT 16)) (int16_t val))]
+    [(uint32_t val) (if (bvugt val (bv MAX_SHORT 32)) (int16_t (bv MAX_SHORT 16)) (int16_t (extract 15 0 val)))]))
 
-(define (sat32 v)
-  (define val (if (signed? (type v)) (bitvector->integer (eval v)) (bitvector->natural (eval v))))
-  (if (< val MIN_INT)
-      (int32_t (bv MIN_INT 32))
-      (if (> val MAX_INT)
-          (int32_t (bv MAX_INT 32))
-          (int32_t (bv val 32)))))
+(define (sat32 e)
+  (match e
+    [(int8_t val) (int32_t (sign-extend val (bitvector 32)))]
+    [(int16_t val) (int32_t (sign-extend val (bitvector 32)))]
+    [(int32_t val) e]
+    [(int64_t val) (cond
+                     [(bvslt val (bv MIN_INT 64)) (int32_t (bv MIN_INT 32))]
+                     [(bvsgt val (bv MAX_INT 64)) (int32_t (bv MAX_INT 32))]
+                     [else (int32_t (extract 31 0 val))])]
+    [(uint8_t val) (int32_t (zero-extend val (bitvector 32)))]
+    [(uint16_t val) (int32_t (zero-extend val (bitvector 32)))]
+    [(uint32_t val) (if (bvugt val (bv MAX_INT 32)) (int32_t (bv MAX_INT 32)) (int32_t val))]
+    [(uint64_t val) (if (bvugt val (bv MAX_INT 64)) (int32_t (bv MAX_INT 32)) (int32_t (extract 31 0 val)))]))
 
-(define (satu8 v)
-  (define val (if (signed? (type v)) (bitvector->integer (eval v)) (bitvector->natural (eval v))))
-  (if (< val MIN_UCHAR)
-      (uint8_t (bv MIN_UCHAR 8))
-      (if (> val MAX_UCHAR)
-          (uint8_t (bv MAX_UCHAR 8))
-          (uint8_t (bv val 8)))))
+(define (satu8 e)
+  (match e
+    [(int8_t val) (if (bvslt val (bv MIN_UCHAR 8)) (uint8_t (bv MIN_UCHAR 8)) (uint8_t val))]
+    [(int16_t val) (cond
+                     [(bvslt val (bv MIN_UCHAR 16)) (uint8_t (bv MIN_UCHAR 8))]
+                     [(bvsgt val (bv MAX_UCHAR 16)) (uint8_t (bv MAX_UCHAR 8))]
+                     [else (uint8_t (extract 7 0 val))])]
+    [(int32_t val) (cond
+                     [(bvslt val (bv MIN_UCHAR 32)) (uint8_t (bv MIN_UCHAR 8))]
+                     [(bvsgt val (bv MAX_UCHAR 32)) (uint8_t (bv MAX_UCHAR 8))]
+                     [else (uint8_t (extract 7 0 val))])]
+    [(uint8_t val) e]
+    [(uint16_t val) (if (bvugt val (bv MAX_UCHAR 16)) (uint8_t (bv MAX_UCHAR 8)) (uint8_t (extract 7 0 val)))]
+    [(uint32_t val) (if (bvugt val (bv MAX_UCHAR 32)) (uint8_t (bv MAX_UCHAR 8)) (uint8_t (extract 7 0 val)))]))
 
-(define (satu16 v)
-  (define val (if (signed? (type v)) (bitvector->integer (eval v)) (bitvector->natural (eval v))))
-  (if (< val MIN_USHORT)
-      (uint16_t (bv MIN_USHORT 16))
-      (if (> val MAX_USHORT)
-          (uint16_t (bv MAX_USHORT 16))
-          (uint16_t (bv val 16)))))
+(define (satu16 e)
+  (match e
+    [(int8_t val) (if (bvslt val (bv MIN_USHORT 8)) (uint16_t (bv MIN_USHORT 16)) (uint16_t (zero-extend val (bitvector 16))))]
+    [(int16_t val) (if (bvslt val (bv MIN_USHORT 16)) (uint16_t (bv MIN_USHORT 16)) (uint16_t val))]
+    [(int32_t val) (cond
+                     [(bvslt val (bv MIN_USHORT 32)) (uint16_t (bv MIN_USHORT 16))]
+                     [(bvsgt val (bv MAX_USHORT 32)) (uint16_t (bv MAX_USHORT 16))]
+                     [else (uint16_t (extract 15 0 val))])]
+    [(uint8_t val) (uint16_t (zero-extend val (bitvector 16)))]
+    [(uint16_t val) e]
+    [(uint32_t val) (if (bvugt val (bv MAX_USHORT 32)) (uint16_t (bv MAX_USHORT 16)) (uint16_t (extract 15 0 val)))]))
 
-(define (satu32 v)
-  (define val (if (signed? (type v)) (bitvector->integer (eval v)) (bitvector->natural (eval v))))
-  (if (< val MIN_UINT)
-      (uint32_t (bv MIN_UINT 32))
-      (if (> val MAX_UINT)
-          (uint32_t (bv MAX_UINT 32))
-          (uint32_t (bv val 32)))))
+(define (satu32 e)
+  (match e
+    [(int8_t val) (if (bvslt val (bv MIN_UINT 8)) (uint32_t (bv MIN_UINT 32)) (uint32_t (zero-extend val (bitvector 32))))]
+    [(int16_t val) (if (bvslt val (bv MIN_UINT 16)) (uint32_t (bv MIN_UINT 32)) (uint32_t (zero-extend val (bitvector 32))))]
+    [(int32_t val) (if (bvslt val (bv MIN_UINT 32)) (uint32_t (bv MIN_UINT 32)) (uint32_t val))]
+    [(int64_t val) (cond
+                     [(bvslt val (bv MIN_UINT 64)) (uint32_t (bv MIN_UINT 32))]
+                     [(bvsgt val (bv MAX_UINT 64)) (uint32_t (bv MAX_UINT 32))]
+                     [else (uint32_t (extract 31 0 val))])]
+    [(uint8_t val) (uint32_t (zero-extend val (bitvector 32)))]
+    [(uint16_t val) (uint32_t (zero-extend val (bitvector 32)))]
+    [(uint32_t val) e]
+    [(uint64_t val) (if (bvugt val (bv MAX_UINT 64)) (uint32_t (bv MAX_UINT 32)) (uint32_t (extract 31 0 val)))]))
 
 (provide (all-defined-out))
