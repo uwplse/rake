@@ -10,7 +10,7 @@
 
 ;; Creating typed expressions
 (define (get-type bw signed?)
-  (if (signed?)
+  (if signed?
       (cond
         [(eq? bw 8) 'int8]
         [(eq? bw 16) 'int16]

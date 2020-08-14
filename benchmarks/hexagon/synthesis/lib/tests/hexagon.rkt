@@ -50,7 +50,7 @@
   (printf "Test Passed: vadd int8_t no saturation\n")
 
   (define p1 (interpret-hvx (vadd (vread charbuf i) (vread charbuf j) #t)))
-  (check-equal? (p1 k) (int8_t (sat8 (bvadd (sign-extend (charbuf (+ i k)) (bitvector 16)) (sign-extend (charbuf (+ j k)) (bitvector 16))))))
+  (check-equal? (p1 k) (sat8 (int16_t (bvadd (sign-extend (charbuf (+ i k)) (bitvector 16)) (sign-extend (charbuf (+ j k)) (bitvector 16))))))
   (printf "Test Passed: vadd int8_t with saturation\n")
 
   (define p2 (interpret-hvx (vadd (vread shortbuf i) (vread shortbuf j) #f)))
@@ -58,7 +58,7 @@
   (printf "Test Passed: vadd int16_t no saturation\n")
 
   (define p3 (interpret-hvx (vadd (vread shortbuf i) (vread shortbuf j) #t)))
-  (check-equal? (p3 k) (int16_t (sat16 (bvadd (sign-extend (shortbuf (+ i k)) (bitvector 32)) (sign-extend (shortbuf (+ j k)) (bitvector 32))))))
+  (check-equal? (p3 k) (sat16 (int32_t (bvadd (sign-extend (shortbuf (+ i k)) (bitvector 32)) (sign-extend (shortbuf (+ j k)) (bitvector 32))))))
   (printf "Test Passed: vadd int16_t with saturation\n")
   
   (define p4 (interpret-hvx (vadd (vread intbuf i) (vread intbuf j) #f)))
@@ -66,11 +66,11 @@
   (printf "Test Passed: vadd int32_t no saturation\n")
 
   (define p5 (interpret-hvx (vadd (vread intbuf i) (vread intbuf j) #t)))
-  (check-equal? (p5 k) (int32_t (sat32 (bvadd (sign-extend (intbuf (+ i k)) (bitvector 64)) (sign-extend (intbuf (+ j k)) (bitvector 64))))))
+  (check-equal? (p5 k) (sat32 (int64_t (bvadd (sign-extend (intbuf (+ i k)) (bitvector 64)) (sign-extend (intbuf (+ j k)) (bitvector 64))))))
   (printf "Test Passed: vadd int32_t with saturation\n")
 
   (define p6 (interpret-hvx (vadd (vread ucharbuf i) (vread charbuf j) #f)))
   (define p7 (interpret-hvx (vadd (vread ucharbuf i) (vread charbuf j) #t)))
-  (check-equal? (p6 k) (uint8_t (satu8 (bvadd (zero-extend (ucharbuf (+ i k)) (bitvector 16)) (sign-extend (charbuf (+ j k)) (bitvector 16))))))
+  (check-equal? (p6 k) (satu8 (int16_t (bvadd (zero-extend (ucharbuf (+ i k)) (bitvector 16)) (sign-extend (charbuf (+ j k)) (bitvector 16))))))
   (check-equal? (p6 k) (p7 k))
   (printf "Test Passed: vadd uint8_t with int8_t\n"))
