@@ -127,27 +127,27 @@
            (define rhs ((car (interpret Vv)) i))
            (cond
              ;; Saturating for signed types is optional
-             [(and (eq? (type lhs) 'int8) (eq? (type rhs) 'int8)) (if sat? (add-sat lhs rhs 'int8) (add lhs rhs 'int8))]
-             [(and (eq? (type lhs) 'int16) (eq? (type rhs) 'int16)) (if sat? (add-sat lhs rhs 'int16) (add lhs rhs 'int16))]
-             [(and (eq? (type lhs) 'int32) (eq? (type rhs) 'int32)) (if sat? (add-sat lhs rhs 'int32) (add lhs rhs 'int32))]
+             [(and (int8_t? lhs) (int8_t? rhs)) (if sat? (add-sat lhs rhs 'int8) (add lhs rhs 'int8))]
+             [(and (int16_t? lhs) (int16_t? rhs)) (if sat? (add-sat lhs rhs 'int16) (add lhs rhs 'int16))]
+             [(and (int32_t? lhs) (int32_t? rhs)) (if sat? (add-sat lhs rhs 'int32) (add lhs rhs 'int32))]
              
              ;; Always saturate for unsigned types
-             [(and (eq? (type lhs) 'uint8) (eq? (type rhs) 'uint8)) (add-sat lhs rhs 'uint8)]
-             [(and (eq? (type lhs) 'uint16) (eq? (type rhs) 'uint16)) (add-sat lhs rhs 'uint16)]
-             [(and (eq? (type lhs) 'uint32) (eq? (type rhs) 'uint32)) (add-sat lhs rhs 'uint32)])
+             [(and (uint8_t? lhs) (uint8_t? rhs)) (add-sat lhs rhs 'uint8)]
+             [(and (uint16_t? lhs) (uint16_t? rhs)) (add-sat lhs rhs 'uint16)]
+             [(and (uint32_t? lhs) (uint32_t? rhs)) (add-sat lhs rhs 'uint32)])
          (lambda (i)
            (define lhs ((cdr (interpret Vu)) i))
            (define rhs ((cdr (interpret Vv)) i))
            (cond
              ;; Saturating for signed types is optional
-             [(and (eq? (type lhs) 'int8) (eq? (type rhs) 'int8)) (if sat? (add-sat lhs rhs 'int8) (add lhs rhs 'int8))]
-             [(and (eq? (type lhs) 'int16) (eq? (type rhs) 'int16)) (if sat? (add-sat lhs rhs 'int16) (add lhs rhs 'int16))]
-             [(and (eq? (type lhs) 'int32) (eq? (type rhs) 'int32)) (if sat? (add-sat lhs rhs 'int32) (add lhs rhs 'int32))]
+             [(and (int8_t? lhs) (int8_t? rhs)) (if sat? (add-sat lhs rhs 'int8) (add lhs rhs 'int8))]
+             [(and (int16_t? lhs) (int16_t? rhs)) (if sat? (add-sat lhs rhs 'int16) (add lhs rhs 'int16))]
+             [(and (int32_t? lhs) (int32_t? rhs)) (if sat? (add-sat lhs rhs 'int32) (add lhs rhs 'int32))]
              
              ;; Always saturate for unsigned types
-             [(and (eq? (type lhs) 'uint8) (eq? (type rhs) 'uint8)) (add-sat lhs rhs 'uint8)]
-             [(and (eq? (type lhs) 'uint16) (eq? (type rhs) 'uint16)) (add-sat lhs rhs 'uint16)]
-             [(and (eq? (type lhs) 'uint32) (eq? (type rhs) 'uint32)) (add-sat lhs rhs 'uint32)]))))]
+             [(and (uint8_t? lhs) (uint8_t? rhs)) (add-sat lhs rhs 'uint8)]
+             [(and (uint16_t? lhs) (uint16_t? rhs)) (add-sat lhs rhs 'uint16)]
+             [(and (uint32_t? lhs) (uint32_t? rhs)) (add-sat lhs rhs 'uint32)]))))]
 
        ;; Variants that operate on single registers
        [(not (or (pair? (interpret Vu)) (pair? (interpret Vv))))
@@ -156,15 +156,15 @@
           (define rhs ((interpret Vv) i))
           (cond
             ;; Saturating for signed types is optional
-            [(and (eq? (type lhs) 'int8) (eq? (type rhs) 'int8)) (if sat? (add-sat lhs rhs 'int8) (add lhs rhs 'int8))]
-            [(and (eq? (type lhs) 'int16) (eq? (type rhs) 'int16)) (if sat? (add-sat lhs rhs 'int16) (add lhs rhs 'int16))]
-            [(and (eq? (type lhs) 'int32) (eq? (type rhs) 'int32)) (if sat? (add-sat lhs rhs 'int32) (add lhs rhs 'int32))]
+            [(and (int8_t? lhs) (int8_t? rhs)) (if sat? (add-sat lhs rhs 'int8) (add lhs rhs 'int8))]
+            [(and (int16_t? lhs) (int16_t? rhs)) (if sat? (add-sat lhs rhs 'int16) (add lhs rhs 'int16))]
+            [(and (int32_t? lhs) (int32_t? rhs)) (if sat? (add-sat lhs rhs 'int32) (add lhs rhs 'int32))]
 
             ;; Always saturate for unsigned types
-            [(and (eq? (type lhs) 'uint8) (eq? (type rhs) 'int8)) (add-sat lhs rhs 'uint8)]
-            [(and (eq? (type lhs) 'uint8) (eq? (type rhs) 'uint8)) (add-sat lhs rhs 'uint8)]
-            [(and (eq? (type lhs) 'uint16) (eq? (type rhs) 'uint16)) (add-sat lhs rhs 'uint16)]
-            [(and (eq? (type lhs) 'uint32) (eq? (type rhs) 'uint32)) (add-sat lhs rhs 'uint32)]))])]
+            [(and (uint8_t? lhs) (int8_t? rhs)) (add-sat lhs rhs 'uint8)]
+            [(and (uint8_t? lhs) (uint8_t? rhs)) (add-sat lhs rhs 'uint8)]
+            [(and (uint16_t? lhs) (uint16_t? rhs)) (add-sat lhs rhs 'uint16)]
+            [(and (uint32_t? lhs) (uint32_t? rhs)) (add-sat lhs rhs 'uint32)]))])]
 
     ;; Addition (widening)
     [(vadd-w Vu Vv)
@@ -173,16 +173,16 @@
         (define lhs ((interpret Vu) (* i 2)))
         (define rhs ((interpret Vv) (* i 2)))
         (cond
-          [(and (eq? (type lhs) 'uint8) (eq? (type rhs) 'uint8)) (add lhs rhs 'int16)] 
-          [(and (eq? (type lhs) 'uint16) (eq? (type rhs) 'uint16)) (add lhs rhs 'int32)] 
-          [(and (eq? (type lhs) 'int16) (eq? (type rhs) 'int16)) (add lhs rhs 'int32)]))
+          [(and (uint8_t? lhs) (uint8_t? rhs)) (add lhs rhs 'int16)] 
+          [(and (uint16_t? lhs) (uint16_t? rhs)) (add lhs rhs 'int32)] 
+          [(and (int16_t? lhs) (int16_t? rhs)) (add lhs rhs 'int32)]))
       (lambda (i)
         (define lhs ((interpret Vu) (+ (* i 2) 1)))
         (define rhs ((interpret Vv) (+ (* i 2) 1)))
         (cond
-          [(and (eq? (type lhs) 'uint8) (eq? (type rhs) 'uint8)) (add lhs rhs 'int16)] 
-          [(and (eq? (type lhs) 'uint16) (eq? (type rhs) 'uint16)) (add lhs rhs 'int32)] 
-          [(and (eq? (type lhs) 'int16) (eq? (type rhs) 'int16)) (add lhs rhs 'int32)])))]
+          [(and (uint8_t? lhs) (uint8_t? rhs)) (add lhs rhs 'int16)] 
+          [(and (uint16_t? lhs) (uint16_t? rhs)) (add lhs rhs 'int32)] 
+          [(and (int16_t? lhs) (int16_t? rhs)) (add lhs rhs 'int32)])))]
 
     ;; Addition (widening) with accumulation
     [(vadd-w-acc Vdd Vu Vv)
@@ -192,17 +192,17 @@
         (define lhs ((interpret Vu) (* i 2)))
         (define rhs ((interpret Vv) (* i 2)))
         (cond
-          [(and (eq? (type lhs) 'uint8) (eq? (type rhs) 'uint8)) (add-acc acc lhs rhs 'int16)] 
-          [(and (eq? (type lhs) 'uint16) (eq? (type rhs) 'uint16)) (add-acc acc lhs rhs 'int32)] 
-          [(and (eq? (type lhs) 'int16) (eq? (type rhs) 'int16)) (add-acc acc lhs rhs 'int32)]))
+          [(and (uint8_t? lhs) (uint8_t? rhs)) (add-acc acc lhs rhs 'int16)] 
+          [(and (uint16_t? lhs) (uint16_t? rhs)) (add-acc acc lhs rhs 'int32)] 
+          [(and (int16_t? lhs) (int16_t? rhs)) (add-acc acc lhs rhs 'int32)]))
       (lambda (i)
         (define acc ((cdr (interpret Vdd)) i))
         (define lhs ((interpret Vu) (+ (* i 2) 1)))
         (define rhs ((interpret Vv) (+ (* i 2) 1)))
         (cond
-          [(and (eq? (type lhs) 'uint8) (eq? (type rhs) 'uint8)) (add-acc acc lhs rhs 'int16)] 
-          [(and (eq? (type lhs) 'uint16) (eq? (type rhs) 'uint16)) (add-acc acc lhs rhs 'int32)] 
-          [(and (eq? (type lhs) 'int16) (eq? (type rhs) 'int16)) (add-acc acc lhs rhs 'int32)])))]
+          [(and (uint8_t? lhs) (uint8_t? rhs)) (add-acc acc lhs rhs 'int16)] 
+          [(and (uint16_t? lhs) (uint16_t? rhs)) (add-acc acc lhs rhs 'int32)] 
+          [(and (int16_t? lhs) (int16_t? rhs)) (add-acc acc lhs rhs 'int32)])))]
 
     ;; Vector-scalar multiplication (widening)
     [(vmpy Vu Rt)
@@ -211,18 +211,18 @@
         (define lhs ((interpret Vu) (* i 2)))
         (define rhs (interpret Rt))
         (cond
-          [(and (eq? (type lhs) 'uint8) (eq? (type rhs) 'int8)) (multiply lhs rhs 'int16)]
-          [(and (eq? (type lhs) 'uint8) (eq? (type rhs) 'uint8)) (multiply lhs rhs 'uint16)]
-          [(and (eq? (type lhs) 'uint16) (eq? (type rhs) 'uint16)) (multiply lhs rhs 'uint32)]
-          [(and (eq? (type lhs) 'int16) (eq? (type rhs) 'int16)) (multiply lhs rhs 'int32)]))
+          [(and (uint8_t? lhs) (int8_t? rhs)) (multiply lhs rhs 'int16)]
+          [(and (uint8_t? lhs) (uint8_t? rhs)) (multiply lhs rhs 'uint16)]
+          [(and (uint16_t? lhs) (uint16_t? rhs)) (multiply lhs rhs 'uint32)]
+          [(and (int16_t? lhs) (int16_t? rhs)) (multiply lhs rhs 'int32)]))
       (lambda (i)
         (define lhs ((interpret Vu) (+ (* i 2) 1)))
         (define rhs (interpret Rt))
         (cond
-          [(and (eq? (type lhs) 'uint8) (eq? (type rhs) 'int8)) (multiply lhs rhs 'int16)]
-          [(and (eq? (type lhs) 'uint8) (eq? (type rhs) 'uint8)) (multiply lhs rhs 'uint16)]
-          [(and (eq? (type lhs) 'uint16) (eq? (type rhs) 'uint16)) (multiply lhs rhs 'uint32)]
-          [(and (eq? (type lhs) 'int16) (eq? (type rhs) 'int16)) (multiply lhs rhs 'int32)])))]
+          [(and (uint8_t? lhs) (int8_t? rhs)) (multiply lhs rhs 'int16)]
+          [(and (uint8_t? lhs) (uint8_t? rhs)) (multiply lhs rhs 'uint16)]
+          [(and (uint16_t? lhs) (uint16_t? rhs)) (multiply lhs rhs 'uint32)]
+          [(and (int16_t? lhs) (int16_t? rhs)) (multiply lhs rhs 'int32)])))]
 
     ;; Vector-scalar multiplication (non-widening)
     [(vmpyi Vu Rt)
@@ -230,10 +230,10 @@
        (define lhs ((interpret Vu) i))
        (define rhs (interpret Rt))
        (cond
-         [(and (eq? (type lhs) 'int16) (eq? (type rhs) 'int8)) (multiply lhs rhs 'int16)]
-         [(and (eq? (type lhs) 'int32) (eq? (type rhs) 'int8)) (multiply lhs rhs 'int32)]
-         [(and (eq? (type lhs) 'int32) (eq? (type rhs) 'uint8)) (multiply lhs rhs 'int32)]
-         [(and (eq? (type lhs) 'int32) (eq? (type rhs) 'int16)) (multiply lhs rhs 'int32)]))]
+         [(and (int16_t? lhs) (int8_t? rhs)) (multiply lhs rhs 'int16)]
+         [(and (int32_t? lhs) (int8_t? rhs)) (multiply lhs rhs 'int32)]
+         [(and (int32_t? lhs) (uint8_t? rhs)) (multiply lhs rhs 'int32)]
+         [(and (int32_t? lhs) (int16_t? rhs)) (multiply lhs rhs 'int32)]))]
 
     ;; Vector-scalar multiplication (non-widening) -- ignores upper16 bits
     [(vmpye Vu Rt)
@@ -241,8 +241,8 @@
        (define lhs ((interpret Vu) i))
        (define rhs (interpret Rt))
        (cond
-         [(and (eq? (type lhs) 'int32) (eq? (type rhs) 'uint16)) (uint32_t (bvmul (lsb16 lhs) (eval (cpp_cast rhs 'uint32))))]
-         [(and (eq? (type lhs) 'uint32) (eq? (type rhs) 'uint16)) (uint32_t (bvmul (lsb16 lhs) (eval (cpp_cast rhs 'uint32))))]))]
+         [(and (int32_t? lhs) (uint16_t? rhs)) (uint32_t (bvmul (lsb16 lhs) (eval (cpp_cast rhs 'uint32))))]
+         [(and (uint32_t? lhs) (uint16_t? rhs)) (uint32_t (bvmul (lsb16 lhs) (eval (cpp_cast rhs 'uint32))))]))]
 
     ;; Vector-scalar multiplication (widening) with accumulation
     [(vmpy-acc Vdd Vu Rt)
@@ -252,19 +252,19 @@
         (define lhs ((interpret Vu) (* i 2)))
         (define rhs (interpret Rt))
         (cond
-          [(and (eq? (type lhs) 'uint8) (eq? (type rhs) 'int8)) (int16_t (bvadd (eval acc) (eval (multiply lhs rhs 'int16))))]
-          [(and (eq? (type lhs) 'uint8) (eq? (type rhs) 'uint8)) (uint16_t (bvadd (eval acc) (eval (multiply lhs rhs 'uint16))))]
-          [(and (eq? (type lhs) 'uint16) (eq? (type rhs) 'uint16)) (uint32_t (bvadd (eval acc) (eval (multiply lhs rhs 'uint32))))]
-          [(and (eq? (type lhs) 'int16) (eq? (type rhs) 'int16)) (int32_t (bvadd (eval acc) (eval (multiply lhs rhs 'int32))))]))
+          [(and (uint8_t? lhs) (int8_t? rhs)) (int16_t (bvadd (eval acc) (eval (multiply lhs rhs 'int16))))]
+          [(and (uint8_t? lhs) (uint8_t? rhs)) (uint16_t (bvadd (eval acc) (eval (multiply lhs rhs 'uint16))))]
+          [(and (uint16_t? lhs) (uint16_t? rhs)) (uint32_t (bvadd (eval acc) (eval (multiply lhs rhs 'uint32))))]
+          [(and (int16_t? lhs) (int16_t? rhs)) (int32_t (bvadd (eval acc) (eval (multiply lhs rhs 'int32))))]))
       (lambda (i)
         (define acc ((cdr (interpret Vdd)) i))
         (define lhs ((interpret Vu) (+ (* i 2) 1)))
         (define rhs (interpret Rt))
         (cond
-          [(and (eq? (type lhs) 'uint8) (eq? (type rhs) 'int8)) (int16_t (bvadd (eval acc) (eval (multiply lhs rhs 'int16))))]
-          [(and (eq? (type lhs) 'uint8) (eq? (type rhs) 'uint8)) (uint16_t (bvadd (eval acc) (eval (multiply lhs rhs 'uint16))))]
-          [(and (eq? (type lhs) 'uint16) (eq? (type rhs) 'uint16)) (uint32_t (bvadd (eval acc) (eval (multiply lhs rhs 'uint32))))]
-          [(and (eq? (type lhs) 'int16) (eq? (type rhs) 'int16)) (int32_t (bvadd (eval acc) (eval (multiply lhs rhs 'int32))))])))]
+          [(and (uint8_t? lhs) (int8_t? rhs)) (int16_t (bvadd (eval acc) (eval (multiply lhs rhs 'int16))))]
+          [(and (uint8_t? lhs) (uint8_t? rhs)) (uint16_t (bvadd (eval acc) (eval (multiply lhs rhs 'uint16))))]
+          [(and (uint16_t? lhs) (uint16_t? rhs)) (uint32_t (bvadd (eval acc) (eval (multiply lhs rhs 'uint32))))]
+          [(and (int16_t? lhs) (int16_t? rhs)) (int32_t (bvadd (eval acc) (eval (multiply lhs rhs 'int32))))])))]
 
 
     ;; Vector-scalar multiplication (non-widening) with accumulation
@@ -274,10 +274,10 @@
        (define lhs ((interpret Vu) i))
        (define rhs (interpret Rt))
        (cond
-         [(and (eq? (type lhs) 'int16) (eq? (type rhs) 'int8)) (int16_t (bvadd (eval acc) (eval (multiply lhs rhs 'int16))))]
-         [(and (eq? (type lhs) 'int32) (eq? (type rhs) 'int8)) (int32_t (bvadd (eval acc) (eval (multiply lhs rhs 'int32))))]
-         [(and (eq? (type lhs) 'int32) (eq? (type rhs) 'uint8)) (int32_t (bvadd (eval acc) (eval (multiply lhs rhs 'int32))))]
-         [(and (eq? (type lhs) 'int32) (eq? (type rhs) 'int16)) (int32_t (bvadd (eval acc) (eval (multiply lhs rhs 'int32))))]))]
+         [(and (int16_t? lhs) (int8_t? rhs)) (int16_t (bvadd (eval acc) (eval (multiply lhs rhs 'int16))))]
+         [(and (int32_t? lhs) (int8_t? rhs)) (int32_t (bvadd (eval acc) (eval (multiply lhs rhs 'int32))))]
+         [(and (int32_t? lhs) (uint8_t? rhs)) (int32_t (bvadd (eval acc) (eval (multiply lhs rhs 'int32))))]
+         [(and (int32_t? lhs) (int16_t? rhs)) (int32_t (bvadd (eval acc) (eval (multiply lhs rhs 'int32))))]))]
 
     ;; Vector-scalar multiplication (non-widening) with accumulation -- ignores upper16 bits
     [(vmpye-acc Vd Vu Rt)
@@ -286,8 +286,8 @@
        (define lhs ((interpret Vu) i))
        (define rhs (interpret Rt))
        (cond
-         [(and (eq? (type lhs) 'int32) (eq? (type rhs) 'uint16)) (uint32_t (bvadd (eval acc) (bvmul (lsb16 lhs) (eval (cpp_cast rhs 'uint32)))))]
-         [(and (eq? (type lhs) 'uint32) (eq? (type rhs) 'uint16)) (uint32_t (bvadd (eval acc) (bvmul (lsb16 lhs) (eval (cpp_cast rhs 'uint32)))))]))]
+         [(and (int32_t? lhs) (uint16_t? rhs)) (uint32_t (bvadd (eval acc) (bvmul (lsb16 lhs) (eval (cpp_cast rhs 'uint32)))))]
+         [(and (uint32_t? lhs) (uint16_t? rhs)) (uint32_t (bvadd (eval acc) (bvmul (lsb16 lhs) (eval (cpp_cast rhs 'uint32)))))]))]
 
     ;; Sum to vector-scalar multiplies
     [(vmpa Vuu Rt)
@@ -298,20 +298,20 @@
         (define rhs ((cdr (interpret Vuu)) (* i 2)))
         (define w2 (cdr (interpret Rt)))
         (cond
-          [(and (eq? (type lhs) 'uint8) (eq? (type w1) 'int8)) (multiply-add lhs w1 rhs w2 'int16)]
-          [(and (eq? (type lhs) 'uint8) (eq? (type rhs) 'uint8)) (multiply-add lhs w1 rhs w2 'int16)]
-          [(and (eq? (type lhs) 'uint16) (eq? (type rhs) 'int8)) (multiply-add lhs w1 rhs w2 'int32)]
-          [(and (eq? (type lhs) 'int16) (eq? (type rhs) 'int8)) (multiply-add lhs w1 rhs w2 'int32)]))
+          [(and (uint8_t? lhs) (int8_t? w1)) (multiply-add lhs w1 rhs w2 'int16)]
+          [(and (uint8_t? lhs) (uint8_t? rhs)) (multiply-add lhs w1 rhs w2 'int16)]
+          [(and (uint16_t? lhs) (int8_t? rhs)) (multiply-add lhs w1 rhs w2 'int32)]
+          [(and (int16_t? lhs) (int8_t? rhs)) (multiply-add lhs w1 rhs w2 'int32)]))
       (lambda (i)
         (define lhs ((car (interpret Vuu)) (+ (* i 2) 1)))
         (define w1 (car (interpret Rt)))
         (define rhs ((cdr (interpret Vuu)) (+ (* i 2) 1)))
         (define w2 (cdr (interpret Rt)))
         (cond
-          [(and (eq? (type lhs) 'uint8) (eq? (type w1) 'int8)) (multiply-add lhs w1 rhs w2 'int16)]
-          [(and (eq? (type lhs) 'uint8) (eq? (type rhs) 'uint8)) (multiply-add lhs w1 rhs w2 'int16)]
-          [(and (eq? (type lhs) 'uint16) (eq? (type rhs) 'int8)) (multiply-add lhs w1 rhs w2 'int32)]
-          [(and (eq? (type lhs) 'int16) (eq? (type rhs) 'int8)) (multiply-add lhs w1 rhs w2 'int32)])))]
+          [(and (uint8_t? lhs) (int8_t? w1)) (multiply-add lhs w1 rhs w2 'int16)]
+          [(and (uint8_t? lhs) (uint8_t? rhs)) (multiply-add lhs w1 rhs w2 'int16)]
+          [(and (uint16_t? lhs) (int8_t? rhs)) (multiply-add lhs w1 rhs w2 'int32)]
+          [(and (int16_t? lhs) (int8_t? rhs)) (multiply-add lhs w1 rhs w2 'int32)])))]
 
     ;; Sum two vector-scalar multiplies, accumulate into output register
     [(vmpa-acc Vdd Vuu Rt)
@@ -323,10 +323,10 @@
         (define rhs ((cdr (interpret Vuu)) (* i 2)))
         (define w2 (cdr (interpret Rt)))
         (cond
-          [(and (eq? (type lhs) 'uint8) (eq? (type w1) 'int8)) (multiply-add-acc lhs w1 rhs w2 acc 'int16)]
-          [(and (eq? (type lhs) 'uint8) (eq? (type rhs) 'uint8)) (multiply-add-acc lhs w1 rhs w2 acc 'int16)]
-          [(and (eq? (type lhs) 'uint16) (eq? (type rhs) 'int8)) (multiply-add-acc lhs w1 rhs w2 acc 'int32)]
-          [(and (eq? (type lhs) 'int16) (eq? (type rhs) 'int8)) (multiply-add-acc lhs w1 rhs w2 acc 'int32)]))
+          [(and (uint8_t? lhs) (int8_t? w1)) (multiply-add-acc lhs w1 rhs w2 acc 'int16)]
+          [(and (uint8_t? lhs) (uint8_t? rhs)) (multiply-add-acc lhs w1 rhs w2 acc 'int16)]
+          [(and (uint16_t? lhs) (int8_t? rhs)) (multiply-add-acc lhs w1 rhs w2 acc 'int32)]
+          [(and (int16_t? lhs) (int8_t? rhs)) (multiply-add-acc lhs w1 rhs w2 acc 'int32)]))
       (lambda (i)
         (define acc ((cdr (interpret Vdd)) i))
         (define lhs ((car (interpret Vuu)) (+ (* i 2) 1)))
@@ -334,10 +334,10 @@
         (define rhs ((cdr (interpret Vuu)) (+ (* i 2) 1)))
         (define w2 (cdr (interpret Rt)))
         (cond
-          [(and (eq? (type lhs) 'uint8) (eq? (type w1) 'int8)) (multiply-add-acc lhs w1 rhs w2 acc 'int16)]
-          [(and (eq? (type lhs) 'uint8) (eq? (type rhs) 'uint8)) (multiply-add-acc lhs w1 rhs w2 acc 'int16)]
-          [(and (eq? (type lhs) 'uint16) (eq? (type rhs) 'int8)) (multiply-add-acc lhs w1 rhs w2 acc 'int32)]
-          [(and (eq? (type lhs) 'int16) (eq? (type rhs) 'int8)) (multiply-add-acc lhs w1 rhs w2 acc 'int32)])))]
+          [(and (uint8_t? lhs) (int8_t? w1)) (multiply-add-acc lhs w1 rhs w2 acc 'int16)]
+          [(and (uint8_t? lhs) (uint8_t? rhs)) (multiply-add-acc lhs w1 rhs w2 acc 'int16)]
+          [(and (uint16_t? lhs) (int8_t? rhs)) (multiply-add-acc lhs w1 rhs w2 acc 'int32)]
+          [(and (int16_t? lhs) (int8_t? rhs)) (multiply-add-acc lhs w1 rhs w2 acc 'int32)])))]
 
     ;; Reduce (via sum) two vector-scalar multiplies. Unlike vmpa, this is reduction within the vector.
     ;; Saturates output for some input types
@@ -349,18 +349,18 @@
            (define w1 (car (interpret Rt)))
            (define w2 (cdr (interpret Rt)))
            (cond
-             [(and (eq? (type x1) 'int16) (eq? (type w1) 'int16)) (sat32 (multiply-add x1 w1 x2 w2 'int64))]
-             [(and (eq? (type x1) 'int16) (eq? (type w1) 'uint16)) (sat32 (multiply-add x1 w1 x2 w2 'int64))]))
+             [(and (int16_t? x1) (int16_t? w1)) (sat32 (multiply-add x1 w1 x2 w2 'int64))]
+             [(and (int16_t? x1) (uint16_t? w1)) (sat32 (multiply-add x1 w1 x2 w2 'int64))]))
          (lambda (i)
            (define x1 ((interpret Vu) (* i 2)))
            (define x2 ((interpret Vu) (+ (* i 2) 1)))
            (define w1 (car (interpret Rt)))
            (define w2 (cdr (interpret Rt)))
            (cond
-             [(and (eq? (type x1) 'uint8) (eq? (type w1) 'int8)) (multiply-add x1 w1 x2 w2 'int16)]
-             [(and (eq? (type x1) 'int16) (eq? (type w1) 'int8)) (multiply-add x1 w1 x2 w2 'int32)]
-             [(and (eq? (type x1) 'int16) (eq? (type w1) 'int16)) (sat32 (multiply-add x1 w1 x2 w2 'int64))]
-             [(and (eq? (type x1) 'int16) (eq? (type w1) 'uint16)) (sat32 (multiply-add x1 w1 x2 w2 'int64))])))]
+             [(and (uint8_t? x1) (int8_t? w1)) (multiply-add x1 w1 x2 w2 'int16)]
+             [(and (int16_t? x1) (int8_t? w1)) (multiply-add x1 w1 x2 w2 'int32)]
+             [(and (int16_t? x1) (int16_t? w1)) (sat32 (multiply-add x1 w1 x2 w2 'int64))]
+             [(and (int16_t? x1) (uint16_t? w1)) (sat32 (multiply-add x1 w1 x2 w2 'int64))])))]
 
     ;; Reduce (via sum) two vector-scalar multiplies in a sliding window
     [(vdmpy-sw Vuu Rt)
@@ -371,16 +371,16 @@
         (define w1 (car (interpret Rt)))
         (define w2 (cdr (interpret Rt)))
         (cond
-          [(and (eq? (type x1) 'uint8) (eq? (type w1) 'int8)) (multiply-add x1 w1 x2 w2 'int16)]
-          [(and (eq? (type x1) 'int16) (eq? (type w1) 'int8)) (multiply-add x1 w1 x2 w2 'int32)]))
+          [(and (uint8_t? x1) (int8_t? w1)) (multiply-add x1 w1 x2 w2 'int16)]
+          [(and (int16_t? x1) (int8_t? w1)) (multiply-add x1 w1 x2 w2 'int32)]))
       (lambda (i)
         (define x1 ((car (interpret Vuu)) (+ (* i 2) 1)))
         (define x2 ((cdr (interpret Vuu)) (* i 2)))
         (define w1 (car (interpret Rt)))
         (define w2 (cdr (interpret Rt)))
         (cond
-          [(and (eq? (type x1) 'uint8) (eq? (type w1) 'int8)) (multiply-add x1 w1 x2 w2 'int16)]
-          [(and (eq? (type x1) 'int16) (eq? (type w1) 'int8)) (multiply-add x1 w1 x2 w2 'int32)])))]
+          [(and (uint8_t? x1) (int8_t? w1)) (multiply-add x1 w1 x2 w2 'int16)]
+          [(and (int16_t? x1) (int8_t? w1)) (multiply-add x1 w1 x2 w2 'int32)])))]
 
     ;; Reduce (via sum) two vector-scalar multiplies with accumulation.
     [(vdmpy-acc Vd Vu Rt)
@@ -392,8 +392,8 @@
            (define w1 (car (interpret Rt)))
            (define w2 (cdr (interpret Rt)))
            (cond
-             [(and (eq? (type x1) 'int16) (eq? (type w1) 'int16)) (sat32 (multiply-add-acc x1 w1 x2 w2 acc 'int64))]
-             [(and (eq? (type x1) 'int16) (eq? (type w1) 'uint16)) (sat32 (multiply-add-acc x1 w1 x2 w2 acc 'int64))]))
+             [(and (int16_t? x1) (int16_t? w1)) (sat32 (multiply-add-acc x1 w1 x2 w2 acc 'int64))]
+             [(and (int16_t? x1) (uint16_t? w1)) (sat32 (multiply-add-acc x1 w1 x2 w2 acc 'int64))]))
          (lambda (i)
            (define acc ((interpret Vd) i))
            (define x1 ((interpret Vu) (* i 2)))
@@ -401,10 +401,10 @@
            (define w1 (car (interpret Rt)))
            (define w2 (cdr (interpret Rt)))
            (cond
-             [(and (eq? (type x1) 'uint8) (eq? (type w1) 'int8)) (multiply-add-acc x1 w1 x2 w2 acc 'int16)]
-             [(and (eq? (type x1) 'int16) (eq? (type w1) 'int8)) (multiply-add-acc x1 w1 x2 w2 acc 'int32)]
-             [(and (eq? (type x1) 'int16) (eq? (type w1) 'int16)) (sat32 (multiply-add-acc x1 w1 x2 w2 acc 'int64))]
-             [(and (eq? (type x1) 'int16) (eq? (type w1) 'uint16)) (sat32 (multiply-add-acc x1 w1 x2 w2 acc 'int64))])))]
+             [(and (uint8_t? x1) (int8_t? w1)) (multiply-add-acc x1 w1 x2 w2 acc 'int16)]
+             [(and (int16_t? x1) (int8_t? w1)) (multiply-add-acc x1 w1 x2 w2 acc 'int32)]
+             [(and (int16_t? x1) (int16_t? w1)) (sat32 (multiply-add-acc x1 w1 x2 w2 acc 'int64))]
+             [(and (int16_t? x1) (uint16_t? w1)) (sat32 (multiply-add-acc x1 w1 x2 w2 acc 'int64))])))]
 
     ;; Reduce (via sum) two vector-scalar multiplies in a sliding window with accumulate
     [(vdmpy-sw-acc Vdd Vuu Rt)
@@ -416,8 +416,8 @@
         (define w1 (car (interpret Rt)))
         (define w2 (cdr (interpret Rt)))
         (cond
-          [(and (eq? (type x1) 'uint8) (eq? (type w1) 'int8)) (multiply-add-acc x1 w1 x2 w2 acc 'int16)]
-          [(and (eq? (type x1) 'int16) (eq? (type w1) 'int8)) (multiply-add-acc x1 w1 x2 w2 acc 'int32)]))
+          [(and (uint8_t? x1) (int8_t? w1)) (multiply-add-acc x1 w1 x2 w2 acc 'int16)]
+          [(and (int16_t? x1) (int8_t? w1)) (multiply-add-acc x1 w1 x2 w2 acc 'int32)]))
       (lambda (i)
         (define acc ((cdr (interpret Vdd)) i))
         (define x1 ((car (interpret Vuu)) (+ (* i 2) 1)))
@@ -425,8 +425,8 @@
         (define w1 (car (interpret Rt)))
         (define w2 (cdr (interpret Rt)))
         (cond
-          [(and (eq? (type x1) 'uint8) (eq? (type w1) 'int8)) (multiply-add-acc x1 w1 x2 w2 acc 'int16)]
-          [(and (eq? (type x1) 'int16) (eq? (type w1) 'int8)) (multiply-add-acc x1 w1 x2 w2 acc 'int32)])))]
+          [(and (uint8_t? x1) (int8_t? w1)) (multiply-add-acc x1 w1 x2 w2 acc 'int16)]
+          [(and (int16_t? x1) (int8_t? w1)) (multiply-add-acc x1 w1 x2 w2 acc 'int32)])))]
 
     ;; Reduce (via sum) two vector-scalar multiplies in a sliding window with an additional accumulate
     [(vtmpy Vuu Rt)
@@ -438,9 +438,9 @@
         (define w1 (car (interpret Rt)))
         (define w2 (cdr (interpret Rt)))
         (cond
-          [(and (eq? (type x1) 'int8) (eq? (type w1) 'int8)) (multiply-add-acc x1 w1 x2 w2 x3 'int16)]
-          [(and (eq? (type x1) 'uint8) (eq? (type w1) 'int8)) (multiply-add-acc x1 w1 x2 w2 x3 'int16)]
-          [(and (eq? (type x1) 'int16) (eq? (type w1) 'int8)) (multiply-add-acc x1 w1 x2 w2 x3 'int32)]))
+          [(and (int8_t? x1) (int8_t? w1)) (multiply-add-acc x1 w1 x2 w2 x3 'int16)]
+          [(and (uint8_t? x1) (int8_t? w1)) (multiply-add-acc x1 w1 x2 w2 x3 'int16)]
+          [(and (int16_t? x1) (int8_t? w1)) (multiply-add-acc x1 w1 x2 w2 x3 'int32)]))
       (lambda (i)
         (define x1 ((car (interpret Vuu)) (+ (* i 2) 1)))
         (define x2 ((cdr (interpret Vuu)) (* i 2)))
@@ -448,9 +448,9 @@
         (define w1 (car (interpret Rt)))
         (define w2 (cdr (interpret Rt)))
         (cond
-          [(and (eq? (type x1) 'int8) (eq? (type w1) 'int8)) (multiply-add-acc x1 w1 x2 w2 x3 'int16)]
-          [(and (eq? (type x1) 'uint8) (eq? (type w1) 'int8)) (multiply-add-acc x1 w1 x2 w2 x3 'int16)]
-          [(and (eq? (type x1) 'int16) (eq? (type w1) 'int8)) (multiply-add-acc x1 w1 x2 w2 x3 'int32)])))]
+          [(and (int8_t? x1) (int8_t? w1)) (multiply-add-acc x1 w1 x2 w2 x3 'int16)]
+          [(and (uint8_t? x1) (int8_t? w1)) (multiply-add-acc x1 w1 x2 w2 x3 'int16)]
+          [(and (int16_t? x1) (int8_t? w1)) (multiply-add-acc x1 w1 x2 w2 x3 'int32)])))]
 
     ;; Reduce (via sum) two vector-scalar multiplies in a sliding window with an additional accumulate.
     ;; Also accumulate the output into the target register
@@ -464,9 +464,9 @@
         (define w1 (car (interpret Rt)))
         (define w2 (cdr (interpret Rt)))
         (cond
-          [(and (eq? (type x1) 'int8) (eq? (type w1) 'int8)) (int16_t (bvadd (eval acc) (eval (multiply-add-acc x1 w1 x2 w2 x3 'int16))))]
-          [(and (eq? (type x1) 'uint8) (eq? (type w1) 'int8)) (int16_t (bvadd (eval acc) (eval (multiply-add-acc x1 w1 x2 w2 x3 'int16))))]
-          [(and (eq? (type x1) 'int16) (eq? (type w1) 'int8)) (int32_t (bvadd (eval acc) (eval (multiply-add-acc x1 w1 x2 w2 x3 'int32))))]))
+          [(and (int8_t? x1) (int8_t? w1)) (int16_t (bvadd (eval acc) (eval (multiply-add-acc x1 w1 x2 w2 x3 'int16))))]
+          [(and (uint8_t? x1) (int8_t? w1)) (int16_t (bvadd (eval acc) (eval (multiply-add-acc x1 w1 x2 w2 x3 'int16))))]
+          [(and (int16_t? x1) (int8_t? w1)) (int32_t (bvadd (eval acc) (eval (multiply-add-acc x1 w1 x2 w2 x3 'int32))))]))
       (lambda (i)
         (define acc ((cdr (interpret Vdd)) i))
         (define x1 ((car (interpret Vuu)) (+ (* i 2) 1)))
@@ -475,9 +475,9 @@
         (define w1 (car (interpret Rt)))
         (define w2 (cdr (interpret Rt)))
         (cond
-          [(and (eq? (type x1) 'int8) (eq? (type w1) 'int8)) (int16_t (bvadd (eval acc) (eval (eval (multiply-add-acc x1 w1 x2 w2 x3 'int16)))))]
-          [(and (eq? (type x1) 'uint8) (eq? (type w1) 'int8)) (int16_t (bvadd (eval acc) (eval (multiply-add-acc x1 w1 x2 w2 x3 'int16))))]
-          [(and (eq? (type x1) 'int16) (eq? (type w1) 'int8)) (int32_t (bvadd (eval acc) (eval (multiply-add-acc x1 w1 x2 w2 x3 'int32))))])))]
+          [(and (int8_t? x1) (int8_t? w1)) (int16_t (bvadd (eval acc) (eval (eval (multiply-add-acc x1 w1 x2 w2 x3 'int16)))))]
+          [(and (uint8_t? x1) (int8_t? w1)) (int16_t (bvadd (eval acc) (eval (multiply-add-acc x1 w1 x2 w2 x3 'int16))))]
+          [(and (int16_t? x1) (int8_t? w1)) (int32_t (bvadd (eval acc) (eval (multiply-add-acc x1 w1 x2 w2 x3 'int32))))])))]
 
     ;; Vector-scalar multiply with 4-wide within-vector reduction
     [(vrmpy Vu Rt)
@@ -491,8 +491,8 @@
        (define w3 (list-ref (interpret Rt) 2))
        (define w4 (list-ref (interpret Rt) 3))
        (cond
-         [(and (eq? (type x1) 'uint8) (eq? (type w1) 'uint8)) (dot-prod4 x1 x2 x3 x4 w1 w2 w3 w4 'uint32)]
-         [(and (eq? (type x1) 'uint8) (eq? (type w1) 'int8)) (dot-prod4 x1 x2 x3 x4 w1 w2 w3 w4 'int32)]))]
+         [(and (uint8_t? x1) (uint8_t? w1)) (dot-prod4 x1 x2 x3 x4 w1 w2 w3 w4 'uint32)]
+         [(and (uint8_t? x1) (int8_t? w1)) (dot-prod4 x1 x2 x3 x4 w1 w2 w3 w4 'int32)]))]
 
     ;; Vector-scalar multiply with 4-wide within-vector reduction with accumulation
     [(vrmpy-acc Vd Vu Rt)
@@ -507,8 +507,8 @@
        (define w3 (list-ref (interpret Rt) 2))
        (define w4 (list-ref (interpret Rt) 3))
        (cond
-         [(and (eq? (type x1) 'uint8) (eq? (type w1) 'uint8)) (uint32_t (bvadd (eval acc) (eval (dot-prod4 x1 x2 x3 x4 w1 w2 w3 w4 'uint32))))]
-         [(and (eq? (type x1) 'uint8) (eq? (type w1) 'int8)) (int32_t (bvadd (eval acc) (eval (dot-prod4 x1 x2 x3 x4 w1 w2 w3 w4 'int32))))]))]
+         [(and (uint8_t? x1) (uint8_t? w1)) (uint32_t (bvadd (eval acc) (eval (dot-prod4 x1 x2 x3 x4 w1 w2 w3 w4 'uint32))))]
+         [(and (uint8_t? x1) (int8_t? w1)) (int32_t (bvadd (eval acc) (eval (dot-prod4 x1 x2 x3 x4 w1 w2 w3 w4 'int32))))]))]
 
     ;; Vector-scalar multiply with 4-wide within-vector reduction (partial sliding window)
     [(vrmpy-p Vuu Rt ub)
@@ -524,8 +524,8 @@
             (define w3 (list-ref (interpret Rt) 2))
             (define w4 (list-ref (interpret Rt) 3))
             (cond
-              [(and (eq? (type x1) 'uint8) (eq? (type w1) 'uint8)) (dot-prod4 x1 x2 x3 x4 w1 w2 w3 w4 'uint32)]
-              [(and (eq? (type x1) 'uint8) (eq? (type w1) 'int8)) (dot-prod4 x1 x2 x3 x4 w1 w2 w3 w4 'int32)]))
+              [(and (uint8_t? x1) (uint8_t? w1)) (dot-prod4 x1 x2 x3 x4 w1 w2 w3 w4 'uint32)]
+              [(and (uint8_t? x1) (int8_t? w1)) (dot-prod4 x1 x2 x3 x4 w1 w2 w3 w4 'int32)]))
           (lambda (i)
             (define x1 ((car (interpret Vuu)) (+ (* i 4) 2)))
             (define x2 ((car (interpret Vuu)) (+ (* i 4) 3)))
@@ -536,8 +536,8 @@
             (define w3 (list-ref (interpret Rt) 2))
             (define w4 (list-ref (interpret Rt) 3))
             (cond
-              [(and (eq? (type x1) 'uint8) (eq? (type w1) 'uint8)) (dot-prod4 x1 x2 x3 x4 w1 w2 w3 w4 'uint32)]
-              [(and (eq? (type x1) 'uint8) (eq? (type w1) 'int8)) (dot-prod4 x1 x2 x3 x4 w1 w2 w3 w4 'int32)])))
+              [(and (uint8_t? x1) (uint8_t? w1)) (dot-prod4 x1 x2 x3 x4 w1 w2 w3 w4 'uint32)]
+              [(and (uint8_t? x1) (int8_t? w1)) (dot-prod4 x1 x2 x3 x4 w1 w2 w3 w4 'int32)])))
          (cons
           (lambda (i)
             (define x1 ((car (interpret Vuu)) (+ (* i 4) 1)))
@@ -549,8 +549,8 @@
             (define w3 (list-ref (interpret Rt) 2))
             (define w4 (list-ref (interpret Rt) 3))
             (cond
-              [(and (eq? (type x1) 'uint8) (eq? (type w1) 'uint8)) (dot-prod4 x1 x2 x3 x4 w1 w2 w3 w4 'uint32)]
-              [(and (eq? (type x1) 'uint8) (eq? (type w1) 'int8)) (dot-prod4 x1 x2 x3 x4 w1 w2 w3 w4 'int32)]))
+              [(and (uint8_t? x1) (uint8_t? w1)) (dot-prod4 x1 x2 x3 x4 w1 w2 w3 w4 'uint32)]
+              [(and (uint8_t? x1) (int8_t? w1)) (dot-prod4 x1 x2 x3 x4 w1 w2 w3 w4 'int32)]))
           (lambda (i)
             (define x1 ((car (interpret Vuu)) (+ (* i 4) 3)))
             (define x2 ((cdr (interpret Vuu)) (* i 4)))
@@ -561,8 +561,8 @@
             (define w3 (list-ref (interpret Rt) 2))
             (define w4 (list-ref (interpret Rt) 3))
             (cond
-              [(and (eq? (type x1) 'uint8) (eq? (type w1) 'uint8)) (dot-prod4 x1 x2 x3 x4 w1 w2 w3 w4 'uint32)]
-              [(and (eq? (type x1) 'uint8) (eq? (type w1) 'int8)) (dot-prod4 x1 x2 x3 x4 w1 w2 w3 w4 'int32)]))))]
+              [(and (uint8_t? x1) (uint8_t? w1)) (dot-prod4 x1 x2 x3 x4 w1 w2 w3 w4 'uint32)]
+              [(and (uint8_t? x1) (int8_t? w1)) (dot-prod4 x1 x2 x3 x4 w1 w2 w3 w4 'int32)]))))]
 
     ;; Element-wise average of two vectors (optional +1 rounding)
     [(vavg Vu Vv rnd?)
@@ -570,12 +570,12 @@
        (define lhs ((interpret Vu) i))
        (define rhs ((interpret Vv) i))
        (cond
-         [(and (eq? (type lhs) 'int8) (eq? (type rhs) 'int8)) (if rnd? (average-round lhs rhs 'int8) (average lhs rhs 'int8))]
-         [(and (eq? (type lhs) 'int16) (eq? (type rhs) 'int16)) (if rnd? (average-round lhs rhs 'int16) (average lhs rhs 'int16))]
-         [(and (eq? (type lhs) 'int32) (eq? (type rhs) 'int32)) (if rnd? (average-round lhs rhs 'int32) (average lhs rhs 'int32))]
-         [(and (eq? (type lhs) 'uint8) (eq? (type rhs) 'uint8)) (if rnd? (average-round lhs rhs 'uint8) (average lhs rhs 'uint8))]
-         [(and (eq? (type lhs) 'uint16) (eq? (type rhs) 'uint16)) (if rnd? (average-round lhs rhs 'uint16) (average lhs rhs 'uint16))]
-         [(and (eq? (type lhs) 'uint32) (eq? (type rhs) 'uint32)) (if rnd? (average-round lhs rhs 'uint32) (average lhs rhs 'uint32))]))]
+         [(and (int8_t? lhs) (int8_t? rhs)) (if rnd? (average-round lhs rhs 'int8) (average lhs rhs 'int8))]
+         [(and (int16_t? lhs) (int16_t? rhs)) (if rnd? (average-round lhs rhs 'int16) (average lhs rhs 'int16))]
+         [(and (int32_t? lhs) (int32_t? rhs)) (if rnd? (average-round lhs rhs 'int32) (average lhs rhs 'int32))]
+         [(and (uint8_t? lhs) (uint8_t? rhs)) (if rnd? (average-round lhs rhs 'uint8) (average lhs rhs 'uint8))]
+         [(and (uint16_t? lhs) (uint16_t? rhs)) (if rnd? (average-round lhs rhs 'uint16) (average lhs rhs 'uint16))]
+         [(and (uint32_t? lhs) (uint32_t? rhs)) (if rnd? (average-round lhs rhs 'uint32) (average lhs rhs 'uint32))]))]
 
     ;; Subtract and divide by 2
     [(vnavg Vu Vv)
@@ -583,10 +583,10 @@
        (define lhs ((interpret Vu) i))
        (define rhs ((interpret Vv) i))
        (cond
-         [(and (eq? (type lhs) 'uint8) (eq? (type rhs) 'uint8)) (naverage lhs rhs 'int8)]
-         [(and (eq? (type lhs) 'int8) (eq? (type rhs) 'int8)) (naverage lhs rhs 'int8)]
-         [(and (eq? (type lhs) 'int16) (eq? (type rhs) 'int16)) (naverage lhs rhs 'int16)]
-         [(and (eq? (type lhs) 'int32) (eq? (type rhs) 'int32)) (naverage lhs rhs 'int32)]))]
+         [(and (uint8_t? lhs) (uint8_t? rhs)) (naverage lhs rhs 'int8)]
+         [(and (int8_t? lhs) (int8_t? rhs)) (naverage lhs rhs 'int8)]
+         [(and (int16_t? lhs) (int16_t? rhs)) (naverage lhs rhs 'int16)]
+         [(and (int32_t? lhs) (int32_t? rhs)) (naverage lhs rhs 'int32)]))]
 
     ;; Logical shift right
     [(vlsr Vu Rt)
@@ -594,9 +594,9 @@
        (define val ((interpret Vu) i))
        (define c (interpret Rt))
        (cond
-         [(eq? (type val) 'uint8) (uint8_t (bvlshr (eval val) (eval c)))]
-         [(eq? (type val) 'uint16) (uint16_t (bvlshr (eval val) (eval c)))]
-         [(eq? (type val) 'uint32) (uint32_t (bvlshr (eval val) (eval c)))]))]
+         [(uint8_t? val) (uint8_t (bvlshr (eval val) (eval c)))]
+         [(uint16_t? val) (uint16_t (bvlshr (eval val) (eval c)))]
+         [(uint32_t? val) (uint32_t (bvlshr (eval val) (eval c)))]))]
 
     ;; Logical shift right
     [(vlsr Vu Rt)
@@ -604,9 +604,9 @@
        (define val ((interpret Vu) i))
        (define c (interpret Rt))
        (cond
-         [(eq? (type val) 'uint8) (uint8_t (bvlshr (eval val) (eval c)))]
-         [(eq? (type val) 'uint16) (uint16_t (bvlshr (eval val) (eval c)))]
-         [(eq? (type val) 'uint32) (uint32_t (bvlshr (eval val) (eval c)))]))]
+         [(uint8_t? val) (uint8_t (bvlshr (eval val) (eval c)))]
+         [(uint16_t? val) (uint16_t (bvlshr (eval val) (eval c)))]
+         [(uint32_t? val) (uint32_t (bvlshr (eval val) (eval c)))]))]
     
     ;; ---- Everything below this line in the interpreter is tentative ----
     
@@ -658,7 +658,8 @@
     [(eq? outT 'int16) (sat16 (add lhs rhs 'int32))]
     [(eq? outT 'int32) (sat32 (add lhs rhs 'int64))]
 
-    [(eq? outT 'uint8) (satu8 (mk-typed-expr (bvadd (eval (promote lhs)) (eval (promote rhs))) 'int16))]
+    [(and (eq? outT 'uint8) (int8_t? rhs)) (satu8 (int16_t (bvadd (eval (promote lhs)) (eval (promote rhs)))))]
+    [(eq? outT 'uint8) (satu8 (add lhs rhs 'uint16_t))]
     [(eq? outT 'uint16) (satu16 (add lhs rhs 'uint32))]
     [(eq? outT 'uint32) (satu32 (add lhs rhs 'uint64))]))
 

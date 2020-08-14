@@ -143,35 +143,27 @@
 
 
 ;; Model basic arithmetic
-(define (infer-out-type lhsT rhsT)
+(define (infer-out-type lhs rhs)
+  (define max_bw (if (> (bw lhs) (bw rhs)) (bw lhs) (bw rhs)))
   (cond
-    [(eq? lhsT rhsT) lhsT]
-    [(and (signed? lhsT) (signed? rhsT)) (if (> (bw lhsT) (bw rhsT)) lhsT rhsT)]
-    [(and (unsigned? lhsT) (unsigned? rhsT)) (if (> (bw lhsT) (bw rhsT)) lhsT rhsT)]
-    [else (if (> (bw lhsT) (bw rhsT)) (get-type (bw lhsT) #t) (get-type (bw rhsT) #t))]))
+    [(and (signed? lhs) (signed? rhs)) (get-type max_bw #t)]
+    [(and (unsigned? lhs) (unsigned? rhs)) (get-type max_bw #f)]
+    [else (get-type max_bw #t)]))
 
 (define (do-add lhs rhs)
-  (define lhsT (type lhs))
-  (define rhsT (type rhs))
-  (define outT (infer-out-type lhsT rhsT))
+  (define outT (infer-out-type lhs rhs))
   (mk-typed-expr (bvadd (eval lhs) (eval rhs)) outT))
 
 (define (do-sub lhs rhs)
-  (define lhsT (type lhs))
-  (define rhsT (type rhs))
-  (define outT (infer-out-type lhsT rhsT))
+  (define outT (infer-out-type lhs rhs))
   (mk-typed-expr (bvsub (eval lhs) (eval rhs)) outT))
 
 (define (do-mul lhs rhs)
-  (define lhsT (type lhs))
-  (define rhsT (type rhs))
-  (define outT (infer-out-type lhsT rhsT))
+  (define outT (infer-out-type lhs rhs))
   (mk-typed-expr (bvmul (eval lhs) (eval rhs)) outT))
 
 (define (do-div lhs rhs)
-  (define lhsT (type lhs))
-  (define rhsT (type rhs))
-  (define outT (infer-out-type lhsT rhsT))
+  (define outT (infer-out-type lhs rhs))
   (if (signed? outT)
       (mk-typed-expr (bvsdiv (eval lhs) (eval rhs)) outT)
       (mk-typed-expr (bvudiv (eval lhs) (eval rhs)) outT)))
