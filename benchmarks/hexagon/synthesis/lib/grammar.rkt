@@ -11,16 +11,52 @@
 ; Signed div
 
 (define (bool-const)
-  (define-symbolic b boolean?)
+  (define-symbolic* b boolean?)
   b)
 
 (define (int-const)
   (define-symbolic* c (bitvector 4))
   (choose*
-   (int8_t (sign-extend  c (bitvector 8)))
-   (int16_t (sign-extend  c (bitvector 16)))
-   (uint8_t (sign-extend  c (bitvector 8)))
-   (uint16_t (sign-extend  c (bitvector 16)))))
+   (int8_t (sign-extend c (bitvector 8)))
+   (int16_t (sign-extend c (bitvector 16)))
+   (uint8_t (sign-extend c (bitvector 8)))
+   (uint16_t (sign-extend c (bitvector 16)))))
+
+;; Simplified Grammar
+(define (??hvx-instr-smpl registers)
+  (define t0 (apply choose* registers))
+  (define t1 (apply choose* registers))
+  (define t2 (apply choose* registers))
+  (define c0 (int-const))
+  (define c1 (int-const))
+  (define c2 (int-const))
+  (define Rt3 (list c0 c1 c2))
+  (define Rt4 (list c0 c1 (int-const) (int-const)))
+  (choose*
+   ;; Swizzle
+   ;(swizzle t0)
+
+   ;; Broadcast
+   ;(vsplat c0)
+
+   ;; Element-wise multiply with weights followed by a sum
+   (mpy-add t0 t1 t2 Rt3 (bool-const))
+   (mpy-add-w t0 t1 t2 Rt3)
+   
+   ;; Convolve within vectors
+   (convolve-sw t0 Rt4)
+
+   ;; Dot-product
+   (dot-product t0 Rt4)
+
+   ;; Division
+   ;(vavg t0 t1 (bool-const))
+   ;(vasr t0 t1)
+   ;(vlsr t0 t1)
+   ;(vround t0)
+   )) ;; 42 seconds
+
+   ;(vasr-rnd-sat t0 t1 (zero-extend (?? (bitvector 4)) (bitvector 16)))))
 
 ;; Dynamic Grammars
 (define (??hvx-instr registers)
@@ -36,7 +72,7 @@
    ;(swizzle t0)
 
    ;; Broadcast
-   (vsplat c0)
+   ;(vsplat c0)
 
    ;; Addition
    (vadd t0 t1 (bool-const))
@@ -70,8 +106,8 @@
    (vrmpy-p-acc t0 t1 Rt4 (bool-const))
 
    ;; Division
-   (vavg t0 t1 (bool-const))
-   (vasr t0 t1)
+   ;(vavg t0 t1 (bool-const))
+   ;(vasr t0 t1)
    ;(vlsr t0 t1)
    ;(vround t0)
    )) ;; 42 seconds

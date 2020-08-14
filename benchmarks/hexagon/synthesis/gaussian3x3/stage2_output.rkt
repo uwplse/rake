@@ -71,6 +71,8 @@
 (for ([i VEC_LANES])
   (set! buff-reads (append buff-reads (list (extract-buf-reads ((interpret-halide original-expr) i))))))
 
+(println "Prepping...")
+
 (define synthesized-expr
   (??hvx-expr buff-reads))
 
@@ -89,6 +91,8 @@
 
 (define (lane-eq? oe se lane)
   (assert (eq? (oe lane) (se lane))))
+
+(println "Starting!")
 
 ;; Synthesize expression
 (define st (current-seconds))
