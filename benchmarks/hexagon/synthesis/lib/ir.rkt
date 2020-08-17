@@ -1,34 +1,56 @@
 #lang rosette
 
+(require rosette/lib/match)
+(require rosette/lib/angelic)
+(require rosette/lib/synthax)
+
 (require "cpp.rkt")
+(require "util.rkt")
 
-;; Model IR Instr
-(define (convolve-x v k)
-  (lambda (i)
-    (convolve-x-inner v k i 0)))
+(define curr_cn 0)
+(define (set-curr-cn v) (set! curr_cn v))
 
-(define (convolve-x-inner v k i offset)
-  (cond
-    [(< offset (vector-length k))
-     (bvadd
-      (bvmul
-       (cpp_cast (v (+ i offset)) 'uint8 'int16)
-       (cpp_cast (vector-ref k offset) 'int8 'int16))
-      (convolve-x-inner v k i (+ offset 1)))]
-    [else
-     (bv 0 16)]))
+;; IR instructions
+(struct convolve (data weights saturateFunc outputType) #:transparent)
 
-;(define (convolve-x v k)
-;  (lambda (i)
-;    (bvadd
-;     (bvmul
-;      (cast (v i) 'uint8 'int16)
-;      (cast (vector-ref k 0) 'int8 'int16))
-;     (bvmul
-;      (cast (v (+ i 1)) 'uint8 'int16)
-;      (cast (vector-ref k 1) 'int8 'int16))
-;     (bvmul
-;      (cast (v (+ i 2)) 'uint8 'int16)
-;      (cast (vector-ref k 2) 'int8 'int16)))))
+;(struct mpy-add (Vd Vu Vv Rt outT satF) #:transparent)
+;(struct dot-product (Vu Rt len outT) #:transparent)
 
-(provide (all-defined-out))
+(struct load-data (opts))
+
+;; Model IR Instructions
+(define (interpret p)
+  (match p
+    
+    ;;;;;;;;;;;;;;;; Define DSL for data-movement ;;;;;;;;;;;;;;
+    
+    [(load-data opts)
+     (begin
+       (lambda (i)
+         (define-symbolic* idx integer?)
+         (list-ref (list-ref opts curr_cn) idx)))]
+    
+    ;[(swizzle vec) (get-from-vec (interpret vec))]
+
+    ;;;;;;;;;;;;;;;;; Define DSL data-processing ;;;;;;;;;;;;;;;
+
+    [(convolve data weights saturateFunc outputType)
+     (lambda (i)
+       (define v1 (eval (cpp_cast ((interpret data) i) outputType)))
+       (define v2 (eval (cpp_cast ((interpret data) (+ i 1)) outputType)))
+       (define v3 (eval (cpp_cast ((interpret data) (+ i 2)) outputType)))
+       (define v4 (eval (cpp_cast ((interpret data) (+ i 3)) outputType)))
+       (define v5 (eval (cpp_cast ((interpret data) (+ i 3)) outputType)))
+       (define w1 (eval (cpp_cast (list-ref weights 0) outputType)))
+       (define w2 (eval (cpp_cast (list-ref weights 1) outputType)))
+       (define w3 (eval (cpp_cast (list-ref weights 2) outputType)))
+       (define w4 (eval (cpp_cast (list-ref weights 3) outputType)))
+       (define w5 (list-ref weights 4))
+       (if w5
+           (saturateFunc (mk-typed-expr (bvadd (bvmul v1 w1) (bvmul v2 w2) (bvmul v3 w3) (bvmul v4 w4) v5) outputType))
+           (saturateFunc (mk-typed-expr (bvadd (bvmul v1 w1) (bvmul v2 w2) (bvmul v3 w3) (bvmul v4 w4)) outputType))))]
+
+    [_ p]))
+
+(provide
+ (except-out (all-defined-out) interpret) (rename-out [interpret interpret-ir]))

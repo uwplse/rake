@@ -715,22 +715,8 @@
     [(eq? outT 'int16) (mk-typed-expr (bvashr (bvsub (eval lhs) (eval rhs)) (bv 1 16)) outT)]
     [(eq? outT 'int32) (mk-typed-expr (bvashr (bvsub (eval lhs) (eval rhs)) (bv 1 32)) outT)]))
 
-(define (nop v) v)
-
-(define (lsb16 v) (zero-extend (extract 15 0 (eval v)) (bitvector 32)))
-
-(define (lo8 v) (extract 7 0 v))
-(define (hi8 v) (extract 15 8 v))
-(define (lo16 v) (extract 15 0 v))
-(define (hi16 v) (extract 31 16 v))
-
-(define (zxt16 v) (uint16_t (zero-extend (eval v) (bitvector 16))))
-(define (sxt16 v) (int16_t (sign-extend (eval v) (bitvector 16))))
-(define (zxt32 v) (uint32_t (zero-extend (eval v) (bitvector 32))))
-(define (sxt32 v) (int32_t (sign-extend (eval v) (bitvector 32))))
-
 (define cn 0)
-(define (set-curr-cn v) (set! cn v))
+(define (set-cn v) (set! cn v))
 
 (define (get-from-buf opts)
   (define op (choose* nop sxt16 zxt16 sxt32 zxt32))
@@ -761,6 +747,5 @@
  (except-out
   (all-defined-out)
   interpret
-  add add-acc add-sat multiply multiply-add multiply-add-acc dot-prod4
-  lsb16 nop lo8 hi8 lo16 hi16 zxt16 sxt16 zxt32 sxt32)
+  add add-acc add-sat multiply multiply-add multiply-add-acc dot-prod4)
  (rename-out [interpret interpret-hvx]))

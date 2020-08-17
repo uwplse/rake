@@ -6,6 +6,7 @@
 (require "../lib/cpp.rkt")
 (require "../lib/util.rkt")
 (require "../lib/axioms.rkt")
+(require "../lib/ir.rkt")
 (require "../lib/halide.rkt")
 (require "../lib/hexagon.rkt")
 (require "../lib/grammar.rkt")
@@ -36,7 +37,7 @@
 (define original-expr
   ;(uint8x128
    ;(vec-div
-;    (vec-add
+    (vec-add
      (vec-add
       (concat_vectors
        (slice_vectors
@@ -61,8 +62,8 @@
         (x128 (int16_t (bv 2 16))))
        (concat_vectors
         (ramp c1 0 1 64)
-        (ramp rows (+ (* output.s0.x.x 128) 64) 1 64)))))
-     ;(x128 (int16_t (bv 8 16))))
+        (ramp rows (+ (* output.s0.x.x 128) 64) 1 64))))
+     (x128 (int16_t (bv 8 16)))))
     ;(x128 (int16_t (bv 16 16))))
    ;'int16))
 
@@ -73,21 +74,19 @@
 
 (println "Prepping...")
 
+(list-ref buff-reads 0)
+
 (define synthesized-expr
-  (??hvx-expr buff-reads))
+  (??hvx-expr-smpl buff-reads))
 
 ;; Verification condition
 (define (bounded-eq? oe se lanes)
-  (if (pair? oe)
-      (for ([i lanes])
-        (and
-         (assert (eq? ((car oe) i) ((car se) i)))
-         (assert (eq? ((cdr oe) i) ((cdr se) i)))))
-      (for ([i lanes])
-        (set-curr-cn i)
-        (assert (eq? (eval (oe i)) (eval (se i))))
-        (set-curr-cn (+ i 65))
-        (assert (eq? (eval (oe (+ i 65))) (eval (se (+ i 65))))))))
+  (for ([i lanes])
+    (set-curr-cn i)
+    (assert (eq? (oe i) (se i)))
+    ;(set-curr-cn (+ i 65))
+    ;(assert (eq? (oe (+ i 65)) (se (+ i 65))))
+    ))
 
 (define (lane-eq? oe se lane)
   (assert (eq? (oe lane) (se lane))))
@@ -97,7 +96,7 @@
 ;; Synthesize expression
 (define st (current-seconds))
 (define sol (synthesize #:forall (list rows output.s0.x.x c1)
-                        #:guarantee (bounded-eq? (interpret-halide original-expr) (interpret-hvx synthesized-expr) MC_BND)))
+                        #:guarantee (bounded-eq? (interpret-halide original-expr) (interpret-ir synthesized-expr) MC_BND)))
 (define runtime (- (current-seconds) st))
 
 ;; Print solution

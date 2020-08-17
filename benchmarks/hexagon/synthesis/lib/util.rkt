@@ -78,4 +78,19 @@
 
   vecs)
 
+;; Utility functions
+(define (nop v) v)
+
+(define (lsb16 v) (zero-extend (extract 15 0 (eval v)) (bitvector 32)))
+
+(define (lo8 v) (extract 7 0 v))
+(define (hi8 v) (extract 15 8 v))
+(define (lo16 v) (extract 15 0 v))
+(define (hi16 v) (extract 31 16 v))
+
+(define (zxt16 v) (uint16_t (zero-extend (eval v) (bitvector 16))))
+(define (sxt16 v) (int16_t (sign-extend (eval v) (bitvector 16))))
+(define (zxt32 v) (uint32_t (zero-extend (eval v) (bitvector 32))))
+(define (sxt32 v) (int32_t (sign-extend (eval v) (bitvector 32))))
+
 (provide (all-defined-out))

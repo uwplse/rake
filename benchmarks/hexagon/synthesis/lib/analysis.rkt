@@ -8,6 +8,8 @@
 (define (extract-buf-reads expr)
   (match expr
     [(int16_t v) (extract-buf-reads v)]
+
+    [(bv c bw) (list (int16_t expr))]
     
     [(expression op operands ...)
 

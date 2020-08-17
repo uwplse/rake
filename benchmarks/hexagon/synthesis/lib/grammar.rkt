@@ -6,6 +6,7 @@
 (require "analysis.rkt")
 (require "cpp.rkt")
 (require "hexagon.rkt")
+(require "ir.rkt")
 
 ; Cast to uint8
 ; Signed div
@@ -17,46 +18,37 @@
 (define (int-const)
   (define-symbolic* c (bitvector 4))
   (choose*
-   (int8_t (sign-extend c (bitvector 8)))
-   (int16_t (sign-extend c (bitvector 16)))
-   (uint8_t (sign-extend c (bitvector 8)))
-   (uint16_t (sign-extend c (bitvector 16)))))
+   (int16_t (bv 2 16))
+   (int8_t (sign-extend c (bitvector 8)))))
 
 ;; Simplified Grammar
-(define (??hvx-instr-smpl registers)
-  (define t0 (apply choose* registers))
-  (define t1 (apply choose* registers))
-  (define t2 (apply choose* registers))
-  (define c0 (int-const))
-  (define c1 (int-const))
-  (define c2 (int-const))
-  (define Rt3 (list c0 c1 c2))
-  (define Rt4 (list c0 c1 (int-const) (int-const)))
-  (choose*
-   ;; Swizzle
-   ;(swizzle t0)
+(define (??hvx-instr-smpl1 r0)
+  (define t0 (choose r0))
 
-   ;; Broadcast
-   ;(vsplat c0)
+  (choose
+   ;; Convolve data
+   (convolve
+    t0
+    (list (int-const) (int-const) (int-const) (int-const) (bool-const))
+    (choose sat8 sat16)
+    (choose 'int16 'int32))))
 
-   ;; Element-wise multiply with weights followed by a sum
-   (mpy-add t0 t1 t2 Rt3 (bool-const))
-   (mpy-add-w t0 t1 t2 Rt3)
-   
-   ;; Convolve within vectors
-   (convolve-sw t0 Rt4)
+(define (??hvx-instr-smpl2 r0 r1)
+  (define t0 (choose r0 r1))
 
-   ;; Dot-product
-   (dot-product t0 Rt4)
+  (choose
+   ;; Convolve data
+   (convolve
+    t0
+    (list (int-const) (int-const) (int-const) (int-const) (bool-const))
+    (choose sat8 sat16)
+    (choose 'int16 'int32))))
 
-   ;; Division
-   ;(vavg t0 t1 (bool-const))
-   ;(vasr t0 t1)
-   ;(vlsr t0 t1)
-   ;(vround t0)
-   )) ;; 42 seconds
-
-   ;(vasr-rnd-sat t0 t1 (zero-extend (?? (bitvector 4)) (bitvector 16)))))
+(define (??hvx-expr-smpl buffers)
+  (define r0 (load-data buffers))
+  (define r1 (??hvx-instr-smpl1 r0))
+  (define r2 (??hvx-instr-smpl2 r0 r1))
+  r1)
 
 ;; Dynamic Grammars
 (define (??hvx-instr registers)
