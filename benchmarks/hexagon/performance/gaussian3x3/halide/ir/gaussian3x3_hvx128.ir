@@ -1,0 +1,51 @@
++ ./tmp/gaussian3x3_generator -o tmp -e o,h,assembly,bitcode -g gaussian3x3 -f gaussian3x3_hvx128 target=hexagon-32-noos-no_bounds_query-no_asserts-hvx_128
+assert((reinterpret(uint64, output.buffer) != (uint64)0), halide_error_buffer_argument_is_null("output"))
+assert((reinterpret(uint64, input.buffer) != (uint64)0), halide_error_buffer_argument_is_null("input"))
+let input = _halide_buffer_get_host(input.buffer)
+let input.min.0 = _halide_buffer_get_min(input.buffer, 0)
+let input.stride.0 = _halide_buffer_get_stride(input.buffer, 0)
+let input.min.1 = _halide_buffer_get_min(input.buffer, 1)
+let input.stride.1 = _halide_buffer_get_stride(input.buffer, 1)
+let output = _halide_buffer_get_host(output.buffer)
+let output.min.0 = _halide_buffer_get_min(output.buffer, 0)
+let output.extent.0 = _halide_buffer_get_extent(output.buffer, 0)
+let output.stride.0 = _halide_buffer_get_stride(output.buffer, 0)
+let output.min.1 = _halide_buffer_get_min(output.buffer, 1)
+let output.extent.1 = _halide_buffer_get_extent(output.buffer, 1)
+let output.stride.1 = _halide_buffer_get_stride(output.buffer, 1)
+assert((input.stride.0 == 1), 0)
+assert((input.min.0 == 0), 0)
+assert(((input.stride.1 % 128) == 0), 0)
+assert((input.min.1 == 0), 0)
+assert((output.stride.0 == 1), 0)
+assert((output.min.0 == 0), 0)
+assert(((output.stride.1 % 128) == 0), 0)
+assert((output.min.1 == 0), 0)
+produce output {
+  for<Hexagon> (output.s0.__outermost, 0, 1) {
+    for (output.s0.y.y, 0, ((output.extent.1 + 3)/4)) {
+      prefetch(input, ((((input.stride.1*output.s0.y.y)*4) + (input.stride.1*7)) + -1), ((((output.extent.0 + 127)/128)*128) + 128), 1, 6, input.stride.1)
+      for (output.s0.y.yi, 0, 4) {
+        allocate rows[int16 * (((output.extent.0 + 255)/128)*128) * 1]
+        produce rows {
+          for (rows.s0.x.x, 0, ((output.extent.0 + 255)/128)) {
+            rows[ramp((rows.s0.x.x*128), 1, 128) aligned(128, 0)] = halide.hexagon.interleave.vh((let t34 = ((rows.s0.x.x*128) + (((output.s0.y.y*4) + output.s0.y.yi)*input.stride.1)) in halide.hexagon.acc_add_2mpy.vh.vub.vub.b.b(halide.hexagon.zxt.vub(input[ramp(((input.stride.1 + t34) + -1), 1, 128) aligned(128, 127)]), input[ramp((t34 + -1), 1, 128) aligned(128, 127)], input[ramp(((t34 - input.stride.1) + -1), 1, 128) aligned(128, 127)], (int8)2, (int8)1)))
+          }
+        }
+        consume rows {
+          if ((0 < output.extent.0)) {
+            allocate c1[int16 * 128] in Stack
+            c1[ramp(0, 1, 64)] = rows[ramp(0, 1, 64)]
+            for (output.s0.x.x, 0, ((output.extent.0 + 127)/128)) {
+              c1[ramp(64, 1, 64)] = rows[ramp(((output.s0.x.x*128) + 128), 1, 64) aligned(128, 0)]
+              output[ramp(((output.s0.x.x*128) + (((output.s0.y.y*4) + output.s0.y.yi)*output.stride.1)), 1, 128) aligned(128, 0)] = (let t38 = rows[ramp(((output.s0.x.x*128) + 64), 1, 64) aligned(128, 64)] in (let t39.s = c1[ramp(0, 1, 64)] in (let t40.s = c1[ramp(64, 1, 64)] in halide.hexagon.pack.vh(((halide.hexagon.add_mul.vh.vh.b((concat_vectors(t39.s, t38) + concat_vectors(slice_vectors(concat_vectors(t39.s, t38), 2, 1, 64), slice_vectors(concat_vectors(t38, t40.s), 2, 1, 64))), concat_vectors(slice_vectors(concat_vectors(t39.s, t38), 1, 1, 64), slice_vectors(concat_vectors(t38, t40.s), 1, 1, 64)), (int8)2) + x128((int16)8))/x128((int16)16))))))
+              c1[ramp(0, 1, 64)] = c1[ramp(64, 1, 64)]
+            }
+          }
+        }
+        free rows
+      }
+    }
+  }
+}
+
