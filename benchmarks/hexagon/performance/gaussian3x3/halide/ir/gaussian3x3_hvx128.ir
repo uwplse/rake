@@ -29,7 +29,7 @@ produce output {
         allocate rows[int16 * (((output.extent.0 + 255)/128)*128) * 1]
         produce rows {
           for (rows.s0.x.x, 0, ((output.extent.0 + 255)/128)) {
-            rows[ramp((rows.s0.x.x*128), 1, 128) aligned(128, 0)] = halide.hexagon.interleave.vh((let t34 = ((rows.s0.x.x*128) + (((output.s0.y.y*4) + output.s0.y.yi)*input.stride.1)) in halide.hexagon.acc_add_2mpy.vh.vub.vub.b.b(halide.hexagon.zxt.vub(input[ramp(((input.stride.1 + t34) + -1), 1, 128) aligned(128, 127)]), input[ramp((t34 + -1), 1, 128) aligned(128, 127)], input[ramp(((t34 - input.stride.1) + -1), 1, 128) aligned(128, 127)], (int8)2, (int8)1)))
+            rows[ramp((rows.s0.x.x*128), 1, 128) aligned(128, 0)] = halide.hexagon.interleave.vh((let t40 = ((rows.s0.x.x*128) + (((output.s0.y.y*4) + output.s0.y.yi)*input.stride.1)) in halide.hexagon.acc_add_2mpy.vh.vub.vub.b.b(halide.hexagon.zxt.vub(input[ramp(((input.stride.1 + t40) + -1), 1, 128) aligned(128, 127)]), input[ramp((t40 + -1), 1, 128) aligned(128, 127)], input[ramp(((t40 - input.stride.1) + -1), 1, 128) aligned(128, 127)], (int8)2, (int8)1)))
           }
         }
         consume rows {
@@ -38,7 +38,7 @@ produce output {
             c1[ramp(0, 1, 64)] = rows[ramp(0, 1, 64)]
             for (output.s0.x.x, 0, ((output.extent.0 + 127)/128)) {
               c1[ramp(64, 1, 64)] = rows[ramp(((output.s0.x.x*128) + 128), 1, 64) aligned(128, 0)]
-              output[ramp(((output.s0.x.x*128) + (((output.s0.y.y*4) + output.s0.y.yi)*output.stride.1)), 1, 128) aligned(128, 0)] = (let t38 = rows[ramp(((output.s0.x.x*128) + 64), 1, 64) aligned(128, 64)] in (let t39.s = c1[ramp(0, 1, 64)] in (let t40.s = c1[ramp(64, 1, 64)] in halide.hexagon.pack.vh(((halide.hexagon.add_mul.vh.vh.b((concat_vectors(t39.s, t38) + concat_vectors(slice_vectors(concat_vectors(t39.s, t38), 2, 1, 64), slice_vectors(concat_vectors(t38, t40.s), 2, 1, 64))), concat_vectors(slice_vectors(concat_vectors(t39.s, t38), 1, 1, 64), slice_vectors(concat_vectors(t38, t40.s), 1, 1, 64)), (int8)2) + x128((int16)8))/x128((int16)16))))))
+              output[ramp(((output.s0.x.x*128) + (((output.s0.y.y*4) + output.s0.y.yi)*output.stride.1)), 1, 128) aligned(128, 0)] = (let t45 = rows[ramp(((output.s0.x.x*128) + 64), 1, 64) aligned(128, 64)] in (let t46.s = c1[ramp(0, 1, 64)] in (let t47.s = c1[ramp(64, 1, 64)] in (let t48 = concat_vectors(slice_vectors(concat_vectors(t46.s, t45), 1, 1, 64), slice_vectors(concat_vectors(t45, t47.s), 1, 1, 64)) in halide.hexagon.pack.vh((halide.hexagon.add_mul.vh.vh.b((concat_vectors(slice_vectors(concat_vectors(t46.s, t45), 2, 1, 64), slice_vectors(concat_vectors(t45, t47.s), 2, 1, 64)) + concat_vectors(t46.s, t45)), t48, (int8)2)/t48))))))
               c1[ramp(0, 1, 64)] = c1[ramp(64, 1, 64)]
             }
           }

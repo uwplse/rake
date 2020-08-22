@@ -16,7 +16,7 @@ public:
         rows(x, y) = input_16(x, y-1) + 2 * input_16(x, y) + input_16(x, y+1);
         cols(x,y) =  rows(x-1, y) + 2 * rows(x, y) + rows(x+1, y);
 
-        output(x, y)  = cast<uint8_t> ((cols(x, y) + 8) >> 4);
+        output(x, y)  = cast<uint8_t> (cols(x,y) / rows(x,y));//cast<uint8_t> ((cols(x, y) + 8) >> 4);
     }
 
     void schedule() {
