@@ -7,10 +7,13 @@
 
 (define (extract-buf-reads expr)
   (match expr
+    [(int8_t v) (extract-buf-reads v)]
     [(int16_t v) (extract-buf-reads v)]
+    [(int32_t v) (extract-buf-reads v)]
+    [(uint8_t v) (extract-buf-reads v)]
+    [(uint16_t v) (extract-buf-reads v)]
+    [(uint32_t v) (extract-buf-reads v)]
 
-    [(bv c bw) (list (int16_t expr))]
-    
     [(expression op operands ...)
 
      ;; Silly workaround -- ask rosette folks how to do this properly

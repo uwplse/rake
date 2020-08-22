@@ -7,32 +7,40 @@
 (require "cpp.rkt")
 (require "util.rkt")
 
-(define curr_cn 0)
-(define (set-curr-cn v) (set! curr_cn v))
+(define curr-cn 0)
+(define (set-curr-cn v) (set! curr-cn v))
 
 ;; IR instructions
 (struct convolve (data weights saturateFunc outputType) #:transparent)
-
-;(struct mpy-add (Vd Vu Vv Rt outT satF) #:transparent)
-;(struct dot-product (Vu Rt len outT) #:transparent)
-
-(struct load-data (opts))
+(struct const-divide (data divisor) #:transparent)
+(struct arith-shift-right (data n round? outputType) #:transparent)
+(struct logic-shift-right (data n) #:transparent)
+(struct saturate (data round? signedOut?) #:transparent)
+(struct upcast (data) #:transparent)
+(struct downcast (data) #:transparent)
+(struct broadcast (val) #:transparent)
+(struct load-data (opts) #:transparent)
+(struct swizzle-data (t0 opts) #:transparent)
 
 ;; Model IR Instructions
 (define (interpret p)
   (match p
     
-    ;;;;;;;;;;;;;;;; Define DSL for data-movement ;;;;;;;;;;;;;;
-    
     [(load-data opts)
      (begin
+       (define-symbolic get-idx (~> integer? integer?))
        (lambda (i)
-         (define-symbolic* idx integer?)
-         (list-ref (list-ref opts curr_cn) idx)))]
-    
-    ;[(swizzle vec) (get-from-vec (interpret vec))]
+         (list-ref (list-ref opts curr-cn) (get-idx i))))]
 
-    ;;;;;;;;;;;;;;;;; Define DSL data-processing ;;;;;;;;;;;;;;;
+    [(swizzle-data t0 opts)
+     (lambda (i)
+       (define-symbolic* prev? boolean?)
+       (define-symbolic* idx integer?)
+       (if prev?
+           ((interpret t0) idx)
+           (list-ref (list-ref opts curr-cn) idx)))]
+
+    [(broadcast val) (lambda (i) val)]
 
     [(convolve data weights saturateFunc outputType)
      (lambda (i)
@@ -49,6 +57,86 @@
        (if w5
            (saturateFunc (mk-typed-expr (bvadd (bvmul v1 w1) (bvmul v2 w2) (bvmul v3 w3) (bvmul v4 w4) v5) outputType))
            (saturateFunc (mk-typed-expr (bvadd (bvmul v1 w1) (bvmul v2 w2) (bvmul v3 w3) (bvmul v4 w4)) outputType))))]
+
+    [(const-divide data divisor)
+     (lambda (i)
+       (define v ((interpret data) i))
+       (define c (interpret divisor))
+       (cond
+         [(int8_t? v) (mk-typed-expr (bvsdiv (eval v) (eval c)) 'int8)]
+         [(int16_t? v) (mk-typed-expr (bvsdiv (eval v) (eval c)) 'int16)]
+         [(uint8_t? v) (mk-typed-expr (bvudiv (eval v) (eval c)) 'uint8)]
+         [(uint16_t? v) (mk-typed-expr (bvudiv (eval v) (eval c)) 'uint16)]))]
+
+    [(arith-shift-right data n round? outputType)
+     (lambda (i)
+       (define v ((interpret data) i))
+       (define c (interpret n))
+       (cond
+         [(uint16_t? v)
+          (satu8 (uint16_t (bvashr (if round? (bvadd (eval v) (bvshl (bv 1 16) (bvsub (eval c) (bv 1 16)))) (eval v)) (eval c))))]
+         [(uint32_t? v)
+          (satu16 (uint32_t (bvashr (if round? (bvadd (eval v) (bvshl (bv 1 32) (bvsub (eval c) (bv 1 32)))) (eval v)) (eval c))))]
+         [(int16_t? v)
+          (define out (int16_t (bvashr (if round? (bvadd (eval v) (bvshl (bv 1 16) (bvsub (eval c) (bv 1 16)))) (eval v)) (eval c))))
+          (cond
+            [(eq? outputType 'uint8) (satu8 out)]
+            [(eq? outputType 'int8) (sat8 out)]
+            [(eq? outputType 'int16) (mk-typed-expr (bvashr (eval v) (eval c)) outputType)])]
+         [(int32_t? v)
+          (define out (int32_t (bvashr (if round? (bvadd (eval v) (bvshl (bv 1 32) (bvsub (eval c) (bv 1 32)))) (eval v)) (eval c))))
+          (cond
+            [(eq? outputType 'uint16) (satu16 out)]
+            [(eq? outputType 'int16) (sat16 out)]
+            [(eq? outputType 'int32) (mk-typed-expr (bvashr (eval v) (eval c)) outputType)])]))]
+
+    [(logic-shift-right data n)
+     (lambda (i)
+       (define v ((interpret data) i))
+       (define c (interpret n))
+       (cond
+         [(uint8_t? v) (uint8_t (bvlshr (eval v) (eval c)))]
+         [(uint16_t? v) (uint16_t (bvlshr (eval v) (eval c)))]
+         [(uint32_t? v) (uint32_t (bvlshr (eval v) (eval c)))]))]
+
+    [(saturate data round? signedOut?)
+     (lambda (i)
+       (define v ((interpret data) i))
+       (cond
+         [(int16_t? v)
+          (cond
+            [(and round? signedOut?) (sat8 (int16_t (bvashr (bvadd (eval v) (bv 128 16)) (bv 8 16))))]
+            [round? (satu8 (uint16_t (bvlshr (bvadd (eval v) (bv 128 16)) (bv 8 16))))]
+            [else (satu8 v)])]
+         [(uint16_t? v)
+          (satu8 (uint16_t (bvlshr (bvadd (eval v) (bv 128 16)) (bv 8 16))))]
+         [(int32_t? v)
+          (cond
+            [(and round? signedOut?) (sat16 (int32_t (bvashr (bvadd (eval v) (bv 32768 32)) (bv 16 32))))]
+            [round? (satu16 (uint32_t (bvlshr (bvadd (eval v) (bv 32768 32)) (bv 16 32))))]
+            [else (sat16 v)])]
+         [(uint32_t? v)
+          (if round
+              (satu16 (uint32_t (bvlshr (bvadd (eval v) (bv 32768 32)) (bv 16 32))))
+              (satu16 v))]))]
+
+    [(upcast data)
+     (lambda (i)
+       (define v ((interpret data) i))
+       (cond
+         [(int8_t? v) (cpp_cast v 'int16)]
+         [(int16_t? v) (cpp_cast v 'int32)]
+         [(uint8_t? v) (cpp_cast v 'uint16)]
+         [(uint16_t? v) (cpp_cast v 'uint32)]))]
+
+    [(downcast data)
+     (lambda (i)
+       (define v ((interpret data) i))
+       (cond
+         [(int16_t? v) (cpp_cast v 'int8)]
+         [(int32_t? v) (cpp_cast v 'int16)]
+         [(uint16_t? v) (cpp_cast v 'uint8)]
+         [(uint32_t? v) (cpp_cast v 'uint16)]))]
 
     [_ p]))
 

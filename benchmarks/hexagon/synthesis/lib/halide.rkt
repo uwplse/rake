@@ -17,29 +17,29 @@
 (struct concat_vectors (v1 v2) #:transparent)
 
 ;; Type Casts
-(struct uint8x32 (vec vtype) #:transparent)
-(struct uint8x64 (vec vtype) #:transparent)
-(struct uint8x128 (vec vtype) #:transparent)
+(struct uint8x32 (vec) #:transparent)
+(struct uint8x64 (vec) #:transparent)
+(struct uint8x128 (vec) #:transparent)
 
-(struct uint16x32 (vec vtype) #:transparent)
-(struct uint16x64 (vec vtype) #:transparent)
-(struct uint16x128 (vec vtype) #:transparent)
+(struct uint16x32 (vec) #:transparent)
+(struct uint16x64 (vec) #:transparent)
+(struct uint16x128 (vec) #:transparent)
 
-(struct uint32x32 (vec vtype) #:transparent)
-(struct uint32x64 (vec vtype) #:transparent)
-(struct uint32x128 (vec vtype) #:transparent)
+(struct uint32x32 (vec) #:transparent)
+(struct uint32x64 (vec) #:transparent)
+(struct uint32x128 (vec) #:transparent)
 
-(struct int8x32 (vec vtype) #:transparent)
-(struct int8x64 (vec vtype) #:transparent)
-(struct int8x128 (vec vtype) #:transparent)
+(struct int8x32 (vec) #:transparent)
+(struct int8x64 (vec) #:transparent)
+(struct int8x128 (vec) #:transparent)
 
-(struct int16x32 (vec vtype) #:transparent)
-(struct int16x64 (vec vtype) #:transparent)
-(struct int16x128 (vec vtype) #:transparent)
+(struct int16x32 (vec) #:transparent)
+(struct int16x64 (vec) #:transparent)
+(struct int16x128 (vec) #:transparent)
 
-(struct int32x32 (vec vtype) #:transparent)
-(struct int32x64 (vec vtype) #:transparent)
-(struct int32x128 (vec vtype) #:transparent)
+(struct int32x32 (vec) #:transparent)
+(struct int32x64 (vec) #:transparent)
+(struct int32x128 (vec) #:transparent)
 
 ;; Operations
 (struct add (v1 v2) #:transparent)
@@ -64,29 +64,29 @@
     [(concat_vectors v1 v2) (lambda (i) (if (< i (vec-len v1)) ((interpret v1) i) ((interpret v2) (- i (vec-len v1)))))]
 
     ;; Type Casts
-    [(uint8x32 vec vtype) (lambda (i) (cpp_cast ((interpret vec) i) 'uint8))]
-    [(uint8x64 vec vtype) (lambda (i) (cpp_cast ((interpret vec) i) 'uint8))]
-    [(uint8x128 vec vtype) (lambda (i) (cpp_cast ((interpret vec) i) 'uint8))]
+    [(uint8x32 vec) (lambda (i) (cpp_cast ((interpret vec) i) 'uint8))]
+    [(uint8x64 vec) (lambda (i) (cpp_cast ((interpret vec) i) 'uint8))]
+    [(uint8x128 vec) (lambda (i) (cpp_cast ((interpret vec) i) 'uint8))]
 
-    [(int8x32 vec vtype) (lambda (i) (cpp_cast ((interpret vec) i) 'int8))]
-    [(int8x64 vec vtype) (lambda (i) (cpp_cast ((interpret vec) i) 'int8))]
-    [(int8x128 vec vtype) (lambda (i) (cpp_cast ((interpret vec) i) 'int8))]
+    [(int8x32 vec) (lambda (i) (cpp_cast ((interpret vec) i) 'int8))]
+    [(int8x64 vec) (lambda (i) (cpp_cast ((interpret vec) i) 'int8))]
+    [(int8x128 vec) (lambda (i) (cpp_cast ((interpret vec) i) 'int8))]
 
-    [(uint16x32 vec vtype) (lambda (i) (cpp_cast ((interpret vec) i) 'uint16))]
-    [(uint16x64 vec vtype) (lambda (i) (cpp_cast ((interpret vec) i) 'uint16))]
-    [(uint16x128 vec vtype) (lambda (i) (cpp_cast ((interpret vec) i) 'uint16))]
+    [(uint16x32 vec) (lambda (i) (cpp_cast ((interpret vec) i) 'uint16))]
+    [(uint16x64 vec) (lambda (i) (cpp_cast ((interpret vec) i) 'uint16))]
+    [(uint16x128 vec) (lambda (i) (cpp_cast ((interpret vec) i) 'uint16))]
 
-    [(int16x32 vec vtype) (lambda (i) (cpp_cast ((interpret vec) i) 'int16))]
-    [(int16x64 vec vtype) (lambda (i) (cpp_cast ((interpret vec) i) 'int16))]
-    [(int16x128 vec vtype) (lambda (i) (cpp_cast ((interpret vec) i) 'int16))]
+    [(int16x32 vec) (lambda (i) (cpp_cast ((interpret vec) i) 'int16))]
+    [(int16x64 vec) (lambda (i) (cpp_cast ((interpret vec) i) 'int16))]
+    [(int16x128 vec) (lambda (i) (cpp_cast ((interpret vec) i) 'int16))]
     
-    [(uint32x32 vec vtype) (lambda (i) (cpp_cast ((interpret vec) i) 'uint32))]
-    [(uint32x64 vec vtype) (lambda (i) (cpp_cast ((interpret vec) i) 'uint32))]
-    [(uint32x128 vec vtype) (lambda (i) (cpp_cast ((interpret vec) i) 'uint32))]
+    [(uint32x32 vec) (lambda (i) (cpp_cast ((interpret vec) i) 'uint32))]
+    [(uint32x64 vec) (lambda (i) (cpp_cast ((interpret vec) i) 'uint32))]
+    [(uint32x128 vec) (lambda (i) (cpp_cast ((interpret vec) i) 'uint32))]
 
-    [(int32x32 vec vtype) (lambda (i) (cpp_cast ((interpret vec) i) 'int32))]
-    [(int32x64 vec vtype) (lambda (i) (cpp_cast ((interpret vec) i) 'int32))]
-    [(int32x128 vec vtype) (lambda (i) (cpp_cast ((interpret vec) i) 'int32))]
+    [(int32x32 vec) (lambda (i) (cpp_cast ((interpret vec) i) 'int32))]
+    [(int32x64 vec) (lambda (i) (cpp_cast ((interpret vec) i) 'int32))]
+    [(int32x128 vec) (lambda (i) (cpp_cast ((interpret vec) i) 'int32))]
 
     ;; Operations
     [(add v1 v2) (do-add v1 v2)]
@@ -113,24 +113,24 @@
     [(concat_vectors v1 v2) (+ (vec-len v1) (vec-len v2))]
 
     ;; Type Casts
-    [(uint8x32 vec vtype) 32]
-    [(uint16x32 vec vtype) 32]
-    [(uint32x32 vec vtype) 32]
-    [(int8x32 vec vtype) 32]
-    [(int16x32 vec vtype) 32]
-    [(int32x32 vec vtype) 32]
-    [(uint8x64 vec vtype) 64]
-    [(uint16x64 vec vtype) 64]
-    [(uint32x64 vec vtype) 64]
-    [(int8x64 vec vtype) 64]
-    [(int16x64 vec vtype) 64]
-    [(int32x64 vec vtype) 64]
-    [(uint8x128 vec vtype) 128]
-    [(uint16x128 vec vtype) 128]
-    [(uint32x128 vec vtype) 128]
-    [(int8x128 vec vtype) 128]
-    [(int16x128 vec vtype) 128]
-    [(int32x128 vec vtype) 128]
+    [(uint8x32 vec) 32]
+    [(uint16x32 vec) 32]
+    [(uint32x32 vec) 32]
+    [(int8x32 vec) 32]
+    [(int16x32 vec) 32]
+    [(int32x32 vec) 32]
+    [(uint8x64 vec) 64]
+    [(uint16x64 vec) 64]
+    [(uint32x64 vec) 64]
+    [(int8x64 vec) 64]
+    [(int16x64 vec) 64]
+    [(int32x64 vec) 64]
+    [(uint8x128 vec) 128]
+    [(uint16x128 vec) 128]
+    [(uint32x128 vec) 128]
+    [(int8x128 vec) 128]
+    [(int16x128 vec) 128]
+    [(int32x128 vec) 128]
 
     ;; Operations
     [(vec-add v1 v2) (vec-len v1)]
@@ -164,7 +164,7 @@
 
 (define (do-div lhs rhs)
   (define outT (infer-out-type lhs rhs))
-  (if (signed? outT)
+  (if (signedT? outT)
       (mk-typed-expr (bvsdiv (eval lhs) (eval rhs)) outT)
       (mk-typed-expr (bvudiv (eval lhs) (eval rhs)) outT)))
 

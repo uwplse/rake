@@ -609,20 +609,6 @@
          [(uint32_t? val) (uint32_t (bvlshr (eval val) (eval c)))]))]
     
     ;; ---- Everything below this line in the interpreter is tentative ----
-    
-    ;; Shift right with rounding and saturation
-    [(vasr-rnd-sat Vu Vv Rt)
-     (cond
-       [((bitvector 16) ((interpret Vu) 0))
-        (lambda (i)
-          (if (even? i)
-              (satu8 (bvashr (bvadd ((interpret Vv) (quotient i 2)) (bvshl (bv 1 16) (bvsub Rt (bv 1 16)))) Rt))
-              (satu8 (bvashr (bvadd ((interpret Vu) (quotient i 2)) (bvshl (bv 1 16) (bvsub Rt (bv 1 16)))) Rt))))]
-       [((bitvector 32) ((interpret Vu) 0))
-        (lambda (i)
-          (if (even? i)
-              (sat16 (bvashr (bvadd ((interpret Vv) (quotient i 2)) (bvshl (bv 1 32) (bvsub Rt (bv 1 32)))) Rt))
-              (sat16 (bvashr (bvadd ((interpret Vu) (quotient i 2)) (bvshl (bv 1 32) (bvsub Rt (bv 1 32)))) Rt))))])]
 
 ;    ;; Define DSL for data swizzling
 ;    [(lo Vuu) (car (interpret Vuu))]

@@ -35,8 +35,8 @@
 
 ;; Define original expression
 (define original-expr
-  ;(uint8x128
-   ;(vec-div
+  (uint8x128
+   (vec-div
     (vec-add
      (vec-add
       (concat_vectors
@@ -63,29 +63,36 @@
        (concat_vectors
         (ramp c1 0 1 64)
         (ramp rows (+ (* output.s0.x.x 128) 64) 1 64))))
-     (x128 (int16_t (bv 8 16)))))
-    ;(x128 (int16_t (bv 16 16))))
-   ;'int16))
+     (x128 (int16_t (bv 8 16))))
+    (x128 (int16_t (bv 16 16))))))
 
-;; Perform analysis to extract the set of buffer reads
+;; Extract the set of buffer reads
 (define buff-reads (list))
 (for ([i VEC_LANES])
   (set! buff-reads (append buff-reads (list (extract-buf-reads ((interpret-halide original-expr) i))))))
 
+
+;; Extract the set of constant multiplication factors
+;(define mul-consts (extract-mul-consts original-expr))
+;(define mul-consts (extract-mul-consts original-expr))
+
 (println "Prepping...")
 
-(list-ref buff-reads 0)
+(list-ref buff-reads 65)
 
 (define synthesized-expr
   (??hvx-expr-smpl buff-reads))
+
+;((interpret-halide original-expr) 65)
+;((interpret-ir synthesized-expr) 65)
 
 ;; Verification condition
 (define (bounded-eq? oe se lanes)
   (for ([i lanes])
     (set-curr-cn i)
     (assert (eq? (oe i) (se i)))
-    ;(set-curr-cn (+ i 65))
-    ;(assert (eq? (oe (+ i 65)) (se (+ i 65))))
+    (set-curr-cn (+ i 65))
+    (assert (eq? (oe (+ i 65)) (se (+ i 65))))
     ))
 
 (define (lane-eq? oe se lane)
@@ -101,8 +108,34 @@
 
 ;; Print solution
 (println sol)
-(evaluate synthesized-expr sol)
+(evaluate ((interpret-ir (evaluate synthesized-expr sol)) 0) sol)
 (printf "\nRuntime (stage 1): ~a seconds\n\n" runtime)
+
+(define synthesized-conv
+  (convolve (load-data buff-reads) (list (int8_t (bv #x01 8)) (int8_t (bv #x02 8)) (int8_t (bv #x01 8)) (int8_t (bv #x00 8)) #f) nop 'int16))
+
+(evaluate ((interpret-ir (evaluate synthesized-conv sol)) 0) sol)
+
+(define synthesized-hvx-expr
+  (??hvx-expr buff-reads))
+
+(define (bounded-eq2? oe se lanes)
+  (for ([i lanes])
+    (set-curr-cn i)
+    (assert (eq? (evaluate (oe i) sol) (se i)))
+    ;(set-curr-cn (+ i 65))
+    ;(assert (eq? (oe (+ i 65)) (se (+ i 65))))
+    ))
+
+(set! st (current-seconds))
+(define sol2 (synthesize #:forall (list rows output.s0.x.x c1)
+                        #:guarantee (bounded-eq2? (interpret-ir (evaluate synthesized-conv sol)) (interpret-hvx synthesized-hvx-expr) MC_BND)))
+(set! runtime (- (current-seconds) st))
+
+;; Print solution 2
+(println sol2)
+(evaluate synthesized-hvx-expr sol2)
+(printf "\nRuntime (stage 1.5): ~a seconds\n\n" runtime)
 
 (exit)
 

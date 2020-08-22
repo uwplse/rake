@@ -49,10 +49,25 @@
     [(uint16_t v) #f]
     [(uint32_t v) #f]
     [(uint64_t v) #f]
-    [_ (error "Cannot infer type: ~a" e)]))
+    [_ (error "Cannot infer signed-ness of exprs" e)]))
 
 (define (unsigned? e)
   (not (signed? e)))
+
+(define (signedT? t)
+  (match t
+    ['int8 #t]
+    ['int16 #t]
+    ['int32 #t]
+    ['int64  #t]
+    ['uint8 #f]
+    ['uint16 #f]
+    ['uint32 #f]
+    ['uint64 #f]
+    [_ (error "Cannot infer signed-ness of type" t)]))
+
+(define (unsignedT? t)
+  (not (signedT? t)))
 
 (define (bw e)
   (match e
