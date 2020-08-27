@@ -19,7 +19,7 @@
 (struct upcast (data) #:transparent)
 (struct downcast (data) #:transparent)
 (struct broadcast (val) #:transparent)
-(struct load-data (opts) #:transparent)
+(struct load-data (opts))
 (struct swizzle-data (t0 opts) #:transparent)
 
 ;; Model IR Instructions

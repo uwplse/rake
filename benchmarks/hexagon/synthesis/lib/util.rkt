@@ -3,6 +3,12 @@
 (require "cpp.rkt")
 (require rosette/lib/match)
 
+;; Debugging
+(define debug-flag-set? #f)
+(define (debug-on) (set! debug-flag-set? #t))
+(define (debug-off) (set! debug-flag-set? #f))
+(define (debug expr) (when debug-flag-set? (display expr)))
+
 ;; For tracking types of variables
 (define type-dict (make-hash))
 (define (init-var-types td) (set! type-dict td))

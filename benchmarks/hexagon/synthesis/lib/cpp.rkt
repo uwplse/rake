@@ -27,6 +27,19 @@
     [(uint64_t v) v]
     [_ (error "Cannot eval: ~a" e)]))
 
+(define (eval-to-int e)
+  (match e
+    [(int8_t v) (bitvector->integer v)]
+    [(int16_t v) (bitvector->integer v)]
+    [(int32_t v) (bitvector->integer v)]
+    [(int64_t v) (bitvector->integer v)]
+    [(uint8_t v) (bitvector->natural v)]
+    [(uint16_t v) (bitvector->natural v)]
+    [(uint32_t v) (bitvector->natural v)]
+    [(uint32_t v) (bitvector->natural v)]
+    [(uint64_t v) (bitvector->natural v)]
+    [_ (error "Cannot eval: ~a" e)]))
+
 (define (type e)
   (match e
     [(int8_t v) 'int8]
