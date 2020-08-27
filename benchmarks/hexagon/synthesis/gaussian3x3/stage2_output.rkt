@@ -13,18 +13,16 @@
 (require "../lib/analysis.rkt")
 
 (error-print-width 100000)
+(debug-on)
 
 ;; Synthesis parameters
 (define MC_BND 1)
-(define VEC_LANES 128)
 
 ;; Model buffers as uninterpreted functions
 (define-symbolic rows (~> integer? (bitvector 16)))
 (define-symbolic c1 (~> integer? (bitvector 16)))
 
 (init-var-types (make-hash (list (cons rows 'int16) (cons c1 'int16))))
-
-(define buffers (list rows c1))
 
 ;; Axioms describing value range for intermediates
 (assert (values-range-from rows (bv 0 16) (bv 1021 16)))
@@ -66,97 +64,131 @@
      (x128 (int16_t (bv 8 16))))
     (x128 (int16_t (bv 16 16))))))
 
+;; Infer the vec-length of original-expr
+(define VEC_LANES (vec-len original-expr))
+
 ;; Extract the set of buffer reads
 (define buff-reads (list))
 (for ([i VEC_LANES])
   (set! buff-reads (append buff-reads (list (extract-buf-reads ((interpret-halide original-expr) i))))))
 
-
 ;; Extract the set of constant multiplication factors
-;(define mul-consts (extract-mul-consts original-expr))
-;(define mul-consts (extract-mul-consts original-expr))
+(define add-consts (extract-add-consts original-expr))
+(define sub-consts (extract-sub-consts original-expr))
+(define mul-consts (extract-mul-consts original-expr))
+(define div-consts (extract-div-consts original-expr))
 
-(println "Prepping...")
+;; Extract the set of live ops
+(define live-ops (list->set (extract-live-ops original-expr)))
 
-(list-ref buff-reads 65)
+;; Generate a specialized grammar based on 
+(define ??ir-grammar (generate-ir-grammar live-ops buff-reads add-consts sub-consts mul-consts div-consts))
 
-(define synthesized-expr
-  (??hvx-expr-smpl buff-reads))
-
-;((interpret-halide original-expr) 65)
-;((interpret-ir synthesized-expr) 65)
-
-;; Verification condition
+;; Verification conditions
 (define (bounded-eq? oe se lanes)
   (for ([i lanes])
     (set-curr-cn i)
     (assert (eq? (oe i) (se i)))
     (set-curr-cn (+ i 65))
-    (assert (eq? (oe (+ i 65)) (se (+ i 65))))
-    ))
+    (assert (eq? (oe (+ i 65)) (se (+ i 65))))))
 
 (define (lane-eq? oe se lane)
   (assert (eq? (oe lane) (se lane))))
 
-(println "Starting!")
+;; Start incremental synthesis loop
+(define (synthesize-ir-expr)
+  (if (not (instr-limit-exceeded?))
+      (begin
+        (display "Generating IR Grammar...\n")
+        (display "========================\n")
+        (debug (format "Number of instructions: ~a\n" (instr-bnd)))
+        (debug (format "Saturation arithmetic: ~a\n" (if (sat-arith?) "Enabled" "Disabled")))
+        (debug (format "Set of operators: ~a\n\n" (if (specialized-ops?) "Specialized" "Full")))
+    
+        (define synthesized-expr (??ir-grammar))
 
-;; Synthesize expression
-(define st (current-seconds))
-(define sol (synthesize #:forall (list rows output.s0.x.x c1)
-                        #:guarantee (bounded-eq? (interpret-halide original-expr) (interpret-ir synthesized-expr) MC_BND)))
-(define runtime (- (current-seconds) st))
+        ;((interpret-halide original-expr) 65)
+        ;((interpret-ir synthesized-expr) 65)
 
-;; Print solution
-(println sol)
-(evaluate ((interpret-ir (evaluate synthesized-expr sol)) 0) sol)
-(printf "\nRuntime (stage 1): ~a seconds\n\n" runtime)
+        (display "Searching...\n")
+        (display "============\n")
 
-(define synthesized-conv
-  (convolve (load-data buff-reads) (list (int8_t (bv #x01 8)) (int8_t (bv #x02 8)) (int8_t (bv #x01 8)) (int8_t (bv #x00 8)) #f) nop 'int16))
+        ;; Synthesize expression
+        (define st (current-seconds))
+        (define sol (synthesize #:forall (list rows output.s0.x.x c1)
+                                #:guarantee (bounded-eq? (interpret-halide original-expr) (interpret-ir synthesized-expr) MC_BND)))
+        (define runtime (- (current-seconds) st))
 
-(evaluate ((interpret-ir (evaluate synthesized-conv sol)) 0) sol)
+        (if (eq? sol (unsat))
+            (begin
+              (display "Failed to find an equivalent IR expression.\n\n")
+              (increment-instr-bnd)
+              (synthesize-ir-expr))
+            (begin
+              (display "Successfully found an equivalent IR expression:-\n")
+              (debug (evaluate synthesized-expr sol))
+              (display (format "\n\nSynthesis time: ~a seconds\n\n" runtime))
+              (cons synthesized-expr sol))))
+      (begin
+        (display "Maximum instruction bound reached. Giving up.\n\n")
+        (void))))
+          
+(init-grammar-generator)
+(define stage1_res (synthesize-ir-expr))
+(define ir-expr-q (car stage1_res))
+(define ir-expr-sol (cdr stage1_res))
 
-(define synthesized-hvx-expr
-  (??hvx-expr buff-reads))
-
-(define (bounded-eq2? oe se lanes)
-  (for ([i lanes])
-    (set-curr-cn i)
-    (assert (eq? (evaluate (oe i) sol) (se i)))
-    ;(set-curr-cn (+ i 65))
-    ;(assert (eq? (oe (+ i 65)) (se (+ i 65))))
-    ))
-
-(set! st (current-seconds))
-(define sol2 (synthesize #:forall (list rows output.s0.x.x c1)
-                        #:guarantee (bounded-eq2? (interpret-ir (evaluate synthesized-conv sol)) (interpret-hvx synthesized-hvx-expr) MC_BND)))
-(set! runtime (- (current-seconds) st))
-
-;; Print solution 2
-(println sol2)
-(evaluate synthesized-hvx-expr sol2)
-(printf "\nRuntime (stage 1.5): ~a seconds\n\n" runtime)
+;(set-curr-cn 0)
+;(debug (evaluate ((interpret-ir (evaluate ir-expr-q ir-expr-sol)) 0) ir-expr-sol))
 
 (exit)
 
-;; Synthesize swizzles spec (+ full verification)
-(set! st (current-seconds))
-(define sols (list))
-(for ([lane VEC_LANES])
-  (set-curr-cn lane)
-  (define lane-sol (synthesize #:forall (list rows output.s0.x.x c1)
-                               #:guarantee (lane-eq? (interpret-halide original-expr) (interpret-hvx (evaluate synthesized-expr sol)) lane)))
-  (set! sols (append sols (list lane-sol))))
-(set! runtime (- (current-seconds) st))
-
-;; Parse stage 2 output
-(define vecs (parse-swizzle-spec buff-reads sols))
-
-;; Print solution
-(printf "Runtime (stage 2): ~a seconds\n\n" runtime)
+;(define synthesized-conv
+;  (convolve (load-data buff-reads) (list (int8_t (bv #x01 8)) (int8_t (bv #x02 8)) (int8_t (bv #x01 8)) (int8_t (bv #x00 8)) #f) nop 'int16))
+;
+;(evaluate ((interpret-ir (evaluate synthesized-conv sol)) 0) sol)
+;
+;(define synthesized-hvx-expr
+;  (??hvx-expr buff-reads))
+;
+;(define (bounded-eq2? oe se lanes)
+;  (for ([i lanes])
+;    (set-curr-cn i)
+;    (assert (eq? (evaluate (oe i) sol) (se i)))
+;    ;(set-curr-cn (+ i 65))
+;    ;(assert (eq? (oe (+ i 65)) (se (+ i 65))))
+;    ))
+;
+;(set! st (current-seconds))
+;(define sol2 (synthesize #:forall (list rows output.s0.x.x c1)
+;                        #:guarantee (bounded-eq2? (interpret-ir (evaluate synthesized-conv sol)) (interpret-hvx synthesized-hvx-expr) MC_BND)))
+;(set! runtime (- (current-seconds) st))
+;
+;;; Print solution 2
+;;(println sol2)
+;(evaluate synthesized-hvx-expr sol2)
+;(printf "\nRuntime (stage 1.5): ~a seconds\n\n" runtime)
+;
+;(exit)
+;
+;;; Synthesize swizzles spec (+ full verification)
+;(set! st (current-seconds))
+;(define sols (list))
+;(for ([lane VEC_LANES])
+;  (set-curr-cn lane)
+;  (define lane-sol (synthesize #:forall (list rows output.s0.x.x c1)
+;                               #:guarantee (lane-eq? (interpret-halide original-expr) (interpret-hvx (evaluate synthesized-expr sol)) lane)))
+;  (set! sols (append sols (list lane-sol))))
+;(set! runtime (- (current-seconds) st))
+;
+;;; Parse stage 2 output
+;(define vecs (parse-swizzle-spec buff-reads sols))
+;
+;;; Print solution
+;(printf "Runtime (stage 2): ~a seconds\n\n" runtime)
 
 ;; Synthesize swizzle instructions
-(set! st (current-seconds))
+;(set! st (current-seconds))
 ;(define vreads (list (vread c1 0) (vread rows (+ (* output.s0.x.x 128) 64)) (vread c1 64)))
 ;(define vreads (list
 ;                (valign (vcombine (vread c1 0) (vread rows (+ (* output.s0.x.x 128) 64))) 1)
@@ -173,4 +205,4 @@
   ;(evaluate program_sketch sol2)
 
 ;; Print solution
-(printf "Runtime (stage 3): ~a seconds" runtime)
+;(printf "Runtime (stage 3): ~a seconds" runtime)
