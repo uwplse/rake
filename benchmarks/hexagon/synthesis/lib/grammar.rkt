@@ -22,6 +22,7 @@
 (define (specialized-ops?) specialized-op-set)
 
 (define (increment-instr-bnd) (set! curr-instr-bnd (add1 curr-instr-bnd)))
+(define (reset-instr-bnd) (set! curr-instr-bnd 1))
 
 (define (init-grammar-generator [max-i-bnd 3])
   (set! max-instr-bnd max-i-bnd)
@@ -29,8 +30,11 @@
   (set! saturation-arith? #f)
   (set! curr-instr-bnd 1))
 
-;; Dynamic Gramamr generation
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; IR GRAMMAR ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; Dynamic IR Gramamr Generation
 (define (pow2? val) (integer? (log (eval-to-int val) 2)))
+(define (log2 val) (mk-typed-expr (bv (exact-round (log (eval-to-int val) 2)) (bw val)) (type val)))
 (define (bool-const) (define-symbolic* b boolean?)  b)
 (define (get-generator-func opts) (when (not (empty? opts)) (lambda() (apply choose* opts))))
 
@@ -74,7 +78,7 @@
 (define (generate-ir-grammar live-ops buff-reads add-consts sub-consts mul-consts div-consts)
   (define data (for/list [(l buff-reads)] (append add-consts l)))
   (define int-weights-gen (get-generator-func (append (list (int8_t (bv 0 8)) (int8_t (bv 1 8))) mul-consts)))
-  (define int-shiftr-gen (get-generator-func (list (int16_t (bv 4 16)))))
+  (define int-shiftr-gen (get-generator-func (map log2 (filter pow2? div-consts))))
   (define int-divisor-gen (get-generator-func (remove* (filter pow2? div-consts) div-consts)))
   (define (??ir-instr t0) (apply choose* (get-ir-ops t0 live-ops int-weights-gen int-divisor-gen int-shiftr-gen)))
   (define (??ir-expr)
@@ -88,129 +92,71 @@
       [else r3]))
   ??ir-expr)
 
-(define (int-const)
-  (choose*
-   (int8_t (bv 0 8))
-   (int8_t (bv 1 8))
-   (int8_t (bv 2 8))))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; HVX GRAMMAR ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(define (int-const-s)
-  (choose*
-   (int16_t (bv 4 16))
-   (int32_t (bv 4 32))))
+(define (generate-hvx-grammar ir-expr sub-expr)
+  (define ??hvx-instr (match ir-expr
+                        [(convolve sub-expr weights saturateFunc outputType) (get-hvx-conv-isa weights)]
+                        [_ (begin (println "gand marao bc") (exit))]))
+  (define (??ir-expr)
+    (define r0 sub-expr)
+    (define r1 (??hvx-instr (list r0)))
+    (define r2 (??hvx-instr (list r0 r1)))
+    (define r3 (??hvx-instr (list r0 r1 r2)))
+    (cond
+      [(eq? curr-instr-bnd 1) r1]
+      [(eq? curr-instr-bnd 2) r2]
+      [else r3]))
+  ??ir-expr)
 
-(define (int-const-d)
-  (choose*
-   (int8_t (bv 16 8))
-   (int16_t (bv 16 16))
-   (int32_t (bv 16 32))))
+;; HVX instructions for synthesizing convolutions
+(define (get-hvx-conv-isa weights)
+  (define (int-const) (cpp_cast (apply choose* (set->list (list->set (take weights 4)))) (choose* 'int8 'uint8)))
+  (define (??hvx-conv-instr registers)
+    (define t0 (apply choose* registers))
+    (define t1 (apply choose* registers))
+    (define t2 (apply choose* registers))
+    (define c0 (int-const))
+    (define c1 (int-const))
+    (define Rt (cons c0 c1))
+    (define Rt4 (list c0 c1 (int-const) (int-const)))
+    (choose*
+     ;; Swizzle
+     ;(swizzle t0)
 
-;; Simplified Grammar
-(define (??hvx-instr-smpl1 t0)
-  (define convOutT (choose 'int16 'int32))
-  (define convSatF (if (eq? convOutT 'int16) (choose nop sat8 satu8) (choose nop sat16 satu16)))
-  
-  (choose
-   ;; Convolve data
-   (convolve
-    t0
-    (list (int-const) (int-const) (int-const) (int-const) (bool-const))
-    nop;convSatF
-    convOutT)
+     ;; Broadcast
+     ;(vsplat c0)
 
-   ;; Division
-   (const-divide t0 (int-const-d))
+     ;; Addition
+     (vadd t0 t1 (bool-const))
+     (vadd-w t0 t1)
+     (vadd-w-acc t0 t1 t2)
 
-   ;; Shift right
-   (arith-shift-right t0 (int-const-s) (bool-const) (choose 'int16 'int8 'uint8))
-   (logic-shift-right t0 (int-const-s))
+     ;; Vec-Sca multiplies
+     (vmpy t0 c0)
+     (vmpyi t0 c0)
+     (vmpye t0 c0)
 
-   ;; Saturation with optional rounding
-   (saturate t0 #t (bool-const))
-   ))
+     (vmpy-acc t0 t1 c0)
+     (vmpyi-acc t0 t1 c0)
+     (vmpye-acc t0 t1 c0)
 
-(define (??hvx-instr-smpl2 t0)
-  (choose
-   ;; Convolve data
-   (convolve
-    t0
-    (list (int-const) (int-const) (int-const) (int-const) (bool-const))
-    nop;(choose nop sat8 satu8 sat16 satu16)
-    (choose 'int16 'int32))
+     (vmpa t1 Rt)
+     (vmpa-acc t0 t1 Rt)
 
-   ;; Division
-   (const-divide t0 (int-const-d))
+     (vdmpy t0 Rt)
+     (vdmpy-sw t0 Rt)
+     (vdmpy-acc t0 t1 Rt)
+     (vdmpy-sw-acc t0 t1 Rt)
 
-   ;; Shift right
-   (arith-shift-right t0 (int-const-s) (bool-const) (choose 'int32 'int16 'uint16 'int8 'uint8))
-   (logic-shift-right t0 (int-const-s))
+     (vtmpy t0 Rt)
+     (vtmpy-acc t0 t1 Rt)
 
-   ;; Saturation with optional rounding
-   (saturate t0 #t (bool-const))
-   ))
+     (vrmpy t0 Rt4)
+     (vrmpy-acc t0 t1 Rt4)
 
-(define (??hvx-expr-smpl buffers)
-  (define r0 (load-data buffers))
-  (define r1 (??hvx-instr-smpl1 r0))
-  ;(define r2 (swizzle-data r1 buffers))
-  (define r3 (??hvx-instr-smpl2 r1))
-  r3)
-
-;; Dynamic Grammars
-(define (??hvx-instr registers)
-  (define t0 (apply choose* registers))
-  (define t1 (apply choose* registers))
-  (define t2 (apply choose* registers))
-  (define c0 (int-const))
-  (define c1 (int-const))
-  (define Rt (cons c0 c1))
-  (define Rt4 (list c0 c1 (int-const) (int-const)))
-  (choose*
-   ;; Swizzle
-   ;(swizzle t0)
-
-   ;; Broadcast
-   ;(vsplat c0)
-
-   ;; Addition
-   (vadd t0 t1 (bool-const))
-   (vadd-w t0 t1)
-   (vadd-w-acc t0 t1 t2)
-
-   ;; Vec-Sca multiplies
-   (vmpy t0 c0)
-   (vmpyi t0 c0)
-   (vmpye t0 c0)
-
-   (vmpy-acc t0 t1 c0)
-   (vmpyi-acc t0 t1 c0)
-   (vmpye-acc t0 t1 c0)
-
-   (vmpa t1 Rt)
-   (vmpa-acc t0 t1 Rt)
-
-   (vdmpy t0 Rt)
-   (vdmpy-sw t0 Rt)
-   (vdmpy-acc t0 t1 Rt)
-   (vdmpy-sw-acc t0 t1 Rt)
-
-   (vtmpy t0 Rt)
-   (vtmpy-acc t0 t1 Rt)
-
-   (vrmpy t0 Rt4)
-   (vrmpy-acc t0 t1 Rt4)
-
-   (vrmpy-p t0 Rt4 (bool-const))
-   (vrmpy-p-acc t0 t1 Rt4 (bool-const))
-   )) ;; 42 seconds
-
-(define (??hvx-expr buffers)
-  (define r0 (gather buffers))
-  (define r1 (??hvx-instr (list r0)))
-  (define r2 (??hvx-instr (list r0 r1)))
-  ;(define r3 (??hvx-instr (list r0 r1 r2)))
-  ;(define r4 (??hvx-instr (list r0 r1 r2 r3)))
-  ;(define r5 (??hvx-instr (list r0 r1 r2 r3 r4)))
-  r2)
+     (vrmpy-p t0 Rt4 (bool-const))
+     (vrmpy-p-acc t0 t1 Rt4 (bool-const))))
+  ??hvx-conv-instr)
 
 (provide (all-defined-out))

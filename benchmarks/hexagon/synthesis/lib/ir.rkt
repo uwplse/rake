@@ -141,4 +141,4 @@
     [_ p]))
 
 (provide
- (except-out (all-defined-out) interpret) (rename-out [interpret interpret-ir]))
+ (except-out (all-defined-out) interpret set-curr-cn curr-cn) (rename-out [interpret interpret-ir] [set-curr-cn set-curr-cn-ir]))
