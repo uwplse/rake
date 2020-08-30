@@ -263,18 +263,15 @@
        [(list (i16x64x2 acc-v0 acc-v1) (u8x128 lhs) (int8_t v))
         (i16x64x2
          (lambda (i) (int16_t (bvadd (eval (acc-v0 i)) (eval (multiply (lhs (* i 2)) rhs 'int16)))))
-         (lambda (i) (int16_t (bvadd (eval (acc-v1 i)) (eval (multiply (lhs (+ (* i 2) 1)) rhs 'int16))))))]
-       
+         (lambda (i) (int16_t (bvadd (eval (acc-v1 i)) (eval (multiply (lhs (+ (* i 2) 1)) rhs 'int16))))))]       
        [(list (u16x64x2 acc-v0 acc-v1) (u8x128 lhs) (uint8_t v))
         (u16x64x2
          (lambda (i) (uint16_t (bvadd (eval (acc-v0 i)) (eval (multiply (lhs (* i 2)) rhs 'uint16)))))
-         (lambda (i) (uint16_t (bvadd (eval (acc-v1 i)) (eval (multiply (lhs (+ (* i 2) 1)) rhs 'uint16))))))]
-       
+         (lambda (i) (uint16_t (bvadd (eval (acc-v1 i)) (eval (multiply (lhs (+ (* i 2) 1)) rhs 'uint16))))))]       
        [(list (u32x32x2 acc-v0 acc-v1) (u16x64 lhs) (uint16_t v))
         (u32x32x2
          (lambda (i) (uint32_t (bvadd (eval (acc-v0 i)) (eval (multiply (lhs (* i 2)) rhs 'uint32)))))
-         (lambda (i) (uint32_t (bvadd (eval (acc-v1 i)) (eval (multiply (lhs (+ (* i 2) 1)) rhs 'int'uint3216))))))]
-       
+         (lambda (i) (uint32_t (bvadd (eval (acc-v1 i)) (eval (multiply (lhs (+ (* i 2) 1)) rhs 'int'uint3216))))))]       
        [(list (i32x32x2 acc-v0 acc-v1) (i16x64 lhs) (int16_t v))
         (i32x32x2
          (lambda (i) (int32_t (bvadd (eval (acc-v0 i)) (eval (multiply (lhs (* i 2)) rhs 'int32)))))
@@ -299,8 +296,7 @@
 
     ;; Sum to vector-scalar multiplies
     [(vmpa Vuu Rt)
-     (define rhs (interpret Rt))
-     (match (list (interpret Vuu) rhs)
+     (match (list (interpret Vuu) (interpret Rt))
        [(list (u8x128x2 data-v0 data-v1) (cons (int8_t w1) (int8_t w2)))
         (i16x64x2
          (lambda (i) (multiply-add (data-v0 (* i 2)) (int8_t w1) (data-v1 (* i 2)) (int8_t w2) 'int16))
@@ -320,176 +316,110 @@
 
     ;; Sum two vector-scalar multiplies, accumulate into output register
     [(vmpa-acc Vdd Vuu Rt)
-     (define rhs (interpret Rt))
-     (match (list (interpret Vdd) (interpret Vuu) rhs)
+     (match (list (interpret Vdd) (interpret Vuu) (interpret Rt))
        [(list (i16x64x2 acc-v0 acc-v1) (u8x128x2 data-v0 data-v1) (cons (int8_t w1) (int8_t w2)))
         (i16x64x2
          (lambda (i) (multiply-add-acc (data-v0 (* i 2)) (int8_t w1) (data-v1 (* i 2)) (int8_t w2) (acc-v0 i) 'int16))
-         (lambda (i) (multiply-add-acc (data-v0 (+ (* i 2) 1)) (int8_t w1) (data-v1 (* i 2)) (int8_t w2) (acc-v1 i) 'int16)))]
+         (lambda (i) (multiply-add-acc (data-v0 (+ (* i 2) 1)) (int8_t w1) (data-v1 (+ (* i 2) 1)) (int8_t w2) (acc-v1 i) 'int16)))]
        [(list (i16x64x2 acc-v0 acc-v1) (u8x128x2 data-v0 data-v1) (cons (uint8_t w1) (uint8_t w2)))
         (i16x64x2
          (lambda (i) (multiply-add-acc (data-v0 (* i 2)) (uint8_t w1) (data-v1 (* i 2)) (uint8_t w2) (acc-v0 i) 'int16))
-         (lambda (i) (multiply-add-acc (data-v0 (+ (* i 2) 1)) (uint8_t w1) (data-v1 (* i 2)) (uint8_t w2) (acc-v1 i) 'int16)))]
+         (lambda (i) (multiply-add-acc (data-v0 (+ (* i 2) 1)) (uint8_t w1) (data-v1 (+ (* i 2) 1)) (uint8_t w2) (acc-v1 i) 'int16)))]
        [(list (i32x32x2 acc-v0 acc-v1) (u16x64x2 data-v0 data-v1) (cons (int8_t w1) (int8_t w2)))
         (i32x32x2
          (lambda (i) (multiply-add-acc (data-v0 (* i 2)) (int8_t w1) (data-v1 (* i 2)) (int8_t w2) (acc-v0 i) 'int32))
-         (lambda (i) (multiply-add-acc (data-v0 (+ (* i 2) 1)) (int8_t w1) (data-v1 (* i 2)) (int8_t w2) (acc-v1 i) 'int32)))]
+         (lambda (i) (multiply-add-acc (data-v0 (+ (* i 2) 1)) (int8_t w1) (data-v1 (+ (* i 2) 1)) (int8_t w2) (acc-v1 i) 'int32)))]
        [(list (i32x32x2 acc-v0 acc-v1) (i16x64x2 data-v0 data-v1) (cons (int8_t w1) (int8_t w2)))
         (i32x32x2
          (lambda (i) (multiply-add-acc (data-v0 (* i 2)) (int8_t w1) (data-v1 (* i 2)) (int8_t w2) (acc-v0 i) 'int32))
-         (lambda (i) (multiply-add-acc (data-v0 (+ (* i 2) 1)) (int8_t w1) (data-v1 (* i 2)) (int8_t w2) (acc-v1 i) 'int32)))])]
+         (lambda (i) (multiply-add-acc (data-v0 (+ (* i 2) 1)) (int8_t w1) (data-v1 (+ (* i 2) 1)) (int8_t w2) (acc-v1 i) 'int32)))])]
 
     ;; Reduce (via sum) two vector-scalar multiplies. Unlike vmpa, this is reduction within the vector.
     ;; Saturates output for some input types
     [(vdmpy Vu Rt)
-     (define rhs (interpret Rt))
-     (match (list (interpret Vu) Rt)
+     (match (list (interpret Vu) (interpret Rt))
+       [(list (u8x128 data) (cons (int8_t w1) (int8_t w2))) (i16x64 (lambda (i) (multiply-add (data (* i 2)) (int8_t w1) (data (+ (* i 2) 1)) (int8_t w2) 'int16)))]
+       [(list (i16x64 data) (cons (int8_t w1) (int8_t w2))) (i32x32 (lambda (i) (multiply-add (data (* i 2)) (int8_t w1) (data (+ (* i 2) 1)) (int8_t w2) 'int32)))]
+       [(list (i16x64 data) (cons (int16_t w1) (int16_t w2))) (i32x32 (lambda (i) (sat32 (multiply-add (data (* i 2)) (int16_t w1) (data (+ (* i 2) 1)) (int16_t w2) 'int64))))]
+       [(list (i16x64 data) (cons (uint16_t w1) (uint16_t w2))) (i32x32 (lambda (i) (sat32 (multiply-add (data (* i 2)) (uint16_t w1) (data (+ (* i 2) 1)) (uint16_t w2) 'int64))))]
        [(list (i16x64x2 data-v0 data-v1) (cons (int16_t w1) (int16_t w2))) (i32x32 (lambda (i) (sat32 (multiply-add (data-v0 (+ (* i 2) 1)) (int16_t w1) (data-v1 (* i 2)) (int16_t w2) 'int64))))]
-       [(list (i16x64x2 data-v0 data-v1) (cons (uint16_t w1) (uint16_t w2))) (i32x32 (lambda (i) (sat32 (multiply-add (data-v0 (+ (* i 2) 1)) (int16_t w1) (data-v1 (* i 2)) (int16_t w2) 'int64))))]
-       
-       (lambda (i)
-           (define x1 ((interpret Vu) (* i 2)))
-           (define x2 ((interpret Vu) (+ (* i 2) 1)))
-           (define w1 (car (interpret Rt)))
-           (define w2 (cdr (interpret Rt)))
-           (cond
-             [(and (uint8_t? x1) (int8_t? w1)) (multiply-add x1 w1 x2 w2 'int16)]
-             [(and (int16_t? x1) (int8_t? w1)) (multiply-add x1 w1 x2 w2 'int32)]
-             [(and (int16_t? x1) (int16_t? w1)) (sat32 (multiply-add x1 w1 x2 w2 'int64))]
-             [(and (int16_t? x1) (uint16_t? w1)) (sat32 (multiply-add x1 w1 x2 w2 'int64))])))]
+       [(list (i16x64x2 data-v0 data-v1) (cons (uint16_t w1) (uint16_t w2))) (i32x32 (lambda (i) (sat32 (multiply-add (data-v0 (+ (* i 2) 1)) (int16_t w1) (data-v1 (* i 2)) (int16_t w2) 'int64))))])]
 
     ;; Reduce (via sum) two vector-scalar multiplies in a sliding window
     [(vdmpy-sw Vuu Rt)
-     (cons
-      (lambda (i)
-        (define x1 ((car (interpret Vuu)) (* i 2)))
-        (define x2 ((car (interpret Vuu)) (+ (* i 2) 1)))
-        (define w1 (car (interpret Rt)))
-        (define w2 (cdr (interpret Rt)))
-        (cond
-          [(and (uint8_t? x1) (int8_t? w1)) (multiply-add x1 w1 x2 w2 'int16)]
-          [(and (int16_t? x1) (int8_t? w1)) (multiply-add x1 w1 x2 w2 'int32)]))
-      (lambda (i)
-        (define x1 ((car (interpret Vuu)) (+ (* i 2) 1)))
-        (define x2 ((cdr (interpret Vuu)) (* i 2)))
-        (define w1 (car (interpret Rt)))
-        (define w2 (cdr (interpret Rt)))
-        (cond
-          [(and (uint8_t? x1) (int8_t? w1)) (multiply-add x1 w1 x2 w2 'int16)]
-          [(and (int16_t? x1) (int8_t? w1)) (multiply-add x1 w1 x2 w2 'int32)])))]
+     (match (list (interpret Vuu) (interpret Rt))
+       [(list (u8x128x2 data-v0 data-v1) (cons (int8_t w1) (int8_t w2)))
+        (i16x64x2
+         (lambda (i) (multiply-add (data-v0 (* i 2)) (int8_t w1) (data-v0 (+ (* i 2) 1)) (int8_t w2) 'int16))
+         (lambda (i) (multiply-add (data-v0 (+ (* i 2) 1)) (int8_t w1) (data-v1 (* i 2)) (int8_t w2) 'int16)))]
+       [(list (i16x64x2 data-v0 data-v1) (cons (int8_t w1) (int8_t w2)))
+        (i32x32x2
+         (lambda (i) (multiply-add (data-v0 (* i 2)) (int8_t w1) (data-v0 (+ (* i 2) 1)) (int8_t w2) 'int32))
+         (lambda (i) (multiply-add (data-v0 (+ (* i 2) 1)) (int8_t w1) (data-v1 (* i 2)) (int8_t w2) 'int32)))])]
 
     ;; Reduce (via sum) two vector-scalar multiplies with accumulation.
     [(vdmpy-acc Vd Vu Rt)
-     (if (pair? (interpret Vu))
-         (lambda (i)
-           (define acc ((interpret Vd) i))
-           (define x1 ((car (interpret Vu)) (+ (* i 2) 1)))
-           (define x2 ((cdr (interpret Vu)) (* i 2)))
-           (define w1 (car (interpret Rt)))
-           (define w2 (cdr (interpret Rt)))
-           (cond
-             [(and (int16_t? x1) (int16_t? w1)) (sat32 (multiply-add-acc x1 w1 x2 w2 acc 'int64))]
-             [(and (int16_t? x1) (uint16_t? w1)) (sat32 (multiply-add-acc x1 w1 x2 w2 acc 'int64))]))
-         (lambda (i)
-           (define acc ((interpret Vd) i))
-           (define x1 ((interpret Vu) (* i 2)))
-           (define x2 ((interpret Vu) (+ (* i 2) 1)))
-           (define w1 (car (interpret Rt)))
-           (define w2 (cdr (interpret Rt)))
-           (cond
-             [(and (uint8_t? x1) (int8_t? w1)) (multiply-add-acc x1 w1 x2 w2 acc 'int16)]
-             [(and (int16_t? x1) (int8_t? w1)) (multiply-add-acc x1 w1 x2 w2 acc 'int32)]
-             [(and (int16_t? x1) (int16_t? w1)) (sat32 (multiply-add-acc x1 w1 x2 w2 acc 'int64))]
-             [(and (int16_t? x1) (uint16_t? w1)) (sat32 (multiply-add-acc x1 w1 x2 w2 acc 'int64))])))]
+     (match (list (interpret Vd) (interpret Vu) (interpret Rt))
+       [(list (i16x64 acc) (u8x128 data) (cons (int8_t w1) (int8_t w2))) (i16x64 (lambda (i) (multiply-add-acc (data (* i 2)) (int8_t w1) (data (+ (* i 2) 1)) (int8_t w2) (acc i) 'int16)))]
+       [(list (i32x32 acc) (i16x64 data) (cons (int8_t w1) (int8_t w2))) (i32x32 (lambda (i) (multiply-add-acc (data (* i 2)) (int8_t w1) (data (+ (* i 2) 1)) (int8_t w2) (acc i) 'int32)))]
+       [(list (i32x32 acc) (i16x64 data) (cons (int16_t w1) (int16_t w2))) (i32x32 (lambda (i) (sat32 (multiply-add-acc (data (* i 2)) (int16_t w1) (data (+ (* i 2) 1)) (int16_t w2) (acc i) 'int64))))]
+       [(list (i32x32 acc) (i16x64 data) (cons (uint16_t w1) (uint16_t w2))) (i32x32 (lambda (i) (sat32 (multiply-add-acc (data (* i 2)) (uint16_t w1) (data (+ (* i 2) 1)) (uint16_t w2) (acc i) 'int64))))]
+       [(list (i32x32 acc) (i16x64x2 data-v0 data-v1) (cons (int16_t w1) (int16_t w2))) (i32x32 (lambda (i) (sat32 (multiply-add-acc (data-v0 (+ (* i 2) 1)) (int16_t w1) (data-v1 (* i 2)) (int16_t w2) (acc i) 'int64))))]
+       [(list (i32x32 acc) (i16x64x2 data-v0 data-v1) (cons (uint16_t w1) (uint16_t w2))) (i32x32 (lambda (i) (sat32 (multiply-add-acc (data-v0 (+ (* i 2) 1)) (int16_t w1) (data-v1 (* i 2)) (int16_t w2) (acc i) 'int64))))])]
 
     ;; Reduce (via sum) two vector-scalar multiplies in a sliding window with accumulate
     [(vdmpy-sw-acc Vdd Vuu Rt)
-     (cons
-      (lambda (i)
-        (define acc ((car (interpret Vdd)) i))
-        (define x1 ((car (interpret Vuu)) (* i 2)))
-        (define x2 ((car (interpret Vuu)) (+ (* i 2) 1)))
-        (define w1 (car (interpret Rt)))
-        (define w2 (cdr (interpret Rt)))
-        (cond
-          [(and (uint8_t? x1) (int8_t? w1)) (multiply-add-acc x1 w1 x2 w2 acc 'int16)]
-          [(and (int16_t? x1) (int8_t? w1)) (multiply-add-acc x1 w1 x2 w2 acc 'int32)]))
-      (lambda (i)
-        (define acc ((cdr (interpret Vdd)) i))
-        (define x1 ((car (interpret Vuu)) (+ (* i 2) 1)))
-        (define x2 ((cdr (interpret Vuu)) (* i 2)))
-        (define w1 (car (interpret Rt)))
-        (define w2 (cdr (interpret Rt)))
-        (cond
-          [(and (uint8_t? x1) (int8_t? w1)) (multiply-add-acc x1 w1 x2 w2 acc 'int16)]
-          [(and (int16_t? x1) (int8_t? w1)) (multiply-add-acc x1 w1 x2 w2 acc 'int32)])))]
+     (match (list (interpret Vdd) (interpret Vuu) (interpret Rt))
+       [(list (i16x64x2 acc-v0 acc-v1) (u8x128x2 data-v0 data-v1) (cons (int8_t w1) (int8_t w2)))
+        (i16x64x2
+         (lambda (i) (multiply-add-acc (data-v0 (* i 2)) (int8_t w1) (data-v0 (+ (* i 2) 1)) (int8_t w2) (acc-v0 i) 'int16))
+         (lambda (i) (multiply-add-acc (data-v0 (+ (* i 2) 1)) (int8_t w1) (data-v1 (* i 2)) (int8_t w2) (acc-v1 i) 'int16)))]
+       [(list (i32x32x2 acc-v0 acc-v1) (i16x64x2 data-v0 data-v1) (cons (int8_t w1) (int8_t w2)))
+        (i32x32x2
+         (lambda (i) (multiply-add-acc (data-v0 (* i 2)) (int8_t w1) (data-v0 (+ (* i 2) 1)) (int8_t w2) (acc-v0 i) 'int32))
+         (lambda (i) (multiply-add-acc (data-v0 (+ (* i 2) 1)) (int8_t w1) (data-v1 (* i 2)) (int8_t w2) (acc-v1 i) 'int32)))])]
 
     ;; Reduce (via sum) two vector-scalar multiplies in a sliding window with an additional accumulate
     [(vtmpy Vuu Rt)
-     (cons
-      (lambda (i)
-        (define x1 ((car (interpret Vuu)) (* i 2)))
-        (define x2 ((car (interpret Vuu)) (+ (* i 2) 1)))
-        (define x3 ((cdr (interpret Vuu)) (* i 2)))
-        (define w1 (car (interpret Rt)))
-        (define w2 (cdr (interpret Rt)))
-        (cond
-          [(and (int8_t? x1) (int8_t? w1)) (multiply-add-acc x1 w1 x2 w2 x3 'int16)]
-          [(and (uint8_t? x1) (int8_t? w1)) (multiply-add-acc x1 w1 x2 w2 x3 'int16)]
-          [(and (int16_t? x1) (int8_t? w1)) (multiply-add-acc x1 w1 x2 w2 x3 'int32)]))
-      (lambda (i)
-        (define x1 ((car (interpret Vuu)) (+ (* i 2) 1)))
-        (define x2 ((cdr (interpret Vuu)) (* i 2)))
-        (define x3 ((cdr (interpret Vuu)) (+ (* i 2) 1)))
-        (define w1 (car (interpret Rt)))
-        (define w2 (cdr (interpret Rt)))
-        (cond
-          [(and (int8_t? x1) (int8_t? w1)) (multiply-add-acc x1 w1 x2 w2 x3 'int16)]
-          [(and (uint8_t? x1) (int8_t? w1)) (multiply-add-acc x1 w1 x2 w2 x3 'int16)]
-          [(and (int16_t? x1) (int8_t? w1)) (multiply-add-acc x1 w1 x2 w2 x3 'int32)])))]
+     (match (list (interpret Vuu) (interpret Rt))
+       [(list (i8x128x2 data-v0 data-v1) (cons (int8_t w1) (int8_t w2)))
+        (i16x64x2
+         (lambda (i) (multiply-add-acc (data-v0 (* i 2)) (int8_t w1) (data-v0 (+ (* i 2) 1)) (int8_t w2) (data-v1 (* i 2)) 'int16))
+         (lambda (i) (multiply-add-acc (data-v0 (+ (* i 2) 1)) (int8_t w1) (data-v1 (* i 2)) (int8_t w2) (data-v1 (+ (* i 2) 1)) 'int16)))]
+       [(list (u8x128x2 data-v0 data-v1) (cons (int8_t w1) (int8_t w2)))
+        (i16x64x2
+         (lambda (i) (multiply-add-acc (data-v0 (* i 2)) (int8_t w1) (data-v0 (+ (* i 2) 1)) (int8_t w2) (data-v1 (* i 2)) 'int16))
+         (lambda (i) (multiply-add-acc (data-v0 (+ (* i 2) 1)) (int8_t w1) (data-v1 (* i 2)) (int8_t w2) (data-v1 (+ (* i 2) 1)) 'int16)))]
+       [(list (i16x64x2 data-v0 data-v1) (cons (int8_t w1) (int8_t w2)))
+        (i32x32x2
+         (lambda (i) (multiply-add-acc (data-v0 (* i 2)) (int8_t w1) (data-v0 (+ (* i 2) 1)) (int8_t w2) (data-v1 (* i 2)) 'int32))
+         (lambda (i) (multiply-add-acc (data-v0 (+ (* i 2) 1)) (int8_t w1) (data-v1 (* i 2)) (int8_t w2) (data-v1 (+ (* i 2) 1)) 'int32)))])]
 
     ;; Reduce (via sum) two vector-scalar multiplies in a sliding window with an additional accumulate.
     ;; Also accumulate the output into the target register
     [(vtmpy-acc Vdd Vuu Rt)
-     (cons
-      (lambda (i)
-        (define acc ((car (interpret Vdd)) i))
-        (define x1 ((car (interpret Vuu)) (* i 2)))
-        (define x2 ((car (interpret Vuu)) (+ (* i 2) 1)))
-        (define x3 ((cdr (interpret Vuu)) (* i 2)))
-        (define w1 (car (interpret Rt)))
-        (define w2 (cdr (interpret Rt)))
-        (cond
-          [(and (int8_t? x1) (int8_t? w1)) (int16_t (bvadd (eval acc) (eval (multiply-add-acc x1 w1 x2 w2 x3 'int16))))]
-          [(and (uint8_t? x1) (int8_t? w1)) (int16_t (bvadd (eval acc) (eval (multiply-add-acc x1 w1 x2 w2 x3 'int16))))]
-          [(and (int16_t? x1) (int8_t? w1)) (int32_t (bvadd (eval acc) (eval (multiply-add-acc x1 w1 x2 w2 x3 'int32))))]))
-      (lambda (i)
-        (define acc ((cdr (interpret Vdd)) i))
-        (define x1 ((car (interpret Vuu)) (+ (* i 2) 1)))
-        (define x2 ((cdr (interpret Vuu)) (* i 2)))
-        (define x3 ((cdr (interpret Vuu)) (+ (* i 2) 1)))
-        (define w1 (car (interpret Rt)))
-        (define w2 (cdr (interpret Rt)))
-        (cond
-          [(and (int8_t? x1) (int8_t? w1)) (int16_t (bvadd (eval acc) (eval (eval (multiply-add-acc x1 w1 x2 w2 x3 'int16)))))]
-          [(and (uint8_t? x1) (int8_t? w1)) (int16_t (bvadd (eval acc) (eval (multiply-add-acc x1 w1 x2 w2 x3 'int16))))]
-          [(and (int16_t? x1) (int8_t? w1)) (int32_t (bvadd (eval acc) (eval (multiply-add-acc x1 w1 x2 w2 x3 'int32))))])))]
-
+     (match (list (interpret Vdd) (interpret Vuu) (interpret Rt))
+       [(list (i16x64x2 acc-v0 acc-v1) (i8x128x2 data-v0 data-v1) (cons (int8_t w1) (int8_t w2)))
+        (i16x64x2
+         (lambda (i) (int16_t (bvadd (eval (acc-v0 i)) (eval (multiply-add-acc (data-v0 (* i 2)) (int8_t w1) (data-v0 (+ (* i 2) 1)) (int8_t w2) (data-v1 (* i 2)) 'int16)))))
+         (lambda (i) (int16_t (bvadd (eval (acc-v1 i)) (eval (multiply-add-acc (data-v0 (+ (* i 2) 1)) (int8_t w1) (data-v1 (* i 2)) (int8_t w2) (data-v1 (+ (* i 2) 1)) 'int16))))))]
+       [(list (i16x64x2 acc-v0 acc-v1) (u8x128x2 data-v0 data-v1) (cons (int8_t w1) (int8_t w2)))
+        (i16x64x2
+         (lambda (i) (int16_t (bvadd (eval (acc-v0 i)) (eval (multiply-add-acc (data-v0 (* i 2)) (int8_t w1) (data-v0 (+ (* i 2) 1)) (int8_t w2) (data-v1 (* i 2)) 'int16)))))
+         (lambda (i) (int16_t (bvadd (eval (acc-v1 i)) (eval (multiply-add-acc (data-v0 (+ (* i 2) 1)) (int8_t w1) (data-v1 (* i 2)) (int8_t w2) (data-v1 (+ (* i 2) 1)) 'int16))))))]
+       [(list (i32x32x2 acc-v0 acc-v1) (i16x64x2 data-v0 data-v1) (cons (int8_t w1) (int8_t w2)))
+        (i32x32x2
+         (lambda (i) (int32_t (bvadd (eval (acc-v0 i)) (eval (multiply-add-acc (data-v0 (* i 2)) (int8_t w1) (data-v0 (+ (* i 2) 1)) (int8_t w2) (data-v1 (* i 2)) 'int32)))))
+         (lambda (i) (int32_t (bvadd (eval (acc-v1 i)) (eval (multiply-add-acc (data-v0 (+ (* i 2) 1)) (int8_t w1) (data-v1 (* i 2)) (int8_t w2) (data-v1 (+ (* i 2) 1)) 'int32))))))])]
+    
     ;; Vector-scalar multiply with 4-wide within-vector reduction
     [(vrmpy Vu Rt)
-     (lambda (i)
-       (define x1 ((interpret Vu) (* i 4)))
-       (define x2 ((interpret Vu) (+ (* i 4) 1)))
-       (define x3 ((interpret Vu) (+ (* i 4) 2)))
-       (define x4 ((interpret Vu) (+ (* i 4) 3)))
-       (define w1 (list-ref (interpret Rt) 0))
-       (define w2 (list-ref (interpret Rt) 1))
-       (define w3 (list-ref (interpret Rt) 2))
-       (define w4 (list-ref (interpret Rt) 3))
-       (cond
-         [(and (uint8_t? x1) (uint8_t? w1)) (dot-prod4 x1 x2 x3 x4 w1 w2 w3 w4 'uint32)]
-         [(and (uint8_t? x1) (int8_t? w1)) (dot-prod4 x1 x2 x3 x4 w1 w2 w3 w4 'int32)]))]
-
+     (match (list (interpret Vu) (interpret Rt))
+       [(list (u8x128 data) (list (uint8_t w1) (uint8_t w2) (uint8_t w3) (uint8_t w4)))
+        (u32x32 (lambda (i) (dot-prod4 (data (* i 4)) (data (+ (* i 4) 1)) (data (+ (* i 4) 2)) (data (+ (* i 4) 3)) (uint8_t w1) (uint8_t w2) (uint8_t w3) (uint8_t w4) 'uint32)))]
+       [(and (uint8_t? x1) (int8_t? w1))
+        (i32x32 (lambda (i) (dot-prod4 (data (* i 4)) (data (+ (* i 4) 1)) (data (+ (* i 4) 2)) (data (+ (* i 4) 3)) (uint8_t w1) (uint8_t w2) (uint8_t w3) (uint8_t w4) 'int32)))])]
+    
     ;; Vector-scalar multiply with 4-wide within-vector reduction with accumulation
     [(vrmpy-acc Vd Vu Rt)
      (lambda (i)
