@@ -417,8 +417,8 @@
      (match (list (interpret Vu) (interpret Rt))
        [(list (u8x128 data) (list (uint8_t w1) (uint8_t w2) (uint8_t w3) (uint8_t w4)))
         (u32x32 (lambda (i) (dot-prod4 (data (* i 4)) (data (+ (* i 4) 1)) (data (+ (* i 4) 2)) (data (+ (* i 4) 3)) (uint8_t w1) (uint8_t w2) (uint8_t w3) (uint8_t w4) 'uint32)))]
-       [(and (uint8_t? x1) (int8_t? w1))
-        (i32x32 (lambda (i) (dot-prod4 (data (* i 4)) (data (+ (* i 4) 1)) (data (+ (* i 4) 2)) (data (+ (* i 4) 3)) (uint8_t w1) (uint8_t w2) (uint8_t w3) (uint8_t w4) 'int32)))])]
+       [(list (u8x128 data) (list (int8_t w1) (int8_t w2) (int8_t w3) (int8_t w4)))
+        (i32x32 (lambda (i) (dot-prod4 (data (* i 4)) (data (+ (* i 4) 1)) (data (+ (* i 4) 2)) (data (+ (* i 4) 3)) (int8_t w1) (int8_t w2) (int8_t w3) (int8_t w4) 'int32)))])]
     
     ;; Vector-scalar multiply with 4-wide within-vector reduction with accumulation
     [(vrmpy-acc Vd Vu Rt)
