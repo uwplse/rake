@@ -82,13 +82,6 @@
 (define live-ops (list->set (extract-live-ops original-expr)))
 
 ;; Verification conditions
-(define (bounded-eq? oe se lanes)
-  (for ([i lanes])
-    (set-curr-cn-ir i)
-    (assert (eq? (oe i) (se i)))
-    (set-curr-cn-ir (+ i 65))
-    (assert (eq? (oe (+ i 65)) (se (+ i 65))))))
-
 (define (lane-eq? oe se lane)
   (assert (eq? (oe lane) (se lane))))
 
@@ -111,6 +104,14 @@
         ;((interpret-halide original-expr) 65)
         ;((interpret-ir synthesized-expr) 65)
 
+        ;; Verification conditions
+        (define (bounded-eq? oe se lanes)
+          (for ([i lanes])
+            (set-curr-cn-ir i)
+            (assert (eq? (oe i) (elem-ir se i)))
+            (set-curr-cn-ir (+ i 65))
+            (assert (eq? (oe (+ i 65)) (elem-ir se (+ i 65))))))
+        
         (display "Searching...\n")
         (display "============\n")
 
@@ -141,40 +142,37 @@
 (define ir-expr-sol (cdr stage1_res))
 
 ;; Define modular synthesis loop for HVX expression generation
-(define (synthesize-equiv-hvx ir-expr hvx-sub-expr)
+(define (synthesize-equiv-hvx ir-expr hvx-sub-expr num-req-elems)
   (if (not (instr-limit-exceeded?))
       (begin
         (display "Generating HVX Grammar...\n")
-        (display "========================\n")
+        (display "=========================\n")
         (debug (format "Number of instructions: ~a\n" (instr-bnd)))
         (debug (format "Set of instructions: Specialized\n\n"))
 
-        ;(evaluate ((interpret-ir (evaluate synthesized-conv sol)) 0) sol)
-
         (define (bounded-eq2? oe se lanes)
           (for ([i lanes])
-            (set-curr-cn-ir i)
-            (set-curr-cn-hvx i)
-            (assert (eq? (evaluate (oe i) ir-expr-sol) (se i)))
-            (set-curr-cn-ir (+ i 65))
-            (set-curr-cn-hvx (+ i 65))
-            (assert (eq? (evaluate (oe (+ i 65)) ir-expr-sol) (se (+ i 65))))
-            ))
+            (cond
+              [(hvx-pair? se)
+               (set-curr-cn-ir i)
+               (set-curr-cn-hvx i)
+               (assert (eq? (evaluate (elem-ir oe i) ir-expr-sol) (v0-elem se i)))
+               (set-curr-cn-ir (+ i 65))
+               (set-curr-cn-hvx (+ i 65))
+               (assert (eq? (evaluate (elem-ir oe (+ i 65)) ir-expr-sol) (v1-elem se (+ i 1))))]
+              [else
+               (set-curr-cn-ir i)
+               (set-curr-cn-hvx i)
+               (assert (eq? (evaluate (elem-ir oe i) ir-expr-sol) (elem-hvx se i)))
+               (set-curr-cn-ir (+ i 65))
+               (set-curr-cn-hvx (+ i 65))
+               (assert (eq? (evaluate (elem-ir oe (+ i 65)) ir-expr-sol) (elem-hvx se (+ i 65))))])))
 
         (define ??hvx-expr (generate-hvx-grammar ir-expr hvx-sub-expr))
 
-        ;(define synthesized-hvx-expr (??hvx-expr))
-        ;(define synthesized-hvx-expr (vmpyi-acc (vadd hvx-sub-expr hvx-sub-expr #f) hvx-sub-expr (int8_t (bv 2 8))))
-        (define synthesized-hvx-expr (vadd hvx-sub-expr hvx-sub-expr #f))
-
-        (set-curr-cn-ir 0)
-        (println (evaluate ((interpret-ir ir-expr) 0) ir-expr-sol))
-        (set-curr-cn-hvx 0)
-        (println ((interpret-hvx synthesized-hvx-expr) 0))
-        (set-curr-cn-ir 65)
-        (println (evaluate ((interpret-ir ir-expr) 65) ir-expr-sol))
-        (set-curr-cn-hvx 65)
-        (println ((interpret-hvx synthesized-hvx-expr) 65))
+        (define synthesized-hvx-expr (??hvx-expr))
+        ;(define synthesized-hvx-expr (vcombine (vmpyi-acc (vadd (gather buff-reads)  (gather buff-reads) #f)  (gather buff-reads) (int8_t (bv 2 8))) (vmpyi-acc (vadd (gather buff-reads)  (gather buff-reads) #f)  (gather buff-reads) (int8_t (bv 2 8)))))
+        ;(define synthesized-hvx-expr (if (arith-shift-right? ir-expr) (vasr-rnd-sat hvx-sub-expr hvx-sub-expr (int8_t (bv 4 8)) #t #t #t) (??hvx-expr)))
 
         (define st (current-seconds))
         (define sol (synthesize #:forall (list rows output.s0.x.x c1)
@@ -185,7 +183,7 @@
             (begin
               (display "Failed to find an equivalent HVX expression.\n\n")
               (increment-instr-bnd)
-              (synthesize-equiv-hvx ir-expr hvx-sub-expr))
+              (synthesize-equiv-hvx ir-expr hvx-sub-expr num-req-elems))
             (begin
               (display "Successfully found an equivalent HVX expression:-\n")
               (debug (evaluate synthesized-hvx-expr sol))
@@ -195,27 +193,32 @@
         (display "Maximum instruction bound reached. Giving up.\n\n")
         (void))))
 
-(define (compile-to-hvx ir-expr)
+(define (compile-to-hvx ir-expr num-req-elems)
   (match ir-expr
     [(arith-shift-right sub-expr n round? outputType)
      (begin
-       (define data (compile-to-hvx sub-expr))
-       (arith-shift-right data n round? outputType))]
-
-    [(convolve sub-expr weights saturateFunc outputType)
-     (begin
+       (define hvx-sub-expr (compile-to-hvx sub-expr num-req-elems))
        (display "Lifting IR to HVX...\n")
        (display "====================\n")
        (display (format "IR Operation: ~a\n\n" ir-expr))
-       (synthesize-equiv-hvx ir-expr (compile-to-hvx sub-expr)))]
+       (reset-instr-bnd)
+       (synthesize-equiv-hvx ir-expr hvx-sub-expr num-req-elems))]
+
+    [(convolve sub-expr weights saturateFunc outputType)
+     (begin
+       (define hvx-sub-expr (compile-to-hvx sub-expr num-req-elems))
+       (display "Lifting IR to HVX...\n")
+       (display "====================\n")
+       (display (format "IR Operation: ~a\n\n" ir-expr))
+       (reset-instr-bnd)
+       (synthesize-equiv-hvx ir-expr hvx-sub-expr num-req-elems))]
 
     [(load-data opts) (gather opts)]
 
-    [_ (println "bund marao bc")]))
+    [_ (println "NYI")]))
 
 ;; Synthesize equivalent HVX expression for each Op in the IR
-(reset-instr-bnd)
-(define hvx-expr (compile-to-hvx ir-expr))
+(define hvx-expr (compile-to-hvx ir-expr (vec-len original-expr)))
 ;hvx-expr
 
 ;(set-curr-cn 0)

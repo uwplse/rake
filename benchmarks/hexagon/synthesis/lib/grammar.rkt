@@ -39,19 +39,21 @@
 (define (get-generator-func opts) (when (not (empty? opts)) (lambda() (apply choose* opts))))
 
 (define (filter-conv-output-types t0)
+  (define vec (vector-data (interpret-ir t0)))
   (cond
-    [(int8_t? ((interpret-ir t0) 0)) (choose* 'int8 'int16)]
-    [(int16_t? ((interpret-ir t0) 0)) (choose* 'int16 'int32)]
-    [(int32_t? ((interpret-ir t0) 0)) (choose* 'int32)]
-    [(uint8_t? ((interpret-ir t0) 0)) (choose* 'uint8 'uint16)]
-    [(uint16_t? ((interpret-ir t0) 0)) (choose* 'uint16 'uint32)]
-    [(uint32_t? ((interpret-ir t0) 0)) (choose* 'uint32)]
+    [(int8_t? (vec 0)) (choose* 'int8 'int16)]
+    [(int16_t? (vec 0)) (choose* 'int16 'int32)]
+    [(int32_t? (vec 0)) (choose* 'int32)]
+    [(uint8_t? (vec 0)) (choose* 'uint8 'uint16)]
+    [(uint16_t? (vec 0)) (choose* 'uint16 'uint32)]
+    [(uint32_t? (vec 0)) (choose* 'uint32)]
     [else (choose* 'int8 'int16 'int32 'uint8 'uint16 'uint32)]))
 
 (define (filter-asr-output-types t0)
+  (define vec (vector-data (interpret-ir t0)))
   (cond
-    [(int16_t? ((interpret-ir t0) 0)) (choose* 'int16 'int8 'uint8)]
-    [(int32_t? ((interpret-ir t0) 0)) (choose* 'uint16 'int16 'int32)]
+    [(int16_t? (vec 0)) (choose* 'int16 'int8 'uint8)]
+    [(int32_t? (vec 0)) (choose* 'uint16 'int16 'int32)]
     [else 'int8]))
 
 (define (get-ir-ops t0 live-ops int-weights-gen int-divisor-gen int-shiftr-gen)
@@ -96,8 +98,9 @@
 
 (define (generate-hvx-grammar ir-expr sub-expr)
   (define ??hvx-instr (match ir-expr
-                        [(convolve sub-expr weights saturateFunc outputType) (get-hvx-conv-isa weights)]
-                        [_ (begin (println "gand marao bc") (exit))]))
+                        [(convolve data weights saturateFunc outputType) (get-hvx-conv-isa weights)]
+                        [(arith-shift-right data n round? outputType) (get-hvx-asr-isa n round? outputType)]
+                        [_ (begin (println "NYI") (exit))]))
   (define (??ir-expr)
     (define r0 sub-expr)
     (define r1 (??hvx-instr (list r0)))
@@ -106,6 +109,7 @@
     (cond
       [(eq? curr-instr-bnd 1) r1]
       [(eq? curr-instr-bnd 2) r2]
+      [(eq? curr-instr-bnd 3) r3]
       [else r3]))
   ??ir-expr)
 
@@ -157,6 +161,18 @@
 
      (vrmpy-p t0 Rt4 (bool-const))
      (vrmpy-p-acc t0 t1 Rt4 (bool-const))))
+  ??hvx-conv-instr)
+
+;; HVX instructions for arithmetic shift right
+(define (get-hvx-asr-isa n round? outputType)
+  (define signed? (unsignedT? outputType))
+  (define i8_n (cpp_cast n 'int8))
+  (define (??hvx-conv-instr registers)
+    (define t0 (apply choose* registers))
+    (define t1 (apply choose* registers))
+    (choose*
+     (vasr-n t0 t1 i8_n round? (bool-const) signed?)
+     ))
   ??hvx-conv-instr)
 
 (provide (all-defined-out))
