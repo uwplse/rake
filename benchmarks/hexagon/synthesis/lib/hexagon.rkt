@@ -121,13 +121,9 @@
 
 (struct vlsr (Vu Rt) #:transparent)
 (struct vasr (Vu Rt) #:transparent)
+(struct vasr-acc (Vd Vu Rt) #:transparent)
 
-;; Temp
-;(struct vdmpy (Vuu Rtb0 Rtb1) #:transparent)
-;(struct vdmpy-acc (Vdd Vuu Rtb0 Rtb1) #:transparent)
-;(struct vtmpy (Vuu Rtb0 Rtb1) #:transparent)
-(struct vasr-rnd-sat (Vu Vv Rt) #:transparent)
-;(struct vpackhi (v) #:transparent)
+(struct vasr-n (Vu Vv Rt round? sat? unsigned?) #:transparent)
 
 (define (interpret p)
   (match p
@@ -422,74 +418,76 @@
     
     ;; Vector-scalar multiply with 4-wide within-vector reduction with accumulation
     [(vrmpy-acc Vd Vu Rt)
-     (lambda (i)
-       (define acc ((interpret Vd) i))
-       (define x1 ((interpret Vu) (* i 4)))
-       (define x2 ((interpret Vu) (+ (* i 4) 1)))
-       (define x3 ((interpret Vu) (+ (* i 4) 2)))
-       (define x4 ((interpret Vu) (+ (* i 4) 3)))
-       (define w1 (list-ref (interpret Rt) 0))
-       (define w2 (list-ref (interpret Rt) 1))
-       (define w3 (list-ref (interpret Rt) 2))
-       (define w4 (list-ref (interpret Rt) 3))
-       (cond
-         [(and (uint8_t? x1) (uint8_t? w1)) (uint32_t (bvadd (eval acc) (eval (dot-prod4 x1 x2 x3 x4 w1 w2 w3 w4 'uint32))))]
-         [(and (uint8_t? x1) (int8_t? w1)) (int32_t (bvadd (eval acc) (eval (dot-prod4 x1 x2 x3 x4 w1 w2 w3 w4 'int32))))]))]
-
+     (match (list (interpret Vd) (interpret Vu) (interpret Rt))
+       [(list (u32x32 acc) (u8x128 data) (list (uint8_t w1) (uint8_t w2) (uint8_t w3) (uint8_t w4)))
+        (u32x32 (lambda (i) (uint32_t (bvadd (eval (acc i)) (eval (dot-prod4 (data (* i 4)) (data (+ (* i 4) 1)) (data (+ (* i 4) 2)) (data (+ (* i 4) 3)) (uint8_t w1) (uint8_t w2) (uint8_t w3) (uint8_t w4) 'uint32))))))]
+       [(list (i32x32 acc) (u8x128 data) (list (int8_t w1) (int8_t w2) (int8_t w3) (int8_t w4)))
+        (i32x32 (lambda (i) (uint32_t (bvadd (eval (acc i)) (eval (dot-prod4 (data (* i 4)) (data (+ (* i 4) 1)) (data (+ (* i 4) 2)) (data (+ (* i 4) 3)) (int8_t w1) (int8_t w2) (int8_t w3) (int8_t w4) 'int32))))))])]
+    
     ;; Vector-scalar multiply with 4-wide within-vector reduction (partial sliding window)
     [(vrmpy-p Vuu Rt ub)
-     (if ub
-         (cons
-          (lambda (i)
-            (define x1 ((car (interpret Vuu)) (* i 4)))
-            (define x2 ((car (interpret Vuu)) (+ (* i 4) 1)))
-            (define x3 ((car (interpret Vuu)) (+ (* i 4) 2)))
-            (define x4 ((car (interpret Vuu)) (+ (* i 4) 3)))
-            (define w1 (list-ref (interpret Rt) 0))
-            (define w2 (list-ref (interpret Rt) 1))
-            (define w3 (list-ref (interpret Rt) 2))
-            (define w4 (list-ref (interpret Rt) 3))
-            (cond
-              [(and (uint8_t? x1) (uint8_t? w1)) (dot-prod4 x1 x2 x3 x4 w1 w2 w3 w4 'uint32)]
-              [(and (uint8_t? x1) (int8_t? w1)) (dot-prod4 x1 x2 x3 x4 w1 w2 w3 w4 'int32)]))
-          (lambda (i)
-            (define x1 ((car (interpret Vuu)) (+ (* i 4) 2)))
-            (define x2 ((car (interpret Vuu)) (+ (* i 4) 3)))
-            (define x3 ((cdr (interpret Vuu)) (* i 4)))
-            (define x4 ((cdr (interpret Vuu)) (+ (* i 4) 1)))
-            (define w1 (list-ref (interpret Rt) 0))
-            (define w2 (list-ref (interpret Rt) 1))
-            (define w3 (list-ref (interpret Rt) 2))
-            (define w4 (list-ref (interpret Rt) 3))
-            (cond
-              [(and (uint8_t? x1) (uint8_t? w1)) (dot-prod4 x1 x2 x3 x4 w1 w2 w3 w4 'uint32)]
-              [(and (uint8_t? x1) (int8_t? w1)) (dot-prod4 x1 x2 x3 x4 w1 w2 w3 w4 'int32)])))
-         (cons
-          (lambda (i)
-            (define x1 ((car (interpret Vuu)) (+ (* i 4) 1)))
-            (define x2 ((car (interpret Vuu)) (+ (* i 4) 2)))
-            (define x3 ((car (interpret Vuu)) (+ (* i 4) 3)))
-            (define x4 ((cdr (interpret Vuu)) (* i 4)))
-            (define w1 (list-ref (interpret Rt) 0))
-            (define w2 (list-ref (interpret Rt) 1))
-            (define w3 (list-ref (interpret Rt) 2))
-            (define w4 (list-ref (interpret Rt) 3))
-            (cond
-              [(and (uint8_t? x1) (uint8_t? w1)) (dot-prod4 x1 x2 x3 x4 w1 w2 w3 w4 'uint32)]
-              [(and (uint8_t? x1) (int8_t? w1)) (dot-prod4 x1 x2 x3 x4 w1 w2 w3 w4 'int32)]))
-          (lambda (i)
-            (define x1 ((car (interpret Vuu)) (+ (* i 4) 3)))
-            (define x2 ((cdr (interpret Vuu)) (* i 4)))
-            (define x3 ((cdr (interpret Vuu)) (+ (* i 4) 1)))
-            (define x4 ((cdr (interpret Vuu)) (+ (* i 4) 2)))
-            (define w1 (list-ref (interpret Rt) 0))
-            (define w2 (list-ref (interpret Rt) 1))
-            (define w3 (list-ref (interpret Rt) 2))
-            (define w4 (list-ref (interpret Rt) 3))
-            (cond
-              [(and (uint8_t? x1) (uint8_t? w1)) (dot-prod4 x1 x2 x3 x4 w1 w2 w3 w4 'uint32)]
-              [(and (uint8_t? x1) (int8_t? w1)) (dot-prod4 x1 x2 x3 x4 w1 w2 w3 w4 'int32)]))))]
+     (match (list (interpret Vuu) (interpret Rt) (interpret ub))
+       [(list (u8x128x2 data-v0 data-v1) (list (uint8_t w1) (uint8_t w2) (uint8_t w3) (uint8_t w4)) #t)
+        (u32x32x2
+         (lambda (i) (dot-prod4 (data-v0 (* i 4)) (data-v0 (+ (* i 4) 1)) (data-v0 (+ (* i 4) 2)) (data-v0 (+ (* i 4) 3)) (uint8_t w1) (uint8_t w2) (uint8_t w3) (uint8_t w4) 'uint32))
+         (lambda (i) (dot-prod4 (data-v0 (+ (* i 4) 2)) (data-v0 (+ (* i 4) 3)) (data-v1 (* i 4)) (data-v1 (+ (* i 4) 1)) (uint8_t w1) (uint8_t w2) (uint8_t w3) (uint8_t w4) 'uint32)))]
+       [(list (u8x128x2 data-v0 data-v1) (list (int8_t w1) (int8_t w2) (int8_t w3) (int8_t w4)) #t)
+        (i32x32x2
+         (lambda (i) (dot-prod4 (data-v0 (* i 4)) (data-v0 (+ (* i 4) 1)) (data-v0 (+ (* i 4) 2)) (data-v0 (+ (* i 4) 3)) (int8_t w1) (int8_t w2) (int8_t w3) (int8_t w4) 'int32))
+         (lambda (i) (dot-prod4 (data-v0 (+ (* i 4) 2)) (data-v0 (+ (* i 4) 3)) (data-v1 (* i 4)) (data-v1 (+ (* i 4) 1)) (int8_t w1) (int8_t w2) (int8_t w3) (int8_t w4) 'int32)))]
+       [(list (u8x128x2 data-v0 data-v1) (list (uint8_t w1) (uint8_t w2) (uint8_t w3) (uint8_t w4)) #f)
+        (u32x32x2
+         (lambda (i) (dot-prod4 (data-v0 (+ (* i 4) 1)) (data-v0 (+ (* i 4) 2)) (data-v0 (+ (* i 4) 3)) (data-v1 (* i 4)) (uint8_t w1) (uint8_t w2) (uint8_t w3) (uint8_t w4) 'uint32))
+         (lambda (i) (dot-prod4 (data-v0 (+ (* i 4) 3)) (data-v1 (* i 4)) (data-v1 (+ (* i 4) 1)) (data-v1 (+ (* i 4) 2)) (uint8_t w1) (uint8_t w2) (uint8_t w3) (uint8_t w4) 'uint32)))]
+       [(list (u8x128x2 data-v0 data-v1) (list (int8_t w1) (int8_t w2) (int8_t w3) (int8_t w4)) #f)
+        (i32x32x2
+         (lambda (i) (dot-prod4 (data-v0 (+ (* i 4) 1)) (data-v0 (+ (* i 4) 2)) (data-v0 (+ (* i 4) 3)) (data-v1 (* i 4)) (int8_t w1) (int8_t w2) (int8_t w3) (int8_t w4) 'int32))
+         (lambda (i) (dot-prod4 (data-v0 (+ (* i 4) 3)) (data-v1 (* i 4)) (data-v1 (+ (* i 4) 1)) (data-v1 (+ (* i 4) 2)) (int8_t w1) (int8_t w2) (int8_t w3) (int8_t w4) 'int32)))])]
 
+    ;; Arithmetic shift-right (all elems right-shifted by the same value)
+    [(vasr Vu Rt)
+     (match (list (interpret Vu) (interpret Rt))
+       [(list (i16x64 data) (int8_t n)) (i16x64 (lambda (i) (int16_t (bvashr (eval (data i)) n))))]
+       [(list (i32x32 data) (int8_t n)) (i32x32 (lambda (i) (int32_t (bvashr (eval (data i)) n))))])]
+
+    ;; Arithmetic shift-right with (all elems right-shifted by the same value) with accumulation
+    [(vasr-acc Vd Vu Rt)
+     (match (list (interpret Vd) (interpret Vu) (interpret Rt))
+       [(list (i16x64 acc) (i16x64 data) (int8_t n)) (i16x64 (lambda (i) (int16_t (bvadd (eval (acc i)) (bvashr (eval (data i)) n)))))]
+       [(list (i32x32 acc) (i32x32 data) (int8_t n)) (i32x32 (lambda (i) (int32_t (bvadd (eval (acc i)) (bvashr (eval (data i)) n)))))])]
+    
+    ;; Narrowing arithmetic shift-right with (all elems right-shifted by the same value)
+    [(vasr-n Vu Vv Rt round? sat? unsigned?)
+     (match (list (interpret Vu) (interpret Vu) (interpret Rt) (interpret round?) (interpret sat?) (interpret unsigned?))
+       [(list (i16x64 v0) (i16x64 v1) (int8_t n) #f _ #t) (u8x128 (lambda (i) (satu8 (asr (if (even? i) (v1 (quotient i 2)) (v0 (quotient i 2))) (int8_t n)))))]
+       [(list (i16x64 v0) (i16x64 v1) (int8_t n) #f _ #f) (i8x128 (lambda (i) (sat8 (asr (if (even? i) (v1 (quotient i 2)) (v0 (quotient i 2))) (int8_t n)))))]
+       [(list (i16x64 v0) (i16x64 v1) (int8_t n) #t _ #t) (u8x128 (lambda (i) (satu8 (round-asr (if (even? i) (v1 (quotient i 2)) (v0 (quotient i 2))) (int8_t n)))))]
+       [(list (i16x64 v0) (i16x64 v1) (int8_t n) #t _ #f) (i8x128 (lambda (i) (sat8 (round-asr (if (even? i) (v1 (quotient i 2)) (v0 (quotient i 2))) (int8_t n)))))]
+
+       [(list (u16x64 v0) (u16x64 v1) (int8_t n) #f _ _) (u8x128 (lambda (i) (satu8 (asr (if (even? i) (v1 (quotient i 2)) (v0 (quotient i 2))) (int8_t n)))))]
+       [(list (u16x64 v0) (u16x64 v1) (int8_t n) #t _ _) (u8x128 (lambda (i) (satu8 (round-asr (if (even? i) (v1 (quotient i 2)) (v0 (quotient i 2))) (int8_t n)))))]
+
+       [(list (i32x32 v0) (i32x32 v1) (int8_t n) #f _ #t) (u16x64 (lambda (i) (satu16 (asr (if (even? i) (v1 (quotient i 2)) (v0 (quotient i 2))) (int8_t n)))))]
+       [(list (i32x32 v0) (i32x32 v1) (int8_t n) #t _ #t) (u16x64 (lambda (i) (satu16 (round-asr (if (even? i) (v1 (quotient i 2)) (v0 (quotient i 2))) (int8_t n)))))]
+
+       [(list (i32x32 v0) (i32x32 v1) (int8_t n) #f #t #f) (i16x64 (lambda (i) (sat16 (asr (if (even? i) (v1 (quotient i 2)) (v0 (quotient i 2))) (int8_t n)))))]
+       [(list (i32x32 v0) (i32x32 v1) (int8_t n) #f #f #f) (i16x64 (lambda (i) (cpp_cast (round-asr (if (even? i) (v1 (quotient i 2)) (v0 (quotient i 2))) (int8_t n)) 'int16)))]
+       [(list (i32x32 v0) (i32x32 v1) (int8_t n) #t _ #f) (i16x64 (lambda (i) (sat16 (round-asr (if (even? i) (v1 (quotient i 2)) (v0 (quotient i 2))) (int8_t n)))))]
+       
+       [(list (u32x32 v0) (u32x32 v1) (int8_t n) #f _ _) (u16x64 (lambda (i) (satu16 (asr (if (even? i) (v1 (quotient i 2)) (v0 (quotient i 2))) (int8_t n)))))]
+       [(list (u32x32 v0) (u32x32 v1) (int8_t n) #t _ _) (u16x64 (lambda (i) (satu16 (round-asr (if (even? i) (v1 (quotient i 2)) (v0 (quotient i 2))) (int8_t n)))))])]
+    
+    ;; ---- Everything below this line in the interpreter is tentative ----
+
+    [(vcombine Vu Vv)
+     (match (list (interpret Vu) (interpret Vv))
+       [(list (i8x128 v0) (i8x128 v1)) (i8x128x2 (lambda (i) (v0 i)) (lambda (i) (v1 i)))]
+       [(list (u8x128 v0) (u8x128 v1)) (u8x128x2 (lambda (i) (v0 i)) (lambda (i) (v1 i)))]
+       [(list (i16x64 v0) (i16x64 v1)) (i16x64x2 (lambda (i) (v0 i)) (lambda (i) (v1 i)))]
+       [(list (u16x64 v0) (u16x64 v1)) (u16x64x2 (lambda (i) (v0 i)) (lambda (i) (v1 i)))]
+       [(list (i32x32 v0) (i32x32 v1)) (i32x32x2 (lambda (i) (v0 i)) (lambda (i) (v1 i)))]
+       [(list (u32x32 v0) (u32x32 v1)) (i32x32x2 (lambda (i) (v0 i)) (lambda (i) (v1 i)))])]
+    
     ;; Element-wise average of two vectors (optional +1 rounding)
     [(vavg Vu Vv rnd?)
      (lambda (i)
@@ -533,27 +531,6 @@
          [(uint8_t? val) (uint8_t (bvlshr (eval val) (eval c)))]
          [(uint16_t? val) (uint16_t (bvlshr (eval val) (eval c)))]
          [(uint32_t? val) (uint32_t (bvlshr (eval val) (eval c)))]))]
-    
-    ;; ---- Everything below this line in the interpreter is tentative ----
-
-;    ;; Define DSL for data swizzling
-;    [(lo Vuu) (car (interpret Vuu))]
-;    [(hi Vuu) (cdr (interpret Vuu))]
-;    [(vcombine v1 v2) (lambda (i) (if (< i 64) (v1 i) (v2 i)))]
-;    [(valign v1 v2 Rt) (lambda (i) (if (< i 64) (v1 (+ i Rt)) (v2 (+ i Rt))))]
-;    
-;
-;    ;; Define DSL for type-casting
-;    [(vsxt Vu)
-;     (cons
-;      (lambda (i) (cpp_cast ((interpret Vu) (* i 2)) 'int16 'int32))
-;      (lambda (i) (cpp_cast ((interpret Vu) (+ (* i 2) 1)) 'int16 'int32)))]
-;
-;    [(vsat Vu Vv)
-;     (lambda (i)
-;       (if (even? i)
-;           (sat16 ((interpret Vv) (quotient i 2)))
-;           (sat16 ((interpret Vu) (quotient i 2)))))]
     
     [_ p]))
 
@@ -627,16 +604,22 @@
     [(eq? outT 'int16) (mk-typed-expr (bvashr (bvsub (eval lhs) (eval rhs)) (bv 1 16)) outT)]
     [(eq? outT 'int32) (mk-typed-expr (bvashr (bvsub (eval lhs) (eval rhs)) (bv 1 32)) outT)]))
 
+(define (asr val n)
+  (match val
+    [(int16_t v) (int16_t (bvashr v (eval (cpp_cast n 'int16))))]
+    [(int32_t v) (int32_t (bvashr v (eval (cpp_cast n 'int32))))]
+    [(uint16_t v) (uint32_t (bvashr v (eval (cpp_cast n 'int16))))]
+    [(uint32_t v) (uint32_t (bvashr v (eval (cpp_cast n 'int32))))]))
+
+(define (round-asr val n)
+  (match val
+    [(int16_t v) (define r (eval (cpp_cast n 'int16))) (int16_t (bvashr (bvadd v (bvshl (bv 1 16) (bvsub r (bv 1 16)))) r))]
+    [(int32_t v) (define r (eval (cpp_cast n 'int32))) (int32_t (bvashr (bvadd v (bvshl (bv 1 32) (bvsub r (bv 1 32)))) r))]
+    [(uint16_t v) (define r (eval (cpp_cast n 'int16))) (uint16_t (bvashr (bvadd v (bvshl (bv 1 32) (bvsub r (bv 1 16)))) r))]
+    [(uint32_t v) (define r (eval (cpp_cast n 'int32))) (uint32_t (bvashr (bvadd v (bvshl (bv 1 32) (bvsub r (bv 1 32)))) r))]))
+
 (define curr-cn 0)
 (define (set-curr-cn v) (set! curr-cn v))
-
-;(define (filter-upcasts vec)
-;  (cond
-;    [(int8_t? ((interpret-ir vec) 0)) (choose* 'int16)]
-;    [(int16_t? ((interpret-ir vec) 0)) (choose* 'int32)]
-;    [(uint8_t? ((interpret-ir vec) 0)) (choose* 'uint16 'int16)]
-;    [(uint16_t? ((interpret-ir vec) 0)) (choose* 'int32 'uint32)]
-;    [else (choose* )]))
 
 (define (get-vec-type buf)
   (match (hash-ref type-dict buf)
@@ -648,7 +631,7 @@
     ['uint32 u32x32]))
 
 (define (get-from-buf buff-reads)
-  (define cn-reads (list-ref buff-reads curr-cn))
+  (define cn-reads (list-ref buff-reads 0))
   (define elemType (apply choose* (map (lambda(v) (type v)) cn-reads)))
   (define opts (filter (lambda(v) (eq? (type v) elemType)) cn-reads))
   (define vecType (cond
@@ -668,22 +651,14 @@
   (define-symbolic* get-idx (~> integer? integer?))
   (define-symbolic* get-idx2 (~> integer? integer?))
   (choose*
-   (vecType (lambda (i) (list-ref opts (get-idx i))))
-   (vecpType ((cons (lambda (i) (list-ref opts (get-idx i))) (lambda (i) (list-ref opts (get-idx2 i))))))))
-
-;  (define op (choose* nop sxt16 zxt16 sxt32 zxt32))
-;  (choose*
-;   (lambda (i)
-;    (define-symbolic* idx integer?) (list-ref  idx))
-;   (cons
-;    (lambda (i)
-;      (define-symbolic* idx integer?) (op (list-ref (list-ref opts curr-cn) idx)))
-;    (lambda (i)
-;      (define-symbolic* idx integer?) (op (list-ref (list-ref opts curr-cn) idx))))))
+   (vecType
+    (lambda (i) (list-ref (filter (lambda(v) (eq? (type v) elemType)) (list-ref buff-reads curr-cn)) (get-idx i))))
+   (vecpType
+    (lambda (i) (list-ref (filter (lambda(v) (eq? (type v) elemType)) (list-ref buff-reads curr-cn)) (get-idx i)))
+    (lambda (i) (list-ref (filter (lambda(v) (eq? (type v) elemType)) (list-ref buff-reads curr-cn)) (get-idx2 i))))))
 
 (define (get-from-vec vec)
   (define op (choose* sxt16 zxt16 sxt32 zxt32))
-  ;(define downcasts (choose* sxt16 zxt16 sxt32 zxt32))
   (if (pair? vec)
       (choose
        (lambda (i) ((choose* lo8 hi8 lo16 hi16) ((choose* (car vec) (cdr vec)) (apply choose* (build-list 128 values)))))
@@ -695,11 +670,42 @@
        (cons
         (lambda (i) (op (vec (apply choose* (build-list 128 values)))))
         (lambda (i) (op (vec (apply choose* (build-list 128 values)))))))))
-    
+
+(define (num-elems v)
+  (match v
+    [(i8x128 data) 128]
+    [(u8x128 data) 128]
+    [(i16x64 data) 64]
+    [(u16x64 data) 64]
+    [(i32x32 data) 32]
+    [(u32x32 data) 32]
+    [(i8x128x2 data-v0 data-v1) 256]
+    [(u8x128x2 data-v0 data-v1) 256]
+    [(i16x64x2 data-v0 data-v1) 128]
+    [(u16x64x2 data-v0 data-v1) 128]
+    [(i32x32x2 data-v0 data-v1) 64]
+    [(u32x32x2 data-v0 data-v1) 64]))
+
+(define (hvx-pair? v)
+  (match v
+    [(i8x128 data) #f]
+    [(u8x128 data) #f]
+    [(i16x64 data) #f]
+    [(u16x64 data) #f]
+    [(i32x32 data) #f]
+    [(u32x32 data) #f]
+    [(i8x128x2 data-v0 data-v1) #t]
+    [(u8x128x2 data-v0 data-v1) #t]
+    [(i16x64x2 data-v0 data-v1) #t]
+    [(u16x64x2 data-v0 data-v1) #t]
+    [(i32x32x2 data-v0 data-v1) #t]
+    [(u32x32x2 data-v0 data-v1) #t]))
+
 (provide
  (except-out
   (all-defined-out)
+  elem
   interpret
   set-curr-cn curr-cn
-  add add-acc add-sat multiply multiply-add multiply-add-acc dot-prod4)
- (rename-out [interpret interpret-hvx] [set-curr-cn set-curr-cn-hvx]))
+  add add-acc add-sat multiply multiply-add multiply-add-acc dot-prod4 asr round-asr)
+ (rename-out [interpret interpret-hvx] [set-curr-cn set-curr-cn-hvx] [elem elem-hvx]))
