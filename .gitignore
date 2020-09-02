@@ -3,11 +3,11 @@ benchmarks/**/*.bc
 benchmarks/**/*.s
 benchmarks/**/*.out
 benchmarks/**/*.a
-benchmarks/**/*.bak
 benchmarks/**/*.dep
 benchmarks/**/*.zo
 benchmarks/**/*.o
 benchmarks/**/*_generator
 benchmarks/**/*.exe
 benchmarks/**/*~
-benchmarks/**/compiled/**/*
+rake/**/*.bak
+rake/**/compiled/**/*
