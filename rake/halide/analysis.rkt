@@ -1,13 +1,17 @@
 #lang rosette
 
-(require "cpp.rkt")
-(require "halide.rkt")
-(require "util.rkt")
+(require rake/util)
+(require rake/cpp/types)
+(require rake/halide/ir/types)
+(require rake/halide/ir/interpreter)
 
 (require rosette/lib/match)
 
 ;; Extract buffer reads
 (define (extract-buf-reads expr)
+  (for/fold ([buff-reads '()]) ([i (num-elems-hal expr)]) (append buff-reads (list (extract-lane-buf-reads ((interpret-halide expr) i))))))
+  
+(define (extract-lane-buf-reads expr)
   (match expr
     [(int8_t v) (extract-buf-reads v)]
     [(int16_t v) (extract-buf-reads v)]
@@ -284,4 +288,11 @@
     [(int32x128 vec) (strip-halide-casts vec)]
     [_ expr]))
 
-(provide extract-buf-reads extract-live-ops extract-add-consts extract-sub-consts extract-mul-consts extract-div-consts)
+(provide
+ (rename-out
+  [extract-buf-reads extract-buf-reads-hal]
+  [extract-live-ops extract-live-ops-hal]
+  [extract-add-consts extract-add-consts-hal]
+  [extract-sub-consts extract-sub-consts-hal]
+  [extract-mul-consts extract-mul-consts-hal]
+  [extract-div-consts extract-div-consts-hal]))

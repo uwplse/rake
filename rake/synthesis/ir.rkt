@@ -2,10 +2,10 @@
 
 (require rosette/lib/match)
 (require rosette/lib/angelic)
-(require rosette/lib/synthax)
 
-(require "cpp.rkt")
-(require "util.rkt")
+(require rake/cpp/types)
+(require rake/cpp/cast)
+(require rake/util)
 
 (define curr-cn 0)
 (define (set-curr-cn v) (set! curr-cn v))

@@ -1,7 +1,7 @@
 #lang rosette
 
-(require "cpp.rkt")
-(require "hexagon.rkt")
+(require rosette/lib/match)
+(require rake/hvx/ast/types)
 
 (define (codegen p)
   (match p

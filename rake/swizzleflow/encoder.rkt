@@ -1,7 +1,6 @@
 #lang rosette
 
-(require "cpp.rkt")
-(require "hexagon.rkt")
+(require rake/hvx/ast/types)
 
 (require rosette/lib/match)
 
@@ -38,4 +37,4 @@
      
     [_ p]))
     
-(provide (except-out (all-defined-out) encode) (rename-out [encode gen-swizzleflow-encoding]))
+(provide (except-out (all-defined-out) encode) (rename-out [encode swizzleflow-encode]))

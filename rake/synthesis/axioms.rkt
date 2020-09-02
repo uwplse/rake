@@ -1,7 +1,7 @@
 #lang rosette
 
-(require "cpp.rkt")
-(require "util.rkt")
+(require rake/cpp/types)
+(require rake/util)
 
 (define (values-range-from buffer lb ub)
   (define-symbolic idx integer?)

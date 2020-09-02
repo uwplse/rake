@@ -1,134 +1,21 @@
 #lang rosette
 
-(require "cpp.rkt")
-(require "util.rkt")
+(require rake/cpp/types)
+(require rake/cpp/cast)
+(require rake/util)
+(require rake/hvx/ast/types)
 
 (require rosette/lib/match)
 (require rosette/lib/angelic)
-(require rosette/lib/synthax)
 
-;; HVX data types
-(struct i8x128 (Vu) #:transparent)
-(struct u8x128 (Vu) #:transparent)
-(struct i16x64 (Vu) #:transparent)
-(struct u16x64 (Vu) #:transparent)
-(struct i32x32 (Vu) #:transparent)
-(struct u32x32 (Vu) #:transparent)
-
-(struct i8x128x2 (Vu Vv) #:transparent)
-(struct u8x128x2 (Vu Vv) #:transparent)
-(struct i16x64x2 (Vu Vv) #:transparent)
-(struct u16x64x2 (Vu Vv) #:transparent)
-(struct i32x32x2 (Vu Vv) #:transparent)
-(struct u32x32x2 (Vu Vv) #:transparent)
-
-(define (elem vec idx)
-  (match vec
-    [(i8x128 data) (data idx)]
-    [(u8x128 data) (data idx)]
-    [(i16x64 data) (data idx)]
-    [(u16x64 data) (data idx)]
-    [(i32x32 data) (data idx)]
-    [(u32x32 data) (data idx)]))
-
-(define (v0-elem vec idx)
-  (match vec
-    [(i8x128x2 v0 v1) (v0 idx)]
-    [(u8x128x2 v0 v1) (v0 idx)]
-    [(i16x64x2 v0 v1) (v0 idx)]
-    [(u16x64x2 v0 v1) (v0 idx)]
-    [(i32x32x2 v0 v1) (v0 idx)]
-    [(u32x32x2 v0 v1) (v0 idx)]))
-
-(define (v1-elem vec idx)
-  (match vec
-    [(i8x128x2 v0 v1) (v1 idx)]
-    [(u8x128x2 v0 v1) (v1 idx)]
-    [(i16x64x2 v0 v1) (v1 idx)]
-    [(u16x64x2 v0 v1) (v1 idx)]
-    [(i32x32x2 v0 v1) (v1 idx)]
-    [(u32x32x2 v0 v1) (v1 idx)]))
-     
-;; Define DSL for vector creation
-(struct vread (buf loc) #:transparent)
-(struct vsplat (Rt) #:transparent)
-
-;; New constructs to abstract away data movement
-(struct gather (buff-reads))
-(struct swizzle (vec) #:transparent)
-
-;; Define DSL for data swizzling
-(struct lo (Vuu) #:transparent)
-(struct hi (Vuu) #:transparent)
-(struct vcombine (Vu Vv) #:transparent)
-(struct vshuffe (Vu Vv) #:transparent)
-(struct vshuffo (Vu Vv) #:transparent)
-(struct vshuffoe (Vu Vv) #:transparent)
-(struct vswap (Qt Vu Vv) #:transparent)
-(struct vmux (Qt Vu Vv) #:transparent)
-(struct vsat (Vu Vv) #:transparent)
-(struct valign (Vu Vv Rt) #:transparent)
-(struct vror (Vu Rt) #:transparent)
-(struct vrotr (Vu Vv) #:transparent)
-(struct vdeal (Vu) #:transparent)
-(struct vdeale (Vu Vv) #:transparent)
-(struct vshuff (Vu) #:transparent)
-(struct vtranspose (Vu Vv Rt) #:transparent)
-(struct vpack (Vu Vv) #:transparent)
-(struct vpacke (Vu Vv) #:transparent)
-(struct vpacko (Vu Vv) #:transparent)
-(struct vunpack (Vu) #:transparent)
-(struct vunpacko (Vu) #:transparent)
-(struct vgather (Rt Mu Vv) #:transparent)
-
-;; Define DSL for type-casting
-(struct vzxt (Vu) #:transparent)
-(struct vsxt (Vu) #:transparent)
-
-;; Define DSL for data processing
-(struct vadd (Vu Vv sat?) #:transparent)
-(struct vadd-w (Vu Vv) #:transparent)
-(struct vadd-w-acc (Vdd Vu Vv) #:transparent)
-
-(struct vmpy (Vu Rt) #:transparent)
-(struct vmpyi (Vu Rt) #:transparent)
-(struct vmpye (Vu Rt) #:transparent)
-
-(struct vmpy-acc (Vdd Vu Rt) #:transparent)
-(struct vmpyi-acc (Vd Vu Rt) #:transparent)
-(struct vmpye-acc (Vd Vu Rt) #:transparent)
-
-(struct vmpa (Vuu Rt) #:transparent)
-(struct vmpa-acc (Vdd Vuu Rt) #:transparent)
-
-(struct vdmpy (Vu Rt) #:transparent)
-(struct vdmpy-sw (Vuu Rt) #:transparent)
-
-(struct vdmpy-acc (Vd Vu Rt) #:transparent)
-(struct vdmpy-sw-acc (Vdd Vuu Rt) #:transparent)
-
-(struct vtmpy (Vuu Rt) #:transparent)
-(struct vtmpy-acc (Vdd Vuu Rt) #:transparent)
-
-(struct vrmpy (Vu Rt) #:transparent)
-(struct vrmpy-acc (Vd Vu Rt) #:transparent)
-
-(struct vrmpy-p (Vuu Rt u1) #:transparent)
-(struct vrmpy-p-acc (Vdd Vuu Rt u1) #:transparent)
-
-(struct vavg (Vu Vv rnd?) #:transparent)
-(struct vnavg (Vu Vv) #:transparent)
-
-(struct vlsr (Vu Rt) #:transparent)
-(struct vasr (Vu Rt) #:transparent)
-(struct vasr-acc (Vd Vu Rt) #:transparent)
-
-(struct vasr-n (Vu Vv Rt round? sat? unsigned?) #:transparent)
+;; This might be unnecessary. TODO: Check
+(define idx-tables (make-hash))
+(define (reset-lookup-hash) (set! idx-tables (make-hash)))
 
 (define (interpret p)
   (match p
 
-    ;;;;;;;;;;;;;;;;; Define DSL for vector creation ;;;;;;;;;;;;;;;
+    ;;;;;;;;;;;;;;;;; Instructions for vector creation ;;;;;;;;;;;;;;;
     
     [(vread buf loc) ((get-vec-type buf) (lambda (i) (get buf (+ loc i))))]
 
@@ -136,10 +23,23 @@
 
     ;;;;;;;;; New constructs to abstract away data movement;;;;;;;;;
     
-    [(gather buff-reads) (get-from-buf buff-reads)]
+    [(gather* buff-reads)
+     (define-symbolic* idx-tbl1 (~> integer? integer?))
+     (define-symbolic* idx-tbl2 (~> integer? integer?))
+     (get-from-buf buff-reads idx-tbl1 idx-tbl2)]
+    
+    [(gather buff-reads)
+     (define caller-id (get-caller-id p))
+     (when (not (hash-has-key? idx-tables caller-id))
+       (define-symbolic* idx-tbl1 (~> integer? integer?))
+       (define-symbolic* idx-tbl2 (~> integer? integer?))
+       (hash-set! idx-tables caller-id (cons idx-tbl1 idx-tbl2)))
+     (define idx-maps (hash-ref idx-tables caller-id))
+     (get-from-buf buff-reads (car idx-maps) (cdr idx-maps))]
+    
     [(swizzle vec) (get-from-vec (interpret vec))]
     
-    ;;;;;;;;;;;;;;;; Define DSL for data processing ;;;;;;;;;;;;;;;;
+    ;;;;;;;;;;;;;;;; Instructions for data processing ;;;;;;;;;;;;;;;;
 
     ;; Addition (non-widening) -- carry variants currently not supported
     [(vadd Vu Vv sat?)
@@ -458,7 +358,7 @@
     
     ;; Narrowing arithmetic shift-right with (all elems right-shifted by the same value)
     [(vasr-n Vu Vv Rt round? sat? unsigned?)
-     (match (list (interpret Vu) (interpret Vu) (interpret Rt) (interpret round?) (interpret sat?) (interpret unsigned?))
+     (match (list (interpret Vu) (interpret Vv) (interpret Rt) (interpret round?) (interpret sat?) (interpret unsigned?))
        [(list (i16x64 v0) (i16x64 v1) (int8_t n) #f _ #t) (u8x128 (lambda (i) (satu8 (asr (if (even? i) (v1 (quotient i 2)) (v0 (quotient i 2))) (int8_t n)))))]
        [(list (i16x64 v0) (i16x64 v1) (int8_t n) #f _ #f) (i8x128 (lambda (i) (sat8 (asr (if (even? i) (v1 (quotient i 2)) (v0 (quotient i 2))) (int8_t n)))))]
        [(list (i16x64 v0) (i16x64 v1) (int8_t n) #t _ #t) (u8x128 (lambda (i) (satu8 (round-asr (if (even? i) (v1 (quotient i 2)) (v0 (quotient i 2))) (int8_t n)))))]
@@ -534,7 +434,8 @@
     
     [_ p]))
 
-;; Define some helper functions
+;; Define commonly occuring scalar-computation patterns as funcs for re-usability and
+;; easier maintainability
 (define (add lhs rhs outT)
   (mk-typed-expr (bvadd (eval (cpp_cast lhs outT)) (eval (cpp_cast rhs outT))) outT))
 
@@ -542,15 +443,13 @@
   (mk-typed-expr (bvadd (eval acc) (eval (cpp_cast lhs outT)) (eval (cpp_cast rhs outT))) outT))
 
 (define (add-sat lhs rhs outT)
-  (cond
-    [(eq? outT 'int8) (sat8 (add lhs rhs 'int16))]
-    [(eq? outT 'int16) (sat16 (add lhs rhs 'int32))]
-    [(eq? outT 'int32) (sat32 (add lhs rhs 'int64))]
-
-    [(and (eq? outT 'uint8) (int8_t? rhs)) (satu8 (int16_t (bvadd (eval (promote lhs)) (eval (promote rhs)))))]
-    [(eq? outT 'uint8) (satu8 (add lhs rhs 'uint16_t))]
-    [(eq? outT 'uint16) (satu16 (add lhs rhs 'uint32))]
-    [(eq? outT 'uint32) (satu32 (add lhs rhs 'uint64))]))
+  (match outT
+    ['int8 (sat8 (add lhs rhs 'int16))]
+    ['int16 (sat16 (add lhs rhs 'int32))]
+    ['int32 (sat32 (add lhs rhs 'int64))]
+    ['uint8 (if (int8_t? rhs) (satu8 (int16_t (bvadd (eval (promote lhs)) (eval (promote rhs))))) (satu8 (add lhs rhs 'uint16_t)))]
+    ['uint16 (satu16 (add lhs rhs 'uint32))]
+    ['uint32 (satu32 (add lhs rhs 'uint64))]))
 
 (define (multiply lhs rhs outT)
   (mk-typed-expr (bvmul (eval (cpp_cast lhs outT)) (eval (cpp_cast rhs outT))) outT))
@@ -618,9 +517,6 @@
     [(uint16_t v) (define r (eval (cpp_cast n 'int16))) (uint16_t (bvashr (bvadd v (bvshl (bv 1 32) (bvsub r (bv 1 16)))) r))]
     [(uint32_t v) (define r (eval (cpp_cast n 'int32))) (uint32_t (bvashr (bvadd v (bvshl (bv 1 32) (bvsub r (bv 1 32)))) r))]))
 
-(define curr-cn 0)
-(define (set-curr-cn v) (set! curr-cn v))
-
 (define (get-vec-type buf)
   (match (hash-ref type-dict buf)
     ['int8 i8x128]
@@ -630,7 +526,14 @@
     ['uint16 u16x64]
     ['uint32 u32x32]))
 
-(define (get-from-buf buff-reads)
+;; The curr-cn flag is used to restrict the set of values a gather returns when the expression is being evaluated for
+;; any particular channel
+(define curr-cn 0)
+(define (set-curr-cn v) (set! curr-cn v))
+
+;; Since gather and swizzle constructs abstract away data-movement, their implementation must be synthesized as a hash-table.
+;; Ideally this definition should be in the grammar file but that would cause a circular dependency, so here we are.
+(define (get-from-buf buff-reads idx-tbl1 idx-tbl2)
   (define cn-reads (list-ref buff-reads 0))
   (define elemType (apply choose* (map (lambda(v) (type v)) cn-reads)))
   (define opts (filter (lambda(v) (eq? (type v) elemType)) cn-reads))
@@ -648,64 +551,25 @@
                     [(eq? elemType 'uint8) u8x128x2]
                     [(eq? elemType 'uint16) u16x64x2]
                     [(eq? elemType 'uint32) u32x32x2]))
-  (define-symbolic* get-idx (~> integer? integer?))
-  (define-symbolic* get-idx2 (~> integer? integer?))
   (choose*
    (vecType
-    (lambda (i) (list-ref (filter (lambda(v) (eq? (type v) elemType)) (list-ref buff-reads curr-cn)) (get-idx i))))
+    (lambda (i) (list-ref (filter (lambda(v) (eq? (type v) elemType)) (list-ref buff-reads curr-cn)) (idx-tbl1 i))))
    (vecpType
-    (lambda (i) (list-ref (filter (lambda(v) (eq? (type v) elemType)) (list-ref buff-reads curr-cn)) (get-idx i)))
-    (lambda (i) (list-ref (filter (lambda(v) (eq? (type v) elemType)) (list-ref buff-reads curr-cn)) (get-idx2 i))))))
+    (lambda (i) (list-ref (filter (lambda(v) (eq? (type v) elemType)) (list-ref buff-reads curr-cn)) (idx-tbl1 i)))
+    (lambda (i) (list-ref (filter (lambda(v) (eq? (type v) elemType)) (list-ref buff-reads curr-cn)) (idx-tbl2 i))))))
 
 (define (get-from-vec vec)
   (define op (choose* sxt16 zxt16 sxt32 zxt32))
   (if (pair? vec)
-      (choose
+      (choose*
        (lambda (i) ((choose* lo8 hi8 lo16 hi16) ((choose* (car vec) (cdr vec)) (apply choose* (build-list 128 values)))))
        (cons
         (lambda (i) ((choose* (car vec) (cdr vec)) (apply choose* (build-list 128 values))))
         (lambda (i) ((choose* (car vec) (cdr vec)) (apply choose* (build-list 128 values))))))
-      (choose
+      (choose*
        (lambda (i) (vec (apply choose* (build-list 128 values))))
        (cons
         (lambda (i) (op (vec (apply choose* (build-list 128 values)))))
         (lambda (i) (op (vec (apply choose* (build-list 128 values)))))))))
 
-(define (num-elems v)
-  (match v
-    [(i8x128 data) 128]
-    [(u8x128 data) 128]
-    [(i16x64 data) 64]
-    [(u16x64 data) 64]
-    [(i32x32 data) 32]
-    [(u32x32 data) 32]
-    [(i8x128x2 data-v0 data-v1) 256]
-    [(u8x128x2 data-v0 data-v1) 256]
-    [(i16x64x2 data-v0 data-v1) 128]
-    [(u16x64x2 data-v0 data-v1) 128]
-    [(i32x32x2 data-v0 data-v1) 64]
-    [(u32x32x2 data-v0 data-v1) 64]))
-
-(define (hvx-pair? v)
-  (match v
-    [(i8x128 data) #f]
-    [(u8x128 data) #f]
-    [(i16x64 data) #f]
-    [(u16x64 data) #f]
-    [(i32x32 data) #f]
-    [(u32x32 data) #f]
-    [(i8x128x2 data-v0 data-v1) #t]
-    [(u8x128x2 data-v0 data-v1) #t]
-    [(i16x64x2 data-v0 data-v1) #t]
-    [(u16x64x2 data-v0 data-v1) #t]
-    [(i32x32x2 data-v0 data-v1) #t]
-    [(u32x32x2 data-v0 data-v1) #t]))
-
-(provide
- (except-out
-  (all-defined-out)
-  elem
-  interpret
-  set-curr-cn curr-cn
-  add add-acc add-sat multiply multiply-add multiply-add-acc dot-prod4 asr round-asr)
- (rename-out [interpret interpret-hvx] [set-curr-cn set-curr-cn-hvx] [elem elem-hvx]))
+(provide (rename-out [interpret interpret-hvx] [set-curr-cn set-curr-cn-hvx]))

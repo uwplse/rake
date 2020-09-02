@@ -1,6 +1,6 @@
 #lang rosette
 
-(require "cpp.rkt")
+(require rake/cpp/types)
 (require rosette/lib/match)
 
 ;; Debugging
@@ -98,5 +98,7 @@
 (define (sxt16 v) (int16_t (sign-extend (eval v) (bitvector 16))))
 (define (zxt32 v) (uint32_t (zero-extend (eval v) (bitvector 32))))
 (define (sxt32 v) (int32_t (sign-extend (eval v) (bitvector 32))))
+
+(define (get-caller-id obj) (eq-hash-code obj))
 
 (provide (all-defined-out))
