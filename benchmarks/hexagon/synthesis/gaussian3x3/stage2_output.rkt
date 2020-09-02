@@ -81,10 +81,6 @@
 ;; Extract the set of live ops
 (define live-ops (list->set (extract-live-ops original-expr)))
 
-;; Verification conditions
-(define (lane-eq? oe se lane)
-  (assert (eq? (oe lane) (se lane))))
-
 ;; Define incremental synthesis loop for ir-expr generation
 (define (synthesize-ir-expr)
   (if (not (instr-limit-exceeded?))
@@ -100,9 +96,6 @@
         
         ;(define synthesized-expr (??ir-grammar))
         (define synthesized-expr (arith-shift-right (convolve (load-data buff-reads) (list (int8_t (bv 1 8)) (int16_t (bv 2 16)) (int8_t (bv 1 8)) (int8_t (bv 0 8)) #f) nop 'int16) (int16_t (bv 4 16)) #t 'uint8))
-
-        ;((interpret-halide original-expr) 65)
-        ;((interpret-ir synthesized-expr) 65)
 
         ;; Verification conditions
         (define (bounded-eq? oe se lanes)
@@ -127,9 +120,9 @@
               (increment-instr-bnd)
               (synthesize-ir-expr))
             (begin
-              (display "Successfully found an equivalent IR expression:-\n")
-              (debug (evaluate synthesized-expr sol))
-              (display (format "\n\nSynthesis time: ~a seconds\n\n" runtime))
+              (display "Successfully found an equivalent IR expression.\n\n")
+              (debug (format "~a\n\n" (evaluate synthesized-expr sol)))
+              (debug (format "Synthesis time: ~a seconds\n\n" runtime))
               (cons (evaluate synthesized-expr sol) sol))))
       (begin
         (display "Maximum instruction bound reached. Giving up.\n\n")
@@ -168,12 +161,16 @@
                (set-curr-cn-hvx (+ i 65))
                (assert (eq? (evaluate (elem-ir oe (+ i 65)) ir-expr-sol) (elem-hvx se (+ i 65))))])))
 
-        (define ??hvx-expr (generate-hvx-grammar ir-expr hvx-sub-expr))
+        (define ??hvx-expr (generate-hvx-grammar ir-expr hvx-sub-expr add-consts))
 
         (define synthesized-hvx-expr (??hvx-expr))
         ;(define synthesized-hvx-expr (vcombine (vmpyi-acc (vadd (gather buff-reads)  (gather buff-reads) #f)  (gather buff-reads) (int8_t (bv 2 8))) (vmpyi-acc (vadd (gather buff-reads)  (gather buff-reads) #f)  (gather buff-reads) (int8_t (bv 2 8)))))
+        ;(define synthesized-hvx-expr (vmpyi-acc (vadd (gather buff-reads)  (gather buff-reads) #f)  (gather buff-reads) (int8_t (bv 2 8))))
         ;(define synthesized-hvx-expr (if (arith-shift-right? ir-expr) (vasr-rnd-sat hvx-sub-expr hvx-sub-expr (int8_t (bv 4 8)) #t #t #t) (??hvx-expr)))
 
+        ;(println (elem-hvx (interpret-hvx synthesized-hvx-expr) 0))
+        
+        ;(reset-lookup-hash)
         (define st (current-seconds))
         (define sol (synthesize #:forall (list rows output.s0.x.x c1)
                                 #:guarantee (bounded-eq2? (interpret-ir ir-expr) (interpret-hvx synthesized-hvx-expr) MC_BND)))
@@ -185,12 +182,13 @@
               (increment-instr-bnd)
               (synthesize-equiv-hvx ir-expr hvx-sub-expr num-req-elems))
             (begin
-              (display "Successfully found an equivalent HVX expression:-\n")
-              (debug (evaluate synthesized-hvx-expr sol))
-              (display (format "\n\nSynthesis time: ~a seconds\n\n" runtime))
+              (display "Successfully found an equivalent HVX expression.\n\n")
+              (debug (format "~a\n\n" (evaluate synthesized-hvx-expr sol)))
+              (debug (format "Synthesis time: ~a seconds\n\n" runtime))
               (evaluate synthesized-hvx-expr sol))))
       (begin
         (display "Maximum instruction bound reached. Giving up.\n\n")
+        (exit)
         (void))))
 
 (define (compile-to-hvx ir-expr num-req-elems)
@@ -213,34 +211,53 @@
        (reset-instr-bnd)
        (synthesize-equiv-hvx ir-expr hvx-sub-expr num-req-elems))]
 
-    [(load-data opts) (gather opts)]
+    [(load-data opts) (gather* opts)]
 
     [_ (println "NYI")]))
 
 ;; Synthesize equivalent HVX expression for each Op in the IR
 (define hvx-expr (compile-to-hvx ir-expr (vec-len original-expr)))
-;hvx-expr
 
-;(set-curr-cn 0)
-;(debug (evaluate ((interpret-ir (evaluate ir-expr-q ir-expr-sol)) 0) ir-expr-sol))
+;; Synthesize swizzles spec (+ full verification)
+;; Verification conditions
+(display "Verifying expression equivalence over full-length vectors...\n")
+(display "============================================================\n")
 
-(exit)
+(define (repl-gather*-gather node)
+  (match node
+    [(gather* opts) (gather opts)]
+    [_ node]))
+(set! hvx-expr (transform hvx-expr repl-gather*-gather))
 
-;;; Synthesize swizzles spec (+ full verification)
-;(set! st (current-seconds))
-;(define sols (list))
-;(for ([lane VEC_LANES])
-;  (set-curr-cn lane)
-;  (define lane-sol (synthesize #:forall (list rows output.s0.x.x c1)
-;                               #:guarantee (lane-eq? (interpret-halide original-expr) (interpret-hvx (evaluate synthesized-expr sol)) lane)))
-;  (set! sols (append sols (list lane-sol))))
-;(set! runtime (- (current-seconds) st))
-;
+(define interpreted-expr (interpret-hvx hvx-expr))
+
+(define out-size-eq? (eq? (vec-len original-expr) (num-elems-hvx interpreted-expr)))
+
+(define (lane-eq? oe se lane)
+  (assert (eq? (oe lane) (elem-hvx se lane))))
+
+(define st (current-seconds))
+(define sols (list))
+(for ([lane VEC_LANES])
+  (set-curr-cn-hvx lane)
+  (define lane-sol (synthesize #:forall (list rows output.s0.x.x c1)
+                               #:guarantee (lane-eq? (interpret-halide original-expr) interpreted-expr lane)))
+  (set! sols (append sols (list lane-sol))))
+(define runtime (- (current-seconds) st))
+
+;; Print solution
+(if (and out-size-eq? (for/or ([sol sols]) (unsat? sol)))
+    (display "Synthesized solution is incorrect.\n\n")
+    (display "Synthesized solution is correct.\n\n"))
+(debug (format "Verification time: ~a seconds\n\n" runtime))
+
 ;;; Parse stage 2 output
 ;(define vecs (parse-swizzle-spec buff-reads sols))
 ;
 ;;; Print solution
 ;(printf "Runtime (stage 2): ~a seconds\n\n" runtime)
+;
+;(exit)
 
 ;; Synthesize swizzle instructions
 ;(set! st (current-seconds))
