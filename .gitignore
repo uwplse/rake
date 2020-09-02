@@ -9,5 +9,5 @@ benchmarks/**/*.o
 benchmarks/**/*_generator
 benchmarks/**/*.exe
 benchmarks/**/*~
-rake/**/*.bak
+**/*.bak
 rake/**/compiled/**/*
