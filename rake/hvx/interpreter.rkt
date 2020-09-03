@@ -8,10 +8,6 @@
 (require rosette/lib/match)
 (require rosette/lib/angelic)
 
-;; This might be unnecessary. TODO: Check
-(define idx-tables (make-hash))
-(define (reset-lookup-hash) (set! idx-tables (make-hash)))
-
 (define (interpret p)
   (match p
 
@@ -23,19 +19,7 @@
 
     ;;;;;;;;; New constructs to abstract away data movement;;;;;;;;;
     
-    [(gather* buff-reads)
-     (define-symbolic* idx-tbl1 (~> integer? integer?))
-     (define-symbolic* idx-tbl2 (~> integer? integer?))
-     (get-from-buf buff-reads idx-tbl1 idx-tbl2)]
-    
-    [(gather buff-reads)
-     (define caller-id (get-caller-id p))
-     (when (not (hash-has-key? idx-tables caller-id))
-       (define-symbolic* idx-tbl1 (~> integer? integer?))
-       (define-symbolic* idx-tbl2 (~> integer? integer?))
-       (hash-set! idx-tables caller-id (cons idx-tbl1 idx-tbl2)))
-     (define idx-maps (hash-ref idx-tables caller-id))
-     (get-from-buf buff-reads (car idx-maps) (cdr idx-maps))]
+    [(gather* buff-reads) (get-from-buf* buff-reads)]
     
     [(swizzle vec) (get-from-vec (interpret vec))]
     
@@ -533,7 +517,7 @@
 
 ;; Since gather and swizzle constructs abstract away data-movement, their implementation must be synthesized as a hash-table.
 ;; Ideally this definition should be in the grammar file but that would cause a circular dependency, so here we are.
-(define (get-from-buf buff-reads idx-tbl1 idx-tbl2)
+(define (get-from-buf* buff-reads)
   (define cn-reads (list-ref buff-reads 0))
   (define elemType (apply choose* (map (lambda(v) (type v)) cn-reads)))
   (define opts (filter (lambda(v) (eq? (type v) elemType)) cn-reads))
@@ -551,6 +535,10 @@
                     [(eq? elemType 'uint8) u8x128x2]
                     [(eq? elemType 'uint16) u16x64x2]
                     [(eq? elemType 'uint32) u32x32x2]))
+
+  (define-symbolic* idx-tbl1 (~> integer? integer?))
+  (define-symbolic* idx-tbl2 (~> integer? integer?))
+     
   (choose*
    (vecType
     (lambda (i) (list-ref (filter (lambda(v) (eq? (type v) elemType)) (list-ref buff-reads curr-cn)) (idx-tbl1 i))))

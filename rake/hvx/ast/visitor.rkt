@@ -5,10 +5,10 @@
 
 (define (visit p transform)
   (match p
-    [(vread buf loc) (transform p)]
-    [(vsplat Rt) (transform p)]
-    [(gather* buff-reads) (transform p)]
-    [(gather buff-reads) (transform p)]
+    [(vread buf loc) (transform (vread buf loc))]
+    [(vsplat Rt) (transform (vsplat Rt))]
+    [(gather* buff-reads) (transform (gather* buff-reads))]
+    [(gather buff-reads) (transform (gather buff-reads))]
     [(swizzle vec) (transform (swizzle (visit vec transform)))]
     [(vadd Vu Vv sat?) (transform (vadd (visit Vu transform) (visit Vv transform) (visit sat? transform)))]
     [(vadd-w Vu Vv) (transform (vadd-w (visit Vu transform) (visit Vv transform)))]

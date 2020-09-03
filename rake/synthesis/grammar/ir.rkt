@@ -4,6 +4,7 @@
 (require rosette/lib/angelic)
 
 (require rake/util)
+(require rake/spec)
 (require rake/cpp/types)
 (require rake/synthesis/ir)
 
@@ -75,7 +76,13 @@
 
   operators)
 
-(define (generate-ir-grammar live-ops buff-reads add-consts sub-consts mul-consts div-consts)
+(define (generate-ir-grammar spec)
+  (define live-ops (halide-spec-live-ops spec))
+  (define buff-reads (halide-spec-buff-reads spec))
+  (define add-consts (halide-spec-add-consts spec))
+  (define sub-consts (halide-spec-sub-consts spec))
+  (define mul-consts (halide-spec-mul-consts spec))
+  (define div-consts (halide-spec-div-consts spec))
   (define data (for/list [(l buff-reads)] (append add-consts l)))
   (define int-weights-gen (get-generator-func (append (list (int8_t (bv 0 8)) (int8_t (bv 1 8))) mul-consts)))
   (define int-shiftr-gen (get-generator-func (map log2 (filter pow2? div-consts))))
