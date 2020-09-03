@@ -17,6 +17,7 @@
 
 ;; IR instructions
 (struct convolve (data weights saturateFunc outputType) #:transparent)
+(struct const-add (data const saturateFunc outputType) #:transparent)
 (struct const-divide (data divisor) #:transparent)
 (struct arith-shift-right (data n round? outputType) #:transparent)
 (struct logic-shift-right (data n) #:transparent)
@@ -63,6 +64,14 @@
         (if w5
             (saturateFunc (mk-typed-expr (bvadd (bvmul v1 w1) (bvmul v2 w2) (bvmul v3 w3) (bvmul v4 w4) v5) outputType))
             (saturateFunc (mk-typed-expr (bvadd (bvmul v1 w1) (bvmul v2 w2) (bvmul v3 w3) (bvmul v4 w4)) outputType)))))]
+
+    [(const-add data const saturateFunc outputType)
+     (vector
+      (lambda (i)
+        (define vec (vector-data (interpret data)))
+        (define v (eval (cpp_cast (vec i) outputType)))
+        (define c (eval (cpp_cast const outputType)))
+        (saturateFunc (mk-typed-expr (bvadd v c) outputType))))]
 
     [(const-divide data divisor)
      (vector

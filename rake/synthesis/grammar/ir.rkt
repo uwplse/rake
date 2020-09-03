@@ -1,5 +1,6 @@
 #lang rosette
 
+(require rosette/lib/match)
 (require rosette/lib/synthax)
 (require rosette/lib/angelic)
 
@@ -37,25 +38,31 @@
 (define (bool-const) (define-symbolic* b boolean?)  b)
 (define (get-generator-func opts) (when (not (empty? opts)) (lambda() (apply choose* opts))))
 
+(define (infer-outT expr)
+  (match expr
+    [(load-data data) (apply choose* (map (lambda(v) (type v)) (list-ref data 0)))]
+    [(convolve _ _ _ outT) outT]
+    [(const-add _ _ _ outT) outT]
+    [(const-divide t0 _ ) (infer-outT t0)]
+    [(logic-shift-right t0 _) (infer-outT t0)]
+    [(arith-shift-right _ _ _ outT) (choose* 'uint8 'uint16 outT)]))
+
 (define (filter-conv-output-types t0)
-  (define vec (vector-data (interpret-ir t0)))
-  (cond
-    [(int8_t? (vec 0)) (choose* 'int8 'int16)]
-    [(int16_t? (vec 0)) (choose* 'int16 'int32)]
-    [(int32_t? (vec 0)) (choose* 'int32)]
-    [(uint8_t? (vec 0)) (choose* 'uint8 'uint16)]
-    [(uint16_t? (vec 0)) (choose* 'uint16 'uint32)]
-    [(uint32_t? (vec 0)) (choose* 'uint32)]
-    [else (choose* 'int8 'int16 'int32 'uint8 'uint16 'uint32)]))
+  (match (infer-outT t0)
+    ['int8 (choose* 'int8 'int16)]
+    ['int16 (choose* 'int16 'int32)]
+    ['int32 (choose* 'int32)]
+    ['uint8 (choose* 'uint8 'uint16)]
+    ['uint16 (choose* 'uint16 'uint32)]
+    ['uint32 (choose* 'uint32)]))
 
 (define (filter-asr-output-types t0)
-  (define vec (vector-data (interpret-ir t0)))
-  (cond
-    [(int16_t? (vec 0)) (choose* 'int16 'int8 'uint8)]
-    [(int32_t? (vec 0)) (choose* 'uint16 'int16 'int32)]
-    [else 'int8]))
+  (match (infer-outT t0)
+    ['int16 (choose* 'int16 'int8 'uint8)]
+    ['int32 (choose* 'uint16 'int16 'int32)]
+    [_ 'int8]))
 
-(define (get-ir-ops t0 live-ops int-weights-gen int-divisor-gen int-shiftr-gen)
+(define (get-ir-ops t0 live-ops int-weights-gen int-divisor-gen int-shiftr-gen int-offsets-gen)
   (define operators (list))
 
   (when (or (set-member? live-ops 'vec-sca-mul) (set-member?  live-ops 'add))
@@ -64,7 +71,9 @@
       (define saturation-func (if saturation-arith? nop nop))
       (define output-type (filter-conv-output-types t0))
       (define conv-op (convolve t0 weights saturation-func output-type))
-      (set! operators (cons conv-op operators))))
+      (set! operators (cons conv-op operators))
+      (when (not (void? int-offsets-gen))
+        (set! operators (cons (const-add t0 (int-offsets-gen) saturation-func output-type) operators)))))
   
   (when (set-member? live-ops 'vec-sca-div)
     (begin
@@ -73,7 +82,7 @@
         (begin
           (set! operators (cons (logic-shift-right t0 (int-shiftr-gen)) operators))
           (set! operators (cons (arith-shift-right t0 (int-shiftr-gen) (bool-const) (filter-asr-output-types t0)) operators))))))
-
+  
   operators)
 
 (define (generate-ir-grammar spec)
@@ -84,10 +93,11 @@
   (define mul-consts (ir-expr-spec-mul-consts spec))
   (define div-consts (ir-expr-spec-div-consts spec))
   (define data buff-reads)
+  (define int-offsets-gen (get-generator-func add-consts))
   (define int-weights-gen (get-generator-func (append (list (int8_t (bv 0 8)) (int8_t (bv 1 8))) mul-consts)))
   (define int-shiftr-gen (get-generator-func (map log2 (filter pow2? div-consts))))
   (define int-divisor-gen (get-generator-func (remove* (filter pow2? div-consts) div-consts)))
-  (define (??ir-instr t0) (apply choose* (get-ir-ops t0 live-ops int-weights-gen int-divisor-gen int-shiftr-gen)))
+  (define (??ir-instr t0) (apply choose* (get-ir-ops t0 live-ops int-weights-gen int-divisor-gen int-shiftr-gen int-offsets-gen)))
   (define (??ir-expr)
     (define r0 (load-data data))
     (define r1 (??ir-instr r0))

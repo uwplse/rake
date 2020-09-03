@@ -73,7 +73,8 @@
         
         (define synthesized-expr (??ir-grammar))
         ;(define synthesized-expr (arith-shift-right (convolve (load-data (halide-spec-buff-reads spec)) (list (int16_t (bv 2 16)) (int8_t (bv 1 8)) (int8_t (bv 0 8)) (int8_t (bv 0 8)) #t) nop 'int16) (int16_t (bv 4 16)) #t 'uint8))
-
+        ;(define synthesized-expr (arith-shift-right (const-add (convolve (load-data (ir-expr-spec-buff-reads spec)) (list (int16_t (bv 1 16)) (int8_t (bv 2 8)) (int8_t (bv 1 8)) (int8_t (bv 0 8)) #f) nop 'int16) (int16_t (bv 9 16)) nop 'int16) (int16_t (bv 4 16)) #f 'uint8))
+        
         (define orig-expr (ir-expr-spec-expr spec))
         
         (define VEC_LANES (num-elems-hal orig-expr))
