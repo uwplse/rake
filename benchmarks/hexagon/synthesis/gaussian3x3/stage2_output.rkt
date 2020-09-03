@@ -3,13 +3,7 @@
 (require rosette/lib/synthax)
 (require rosette/lib/angelic)
 
-(require rake/util)
-(require rake/spec)
-
-(require rake/cpp/types)
-(require rake/halide/ir/types)
-(require rake/synthesis/axioms)
-(require rake/synthesis/algorithm)
+(require rake)
 
 (error-print-width 100000)
 (debug-on)
