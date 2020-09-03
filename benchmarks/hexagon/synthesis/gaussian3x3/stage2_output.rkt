@@ -4,6 +4,7 @@
 (require rosette/lib/angelic)
 
 (require rake/util)
+(require rake/spec)
 
 (require rake/cpp/types)
 (require rake/halide/ir/types)
@@ -20,17 +21,12 @@
 (init-var-types (make-hash (list (cons rows 'int16) (cons c1 'int16))))
 
 ;; Axioms describing value range for intermediates
-(define (axioms)
-  (assert (values-range-from rows (bv 0 16) (bv 1021 16)))
-  (assert (values-range-from c1 (bv 0 16) (bv 1021 16))))
+(define axioms (list (values-range-from rows (bv 0 16) (bv 1021 16)) (values-range-from c1 (bv 0 16) (bv 1021 16))))
 
 ;; Model indexing variables as integers
 (define-symbolic output.s0.x.x integer?)
 
-;; Define the context of the spec
-(define ctx (spec-context (list rows output.s0.x.x c1) axioms))
-
-;; Define original expression
+;; Define original expression in Halide IR
 (define halide-expr
   (uint8x128
    (vec-div
@@ -63,6 +59,9 @@
      (x128 (int16_t (bv 8 16))))
     (x128 (int16_t (bv 16 16))))))
 
-(define hvx-expr (synthesize-hvx halide-expr ctx))
+;; Define the specification for the synthesizer
+(define spec (synthesis-spec halide-expr (list rows output.s0.x.x c1) axioms))
+
+(define hvx-expr (synthesize-hvx spec))
 
 (println hvx-expr)

@@ -17,40 +17,42 @@
 
 (define MC_BND 1)
 
-(struct spec-context (symbolic-vars axioms))
-
-(define (synthesize-hvx spec-expr spec-ctx [spec-lang 'halide-ir])
+(define (synthesize-hvx spec [spec-lang 'halide-ir])
   (cond
     [(eq? spec-lang 'halide-ir)
+     (define halide-expr (synthesis-spec-expr spec))
+     (define halide-expr-ctx (synthesis-spec-context spec))
+     (define halide-expr-axioms (synthesis-spec-axioms spec))
+     
      ;; Extract the set of buffer reads
-     (define buff-reads (extract-buf-reads-hal spec-expr))
+     (define buff-reads (extract-buf-reads-hal halide-expr))
 
      ;; Extract the set of constant multiplication factors
-     (define add-consts (extract-add-consts-hal spec-expr))
-     (define sub-consts (extract-sub-consts-hal spec-expr))
-     (define mul-consts (extract-mul-consts-hal spec-expr))
-     (define div-consts (extract-div-consts-hal spec-expr))
+     (define add-consts (extract-add-consts-hal halide-expr))
+     (define sub-consts (extract-sub-consts-hal halide-expr))
+     (define mul-consts (extract-mul-consts-hal halide-expr))
+     (define div-consts (extract-div-consts-hal halide-expr))
 
      ;; Extract the set of live ops
-     (define live-ops (list->set (extract-live-ops-hal spec-expr)))
+     (define live-ops (list->set (extract-live-ops-hal halide-expr)))
 
-     ;; Define the halide specification for stage 1
-     (define spec-stage1 (halide-spec spec-expr spec-ctx buff-reads live-ops add-consts sub-consts mul-consts div-consts))
+     ;; Define the specification for synthesizing equiv expr in our IR
+     (define ir-spec (ir-expr-spec halide-expr halide-expr-ctx halide-expr-axioms buff-reads live-ops add-consts sub-consts mul-consts div-consts))
     
      ;; Synthesize equivalent expression in IR
      (init-ir-grammar-generator)
-     (define stage1_res (synthesize-ir-expr spec-stage1))
+     (define stage1_res (synthesize-ir-expr ir-spec))
      (define ir-expr (car stage1_res))
      (define ir-expr-sol (cdr stage1_res))
 
      ;; Define the ir specification for stage 1
-     (define spec_stage2 (ir-spec ir-expr ir-expr-sol spec-ctx (vec-len spec-expr)))
+     (define hvx-spec (hvx-expr-spec ir-expr ir-expr-sol halide-expr-ctx halide-expr-axioms))
 
      ;; Synthesize equivalent HVX expression for each Op in the IR
-     (define hvx-expr (compile-to-hvx spec_stage2))
+     (define hvx-expr (synthesize-hvx-expr hvx-spec))
 
      ;; Full verification
-     (if (verify-eq? spec-expr hvx-expr spec-ctx)
+     (if (verify-equiv? halide-expr hvx-expr halide-expr-ctx halide-expr-axioms)
          (begin (display "Synthesized solution is correct.\n\n") hvx-expr)
          (begin (display "Synthesized solution is incorrect.\n\n") #f))]
 
@@ -72,23 +74,27 @@
         (define synthesized-expr (??ir-grammar))
         ;(define synthesized-expr (arith-shift-right (convolve (load-data (halide-spec-buff-reads spec)) (list (int16_t (bv 2 16)) (int8_t (bv 1 8)) (int8_t (bv 0 8)) (int8_t (bv 0 8)) #t) nop 'int16) (int16_t (bv 4 16)) #t 'uint8))
 
+        (define orig-expr (ir-expr-spec-expr spec))
+        
+        (define VEC_LANES (num-elems-hal orig-expr))
+        
         ;; Verification conditions
         (define (bounded-eq? oe se lanes)
           (for ([i lanes])
             (set-curr-cn-ir i)
             (assert (eq? (oe i) (elem-ir se i)))
-            (set-curr-cn-ir (+ i 65))
-            (assert (eq? (oe (+ i 65)) (elem-ir se (+ i 65))))))
+            (set-curr-cn-ir (+ i (/ VEC_LANES 2) 1))
+            (assert (eq? (oe (+ i (/ VEC_LANES 2) 1)) (elem-ir se (+ i (/ VEC_LANES 2) 1))))))
         
         (display "Searching...\n")
         (display "============\n")
 
         ;; Synthesize expression
         (clear-asserts!)
-        ((spec-context-axioms (halide-spec-ctx spec)))
+        (for ([axiom (ir-expr-spec-axioms spec)]) (assert axiom))
         (define st (current-seconds))
-        (define sol (synthesize #:forall (spec-context-symbolic-vars (halide-spec-ctx spec))
-                                #:guarantee (bounded-eq? (interpret-halide (halide-spec-expr spec)) (interpret-ir synthesized-expr) MC_BND)))
+        (define sol (synthesize #:forall (ir-expr-spec-ctx spec)
+                                #:guarantee (bounded-eq? (interpret-halide orig-expr) (interpret-ir synthesized-expr) MC_BND)))
         (define runtime (- (current-seconds) st))
 
         (if (eq? sol (unsat))
@@ -105,42 +111,42 @@
         (display "Maximum instruction bound reached. Giving up.\n\n")
         (void))))
 
-(define (compile-to-hvx spec)
-  (define ir-expr (ir-spec-expr spec))
-  (define ir-expr-sol (ir-spec-sol spec))
-  (define ir-expr-ctx (ir-spec-ctx spec))
-  (define num-req-elems (ir-spec-req-elems spec))
+(define (synthesize-hvx-expr spec)
+  (define ir-expr (hvx-expr-spec-expr spec))
+  (define ir-expr-sol (hvx-expr-spec-sol spec))
+  (define ir-expr-ctx (hvx-expr-spec-ctx spec))
+  (define ir-expr-axioms (hvx-expr-spec-axioms spec))
   
   (match ir-expr
     [(arith-shift-right sub-expr n round? outputType)
      (begin
-       (define ir-sub-spec (ir-spec sub-expr ir-expr-sol ir-expr-ctx num-req-elems))
-       (define hvx-sub-expr (compile-to-hvx ir-sub-spec))
+       (define hvx-sub-spec (hvx-expr-spec sub-expr ir-expr-sol ir-expr-ctx ir-expr-axioms))
+       (define hvx-sub-expr (synthesize-hvx-expr hvx-sub-spec))
        (display "Lifting IR to HVX...\n")
        (display "====================\n")
        (display (format "IR Operation: ~a\n\n" ir-expr))
        (reset-hvx-instr-bnd)
-       (synthesize-equiv-hvx spec hvx-sub-expr num-req-elems))]
+       (synthesize-equiv-hvx spec hvx-sub-expr))]
 
     [(convolve sub-expr weights saturateFunc outputType)
      (begin
-       (define ir-sub-spec (ir-spec sub-expr ir-expr-sol ir-expr-ctx num-req-elems))
-       (define hvx-sub-expr (compile-to-hvx ir-sub-spec))
+       (define hvx-sub-spec (hvx-expr-spec sub-expr ir-expr-sol ir-expr-ctx ir-expr-axioms))
+       (define hvx-sub-expr (synthesize-hvx-expr hvx-sub-spec))
        (display "Lifting IR to HVX...\n")
        (display "====================\n")
-       (display (format "IR Operation: ~a\n\n" (ir-spec-expr spec)))
+       (display (format "IR Operation: ~a\n\n" ir-expr))
        (reset-hvx-instr-bnd)
-       (synthesize-equiv-hvx spec hvx-sub-expr num-req-elems))]
+       (synthesize-equiv-hvx spec hvx-sub-expr))]
 
     [(load-data opts) (gather* opts)]
 
     [_ (println "NYI")]))
 
 ;; Define modular synthesis loop for HVX expression generation
-(define (synthesize-equiv-hvx spec hvx-sub-expr num-req-elems)
-  (define ir-expr (ir-spec-expr spec))
-  (define ir-expr-sol (ir-spec-sol spec))
-  (define ir-expr-ctx (ir-spec-ctx spec))
+(define (synthesize-equiv-hvx spec hvx-sub-expr)
+  (define ir-expr (hvx-expr-spec-expr spec))
+  (define ir-expr-sol (hvx-expr-spec-sol spec))
+  (define ir-expr-ctx (hvx-expr-spec-ctx spec))
   (if (not (hvx-instr-limit-exceeded?))
       (begin
         (display "Generating HVX Grammar...\n")
@@ -174,9 +180,9 @@
         ;(define synthesized-hvx-expr (if (arith-shift-right? ir-expr) (vasr-rnd-sat hvx-sub-expr hvx-sub-expr (int8_t (bv 4 8)) #t #t #t) (??hvx-expr)))
 
         (clear-asserts!)
-        ((spec-context-axioms ir-expr-ctx))
+        (for ([axiom (hvx-expr-spec-axioms spec)]) (assert axiom))
         (define st (current-seconds))
-        (define sol (synthesize #:forall (spec-context-symbolic-vars ir-expr-ctx)
+        (define sol (synthesize #:forall (hvx-expr-spec-ctx spec)
                                 #:guarantee (bounded-eq2? (interpret-ir ir-expr) (interpret-hvx synthesized-hvx-expr) MC_BND)))
         (define runtime (- (current-seconds) st))
 
@@ -184,7 +190,7 @@
             (begin
               (display "Failed to find an equivalent HVX expression.\n\n")
               (increment-hvx-instr-bnd)
-              (synthesize-equiv-hvx spec hvx-sub-expr num-req-elems))
+              (synthesize-equiv-hvx spec hvx-sub-expr))
             (begin
               (display "Successfully found an equivalent HVX expression.\n\n")
               (debug (format "~a\n\n" (evaluate synthesized-hvx-expr sol)))
@@ -195,7 +201,7 @@
         (exit)
         (void))))
 
-(define (verify-eq? halide-spec hvx-expr ctx)
+(define (verify-equiv? halide-spec hvx-expr ctx axioms)
   (display "Verifying expression equivalence over full-length vectors...\n")
   (display "============================================================\n")
 
@@ -214,7 +220,7 @@
       (set-curr-cn-hvx lane)
       (assert (eq? (oe lane) (elem-hvx se lane)))))
   (clear-asserts!)
-  ((spec-context-axioms ctx))
+  (for ([axiom axioms]) (assert axiom))
   (define st (current-seconds))
   (define sol (synthesize #:forall ctx
                           #:guarantee (equiv-output? interpreted-o-expr interpreted-s-expr)))
@@ -225,11 +231,11 @@
   (define (lane-eq? oe se lane) (assert (eq? (oe lane) (elem-hvx se lane))))
   (define sols (list))
   (clear-asserts!)
-  ((spec-context-axioms ctx))
+  (for ([axiom axioms]) (assert axiom))
   (set! st (current-seconds))
   (for ([lane VEC_LANES])
     (set-curr-cn-hvx lane)
-    (define sol (synthesize #:forall (spec-context-symbolic-vars ctx)
+    (define sol (synthesize #:forall ctx
                             #:guarantee (lane-eq? interpreted-o-expr interpreted-s-expr lane)))
     (set! sols (append sols (list sol))))
   (set! runtime (- (current-seconds) st))
@@ -240,4 +246,4 @@
 
   correct?)
 
-(provide synthesize-hvx spec-context)
+(provide synthesize-hvx)

@@ -1,6 +1,8 @@
 #lang rosette
 
-(struct halide-spec (expr ctx buff-reads live-ops add-consts sub-consts mul-consts div-consts))
-(struct ir-spec (expr sol ctx req-elems))
+(struct synthesis-spec (expr context axioms))
+
+(struct ir-expr-spec (expr ctx axioms buff-reads live-ops add-consts sub-consts mul-consts div-consts))
+(struct hvx-expr-spec (expr sol ctx axioms))
 
 (provide (all-defined-out))
