@@ -9,7 +9,26 @@
 (require rake/hvx/ast/types)
 (require rake/synthesis/ir)
 
+;; Grammar features
+(define max-instr-bnd 3)
 (define curr-instr-bnd 1)
+(define saturation-arith? #f)
+(define specialized-op-set #t)
+
+;; Utility functions
+(define (hvx-instr-limit-exceeded?) (> curr-instr-bnd max-instr-bnd))
+(define (hvx-instr-bnd) curr-instr-bnd)
+;(define (ir-sat-arith?) saturation-arith?)
+;(define (ir-specialized-ops?) specialized-op-set)
+
+(define (increment-hvx-instr-bnd) (set! curr-instr-bnd (add1 curr-instr-bnd)))
+(define (reset-hvx-instr-bnd) (set! curr-instr-bnd 1))
+
+(define (init-hvx-grammar-generator [max-i-bnd 3])
+  (set! max-instr-bnd max-i-bnd)
+  (set! specialized-op-set #t)
+  (set! saturation-arith? #f)
+  (set! curr-instr-bnd 1))
 
 (define (bool-const) (define-symbolic* b boolean?)  b)
 
@@ -90,4 +109,4 @@
      ))
   ??hvx-asr-instr)
 
-(provide (all-defined-out))
+(provide hvx-instr-limit-exceeded? hvx-instr-bnd generate-hvx-grammar increment-hvx-instr-bnd reset-hvx-instr-bnd)

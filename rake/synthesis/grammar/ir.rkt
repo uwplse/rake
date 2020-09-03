@@ -14,15 +14,15 @@
 (define specialized-op-set #t)
 
 ;; Utility functions
-(define (instr-limit-exceeded?) (> curr-instr-bnd max-instr-bnd))
-(define (instr-bnd) curr-instr-bnd)
-(define (sat-arith?) saturation-arith?)
-(define (specialized-ops?) specialized-op-set)
+(define (ir-instr-limit-exceeded?) (> curr-instr-bnd max-instr-bnd))
+(define (ir-instr-bnd) curr-instr-bnd)
+(define (ir-sat-arith?) saturation-arith?)
+(define (ir-specialized-ops?) specialized-op-set)
 
-(define (increment-instr-bnd) (set! curr-instr-bnd (add1 curr-instr-bnd)))
-(define (reset-instr-bnd) (set! curr-instr-bnd 1))
+(define (increment-ir-instr-bnd) (set! curr-instr-bnd (add1 curr-instr-bnd)))
+(define (reset-ir-instr-bnd) (set! curr-instr-bnd 1))
 
-(define (init-grammar-generator [max-i-bnd 3])
+(define (init-ir-grammar-generator [max-i-bnd 3])
   (set! max-instr-bnd max-i-bnd)
   (set! specialized-op-set #t)
   (set! saturation-arith? #f)
@@ -92,4 +92,4 @@
       [else r3]))
   ??ir-expr)
 
-(provide init-grammar-generator generate-ir-grammar instr-limit-exceeded? instr-bnd sat-arith? specialized-ops? increment-instr-bnd reset-instr-bnd)
+(provide init-ir-grammar-generator generate-ir-grammar ir-instr-limit-exceeded? ir-instr-bnd ir-sat-arith? ir-specialized-ops? increment-ir-instr-bnd reset-ir-instr-bnd)

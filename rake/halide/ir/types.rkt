@@ -90,4 +90,4 @@
     ;; Base case
     [_ (error "Don't know how to get vector length from:" expr)]))
 
-(provide (except-out (all-defined-out) vec-len) (rename-out [vec-len num-elems-hal]))
+(provide (except-out (all-defined-out)) (rename-out [vec-len num-elems-hal]))
