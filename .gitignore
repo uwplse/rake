@@ -2,4 +2,8 @@
 **/*~
 **/*.bak
 benchmarks/**/bin/*
+benchmarks/**/out/*
+benchmarks/**/build/*
+benchmarks/**/ref_build/*
+benchmarks/**/profile/*
 rake/**/compiled/**/*
