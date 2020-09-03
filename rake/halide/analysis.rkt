@@ -13,12 +13,12 @@
   
 (define (extract-lane-buf-reads expr)
   (match expr
-    [(int8_t v) (extract-buf-reads v)]
-    [(int16_t v) (extract-buf-reads v)]
-    [(int32_t v) (extract-buf-reads v)]
-    [(uint8_t v) (extract-buf-reads v)]
-    [(uint16_t v) (extract-buf-reads v)]
-    [(uint32_t v) (extract-buf-reads v)]
+    [(int8_t v) (extract-lane-buf-reads v)]
+    [(int16_t v) (extract-lane-buf-reads v)]
+    [(int32_t v) (extract-lane-buf-reads v)]
+    [(uint8_t v) (extract-lane-buf-reads v)]
+    [(uint16_t v) (extract-lane-buf-reads v)]
+    [(uint32_t v) (extract-lane-buf-reads v)]
 
     [(expression op operands ...)
 
@@ -28,11 +28,11 @@
      (define app (match hack2 [(expression op2 ops2 ...) op2]))
      
      (cond
-       [(eq? op bvadd) (flatten (for/list ([operand operands]) (extract-buf-reads operand)))]
-       [(eq? op bvmul) (flatten (for/list ([operand operands]) (extract-buf-reads operand)))]
-       [(eq? op bvsdiv) (flatten (for/list ([operand operands]) (extract-buf-reads operand)))]
-       [(eq? op bvudiv) (flatten (for/list ([operand operands]) (extract-buf-reads operand)))]
-       [(eq? op extract) (flatten (for/list ([operand operands]) (extract-buf-reads operand)))]
+       [(eq? op bvadd) (flatten (for/list ([operand operands]) (extract-lane-buf-reads operand)))]
+       [(eq? op bvmul) (flatten (for/list ([operand operands]) (extract-lane-buf-reads operand)))]
+       [(eq? op bvsdiv) (flatten (for/list ([operand operands]) (extract-lane-buf-reads operand)))]
+       [(eq? op bvudiv) (flatten (for/list ([operand operands]) (extract-lane-buf-reads operand)))]
+       [(eq? op extract) (flatten (for/list ([operand operands]) (extract-lane-buf-reads operand)))]
        [(eq? op app) (mk-typed-expr expr (var-type (list-ref operands 0)))]
        [else (error "NYI: extract buffer reads from" expr)])]
      
