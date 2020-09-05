@@ -73,10 +73,12 @@
 (struct vrmpy-p-acc (Vdd Vuu Rt u1) #:transparent)
 (struct vavg (Vu Vv rnd?) #:transparent)
 (struct vnavg (Vu Vv) #:transparent)
+(struct vasl (Vu Rt) #:transparent)
 (struct vlsr (Vu Rt) #:transparent)
 (struct vasr (Vu Rt) #:transparent)
 (struct vasr-acc (Vd Vu Rt) #:transparent)
 (struct vasr-n (Vu Vv Rt round? sat? unsigned?) #:transparent)
+(struct vround (Vu Vv signed?) #:transparent)
 
 ;; New instructions types we introduce to abstract away data-movement.
 ;; These instr types should never exist in output code.

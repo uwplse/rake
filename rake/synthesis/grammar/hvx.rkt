@@ -16,6 +16,8 @@
 (define specialized-op-set #t)
 
 ;; Utility functions
+(define (pow2? val) (if (<= (eval-to-int val) 0) #f (integer? (log (eval-to-int val) 2))))
+(define (log2 val) (mk-typed-expr (bv (exact-round (log (eval-to-int val) 2)) (bw val)) (type val)))
 (define (hvx-instr-limit-exceeded?) (> curr-instr-bnd max-instr-bnd))
 (define (hvx-instr-bnd) curr-instr-bnd)
 ;(define (ir-sat-arith?) saturation-arith?)
@@ -52,6 +54,7 @@
 ;; HVX instructions for synthesizing convolutions
 (define (get-hvx-conv-isa weights)
   (define (int-const) (cpp_cast (apply choose* (set->list (list->set (take weights 4)))) (choose* 'int8 'uint8)))
+  (define (shl-const) (cpp_cast (apply choose* (set->list (list->set (map log2 (filter pow2? (take weights 4)))))) 'int8))
   (define (??hvx-conv-instr registers)
     (define t0 (apply choose* registers))
     (define t1 (apply choose* registers))
@@ -90,7 +93,10 @@
      (vrmpy-acc t0 t1 Rt4)
 
      (vrmpy-p t0 Rt4 (bool-const))
-     (vrmpy-p-acc t0 t1 Rt4 (bool-const))))
+     (vrmpy-p-acc t0 t1 Rt4 (bool-const))
+
+     ;; Shift-left
+     (vasl t0 (shl-const))))
   ??hvx-conv-instr)
 
 ;; HVX instructions for arithmetic shift right

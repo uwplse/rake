@@ -138,7 +138,7 @@
            (if round
                (satu16 (uint32_t (bvlshr (bvadd (eval v) (bv 32768 32)) (bv 16 32))))
                (satu16 v))])))]
-
+    
     [(upcast data)
      (vector
       (lambda (i)
