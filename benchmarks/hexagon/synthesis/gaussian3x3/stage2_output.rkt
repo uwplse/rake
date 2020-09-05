@@ -58,4 +58,6 @@
 
 (define hvx-expr (synthesize-hvx spec))
 
+(basic-expr-cost hvx-expr)
+
 (println hvx-expr)

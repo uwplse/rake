@@ -9,6 +9,7 @@
 
 (require rake/hvx/ast/types)
 (require rake/hvx/ast/visitor)
+(require rake/hvx/cost-model)
 (require rake/hvx/interpreter)
 
 (require rake/synthesis/ir)
@@ -28,10 +29,10 @@
      (define buff-reads (extract-buf-reads-hal halide-expr))
 
      ;; Extract the set of constant multiplication factors
-     (define add-consts (extract-add-consts-hal halide-expr))
-     (define sub-consts (extract-sub-consts-hal halide-expr))
-     (define mul-consts (extract-mul-consts-hal halide-expr))
-     (define div-consts (extract-div-consts-hal halide-expr))
+     (define add-consts (set->list (list->set (extract-add-consts-hal halide-expr))))
+     (define sub-consts (set->list (list->set (extract-sub-consts-hal halide-expr))))
+     (define mul-consts (set->list (list->set (extract-mul-consts-hal halide-expr))))
+     (define div-consts (set->list (list->set (extract-div-consts-hal halide-expr))))
 
      ;; Extract the set of live ops
      (define live-ops (list->set (extract-live-ops-hal halide-expr)))
@@ -70,13 +71,10 @@
 
         ;; Generate a specialized grammar based on 
         (define ??ir-grammar (generate-ir-grammar spec))
-        
+
         (define synthesized-expr (??ir-grammar))
-        ;(define synthesized-expr (arith-shift-right (convolve (load-data (halide-spec-buff-reads spec)) (list (int16_t (bv 2 16)) (int8_t (bv 1 8)) (int8_t (bv 0 8)) (int8_t (bv 0 8)) #t) nop 'int16) (int16_t (bv 4 16)) #t 'uint8))
-        ;(define synthesized-expr (arith-shift-right (const-add (convolve (load-data (ir-expr-spec-buff-reads spec)) (list (int16_t (bv 1 16)) (int8_t (bv 2 8)) (int8_t (bv 1 8)) (int8_t (bv 0 8)) #f) nop 'int16) (int16_t (bv 9 16)) nop 'int16) (int16_t (bv 4 16)) #f 'uint8))
-        
         (define orig-expr (ir-expr-spec-expr spec))
-        
+
         (define VEC_LANES (num-elems-hal orig-expr))
         
         ;; Verification conditions
@@ -143,11 +141,14 @@
 
     [_ (println "NYI")]))
 
+;; Dynamic programming to find best cost solution
+;; Sub-exprs synthesized first
+;; Dynamic programming to remove swizzles whenever possible
+;; Otherwise dyn programming might be too expensive? If total expr cost is N, all sub-exprs with cost lt N should be considered. (Try?)
+;; Various cost-models: Naive instr count, weighted instr count, best packets / latency, minimize loads
+
 ;; Define modular synthesis loop for HVX expression generation
 (define (synthesize-equiv-hvx spec hvx-sub-expr)
-  (define ir-expr (hvx-expr-spec-expr spec))
-  (define ir-expr-sol (hvx-expr-spec-sol spec))
-  (define ir-expr-ctx (hvx-expr-spec-ctx spec))
   (if (not (hvx-instr-limit-exceeded?))
       (begin
         (display "Generating HVX Grammar...\n")
@@ -155,52 +156,68 @@
         (debug (format "Number of instructions: ~a\n" (hvx-instr-bnd)))
         (debug (format "Set of instructions: Specialized\n\n"))
 
-        (define (bounded-eq2? oe se lanes)
-          (for ([i lanes])
-            (cond
-              [(hvx-pair? se)
-               (set-curr-cn-ir i)
-               (set-curr-cn-hvx i)
-               (assert (eq? (evaluate (elem-ir oe i) ir-expr-sol) (v0-elem-hvx se i)))
-               (set-curr-cn-ir (+ i 65))
-               (set-curr-cn-hvx (+ i 65))
-               (assert (eq? (evaluate (elem-ir oe (+ i 65)) ir-expr-sol) (v1-elem-hvx se (+ i 1))))]
-              [else
-               (set-curr-cn-ir i)
-               (set-curr-cn-hvx i)
-               (assert (eq? (evaluate (elem-ir oe i) ir-expr-sol) (elem-hvx se i)))
-               (set-curr-cn-ir (+ i 65))
-               (set-curr-cn-hvx (+ i 65))
-               (assert (eq? (evaluate (elem-ir oe (+ i 65)) ir-expr-sol) (elem-hvx se (+ i 65))))])))
-
-        (define ??hvx-expr (generate-hvx-grammar ir-expr hvx-sub-expr))
-
-        (define synthesized-hvx-expr (??hvx-expr))
-        ;(define synthesized-hvx-expr (vcombine (vmpyi-acc (vadd (gather buff-reads)  (gather buff-reads) #f)  (gather buff-reads) (int8_t (bv 2 8))) (vmpyi-acc (vadd (gather buff-reads)  (gather buff-reads) #f)  (gather buff-reads) (int8_t (bv 2 8)))))
-        ;(define synthesized-hvx-expr (vmpyi-acc (vadd (gather buff-reads)  (gather buff-reads) #f)  (gather buff-reads) (int8_t (bv 2 8))))
-        ;(define synthesized-hvx-expr (if (arith-shift-right? ir-expr) (vasr-rnd-sat hvx-sub-expr hvx-sub-expr (int8_t (bv 4 8)) #t #t #t) (??hvx-expr)))
-
-        (clear-asserts!)
-        (for ([axiom (hvx-expr-spec-axioms spec)]) (assert axiom))
+        (define ??hvx-expr-grm (generate-hvx-grammar (hvx-expr-spec-expr spec) hvx-sub-expr))
         (define st (current-seconds))
-        (define sol (synthesize #:forall (hvx-expr-spec-ctx spec)
-                                #:guarantee (bounded-eq2? (interpret-ir ir-expr) (interpret-hvx synthesized-hvx-expr) MC_BND)))
-        (define runtime (- (current-seconds) st))
-
-        (if (eq? sol (unsat))
+        (define res (synthesize-optimal spec ??hvx-expr-grm basic-expr-cost))
+        
+        (if (eq? res (unsat))
             (begin
               (display "Failed to find an equivalent HVX expression.\n\n")
               (increment-hvx-instr-bnd)
               (synthesize-equiv-hvx spec hvx-sub-expr))
-            (begin
-              (display "Successfully found an equivalent HVX expression.\n\n")
-              (debug (format "~a\n\n" (evaluate synthesized-hvx-expr sol)))
-              (debug (format "Synthesis time: ~a seconds\n\n" runtime))
-              (evaluate synthesized-hvx-expr sol))))
+            res))
       (begin
         (display "Maximum instruction bound reached. Giving up.\n\n")
         (exit)
         (void))))
+
+(define (synthesize-optimal spec ??hvx-expr-grm cost-model [curr-best-sol (void)])
+  (define ir-expr (hvx-expr-spec-expr spec))
+  (define ir-expr-sol (hvx-expr-spec-sol spec))
+  (define ir-expr-ctx (hvx-expr-spec-ctx spec))
+  (define ir-expr-axioms (hvx-expr-spec-axioms spec))
+  (define synthesized-hvx-expr (??hvx-expr-grm))
+
+  (define (bounded-eq? oe se lanes)
+    (for ([i lanes])
+      (cond
+        [(hvx-pair? se)
+         (set-curr-cn-ir i)
+         (set-curr-cn-hvx i)
+         (assert (eq? (evaluate (elem-ir oe i) ir-expr-sol) (v0-elem-hvx se i)))
+         (set-curr-cn-ir (+ i 1))
+         (set-curr-cn-hvx (+ i 1))
+         (assert (eq? (evaluate (elem-ir oe (+ i 1)) ir-expr-sol) (v1-elem-hvx se (+ i 1))))]
+        [else
+         (set-curr-cn-ir i)
+         (set-curr-cn-hvx i)
+         (assert (eq? (evaluate (elem-ir oe i) ir-expr-sol) (elem-hvx se i)))
+         (set-curr-cn-ir (+ i 1))
+         (set-curr-cn-hvx (+ i 1))
+         (assert (eq? (evaluate (elem-ir oe (+ i 1)) ir-expr-sol) (elem-hvx se (+ i 1))))])))
+
+  (define curr-best-cost (if (void? curr-best-sol) +inf.0 (cost-model curr-best-sol)))
+
+  (clear-asserts!)
+  (for ([axiom ir-expr-axioms]) (assert axiom))
+  (define st (current-seconds))
+  (define sol (synthesize #:forall ir-expr-ctx
+                          #:guarantee (begin
+                                       (bounded-eq? (interpret-ir ir-expr) (interpret-hvx synthesized-hvx-expr) MC_BND)
+                                       (when (not (eq? curr-best-cost +inf.0)) (assert (< (cost-model synthesized-hvx-expr) curr-best-cost))))))
+  (define runtime (- (current-seconds) st))
+
+  (cond
+    [(unsat? sol) (cond
+                    [(void? curr-best-sol) sol]
+                    [else (display (format "Failed to find an equivalent HVX expression with cost lower than ~a.\n\n" curr-best-cost))
+                          curr-best-sol])]
+    [else (display "Successfully found an equivalent HVX expression.\n\n")
+          (debug (format "~a\n\n" (evaluate synthesized-hvx-expr sol)))
+          (debug (format "Expression cost: ~a\n\n" (cost-model (evaluate synthesized-hvx-expr sol))))
+          (debug (format "Synthesis time: ~a seconds\n\n" runtime))
+          (display "Searching for a more optimal solution...\n\n")
+          (synthesize-optimal spec ??hvx-expr-grm cost-model (evaluate synthesized-hvx-expr sol))]))
 
 (define (verify-equiv? halide-spec hvx-expr ctx axioms)
   (display "Verifying expression equivalence over full-length vectors...\n")
