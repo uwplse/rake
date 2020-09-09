@@ -62,9 +62,12 @@
     ['int32 (choose* 'uint16 'int16 'int32)]
     [_ 'int8]))
 
-(define (get-ir-ops t0 live-ops int-weights-gen int-divisor-gen int-shiftr-gen int-offsets-gen)
+(define (get-ir-ops t0 live-ops int-weights-gen int-divisor-gen int-shiftr-gen int-offsets-gen add-consts)
   (define operators (list))
 
+  (when (for/or ([c add-consts]) (or (eq? (eval-to-int c) 128) (eq? (eval-to-int c) 32768)))
+    (set! operators (cons (saturate t0 #t (bool-const)) operators)))
+  
   (when (or (set-member? live-ops 'vec-sca-mul) (set-member?  live-ops 'add))
     (begin
       (define weights (list (int-weights-gen) (int-weights-gen) (int-weights-gen) (int-weights-gen) (bool-const)))
@@ -97,7 +100,7 @@
   (define int-weights-gen (get-generator-func (append (list (int8_t (bv 0 8)) (int8_t (bv 1 8))) mul-consts)))
   (define int-shiftr-gen (get-generator-func (map log2 (filter pow2? div-consts))))
   (define int-divisor-gen (get-generator-func (remove* (filter pow2? div-consts) div-consts)))
-  (define (??ir-instr t0) (apply choose* (get-ir-ops t0 live-ops int-weights-gen int-divisor-gen int-shiftr-gen int-offsets-gen)))
+  (define (??ir-instr t0) (apply choose* (get-ir-ops t0 live-ops int-weights-gen int-divisor-gen int-shiftr-gen int-offsets-gen add-consts)))
   (define (??ir-expr)
     (define r0 (load-data data))
     (define r1 (??ir-instr r0))
