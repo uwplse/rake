@@ -38,7 +38,6 @@ public:
 
             Expr ht = output.dim(1).extent();
 
-            // HALIDE: 0.3881 cycles/pixel
             // Best Manual Implementation :   0.1412 cycles/pixel
             /*output
                 .hexagon()
@@ -47,18 +46,28 @@ public:
                 .vectorize(xi);
 
             rows
-                .compute_at(Func(output), x)
+                .store_at(Func(output), yo)
+                .compute_at(Func(output), y)
                 .align_storage(x, vector_size)
                 .vectorize(x, vector_size, TailStrategy::RoundUp);
 
             output.parallel(yo);
             output.prefetch(input, y, 2, PrefetchBoundStrategy::NonFaulting);*/
 
-            // Halide: 0.3383 cycles/pixel
+            // Parallel loop error
+            /*rows.compute_at(Func(output), xi).store_at(Func(output), yi);
+
+            output
+                .hexagon()
+                .tile(x, y, xi, yi, vector_size, 4, TailStrategy::RoundUp)
+                .vectorize(xi);*/
+
+            // Best Halide I know of (0.1979 cycles/pixel)
             output
                 .hexagon()
                 .tile(x, y, xi, yi, vector_size, 4, TailStrategy::RoundUp)
                 .vectorize(xi);
+
 
             output.prefetch(input, y, 2, PrefetchBoundStrategy::NonFaulting);
         } else {
