@@ -1,8 +1,8 @@
 #lang rosette
 
-(require "../cpp.rkt")
-(require "../hexagon.rkt")
-(require "../codegen.rkt")
+(require rake/cpp/types)
+(require rake/hvx/ast/types)
+(require rake/hvx/codegen/cpp)
 
 (require rackunit)
 

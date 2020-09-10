@@ -235,18 +235,32 @@
   ;; Verify multiple lanes at once (Slower...takes 1554 seconds (128 lanes) for baseline gaussian stage 2 example)
   (define (equiv-output? oe se)
     (for ([lane 8])
-      (set-curr-cn-hvx lane)
-      (assert (eq? (oe lane) (elem-hvx se lane)))))
+      (cond
+        [(hvx-pair? se)
+         (set-curr-cn-hvx lane)
+         (assert (eq? (oe lane) (v0-elem-hvx se lane)))]
+        [else
+         (set-curr-cn-hvx lane)
+         (assert (eq? (oe lane) (elem-hvx se lane)))])))
+  
   (clear-asserts!)
   (for ([axiom axioms]) (assert axiom))
   (define st (current-seconds))
   (define sol (synthesize #:forall ctx
                           #:guarantee (equiv-output? interpreted-o-expr interpreted-s-expr)))
   (define runtime (- (current-seconds) st))
-  (define correct? (and (eq? (vec-len halide-spec) (num-elems-hvx interpreted-s-expr)) (not (unsat? sol))))
+  (define correct? (not (unsat? sol)))
 
   ;; Verify all lanes incrementally (Faster...takes 30 seconds for baseline gaussian stage 2 example)
-  (define (lane-eq? oe se lane) (assert (eq? (oe lane) (elem-hvx se lane))))
+  (define (lane-eq? oe se lane)
+    (cond
+      [(hvx-pair? se)
+       (set-curr-cn-hvx lane)
+       (assert (eq? (oe lane) (v0-elem-hvx se lane)))]
+      [else
+       (set-curr-cn-hvx lane)
+       (assert (eq? (oe lane) (elem-hvx se lane)))]))
+  
   (define sols (list))
   (clear-asserts!)
   (for ([axiom axioms]) (assert axiom))

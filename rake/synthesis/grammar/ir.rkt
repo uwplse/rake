@@ -49,11 +49,11 @@
 
 (define (filter-conv-output-types t0)
   (match (infer-outT t0)
-    ['int8 (choose* 'int8 'int16)]
-    ['int16 (choose* 'int16 'int32)]
+    ['int8 (choose* 'int8 'int16 'uint16)]
+    ['int16 (choose* 'int16 'int32 'uint32)]
     ['int32 (choose* 'int32)]
-    ['uint8 (choose* 'uint8 'uint16)]
-    ['uint16 (choose* 'uint16 'uint32)]
+    ['uint8 (choose* 'uint8 'uint16 'int16)]
+    ['uint16 (choose* 'uint16 'uint32 'int32)]
     ['uint32 (choose* 'uint32)]))
 
 (define (filter-asr-output-types t0)
