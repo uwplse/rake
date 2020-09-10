@@ -1,0 +1,37 @@
+
+            // HALIDE: 0.3881 cycles/pixel
+            // Best Manual Implementation :   0.1412 cycles/pixel
+            output
+                .hexagon()
+                .split(y, yo, y, ht/2)
+                .tile(x, y, xi, yi, vector_size, 4, TailStrategy::RoundUp)
+                .vectorize(xi);
+
+            rows
+                .compute_at(Func(output), xi)
+                .store_at(Func(output), x);
+                //.align_storage(x, vector_size)
+                //.vectorize(x, vector_size, TailStrategy::RoundUp);
+
+
++ ./tmp/gaussian3x3_generator -o tmp -e o,h,assembly,bitcode -g gaussian3x3 -f gaussian3x3_hvx128 target=hexagon-32-noos-no_bounds_query-no_asserts-hvx_128
+Error: Func "rows" is stored outside the parallel loop over output.xi but computed within it. This is a potential race condition.
+Func "rows" is computed at the following invalid location:
+  rows.store_at(output, x).compute_at(output, xi);
+Legal locations for this function are:
+  rows.compute_root();
+  rows.compute_at(output, Var::outermost());
+  rows.compute_at(output, yo);
+  rows.compute_at(output, y);
+  rows.compute_at(output, x);
+  rows.compute_at(output, yi);
+  rows.compute_at(output, xi);
+"rows" is used in the following places:
+  for output.s0.y.yo:
+    for output.s0.y.y.y:
+      for output.s0.x.x:
+        for output.s0.y.y.yi:
+          for output.s0.x.xi:
+            output uses rows
+            output uses rows
+            output uses rows
