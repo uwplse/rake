@@ -43,21 +43,28 @@
      ;; Synthesize equivalent expression in IR
      (init-ir-grammar-generator)
      (define stage1_res (synthesize-ir-expr ir-spec))
-     (define ir-expr (car stage1_res))
-     (define ir-expr-sol (cdr stage1_res))
 
-     ;; Define the ir specification for stage 1
-     (define hvx-spec (hvx-expr-spec ir-expr ir-expr-sol halide-expr-ctx halide-expr-axioms))
+     (when (not (void? stage1_res))
+       (define ir-expr (car stage1_res))
+       (define ir-expr-sol (cdr stage1_res))
 
-     ;; Synthesize equivalent HVX expression for each Op in the IR
-     (define hvx-expr (synthesize-hvx-expr hvx-spec))
+       ;; Define the ir specification for stage 1
+       (define hvx-spec (hvx-expr-spec ir-expr ir-expr-sol halide-expr-ctx halide-expr-axioms))
 
-     ;; Full verification
-     (if (verify-equiv? halide-expr hvx-expr halide-expr-ctx halide-expr-axioms)
-         (begin (display "Synthesized solution is correct.\n\n") hvx-expr)
-         (begin (display "Synthesized solution is incorrect.\n\n") #f))]
+       ;; Synthesize equivalent HVX expression for each Op in the IR
+       (define hvx-expr (synthesize-hvx-expr hvx-spec))
+
+       (when (not (unsat? hvx-expr))
+       
+         ;; Full verification
+         (if (verify-equiv? halide-expr hvx-expr halide-expr-ctx halide-expr-axioms)
+             (begin (display "Synthesized solution is correct.\n\n") hvx-expr)
+             (begin (display "Synthesized solution is incorrect.\n\n") #f))))]
 
     [else (error "Input specification is provided in a language I don't understand:" spec-lang)]))
+
+(require rake/cpp/types)
+(require rosette/lib/synthax)
 
 ;; Define incremental synthesis loop for ir-expr generation
 (define (synthesize-ir-expr spec)
@@ -72,10 +79,39 @@
         ;; Generate a specialized grammar based on 
         (define ??ir-grammar (generate-ir-grammar spec))
 
-        (define synthesized-expr (??ir-grammar))
+        ;(define synthesized-expr (??ir-grammar))
         (define orig-expr (ir-expr-spec-expr spec))
 
         (define VEC_LANES (num-elems-hal orig-expr))
+
+        ;(set! synthesized-expr (arith-shift-right (load-data (ir-expr-spec-buff-reads spec)) (int16_t (bv 4 16)) (choose #t #f) 'not-sup))
+        ;(set! synthesized-expr (logic-shift-right (load-data (ir-expr-spec-buff-reads spec)) (int16_t (bv 4 16))))
+        ;(set! synthesized-expr (const-add (load-data (ir-expr-spec-buff-reads spec)) (int16_t (bv #x0008 16)) nop (choose 'uint8 'uint16 'int16)))
+        ;(println (list-ref (ir-expr-spec-buff-reads spec) 0))
+        ;(println (list-ref (ir-expr-spec-buff-reads spec) 0))
+        ;(println ((interpret-halide orig-expr) 0))
+        (define synthesized-expr (arith-shift-right
+                                  (convolve (load-data (ir-expr-spec-buff-reads spec))
+                                         2
+                                         (list
+                                          (int8_t (bv #x01 8));(choose (int16_t (bv #x0002 16)) (int16_t (bv #x0004 16)) (int8_t (bv #x01 8)))
+                                          (int16_t (bv #x0002 16));(choose (int16_t (bv #x0002 16)) (int16_t (bv #x0004 16)) (int8_t (bv #x01 8)))
+                                          (int16_t (bv #x0002 16));(choose (int16_t (bv #x0002 16)) (int16_t (bv #x0004 16)) (int8_t (bv #x01 8)))
+                                          (int16_t (bv #x0004 16)));(choose (int16_t (bv #x0002 16)) (int16_t (bv #x0004 16)) (int8_t (bv #x01 8))))
+;                                          ;(choose (int16_t (bv #x0002 16)) (int16_t (bv #x0004 16)) (int8_t (bv #x01 8)))
+;                                          ;(choose (int16_t (bv #x0002 16)) (int16_t (bv #x0004 16)) (int8_t (bv #x01 8)))
+;                                          ;(choose (int16_t (bv #x0002 16)) (int16_t (bv #x0004 16)) (int8_t (bv #x01 8)))
+;                                          ;(choose (int16_t (bv #x0002 16)) (int16_t (bv #x0004 16)) (int8_t (bv #x01 8)))
+;                                          ;(int16_t (bv #x0004 16)));(choose (int16_t (bv #x0002 16)) (int8_t (bv #x01 8)))
+                                         nop
+                                         'int16;(choose 'uint8 'uint16 'int16)
+                                         )
+                                  (int16_t (bv 4 16))
+                                  #t;(choose #t #f)
+                                  'uint8))
+
+        ;(println synthesized-expr)
+        ;(println (elem-ir (interpret-ir synthesized-expr) 0))
         
         ;; Verification conditions
         (define (bounded-eq? oe se lanes)
@@ -99,6 +135,7 @@
         (if (eq? sol (unsat))
             (begin
               (display "Failed to find an equivalent IR expression.\n\n")
+              (debug (format "Synthesis time: ~a seconds\n\n" runtime))
               (increment-ir-instr-bnd)
               (synthesize-ir-expr spec))
             (begin
@@ -127,7 +164,7 @@
        (reset-hvx-instr-bnd)
        (synthesize-equiv-hvx spec hvx-sub-expr))]
 
-    [(convolve sub-expr weights saturateFunc outputType)
+    [(convolve sub-expr width weights saturateFunc outputType)
      (begin
        (define hvx-sub-spec (hvx-expr-spec sub-expr ir-expr-sol ir-expr-ctx ir-expr-axioms))
        (define hvx-sub-expr (synthesize-hvx-expr hvx-sub-spec))
@@ -158,7 +195,7 @@
 
         (define ??hvx-expr-grm (generate-hvx-grammar (hvx-expr-spec-expr spec) hvx-sub-expr))
         (define st (current-seconds))
-        (define res (synthesize-optimal spec ??hvx-expr-grm basic-expr-cost))
+        (define res (synthesize-optimal spec ??hvx-expr-grm basic-expr-cost hvx-sub-expr))
         
         (if (eq? res (unsat))
             (begin
@@ -171,12 +208,42 @@
         (exit)
         (void))))
 
-(define (synthesize-optimal spec ??hvx-expr-grm cost-model [curr-best-sol (void)])
+(define (synthesize-optimal spec ??hvx-expr-grm cost-model hvx-sub-expr [curr-best-sol (void)])
   (define ir-expr (hvx-expr-spec-expr spec))
   (define ir-expr-sol (hvx-expr-spec-sol spec))
   (define ir-expr-ctx (hvx-expr-spec-ctx spec))
   (define ir-expr-axioms (hvx-expr-spec-axioms spec))
-  (define synthesized-hvx-expr (??hvx-expr-grm))
+
+  ;(define synthesized-hvx-expr (??hvx-expr-grm))
+  (define synthesized-hvx-expr
+    (vasr-n
+     (lo
+      (vtmpy-acc
+       (vtmpy-acc
+        (vtmpy
+         hvx-sub-expr
+         (cons (int8_t (bv 1 8)) (int8_t (bv 2 8))))
+        hvx-sub-expr
+        (cons (int8_t (bv 1 8)) (int8_t (bv 2 8))))
+       hvx-sub-expr
+       (cons (int8_t (bv 1 8)) (int8_t (bv 2 8)))))
+     (hi
+      (vtmpy-acc
+       (vtmpy-acc
+        (vtmpy
+         hvx-sub-expr
+         (cons (int8_t (bv 1 8)) (int8_t (bv 2 8))))
+        hvx-sub-expr
+        (cons (int8_t (bv 1 8)) (int8_t (bv 2 8))))
+       hvx-sub-expr
+       (cons (int8_t (bv 1 8)) (int8_t (bv 2 8)))))
+     (int8_t (bv 4 8))
+     #t
+     #t
+     #t))
+
+  (println (elem-hvx (interpret-hvx synthesized-hvx-expr) 0))
+    
 
   (define (bounded-eq? oe se lanes)
     (for ([i lanes])

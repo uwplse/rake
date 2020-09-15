@@ -36,12 +36,13 @@
 (define (pow2? val) (integer? (log (eval-to-int val) 2)))
 (define (log2 val) (mk-typed-expr (bv (exact-round (log (eval-to-int val) 2)) (bw val)) (type val)))
 (define (bool-const) (define-symbolic* b boolean?)  b)
+(define (int-const) (define-symbolic* i integer?)  i)
 (define (get-generator-func opts) (when (not (empty? opts)) (lambda() (apply choose* opts))))
 
 (define (infer-outT expr)
   (match expr
     [(load-data data) (apply choose* (map (lambda(v) (type v)) (list-ref data 0)))]
-    [(convolve _ _ _ outT) outT]
+    [(convolve _ _ _ _ outT) outT]
     [(const-add _ _ _ outT) outT]
     [(const-divide t0 _ ) (infer-outT t0)]
     [(logic-shift-right t0 _) (infer-outT t0)]
@@ -60,31 +61,39 @@
   (match (infer-outT t0)
     ['int16 (choose* 'int16 'int8 'uint8)]
     ['int32 (choose* 'uint16 'int16 'int32)]
-    [_ 'int8]))
+    [_ 'not-sup]))
 
 (define (get-ir-ops t0 live-ops int-weights-gen int-divisor-gen int-shiftr-gen int-offsets-gen add-consts)
   (define operators (list))
-
+  (define opNames (list))
+  
   (when (for/or ([c add-consts]) (or (eq? (eval-to-int c) 128) (eq? (eval-to-int c) 32768)))
-    (set! operators (cons (saturate t0 #t (bool-const)) operators)))
+    (set! operators (cons (saturate t0 #t (bool-const)) operators))
+    (set! opNames (cons "(saturate t0 #t (bool-const))" opNames)))
   
   (when (or (set-member? live-ops 'vec-sca-mul) (set-member?  live-ops 'add))
     (begin
-      (define weights (list (int-weights-gen) (int-weights-gen) (int-weights-gen) (int-weights-gen) (bool-const)))
+      (define weights (list (int-weights-gen) (int-weights-gen) (int-weights-gen) (int-weights-gen) (int-weights-gen)))
       (define saturation-func (if saturation-arith? nop nop))
       (define output-type (filter-conv-output-types t0))
-      (define conv-op (convolve t0 weights saturation-func output-type))
+      (define conv-op (convolve t0 2 weights saturation-func output-type))
       (set! operators (cons conv-op operators))
+      (set! opNames (cons "(convolve t0 9 weights saturation-func output-type)" opNames))
       (when (not (void? int-offsets-gen))
-        (set! operators (cons (const-add t0 (int-offsets-gen) saturation-func output-type) operators)))))
+        (set! operators (cons (const-add t0 (int-offsets-gen) saturation-func output-type) operators))
+        (set! opNames (cons "(const-add t0 (int-offsets-gen) saturation-func output-type)" opNames)))))
   
   (when (set-member? live-ops 'vec-sca-div)
     (begin
-      (when (not (void? int-divisor-gen)) (set! operators (cons (const-divide t0 (int-divisor-gen)) operators)))
+      (when (not (void? int-divisor-gen))
+        (set! operators (cons (const-divide t0 (int-divisor-gen)) operators))
+        (set! opNames (cons "(const-divide t0 (int-divisor-gen))" opNames)))
       (when (not (void? int-shiftr-gen))
         (begin
           (set! operators (cons (logic-shift-right t0 (int-shiftr-gen)) operators))
-          (set! operators (cons (arith-shift-right t0 (int-shiftr-gen) (bool-const) (filter-asr-output-types t0)) operators))))))
+          (set! opNames (cons "(logic-shift-right t0 (int-shiftr-gen))" opNames))
+          (set! operators (cons (arith-shift-right t0 (int-shiftr-gen) (bool-const) (filter-asr-output-types t0)) operators))
+          (set! opNames (cons "(arith-shift-right t0 (int-shiftr-gen) (bool-const) (filter-asr-output-types t0))" opNames))))))
   
   operators)
 
@@ -97,7 +106,7 @@
   (define div-consts (ir-expr-spec-div-consts spec))
   (define data buff-reads)
   (define int-offsets-gen (get-generator-func add-consts))
-  (define int-weights-gen (get-generator-func (append (list (int8_t (bv 0 8)) (int8_t (bv 1 8))) mul-consts)))
+  (define int-weights-gen (get-generator-func (append (list (int16_t (bv 4 16)) (int8_t (bv 1 8))) mul-consts)))
   (define int-shiftr-gen (get-generator-func (map log2 (filter pow2? div-consts))))
   (define int-divisor-gen (get-generator-func (remove* (filter pow2? div-consts) div-consts)))
   (define (??ir-instr t0) (apply choose* (get-ir-ops t0 live-ops int-weights-gen int-divisor-gen int-shiftr-gen int-offsets-gen add-consts)))

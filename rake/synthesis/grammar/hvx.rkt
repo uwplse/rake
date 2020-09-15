@@ -10,7 +10,7 @@
 (require rake/synthesis/ir)
 
 ;; Grammar features
-(define max-instr-bnd 3)
+(define max-instr-bnd 4)
 (define curr-instr-bnd 1)
 (define saturation-arith? #f)
 (define specialized-op-set #t)
@@ -36,7 +36,7 @@
 
 (define (generate-hvx-grammar ir-expr sub-expr)
   (define ??hvx-instr (match ir-expr
-                        [(convolve data weights saturateFunc outputType) (get-hvx-conv-isa weights)]
+                        [(convolve data width weights saturateFunc outputType) (get-hvx-conv-isa weights)]
                         [(arith-shift-right data n round? outputType) (get-hvx-asr-isa n round? outputType)]
                         [_ (begin (println "NYI") (exit))]))
   (define (??ir-expr)

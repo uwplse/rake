@@ -87,6 +87,24 @@
 (struct swizzle (vec) #:transparent)
 
 ;; Sine utility methods for HVX types
+(define (v0 vec-p)
+  (match vec-p
+    [(i8x128x2 v0 v1) (i8x128 v0)]
+    [(u8x128x2 v0 v1) (u8x128 v0)]
+    [(i16x64x2 v0 v1) (i16x64 v0)]
+    [(u16x64x2 v0 v1) (u16x64 v0)]
+    [(i32x32x2 v0 v1) (i32x32 v0)]
+    [(u32x32x2 v0 v1) (u32x32 v0)]))
+
+(define (v1 vec-p)
+  (match vec-p
+    [(i8x128x2 v0 v1) (i8x128 v1)]
+    [(u8x128x2 v0 v1) (u8x128 v1)]
+    [(i16x64x2 v0 v1) (i16x64 v1)]
+    [(u16x64x2 v0 v1) (u16x64 v1)]
+    [(i32x32x2 v0 v1) (i32x32 v1)]
+    [(u32x32x2 v0 v1) (u32x32 v1)]))
+
 (define (elem vec idx)
   (match vec
     [(i8x128 data) (data idx)]

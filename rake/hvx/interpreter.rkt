@@ -17,6 +17,9 @@
 
     ;[(vsplat Rt) (lambda (i) Rt)]
 
+    [(lo Vuu) (v0 (interpret Vuu))]
+    [(hi Vuu) (v1 (interpret Vuu))]
+
     ;;;;;;;;; New constructs to abstract away data movement;;;;;;;;;
     
     [(gather* buff-reads) (get-from-buf* buff-reads)]
