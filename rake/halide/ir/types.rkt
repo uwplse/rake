@@ -8,6 +8,7 @@
 (struct x32 (sca) #:transparent)
 (struct x64 (sca) #:transparent)
 (struct x128 (sca) #:transparent)
+(struct x256 (sca) #:transparent)
 
 (struct ramp (buf base stride len) #:transparent)
 (struct slice_vectors (vec base stride len) #:transparent)
@@ -17,6 +18,7 @@
 (struct uint8x32 (vec) #:transparent)
 (struct uint8x64 (vec) #:transparent)
 (struct uint8x128 (vec) #:transparent)
+(struct uint8x256 (vec) #:transparent)
 
 (struct uint16x32 (vec) #:transparent)
 (struct uint16x64 (vec) #:transparent)
@@ -43,11 +45,15 @@
 (struct sub (v1 v2) #:transparent)
 (struct mul (v1 v2) #:transparent)
 (struct div (v1 v2) #:transparent)
+(struct min (v1 v2) #:transparent)
+(struct max (v1 v2) #:transparent)
 
 (struct vec-add (v1 v2) #:transparent)
 (struct vec-sub (v1 v2) #:transparent)
 (struct vec-mul (v1 v2) #:transparent)
 (struct vec-div (v1 v2) #:transparent)
+(struct vec-max (v1 v2) #:transparent)
+(struct vec-min (v1 v2) #:transparent)
 
 ;; Utility functions
 (define (vec-len expr)
@@ -56,6 +62,7 @@
     [(x32 sca) 32]
     [(x64 sca) 64]
     [(x128 sca) 128]
+    [(x256 sca) 256]
     [(ramp buf base stride len) len]
 
     [(slice_vectors vec base stride len) len]
@@ -80,6 +87,7 @@
     [(int8x128 vec) 128]
     [(int16x128 vec) 128]
     [(int32x128 vec) 128]
+    [(uint8x256 vec) 256]
 
     ;; Operations
     [(vec-add v1 v2) (vec-len v1)]

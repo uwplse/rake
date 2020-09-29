@@ -13,6 +13,7 @@
     [(x32 sca) (lambda (i) (interpret sca))]
     [(x64 sca) (lambda (i) (interpret sca))]
     [(x128 sca) (lambda (i) (interpret sca))]
+    [(x256 sca) (lambda (i) (interpret sca))]
     [(ramp buf base stride len) (lambda (i) (get (interpret buf) (+ (interpret base) (* i (interpret stride)))))]
 
     [(slice_vectors vec base stride len) (lambda (i) ((interpret vec) (+ (interpret base) (* i (interpret stride)))))]
@@ -22,6 +23,7 @@
     [(uint8x32 vec) (lambda (i) (cpp_cast ((interpret vec) i) 'uint8))]
     [(uint8x64 vec) (lambda (i) (cpp_cast ((interpret vec) i) 'uint8))]
     [(uint8x128 vec) (lambda (i) (cpp_cast ((interpret vec) i) 'uint8))]
+    [(uint8x256 vec) (lambda (i) (cpp_cast ((interpret vec) i) 'uint8))]
 
     [(int8x32 vec) (lambda (i) (cpp_cast ((interpret vec) i) 'int8))]
     [(int8x64 vec) (lambda (i) (cpp_cast ((interpret vec) i) 'int8))]
@@ -48,10 +50,14 @@
     [(sub v1 v2) (do-sub v1 v2)]
     [(mul v1 v2) (do-mul v1 v2)]
     [(div v1 v2) (do-div v1 v2)]
+    [(min v1 v2) (do-min v1 v2)]
+    [(max v1 v2) (do-max v1 v2)]
     [(vec-add v1 v2) (lambda (i) (do-add ((interpret v1) i) ((interpret v2) i)))]
     [(vec-sub v1 v2) (lambda (i) (do-sub ((interpret v1) i) ((interpret v2) i)))]
     [(vec-mul v1 v2) (lambda (i) (do-mul ((interpret v1) i) ((interpret v2) i)))]
     [(vec-div v1 v2) (lambda (i) (do-div ((interpret v1) i) ((interpret v2) i)))]
+    [(vec-min v1 v2) (lambda (i) (do-min ((interpret v1) i) ((interpret v2) i)))]
+    [(vec-max v1 v2) (lambda (i) (do-max ((interpret v1) i) ((interpret v2) i)))]
     
     ;; Base case
     [_ p]))
@@ -81,5 +87,17 @@
   (if (signedT? outT)
       (mk-typed-expr (bvsdiv (eval lhs) (eval rhs)) outT)
       (mk-typed-expr (bvudiv (eval lhs) (eval rhs)) outT)))
+
+(define (do-min lhs rhs)
+  (define outT (infer-out-type lhs rhs))
+  (if (signedT? outT)
+      (mk-typed-expr (bvsmin (eval lhs) (eval rhs)) outT)
+      (mk-typed-expr (bvumin (eval lhs) (eval rhs)) outT)))
+
+(define (do-max lhs rhs)
+  (define outT (infer-out-type lhs rhs))
+  (if (signedT? outT)
+      (mk-typed-expr (bvsmax (eval lhs) (eval rhs)) outT)
+      (mk-typed-expr (bvumax (eval lhs) (eval rhs)) outT)))
 
 (provide (rename-out [interpret interpret-halide]))

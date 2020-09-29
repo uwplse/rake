@@ -46,6 +46,7 @@
     [(x32 sca) (list)]
     [(x64 sca) (list)]
     [(x128 sca) (list)]
+    [(x256 sca) (list)]
     [(ramp buf base stride len) (list)]
 
     [(slice_vectors vec base stride len) (append (list 'slice) (extract-live-ops vec))]
@@ -70,6 +71,7 @@
     [(int8x128 vec) (append (list 'cast) (extract-live-ops vec))]
     [(int16x128 vec) (append (list 'cast) (extract-live-ops vec))]
     [(int32x128 vec) (append (list 'cast) (extract-live-ops vec))]
+    [(uint8x256 vec) (append (list 'cast) (extract-live-ops vec))]
 
     ;; Operations
     [(vec-add v1 v2) (append (list 'add) (extract-live-ops v1) (extract-live-ops v2))]
@@ -91,6 +93,7 @@
     [(x32 sca) (list)]
     [(x64 sca) (list)]
     [(x128 sca) (list)]
+    [(x256 sca) (list)]
     [(ramp buf base stride len) (list)]
 
     [(slice_vectors vec base stride len) (extract-add-consts vec)]
@@ -115,6 +118,7 @@
     [(int8x128 vec) (extract-add-consts vec)]
     [(int16x128 vec) (extract-add-consts vec)]
     [(int32x128 vec) (extract-add-consts vec)]
+    [(uint8x256 vec) (extract-add-consts vec)]
 
     ;; Operations
     [(vec-add v1 v2) (append
@@ -133,6 +137,7 @@
     [(x32 sca) (list)]
     [(x64 sca) (list)]
     [(x128 sca) (list)]
+    [(x256 sca) (list)]
     [(ramp buf base stride len) (list)]
 
     [(slice_vectors vec base stride len) (extract-sub-consts vec)]
@@ -157,6 +162,7 @@
     [(int8x128 vec) (extract-sub-consts vec)]
     [(int16x128 vec) (extract-sub-consts vec)]
     [(int32x128 vec) (extract-sub-consts vec)]
+    [(uint8x256 vec) (extract-sub-consts vec)]
 
     ;; Operations
     [(vec-add v1 v2) (append (extract-sub-consts v1) (extract-sub-consts v2))]
@@ -175,6 +181,7 @@
     [(x32 sca) (list)]
     [(x64 sca) (list)]
     [(x128 sca) (list)]
+    [(x256 sca) (list)]
     [(ramp buf base stride len) (list)]
 
     [(slice_vectors vec base stride len) (extract-mul-consts vec)]
@@ -199,6 +206,7 @@
     [(int8x128 vec) (extract-mul-consts vec)]
     [(int16x128 vec) (extract-mul-consts vec)]
     [(int32x128 vec) (extract-mul-consts vec)]
+    [(uint8x256 vec) (extract-mul-consts vec)]
 
     ;; Operations
     [(vec-add v1 v2) (append (extract-mul-consts v1) (extract-mul-consts v2))]
@@ -217,6 +225,7 @@
     [(x32 sca) (list)]
     [(x64 sca) (list)]
     [(x128 sca) (list)]
+    [(x256 sca) (list)]
     [(ramp buf base stride len) (list)]
 
     [(slice_vectors vec base stride len) (extract-div-consts vec)]
@@ -241,6 +250,7 @@
     [(int8x128 vec) (extract-div-consts vec)]
     [(int16x128 vec) (extract-div-consts vec)]
     [(int32x128 vec) (extract-div-consts vec)]
+    [(uint8x256 vec) (extract-div-consts vec)]
 
     ;; Operations
     [(vec-add v1 v2) (append (extract-div-consts v1) (extract-div-consts v2))]
@@ -257,6 +267,7 @@
     [(x32 sca) #t]
     [(x64 sca) #t]
     [(x128 sca) #t]
+    [(x256 sca) #t]
     [_ #f]))
 
 (define (extract-consts vec)
@@ -265,6 +276,7 @@
     [(x32 sca) (list ((interpret-halide vec) 0))]
     [(x64 sca) (list ((interpret-halide vec) 0))]
     [(x128 sca) (list ((interpret-halide vec) 0))]
+    [(x256 sca) (list ((interpret-halide vec) 0))]
     [_ (error "Don't know how to extract constant from:" v)]))
 
 (define (strip-halide-casts expr)
@@ -287,6 +299,7 @@
     [(int8x128 vec) (strip-halide-casts vec)]
     [(int16x128 vec) (strip-halide-casts vec)]
     [(int32x128 vec) (strip-halide-casts vec)]
+    [(uint8x256 vec) (strip-halide-casts vec)]
     [_ expr]))
 
 (provide
