@@ -3,76 +3,86 @@
 (require rosette/lib/synthax)
 (require rosette/lib/angelic)
 
-(require "../lib/cpp.rkt")
-(require "../lib/halide.rkt")
-(require "../lib/hexagon.rkt")
-(require "../lib/ir.rkt")
-(require "../lib/grammar.rkt")
+(require rake)
+(require rake/halide/ir/interpreter)
+
+(error-print-width 100000)
+(debug-on)
 
 ;; Model buffers as uninterpreted functions
 (define-symbolic rows (~> integer? (bitvector 16)))
+(define-symbolic c1 (~> integer? (bitvector 16)))
 
-(define buffers (list rows))
+(init-var-types (make-hash (list (cons rows 'int16) (cons c1 'int16))))
 
-;; Define original expression
-(define original-expr-post-hvx
-  (halide.hexagon.packhi.vh
-   (vec-add
-    (halide.hexagon.add_mul.vh.vh.b
-     (halide.hexagon.add_mul.vh.vh.b
-      (halide.hexagon.add_mul.vh.vh.b
-       (ramp rows 126 1 128)
-       (ramp rows 127 1 128)
-       (bv 4 8))
-      (ramp rows 128 1 128)
-      (bv 6 8))
-     (ramp rows 129 1 128) 
-     (bv 4 8))
-    (ramp rows 130 1 128))))
+;; Axioms describing value range for intermediates
+(define axioms (list (values-range-from rows (bv 0 16) (bv 4080 16)) (values-range-from c1 (bv 0 16) (bv 4080 16))))
 
-(define original-expr-pre-hvx
-  (uint8x128
-   (vec-udiv
+;; Model indexing variables as integers
+(define-symbolic output.s0.x.x integer?)
+(define-symbolic input.stride.1 integer?)
+
+(define t116 (ramp c1 0 1 64))
+(define t117 (ramp rows (+ (* output.s0.x.x 256) 64) 1 64))
+(define t118 (concat_vectors t116 t117))
+(define t119 (ramp rows (+ (* output.s0.x.x 256) 128) 1 64))
+(define t120 (concat_vectors t117 t119))
+(define t121 (ramp rows (+ (* output.s0.x.x 256) 192) 1 64))
+(define t122 (concat_vectors t119 t121))
+(define t123.s (ramp c1 64 1 64))
+
+;; Define original expression in Halide IR
+(define halide-expr
+  (uint8x256
+   (vec-div
     (vec-add
-     (ramp rows 130 1 128)
+     (vec-mul
+      (concat_vectors
+       (concat_vectors
+        (slice_vectors t118 1 1 64)
+        (slice_vectors t120 1 1 64))
+       (concat_vectors
+        (slice_vectors t122 1 1 64)
+        (slice_vectors (concat_vectors t121 t123.s) 1 1 64)))
+      (x256 (int16_t (bv 4 16))))
      (vec-add
-      (vec-mul
-       (ramp rows 129 1 128)
-       (x128 (bv 4 16)))
+      (concat_vectors
+       (concat_vectors t116 t117)
+       (concat_vectors t119 t121))
       (vec-add
        (vec-mul
-        (ramp rows 128 1 128)
-        (x128 (bv 6 16)))
+        (concat_vectors
+         (concat_vectors
+          (slice_vectors t118 2 1 64)
+          (slice_vectors t120 2 1 64))
+         (concat_vectors
+          (slice_vectors t122 2 1 64)
+          (slice_vectors (concat_vectors t121 t123.s) 2 1 64)))
+        (x256 (int16_t (bv 6 16))))
        (vec-add
-        (ramp rows 126 1 128)
+        (concat_vectors
+         (concat_vectors
+          (slice_vectors t118 4 1 64)
+          (slice_vectors t120 4 1 64))
+         (concat_vectors
+          (slice_vectors t122 4 1 64)
+          (slice_vectors (concat_vectors t121 t123.s) 4 1 64)))
         (vec-mul
-         (ramp rows 127 1 128)
-         (x128 (bv 4 16)))))))
-    (x128 (bv 256 16)))
-   'int16))
+         (concat_vectors
+          (concat_vectors
+           (slice_vectors t118 3 1 64)
+           (slice_vectors t120 3 1 64))
+          (concat_vectors
+           (slice_vectors t122 3 1 64)
+           (slice_vectors (concat_vectors t121 t123.s) 3 1 64)))
+         (x256 (int16_t (bv 4 16))))))))
+    (x256 (int16_t (bv 256 16))))))
 
-(define synthesized-expr
-  (hxv-expr-linear-static buffers))
+;; Define the specification for the synthesizer
+(define spec (synthesis-spec halide-expr (list rows c1 output.s0.x.x input.stride.1) axioms))
 
-;; Verification condition
-(define (bounded-eq? oe se lanes)
-  (if (pair? oe)
-      (for ([i lanes])
-        (and
-         (assert (eq? ((car oe) i) ((car se) i)))
-         (assert (eq? ((cdr oe) i) ((cdr se) i)))))
-      (for ([i lanes])
-        (assert (eq? (oe i) (se i))))))
+(define hvx-expr (synthesize-hvx spec))
 
-;; Synthesize
-(define st (current-seconds))
-(define sol (synthesize #:forall (list rows)
-                        #:guarantee (bounded-eq? (interpret-halide original-expr-post-hvx) (interpret-hvx synthesized-expr) 1)))
-(define runtime (- (current-seconds) st))
+;(basic-expr-cost hvx-expr)
 
-;; Print solution
-(error-print-width 10000)
-(println sol)
-(evaluate synthesized-expr sol)
-(evaluate (interpret-hvx synthesized-expr) sol)
-(printf "\n\nRuntime in seconds: ~a" runtime)
+;(println hvx-expr)
