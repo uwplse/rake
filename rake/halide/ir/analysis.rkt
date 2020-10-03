@@ -32,12 +32,21 @@
        [(eq? op bvmul) (flatten (for/list ([operand operands]) (extract-lane-buf-reads operand)))]
        [(eq? op bvsdiv) (flatten (for/list ([operand operands]) (extract-lane-buf-reads operand)))]
        [(eq? op bvudiv) (flatten (for/list ([operand operands]) (extract-lane-buf-reads operand)))]
+       [(eq? op bvashr) (flatten (for/list ([operand operands]) (extract-lane-buf-reads operand)))]
+       [(eq? op bvneg) (flatten (for/list ([operand operands]) (extract-lane-buf-reads operand)))]
        [(eq? op extract) (flatten (for/list ([operand operands]) (extract-lane-buf-reads operand)))]
        [(eq? op zero-extend) (flatten (for/list ([operand operands]) (extract-lane-buf-reads operand)))]
+       [(eq? op sign-extend) (flatten (for/list ([operand operands]) (extract-lane-buf-reads operand)))]
        [(eq? op app) (mk-typed-expr expr (var-type (list-ref operands 0)))]
        [else (error "NYI: extract buffer reads from" expr)])]
      
     [_ (list)]))
+
+(define (cast-type vec toT)
+  (define fromT (type ((interpret-halide vec) 0)))
+  (match (cons fromT toT)
+    [(cons 'int16 'uint8) 'down-cast]
+    [_ (error "NYI: infer cast type" fromT toT)]))
 
 ;; Extract the set of operators used in the code
 (define (extract-live-ops expr)
@@ -53,25 +62,25 @@
     [(concat_vectors v1 v2) (append (list 'concat) (extract-live-ops v1) (extract-live-ops v2))]
 
     ;; Type Casts
-    [(uint8x32 vec) (append (list 'cast) (extract-live-ops vec))]
-    [(uint16x32 vec) (append (list 'cast) (extract-live-ops vec))]
-    [(uint32x32 vec) (append (list 'cast) (extract-live-ops vec))]
-    [(int8x32 vec) (append (list 'cast) (extract-live-ops vec))]
-    [(int16x32 vec) (append (list 'cast) (extract-live-ops vec))]
-    [(int32x32 vec) (append (list 'cast) (extract-live-ops vec))]
-    [(uint8x64 vec) (append (list 'cast) (extract-live-ops vec))]
-    [(uint16x64 vec) (append (list 'cast) (extract-live-ops vec))]
-    [(uint32x64 vec) (append (list 'cast) (extract-live-ops vec))]
-    [(int8x64 vec) (append (list 'cast) (extract-live-ops vec))]
-    [(int16x64 vec) (append (list 'cast) (extract-live-ops vec))]
-    [(int32x64 vec) (append (list 'cast) (extract-live-ops vec))]
-    [(uint8x128 vec) (append (list 'cast) (extract-live-ops vec))]
-    [(uint16x128 vec) (append (list 'cast) (extract-live-ops vec))]
-    [(uint32x128 vec) (append (list 'cast) (extract-live-ops vec))]
-    [(int8x128 vec) (append (list 'cast) (extract-live-ops vec))]
-    [(int16x128 vec) (append (list 'cast) (extract-live-ops vec))]
-    [(int32x128 vec) (append (list 'cast) (extract-live-ops vec))]
-    [(uint8x256 vec) (append (list 'cast) (extract-live-ops vec))]
+    [(uint8x32 vec) (append (list 'cast (cast-type vec 'uint8)) (extract-live-ops vec))]
+    [(uint16x32 vec) (append (list 'cast (cast-type vec 'uint16)) (extract-live-ops vec))]
+    [(uint32x32 vec) (append (list 'cast (cast-type vec 'uint32)) (extract-live-ops vec))]
+    [(int8x32 vec) (append (list 'cast (cast-type vec 'int8)) (extract-live-ops vec))]
+    [(int16x32 vec) (append (list 'cast (cast-type vec 'int16)) (extract-live-ops vec))]
+    [(int32x32 vec) (append (list 'cast (cast-type vec 'int32)) (extract-live-ops vec))]
+    [(uint8x64 vec) (append (list 'cast (cast-type vec 'uint8)) (extract-live-ops vec))]
+    [(uint16x64 vec) (append (list 'cast (cast-type vec 'uint16)) (extract-live-ops vec))]
+    [(uint32x64 vec) (append (list 'cast (cast-type vec 'uint32)) (extract-live-ops vec))]
+    [(int8x64 vec) (append (list 'cast (cast-type vec 'int8)) (extract-live-ops vec))]
+    [(int16x64 vec) (append (list 'cast (cast-type vec 'int16)) (extract-live-ops vec))]
+    [(int32x64 vec) (append (list 'cast (cast-type vec 'int32)) (extract-live-ops vec))]
+    [(uint8x128 vec) (append (list 'cast (cast-type vec 'uint8)) (extract-live-ops vec))]
+    [(uint16x128 vec) (append (list 'cast (cast-type vec 'uint16)) (extract-live-ops vec))]
+    [(uint32x128 vec) (append (list 'cast (cast-type vec 'uint32)) (extract-live-ops vec))]
+    [(int8x128 vec) (append (list 'cast (cast-type vec 'int8)) (extract-live-ops vec))]
+    [(int16x128 vec) (append (list 'cast (cast-type vec 'int16)) (extract-live-ops vec))]
+    [(int32x128 vec) (append (list 'cast (cast-type vec 'int32)) (extract-live-ops vec))]
+    [(uint8x256 vec) (append (list 'cast (cast-type vec 'uint8)) (extract-live-ops vec))]
 
     ;; Operations
     [(vec-add v1 v2) (append (list 'add) (extract-live-ops v1) (extract-live-ops v2))]
