@@ -36,7 +36,7 @@
 
 (define (generate-hvx-grammar ir-expr sub-expr)
   (define ??hvx-instr (match ir-expr
-                        [(convolve data width weights saturateFunc outputType) (get-hvx-conv-isa weights)]
+                        [(convolve data kernel saturateFunc outputType) (get-hvx-conv-isa kernel)]
                         [(arith-shift-right data n round? outputType) (get-hvx-asr-isa n round? outputType)]
                         [_ (begin (println "NYI") (exit))]))
   (define (??ir-expr)
@@ -53,8 +53,8 @@
 
 ;; HVX instructions for synthesizing convolutions
 (define (get-hvx-conv-isa weights)
-  (define (int-const) (cpp_cast (apply choose* (set->list (list->set (take weights 4)))) (choose* 'int8 'uint8)))
-  (define (shl-const) (cpp_cast (apply choose* (set->list (list->set (map log2 (filter pow2? (take weights 4)))))) 'int8))
+  (define (int-const) (cpp_cast (apply choose* (set->list (list->set (weight-matrix-vals weights)))) (choose* 'int8 'uint8)))
+  (define (shl-const) (cpp_cast (apply choose* (set->list (list->set (map log2 (filter pow2? (weight-matrix-vals weights)))))) 'int8))
   (define (??hvx-conv-instr registers)
     (define t0 (apply choose* registers))
     (define t1 (apply choose* registers))

@@ -1,7 +1,6 @@
 #lang rosette
 
 (require rake/util)
-(require rake/spec)
 
 (require rake/halide/ir/types)
 (require rake/halide/ir/analysis)
@@ -13,6 +12,7 @@
 (require rake/hvx/interpreter)
 
 (require rake/synthesis/ir)
+(require rake/synthesis/spec)
 (require rake/synthesis/grammar/ir)
 (require rake/synthesis/grammar/hvx)
 
@@ -22,12 +22,13 @@
   (cond
     [(eq? spec-lang 'halide-ir)
      (define halide-expr (synthesis-spec-expr spec))
-     (define halide-expr-ctx (synthesis-spec-context spec))
      (define halide-expr-axioms (synthesis-spec-axioms spec))
      
      ;; Extract the set of buffer reads
      (define buff-reads (extract-buf-reads-hal halide-expr))
 
+     ;(define abstracted-buff-reads (abstract-arr-accesses buff-reads))
+     
      ;; Extract the set of constant multiplication factors
      (define add-consts (set->list (list->set (extract-add-consts-hal halide-expr))))
      (define sub-consts (set->list (list->set (extract-sub-consts-hal halide-expr))))
@@ -37,8 +38,11 @@
      ;; Extract the set of live ops
      (define live-ops (list->set (extract-live-ops-hal halide-expr)))
 
+     ;; Define context
+     (define halide-expr-ctx (symbolics halide-expr))
+     
      ;; Define the specification for synthesizing equiv expr in our IR
-     (define ir-spec (ir-expr-spec halide-expr halide-expr-ctx halide-expr-axioms buff-reads live-ops add-consts sub-consts mul-consts div-consts))
+     (define ir-spec (ir-expr-spec halide-expr (symbolics halide-expr) halide-expr-axioms buff-reads live-ops add-consts sub-consts mul-consts div-consts))
     
      ;; Synthesize equivalent expression in IR
      (init-ir-grammar-generator)
@@ -78,40 +82,10 @@
 
         ;; Generate a specialized grammar based on 
         (define ??ir-grammar (generate-ir-grammar spec))
-
-        ;(define synthesized-expr (??ir-grammar))
+        (define synthesized-expr (??ir-grammar))
         (define orig-expr (ir-expr-spec-expr spec))
 
-        (define VEC_LANES (num-elems-hal orig-expr))
-
-        ;(set! synthesized-expr (arith-shift-right (load-data (ir-expr-spec-buff-reads spec)) (int16_t (bv 4 16)) (choose #t #f) 'not-sup))
-        ;(set! synthesized-expr (logic-shift-right (load-data (ir-expr-spec-buff-reads spec)) (int16_t (bv 4 16))))
-        ;(set! synthesized-expr (const-add (load-data (ir-expr-spec-buff-reads spec)) (int16_t (bv #x0008 16)) nop (choose 'uint8 'uint16 'int16)))
-        ;(println (list-ref (ir-expr-spec-buff-reads spec) 0))
-        ;(println (list-ref (ir-expr-spec-buff-reads spec) 0))
-        ;(println ((interpret-halide orig-expr) 0))
-        (define synthesized-expr (arith-shift-right
-                                  (convolve (load-data (ir-expr-spec-buff-reads spec))
-                                         2
-                                         (list
-                                          (int8_t (bv #x01 8));(choose (int16_t (bv #x0002 16)) (int16_t (bv #x0004 16)) (int8_t (bv #x01 8)))
-                                          (int16_t (bv #x0002 16));(choose (int16_t (bv #x0002 16)) (int16_t (bv #x0004 16)) (int8_t (bv #x01 8)))
-                                          (int16_t (bv #x0002 16));(choose (int16_t (bv #x0002 16)) (int16_t (bv #x0004 16)) (int8_t (bv #x01 8)))
-                                          (int16_t (bv #x0004 16)));(choose (int16_t (bv #x0002 16)) (int16_t (bv #x0004 16)) (int8_t (bv #x01 8))))
-;                                          ;(choose (int16_t (bv #x0002 16)) (int16_t (bv #x0004 16)) (int8_t (bv #x01 8)))
-;                                          ;(choose (int16_t (bv #x0002 16)) (int16_t (bv #x0004 16)) (int8_t (bv #x01 8)))
-;                                          ;(choose (int16_t (bv #x0002 16)) (int16_t (bv #x0004 16)) (int8_t (bv #x01 8)))
-;                                          ;(choose (int16_t (bv #x0002 16)) (int16_t (bv #x0004 16)) (int8_t (bv #x01 8)))
-;                                          ;(int16_t (bv #x0004 16)));(choose (int16_t (bv #x0002 16)) (int8_t (bv #x01 8)))
-                                         nop
-                                         'int16;(choose 'uint8 'uint16 'int16)
-                                         )
-                                  (int16_t (bv 4 16))
-                                  #t;(choose #t #f)
-                                  'uint8))
-
-        ;(println synthesized-expr)
-        ;(println (elem-ir (interpret-ir synthesized-expr) 0))
+        (define VEC_LANES (num-elems-hal orig-expr))   
         
         ;; Verification conditions
         (define (bounded-eq? oe se lanes)
@@ -121,7 +95,7 @@
             (set-curr-cn-ir (+ i (/ VEC_LANES 2) 1))
             (assert (eq? (oe (+ i (/ VEC_LANES 2) 1)) (elem-ir se (+ i (/ VEC_LANES 2) 1))))))
         
-        (display "Searching...\n")
+        (display "Searching...\n")``
         (display "============\n")
 
         ;; Synthesize expression
@@ -164,7 +138,7 @@
        (reset-hvx-instr-bnd)
        (synthesize-equiv-hvx spec hvx-sub-expr))]
 
-    [(convolve sub-expr width weights saturateFunc outputType)
+    [(convolve sub-expr kernel saturateFunc outputType)
      (begin
        (define hvx-sub-spec (hvx-expr-spec sub-expr ir-expr-sol ir-expr-ctx ir-expr-axioms))
        (define hvx-sub-expr (synthesize-hvx-expr hvx-sub-spec))
@@ -177,12 +151,6 @@
     [(load-data opts) (gather* opts)]
 
     [_ (println "NYI")]))
-
-;; Dynamic programming to find best cost solution
-;; Sub-exprs synthesized first
-;; Dynamic programming to remove swizzles whenever possible
-;; Otherwise dyn programming might be too expensive? If total expr cost is N, all sub-exprs with cost lt N should be considered. (Try?)
-;; Various cost-models: Naive instr count, weighted instr count, best packets / latency, minimize loads
 
 ;; Define modular synthesis loop for HVX expression generation
 (define (synthesize-equiv-hvx spec hvx-sub-expr)
@@ -214,38 +182,9 @@
   (define ir-expr-ctx (hvx-expr-spec-ctx spec))
   (define ir-expr-axioms (hvx-expr-spec-axioms spec))
 
-  ;(define synthesized-hvx-expr (??hvx-expr-grm))
-  (define synthesized-hvx-expr
-    (vasr-n
-     (lo
-      (vtmpy-acc
-       (vtmpy-acc
-        (vtmpy
-         hvx-sub-expr
-         (cons (int8_t (bv 1 8)) (int8_t (bv 2 8))))
-        hvx-sub-expr
-        (cons (int8_t (bv 1 8)) (int8_t (bv 2 8))))
-       hvx-sub-expr
-       (cons (int8_t (bv 1 8)) (int8_t (bv 2 8)))))
-     (hi
-      (vtmpy-acc
-       (vtmpy-acc
-        (vtmpy
-         hvx-sub-expr
-         (cons (int8_t (bv 1 8)) (int8_t (bv 2 8))))
-        hvx-sub-expr
-        (cons (int8_t (bv 1 8)) (int8_t (bv 2 8))))
-       hvx-sub-expr
-       (cons (int8_t (bv 1 8)) (int8_t (bv 2 8)))))
-     (int8_t (bv 4 8))
-     #t
-     #t
-     #t))
+  (define synthesized-hvx-expr (??hvx-expr-grm))
 
-  (println (elem-hvx (interpret-hvx synthesized-hvx-expr) 0))
-    
-
-  (define (bounded-eq? oe se lanes)
+  (define (bounded-eq? oe se lanes)    
     (for ([i lanes])
       (cond
         [(hvx-pair? se)
@@ -284,7 +223,7 @@
           (debug (format "Expression cost: ~a\n\n" (cost-model (evaluate synthesized-hvx-expr sol))))
           (debug (format "Synthesis time: ~a seconds\n\n" runtime))
           (display "Searching for a more optimal solution...\n\n")
-          (synthesize-optimal spec ??hvx-expr-grm cost-model (evaluate synthesized-hvx-expr sol))]))
+          (synthesize-optimal spec ??hvx-expr-grm cost-model hvx-sub-expr (evaluate synthesized-hvx-expr sol))]))
 
 (define (verify-equiv? halide-spec hvx-expr ctx axioms)
   (display "Verifying expression equivalence over full-length vectors...\n")
@@ -344,5 +283,51 @@
   (debug (format "Verification time: ~a seconds\n\n" runtime))
 
   correct?)
+
+;; We can simplify our verification query by replacing each array access as a unique symbolic variable.
+;; This allows z3 to not reason about the indexing expressions.
+;; Currently, I am assuming that if two indexing expression generated by Halide are *syntactically* different, then they access
+;; different points of the array. If this assumption is incorrect, we can easily make a z3 query to confirm this assumption before
+;; applying the simplification.
+(define abstractions (make-hash))
+
+(define (abstract-arr-accesses buff-reads)
+  (for/list ([lane-buff-reads buff-reads])
+    (for/list ([buff-read lane-buff-reads])
+      (define v (eval buff-read))
+      (define t (type buff-read))
+      (define bits (bw buff-read))
+      (when (not (hash-has-key? abstractions v))
+        (define-symbolic* arr-read (bitvector bits))
+        (hash-set! abstractions v (mk-typed-expr arr-read t)))
+      (hash-ref abstractions v))))
+
+(define (replace-arr-accesses expr)
+  (match expr
+    [(int8_t v) (int8_t (replace-arr-accesses v))]
+    [(int16_t v) (int16_t (replace-arr-accesses v))]
+    [(int32_t v) (int32_t (replace-arr-accesses v))]
+    [(uint8_t v) (uint8_t (replace-arr-accesses v))]
+    [(uint16_t v) (uint16_t (replace-arr-accesses v))]
+    [(uint32_t v) (uint32_t (replace-arr-accesses v))]
+
+    [(expression op operands ...)
+
+     ;; Silly workaround -- ask rosette folks how to do this properly
+     (define-symbolic hack (~> integer? (bitvector 16)))
+     (define hack2 (hack 0))
+     (define app (match hack2 [(expression op2 ops2 ...) op2]))
+
+     (cond
+       [(eq? op bvadd) (foldr bvadd (replace-arr-accesses (car operands)) (for/list ([operand (cdr operands)]) (replace-arr-accesses operand)))]
+       [(eq? op bvmul) (foldr bvmul (replace-arr-accesses (car operands)) (for/list ([operand (cdr operands)]) (replace-arr-accesses operand)))]
+       [(eq? op bvsdiv) (bvsdiv (replace-arr-accesses (list-ref operands 0)) (replace-arr-accesses (list-ref operands 1)))]
+       [(eq? op bvudiv) (bvudiv (replace-arr-accesses (list-ref operands 0)) (replace-arr-accesses (list-ref operands 1)))]
+       [(eq? op extract) (extract (list-ref operands 0) (list-ref operands 1) (replace-arr-accesses (list-ref operands 3)))]
+       [(eq? op zero-extend) (zero-extend (replace-arr-accesses (list-ref operands 0)) (list-ref operands 1))]
+       [(eq? op app) (eval (hash-ref abstractions expr))]
+       [else (error "NYI: abstract array accesses for" expr)])]
+     
+    [_ expr]))
 
 (provide synthesize-hvx)

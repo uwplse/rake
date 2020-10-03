@@ -5,9 +5,9 @@
 (require rosette/lib/angelic)
 
 (require rake/util)
-(require rake/spec)
 (require rake/cpp/types)
 (require rake/synthesis/ir)
+(require rake/synthesis/spec)
 
 ;; Grammar features
 (define max-instr-bnd 3)
@@ -42,7 +42,7 @@
 (define (infer-outT expr)
   (match expr
     [(load-data data) (apply choose* (map (lambda(v) (type v)) (list-ref data 0)))]
-    [(convolve _ _ _ _ outT) outT]
+    [(convolve _ _ _ outT) outT]
     [(const-add _ _ _ outT) outT]
     [(const-divide t0 _ ) (infer-outT t0)]
     [(logic-shift-right t0 _) (infer-outT t0)]
@@ -50,10 +50,10 @@
 
 (define (filter-conv-output-types t0)
   (match (infer-outT t0)
-    ['int8 (choose* 'int8 'int16 'uint16)]
+    ['int8 (choose* 'int8 'int16 'uint16 'int32 'uint32)]
     ['int16 (choose* 'int16 'int32 'uint32)]
     ['int32 (choose* 'int32)]
-    ['uint8 (choose* 'uint8 'uint16 'int16)]
+    ['uint8 (choose* 'uint8 'uint16 'int16 'int32 'uint32)]
     ['uint16 (choose* 'uint16 'uint32 'int32)]
     ['uint32 (choose* 'uint32)]))
 
@@ -63,38 +63,39 @@
     ['int32 (choose* 'uint16 'int16 'int32)]
     [_ 'not-sup]))
 
-(define (get-ir-ops t0 live-ops int-weights-gen int-divisor-gen int-shiftr-gen int-offsets-gen add-consts)
+(define (get-ir-ops t0 live-ops int-weights-gen int-divisor-gen int-shiftr-gen int-offsets-gen add-consts div-consts)
   (define operators (list))
-  (define opNames (list))
-  
+
   (when (for/or ([c add-consts]) (or (eq? (eval-to-int c) 128) (eq? (eval-to-int c) 32768)))
-    (set! operators (cons (saturate t0 #t (bool-const)) operators))
-    (set! opNames (cons "(saturate t0 #t (bool-const))" opNames)))
+    (define satOp (saturate t0 #t (bool-const)))
+    (set! operators (cons satOp operators)))
   
   (when (or (set-member? live-ops 'vec-sca-mul) (set-member?  live-ops 'add))
     (begin
       (define weights (list (int-weights-gen) (int-weights-gen) (int-weights-gen) (int-weights-gen) (int-weights-gen)))
       (define saturation-func (if saturation-arith? nop nop))
       (define output-type (filter-conv-output-types t0))
-      (define conv-op (convolve t0 2 weights saturation-func output-type))
-      (set! operators (cons conv-op operators))
-      (set! opNames (cons "(convolve t0 9 weights saturation-func output-type)" opNames))
+      (define radius (choose 1 2 3))
+      (define ktype (choose WMT_GENERAL WMT_1DSYM WMT_2DSYM))
+      (define kernel (weight-matrix radius (take weights radius) ktype))
+      (define conv-op (convolve t0 kernel saturation-func output-type))
+      (when (not (convolve? t0))
+        (set! operators (cons conv-op operators)))
       (when (not (void? int-offsets-gen))
-        (set! operators (cons (const-add t0 (int-offsets-gen) saturation-func output-type) operators))
-        (set! opNames (cons "(const-add t0 (int-offsets-gen) saturation-func output-type)" opNames)))))
+        (set! operators (cons (const-add t0 (int-offsets-gen) saturation-func output-type) operators)))))
   
   (when (set-member? live-ops 'vec-sca-div)
-    (begin
-      (when (not (void? int-divisor-gen))
-        (set! operators (cons (const-divide t0 (int-divisor-gen)) operators))
-        (set! opNames (cons "(const-divide t0 (int-divisor-gen))" opNames)))
-      (when (not (void? int-shiftr-gen))
-        (begin
-          (set! operators (cons (logic-shift-right t0 (int-shiftr-gen)) operators))
-          (set! opNames (cons "(logic-shift-right t0 (int-shiftr-gen))" opNames))
-          (set! operators (cons (arith-shift-right t0 (int-shiftr-gen) (bool-const) (filter-asr-output-types t0)) operators))
-          (set! opNames (cons "(arith-shift-right t0 (int-shiftr-gen) (bool-const) (filter-asr-output-types t0))" opNames))))))
-  
+    (when (not (void? int-divisor-gen))
+      (set! operators (cons (const-divide t0 (int-divisor-gen)) operators)))
+    (when (not (void? int-shiftr-gen))
+      (set! operators (cons (logic-shift-right t0 (int-shiftr-gen)) operators))
+      (set! operators (cons (arith-shift-right t0 (int-shiftr-gen) (bool-const) (filter-asr-output-types t0)) operators))
+      (when (for/or ([c div-consts]) (or (eq? (eval-to-int c) 256) (eq? (eval-to-int c) 65536)))
+        (set! operators (cons (packhi t0 (bool-const)) operators)))))
+
+  (when (set-member? live-ops 'down-cast)
+    (set! operators (cons (downcast t0) operators)))
+
   operators)
 
 (define (generate-ir-grammar spec)
@@ -106,10 +107,12 @@
   (define div-consts (ir-expr-spec-div-consts spec))
   (define data buff-reads)
   (define int-offsets-gen (get-generator-func add-consts))
-  (define int-weights-gen (get-generator-func (append (list (int16_t (bv 4 16)) (int8_t (bv 1 8))) mul-consts)))
+  (define int-weights-gen (get-generator-func (append (list (int8_t (bv 1 8))) mul-consts)))
   (define int-shiftr-gen (get-generator-func (map log2 (filter pow2? div-consts))))
   (define int-divisor-gen (get-generator-func (remove* (filter pow2? div-consts) div-consts)))
-  (define (??ir-instr t0) (apply choose* (get-ir-ops t0 live-ops int-weights-gen int-divisor-gen int-shiftr-gen int-offsets-gen add-consts)))
+  (define (??ir-instr t0)
+    (define ops (get-ir-ops t0 live-ops int-weights-gen int-divisor-gen int-shiftr-gen int-offsets-gen add-consts div-consts))
+    (if (empty? ops) t0 (apply choose* ops)))
   (define (??ir-expr)
     (define r0 (load-data data))
     (define r1 (??ir-instr r0))

@@ -10,13 +10,18 @@
 (define curr-cn 0)
 (define (set-curr-cn v) (set! curr-cn v))
 
+(define WMT_GENERAL 0)
+(define WMT_1DSYM 1)
+(define WMT_2DSYM 2)
+
 ;; IR Types
 (struct vector (data) #:transparent)
+(struct weight-matrix (rad vals type) #:transparent)
 
 (define (elem vec idx) ((vector-data vec) idx))
 
 ;; IR instructions
-(struct convolve (data width weights saturateFunc outputType) #:transparent)
+(struct convolve (data kernel saturateFunc outputType) #:transparent)
 (struct const-add (data const saturateFunc outputType) #:transparent)
 (struct const-divide (data divisor) #:transparent)
 (struct arith-shift-right (data n round? outputType) #:transparent)
@@ -24,6 +29,7 @@
 (struct saturate (data round? signedOut?) #:transparent)
 (struct upcast (data) #:transparent)
 (struct downcast (data) #:transparent)
+(struct packhi (data signed?) #:transparent)
 (struct broadcast (val) #:transparent)
 (struct load-data (opts))
 (struct swizzle-data (t0 opts) #:transparent)
@@ -47,201 +53,176 @@
 
     [(broadcast val) (vector (lambda (i) val))]
 
-;    [(convolve data weights saturateFunc outputType)
-;     (vector
-;      (lambda (i)
-;        (define v (vector-data (interpret data)))
-;        (define v1 (eval (cpp_cast (v i) outputType)))
-;        (define v2 (eval (cpp_cast (v (+ i 1)) outputType)))
-;        (define v3 (eval (cpp_cast (v (+ i 2)) outputType)))
-;        (define v4 (eval (cpp_cast (v (+ i 3)) outputType)))
-;        (define v5 (eval (cpp_cast (v (+ i 3)) outputType)))
-;        (define w1 (eval (cpp_cast (list-ref weights 0) outputType)))
-;        (define w2 (eval (cpp_cast (list-ref weights 1) outputType)))
-;        (define w3 (eval (cpp_cast (list-ref weights 2) outputType)))
-;        (define w4 (eval (cpp_cast (list-ref weights 3) outputType)))
-;        (define w5 (list-ref weights 4))
-;        (if w5
-;            (saturateFunc (mk-typed-expr (bvadd (bvmul v1 w1) (bvmul v2 w2) (bvmul v3 w3) (bvmul v4 w4) v5) outputType))
-;            (saturateFunc (mk-typed-expr (bvadd (bvmul v1 w1) (bvmul v2 w2) (bvmul v3 w3) (bvmul v4 w4)) outputType)))))]
-
-;    [(convolve data weights saturateFunc outputType)
-;     (vector
-;      (lambda (i)
-;        (define v (vector-data (interpret data)))
-;        (define v1 (eval (cpp_cast (v i) outputType)))
-;        (define v2 (eval (cpp_cast (v (+ i 1)) outputType)))
-;        (define v3 (eval (cpp_cast (v (+ i 2)) outputType)))
-;        (define v4 (eval (cpp_cast (v (+ i 3)) outputType)))
-;        (define v5 (eval (cpp_cast (v (+ i 3)) outputType)))
-;        (define w1 (eval (cpp_cast (list-ref weights 0) outputType)))
-;        (define w2 (eval (cpp_cast (list-ref weights 1) outputType)))
-;        (define w3 (eval (cpp_cast (list-ref weights 2) outputType)))
-;        (define w4 (eval (cpp_cast (list-ref weights 3) outputType)))
-;        (define w5 (list-ref weights 4))
-;        (if w5
-;            (saturateFunc (mk-typed-expr (bvadd (bvmul v1 w1) (bvmul v2 w2) (bvmul v3 w3) (bvmul v4 w4) v5) outputType))
-;            (saturateFunc (mk-typed-expr (bvadd (bvmul v1 w1) (bvmul v2 w2) (bvmul v3 w3) (bvmul v4 w4)) outputType)))))]
-
     ;; 1150s
     ;; 1455s
-    [(convolve data width weights saturateFunc outputType)
+    [(convolve data kernel saturateFunc outputType)
      (vector
       (lambda (i)
         (define vec (vector-data (interpret data)))
+        (define weights (asList kernel))
+        (define width (length weights))
         (cond
-          [(eq? width 1) (mk-typed-expr (bvmul
-                             (eval (cpp_cast (vec i) outputType))
-                             (eval (cpp_cast (list-ref weights 0) outputType)))
-                             outputType)]
-          [(eq? width 2) (mk-typed-expr (bvadd
-                             (bvmul
-                              (eval (cpp_cast (vec i) outputType))
-                              (eval (cpp_cast (list-ref weights 0) outputType)))
-                             (bvmul
-                              (eval (cpp_cast (vec (+ i 1)) outputType))
-                              (eval (cpp_cast (list-ref weights 1) outputType)))
-                             (bvmul
-                              (eval (cpp_cast (vec (+ i 2)) outputType))
-                              (eval (cpp_cast (list-ref weights 0) outputType)))
-                             (bvmul
-                              (eval (cpp_cast (vec (+ i 3)) outputType))
-                              (eval (cpp_cast (list-ref weights 2) outputType)))
-                             (bvmul
-                              (eval (cpp_cast (vec (+ i 4)) outputType))
-                              (eval (cpp_cast (list-ref weights 3) outputType)))
-                             (bvmul
-                              (eval (cpp_cast (vec (+ i 5)) outputType))
-                              (eval (cpp_cast (list-ref weights 2) outputType)))
-                             (bvmul
-                              (eval (cpp_cast (vec (+ i 6)) outputType))
-                              (eval (cpp_cast (list-ref weights 0) outputType)))
-                             (bvmul
-                              (eval (cpp_cast (vec (+ i 7)) outputType))
-                              (eval (cpp_cast (list-ref weights 1) outputType)))
-                             (bvmul
-                              (eval (cpp_cast (vec (+ i 8)) outputType))
-                              (eval (cpp_cast (list-ref weights 0) outputType))))
-                             outputType)]
-          [2 (mk-typed-expr (bvadd
-                             (bvmul
-                              (eval (cpp_cast (vec i) outputType))
-                              (eval (cpp_cast (list-ref weights 0) outputType)))
-                             (bvmul
-                              (eval (cpp_cast (vec (+ i 1)) outputType))
-                              (eval (cpp_cast (list-ref weights 1) outputType))))
-                             outputType)]
-          [3 (mk-typed-expr (bvadd
-                             (bvmul
-                              (eval (cpp_cast (vec i) outputType))
-                              (eval (cpp_cast (list-ref weights 0) outputType)))
-                             (bvmul
-                              (eval (cpp_cast (vec (+ i 1)) outputType))
-                              (eval (cpp_cast (list-ref weights 1) outputType)))
-                             (bvmul
-                              (eval (cpp_cast (vec (+ i 2)) outputType))
-                              (eval (cpp_cast (list-ref weights 2) outputType))))
-                             outputType)]
-          [4 (mk-typed-expr (bvadd
-                             (bvmul
-                              (eval (cpp_cast (vec i) outputType))
-                              (eval (cpp_cast (list-ref weights 0) outputType)))
-                             (bvmul
-                              (eval (cpp_cast (vec (+ i 1)) outputType))
-                              (eval (cpp_cast (list-ref weights 1) outputType)))
-                             (bvmul
-                              (eval (cpp_cast (vec (+ i 2)) outputType))
-                              (eval (cpp_cast (list-ref weights 2) outputType)))
-                             (bvmul
-                              (eval (cpp_cast (vec (+ i 3)) outputType))
-                              (eval (cpp_cast (list-ref weights 3) outputType))))
-                             outputType)]
-          [5 (mk-typed-expr (bvadd
-                             (bvmul
-                              (eval (cpp_cast (vec i) outputType))
-                              (eval (cpp_cast (list-ref weights 0) outputType)))
-                             (bvmul
-                              (eval (cpp_cast (vec (+ i 1)) outputType))
-                              (eval (cpp_cast (list-ref weights 1) outputType)))
-                             (bvmul
-                              (eval (cpp_cast (vec (+ i 2)) outputType))
-                              (eval (cpp_cast (list-ref weights 2) outputType)))
-                             (bvmul
-                              (eval (cpp_cast (vec (+ i 3)) outputType))
-                              (eval (cpp_cast (list-ref weights 3) outputType)))
-                             (bvmul
-                              (eval (cpp_cast (vec (+ i 4)) outputType))
-                              (eval (cpp_cast (list-ref weights 4) outputType))))
-                             outputType)]
-          [6 (mk-typed-expr (bvadd
-                             (bvmul
-                              (eval (cpp_cast (vec i) outputType))
-                              (eval (cpp_cast (list-ref weights 0) outputType)))
-                             (bvmul
-                              (eval (cpp_cast (vec (+ i 1)) outputType))
-                              (eval (cpp_cast (list-ref weights 1) outputType)))
-                             (bvmul
-                              (eval (cpp_cast (vec (+ i 2)) outputType))
-                              (eval (cpp_cast (list-ref weights 2) outputType)))
-                             (bvmul
-                              (eval (cpp_cast (vec (+ i 3)) outputType))
-                              (eval (cpp_cast (list-ref weights 3) outputType)))
-                             (bvmul
-                              (eval (cpp_cast (vec (+ i 4)) outputType))
-                              (eval (cpp_cast (list-ref weights 4) outputType)))
-                             (bvmul
-                              (eval (cpp_cast (vec (+ i 5)) outputType))
-                              (eval (cpp_cast (list-ref weights 5) outputType))))
-                             outputType)]
-          [7 (mk-typed-expr (bvadd
-                             (bvmul
-                              (eval (cpp_cast (vec i) outputType))
-                              (eval (cpp_cast (list-ref weights 0) outputType)))
-                             (bvmul
-                              (eval (cpp_cast (vec (+ i 1)) outputType))
-                              (eval (cpp_cast (list-ref weights 1) outputType)))
-                             (bvmul
-                              (eval (cpp_cast (vec (+ i 2)) outputType))
-                              (eval (cpp_cast (list-ref weights 2) outputType)))
-                             (bvmul
-                              (eval (cpp_cast (vec (+ i 3)) outputType))
-                              (eval (cpp_cast (list-ref weights 3) outputType)))
-                             (bvmul
-                              (eval (cpp_cast (vec (+ i 4)) outputType))
-                              (eval (cpp_cast (list-ref weights 4) outputType)))
-                             (bvmul
-                              (eval (cpp_cast (vec (+ i 5)) outputType))
-                              (eval (cpp_cast (list-ref weights 5) outputType)))
-                             (bvmul
-                              (eval (cpp_cast (vec (+ i 6)) outputType))
-                              (eval (cpp_cast (list-ref weights 6) outputType))))
-                             outputType)]
-          [8 (mk-typed-expr (bvadd
-                             (bvmul
-                              (eval (cpp_cast (vec i) outputType))
-                              (eval (cpp_cast (list-ref weights 0) outputType)))
-                             (bvmul
-                              (eval (cpp_cast (vec (+ i 1)) outputType))
-                              (eval (cpp_cast (list-ref weights 1) outputType)))
-                             (bvmul
-                              (eval (cpp_cast (vec (+ i 2)) outputType))
-                              (eval (cpp_cast (list-ref weights 2) outputType)))
-                             (bvmul
-                              (eval (cpp_cast (vec (+ i 3)) outputType))
-                              (eval (cpp_cast (list-ref weights 3) outputType)))
-                             (bvmul
-                              (eval (cpp_cast (vec (+ i 4)) outputType))
-                              (eval (cpp_cast (list-ref weights 4) outputType)))
-                             (bvmul
-                              (eval (cpp_cast (vec (+ i 5)) outputType))
-                              (eval (cpp_cast (list-ref weights 5) outputType)))
-                             (bvmul
-                              (eval (cpp_cast (vec (+ i 6)) outputType))
-                              (eval (cpp_cast (list-ref weights 6) outputType)))
-                             (bvmul
-                              (eval (cpp_cast (vec (+ i 7)) outputType))
-                              (eval (cpp_cast (list-ref weights 7) outputType))))
-                             outputType)]
+          [(eq? width 1) (mk-typed-expr
+                          (bvmul
+                           (eval (cpp_cast (vec i) outputType))
+                           (eval (cpp_cast (list-ref weights 0) outputType)))
+                          outputType)]
+          [(eq? width 2) (mk-typed-expr
+                          (bvadd
+                           (bvmul
+                            (eval (cpp_cast (vec i) outputType))
+                            (eval (cpp_cast (list-ref weights 0) outputType)))
+                           (bvmul
+                            (eval (cpp_cast (vec (+ i 1)) outputType))
+                            (eval (cpp_cast (list-ref weights 1) outputType))))
+                          outputType)]
+          [(eq? width 3) (mk-typed-expr
+                          (bvadd
+                           (bvmul
+                            (eval (cpp_cast (vec i) outputType))
+                            (eval (cpp_cast (list-ref weights 0) outputType)))
+                           (bvmul
+                            (eval (cpp_cast (vec (+ i 1)) outputType))
+                            (eval (cpp_cast (list-ref weights 1) outputType)))
+                           (bvmul
+                            (eval (cpp_cast (vec (+ i 2)) outputType))
+                            (eval (cpp_cast (list-ref weights 2) outputType))))
+                          outputType)]
+          [(eq? width 4) (mk-typed-expr
+                          (bvadd
+                           (bvmul
+                            (eval (cpp_cast (vec i) outputType))
+                            (eval (cpp_cast (list-ref weights 0) outputType)))
+                           (bvmul
+                            (eval (cpp_cast (vec (+ i 1)) outputType))
+                            (eval (cpp_cast (list-ref weights 1) outputType)))
+                           (bvmul
+                            (eval (cpp_cast (vec (+ i 2)) outputType))
+                            (eval (cpp_cast (list-ref weights 2) outputType)))
+                           (bvmul
+                            (eval (cpp_cast (vec (+ i 3)) outputType))
+                            (eval (cpp_cast (list-ref weights 3) outputType))))
+                          outputType)]
+          [(eq? width 5) (mk-typed-expr
+                          (bvadd
+                           (bvmul
+                            (eval (cpp_cast (vec i) outputType))
+                            (eval (cpp_cast (list-ref weights 0) outputType)))
+                           (bvmul
+                            (eval (cpp_cast (vec (+ i 1)) outputType))
+                            (eval (cpp_cast (list-ref weights 1) outputType)))
+                           (bvmul
+                            (eval (cpp_cast (vec (+ i 2)) outputType))
+                            (eval (cpp_cast (list-ref weights 2) outputType)))
+                           (bvmul
+                            (eval (cpp_cast (vec (+ i 3)) outputType))
+                            (eval (cpp_cast (list-ref weights 3) outputType)))
+                           (bvmul
+                            (eval (cpp_cast (vec (+ i 4)) outputType))
+                            (eval (cpp_cast (list-ref weights 4) outputType))))
+                          outputType)]
+          [(eq? width 6) (mk-typed-expr
+                          (bvadd
+                           (bvmul
+                            (eval (cpp_cast (vec i) outputType))
+                            (eval (cpp_cast (list-ref weights 0) outputType)))
+                           (bvmul
+                            (eval (cpp_cast (vec (+ i 1)) outputType))
+                            (eval (cpp_cast (list-ref weights 1) outputType)))
+                           (bvmul
+                            (eval (cpp_cast (vec (+ i 2)) outputType))
+                            (eval (cpp_cast (list-ref weights 2) outputType)))
+                           (bvmul
+                            (eval (cpp_cast (vec (+ i 3)) outputType))
+                            (eval (cpp_cast (list-ref weights 3) outputType)))
+                           (bvmul
+                            (eval (cpp_cast (vec (+ i 4)) outputType))
+                            (eval (cpp_cast (list-ref weights 4) outputType)))
+                           (bvmul
+                            (eval (cpp_cast (vec (+ i 5)) outputType))
+                            (eval (cpp_cast (list-ref weights 5) outputType))))
+                          outputType)]
+          [(eq? width 7) (mk-typed-expr
+                          (bvadd
+                           (bvmul
+                            (eval (cpp_cast (vec i) outputType))
+                            (eval (cpp_cast (list-ref weights 0) outputType)))
+                           (bvmul
+                            (eval (cpp_cast (vec (+ i 1)) outputType))
+                            (eval (cpp_cast (list-ref weights 1) outputType)))
+                           (bvmul
+                            (eval (cpp_cast (vec (+ i 2)) outputType))
+                            (eval (cpp_cast (list-ref weights 2) outputType)))
+                           (bvmul
+                            (eval (cpp_cast (vec (+ i 3)) outputType))
+                            (eval (cpp_cast (list-ref weights 3) outputType)))
+                           (bvmul
+                            (eval (cpp_cast (vec (+ i 4)) outputType))
+                            (eval (cpp_cast (list-ref weights 4) outputType)))
+                           (bvmul
+                            (eval (cpp_cast (vec (+ i 5)) outputType))
+                            (eval (cpp_cast (list-ref weights 5) outputType)))
+                           (bvmul
+                            (eval (cpp_cast (vec (+ i 6)) outputType))
+                            (eval (cpp_cast (list-ref weights 6) outputType))))
+                          outputType)]
+          [(eq? width 8) (mk-typed-expr
+                          (bvadd
+                           (bvmul
+                            (eval (cpp_cast (vec i) outputType))
+                            (eval (cpp_cast (list-ref weights 0) outputType)))
+                           (bvmul
+                            (eval (cpp_cast (vec (+ i 1)) outputType))
+                            (eval (cpp_cast (list-ref weights 1) outputType)))
+                           (bvmul
+                            (eval (cpp_cast (vec (+ i 2)) outputType))
+                            (eval (cpp_cast (list-ref weights 2) outputType)))
+                           (bvmul
+                            (eval (cpp_cast (vec (+ i 3)) outputType))
+                            (eval (cpp_cast (list-ref weights 3) outputType)))
+                           (bvmul
+                            (eval (cpp_cast (vec (+ i 4)) outputType))
+                            (eval (cpp_cast (list-ref weights 4) outputType)))
+                           (bvmul
+                            (eval (cpp_cast (vec (+ i 5)) outputType))
+                            (eval (cpp_cast (list-ref weights 5) outputType)))
+                           (bvmul
+                            (eval (cpp_cast (vec (+ i 6)) outputType))
+                            (eval (cpp_cast (list-ref weights 6) outputType)))
+                           (bvmul
+                            (eval (cpp_cast (vec (+ i 7)) outputType))
+                            (eval (cpp_cast (list-ref weights 7) outputType))))
+                          outputType)]
+          [(eq? width 9) (mk-typed-expr
+                          (bvadd
+                           (bvmul
+                            (eval (cpp_cast (vec i) outputType))
+                            (eval (cpp_cast (list-ref weights 0) outputType)))
+                           (bvmul
+                            (eval (cpp_cast (vec (+ i 1)) outputType))
+                            (eval (cpp_cast (list-ref weights 1) outputType)))
+                           (bvmul
+                            (eval (cpp_cast (vec (+ i 2)) outputType))
+                            (eval (cpp_cast (list-ref weights 2) outputType)))
+                           (bvmul
+                            (eval (cpp_cast (vec (+ i 3)) outputType))
+                            (eval (cpp_cast (list-ref weights 3) outputType)))
+                           (bvmul
+                            (eval (cpp_cast (vec (+ i 4)) outputType))
+                            (eval (cpp_cast (list-ref weights 4) outputType)))
+                           (bvmul
+                            (eval (cpp_cast (vec (+ i 5)) outputType))
+                            (eval (cpp_cast (list-ref weights 5) outputType)))
+                           (bvmul
+                            (eval (cpp_cast (vec (+ i 6)) outputType))
+                            (eval (cpp_cast (list-ref weights 6) outputType)))
+                           (bvmul
+                            (eval (cpp_cast (vec (+ i 7)) outputType))
+                            (eval (cpp_cast (list-ref weights 7) outputType)))
+                           (bvmul
+                            (eval (cpp_cast (vec (+ i 8)) outputType))
+                            (eval (cpp_cast (list-ref weights 8) outputType))))
+                          outputType)]
           )))]
 
     [(const-add data const saturateFunc outputType)
@@ -338,7 +319,37 @@
           [(uint16_t? v) (cpp_cast v 'uint8)]
           [(uint32_t? v) (cpp_cast v 'uint16)])))]
 
+    [(packhi data signed?)
+     (vector
+      (lambda (i)
+        (define v (elem (interpret data) i))
+        (match v
+          [(int16_t val) ((if signed? int8_t uint8_t) (extract 15 8 val))]
+          [(uint16_t val) ((if signed? int8_t uint8_t) (extract 15 8 val))]
+          [(int32_t val) ((if signed? int16_t uint16_t) (extract 31 16 val))]
+          [(uint32_t val) ((if signed? int16_t uint16_t) (extract 31 16 val))])))]
+
     [_ p]))
+
+(define (asList kernel)
+  (define radius (weight-matrix-rad kernel))
+  (define ktype (weight-matrix-type kernel))
+  (define vals (weight-matrix-vals kernel))
+  (cond
+    [(eq? radius 1) vals]
+    [(eq? radius 2) (cond
+                      [(eq? ktype WMT_GENERAL) vals]
+                      [(eq? ktype WMT_1DSYM) (append vals (reverse (take vals 1)))])]
+    [(eq? radius 3) (cond
+                      [(eq? ktype WMT_GENERAL) vals]
+                      [(eq? ktype WMT_1DSYM) (append vals (reverse (take vals 2)))])]
+    [(eq? radius 4) (cond
+                      [(eq? ktype WMT_GENERAL) vals]
+                      [(eq? ktype WMT_1DSYM) (append vals (reverse (take vals 3)))]
+                      [(eq? ktype WMT_2DSYM) (append vals (list (list-ref vals 0) (list-ref vals 1) (list-ref vals 0)  (list-ref vals 2) (list-ref vals 0)))]
+                      ;[(eq? ktype WMT_2DGRADX) (append vals (reverse (take vals 3)))]
+                      ;[(eq? ktype WMT_2DGRADY) (append vals (reverse (take vals 3)))]
+                      )]))
 
 (provide
  (except-out (all-defined-out) interpret set-curr-cn curr-cn elem) (rename-out [interpret interpret-ir] [set-curr-cn set-curr-cn-ir] [elem elem-ir]))
