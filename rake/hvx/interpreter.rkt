@@ -24,7 +24,7 @@
     
     [(gather* buff-reads) (get-from-buf* buff-reads)]
     
-    [(swizzle vec) (get-from-vec (interpret vec))]
+    ;[(swizzle vec) (get-from-vec (interpret vec))]
     
     ;;;;;;;;;;;;;;;; Instructions for data processing ;;;;;;;;;;;;;;;;
 
@@ -399,6 +399,29 @@
        [(list (i32x32 v0) (i32x32 v1) #t) (i16x64 (lambda (i) (sat16 (if (even? i) (round (v1 (quotient i 2))) (round (v0 (quotient i 2)))))))]
        [(list (i32x32 v0) (i32x32 v1) #f) (u16x64 (lambda (i) (satu16 (if (even? i) (round (v1 (quotient i 2))) (round (v0 (quotient i 2)))))))]
        [(list (u32x32 v0) (u32x32 v1) _)  (u16x64 (lambda (i) (satu16 (if (even? i) (round (v1 (quotient i 2))) (round (v0 (quotient i 2)))))))])]
+
+    ;; Extract n/2 bits
+    [(vshuffo Vd Vu signed?)
+     (match (list (interpret Vd) (interpret Vu) (interpret signed?))
+       [(list (i16x64 v0) (i16x64 v1) #t) (i8x128 (lambda (i) (if (even? i) (i8hi (v1 (quotient i 2))) (i8hi (v0 (quotient i 2))))))]
+       [(list (i16x64 v0) (i16x64 v1) #f) (u8x128 (lambda (i) (if (even? i) (u8hi (v1 (quotient i 2))) (u8hi (v0 (quotient i 2))))))]
+       [(list (u16x64 v0) (u16x64 v1) #t) (i8x128 (lambda (i) (if (even? i) (i8hi (v1 (quotient i 2))) (i8hi (v0 (quotient i 2))))))]
+       [(list (u16x64 v0) (u16x64 v1) #f) (u8x128 (lambda (i) (if (even? i) (u8hi (v1 (quotient i 2))) (u8hi (v0 (quotient i 2))))))]
+       [(list (i32x32 v0) (i32x32 v1) #t) (i16x64 (lambda (i) (if (even? i) (i16hi (v1 (quotient i 2))) (i16hi (v0 (quotient i 2))))))]
+       [(list (i32x32 v0) (i32x32 v1) #f) (u16x64 (lambda (i) (if (even? i) (u16hi (v1 (quotient i 2))) (u16hi (v0 (quotient i 2))))))]
+       [(list (u32x32 v0) (u32x32 v1) #t) (i16x64 (lambda (i) (if (even? i) (i16hi (v1 (quotient i 2))) (i16hi (v0 (quotient i 2))))))]
+       [(list (u32x32 v0) (u32x32 v1) #f) (u16x64 (lambda (i) (if (even? i) (u16hi (v1 (quotient i 2))) (u16hi (v0 (quotient i 2))))))])]
+
+    [(vpacko Vd Vu signed?)
+     (match (list (interpret Vd) (interpret Vu) (interpret signed?))
+       [(list (i16x64 v0) (i16x64 v1) #t) (i8x128 (lambda (i) (if (< i 32) (i8hi (v1 i)) (i8hi (v0 (- i 32))))))]
+       [(list (i16x64 v0) (i16x64 v1) #f) (u8x128 (lambda (i) (if (< i 32) (u8hi (v1 i)) (u8hi (v0 (- i 32))))))]
+       [(list (u16x64 v0) (u16x64 v1) #t) (i8x128 (lambda (i) (if (< i 32) (i8hi (v1 i)) (i8hi (v0 (- i 32))))))]
+       [(list (u16x64 v0) (u16x64 v1) #f) (u8x128 (lambda (i) (if (< i 32) (u8hi (v1 i)) (u8hi (v0 (- i 32))))))]
+       [(list (i32x32 v0) (i32x32 v1) #t) (i16x64 (lambda (i) (if (< i 16) (i16hi (v1 i)) (i16hi (v0 (- i 32))))))]
+       [(list (i32x32 v0) (i32x32 v1) #f) (u16x64 (lambda (i) (if (< i 16) (u16hi (v1 i)) (u16hi (v0 (- i 32))))))]
+       [(list (u32x32 v0) (u32x32 v1) #t) (i16x64 (lambda (i) (if (< i 16) (i16hi (v1 i)) (i16hi (v0 (- i 32))))))]
+       [(list (u32x32 v0) (u32x32 v1) #f) (u16x64 (lambda (i) (if (< i 16) (u16hi (v1 i)) (u16hi (v0 (- i 32))))))])]
     
     ;; ---- Everything below this line in the interpreter is tentative ----
 
@@ -592,18 +615,18 @@
     (lambda (i) (list-ref (filter (lambda(v) (eq? (type v) elemType)) (list-ref buff-reads curr-cn)) (idx-tbl1 i)))
     (lambda (i) (list-ref (filter (lambda(v) (eq? (type v) elemType)) (list-ref buff-reads curr-cn)) (idx-tbl2 i))))))
 
-(define (get-from-vec vec)
-  (define op (choose* sxt16 zxt16 sxt32 zxt32))
-  (if (pair? vec)
-      (choose*
-       (lambda (i) ((choose* lo8 hi8 lo16 hi16) ((choose* (car vec) (cdr vec)) (apply choose* (build-list 128 values)))))
-       (cons
-        (lambda (i) ((choose* (car vec) (cdr vec)) (apply choose* (build-list 128 values))))
-        (lambda (i) ((choose* (car vec) (cdr vec)) (apply choose* (build-list 128 values))))))
-      (choose*
-       (lambda (i) (vec (apply choose* (build-list 128 values))))
-       (cons
-        (lambda (i) (op (vec (apply choose* (build-list 128 values)))))
-        (lambda (i) (op (vec (apply choose* (build-list 128 values)))))))))
+;(define (get-from-vec vec)
+;  (define op (choose* sxt16 zxt16 sxt32 zxt32))
+;  (if (pair? vec)
+;      (choose*
+;       (lambda (i) ((choose* lo8 hi8 lo16 hi16) ((choose* (car vec) (cdr vec)) (apply choose* (build-list 128 values)))))
+;       (cons
+;        (lambda (i) ((choose* (car vec) (cdr vec)) (apply choose* (build-list 128 values))))
+;        (lambda (i) ((choose* (car vec) (cdr vec)) (apply choose* (build-list 128 values))))))
+;      (choose*
+;       (lambda (i) (vec (apply choose* (build-list 128 values))))
+;       (cons
+;        (lambda (i) (op (vec (apply choose* (build-list 128 values)))))
+;        (lambda (i) (op (vec (apply choose* (build-list 128 values)))))))))
 
 (provide (rename-out [interpret interpret-hvx] [set-curr-cn set-curr-cn-hvx]))

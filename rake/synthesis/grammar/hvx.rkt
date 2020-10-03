@@ -34,13 +34,17 @@
 
 (define (bool-const) (define-symbolic* b boolean?)  b)
 
-(define (generate-hvx-grammar ir-expr sub-expr)
+(define (generate-hvx-grammar ir-expr sub-expr hvx-sub-expr)
   (define ??hvx-instr (match ir-expr
-                        [(convolve data kernel saturateFunc outputType) (get-hvx-conv-isa kernel)]
+                        [(convolve data kernel saturateFunc outputType)
+                         (if (eq? (type (elem-ir (interpret-ir sub-expr) 0)) outputType)
+                             (get-hvx-conv-isa kernel)
+                             (get-hvx-conv-w-isa kernel))]
                         [(arith-shift-right data n round? outputType) (get-hvx-asr-isa n round? outputType)]
+                        [(packhi data signed?) (get-hvx-hi-isa signed?)]
                         [_ (begin (println "NYI") (exit))]))
   (define (??ir-expr)
-    (define r0 sub-expr)
+    (define r0 hvx-sub-expr)
     (define r1 (??hvx-instr (list r0)))
     (define r2 (??hvx-instr (list r0 r1)))
     (define r3 (??hvx-instr (list r0 r1 r2)))
@@ -58,6 +62,25 @@
   (define (??hvx-conv-instr registers)
     (define t0 (apply choose* registers))
     (define t1 (apply choose* registers))
+    (define c0 (int-const))
+    (choose*
+     ;; Addition
+     (vadd t0 t1 (bool-const))
+     ;; Vec-Sca multiplies
+     (vmpyi t0 c0)
+     (vmpyi-acc t0 t1 c0)
+     (vmpye t0 c0)
+     (vmpye-acc t0 t1 c0)
+     ;; Shift-left
+     (vasl t0 (shl-const))))
+  ??hvx-conv-instr)
+
+(define (get-hvx-conv-w-isa weights)
+  (define (int-const) (cpp_cast (apply choose* (set->list (list->set (weight-matrix-vals weights)))) (choose* 'int8 'uint8)))
+  (define (shl-const) (cpp_cast (apply choose* (set->list (list->set (map log2 (filter pow2? (weight-matrix-vals weights)))))) 'int8))
+  (define (??hvx-conv-instr registers)
+    (define t0 (apply choose* registers))
+    (define t1 (apply choose* registers))
     (define t2 (apply choose* registers))
     (define c0 (int-const))
     (define c1 (int-const))
@@ -65,19 +88,13 @@
     (define Rt4 (list c0 c1 (int-const) (int-const)))
     (choose*
      ;; Addition
-     (vadd t0 t1 (bool-const))
      (vadd-w t0 t1)
      (vadd-w-acc t0 t1 t2)
 
      ;; Vec-Sca multiplies
      (vmpy t0 c0)
-     (vmpyi t0 c0)
-     (vmpye t0 c0)
-
      (vmpy-acc t0 t1 c0)
-     (vmpyi-acc t0 t1 c0)
-     (vmpye-acc t0 t1 c0)
-
+     
      (vmpa t1 Rt)
      (vmpa-acc t0 t1 Rt)
 
@@ -93,10 +110,7 @@
      (vrmpy-acc t0 t1 Rt4)
 
      (vrmpy-p t0 Rt4 (bool-const))
-     (vrmpy-p-acc t0 t1 Rt4 (bool-const))
-
-     ;; Shift-left
-     (vasl t0 (shl-const))))
+     (vrmpy-p-acc t0 t1 Rt4 (bool-const))))
   ??hvx-conv-instr)
 
 ;; HVX instructions for arithmetic shift right
@@ -110,5 +124,15 @@
      (vasr-n t0 t1 i8_n round? (bool-const) signed?)
      ))
   ??hvx-asr-instr)
+
+;; HVX instructions for extracting upper bits
+(define (get-hvx-hi-isa signed?)
+  (define (??hvx-hi-instr registers)
+    (define t0 (apply choose* registers))
+    (define t1 (apply choose* registers))
+    (choose*
+     (vshuffo t0 t1 signed?)
+     (vpacko t0 t1 signed?)))
+  ??hvx-hi-instr)
 
 (provide hvx-instr-limit-exceeded? hvx-instr-bnd generate-hvx-grammar increment-hvx-instr-bnd reset-hvx-instr-bnd)

@@ -128,6 +128,16 @@
   (define ir-expr-axioms (hvx-expr-spec-axioms spec))
   
   (match ir-expr
+    [(packhi sub-expr signed?)
+     (begin
+       (define hvx-sub-spec (hvx-expr-spec sub-expr ir-expr-sol ir-expr-ctx ir-expr-axioms))
+       (define hvx-sub-expr (synthesize-hvx-expr hvx-sub-spec))
+       (display "Lifting IR to HVX...\n")
+       (display "====================\n")
+       (display (format "IR Operation: ~a\n\n" ir-expr))
+       (reset-hvx-instr-bnd)
+       (synthesize-equiv-hvx spec sub-expr hvx-sub-expr))]
+    
     [(arith-shift-right sub-expr n round? outputType)
      (begin
        (define hvx-sub-spec (hvx-expr-spec sub-expr ir-expr-sol ir-expr-ctx ir-expr-axioms))
@@ -136,7 +146,7 @@
        (display "====================\n")
        (display (format "IR Operation: ~a\n\n" ir-expr))
        (reset-hvx-instr-bnd)
-       (synthesize-equiv-hvx spec hvx-sub-expr))]
+       (synthesize-equiv-hvx spec sub-expr hvx-sub-expr))]
 
     [(convolve sub-expr kernel saturateFunc outputType)
      (begin
@@ -146,14 +156,14 @@
        (display "====================\n")
        (display (format "IR Operation: ~a\n\n" ir-expr))
        (reset-hvx-instr-bnd)
-       (synthesize-equiv-hvx spec hvx-sub-expr))]
+       (synthesize-equiv-hvx spec sub-expr hvx-sub-expr))]
 
     [(load-data opts) (gather* opts)]
 
     [_ (println "NYI")]))
 
 ;; Define modular synthesis loop for HVX expression generation
-(define (synthesize-equiv-hvx spec hvx-sub-expr)
+(define (synthesize-equiv-hvx spec sub-expr hvx-sub-expr)
   (if (not (hvx-instr-limit-exceeded?))
       (begin
         (display "Generating HVX Grammar...\n")
@@ -161,7 +171,7 @@
         (debug (format "Number of instructions: ~a\n" (hvx-instr-bnd)))
         (debug (format "Set of instructions: Specialized\n\n"))
 
-        (define ??hvx-expr-grm (generate-hvx-grammar (hvx-expr-spec-expr spec) hvx-sub-expr))
+        (define ??hvx-expr-grm (generate-hvx-grammar (hvx-expr-spec-expr spec) sub-expr hvx-sub-expr))
         (define st (current-seconds))
         (define res (synthesize-optimal spec ??hvx-expr-grm basic-expr-cost hvx-sub-expr))
         
@@ -169,7 +179,7 @@
             (begin
               (display "Failed to find an equivalent HVX expression.\n\n")
               (increment-hvx-instr-bnd)
-              (synthesize-equiv-hvx spec hvx-sub-expr))
+              (synthesize-equiv-hvx spec sub-expr hvx-sub-expr))
             res))
       (begin
         (display "Maximum instruction bound reached. Giving up.\n\n")
@@ -217,6 +227,7 @@
     [(unsat? sol) (cond
                     [(void? curr-best-sol) sol]
                     [else (display (format "Failed to find an equivalent HVX expression with cost lower than ~a.\n\n" curr-best-cost))
+                          (debug (format "Synthesis time: ~a seconds\n\n" runtime))
                           curr-best-sol])]
     [else (display "Successfully found an equivalent HVX expression.\n\n")
           (debug (format "~a\n\n" (evaluate synthesized-hvx-expr sol)))

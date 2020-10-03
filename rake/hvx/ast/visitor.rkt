@@ -32,6 +32,8 @@
     [(vasr-acc Vd Vu Rt) (transform (vasr-acc (visit Vd transform) (visit Vu transform) (visit Rt transform)))]
     [(vasr-n Vu Vv Rt round? sat? unsigned?) (transform (vasr-n (visit Vu transform) (visit Vv transform) (visit Rt transform) (visit round? transform) (visit sat? transform) (visit unsigned? transform)))]
     [(vround Vu Vv signed?) (transform (vround (visit Vu transform) (visit Vv transform) (visit signed? transform)))]
+    [(vpacko Vu Vv signed?) (transform (vpacko (visit Vu transform) (visit Vv transform) (visit signed? transform)))]
+    [(vshuffo Vu Vv signed?) (transform (vshuffo (visit Vu transform) (visit Vv transform) (visit signed? transform)))]
     [(gather* buff-reads) (transform (gather* buff-reads))]
     [(gather buff-reads) (transform (gather buff-reads))]
     [(swizzle vec) (transform (swizzle (visit vec transform)))]
