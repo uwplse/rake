@@ -89,10 +89,14 @@
 
 (define (lsb16 v) (zero-extend (extract 15 0 (eval v)) (bitvector 32)))
 
-(define (lo8 v) (extract 7 0 v))
-(define (hi8 v) (extract 15 8 v))
-(define (lo16 v) (extract 15 0 v))
-(define (hi16 v) (extract 31 16 v))
+(define (i8lo v) (int8_t (extract 7 0 (eval v))))
+(define (u8lo v) (uint8_t (extract 7 0 (eval v))))
+(define (i16lo v) (int16_t (extract 15 0 (eval v))))
+(define (u16lo v) (uint16_t (extract 15 0 (eval v))))
+(define (i8hi v) (int8_t (extract 15 8 (eval v))))
+(define (u8hi v) (uint8_t (extract 15 8 (eval v))))
+(define (i16hi v) (int16_t (extract 31 16 (eval v))))
+(define (u16hi v) (uint16_t (extract 31 16 (eval v))))
 
 (define (zxt16 v) (uint16_t (zero-extend (eval v) (bitvector 16))))
 (define (sxt16 v) (int16_t (sign-extend (eval v) (bitvector 16))))
