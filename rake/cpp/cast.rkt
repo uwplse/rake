@@ -67,6 +67,16 @@
        ['uint16 (uint16_t (extract 15 0 val))]
        ['uint32 v]
        ['uint64 (int64_t (zero-extend val (bitvector 64)))])]
+    [(int64_t val)
+     (match type
+       ['int8 (int8_t (extract 7 0 val))]
+       ['int16 (int16_t (extract 15 0 val))]
+       ['int32 (int32_t (extract 31 0 val))]
+       ['int64 v]
+       ['uint8 (uint8_t (extract 7 0 val))]
+       ['uint16 (uint16_t (extract 15 0 val))]
+       ['uint32 (uint32_t (extract 31 0 val))]
+       ['uint64 (uint64_t (extract 63 0 val))])]
     [_ (error "NYI: Casting from type ~a" v)]))
 
 ;; Model C++ Saturation
