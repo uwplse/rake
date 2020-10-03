@@ -8,7 +8,8 @@
 
 (error-print-width 100000)
 (debug-on)
-;(use-int-enc)
+;(lifting-mode 'bv-encoding)
+;(lifting-mode 'int-encoding)
 
 ;; Model buffers as uninterpreted functions
 (define-symbolic input (~> integer? (bitvector 8)))

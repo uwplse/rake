@@ -46,6 +46,7 @@
   (define fromT (type ((interpret-halide vec) 0)))
   (match (cons fromT toT)
     [(cons 'int16 'uint8) 'down-cast]
+    [(cons 'uint8 'int16) 'down-cast]
     [_ (error "NYI: infer cast type" fromT toT)]))
 
 ;; Extract the set of operators used in the code

@@ -1,10 +1,7 @@
 #lang rosette
 
-(require rosette/lib/synthax)
-(require rosette/lib/angelic)
-
 (require rake)
-(require rake/halide/ir/interpreter)
+(require rake/halide)
 
 (error-print-width 100000)
 (debug-on)
@@ -15,8 +12,12 @@
 (init-var-types (make-hash (list (cons input 'uint8))))
 
 ;; Model indexing variables as integers
-(define-symbolic t77 integer?)
-(define-symbolic input.stride.1 integer?)
+;(define-symbolic t77 integer?)
+;(define-symbolic input.stride.1 integer?)
+
+;; Model indexing variables as constants (lightweight verification)
+(define t77 0)
+(define input.stride.1 20)
 
 ;; Define original expression in Halide IR
 (define halide-expr
@@ -37,10 +38,6 @@
    (int16x128 (ramp input (+ (* (+ (* t77 2) input.stride.1) 2) -2) 1 128))))
 
 ;; Define the specification for the synthesizer
-(define spec (synthesis-spec halide-expr (list input t77 input.stride.1) (list)))
+(define spec (synthesis-spec halide-expr (list)))
 
 (define hvx-expr (synthesize-hvx spec))
-
-;(basic-expr-cost hvx-expr)
-
-;(println hvx-expr)
