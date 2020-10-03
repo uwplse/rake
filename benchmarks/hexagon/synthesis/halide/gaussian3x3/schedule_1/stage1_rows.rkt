@@ -1,9 +1,7 @@
 #lang rosette
 
-(require rosette/lib/synthax)
-(require rosette/lib/angelic)
-
 (require rake)
+(require rake/halide)
 
 (error-print-width 100000)
 (debug-on)
@@ -30,10 +28,6 @@
    (int16x128 (ramp input (+ (* (+ (* (quotient input.stride.1 128) (+ (+ (* output.s0.y.y 4) output.s0.y.yi) 1)) rows.s0.x.x) 128) -1) 1 128))))
 
 ;; Define the specification for the synthesizer
-(define spec (synthesis-spec halide-expr (list input input.stride.1 rows.s0.x.x output.s0.y.y output.s0.y.yi) (list)))
+(define spec (synthesis-spec halide-expr (list)))
 
 (define hvx-expr (synthesize-hvx spec))
-
-;(basic-expr-cost hvx-expr)
-
-;(println hvx-expr)

@@ -1,9 +1,7 @@
 #lang rosette
 
-(require rosette/lib/synthax)
-(require rosette/lib/angelic)
-
 (require rake)
+(require rake/halide)
 
 (error-print-width 100000)
 (debug-on)
@@ -57,10 +55,6 @@
     (x128 (int16_t (bv 16 16))))))
 
 ;; Define the specification for the synthesizer
-(define spec (synthesis-spec halide-expr (list rows output.s0.x.x c1) axioms))
+(define spec (synthesis-spec halide-expr axioms))
 
 (define hvx-expr (synthesize-hvx spec))
-
-(basic-expr-cost hvx-expr)
-
-(println hvx-expr)
