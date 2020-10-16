@@ -86,10 +86,6 @@ int main(int argc, char **argv) {
     halide_dimension_t y_dim{0, height, width};
     halide_dimension_t shape[2] = {x_dim, y_dim};
 
-    halide_dimension_t xo_dim{2, width-4, 1};
-    halide_dimension_t yo_dim{2, height-4, width-4};
-    halide_dimension_t shapeo[2] = {xo_dim, yo_dim};
-
     Halide::Runtime::Buffer<uint8_t> input1_buf(input, dims, shape);
     Halide::Runtime::Buffer<uint8_t> output_buf(output, dims, shape);
 

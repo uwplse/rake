@@ -38,7 +38,7 @@ public:
 
             Expr ht = output.dim(1).extent();
 
-            // Best Manual Implementation :   0.1412 cycles/pixel
+            // 0.2808 cycles/pixel
             /*output
                 .hexagon()
                 .split(y, yo, y, ht/2)
@@ -54,7 +54,7 @@ public:
             output.parallel(yo);
             output.prefetch(input, y, 2, PrefetchBoundStrategy::NonFaulting);*/
 
-            // Parallel loop error
+            // SW Attempt: Parallel loop error
             /*rows.compute_at(Func(output), xi).store_at(Func(output), yi);
 
             output
@@ -62,13 +62,35 @@ public:
                 .tile(x, y, xi, yi, vector_size, 4, TailStrategy::RoundUp)
                 .vectorize(xi);*/
 
-            // Best Halide I know of (0.1979 cycles/pixel)
+            // Halide Repo 0.2514
+            /*output
+                .hexagon()
+                .tile(x, y, xi, yi, vector_size*2, 4, TailStrategy::RoundUp)
+                .vectorize(xi)
+                .unroll(yi);
+            rows.compute_at(Func(output), y)
+                .tile(x, y, x, y, xi, yi, vector_size, 4, TailStrategy::RoundUp)
+                .vectorize(xi)
+                .unroll(yi);
+            
+            output.prefetch(input, y, 2, PrefetchBoundStrategy::NonFaulting);
+
+            // 0.2435 cycles/pixel
+            output
+                .hexagon()
+                .split(y, y, yi, 4)
+                .vectorize(x, vector_size, TailStrategy::RoundUp);*/
+            
+
+            // Halide: 0.1979 cycles/pixel
+            // SDK:    0.1412 cycles/pixel
             output
                 .hexagon()
                 .tile(x, y, xi, yi, vector_size, 4, TailStrategy::RoundUp)
-                .vectorize(xi);
+                .vectorize(xi)
+                .unroll(yi);
 
-            output.prefetch(input, y, 2, PrefetchBoundStrategy::NonFaulting);
+            output.prefetch(input, y, 1, PrefetchBoundStrategy::NonFaulting);
         } else {
             const int vector_size = natural_vector_size<uint8_t>();
             output

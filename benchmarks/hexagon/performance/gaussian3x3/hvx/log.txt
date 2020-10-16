@@ -1,0 +1,25 @@
+maaz@iktovian:~/Desktop/Research/rake/benchmarks/hexagon/performance/gaussian3x3/hvx$ ./run-sim-hvx128 
+Running simulator with --timing flag...
+hexagon-sim INFO: The rev_id used in the simulation is 0x00004066 (v66a_512)
+AppReported (HVX128B-mode): Image 1920x1080 - gaussian3x3: 2589436 cycles (1.2488 cycles/pixel)
+
+Done!
+	T0: Insns=1591410 Packets=774651
+	T1: Insns=0 Packets=0
+	T2: Insns=0 Packets=0
+	T3: Insns=0 Packets=0
+	Total: Insns=1591410 Pcycles=5565999
+./build/out.bin ./ref_build/out.bin differ: byte 1, line 1
+
+maaz@iktovian:~/Desktop/Research/rake/benchmarks/hexagon/performance/gaussian3x3/hvx$ ./run-sim-hvx128 
+Running simulator with --timing flag...
+hexagon-sim INFO: The rev_id used in the simulation is 0x00004066 (v66a_512)
+AppReported (HVX128B-mode): Image 1920x1080 - gaussian3x3: 1558360 cycles (0.7515 cycles/pixel)
+
+Done!
+	T0: Insns=1438957 Packets=726523
+	T1: Insns=0 Packets=0
+	T2: Insns=0 Packets=0
+	T3: Insns=0 Packets=0
+	Total: Insns=1438957 Pcycles=4539863
+./build/out.bin ./ref_build/out.bin differ: byte 1, line 1
