@@ -1,15 +1,10 @@
 #lang rosette
 
-(require rosette/lib/synthax)
-(require rosette/lib/angelic)
-
 (require rake)
-(require rake/halide/ir/interpreter)
+(require rake/halide)
 
 (error-print-width 100000)
 (debug-on)
-;(lifting-mode 'bv-encoding)
-;(lifting-mode 'int-encoding)
 
 ;; Model buffers as uninterpreted functions
 (define-symbolic input (~> integer? (bitvector 8)))
@@ -17,9 +12,12 @@
 (init-var-types (make-hash (list (cons input 'uint8))))
 
 ;; Model indexing variables as integers
-(define-symbolic t40 integer?)
-(define-symbolic input.stride.1 integer?)
-;(define input.stride.1 20)
+;(define-symbolic t40 integer?)
+;(define-symbolic input.stride.1 integer?)
+
+;; Model indexing variables as constants (lightweight verification)
+(define t40 0)
+(define input.stride.1 20)
 
 ;; Define original expression in Halide IR
 (define halide-expr
@@ -52,13 +50,10 @@
      (x128 (int16_t (bv 8 16))))
     (x128 (int16_t (bv 16 16))))))
 
-;(println ((interpret-halide halide-expr) 0))
-
 ;; Define the specification for the synthesizer
-(define spec (synthesis-spec halide-expr (list input input.stride.1) (list)))
+(define spec (synthesis-spec halide-expr (list)))
 
-;(define hvx-expr (synthesize-hvx spec))
-
-;(basic-expr-cost hvx-expr)
-
-;(println hvx-expr)
+(define st (current-seconds))
+(define hvx-expr (synthesize-hvx spec))
+(define runtime (- (current-seconds) st))
+(display (format "Total compilation time: ~a\n" runtime))

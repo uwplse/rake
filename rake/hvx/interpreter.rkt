@@ -136,8 +136,8 @@
     [(vmpye Vu Rt)
      (define rhs (interpret Rt))
      (match (list (interpret Vu) rhs)
-       [(list (i32x32 lhs) (uint16_t v)) (u32x32 (lambda (i) (uint32_t (bvmul (lsb16 (lhs i)) (eval (cpp_cast rhs 'uint32))))))]
-       [(list (u32x32 lhs) (uint16_t v)) (u32x32 (lambda (i) (uint32_t (bvmul (lsb16 (lhs i)) (eval (cpp_cast rhs 'uint32))))))])]
+       [(list (i32x32 lhs) (uint16_t v)) (u32x32 (lambda (i) (uint32_t (bvmul (lsb16 (lhs i)) (eval (cpp-cast rhs 'uint32))))))]
+       [(list (u32x32 lhs) (uint16_t v)) (u32x32 (lambda (i) (uint32_t (bvmul (lsb16 (lhs i)) (eval (cpp-cast rhs 'uint32))))))])]
 
     ;; Vector-scalar multiplication (widening) with accumulation
     [(vmpy-acc Vdd Vu Rt)
@@ -174,8 +174,8 @@
     [(vmpye-acc Vd Vu Rt)
      (define rhs (interpret Rt))
      (match (list (interpret Vd) (interpret Vu) rhs)
-       [(list (u32x32 acc) (i32x32 lhs) (uint16_t v)) (u32x32 (lambda (i) (uint32_t (bvadd (eval (acc i)) (bvmul (lsb16 (lhs i)) (eval (cpp_cast rhs 'uint32)))))))]
-       [(list (u32x32 acc) (u32x32 lhs) (uint16_t v)) (u32x32 (lambda (i) (uint32_t (bvadd (eval (acc i)) (bvmul (lsb16 (lhs i)) (eval (cpp_cast rhs 'uint32)))))))])]
+       [(list (u32x32 acc) (i32x32 lhs) (uint16_t v)) (u32x32 (lambda (i) (uint32_t (bvadd (eval (acc i)) (bvmul (lsb16 (lhs i)) (eval (cpp-cast rhs 'uint32)))))))]
+       [(list (u32x32 acc) (u32x32 lhs) (uint16_t v)) (u32x32 (lambda (i) (uint32_t (bvadd (eval (acc i)) (bvmul (lsb16 (lhs i)) (eval (cpp-cast rhs 'uint32)))))))])]
 
     ;; Sum to vector-scalar multiplies
     [(vmpa Vuu Rt)
@@ -384,7 +384,7 @@
        [(list (i32x32 v0) (i32x32 v1) (int8_t n) #t _ #t) (u16x64 (lambda (i) (satu16 (round-asr (if (even? i) (v1 (quotient i 2)) (v0 (quotient i 2))) (int8_t n)))))]
 
        [(list (i32x32 v0) (i32x32 v1) (int8_t n) #f #t #f) (i16x64 (lambda (i) (sat16 (asr (if (even? i) (v1 (quotient i 2)) (v0 (quotient i 2))) (int8_t n)))))]
-       [(list (i32x32 v0) (i32x32 v1) (int8_t n) #f #f #f) (i16x64 (lambda (i) (cpp_cast (round-asr (if (even? i) (v1 (quotient i 2)) (v0 (quotient i 2))) (int8_t n)) 'int16)))]
+       [(list (i32x32 v0) (i32x32 v1) (int8_t n) #f #f #f) (i16x64 (lambda (i) (cpp-cast (round-asr (if (even? i) (v1 (quotient i 2)) (v0 (quotient i 2))) (int8_t n)) 'int16)))]
        [(list (i32x32 v0) (i32x32 v1) (int8_t n) #t _ #f) (i16x64 (lambda (i) (sat16 (round-asr (if (even? i) (v1 (quotient i 2)) (v0 (quotient i 2))) (int8_t n)))))]
        
        [(list (u32x32 v0) (u32x32 v1) (int8_t n) #f _ _) (u16x64 (lambda (i) (satu16 (asr (if (even? i) (v1 (quotient i 2)) (v0 (quotient i 2))) (int8_t n)))))]
@@ -483,10 +483,10 @@
 ;; Define commonly occuring scalar-computation patterns as funcs for re-usability and
 ;; easier maintainability
 (define (add lhs rhs outT)
-  (mk-typed-expr (bvadd (eval (cpp_cast lhs outT)) (eval (cpp_cast rhs outT))) outT))
+  (mk-typed-expr (bvadd (eval (cpp-cast lhs outT)) (eval (cpp-cast rhs outT))) outT))
 
 (define (add-acc acc lhs rhs outT)
-  (mk-typed-expr (bvadd (eval acc) (eval (cpp_cast lhs outT)) (eval (cpp_cast rhs outT))) outT))
+  (mk-typed-expr (bvadd (eval acc) (eval (cpp-cast lhs outT)) (eval (cpp-cast rhs outT))) outT))
 
 (define (add-sat lhs rhs outT)
   (match outT
@@ -498,30 +498,30 @@
     ['uint32 (satu32 (add lhs rhs 'uint64))]))
 
 (define (multiply lhs rhs outT)
-  (mk-typed-expr (bvmul (eval (cpp_cast lhs outT)) (eval (cpp_cast rhs outT))) outT))
+  (mk-typed-expr (bvmul (eval (cpp-cast lhs outT)) (eval (cpp-cast rhs outT))) outT))
   
 (define (multiply-add lhs w1 rhs w2 outT)
   (mk-typed-expr
    (bvadd
-    (bvmul (eval (cpp_cast lhs outT)) (eval (cpp_cast w1 outT)))
-    (bvmul (eval (cpp_cast rhs outT)) (eval (cpp_cast w2 outT))))
+    (bvmul (eval (cpp-cast lhs outT)) (eval (cpp-cast w1 outT)))
+    (bvmul (eval (cpp-cast rhs outT)) (eval (cpp-cast w2 outT))))
    outT))
 
 (define (multiply-add-acc lhs w1 rhs w2 acc outT)
   (mk-typed-expr
    (bvadd
-    (eval (cpp_cast acc outT))
-    (bvmul (eval (cpp_cast lhs outT)) (eval (cpp_cast w1 outT)))
-    (bvmul (eval (cpp_cast rhs outT)) (eval (cpp_cast w2 outT))))
+    (eval (cpp-cast acc outT))
+    (bvmul (eval (cpp-cast lhs outT)) (eval (cpp-cast w1 outT)))
+    (bvmul (eval (cpp-cast rhs outT)) (eval (cpp-cast w2 outT))))
    outT))
 
 (define (dot-prod4 x1 x2 x3 x4 w1 w2 w3 w4 outT)
   (mk-typed-expr
    (bvadd
-    (bvmul (eval (cpp_cast x1 outT)) (eval (cpp_cast w1 outT)))
-    (bvmul (eval (cpp_cast x2 outT)) (eval (cpp_cast w2 outT)))
-    (bvmul (eval (cpp_cast x3 outT)) (eval (cpp_cast w3 outT)))
-    (bvmul (eval (cpp_cast x4 outT)) (eval (cpp_cast w4 outT))))
+    (bvmul (eval (cpp-cast x1 outT)) (eval (cpp-cast w1 outT)))
+    (bvmul (eval (cpp-cast x2 outT)) (eval (cpp-cast w2 outT)))
+    (bvmul (eval (cpp-cast x3 outT)) (eval (cpp-cast w3 outT)))
+    (bvmul (eval (cpp-cast x4 outT)) (eval (cpp-cast w4 outT))))
    outT))
 
 (define (average lhs rhs outT)
@@ -558,17 +558,17 @@
 
 (define (asr val n)
   (match val
-    [(int16_t v) (int16_t (bvashr v (eval (cpp_cast n 'int16))))]
-    [(int32_t v) (int32_t (bvashr v (eval (cpp_cast n 'int32))))]
-    [(uint16_t v) (uint32_t (bvashr v (eval (cpp_cast n 'int16))))]
-    [(uint32_t v) (uint32_t (bvashr v (eval (cpp_cast n 'int32))))]))
+    [(int16_t v) (int16_t (bvashr v (eval (cpp-cast n 'int16))))]
+    [(int32_t v) (int32_t (bvashr v (eval (cpp-cast n 'int32))))]
+    [(uint16_t v) (uint32_t (bvashr v (eval (cpp-cast n 'int16))))]
+    [(uint32_t v) (uint32_t (bvashr v (eval (cpp-cast n 'int32))))]))
 
 (define (round-asr val n)
   (match val
-    [(int16_t v) (define r (eval (cpp_cast n 'int16))) (int16_t (bvashr (bvadd v (bvshl (bv 1 16) (bvsub r (bv 1 16)))) r))]
-    [(int32_t v) (define r (eval (cpp_cast n 'int32))) (int32_t (bvashr (bvadd v (bvshl (bv 1 32) (bvsub r (bv 1 32)))) r))]
-    [(uint16_t v) (define r (eval (cpp_cast n 'int16))) (uint16_t (bvashr (bvadd v (bvshl (bv 1 32) (bvsub r (bv 1 16)))) r))]
-    [(uint32_t v) (define r (eval (cpp_cast n 'int32))) (uint32_t (bvashr (bvadd v (bvshl (bv 1 32) (bvsub r (bv 1 32)))) r))]))
+    [(int16_t v) (define r (eval (cpp-cast n 'int16))) (int16_t (bvashr (bvadd v (bvshl (bv 1 16) (bvsub r (bv 1 16)))) r))]
+    [(int32_t v) (define r (eval (cpp-cast n 'int32))) (int32_t (bvashr (bvadd v (bvshl (bv 1 32) (bvsub r (bv 1 32)))) r))]
+    [(uint16_t v) (define r (eval (cpp-cast n 'int16))) (uint16_t (bvashr (bvadd v (bvshl (bv 1 32) (bvsub r (bv 1 16)))) r))]
+    [(uint32_t v) (define r (eval (cpp-cast n 'int32))) (uint32_t (bvashr (bvadd v (bvshl (bv 1 32) (bvsub r (bv 1 32)))) r))]))
 
 (define (get-vec-type buf)
   (match (hash-ref type-dict buf)

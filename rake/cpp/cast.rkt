@@ -5,7 +5,7 @@
 (require rosette/lib/match)
 
 ;; Model C++ casting
-(define (cpp_cast v type)
+(define (cpp-cast v type)
   (match v
     [(int8_t val)
      (match type

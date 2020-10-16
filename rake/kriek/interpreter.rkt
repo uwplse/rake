@@ -3,6 +3,8 @@
 (require rake/kriek/types)
 (require rake/kriek/util)
 
+(require rosette/lib/match)
+
 (define (interpret-kriek p)
   (match p
     [(Program inT spec outT)

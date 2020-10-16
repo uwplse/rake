@@ -2,6 +2,7 @@
 
 (require rosette/lib/synthax)
 (require rosette/lib/angelic)
+(require rosette/lib/match)
 
 (require rake/util)
 (require rake/cpp/types)
@@ -57,8 +58,8 @@
 
 ;; HVX instructions for synthesizing convolutions
 (define (get-hvx-conv-isa weights)
-  (define (int-const) (cpp_cast (apply choose* (set->list (list->set (weight-matrix-vals weights)))) (choose* 'int8 'uint8)))
-  (define (shl-const) (cpp_cast (apply choose* (set->list (list->set (map log2 (filter pow2? (weight-matrix-vals weights)))))) 'int8))
+  (define (int-const) (cpp-cast (apply choose* (set->list (list->set (weight-matrix-vals weights)))) (choose* 'int8 'uint8)))
+  (define (shl-const) (cpp-cast (apply choose* (set->list (list->set (map log2 (filter pow2? (weight-matrix-vals weights)))))) 'int8))
   (define (??hvx-conv-instr registers)
     (define t0 (apply choose* registers))
     (define t1 (apply choose* registers))
@@ -76,8 +77,8 @@
   ??hvx-conv-instr)
 
 (define (get-hvx-conv-w-isa weights)
-  (define (int-const) (cpp_cast (apply choose* (set->list (list->set (weight-matrix-vals weights)))) (choose* 'int8 'uint8)))
-  (define (shl-const) (cpp_cast (apply choose* (set->list (list->set (map log2 (filter pow2? (weight-matrix-vals weights)))))) 'int8))
+  (define (int-const) (cpp-cast (apply choose* (set->list (list->set (weight-matrix-vals weights)))) (choose* 'int8 'uint8)))
+  (define (shl-const) (cpp-cast (apply choose* (set->list (list->set (map log2 (filter pow2? (weight-matrix-vals weights)))))) 'int8))
   (define (??hvx-conv-instr registers)
     (define t0 (apply choose* registers))
     (define t1 (apply choose* registers))
@@ -116,12 +117,12 @@
 ;; HVX instructions for arithmetic shift right
 (define (get-hvx-asr-isa n round? outputType)
   (define signed? (unsignedT? outputType))
-  (define i8_n (cpp_cast n 'int8))
+  (define i8-n (cpp-cast n 'int8))
   (define (??hvx-asr-instr registers)
     (define t0 (apply choose* registers))
     (define t1 (apply choose* registers))
     (choose*
-     (vasr-n t0 t1 i8_n round? (bool-const) signed?)
+     (vasr-n t0 t1 i8-n round? (bool-const) signed?)
      ))
   ??hvx-asr-instr)
 

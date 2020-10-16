@@ -3,6 +3,8 @@
 (require rake/hvx/ast/types)
 (require rake/hvx/ast/visitor)
 
+(require rosette/lib/match)
+
 (struct hvx-resources (load store mpy1 mpy2 shift xlane) #:transparent)
 ;(struct core-slot-usage (load store mpy mpy shift xlane) #:transparent)
 

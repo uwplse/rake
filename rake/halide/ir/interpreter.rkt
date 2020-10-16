@@ -6,7 +6,6 @@
 (require rake/halide/ir/types)
 
 (require rosette/lib/match)
-
 (define (interpret p)
   (match p
     ;; Constructors
@@ -20,30 +19,30 @@
     [(concat_vectors v1 v2) (lambda (i) (if (< i (num-elems-hal v1)) ((interpret v1) i) ((interpret v2) (- i (num-elems-hal v1)))))]
 
     ;; Type Casts
-    [(uint8x32 vec) (lambda (i) (cpp_cast ((interpret vec) i) 'uint8))]
-    [(uint8x64 vec) (lambda (i) (cpp_cast ((interpret vec) i) 'uint8))]
-    [(uint8x128 vec) (lambda (i) (cpp_cast ((interpret vec) i) 'uint8))]
-    [(uint8x256 vec) (lambda (i) (cpp_cast ((interpret vec) i) 'uint8))]
+    [(uint8x32 vec) (lambda (i) (cpp-cast ((interpret vec) i) 'uint8))]
+    [(uint8x64 vec) (lambda (i) (cpp-cast ((interpret vec) i) 'uint8))]
+    [(uint8x128 vec) (lambda (i) (cpp-cast ((interpret vec) i) 'uint8))]
+    [(uint8x256 vec) (lambda (i) (cpp-cast ((interpret vec) i) 'uint8))]
 
-    [(int8x32 vec) (lambda (i) (cpp_cast ((interpret vec) i) 'int8))]
-    [(int8x64 vec) (lambda (i) (cpp_cast ((interpret vec) i) 'int8))]
-    [(int8x128 vec) (lambda (i) (cpp_cast ((interpret vec) i) 'int8))]
+    [(int8x32 vec) (lambda (i) (cpp-cast ((interpret vec) i) 'int8))]
+    [(int8x64 vec) (lambda (i) (cpp-cast ((interpret vec) i) 'int8))]
+    [(int8x128 vec) (lambda (i) (cpp-cast ((interpret vec) i) 'int8))]
 
-    [(uint16x32 vec) (lambda (i) (cpp_cast ((interpret vec) i) 'uint16))]
-    [(uint16x64 vec) (lambda (i) (cpp_cast ((interpret vec) i) 'uint16))]
-    [(uint16x128 vec) (lambda (i) (cpp_cast ((interpret vec) i) 'uint16))]
+    [(uint16x32 vec) (lambda (i) (cpp-cast ((interpret vec) i) 'uint16))]
+    [(uint16x64 vec) (lambda (i) (cpp-cast ((interpret vec) i) 'uint16))]
+    [(uint16x128 vec) (lambda (i) (cpp-cast ((interpret vec) i) 'uint16))]
 
-    [(int16x32 vec) (lambda (i) (cpp_cast ((interpret vec) i) 'int16))]
-    [(int16x64 vec) (lambda (i) (cpp_cast ((interpret vec) i) 'int16))]
-    [(int16x128 vec) (lambda (i) (cpp_cast ((interpret vec) i) 'int16))]
+    [(int16x32 vec) (lambda (i) (cpp-cast ((interpret vec) i) 'int16))]
+    [(int16x64 vec) (lambda (i) (cpp-cast ((interpret vec) i) 'int16))]
+    [(int16x128 vec) (lambda (i) (cpp-cast ((interpret vec) i) 'int16))]
     
-    [(uint32x32 vec) (lambda (i) (cpp_cast ((interpret vec) i) 'uint32))]
-    [(uint32x64 vec) (lambda (i) (cpp_cast ((interpret vec) i) 'uint32))]
-    [(uint32x128 vec) (lambda (i) (cpp_cast ((interpret vec) i) 'uint32))]
+    [(uint32x32 vec) (lambda (i) (cpp-cast ((interpret vec) i) 'uint32))]
+    [(uint32x64 vec) (lambda (i) (cpp-cast ((interpret vec) i) 'uint32))]
+    [(uint32x128 vec) (lambda (i) (cpp-cast ((interpret vec) i) 'uint32))]
 
-    [(int32x32 vec) (lambda (i) (cpp_cast ((interpret vec) i) 'int32))]
-    [(int32x64 vec) (lambda (i) (cpp_cast ((interpret vec) i) 'int32))]
-    [(int32x128 vec) (lambda (i) (cpp_cast ((interpret vec) i) 'int32))]
+    [(int32x32 vec) (lambda (i) (cpp-cast ((interpret vec) i) 'int32))]
+    [(int32x64 vec) (lambda (i) (cpp-cast ((interpret vec) i) 'int32))]
+    [(int32x128 vec) (lambda (i) (cpp-cast ((interpret vec) i) 'int32))]
 
     ;; Operations
     [(add v1 v2) (do-add v1 v2)]
@@ -64,11 +63,11 @@
 
 ;; Model basic arithmetic
 (define (infer-out-type lhs rhs)
-  (define max_bw (if (> (bw lhs) (bw rhs)) (bw lhs) (bw rhs)))
+  (define max-bw (if (> (bw lhs) (bw rhs)) (bw lhs) (bw rhs)))
   (cond
-    [(and (signed? lhs) (signed? rhs)) (get-type max_bw #t)]
-    [(and (unsigned? lhs) (unsigned? rhs)) (get-type max_bw #f)]
-    [else (get-type max_bw #t)]))
+    [(and (signed? lhs) (signed? rhs)) (get-type max-bw #t)]
+    [(and (unsigned? lhs) (unsigned? rhs)) (get-type max-bw #f)]
+    [else (get-type max-bw #t)]))
 
 (define (do-add lhs rhs)
   (define outT (infer-out-type lhs rhs))
@@ -86,19 +85,19 @@
   (define outT (infer-out-type lhs rhs))
   (if (signedT? outT)
       (begin
-        (define lhs64 (cpp_cast lhs 'int64))
-        (define rhs64 (cpp_cast rhs 'int64))
+        (define lhs64 (cpp-cast lhs 'int64))
+        (define rhs64 (cpp-cast rhs 'int64))
         (define ia (eval lhs64))
         (define ib (eval rhs64))
-        (define a_neg (bvashr ia (bv 63 64)))
-        (define b_neg (bvashr ib (bv 63 64)))
-        (define b_zero (if (bveq ib (bv 0 64)) (bv -1 64) (bv 0 64)))
-        (set! ib (bvsub ib b_zero))
-        (set! ia (bvsub ia a_neg))
+        (define a-neg (bvashr ia (bv 63 64)))
+        (define b-neg (bvashr ib (bv 63 64)))
+        (define b-zero (if (bveq ib (bv 0 64)) (bv -1 64) (bv 0 64)))
+        (set! ib (bvsub ib b-zero))
+        (set! ia (bvsub ia a-neg))
         (define q (bvsdiv ia ib))
-        (set! q (bvadd q (bvand a_neg (bvsub (bvnot b_neg) b_neg))))
-        (set! q (bvand q (bvnot b_zero)))
-        (cpp_cast (int64_t q) outT))
+        (set! q (bvadd q (bvand a-neg (bvsub (bvnot b-neg) b-neg))))
+        (set! q (bvand q (bvnot b-zero)))
+        (cpp-cast (int64_t q) outT))
       (mk-typed-expr (bvudiv (eval lhs) (eval rhs)) outT)))
 
 (define (do-min lhs rhs)

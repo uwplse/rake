@@ -37,7 +37,7 @@
        [(eq? op extract) (flatten (for/list ([operand operands]) (extract-lane-buf-reads operand)))]
        [(eq? op zero-extend) (flatten (for/list ([operand operands]) (extract-lane-buf-reads operand)))]
        [(eq? op sign-extend) (flatten (for/list ([operand operands]) (extract-lane-buf-reads operand)))]
-       [(eq? op app) (mk-typed-expr expr (var-type (list-ref operands 0)))]
+       [(eq? op app) (list (mk-typed-expr expr (var-type (list-ref operands 0))))]
        [else (error "NYI: extract buffer reads from" expr)])]
      
     [_ (list)]))

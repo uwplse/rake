@@ -75,7 +75,7 @@
       (define weights (list (int-weights-gen) (int-weights-gen) (int-weights-gen) (int-weights-gen) (int-weights-gen)))
       (define saturation-func (if saturation-arith? nop nop))
       (define output-type (filter-conv-output-types t0))
-      (define radius (choose 1 2 3))
+      (define radius (choose 1 2 3 4))
       (define ktype (choose WMT_GENERAL WMT_1DSYM WMT_2DSYM))
       (define kernel (weight-matrix radius (take weights radius) ktype))
       (define conv-op (convolve t0 kernel saturation-func output-type))
@@ -124,4 +124,11 @@
       [else r3]))
   ??ir-expr)
 
-(provide init-ir-grammar-generator generate-ir-grammar ir-instr-limit-exceeded? ir-instr-bnd ir-sat-arith? ir-specialized-ops? increment-ir-instr-bnd reset-ir-instr-bnd)
+(define (generate-ir-grammar-bu lifted-sub-expr)
+  (define (??ir-expr)
+    (match lifted-sub-expr
+      [(load-data opts) lifted-sub-expr]
+      [_ (error "Well fuck")]))
+  ??ir-expr)
+
+(provide init-ir-grammar-generator generate-ir-grammar generate-ir-grammar-bu ir-instr-limit-exceeded? ir-instr-bnd ir-sat-arith? ir-specialized-ops? increment-ir-instr-bnd reset-ir-instr-bnd)
