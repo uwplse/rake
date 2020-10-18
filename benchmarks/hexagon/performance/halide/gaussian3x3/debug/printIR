@@ -1,0 +1,20 @@
+#!/bin/bash
+
+set -x
+
+rm -fr tmp 
+mkdir tmp
+mkdir -p ir
+
+HALIDE_ROOT=/home/maaz/Software/Halide-10.0.0
+#HALIDE_ROOT=/home/maaz/Desktop/Research/rake-old/halide/distrib
+
+#HALIDE_TOOLS=$HALIDE_ROOT/share/Halide/tools
+HALIDE_TOOLS=$HALIDE_ROOT/tools
+
+g++ --std=c++11  -DLOG2VLEN=7 -DRUN=1 -DASSEMBLY=1 -DBITCODE=1 -I $HALIDE_ROOT/include -I $HALIDE_TOOLS -fno-rtti -O3 -g src/gaussian3x3_generator.cpp $HALIDE_TOOLS/GenGen.cpp -L $HALIDE_ROOT/lib  -lHalide -o tmp/gaussian3x3_generator -ldl -lpthread -lz  -lz -lrt -ltinfo
+
+export LD_LIBRARY_PATH=$HALIDE_ROOT/lib:; (./tmp/gaussian3x3_generator -o tmp -e o,h,assembly,bitcode -g gaussian3x3 -f gaussian3x3_hvx64 target=hexagon-32-noos-no_bounds_query-no_asserts-hvx_64) &> ir/gaussian3x3_hvx64.ir
+export LD_LIBRARY_PATH=$HALIDE_ROOT/lib:; (./tmp/gaussian3x3_generator -o tmp -e o,h,assembly,bitcode -g gaussian3x3 -f gaussian3x3_hvx128 target=hexagon-32-noos-no_bounds_query-no_asserts-hvx_128) &> ir/gaussian3x3_hvx128.ir
+
+rm -fr tmp
