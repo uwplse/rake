@@ -3,6 +3,7 @@
 (require rake)
 (require rake/halide)
 (require rake/swizzleflow/encoder)
+(require rake/hvx/ast/types)
 
 (error-print-width 100000)
 (debug-on)
@@ -54,7 +55,19 @@
 ;; Define the specification for the synthesizer
 (define data (swizzleflow-encode-data halide-expr))
 (define spec (swizzleflow-encode-spec halide-expr))
-
+(define sketch (vtmpy-acc
+                (vtmpy-acc
+                 (vdmpy-acc
+                  (vmpy
+                   (??swizzle-gen-vec)
+                   2)
+                  (??swizzle-gen-vecpair)
+                  (list 4 2))
+                 (??swizzle-gen-vecpair)
+                 (list 2 1))
+                (??swizzle-gen-vecpair)
+                (list 2 1)))
+                  
 (println (hash-values data))
 ;(println spec)
 ;(println (list-ref spec 1))

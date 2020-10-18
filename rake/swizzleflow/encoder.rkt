@@ -42,6 +42,9 @@
 (struct min-op (v1 v2) #:transparent)
 (struct max-op (v1 v2) #:transparent)
 
+(struct ??swizzle-gen-vecpair ())
+(struct ??swizzle-gen-vec ())
+
 (define (encode p)
   (match p
     ;; Constructors
