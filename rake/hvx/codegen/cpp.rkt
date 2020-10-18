@@ -433,13 +433,6 @@
             [(list (u32x32 _) (u32x32 _)) (format "Q6_Vuh_vround_VuwVuw_sat(~a, ~a)" (codegen Vu) (codegen Vv))]
             [(list (i32x32 _) (i32x32 _)) (format "Q6_Vuh_vround_VwVw_sat(~a, ~a)" (codegen Vu) (codegen Vv))]))]
 
-    ;;+
-    [(+ a b)
-     (format "~a+~a" (codegen b) (codegen a))]
-    
-    ;; Gather instruction
-    [(gather ht) "<cpp-gather-isntr>"]
-     
     [_ (format "~a" p)]))
     
 (provide (rename-out [codegen cpp_codegen]))
