@@ -2,6 +2,7 @@
 
 (require rake)
 (require rake/halide)
+(require rake/swizzleflow/encoder)
 
 (error-print-width 100000)
 (debug-on)
@@ -51,9 +52,9 @@
     (x128 (int16_t (bv 16 16))))))
 
 ;; Define the specification for the synthesizer
-(define spec (synthesis-spec halide-expr (list)))
+(define data (swizzleflow-encode-data halide-expr))
+(define spec (swizzleflow-encode-spec halide-expr))
 
-(define st (current-seconds))
-(define hvx-expr (synthesize-hvx spec))
-(define runtime (- (current-seconds) st))
-(display (format "Total compilation time: ~a\n" runtime))
+(println (hash-values data))
+;(println spec)
+;(println (list-ref spec 1))
