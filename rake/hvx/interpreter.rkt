@@ -493,7 +493,7 @@
     ['int8 (sat8 (add lhs rhs 'int16))]
     ['int16 (sat16 (add lhs rhs 'int32))]
     ['int32 (sat32 (add lhs rhs 'int64))]
-    ['uint8 (if (int8_t? rhs) (satu8 (int16_t (bvadd (eval (promote lhs)) (eval (promote rhs))))) (satu8 (add lhs rhs 'uint16_t)))]
+    ['uint8 (if (int8_t? rhs) (satu8 (int16_t (bvadd (eval (promote lhs)) (eval (promote rhs))))) (satu8 (add lhs rhs 'uint16)))]
     ['uint16 (satu16 (add lhs rhs 'uint32))]
     ['uint32 (satu32 (add lhs rhs 'uint64))]))
 
