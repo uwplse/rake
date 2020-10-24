@@ -12,12 +12,12 @@
 (init-var-types (make-hash (list (cons input 'uint8))))
 
 ;; Model indexing variables as integers
-;(define-symbolic t77 integer?)
-;(define-symbolic input.stride.1 integer?)
+(define-symbolic t77 integer?)
+(define-symbolic input.stride.1 integer?)
 
 ;; Model indexing variables as constants (lightweight verification)
-(define t77 0)
-(define input.stride.1 20)
+;(define t77 0)
+;(define input.stride.1 20)
 
 ;; Define original expression in Halide IR
 (define halide-expr
@@ -40,4 +40,4 @@
 ;; Define the specification for the synthesizer
 (define spec (synthesis-spec halide-expr (list)))
 
-(define hvx-expr (synthesize-hvx spec))
+(define hvx-expr (synthesize-hvx spec 'halide-ir 'greedy))
