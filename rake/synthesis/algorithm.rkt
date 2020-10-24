@@ -5,6 +5,7 @@
 (require rake/synthesis/incremental-ir-lifter)
 (require rake/synthesis/hvx-expr-synthesizer)
 (require rake/synthesis/verifier)
+(require rake/synthesis/swizzler)
 
 (define (synthesize-hvx spec [spec-lang 'halide-ir] [lifting-algo 'greedy])
   (cond
@@ -25,10 +26,13 @@
        (define hvx-spec (hvx-expr-spec ir-expr ir-expr-sol (symbolics halide-expr) halide-expr-axioms))
 
        ;; Synthesize equivalent HVX expression for each Op in the IR
-       (define hvx-expr (synthesize-hvx-expr hvx-spec))
+       (define hvx-expr-sketch (synthesize-hvx-expr hvx-spec))
 
-       (when (not (unsat? hvx-expr))  
-         ;; Full verification
+       ;; Synthesize data-movement
+       (define hvx-expr (synthesize-swizzles halide-expr hvx-expr-sketch (symbolics halide-expr) halide-expr-axioms))
+
+       (when (not (unsat? hvx-expr))
+         ;; Full expr verification
          (if (verify-equiv? halide-expr hvx-expr (symbolics halide-expr) halide-expr-axioms)
              (begin (display "Synthesized solution is correct.\n\n") hvx-expr)
              (begin (display "Synthesized solution is incorrect.\n\n") #f))))

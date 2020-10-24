@@ -96,10 +96,10 @@
      (vmpy t0 c0)
      (vmpy-acc t0 t1 c0)
      
-     (vmpa t1 Rt)
-     (vmpa-acc t0 t1 Rt)
+     ;(vmpa t1 Rt)
+     ;(vmpa-acc t0 t1 Rt)
 
-     (vdmpy t0 Rt)
+     ;(vdmpy t0 Rt)
      (vdmpy-sw t0 Rt)
      (vdmpy-acc t0 t1 Rt)
      (vdmpy-sw-acc t0 t1 Rt)

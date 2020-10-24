@@ -1,10 +1,69 @@
 #lang rosette
 
-(require rake/hvx/ast/types)
 (require rake/util)
-(require rake/cpp/types)
 
-(require rosette/lib/match)
+(require rake/cpp/types)
+(require rake/cpp/cast)
+
+(require rake/halide/ir/types)
+(require rake/halide/ir/analysis)
+(require rake/halide/ir/interpreter)
+
+(require rake/hvx/ast/types)
+(require rake/hvx/ast/visitor)
+(require rake/hvx/interpreter)
+
+(define (synthesize-swizzles halide-spec hvx-expr-sketch ctx axioms)
+  (display "Synthesizing Data Swizzles...\n")
+  (display "=============================\n\n")
+  (display "Synthesizing spec...\n")
+
+  (define VEC_LANES (num-elems-hal halide-spec))
+
+  ;; The visitor clones each node in the AST, converting it from a graph to a tree
+  (define (iden node) node)
+  (set! hvx-expr-sketch (visit-hvx hvx-expr-sketch iden))
+
+  (define interpreted-s-expr (interpret-hvx hvx-expr-sketch))
+  (define interpreted-o-expr (interpret-halide halide-spec))
+
+  (println (v0-elem-hvx interpreted-s-expr 0))
+  
+  ;; Synthesize spec hash-table, one lane at a time
+  (define (lane-eq? oe se lane)
+    (println se)
+    (cond
+      [(i16x64x2? se)
+       (set-curr-cn-hvx lane)
+       (when (<= 0 lane 63)
+         (assert (eq? (oe lane) (v0-elem-hvx se lane))))
+       (when (<= 64 lane 127)
+         (assert (eq? (oe lane) (v1-elem-hvx se (- lane 64)))))]
+      [else
+       (set-curr-cn-hvx lane)
+       (assert (eq? (oe lane) (elem-hvx se lane)))]))
+
+  (define sols (list))
+  (clear-asserts!)
+  (for ([axiom axioms]) (assert axiom))
+  (define st (current-seconds))
+  (for ([lane VEC_LANES])
+    (set-curr-cn-hvx lane)
+    (define sol (synthesize #:forall ctx
+                            #:guarantee (lane-eq? interpreted-o-expr interpreted-s-expr lane)))
+    (println sol)
+    (set! sols (append sols (list sol))))
+  (define runtime (- (current-seconds) st))
+  (define correct? (and (eq? (vec-len halide-spec) (num-elems-hvx interpreted-s-expr)) (not (for/or ([sol sols]) (unsat? sol)))))
+  
+  (display (if correct? "Successfull!\n\n" "Failed.\n"))
+  (debug (format "Synthesis time: ~a seconds\n\n" runtime))
+
+  ;(println (v0-elem-hvx (interpret hvx-expr-sketch) 0))
+  
+  ;(println (parse-swizzle-spec buff-reads sols))
+  
+  correct?)
 
 ;; Types
 (struct serve-vec (vec type))
@@ -56,9 +115,7 @@
     [(serve-vec vec type) (type (lambda (i) (hash-ref vec i)))]
     [(serve-vec-pair v0 v1 type) (type (lambda (i) (hash-ref v0 i)) (lambda (i) (hash-ref v1 i)))]
 
-    ;[(gather* buff-reads)]
-    
-    ;[(??gen-vec vec type) (type (lambda (i) (hash-ref vec i)))]
+    ;;[(??gen-vec vec type) (type (lambda (i) (hash-ref vec i)))]
 
     ;;;;;;;;;;;;;;;; Instructions for data processing ;;;;;;;;;;;;;;;;
     
@@ -203,4 +260,4 @@
      (si-mul (eval (do-si-cast rhs outT)) (eval (do-si-cast w2 outT)))))
    outT))
 
-(provide serve-vec serve-vec-pair ??gen-vec si-eq-expr? (rename-out [interpret si-interpret-hvx]))
+(provide synthesize-swizzles)

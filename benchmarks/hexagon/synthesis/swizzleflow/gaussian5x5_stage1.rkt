@@ -41,10 +41,18 @@
     (cons 2 (uint8_t 'input_102))
     (cons 3 (uint8_t 'input_103)))))
 
-(define spec (vadd
-                (serve-vec tbl0 u8x128)
-                (serve-vec tbl1 u8x128)
-                #t))
+(define spec (vtmpy-acc
+              (vdmpy-sw
+               (serve-vec-pair tbl0 tbl1 u8x128x2)
+               (cons
+                (int8_t (bv #x01 8))
+                (int8_t (bv #x04 8))))
+              (serve-vec-pair tbl0 tbl1 u8x128x2)
+              (cons
+               (int8_t (bv #x04 8))
+               (int8_t (bv #x06 8)))))
+
+(v0-elem-hvx (si-interpret-hvx spec) 0)
 
 (define sketch (vadd
                 (serve-vec tbl2 u8x128)
