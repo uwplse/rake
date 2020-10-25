@@ -8,6 +8,8 @@
 (require rosette/lib/match)
 (require rosette/lib/angelic)
 
+(define gather-tables (make-hash))
+
 (define (interpret p)
   (match p
 
@@ -22,6 +24,7 @@
 
     ;;;;;;;;; New constructs to abstract away data movement;;;;;;;;;
     
+    [(gather buff-reads gid) (get-from-buf buff-reads gid)]
     [(gather* buff-reads) (get-from-buf* buff-reads)]
     
     ;[(swizzle vec) (get-from-vec (interpret vec))]
@@ -607,7 +610,38 @@
 
   (define-symbolic* idx-tbl1 (~> integer? integer?))
   (define-symbolic* idx-tbl2 (~> integer? integer?))
-     
+  
+  (choose*
+   (vecType
+    (lambda (i) (list-ref (filter (lambda(v) (eq? (type v) elemType)) (list-ref buff-reads curr-cn)) (idx-tbl1 i))))
+   (vecpType
+    (lambda (i) (list-ref (filter (lambda(v) (eq? (type v) elemType)) (list-ref buff-reads curr-cn)) (idx-tbl1 i)))
+    (lambda (i) (list-ref (filter (lambda(v) (eq? (type v) elemType)) (list-ref buff-reads curr-cn)) (idx-tbl2 i))))))
+
+(define (get-from-buf buff-reads gid)
+  (define cn-reads (list-ref buff-reads 0))
+  (define elemType (apply choose* (map (lambda(v) (type v)) cn-reads)))
+  (define opts (filter (lambda(v) (eq? (type v) elemType)) cn-reads))
+  (define vecType (cond
+                    [(eq? elemType 'int8) i8x128]
+                    [(eq? elemType 'int16) i16x64]
+                    [(eq? elemType 'int32) i32x32]
+                    [(eq? elemType 'uint8) u8x128]
+                    [(eq? elemType 'uint16) u16x64]
+                    [(eq? elemType 'uint32) u32x32]))
+  (define vecpType (cond
+                    [(eq? elemType 'int8) i8x128x2]
+                    [(eq? elemType 'int16) i16x64x2]
+                    [(eq? elemType 'int32) i32x32x2]
+                    [(eq? elemType 'uint8) u8x128x2]
+                    [(eq? elemType 'uint16) u16x64x2]
+                    [(eq? elemType 'uint32) u32x32x2]))
+
+  (define-symbolic* idx-tbl1 (~> integer? integer?))
+  (define-symbolic* idx-tbl2 (~> integer? integer?))
+
+  (hash-set! gather-tables gid (cons idx-tbl1 idx-tbl2))
+  
   (choose*
    (vecType
     (lambda (i) (list-ref (filter (lambda(v) (eq? (type v) elemType)) (list-ref buff-reads curr-cn)) (idx-tbl1 i))))
@@ -629,4 +663,4 @@
 ;        (lambda (i) (op (vec (apply choose* (build-list 128 values)))))
 ;        (lambda (i) (op (vec (apply choose* (build-list 128 values)))))))))
 
-(provide (rename-out [interpret interpret-hvx] [set-curr-cn set-curr-cn-hvx]))
+(provide (rename-out [interpret interpret-hvx] [set-curr-cn set-curr-cn-hvx] [gather-tables hvx-gather-tables]))

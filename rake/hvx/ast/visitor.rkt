@@ -35,7 +35,7 @@
     [(vpacko Vu Vv signed?) (transform (vpacko (visit Vu transform) (visit Vv transform) (visit signed? transform)))]
     [(vshuffo Vu Vv signed?) (transform (vshuffo (visit Vu transform) (visit Vv transform) (visit signed? transform)))]
     [(gather* buff-reads) (transform (gather* buff-reads))]
-    [(gather buff-reads) (transform (gather buff-reads))]
+    [(gather buff-reads gid) (transform (gather buff-reads gid))]
     [(swizzle vec) (transform (swizzle (visit vec transform)))]
     [_ p]))
 

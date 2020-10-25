@@ -82,7 +82,7 @@
 
 ;; New instructions types we introduce to abstract away data-movement.
 ;; These instr types should never exist in output code.
-(struct gather (buff-reads))
+(struct gather (buff-reads id))
 (struct gather* (buff-reads))
 (struct swizzle (vec) #:transparent)
 

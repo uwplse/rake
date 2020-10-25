@@ -23,7 +23,7 @@
     [(vread buf loc) 1]
     [(vsplat Rt) 1]
     [(gather* buff-reads) 1]
-    [(gather buff-reads) 1]
+    [(gather buff-reads gid) 1]
     [(swizzle vec) 1]
     [(vadd Vu Vv sat?) 1]
     [(vadd-w Vu Vv) 1]

@@ -21,17 +21,19 @@
   (define VEC_LANES (num-elems-hal halide-spec))
 
   ;; The visitor clones each node in the AST, converting it from a graph to a tree
-  (define (iden node) node)
+  (define gather-id 0)
+  (define (iden node)
+    (match node
+      [(gather* opts) (set! gather-id (add1 gather-id)) (gather opts gather-id)]
+      [_ node]))
   (set! hvx-expr-sketch (visit-hvx hvx-expr-sketch iden))
 
+  (hash-clear! hvx-gather-tables)
   (define interpreted-s-expr (interpret-hvx hvx-expr-sketch))
   (define interpreted-o-expr (interpret-halide halide-spec))
 
-  (println (v0-elem-hvx interpreted-s-expr 0))
-  
   ;; Synthesize spec hash-table, one lane at a time
   (define (lane-eq? oe se lane)
-    (println se)
     (cond
       [(i16x64x2? se)
        (set-curr-cn-hvx lane)
@@ -51,30 +53,96 @@
     (set-curr-cn-hvx lane)
     (define sol (synthesize #:forall ctx
                             #:guarantee (lane-eq? interpreted-o-expr interpreted-s-expr lane)))
-    (println sol)
     (set! sols (append sols (list sol))))
   (define runtime (- (current-seconds) st))
   (define correct? (and (eq? (vec-len halide-spec) (num-elems-hvx interpreted-s-expr)) (not (for/or ([sol sols]) (unsat? sol)))))
   
-  (display (if correct? "Successfull!\n\n" "Failed.\n"))
+  (display (if correct? "\nSuccessfull!\n" "Failed.\n"))
   (debug (format "Synthesis time: ~a seconds\n\n" runtime))
 
-  ;(println (v0-elem-hvx (interpret hvx-expr-sketch) 0))
+  (define tbls (set->list (list->set (flatten (for/list ([sol sols]) (hash-keys (model sol)))))))
+  
+  (define (repl-gather-with-swizzle-spec node)
+    (match node
+      [(gather opts gid)
+       (define gather-tbls (hash-ref hvx-gather-tables gid))
+       (cond
+         [(and (set-member? tbls (car gather-tbls)) (set-member? tbls (cdr gather-tbls)))
+          (serve-vec-pair (car gather-tbls) (cdr gather-tbls) u8x128x2  opts sols)]
+         [(and (set-member? tbls (car gather-tbls)))
+          (serve-vec (car gather-tbls) u8x128)])]
+      [_ node]))
+  (define hvx-expr-spec (visit-hvx hvx-expr-sketch repl-gather-with-swizzle-spec))
+
+  ;; Extract the set of buffer reads
+  (set! mem-map (encode-data halide-spec))
+
+  (exit)
+  
+  ;; Synthesize swizzle instructions
+;  (define (repl-gather-with-swizzle-grm node)
+;    (match node
+;      [(gather opts gid)
+;       1]
+;      [_ node]))
+;  (define hvx-expr-grm (visit-hvx hvx-expr-sketch repl-gather-with-swizzle-grm))
+;
+;  (define (vec-eq? oe se)
+;    (cond
+;      [(i16x64x2? se)
+;       (set-si-curr-cn lane)
+;       (for ([lane 4])
+;         (assert (eq? (v0-elem-hvx oe lane) (v0-elem-hvx se lane))))
+;       (for ([lane 4])
+;         (assert (eq? (v1-elem-hvx oe lane) (v1-elem-hvx se lane))))]
+;      [else (assert #f)]))
+;
+;  (clear-asserts!)
+;  (for ([axiom axioms]) (assert axiom))
+;  (define st (current-seconds))
+;  (define sol (synthesize #:forall ctx
+;                          #:guarantee (lane-eq? interpreted-o-expr interpreted-s-expr lane)))
+;  (define runtime (- (current-seconds) st))
+;  
+;  (println hvx-expr-sketch)
+;  (set-si-curr-cn 0)
+;  (println (v0-elem-hvx (interpret hvx-expr-sketch) 0))
+;  (set-si-curr-cn 1)
+;  (println (v0-elem-hvx (interpret hvx-expr-sketch) 1))
+;  (set-si-curr-cn 64)
+;  (println (v1-elem-hvx (interpret hvx-expr-sketch) 0))
+  
+  (exit)
+  
+  ;(for ([i 128])
+  ;  (println ((list-ref tbls 0) 0)))
+  ;(println (v0-elem-hvx interpreted-s-expr 0))
+  ;(println (symbolics (v0-elem-hvx interpreted-s-expr 0)))
   
   ;(println (parse-swizzle-spec buff-reads sols))
   
   correct?)
 
+(define (encode-data p)
+  (define buff-reads (extract-buf-reads-hal p))
+  (set! buff-reads (set->list (list->set (flatten buff-reads))))
+  (define id -1)
+  (for ([buff-read buff-reads])
+    (set! id (add1 id))
+    (define read-id (format "var~a" id))
+    (hash-set! mem-map buff-read (mk-typed-expr read-id (type buff-read))))
+  mem-map)
+
 ;; Types
 (struct serve-vec (vec type))
-(struct serve-vec-pair (v0 v1 type))
+(struct serve-vec-pair (v0 v1 type opts sols))
 (struct ??gen-vec (vec))
 
 ;; Ops
 (struct si-add (v1 v2) #:transparent)
 (struct si-mul (v1 v2) #:transparent)
 
-(struct si-cast (v type) #:transparent)
+(struct si-cast (v otype) #:transparent)
 (struct si-sat8 (v) #:transparent)
 (struct si-sat16 (v) #:transparent)
 (struct si-sat32 (v) #:transparent)
@@ -106,6 +174,11 @@
     [_ (eq? e1 e2)]))
     ;[_ (error "NYI" e1 e2)]))
 
+(define si-curr-cn 0)
+(define (set-si-curr-cn v) (set! si-curr-cn v))
+
+(define mem-map (make-hash))
+
 ;; HVX Interpreter
 (define (interpret p)
 
@@ -113,7 +186,11 @@
     ;;;;;;;;;;;;;;;;; Instructions for vector creation ;;;;;;;;;;;;;;;
     
     [(serve-vec vec type) (type (lambda (i) (hash-ref vec i)))]
-    [(serve-vec-pair v0 v1 type) (type (lambda (i) (hash-ref v0 i)) (lambda (i) (hash-ref v1 i)))]
+    [(serve-vec-pair v0 v1 otype opts sols)
+     ;(type (lambda (i) (hash-ref v0 i)) (lambda (i) (hash-ref v1 i)))
+     (otype
+      (lambda (i) (hash-ref mem-map (list-ref (filter (lambda(v) (eq? (type v) 'uint8)) (list-ref opts si-curr-cn)) ((evaluate v0 (list-ref sols si-curr-cn)) i))))
+      (lambda (i) (hash-ref mem-map (list-ref (filter (lambda(v) (eq? (type v) 'uint8)) (list-ref opts si-curr-cn)) ((evaluate v1 (list-ref sols si-curr-cn)) i)))))]
 
     ;;[(??gen-vec vec type) (type (lambda (i) (hash-ref vec i)))]
 
@@ -183,6 +260,28 @@
         (i32x32x2
          (lambda (i) (multiply-add (data-v0 (* i 2)) (int8_t w1) (data-v0 (+ (* i 2) 1)) (int8_t w2) 'int32))
          (lambda (i) (multiply-add (data-v0 (+ (* i 2) 1)) (int8_t w1) (data-v1 (* i 2)) (int8_t w2) 'int32)))])]
+
+    ;; Reduce (via sum) two vector-scalar multiplies with accumulation.
+    [(vdmpy-acc Vd Vu Rt)
+     (match (list (interpret Vd) (interpret Vu) (interpret Rt))
+       [(list (i16x64 acc) (u8x128 data) (cons (int8_t w1) (int8_t w2))) (i16x64 (lambda (i) (multiply-add-acc (data (* i 2)) (int8_t w1) (data (+ (* i 2) 1)) (int8_t w2) (acc i) 'int16)))]
+       [(list (i32x32 acc) (i16x64 data) (cons (int8_t w1) (int8_t w2))) (i32x32 (lambda (i) (multiply-add-acc (data (* i 2)) (int8_t w1) (data (+ (* i 2) 1)) (int8_t w2) (acc i) 'int32)))]
+       [(list (i32x32 acc) (i16x64 data) (cons (int16_t w1) (int16_t w2))) (i32x32 (lambda (i) (do-si-sat32 (multiply-add-acc (data (* i 2)) (int16_t w1) (data (+ (* i 2) 1)) (int16_t w2) (acc i) 'int64))))]
+       [(list (i32x32 acc) (i16x64 data) (cons (uint16_t w1) (uint16_t w2))) (i32x32 (lambda (i) (do-si-sat32 (multiply-add-acc (data (* i 2)) (uint16_t w1) (data (+ (* i 2) 1)) (uint16_t w2) (acc i) 'int64))))]
+       [(list (i32x32 acc) (i16x64x2 data-v0 data-v1) (cons (int16_t w1) (int16_t w2))) (i32x32 (lambda (i) (do-si-sat32 (multiply-add-acc (data-v0 (+ (* i 2) 1)) (int16_t w1) (data-v1 (* i 2)) (int16_t w2) (acc i) 'int64))))]
+       [(list (i32x32 acc) (i16x64x2 data-v0 data-v1) (cons (uint16_t w1) (uint16_t w2))) (i32x32 (lambda (i) (do-si-sat32 (multiply-add-acc (data-v0 (+ (* i 2) 1)) (int16_t w1) (data-v1 (* i 2)) (int16_t w2) (acc i) 'int64))))])]
+
+    ;; Reduce (via sum) two vector-scalar multiplies in a sliding window with accumulate
+    [(vdmpy-sw-acc Vdd Vuu Rt)
+     (match (list (interpret Vdd) (interpret Vuu) (interpret Rt))
+       [(list (i16x64x2 acc-v0 acc-v1) (u8x128x2 data-v0 data-v1) (cons (int8_t w1) (int8_t w2)))
+        (i16x64x2
+         (lambda (i) (multiply-add-acc (data-v0 (* i 2)) (int8_t w1) (data-v0 (+ (* i 2) 1)) (int8_t w2) (acc-v0 i) 'int16))
+         (lambda (i) (multiply-add-acc (data-v0 (+ (* i 2) 1)) (int8_t w1) (data-v1 (* i 2)) (int8_t w2) (acc-v1 i) 'int16)))]
+       [(list (i32x32x2 acc-v0 acc-v1) (i16x64x2 data-v0 data-v1) (cons (int8_t w1) (int8_t w2)))
+        (i32x32x2
+         (lambda (i) (multiply-add-acc (data-v0 (* i 2)) (int8_t w1) (data-v0 (+ (* i 2) 1)) (int8_t w2) (acc-v0 i) 'int32))
+         (lambda (i) (multiply-add-acc (data-v0 (+ (* i 2) 1)) (int8_t w1) (data-v1 (* i 2)) (int8_t w2) (acc-v1 i) 'int32)))])]
     
     ;; Reduce (via sum) two vector-scalar multiplies in a sliding window with an additional accumulate
     [(vtmpy Vuu Rt)
