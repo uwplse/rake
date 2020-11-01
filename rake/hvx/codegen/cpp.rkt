@@ -441,6 +441,9 @@
             [(list (u32x32 _) (u32x32 _)) (format "~aVuh_vround_VuwVuw_sat(~a, ~a)" prefix (codegen Vu) (codegen Vv))]
             [(list (i32x32 _) (i32x32 _)) (format "~aVuh_vround_VwVw_sat(~a, ~a)" prefix (codegen Vu) (codegen Vv))]))]
 
+    ;;To convert syntax in racket to cpp
+    [(+ a b) (format "~a + ~a" b a)]
+    
     [_ (format "~a" p)]))
     
 (provide (rename-out [codegen cpp_codegen]))
