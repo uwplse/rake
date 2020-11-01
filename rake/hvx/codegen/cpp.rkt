@@ -194,6 +194,12 @@
          )]
     
     ;;vadd-w
+    [(vadd-w Vu Vv)
+     (match (list (interpret-hvx Vu) (interpret-hvx Vv))
+       [(list (u8x128 _)(u8x128 _)) (format "Q6_Wh_vadd_VubVub(~a, ~a)" (codegen Vu) (codegen Vv))]
+       [(list (i16x64 _)(i16x64 _)) (format "Q6_Ww_vadd_VhVh(~a, ~a)" (codegen Vu) (codegen Vv))]
+       [(list (u16x64 _)(u16x64 _)) (format "Q6_Ww_vadd_VuhVuh(~a, ~a)" (codegen Vu) (codegen Vv))]
+       )]
     
     ;;vadd-w-acc
     [(vadd Vdd Vu Vv)
