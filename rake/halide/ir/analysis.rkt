@@ -57,7 +57,9 @@
     [(x64 sca) (list)]
     [(x128 sca) (list)]
     [(x256 sca) (list)]
-    [(ramp buf base stride len) (list)]
+
+    ;[(ramp buf base stride len) (list)]
+    [(ramp base stride len) (list)]
 
     [(slice_vectors vec base stride len) (append (list 'slice) (extract-live-ops vec))]
     [(concat_vectors v1 v2) (append (list 'concat) (extract-live-ops v1) (extract-live-ops v2))]
@@ -104,7 +106,8 @@
     [(x64 sca) (list)]
     [(x128 sca) (list)]
     [(x256 sca) (list)]
-    [(ramp buf base stride len) (list)]
+    ;[(ramp buf base stride len) (list)]
+    [(ramp base stride len) (list)]
 
     [(slice_vectors vec base stride len) (extract-add-consts vec)]
     [(concat_vectors v1 v2) (append (extract-add-consts v1) (extract-add-consts v2))]
@@ -148,7 +151,8 @@
     [(x64 sca) (list)]
     [(x128 sca) (list)]
     [(x256 sca) (list)]
-    [(ramp buf base stride len) (list)]
+    ;[(ramp buf base stride len) (list)]
+    [(ramp base stride len) (list)]
 
     [(slice_vectors vec base stride len) (extract-sub-consts vec)]
     [(concat_vectors v1 v2) (append (extract-sub-consts v1) (extract-sub-consts v2))]
@@ -192,7 +196,8 @@
     [(x64 sca) (list)]
     [(x128 sca) (list)]
     [(x256 sca) (list)]
-    [(ramp buf base stride len) (list)]
+    ;[(ramp buf base stride len) (list)]
+    [(ramp base stride len) (list)]
 
     [(slice_vectors vec base stride len) (extract-mul-consts vec)]
     [(concat_vectors v1 v2) (append (extract-mul-consts v1) (extract-mul-consts v2))]
@@ -236,7 +241,8 @@
     [(x64 sca) (list)]
     [(x128 sca) (list)]
     [(x256 sca) (list)]
-    [(ramp buf base stride len) (list)]
+    ;[(ramp buf base stride len) (list)]
+    [(ramp base stride len) (list)]
 
     [(slice_vectors vec base stride len) (extract-div-consts vec)]
     [(concat_vectors v1 v2) (append (extract-div-consts v1) (extract-div-consts v2))]

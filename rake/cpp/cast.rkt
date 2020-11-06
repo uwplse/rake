@@ -77,7 +77,9 @@
        ['uint16 (uint16_t (extract 15 0 val))]
        ['uint32 (uint32_t (extract 31 0 val))]
        ['uint64 (uint64_t (extract 63 0 val))])]
-    [_ (error "NYI: Casting from type ~a" v)]))
+
+    ;; Casts on indexing variables (modelled as ints not bvs) are currently assumed to never change value
+    [_ (if (integer? v) v (error "NYI: Casting from type ~a" v))]))
 
 ;; Model C++ Saturation
 (define MIN_CHAR -128)

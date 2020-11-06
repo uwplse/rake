@@ -56,7 +56,7 @@
       [(x64 sca) (cons (broadcast sca) (model))]
       [(x128 sca) (cons (broadcast sca) (model))]
       [(x256 sca) (cons (broadcast sca) (model))]
-      [(ramp buf base stride len) (cons (load-data buff-reads) (model))]
+      ;[(ramp buf base stride len) (cons (load-data buff-reads) (model))]
 
       ;[(slice_vectors vec base stride len) (lambda (i) ((interpret vec) (+ (interpret base) (* i (interpret stride)))))]
       ;[(concat_vectors v1 v2) (lambda (i) (if (< i (num-elems-hal v1)) ((interpret v1) i) ((interpret v2) (- i (num-elems-hal v1)))))]

@@ -10,9 +10,8 @@
 (struct x128 (sca) #:transparent)
 (struct x256 (sca) #:transparent)
 
-(struct ramp (buf base stride len) #:transparent)
-(struct slice_vectors (vec base stride len) #:transparent)
-(struct concat_vectors (v1 v2) #:transparent)
+(struct ramp (base stride len) #:transparent)
+(struct load (buf idxs) #:transparent)
 
 ;; Type Casts
 (struct uint8x32 (vec) #:transparent)
@@ -41,12 +40,12 @@
 (struct int32x128 (vec) #:transparent)
 
 ;; Operations
-(struct add (v1 v2) #:transparent)
-(struct sub (v1 v2) #:transparent)
-(struct mul (v1 v2) #:transparent)
-(struct div (v1 v2) #:transparent)
-(struct min (v1 v2) #:transparent)
-(struct max (v1 v2) #:transparent)
+(struct sca-add (v1 v2) #:transparent)
+(struct sca-sub (v1 v2) #:transparent)
+(struct sca-mul (v1 v2) #:transparent)
+(struct sca-div (v1 v2) #:transparent)
+(struct sca-min (v1 v2) #:transparent)
+(struct sca-max (v1 v2) #:transparent)
 
 (struct vec-add (v1 v2) #:transparent)
 (struct vec-sub (v1 v2) #:transparent)
@@ -54,6 +53,11 @@
 (struct vec-div (v1 v2) #:transparent)
 (struct vec-max (v1 v2) #:transparent)
 (struct vec-min (v1 v2) #:transparent)
+
+;; Shuffles
+(struct slice_vectors (vec base stride len) #:transparent)
+(struct concat_vectors (v1 v2) #:transparent)
+(struct dynamic_shuffle (vec idx st end) #:transparent)
 
 ;; Utility functions
 (define (vec-len expr)
@@ -63,7 +67,7 @@
     [(x64 sca) 64]
     [(x128 sca) 128]
     [(x256 sca) 256]
-    [(ramp buf base stride len) len]
+    [(ramp base stride len) len]
 
     [(slice_vectors vec base stride len) len]
     [(concat_vectors v1 v2) (+ (vec-len v1) (vec-len v2))]

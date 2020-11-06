@@ -6,7 +6,7 @@
 (define (codegen p)
   (match p
     ;; Gather instruction
-    [(gather ht) "<halide-gather-isntr>"]
+    ;[(gather ht) "<halide-gather-isntr>"]
      
     [_ (format "~a" p)]))
     
