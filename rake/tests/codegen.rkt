@@ -37,7 +37,7 @@
      #t))
 
   (define out-prog-str
-    "Q6_Vub_vasr_VhVhR_rnd_sat(Q6_Vh_vmpyiacc_VhVhRb(Q6_Vh_vadd_VhVh(Q6_Vh_load(buf, x), Q6_Vh_load(buf, x+2)), Q6_Vh_load(buf, x+1), 0x02020202), Q6_Vh_vmpyiacc_VhVhRb(Q6_Vh_vadd_VhVh(Q6_Vh_load(buf, x+64), Q6_Vh_load(buf, x+66)), Q6_Vh_load(buf, x+65), 0x02020202), 4)")
+    "Q6_Vub_vasr_VhVhR_rnd_sat(Q6_Vh_vmpyiacc_VhVhRb(Q6_Vh_vadd_VhVh(Q6_Vh_load(buf, x), Q6_Vh_load(buf, x + 2)), Q6_Vh_load(buf, x + 1), 0x02020202), Q6_Vh_vmpyiacc_VhVhRb(Q6_Vh_vadd_VhVh(Q6_Vh_load(buf, x + 64), Q6_Vh_load(buf, x + 66)), Q6_Vh_load(buf, x + 65), 0x02020202), 4)")
 
   ;; Feel free to relax or even remove this check. I only added the string so that you have a target
   ;; to shoot for.
