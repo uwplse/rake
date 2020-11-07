@@ -1,6 +1,6 @@
-#HALIDE_DIR ?= ../../../../../Halide-10.0.0
 #HALIDE_DIR ?= ../../../../../Halide-master
-HALIDE_DIR ?= /home/maaz/Desktop/Research/rake-old/halide/distrib
+HALIDE_DIR ?= ../../../../Halide-10.0.0
+#HALIDE_DIR ?= /home/maaz/Desktop/Research/rake-old/halide/distrib
 
 HEXAGON_SIM ?= /home/maaz/Qualcomm/Hexagon_SDK/3.5.2/tools/HEXAGON_Tools/8.3.07/Tools/bin/hexagon-sim
 HEXAGON_CLANG ?= /home/maaz/Qualcomm/Hexagon_SDK/3.5.2/tools/HEXAGON_Tools/8.3.07/Tools/bin/hexagon-clang++

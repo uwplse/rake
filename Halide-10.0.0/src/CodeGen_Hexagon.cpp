@@ -476,8 +476,13 @@ void CodeGen_Hexagon::compile_func(const LoweredFunc &f,
              << body << "\n\n";
 
     // Optimize the IR for Hexagon.
-    debug(1) << "Optimizing Hexagon instructions...\n";
-    body = optimize_hexagon_instructions(body, target);
+#if 0
+    debug(1) << "Optimizing Hexagon instructions using rules...\n";
+    body = optimize_hexagon_instructions_rules(body, target);
+#else
+    debug(1) << "Optimizing Hexagon instructions using synthesis...\n";
+    body = optimize_hexagon_instructions_synthesis(body);
+#endif
 
     debug(1) << "Adding calls to qurt_hvx_lock, if necessary...\n";
     body = inject_hvx_lock_unlock(body, target);

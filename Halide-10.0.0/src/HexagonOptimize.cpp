@@ -5,6 +5,7 @@
 #include "ExprUsesVar.h"
 #include "HexagonAlignment.h"
 #include "IREquality.h"
+#include "IRPrinter.h"
 #include "IRMatch.h"
 #include "IRMutator.h"
 #include "IROperator.h"
@@ -14,6 +15,7 @@
 #include "Substitute.h"
 #include <unordered_map>
 #include <utility>
+#include <fstream>
 
 namespace Halide {
 namespace Internal {
@@ -2280,6 +2282,504 @@ public:
     }
 };
 
+// Synthesis based hvx expression optimizer
+class IROptimizer : public IRGraphMutator {
+
+    private:
+
+        class RacketPrinter : public VariadicVisitor<RacketPrinter, std::string, std::string> {
+        private:
+            class InferVarEncoding : public IRVisitor {
+            public:
+                using IRVisitor::visit;
+
+                InferVarEncoding(std::string n) : var_name(n), indexing(false), computation(false) {
+                    inside_indexing_expr.push(false);
+                }
+
+                void visit(const Variable *op) override {
+                    if (op->name == var_name && inside_indexing_expr.top())
+                        indexing = true;
+                }
+
+                void visit(const Call *op) override {
+                    if (op->name == std::string("dynamic_shuffle")) {
+                        op->args[0].accept(this);
+                        inside_indexing_expr.push(true);
+                        for(unsigned int i=1; i<op->args.size(); i++)
+                            op->args[i].accept(this);
+                        inside_indexing_expr.pop();
+                    }
+                    else
+                        IRVisitor::visit(op);
+                }
+
+                bool for_indexing() { return indexing; }
+                bool for_computation() { return computation; }
+
+            private:
+                std::string var_name;
+
+                bool indexing;
+                bool computation;
+
+                std::stack<bool> inside_indexing_expr;
+            };
+
+        public:
+            RacketPrinter (std::ostream &s) : printer(s) {
+                indent.push(1);
+                bv_enc.push(true);
+            }
+
+            /** Convert IR to racket S-expressions */
+
+            // Leaf nodes
+            std::string visit(const Variable *op) {
+                return tabs() + op->name;
+            }
+
+            std::string visit(const IntImm *op) {
+                if (bv_enc.top())
+                    return tabs() + "(int" + std::to_string(op->type.bits()) + "_t (bv " +
+                           std::to_string(op->value) + " " + std::to_string(op->type.bits()) + "))";
+                else
+                    return tabs() + std::to_string(op->value);
+            }
+
+            std::string visit(const UIntImm *op) {
+                if (bv_enc.top())
+                    return tabs() + "(uint" + std::to_string(op->type.bits()) + "_t (bv " +
+                           std::to_string(op->value) + " " + std::to_string(op->type.bits()) + "))";
+                else
+                    return tabs() + std::to_string(op->value);
+            }
+
+            std::string visit(const FloatImm *op) {
+                return tabs() + std::to_string(op->value);
+            }
+
+            std::string visit(const StringImm *op) {
+                return tabs() + op->value;
+            }
+
+            // Operators
+            std::string visit(const Broadcast *op) {
+                indent.push(0);
+                std::string rkt_type =  std::to_string(op->lanes);
+                std::string rkt_val = dispatch(op->value);
+                indent.pop();
+
+                return tabs() + "(x" + rkt_type + " " + rkt_val + ")";
+            }
+
+            std::string visit(const Cast *op) {
+                std::ostringstream stream;
+                stream << op->type;
+
+                indent.push(indent.top()+1);
+                std::string rkt_type =  stream.str();
+                std::string rkt_val = dispatch(op->value);
+                indent.pop();
+
+                return tabs() + "(" + rkt_type + "\n" + rkt_val + ")";
+            }
+
+            std::string visit(const Let *op) {
+                InferVarEncoding ive(op->name);
+                op->body.accept(&ive);
+
+                if (ive.for_indexing() && !ive.for_computation())
+                    bv_enc.push(false);
+                std::string rkt_val = dispatch(op->value);
+                if (ive.for_indexing() && !ive.for_computation())
+                    bv_enc.pop();
+
+                indent.push(indent.top()+1);
+                std::string rkt_bdy = dispatch(op->body);
+                indent.pop();
+
+                return tabs() + "(let ([" + op->name + " " + rkt_val + "])\n" + rkt_bdy + ")";
+            }
+
+            std::string visit(const Call *op) {
+                if (op->name == std::string("dynamic_shuffle")) {
+                    indent.push(indent.top()+1);
+                    std::string rkt_args = "\n" + dispatch(op->args[0]);
+                    bv_enc.push(false);
+                    for(unsigned int i=1; i<op->args.size(); i++)
+                        rkt_args += "\n" + dispatch(op->args[i]);
+                    bv_enc.pop();
+                    indent.pop();
+
+                    return tabs() + "(" + op->name + rkt_args + ")";
+                }
+                else {
+                    std::string rkt_args = "";
+
+                    indent.push(indent.top()+1);
+                    for(unsigned int i=0; i<op->args.size(); i++)
+                        rkt_args += "\n" + dispatch(op->args[i]);
+                    indent.pop();
+
+                    return tabs() + "(" + op->name + rkt_args + ")";
+                }
+            }
+
+            std::string visit(const Load *op) {
+                indent.push(0);
+                bv_enc.push(false);
+                std::string rkt_idx = dispatch(op->index);
+                bv_enc.pop();
+                indent.pop();
+
+                return tabs() + "(load " + op->name + " " + rkt_idx + ")";
+            }
+
+            std::string visit(const Ramp *op) {
+                indent.push(0);
+                bv_enc.push(false);
+                std::string rkt_base = dispatch(op->base);
+                std::string rkt_stride = dispatch(op->stride);
+                std::string rkt_lanes = std::to_string(op->lanes);
+                bv_enc.pop();
+                indent.pop();
+
+                return tabs() + "(ramp " + rkt_base + " " + rkt_stride + " " + rkt_lanes + ")";
+            }
+
+            std::string visit(const Add *op) {
+                if (op->type.is_vector()) {
+                    indent.push(indent.top()+1);
+                    std::string rkt_lhs = dispatch(op->a);
+                    std::string rkt_rhs = dispatch(op->b);
+                    indent.pop();
+
+                    return tabs() + "(vec-add\n" + rkt_lhs + "\n" + rkt_rhs + ")";
+                }
+                else {
+                    indent.push(0);
+                    std::string rkt_lhs = dispatch(op->a);
+                    std::string rkt_rhs = dispatch(op->b);
+                    indent.pop();
+
+                    return tabs() + "(+ " + rkt_lhs + " " + rkt_rhs + ")";
+                }
+
+            }
+
+            std::string visit(const Sub *op) {
+                if (op->type.is_vector()) {
+                    indent.push(indent.top()+1);
+                    std::string rkt_lhs = dispatch(op->a);
+                    std::string rkt_rhs = dispatch(op->b);
+                    indent.pop();
+
+                    return tabs() + "(vec-sub\n" + rkt_lhs + "\n" + rkt_rhs + ")";
+                }
+                else {
+                    indent.push(0);
+                    std::string rkt_lhs = dispatch(op->a);
+                    std::string rkt_rhs = dispatch(op->b);
+                    indent.pop();
+
+                    return tabs() + "(- " + rkt_lhs + " " + rkt_rhs + ")";
+                }
+            }
+
+            std::string visit(const Mul *op) {
+                if (op->type.is_vector()) {
+                    indent.push(indent.top()+1);
+                    std::string rkt_lhs = dispatch(op->a);
+                    std::string rkt_rhs = dispatch(op->b);
+                    indent.pop();
+
+                    return tabs() + "(vec-mul\n" + rkt_lhs + "\n" + rkt_rhs + ")";
+                } else {
+                    indent.push(0);
+                    std::string rkt_lhs = dispatch(op->a);
+                    std::string rkt_rhs = dispatch(op->b);
+                    indent.pop();
+
+                    return "(* " + rkt_lhs + " " + rkt_rhs + ")";
+                }
+            }
+
+            std::string visit(const Div *op) {
+                if (op->type.is_vector()) {
+                    indent.push(indent.top()+1);
+                    std::string rkt_lhs = dispatch(op->a);
+                    std::string rkt_rhs = dispatch(op->b);
+                    indent.pop();
+
+                    return tabs() + "(vec-div\n" + rkt_lhs + "\n" + rkt_rhs + ")";
+                } else {
+                    indent.push(0);
+                    std::string rkt_lhs = dispatch(op->a);
+                    std::string rkt_rhs = dispatch(op->b);
+                    indent.pop();
+
+                    return tabs() +  "(quotient " + rkt_lhs + " " + rkt_rhs + ")";
+                }
+            }
+
+            std::string visit(const Mod *op) { printer.print(op); return NYI(); }
+
+            std::string visit(const Min *op) {
+                if (op->type.is_vector()) {
+                    indent.push(indent.top()+1);
+                    std::string rkt_lhs = dispatch(op->a);
+                    std::string rkt_rhs = dispatch(op->b);
+                    indent.pop();
+
+                    return tabs() + "(vec-min\n" + rkt_lhs + "\n" + rkt_rhs + ")";
+                } else {
+                    indent.push(0);
+                    std::string rkt_lhs = dispatch(op->a);
+                    std::string rkt_rhs = dispatch(op->b);
+                    indent.pop();
+
+                    return tabs() + "(min " + rkt_lhs + " " + rkt_rhs + ")";
+                }
+            }
+
+            std::string visit(const Max *op) {
+                if (op->type.is_vector()) {
+                    indent.push(indent.top()+1);
+                    std::string rkt_lhs = dispatch(op->a);
+                    std::string rkt_rhs = dispatch(op->b);
+                    indent.pop();
+
+                    return tabs() + "(vec-max\n" + rkt_lhs + "\n" + rkt_rhs + ")";
+                } else {
+                    indent.push(0);
+                    std::string rkt_lhs = dispatch(op->a);
+                    std::string rkt_rhs = dispatch(op->b);
+                    indent.pop();
+
+                    return tabs() + "(max " + rkt_lhs + " " + rkt_rhs + ")";
+                }
+            }
+
+            std::string visit(const EQ *op) { printer.print(op); return NYI(); }
+            std::string visit(const NE *op) { printer.print(op); return NYI(); }
+            std::string visit(const LT *op) { printer.print(op); return NYI(); }
+            std::string visit(const LE *op) { printer.print(op); return NYI(); }
+            std::string visit(const GT *op) { printer.print(op); return NYI(); }
+            std::string visit(const GE *op) { printer.print(op); return NYI(); }
+            std::string visit(const And *op) { printer.print(op); return NYI(); }
+            std::string visit(const Or *op) { printer.print(op); return NYI(); }
+            std::string visit(const Not *op) { printer.print(op); return NYI(); }
+            std::string visit(const Select *op) { printer.print(op); return NYI(); }
+            std::string visit(const IfThenElse *op) { printer.print(op); return NYI(); }
+
+            std::string visit(const Shuffle *op) {
+                if(op->is_slice()){
+                    indent.push(indent.top()+1);
+                    std::string rkt_vec = dispatch(op->vectors[0]);
+                    indent.pop();
+                    indent.push(0);
+                    bv_enc.push(false);
+                    std::string rkt_base = std::to_string(op->slice_begin());
+                    std::string rkt_stride = std::to_string(op->slice_stride());
+                    std::string rkt_len = std::to_string(op->indices.size());
+                    bv_enc.pop();
+                    indent.pop();
+
+                    return tabs() + "(slice_vectors\n" + rkt_vec + " " + rkt_base
+                           + " " + rkt_stride + " " + rkt_len + ")";
+                }
+                else if(op->is_concat()){
+                    indent.push(indent.top()+1);
+                    std::string rkt_lhs = dispatch(op->vectors[0]);
+                    std::string rkt_rhs = dispatch(op->vectors[1]);
+                    indent.pop();
+
+                    return tabs() + "(concat_vectors\n" + rkt_lhs + "\n" + rkt_rhs + ")";
+                }
+
+                return NYI();
+            }
+
+            std::string visit(const VectorReduce * op) {
+                printer.print(op); return NYI();
+            }
+
+            /** Currently we do not do any re-writring at the Stmt level */
+            std::string visit(const LetStmt *op) { return NYI(); }
+            std::string visit(const AssertStmt *op) { return NYI(); }
+            std::string visit(const For *op) { return NYI(); }
+            std::string visit(const Provide *op) { return NYI(); }
+            std::string visit(const Store *op) { return NYI(); }
+            std::string visit(const Allocate *op) { return NYI(); }
+            std::string visit(const Evaluate *op) { return NYI(); }
+            std::string visit(const ProducerConsumer *op) { return NYI(); }
+            std::string visit(const Block *op) { return NYI(); }
+            std::string visit(const Realize *op) { return NYI(); }
+            std::string visit(const Prefetch *op) { return NYI(); }
+            std::string visit(const Free *op) { return NYI(); }
+            std::string visit(const Acquire *op) { return NYI(); }
+            std::string visit(const Fork *op) { return NYI(); }
+
+        private:
+            IRPrinter printer;
+            std::stack<int> indent;
+            std::stack<bool> bv_enc;
+
+            std::string tabs () {
+                std::string ret = "";
+                for (int i=0; i<indent.top(); i++) ret += " ";
+                return ret;
+            }
+
+            std::string NYI () {
+                debug(0) << "\nNYI. \n";
+                exit(0);
+                return "";
+            }
+
+        };
+
+        class InferSymbolics : public IRVisitor {
+        public:
+            using IRVisitor::visit;
+
+            void visit(const Variable * op) override {
+                live_vars.insert(op);
+            }
+
+            void visit(const Let * op) override {
+                local_vars.insert(op->name);
+                IRVisitor::visit(op);
+            }
+
+            void visit(const Load * op) override {
+                buffers.insert(std::pair<std::string,Type>(op->name,
+                                                           (op->type.is_vector() ? op->type.element_of() : op->type)));
+                IRVisitor::visit(op);
+            }
+
+            std::set<const Variable*> getSymVars() {
+                std::set<const Variable*> l;
+                for (auto var : live_vars) {
+                    if (local_vars.count(var->name) == 0)
+                        l.insert(var);
+                }
+                return l;
+            }
+
+            std::set<std::pair<std::string,Type>> getSymBufs() {
+                return buffers;
+            }
+
+        private:
+            std::set<const Variable*> live_vars;
+            std::set<std::string> local_vars;
+            std::set<std::pair<std::string,Type>> buffers;
+        };
+
+    private:
+        using IRMutator::visit;
+
+        Stmt visit(const Store *stmt) override {
+            if (stmt->value.node_type() == IRNodeType::Load)
+                return IRMutator::visit(stmt);
+
+            debug(0) << "\nOptimizing expression:\n" << stmt->value << "\n\n";
+
+            //debug(0) << "Translating expr to Racket\n";
+            RacketPrinter specPrinter(std::cout);
+            //debug(0) << specPrinter.dispatch(stmt->value) << "\n\n";
+            std::string expr = specPrinter.dispatch(stmt->value);
+
+            //debug(0) << "Inferring Symbolic Inputs...\n";
+            InferSymbolics symFinder;
+            stmt->value.accept(&symFinder);
+
+            //IRPrinter printer = IRPrinter(std::cout);
+            //for (auto var : symFinder.getSymVars())
+            //  debug(0) << var->name << "\n";
+
+            //for (auto buf : symFinder.getSymBufs())
+            //  debug(0) << buf.first << "\n";
+
+            debug(0) << "Generating synthesis specification...\n";
+
+            std::stringstream sym_bufs;
+            std::stringstream sym_buf_types;
+            sym_buf_types << "(init-var-types (make-hash (list";
+            for (auto buf : symFinder.getSymBufs()) {
+                sym_bufs << "(define-symbolic " << buf.first << " (~> integer? (bitvector "
+                         << buf.second.bits() << ")))\n";
+                sym_buf_types << " (cons " << buf.first << " '" << buf.second << ")";
+            }
+            sym_buf_types << ")))\n";
+
+            std::stringstream sym_vars;
+            for (auto var : symFinder.getSymVars())
+                sym_vars << "(define-symbolic " << var->name << " integer?)\n";
+
+            debug(0)
+                    << "#lang rosette\n"
+                    << "\n"
+                    << "(require rake)\n"
+                    << "(require rake/halide)\n"
+                    << "\n"
+                    << "(error-print-width 100000)\n"
+                    << "(debug-on)\n"
+                    << "\n"
+                    << sym_bufs.str()
+                    << sym_buf_types.str() << "\n"
+                    << sym_vars.str() << "\n"
+                    << "(define halide-expr\n" << expr << ")\n"
+                    << "\n"
+                    << "(for ([i 8]) (println ((interpret-halide halide-expr) i)))\n";
+
+            std::ofstream myfile;
+            myfile.open ("asd.rkt");
+            myfile << "#lang rosette\n"
+                   << "\n"
+                   << "(require rake)\n"
+                   << "(require rake/halide)\n"
+                   << "\n"
+                   << "(error-print-width 100000)\n"
+                   << "(debug-on)\n"
+                   << "\n"
+                   << sym_bufs.str()
+                   << sym_buf_types.str() << "\n"
+                   << sym_vars.str() << "\n"
+                   << "(define halide-expr\n" << expr << ")\n"
+                   << "\n"
+                   << "(for ([i 8]) (println ((interpret-halide halide-expr) i)))";
+            myfile.close();
+
+            char buf[10000];
+            FILE *fp;
+
+            if ((fp = popen("racket asd.rkt", "r")) == NULL) {
+                printf("Error opening pipe!\n");
+                exit(0);
+            }
+
+            while (fgets(buf, 10000, fp) != NULL) {
+                // Do whatever you want here...
+                printf("OUTPUT: %s", buf);
+            }
+
+            if(pclose(fp))  {
+                printf("Command not found or exited with error status\n");
+                exit(0);
+            }
+
+            // TODO: Ingest synthesizer output
+
+            int x;
+            std::cin >> x;
+
+            return IRMutator::visit(stmt);
+        }
+    };
+
 }  // namespace
 
 Stmt optimize_hexagon_shuffles(const Stmt &s, int lut_alignment) {
@@ -2305,7 +2805,7 @@ Stmt scatter_gather_generator(Stmt s) {
     return s;
 }
 
-Stmt optimize_hexagon_instructions(Stmt s, Target t) {
+Stmt optimize_hexagon_instructions_rules(Stmt s, Target t) {
     // Convert some expressions to an equivalent form which get better
     // optimized in later stages for hexagon
     s = RearrangeExpressions().mutate(s);
@@ -2323,6 +2823,31 @@ Stmt optimize_hexagon_instructions(Stmt s, Target t) {
 
     return s;
 }
+
+Stmt optimize_hexagon_instructions_synthesis(Stmt s) {
+    // Convert some expressions to an equivalent form which get better
+    // optimized in later stages for hexagon
+    s = RearrangeExpressions().mutate(s);
+
+    // s = substitute_in_all_lets(s);
+    // s = common_subexpression_elimination(s, true, true);
+
+    debug(1) << s << "\n\n";
+
+    s = IROptimizer().mutate(s);
+
+    exit(0);
+
+    debug(0) << s << "\n\n";
+
+    //s = common_subexpression_elimination(s);
+
+    exit(0);
+
+    //debug(0) << s << "\n";
+
+    return s;
+    }
 
 }  // namespace Internal
 }  // namespace Halide
