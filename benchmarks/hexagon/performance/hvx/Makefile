@@ -28,7 +28,7 @@ $(benchmarks): %: %/bin %/out %/profile
 
 	$(HEXAGON_SIM) $@/bin/$@.exe -mv66 --memfill 0x0 --simulated_returnval --nullptr=2 --timing --packet_analyze $@/profile/$@.json -- 1920 1080 ../test_vectors/football1920x1080.bin $@/out/out.bin
 
-	#rm pmu_statsfile.txt stats_dump.iss.0
+	rm pmu_statsfile.txt stats_dump.iss.0
 
 $(prof_dirs) $(out_dirs) $(bin_dirs): %:
 	mkdir $@

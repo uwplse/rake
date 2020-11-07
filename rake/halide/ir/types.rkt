@@ -67,7 +67,9 @@
     [(x64 sca) 64]
     [(x128 sca) 128]
     [(x256 sca) 256]
+
     [(ramp base stride len) len]
+    [(load buf idxs) (vec-len idxs)]
 
     [(slice_vectors vec base stride len) len]
     [(concat_vectors v1 v2) (+ (vec-len v1) (vec-len v2))]

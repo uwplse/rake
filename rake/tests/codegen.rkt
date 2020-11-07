@@ -2,7 +2,7 @@
 
 (require rake/cpp/types)
 (require rake/hvx/ast/types)
-(require rake/hvx/codegen/cpp)
+(require rake/hvx/codegen/llvm)
 (require rake/util)
 
 (require rackunit)
@@ -41,6 +41,6 @@
 
   ;; Feel free to relax or even remove this check. I only added the string so that you have a target
   ;; to shoot for.
-  (check-equal? (cpp_codegen program) out-prog-str)
+  (check-equal? (llvm_codegen program) out-prog-str)
 
   (printf "Test Passed: Gaussian 3x3 stage 2\n"))

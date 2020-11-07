@@ -52,7 +52,7 @@
     [(x64 sca) (lambda (i) (encode sca))]
     [(x128 sca) (lambda (i) (encode sca))]
     [(x256 sca) (lambda (i) (encode sca))]
-    [(ramp buf base stride len) (lambda (i) (hash-ref mem-map (get (encode buf) (+ (encode base) (* i (encode stride))))))]
+    ;[(ramp buf base stride len) (lambda (i) (hash-ref mem-map (get (encode buf) (+ (encode base) (* i (encode stride))))))]
 
     [(slice_vectors vec base stride len) (lambda (i) ((encode vec) (+ (encode base) (* i (encode stride)))))]
     [(concat_vectors v1 v2) (lambda (i) (if (< i (num-elems-hal v1)) ((encode v1) i) ((encode v2) (- i (num-elems-hal v1)))))]
