@@ -35,7 +35,6 @@ xcuserdata
 in.png
 _build
 a.out
-*.bc
 *.cubin
 tags
 src/*.top
