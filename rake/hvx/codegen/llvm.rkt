@@ -23,7 +23,8 @@
   (match p
 
     ;;vread
-    
+    [(vread buf loc)
+     (generate `vread `32xi32 `(list (i32 ,(codegen buf)) (i32 ,(codegen loc))))]
 
     ;;vsplat
     [(vsplat Rt)
@@ -132,7 +133,7 @@
     ;;vsxt
 
     
-    ;;vadd  -G
+    ;;vadd
     [(vadd Vu Vv sat?)
      (if sat?
          (match (list (interpret-hvx Vu) (interpret-hvx Vv))
@@ -173,7 +174,13 @@
        [(u16x64 _) (generate `vmpyuh.acc `32xi32 `(list (64xi32 ,(codegen Vdd)) (32xi32 ,(codegen Vu)) (32xi32 ,(codegen Rt))))]
      )]
     
-    ;;vmpyi-acc 
+    ;;vmpyi-acc
+    [(vmpyi-acc Vd Vu Rt)
+     (match (list (interpret-hvx Vd) (interpret-hvx Vu))
+       [(list (i16x64 _) (i16x64 _)) (generate `vmpyihb.acc `32xi32 `(list (32xi32 ,(codegen Vd)) (32xi32 ,(codegen Vu)) (i32 ,(eval-to-int Rt))))]
+       [(list (i32x32 _) (i32x32 _)) (generate `vmpyiwb.acc `32xi32 `(list (32xi32 ,(codegen Vd)) (32xi32 ,(codegen Vu)) (i32 ,(eval-to-int Rt))))])
+     ]
+ 
     ;;vmpye-acc
 
     ;;vmpa
@@ -291,9 +298,32 @@
        )]
     
     ;;vasr-n
-    
+    [(vasr-n Vu Vv Rt round? sat? unsigned?)
+     (if unsigned?
+       (when sat?
+           (if round?
+               (match (list (interpret-hvx Vu) (interpret-hvx Vv))
+                 [(list (i16x64 _) (i16x64 _)) (generate `vasrhubrndsat `32xi32 `(list (32xi32 ,(codegen Vu)) (32xi32 ,(codegen Vv)) (i32 ,(eval-to-int Rt))))]
+                 [(list (u16x64 _) (u16x64 _)) (generate `vasruhubrndsat `32xi32 `(list (32xi32 ,(codegen Vu)) (32xi32 ,(codegen Vv)) (i32 ,(eval-to-int Rt))))]
+                 [(list (i32x32 _) (i32x32 _)) (generate `vasrwubrndsat `32xi32 `(list (32xi32 ,(codegen Vu)) (32xi32 ,(codegen Vv)) (i32 ,(eval-to-int Rt))))]
+                 [(list (u32x32 _) (u32x32 _)) (generate `vasruwubrndsat `32xi32 `(list (32xi32 ,(codegen Vu)) (32xi32 ,(codegen Vv)) (i32 ,(eval-to-int Rt))))])
+               ((match (list (interpret-hvx Vu) (interpret-hvx Vv))
+                 [(list (i16x64 _) (i16x64 _)) (generate `vasrhubsat `32xi32 `(list (32xi32 ,(codegen Vu)) (32xi32 ,(codegen Vv)) (i32 ,(eval-to-int Rt))))]
+                 [(list (u16x64 _) (u16x64 _)) (generate `vasruhubsat `32xi32 `(list (32xi32 ,(codegen Vu)) (32xi32 ,(codegen Vv)) (i32 ,(eval-to-int Rt))))]
+                 [(list (i32x32 _) (i32x32 _)) (generate `vasrwubsat `32xi32 `(list (32xi32 ,(codegen Vu)) (32xi32 ,(codegen Vv)) (i32 ,(eval-to-int Rt))))]
+                 [(list (u32x32 _) (u32x32 _)) (generate `vasruwubsat `32xi32 `(list (32xi32 ,(codegen Vu)) (32xi32 ,(codegen Vv)) (i32 ,(eval-to-int Rt))))]))))
+       (if sat?
+           (if round?
+               (match (list (interpret-hvx Vu) (interpret-hvx Vv))
+                 [(list (i16x64 _) (i16x64 _)) (generate `vasrhrndsat `32xi32 `(list (32xi32 ,(codegen Vu)) (32xi32 ,(codegen Vv)) (i32 ,(eval-to-int Rt))))]
+                 [(list (i32x32 _) (i32x32 _)) (generate `vasrwrndsat `32xi32 `(list (32xi32 ,(codegen Vu)) (32xi32 ,(codegen Vv)) (i32 ,(eval-to-int Rt))))])
+               (match (list (interpret-hvx Vu) (interpret-hvx Vv))
+                 [(list (i16x64 _) (i16x64 _)) (generate `vasrhsat `32xi32 `(list (32xi32 ,(codegen Vu)) (32xi32 ,(codegen Vv)) (i32 ,(eval-to-int Rt))))]
+                 [(list (i32x32 _) (i32x32 _)) (generate `vasrwsat `32xi32 `(list (32xi32 ,(codegen Vu)) (32xi32 ,(codegen Vv)) (i32 ,(eval-to-int Rt))))]))
+           (generate `vasrw `32xi32 `(list (32xi32 ,(codegen Vu)) (32xi32 ,(codegen Vv)) (i32 ,(eval-to-int Rt)))))
+     )]
     ;;vround
 
-    [_ (format "~a" p)]))
+    [_ (read (open-input-string (format "~a" p)))]))
     
 (provide (rename-out [codegen llvm_codegen]))
