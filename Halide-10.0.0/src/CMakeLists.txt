@@ -133,6 +133,7 @@ set(HEADER_FILES
     RemoveUndef.h
     runtime/HalideBuffer.h
     runtime/HalideRuntime.h
+    SExpParser.h
     Schedule.h
     ScheduleFunctions.h
     Scope.h
@@ -290,6 +291,7 @@ set(SOURCE_FILES
     Schedule.cpp
     ScheduleFunctions.cpp
     SelectGPUAPI.cpp
+    SExpParser.cpp
     Simplify.cpp
     Simplify_Add.cpp
     Simplify_And.cpp
