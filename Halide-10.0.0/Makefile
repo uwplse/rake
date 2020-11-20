@@ -510,6 +510,7 @@ SOURCE_FILES = \
   Schedule.cpp \
   ScheduleFunctions.cpp \
   SelectGPUAPI.cpp \
+  SExpParser.cpp \
   Simplify.cpp \
   Simplify_Add.cpp \
   Simplify_And.cpp \
