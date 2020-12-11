@@ -49,8 +49,10 @@
     [(vasr Vu Rt) 1]
     [(vasr-acc Vd Vu Rt) 1]
     [(vasr-n Vu Vv Rt round? sat? unsigned?) 1]
-    [(vshuffo Vd Vu signed?) 1]
-    [(vpacko Vd Vu signed?) 1]
+    [(vshuffo Vd Vu) 1]
+    [(vpacko Vd Vu) 1]
+    [(vshuffo_2 Vd Vu signed?) 1]
+    [(vpacko_2 Vd Vu signed?) 1]
     [_ 0]))
    
 ;;; This is the most crude cost-model.

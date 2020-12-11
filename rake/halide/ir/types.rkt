@@ -71,9 +71,6 @@
     [(ramp base stride len) len]
     [(load buf idxs) (vec-len idxs)]
 
-    [(slice_vectors vec base stride len) len]
-    [(concat_vectors v1 v2) (+ (vec-len v1) (vec-len v2))]
-
     ;; Type Casts
     [(uint8x32 vec) 32]
     [(uint16x32 vec) 32]
@@ -100,6 +97,11 @@
     [(vec-sub v1 v2) (vec-len v1)]
     [(vec-mul v1 v2) (vec-len v1)]
     [(vec-div v1 v2) (vec-len v1)]
+
+    ;; Shuffles
+    [(slice_vectors vec base stride len) len]
+    [(concat_vectors v1 v2) (+ (vec-len v1) (vec-len v2))]
+    [(dynamic_shuffle vec idxs st end) (vec-len idxs)]
     
     ;; Base case
     [_ (error "Don't know how to get vector length from:" expr)]))

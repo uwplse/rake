@@ -33,7 +33,7 @@
   (set! saturation-arith? #f)
   (set! curr-instr-bnd 1))
 
-(define (bool-const) (define-symbolic* b boolean?)  b)
+(define (bool-const) (define-symbolic* b boolean?) b)
 
 (define (generate-hvx-grammar ir-expr sub-expr hvx-sub-expr)
   (define ??hvx-instr (match ir-expr
@@ -42,6 +42,13 @@
                              (get-hvx-conv-isa kernel)
                              (get-hvx-conv-w-isa kernel))]
                         [(arith-shift-right data n round? outputType) (get-hvx-asr-isa n round? outputType)]
+                        [(cast data outType)
+                         ;; Todo specialize based on type
+                         ;(println (bw (elem-ir (interpret-ir sub-expr) 0)))
+                         ;(println (bwT outType))
+                         ;(println (type (elem-ir (interpret-ir sub-expr) 0)))
+                         ;(println outType)
+                         (get-hvx-upcast-isa type)]
                         [(packhi data signed?) (get-hvx-hi-isa signed?)]
                         [_ (begin (println "NYI") (exit))]))
   (define (??ir-expr)
@@ -89,29 +96,30 @@
     (define Rt4 (list c0 c1 (int-const) (int-const)))
     (choose*
      ;; Addition
-     (vadd-w t0 t1)
-     (vadd-w-acc t0 t1 t2)
+     ;(vadd-w t0 t1)
+     ;(vadd-w-acc t0 t1 t2)
 
      ;; Vec-Sca multiplies
-     (vmpy t0 c0)
+     ;(vmpy t0 c0)
      (vmpy-acc t0 t1 c0)
      
-     ;(vmpa t1 Rt)
-     ;(vmpa-acc t0 t1 Rt)
+     (vmpa t1 Rt)
+     (vmpa-acc t0 t1 Rt)
 
      ;(vdmpy t0 Rt)
-     (vdmpy-sw t0 Rt)
-     (vdmpy-acc t0 t1 Rt)
-     (vdmpy-sw-acc t0 t1 Rt)
+     ;(vdmpy-sw t0 Rt)
+     ;(vdmpy-acc t0 t1 Rt)
+     ;(vdmpy-sw-acc t0 t1 Rt)
 
-     (vtmpy t0 Rt)
-     (vtmpy-acc t0 t1 Rt)
+     ;(vtmpy t0 Rt)
+     ;(vtmpy-acc t0 t1 Rt)
 
-     (vrmpy t0 Rt4)
-     (vrmpy-acc t0 t1 Rt4)
+     ;(vrmpy t0 Rt4)
+     ;(vrmpy-acc t0 t1 Rt4)
 
-     (vrmpy-p t0 Rt4 (bool-const))
-     (vrmpy-p-acc t0 t1 Rt4 (bool-const))))
+     ;(vrmpy-p t0 Rt4 (bool-const))
+     ;(vrmpy-p-acc t0 t1 Rt4 (bool-const))
+     ))
   ??hvx-conv-instr)
 
 ;; HVX instructions for arithmetic shift right
@@ -126,13 +134,22 @@
      ))
   ??hvx-asr-instr)
 
+;; HVX instructions for casting
+(define (get-hvx-upcast-isa signed?)
+  (define (??hvx-hi-instr registers)
+    (define t0 (apply choose* registers))
+    (choose*
+     (vsxt t0 #t)
+     (vzxt t0 #t)))
+  ??hvx-hi-instr)
+
 ;; HVX instructions for extracting upper bits
 (define (get-hvx-hi-isa signed?)
   (define (??hvx-hi-instr registers)
     (define t0 (apply choose* registers))
     (define t1 (apply choose* registers))
     (choose*
-     (vshuffo t0 t1 signed?)
+     (vshuffo_2 t0 t1 signed?)
      (vpacko t0 t1 signed?)))
   ??hvx-hi-instr)
 

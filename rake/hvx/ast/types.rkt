@@ -19,6 +19,7 @@
      
 ;; HVX instructions for vector creation
 (struct vread (buf loc) #:transparent)
+(struct vreadp (buf loc) #:transparent)
 (struct vsplat (Rt) #:transparent)
 
 ;; HVX instructions for data swizzling
@@ -26,12 +27,13 @@
 (struct hi (Vuu) #:transparent)
 (struct vcombine (Vu Vv) #:transparent)
 (struct vshuffe (Vu Vv) #:transparent)
-(struct vshuffo (Vu Vv signed?) #:transparent)
+(struct vshuffo (Vu Vv) #:transparent)
 (struct vshuffoe (Vu Vv) #:transparent)
 (struct vswap (Qt Vu Vv) #:transparent)
 (struct vmux (Qt Vu Vv) #:transparent)
 (struct vsat (Vu Vv) #:transparent)
 (struct valign (Vu Vv Rt) #:transparent)
+(struct vlalign (Vu Vv Rt) #:transparent)
 (struct vror (Vu Rt) #:transparent)
 (struct vrotr (Vu Vv) #:transparent)
 (struct vdeal (Vu) #:transparent)
@@ -40,14 +42,15 @@
 (struct vtranspose (Vu Vv Rt) #:transparent)
 (struct vpack (Vu Vv) #:transparent)
 (struct vpacke (Vu Vv) #:transparent)
-(struct vpacko (Vu Vv signed?) #:transparent)
+(struct vpacko (Vu Vv) #:transparent)
 (struct vunpack (Vu) #:transparent)
 (struct vunpacko (Vu) #:transparent)
+(struct vlut (Vu Vv) #:transparent)
 (struct vgather (Rt Mu Vv) #:transparent)
 
 ;; HVX instructions for type-casting
-(struct vzxt (Vu) #:transparent)
-(struct vsxt (Vu) #:transparent)
+(struct vzxt (Vu signed?) #:transparent)
+(struct vsxt (Vu signed?) #:transparent)
 
 ;; HVX instructions for data processing
 (struct vadd (Vu Vv sat?) #:transparent)
@@ -79,12 +82,16 @@
 (struct vasr-acc (Vd Vu Rt) #:transparent)
 (struct vasr-n (Vu Vv Rt round? sat? unsigned?) #:transparent)
 (struct vround (Vu Vv signed?) #:transparent)
+(struct vshuffo_2 (Vu Vv signed?) #:transparent)
+(struct vpacko_2 (Vu Vv signed?) #:transparent)
 
 ;; New instructions types we introduce to abstract away data-movement.
 ;; These instr types should never exist in output code.
 (struct gather (buff-reads id))
 (struct gather* (buff-reads))
 (struct swizzle (vec) #:transparent)
+(struct serve-vec (vec type opts sols))
+(struct serve-vec-pair (v0 v1 type opts sols))
 
 ;; Sine utility methods for HVX types
 (define (v0 vec-p)
@@ -131,6 +138,21 @@
     [(u16x64x2 v0 v1) (v1 idx)]
     [(i32x32x2 v0 v1) (v1 idx)]
     [(u32x32x2 v0 v1) (v1 idx)]))
+
+(define (elem-type expr)
+  (cond
+    [(eq? i8x128 expr) 'int8]
+    [(eq? u8x128 expr) 'uint8]
+    [(eq? i16x64 expr) 'int16]
+    [(eq? u16x64 expr) 'uint16]
+    [(eq? i32x32 expr) 'int32]
+    [(eq? u32x32 expr) 'uint32]
+    [(eq? i8x128x2 expr) 'int8]
+    [(eq? u8x128x2 expr) 'uint8]
+    [(eq? i16x64x2 expr) 'int16]
+    [(eq? u16x64x2 expr) 'uint16]
+    [(eq? i32x32x2 expr) 'int32]
+    [(eq? u32x32x2 expr) 'uint32]))
 
 (define (num-elems expr)
   (match expr

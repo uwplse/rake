@@ -49,9 +49,28 @@
        (reset-hvx-instr-bnd)
        (synthesize-equiv-hvx spec sub-expr hvx-sub-expr))]
 
-    [(load-data opts) (gather* opts)]
+    [(cast sub-expr type)
+     (begin
+       (define hvx-sub-spec (hvx-expr-spec sub-expr ir-expr-sol ir-expr-ctx ir-expr-axioms))
+       (define hvx-sub-expr (synthesize-hvx-expr hvx-sub-spec))
+       (display "Lifting IR to HVX...\n")
+       (display "====================\n")
+       (display (format "IR Operation: ~a\n\n" ir-expr))
+       (reset-hvx-instr-bnd)
+       (synthesize-equiv-hvx spec sub-expr hvx-sub-expr))]
 
-    [_ (println "NYI")]))
+    [(load-data opts)
+     (begin
+       (display "Lifting IR to HVX...\n")
+       (display "====================\n")
+       (display (format "IR Operation: ~a\n\n" ir-expr))
+       (define hvx-expr (gather* opts))
+       (display "Successfully found an equivalent HVX expression.\n\n")
+       (debug (format "~a\n\n" hvx-expr))
+       (debug (format "Synthesis time: 0 seconds\n\n"))
+       hvx-expr)]
+
+    [_ (error "NYI")]))
 
 ;; Define modular synthesis loop for HVX expression generation
 (define (synthesize-equiv-hvx spec sub-expr hvx-sub-expr)
@@ -104,7 +123,7 @@
          (assert (eq? (evaluate (elem-ir oe (+ i 1)) ir-expr-sol) (elem-hvx se (+ i 1))))])))
 
   (define curr-best-cost (if (void? curr-best-sol) +inf.0 (cost-model curr-best-sol)))
-
+  
   (clear-asserts!)
   (for ([axiom ir-expr-axioms]) (assert axiom))
   (define st (current-seconds))
