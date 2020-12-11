@@ -5,7 +5,61 @@
 (require rake/halide/ir/types)
 (require rake/halide/ir/interpreter)
 
+(require rake/hvx/ast/types)
+
 (require rosette/lib/match)
+
+;; Extract vectors
+(define (extract-loads-as-hvx-vecs expr)
+  (match expr
+    ;; Constructors
+    ;[(x32 sca) (list (vsplat sca))]
+    ;[(x64 sca) (list (vsplat sca))]
+    ;[(x128 sca) (list (vsplat sca))]
+    ;[(x256 sca) (list (vsplat sca))]
+    [(x32 sca) (list)]
+    [(x64 sca) (list)]
+    [(x128 sca) (list)]
+    [(x256 sca) (list)]
+
+    [(ramp base stride len) (list)]
+    [(load buf idxs)
+     (match idxs
+       [(ramp base stride len) (list (cons buf base))]
+       [_ (error "NYI: Extracting vec from:" expr)])]
+
+    [(slice_vectors vec base stride len) (extract-loads-as-hvx-vecs vec)]
+    [(concat_vectors v1 v2) (append (extract-loads-as-hvx-vecs v1) (extract-loads-as-hvx-vecs v2))]
+
+    ;; Type Casts
+    [(uint8x32 vec) (extract-loads-as-hvx-vecs vec)]
+    [(uint16x32 vec) (extract-loads-as-hvx-vecs vec)]
+    [(uint32x32 vec) (extract-loads-as-hvx-vecs vec)]
+    [(int8x32 vec) (extract-loads-as-hvx-vecs vec)]
+    [(int16x32 vec) (extract-loads-as-hvx-vecs vec)]
+    [(int32x32 vec) (extract-loads-as-hvx-vecs vec)]
+    [(uint8x64 vec) (extract-loads-as-hvx-vecs vec)]
+    [(uint16x64 vec) (extract-loads-as-hvx-vecs vec)]
+    [(uint32x64 vec) (extract-loads-as-hvx-vecs vec)]
+    [(int8x64 vec) (extract-loads-as-hvx-vecs vec)]
+    [(int16x64 vec) (extract-loads-as-hvx-vecs vec)]
+    [(int32x64 vec) (extract-loads-as-hvx-vecs vec)]
+    [(uint8x128 vec) (extract-loads-as-hvx-vecs vec)]
+    [(uint16x128 vec) (extract-loads-as-hvx-vecs vec)]
+    [(uint32x128 vec) (extract-loads-as-hvx-vecs vec)]
+    [(int8x128 vec) (extract-loads-as-hvx-vecs vec)]
+    [(int16x128 vec) (extract-loads-as-hvx-vecs vec)]
+    [(int32x128 vec) (extract-loads-as-hvx-vecs vec)]
+    [(uint8x256 vec) (extract-loads-as-hvx-vecs vec)]
+
+    ;; Operations
+    [(vec-add v1 v2) (append (extract-loads-as-hvx-vecs v1) (extract-loads-as-hvx-vecs v2))]
+    [(vec-sub v1 v2) (append (extract-loads-as-hvx-vecs v1) (extract-loads-as-hvx-vecs v2))]
+    [(vec-div v1 v2) (append (extract-loads-as-hvx-vecs v1) (extract-loads-as-hvx-vecs v2))]
+    [(vec-mul v1 v2) (append (extract-loads-as-hvx-vecs v1) (extract-loads-as-hvx-vecs v2))]
+    
+    ;; Base case
+    [_ (error "Don't know how to get live ops from:" expr)]))
 
 ;; Extract buffer reads
 (define (extract-buf-reads expr)
@@ -106,11 +160,9 @@
     [(x64 sca) (list)]
     [(x128 sca) (list)]
     [(x256 sca) (list)]
-    ;[(ramp buf base stride len) (list)]
-    [(ramp base stride len) (list)]
 
-    [(slice_vectors vec base stride len) (extract-add-consts vec)]
-    [(concat_vectors v1 v2) (append (extract-add-consts v1) (extract-add-consts v2))]
+    [(ramp base stride len) (list)]
+    [(load buf idxs) (list)]
 
     ;; Type Casts
     [(uint8x32 vec) (extract-add-consts vec)]
@@ -133,6 +185,11 @@
     [(int32x128 vec) (extract-add-consts vec)]
     [(uint8x256 vec) (extract-add-consts vec)]
 
+    ;; Shuffles
+    [(slice_vectors vec base stride len) (extract-add-consts vec)]
+    [(concat_vectors v1 v2) (append (extract-add-consts v1) (extract-add-consts v2))]
+    [(dynamic_shuffle vec idxs st end) (extract-add-consts vec)]
+    
     ;; Operations
     [(vec-add v1 v2) (append
                       (if (broadcast? v1) (extract-consts v1) (extract-add-consts v1))
@@ -151,11 +208,9 @@
     [(x64 sca) (list)]
     [(x128 sca) (list)]
     [(x256 sca) (list)]
-    ;[(ramp buf base stride len) (list)]
-    [(ramp base stride len) (list)]
 
-    [(slice_vectors vec base stride len) (extract-sub-consts vec)]
-    [(concat_vectors v1 v2) (append (extract-sub-consts v1) (extract-sub-consts v2))]
+    [(ramp base stride len) (list)]
+    [(load buf idxs) (list)]
 
     ;; Type Casts
     [(uint8x32 vec) (extract-sub-consts vec)]
@@ -185,6 +240,11 @@
                       (if (broadcast? v2) (extract-consts v2) (extract-sub-consts v2)))]
     [(vec-mul v1 v2) (append (extract-sub-consts v1) (extract-sub-consts v2))]
     [(vec-div v1 v2) (append (extract-sub-consts v1) (extract-sub-consts v2))]
+
+    ;; Shuffles
+    [(slice_vectors vec base stride len) (extract-sub-consts vec)]
+    [(concat_vectors v1 v2) (append (extract-sub-consts v1) (extract-sub-consts v2))]
+    [(dynamic_shuffle vec idxs st end) (extract-sub-consts vec)]
     
     ;; Base case
     [_ (error "Don't know how to extract consts from:" expr)]))
@@ -196,11 +256,9 @@
     [(x64 sca) (list)]
     [(x128 sca) (list)]
     [(x256 sca) (list)]
-    ;[(ramp buf base stride len) (list)]
-    [(ramp base stride len) (list)]
 
-    [(slice_vectors vec base stride len) (extract-mul-consts vec)]
-    [(concat_vectors v1 v2) (append (extract-mul-consts v1) (extract-mul-consts v2))]
+    [(ramp base stride len) (list)]
+    [(load buf idxs) (list)]
 
     ;; Type Casts
     [(uint8x32 vec) (extract-mul-consts vec)]
@@ -230,6 +288,11 @@
                       (if (broadcast? v1) (extract-consts v1) (extract-mul-consts v1))
                       (if (broadcast? v2) (extract-consts v2) (extract-mul-consts v2)))]
     [(vec-div v1 v2) (append (extract-mul-consts v1) (extract-mul-consts v2))]
+
+    ;; Shuffles
+    [(slice_vectors vec base stride len) (extract-mul-consts vec)]
+    [(concat_vectors v1 v2) (append (extract-mul-consts v1) (extract-mul-consts v2))]
+    [(dynamic_shuffle vec idxs st end) (extract-mul-consts vec)]
     
     ;; Base case
     [_ (error "Don't know how to extract consts from:" expr)]))
@@ -241,11 +304,9 @@
     [(x64 sca) (list)]
     [(x128 sca) (list)]
     [(x256 sca) (list)]
-    ;[(ramp buf base stride len) (list)]
-    [(ramp base stride len) (list)]
 
-    [(slice_vectors vec base stride len) (extract-div-consts vec)]
-    [(concat_vectors v1 v2) (append (extract-div-consts v1) (extract-div-consts v2))]
+    [(ramp base stride len) (list)]
+    [(load buf idxs) (list)]
 
     ;; Type Casts
     [(uint8x32 vec) (extract-div-consts vec)]
@@ -273,6 +334,11 @@
     [(vec-sub v1 v2) (append (extract-div-consts v1) (extract-div-consts v2))]
     [(vec-mul v1 v2) (append (extract-div-consts v1) (extract-div-consts v2))]
     [(vec-div v1 v2) (if (broadcast? v2) (extract-consts v2) (extract-div-consts v2))]
+
+    ;; Shuffles
+    [(slice_vectors vec base stride len) (extract-div-consts vec)]
+    [(concat_vectors v1 v2) (append (extract-div-consts v1) (extract-div-consts v2))]
+    [(dynamic_shuffle vec idxs st end) (extract-div-consts vec)]
     
     ;; Base case
     [_ (error "Don't know how to extract consts from:" expr)]))
@@ -319,6 +385,7 @@
     [_ expr]))
 
 (provide
+ extract-loads-as-hvx-vecs
  (rename-out
   [extract-buf-reads extract-buf-reads-hal]
   [extract-live-ops extract-live-ops-hal]

@@ -6,6 +6,7 @@
 (require rake/synthesis/hvx-expr-synthesizer)
 (require rake/synthesis/verifier)
 (require rake/synthesis/swizzler)
+(require rake/hvx/codegen/llvm)
 
 (define (synthesize-hvx spec [spec-lang 'halide-ir] [lifting-algo 'greedy])
   (cond
@@ -31,11 +32,17 @@
        ;; Synthesize data-movement
        (define hvx-expr (synthesize-swizzles halide-expr hvx-expr-sketch (symbolics halide-expr) halide-expr-axioms))
 
+       (define gen-code #f)
        (when (not (unsat? hvx-expr))
          ;; Full expr verification
-         (if (verify-equiv? halide-expr hvx-expr (symbolics halide-expr) halide-expr-axioms)
+         (set! gen-code (verify-equiv? halide-expr hvx-expr (symbolics halide-expr) halide-expr-axioms))
+
+         (if gen-code
              (begin (display "Synthesized solution is correct.\n\n") hvx-expr)
-             (begin (display "Synthesized solution is incorrect.\n\n") #f))))
+             (begin (display "Synthesized solution is incorrect.\n\n") #f)))
+
+       (when gen-code
+         (println (llvm_codegen hvx-expr))))
      ]
 
     [else (error "Input specification is provided in a language I don't understand:" spec-lang)]))

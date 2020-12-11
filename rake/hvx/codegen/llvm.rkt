@@ -80,7 +80,7 @@
        [(list (i32x32 _)(i32x32 _)) (generate `vshuffeb `32xi32 `(list (32xi32 ,(codegen Vu)) (32xi32 ,(codegen Vv))))])]
     
     ;;vshuffo
-    [(vshuffo Vu Vv signed?)
+    [(vshuffo_2 Vu Vv signed?)
      (match (list (interpret-hvx Vu) (interpret-hvx Vv))
        [(list (i32x32 _)(i32x32 _)) (generate `vshuffob `32xi32 `(list (32xi32 ,(codegen Vu)) (32xi32 ,(codegen Vv))))])]
     
@@ -137,7 +137,7 @@
        [(list (i32x32 _)(i32x32 _)) (generate `vpackeh `32xi32 `(list (32xi32 ,(codegen Vu)) (32xi32 ,(codegen Vv))))])]
     
     ;;vpacko  -G
-    [(vpacko Vu Vv signed?)
+    [(vpacko_2 Vu Vv signed?)
      (match (list (interpret-hvx Vu) (interpret-hvx Vv))
        [(list (i32x32 _)(i32x32 _)) (generate `vpackoh `32xi32 `(list (32xi32 ,(codegen Vu)) (32xi32 ,(codegen Vv))))])]
     
@@ -149,7 +149,7 @@
     
     
     ;;vunpacko  -G
-    [(vpacko Vu Vv signed?)
+    [(vpacko_2 Vu Vv signed?)
      (match (list (interpret-hvx Vu) (interpret-hvx Vv))
        [(list (i32x32 _)(i32x32 _)) (generate `vunpackoh `32xi32 `(list (32xi32 ,(codegen Vu)) (32xi32 ,(codegen Vv))))])]
     
