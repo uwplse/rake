@@ -13,6 +13,7 @@
 #include "Scope.h"
 #include "Simplify.h"
 #include "Substitute.h"
+#include "SExpParser.h"
 #include <unordered_map>
 #include <utility>
 #include <fstream>
@@ -2283,7 +2284,7 @@ public:
 };
 
 // Synthesis based hvx expression optimizer
-class IROptimizer : public IRGraphMutator {
+class IROptimizer : public IRMutator {
 
     private:
 
@@ -2681,6 +2682,15 @@ class IROptimizer : public IRGraphMutator {
     private:
         using IRMutator::visit;
 
+        int expr_id = 0;
+
+        std::map<std::string,Expr> let_vars;
+
+        Stmt visit(const LetStmt *stmt) override {
+            let_vars[stmt->name] = stmt->value;
+            return IRMutator::visit(stmt);
+        }
+
         Stmt visit(const Store *stmt) override {
             if (stmt->value.node_type() == IRNodeType::Load)
                 return IRMutator::visit(stmt);
@@ -2713,57 +2723,87 @@ class IROptimizer : public IRGraphMutator {
                          << buf.second.bits() << ")))\n";
                 sym_buf_types << " (cons " << buf.first << " '" << buf.second << ")";
             }
-            sym_buf_types << ")))\n";
 
             std::stringstream sym_vars;
-            for (auto var : symFinder.getSymVars())
-                sym_vars << "(define-symbolic " << var->name << " integer?)\n";
+            for (auto var : symFinder.getSymVars()) {
+                if (var->type.is_vector()) {
+                    if (1) {
+                        sym_bufs << "(define-symbolic " << var->name << "-buf (~> integer? (bitvector "
+                                 << var->type.bits() << ")))\n";
+                        sym_buf_types << " (cons " << var->name << "-buf '" << var->type.element_of() << ")";
+
+                        sym_vars << "(define " << var->name << " (load " << var->name
+                                 << "-buf (ramp 0 1 " << var->type.lanes() << ")))\n";
+                    }
+                    else {
+                        sym_bufs << "(define " << var->name << specPrinter.dispatch(let_vars[var->name]) <<  " (~> integer? (bitvector "
+                                 << var->type.bits() << ")))\n";
+                        sym_buf_types << " (cons " << var->name << " '" << var->type << ")";
+                    }
+                }
+                else
+                    sym_vars << "(define-symbolic " << var->name << " integer?)\n";
+            }
+            sym_buf_types << ")))\n";
 
             debug(0)
-                    << "#lang rosette\n"
-                    << "\n"
-                    << "(require rake)\n"
-                    << "(require rake/halide)\n"
-                    << "\n"
-                    << "(error-print-width 100000)\n"
-                    << "(debug-on)\n"
-                    << "\n"
-                    << sym_bufs.str()
-                    << sym_buf_types.str() << "\n"
-                    << sym_vars.str() << "\n"
-                    << "(define halide-expr\n" << expr << ")\n"
-                    << "\n"
-                    << "(for ([i 8]) (println ((interpret-halide halide-expr) i)))\n";
+                << "#lang rosette\n"
+                << "\n"
+                << "(require rake)\n"
+                << "(require rake/halide)\n"
+                << "\n"
+                << "(error-print-width 100000)\n"
+                << "(debug-on)\n"
+                << "\n"
+                << sym_bufs.str()
+                << sym_buf_types.str() << "\n"
+                << sym_vars.str() << "\n"
+                << "(define halide-expr\n"
+                << expr << ")\n"
+                << "\n"
+                << "(define spec (synthesis-spec halide-expr (list)))\n"
+                << "(define hvx-expr (synthesize-hvx spec 'halide-ir 'greedy))\n"
+                << "\n"
+                << "(define out (open-output-file \"sexp.out\"))\n"
+                << "(write (llvm-codegen hvx-expr) out)"
+                << "(close-output-port out)";
 
-            std::ofstream myfile;
-            myfile.open ("asd.rkt");
-            myfile << "#lang rosette\n"
-                   << "\n"
-                   << "(require rake)\n"
-                   << "(require rake/halide)\n"
-                   << "\n"
-                   << "(error-print-width 100000)\n"
-                   << "(debug-on)\n"
-                   << "\n"
-                   << sym_bufs.str()
-                   << sym_buf_types.str() << "\n"
-                   << sym_vars.str() << "\n"
-                   << "(define halide-expr\n" << expr << ")\n"
-                   << "\n"
-                   << "(for ([i 8]) (println ((interpret-halide halide-expr) i)))";
-            myfile.close();
+            std::ofstream rakeInputF;
+            std::string filename = "expr_" + std::to_string(expr_id) + ".rkt";
+            rakeInputF.open (filename.c_str());
+            rakeInputF
+                << "#lang rosette\n"
+                << "\n"
+                << "(require rake)\n"
+                << "(require rake/halide)\n"
+                << "\n"
+                << "(error-print-width 100000)\n"
+                << "(debug-on)\n"
+                << "\n"
+                << sym_bufs.str()
+                << sym_buf_types.str() << "\n"
+                << sym_vars.str() << "\n"
+                << "(define halide-expr\n" << expr << ")\n"
+                << "\n"
+                << "(define spec (synthesis-spec halide-expr (list)))\n"
+                << "(define hvx-expr (synthesize-hvx spec 'halide-ir 'greedy))\n"
+                << "\n"
+                << "(define out (open-output-file \"sexp.out\"))\n"
+                << "(write (llvm-codegen hvx-expr) out)"
+                << "(close-output-port out)";
+            rakeInputF.close();
 
             char buf[10000];
             FILE *fp;
-
-            if ((fp = popen("racket asd.rkt", "r")) == NULL) {
+            std::string cmd = "racket expr_" + std::to_string(expr_id++) + ".rkt";
+            if ((fp = popen(cmd.c_str(), "r")) == NULL) {
                 printf("Error opening pipe!\n");
                 exit(0);
             }
 
             while (fgets(buf, 10000, fp) != NULL) {
                 // Do whatever you want here...
-                printf("OUTPUT: %s", buf);
+                printf("%s", buf);
             }
 
             if(pclose(fp))  {
@@ -2771,7 +2811,11 @@ class IROptimizer : public IRGraphMutator {
                 exit(0);
             }
 
-            // TODO: Ingest synthesizer output
+            SExpParser p;
+            //std::ifstream in("expr_" + std::to_string(expr_id) + ".sexp");
+            std::ifstream in("sexp.out");
+            std::string s((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
+            debug(0) << p.parse(s) << "\n";
 
             int x;
             std::cin >> x;
