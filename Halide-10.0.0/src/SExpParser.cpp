@@ -44,9 +44,6 @@ bool get_token(string &sexp, Token &token) {
             return true;
         }
     } else if (isdigit(sexp[0])) {
-        // This is somewhat complicated.  Right now, types are
-        // <nn>x<type>, and we also need to deal with both int
-        // and float types.
         bool found_x = false;
         bool found_dot = false;
         auto it = sexp.begin();
@@ -61,17 +58,15 @@ bool get_token(string &sexp, Token &token) {
             token.dbl = stod(sexp.substr(0, it - sexp.begin()));
             sexp = sexp.substr(it - sexp.begin());
             return true;
-        } else if (found_x) {
-            // symbol (a type)
-            token.type = TokenType::Symbol;
-            token.str = sexp.substr(0, it - sexp.begin());
-            sexp = sexp.substr(it - sexp.begin());
-            return true;
         } else {
             // Integer
             token.type = TokenType::Number;
             //debug(0) << sexp.substr(0, it - sexp.begin()) << "\n";
-            token.num = stoi(sexp.substr(0, it - sexp.begin()));
+            if (found_x) {
+                token.num = stoi(sexp.substr(0, it - sexp.begin()), nullptr, 16);
+            } else {
+                token.num = stoi(sexp.substr(0, it - sexp.begin()));
+            }
             sexp = sexp.substr(it - sexp.begin());
             return true;
         }
@@ -111,18 +106,29 @@ Expr SExpParser::parse_binop(Token &tok, string &sexp, Type expected_type) {
 }
 
 Type SExpParser::parse_type(const string &str) {
-    // currently, types are expressed as <lanes>x<u|i><bits>
+    // first, find the underlying type (uint, int, float)
+    auto pos = str.find_first_of("0123456789");
+    user_assert(pos != string::npos);
+    auto type_str = str.substr(0, pos);
+
+    // check if there's an x to see if there's more than one lane
     int lanes = 1;
     auto x_pos = str.find_first_of('x');
+    auto bits = stoi(str.substr(pos, x_pos-pos));
     if (x_pos != string::npos) {
-        lanes = stoi(str.substr(0, x_pos));
-        x_pos++;
-    } else {
-        x_pos = 0; // where to start parsing the type
+      lanes = stoi(str.substr(x_pos+1, string::npos));
     }
-    user_assert(str[x_pos] == 'i') << "Expected str[x_pos] to be 'i' but is " << str[x_pos] << " | full: " << str << "\n";
-    auto bits = stoi(str.substr(x_pos+1));
-    return Int(bits, lanes);
+
+    if (starts_with(type_str, "uint")) {
+      return UInt(bits, lanes);
+    } else if (starts_with(type_str, "int")) {
+      return Int(bits, lanes);
+    } else if (starts_with(type_str, "float")) {
+      return Float(bits, lanes);
+    } else {
+      user_assert(false) << "Unknown type: " << str << "\n";
+      return Type();
+    }
 }
 
 vector<Expr> SExpParser::parse_param_list(string &sexp) {
@@ -131,11 +137,12 @@ vector<Expr> SExpParser::parse_param_list(string &sexp) {
     // the first two tokens here need to be LeftParen
     // and "list"
     Token tok;
-    user_assert(get_token(sexp, tok));
+    user_assert(get_token(sexp, tok)); 
     user_assert(tok.type == TokenType::LeftParen);
     user_assert(get_token(sexp, tok));
     user_assert(tok.type == TokenType::Symbol &&
                 tok.str == "list");
+
 
     // now we have (type val)
     user_assert(get_token(sexp, tok));
@@ -216,47 +223,47 @@ Expr SExpParser::parse(string &sexp, Type expected_type) {
 void sexp_parser_test() {
     SExpParser p;
 
-    string s = "(llvm.hexagon.V6.vread.128B 32xi32 (list (i32 buf) (i32 (+ 2 x))))";
+    string s = "(llvm.hexagon.V6.vread.128B int32x32 (list (int32 buf) (int32 (+ 2 x))))";
 
     string s2 = R"((llvm.hexagon.V6.vasrhubrndsat.128B
-    32xi32
+    int32x32
     (list
-     (32xi32
+     (int32x32
       (llvm.hexagon.V6.vmpyihb.acc.128B
-       32xi32
+       int32x32
        (list
-        (32xi32
+        (int32x32
          (llvm.hexagon.V6.vaddh.128B
-          32xi32
+          int32x32
           (list
-           (32xi32 (llvm.hexagon.V6.vread.128B 32xi32 (list (i32 buf) (i32 x))))
-           (32xi32
+           (int32x32 (llvm.hexagon.V6.vread.128B int32x32 (list (int32 buf) (int32 x))))
+           (int32x32
             (llvm.hexagon.V6.vread.128B
-             32xi32
-             (list (i32 buf) (i32 (+ 2 x))))))))
-        (32xi32
-         (llvm.hexagon.V6.vread.128B 32xi32 (list (i32 buf) (i32 (+ 1 x)))))
-        (i32 2))))
-     (32xi32
+             int32x32
+             (list (int32 buf) (int32 (+ 2 x))))))))
+        (int32x32
+         (llvm.hexagon.V6.vread.128B int32x32 (list (int32 buf) (int32 (+ 1 x)))))
+        (int32 2))))
+     (int32x32
       (llvm.hexagon.V6.vmpyihb.acc.128B
-       32xi32
+       int32x32
        (list
-        (32xi32
+        (int32x32
          (llvm.hexagon.V6.vaddh.128B
-          32xi32
+          int32x32
           (list
-           (32xi32
-            (llvm.hexagon.V6.vread.128B 32xi32 (list (i32 buf) (i32 (+ 64 x)))))
-           (32xi32
+           (int32x32
+            (llvm.hexagon.V6.vread.128B int32x32 (list (int32 buf) (int32 (+ 64 x)))))
+           (int32x32
             (llvm.hexagon.V6.vread.128B
-             32xi32
-             (list (i32 buf) (i32 (+ 66 x))))))))
-        (32xi32
-         (llvm.hexagon.V6.vread.128B 32xi32 (list (i32 buf) (i32 (+ 65 x)))))
-        (i32 2))))
-     (i32 4))))";
+             int32x32
+             (list (int32 buf) (int32 (+ 66 x))))))))
+        (int32x32
+         (llvm.hexagon.V6.vread.128B int32x32 (list (int32 buf) (int32 (+ 65 x)))))
+        (int32 2))))
+     (int32 4))))";
     
-    string s3 = R"(llvm.hexagon.V6.vmpybus.acc.128B 
+    string s3 = R"((llvm.hexagon.V6.vmpybus.acc.128B 
      int32x64 
      (list 
       (int32x64 
@@ -321,11 +328,11 @@ void sexp_parser_test() {
           (list 
            (int32 input) 
            (int32 (+ -2 (+ (+ (* 8 t19.s) (- t42)) (* 2 input.stride.1)))))))))
-      (int32 1)))";
+      (int32 1))))";
 
     debug(0) << p.parse(s) << "\n";
     debug(0) << p.parse(s2) << "\n";
-    debug(0) << p.parse(s3) << "\n";
+    //debug(0) << p.parse(s3) << "\n";
 }
 
 }
