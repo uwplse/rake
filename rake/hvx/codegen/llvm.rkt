@@ -24,12 +24,19 @@
       (~a (format "~X" (+ 256 val)) #:width 2 #:left-pad-string "0" #:align 'right)))
   
 (define (codegen-scalar Rt)
+  (println Rt)
   (read
    (open-input-string
     (match Rt
       ;[(int8_t val) ]
       [(int8_t val) (~a (bitvector->integer val))]
       [(uint8_t val) (~a (bitvector->natural val))]
+      [(list v0 v1 v2 v3)
+       (format "0x~a~a~a~a"
+               (int->hex (codegen-scalar v3))
+               (int->hex (codegen-scalar v2))
+               (int->hex (codegen-scalar v1))
+               (int->hex (codegen-scalar v0)))]
       [(cons v0 v1)
        (format "0x~a~a~a~a"
                (int->hex (codegen-scalar v1))
@@ -141,10 +148,10 @@
     ;;vshuff
     [(vshuff Vu)
      (match (interpret-hvx Vu)
-       [(i8x128 _) (generate `vshuffb t_32xi32 `(,t_32xi32 ,(codegen Vu)))]
-       [(u8x128 _) (generate `vshuffb t_32xi32 `(,t_32xi32 ,(codegen Vu)))]
-       [(i16x64 _) (generate `vshuffh t_32xi32 `(,t_32xi32 ,(codegen Vu)))]
-       [(u16x64 _) (generate `vshuffh t_32xi32 `(,t_32xi32 ,(codegen Vu)))])]
+       [(i8x128 _) (generate `vshuffb t_32xi32 `(list (,t_32xi32 ,(codegen Vu))))]
+       [(u8x128 _) (generate `vshuffb t_32xi32 `(list (,t_32xi32 ,(codegen Vu))))]
+       [(i16x64 _) (generate `vshuffh t_32xi32 `(list (,t_32xi32 ,(codegen Vu))))]
+       [(u16x64 _) (generate `vshuffh t_32xi32 `(list (,t_32xi32 ,(codegen Vu))))])]
     
     ;;vtranspose
     
@@ -168,9 +175,8 @@
        [(list (i32x32 _)(i32x32 _)) (generate `vpackoh t_32xi32 `(list (,t_32xi32 ,(codegen Vu)) (,t_32xi32 ,(codegen Vv))))]
        [(list (i16x64 _)(i16x64 _)) (generate `vpackob t_32xi32 `(list (,t_32xi32 ,(codegen Vu)) (,t_32xi32 ,(codegen Vv))))])]
     
-    
     ;;vunpack
-    [(vunpack_2 Vu)
+    [(vunpack Vu)
      (match (interpret-hvx Vu)
        [(i8x128 _) (generate `vunpackb t_32xi32 `(,t_32xi32 ,(codegen Vu)))]
        [(i16x64 _) (generate `vunpackh t_32xi32 `(,t_32xi32 ,(codegen Vu)))]
@@ -182,13 +188,13 @@
     ;;vgather
 
     ;;vzxt
-    [(vzxt Vu)
+    [(vzxt Vu signed?)
      (match (interpret-hvx Vu)
        [(u8x128 _) (generate `vzb t_32xi32 `(,t_32xi32 ,(codegen Vu)))]
        [(u16x64 _) (generate `vzh t_32xi32 `(,t_32xi32 ,(codegen Vu)))])]
     
     ;;vsxt
-    [(vsxt Vu)
+    [(vsxt Vu signed?)
      (match (interpret-hvx Vu)
        [(i8x128 _) (generate `vsb t_32xi32 `(,t_32xi32 ,(codegen Vu)))]
        [(i16x64 _) (generate `vsh t_32xi32 `(,t_32xi32 ,(codegen Vu)))])]
@@ -452,4 +458,4 @@
     
     [_ (read (open-input-string (format "~a" p)))]))
     
-(provide (rename-out [codegen llvm_codegen]))
+(provide (rename-out [codegen llvm-codegen]))
