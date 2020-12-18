@@ -36,7 +36,14 @@
                (int->hex (codegen-scalar v0))
                (int->hex (codegen-scalar v1))
                (int->hex (codegen-scalar v0)))]
-      [_ (error "NYI: codegen scalar" Rt)]))))
+      [(list v1 v2 v3 v4)
+       (format "0x~a~a~a~a"
+               (int->hex (codegen-scalar v3))
+               (int->hex (codegen-scalar v2))
+               (int->hex (codegen-scalar v1))
+               (int->hex (codegen-scalar v0)))]
+      [_ (error "NYI: codegen scalar ~a" Rt)]))))
+
 
 ;put a prefix to not overwrite the types in ast
 (define t_i32 `int32)
@@ -65,15 +72,15 @@
 
     ;;lo
     [(lo Vuu)
-     (match (interpret-hvx Vuu)
-       [(i32x32x2 _ _) (generate `lo t_32xi32 `(,t_64xi32 ,(codegen Vuu)))]
-       [(i32x32 _) (generate `lo t_16xi32 `(,t_32xi32 ,(codegen Vuu)))])]
+     (if (hvx-pair? (interpret-hvx Vuu))
+         (generate `lo t_32xi32 `(,t_64xi32 ,(codegen Vuu)))
+         (generate `lo t_16xi32 `(,t_32xi32 ,(codegen Vuu))))]
 
     ;;hi
     [(hi Vuu)
-     (match (interpret-hvx Vuu)
-       [(i32x32x2 _ _) (generate `hi t_32xi32 `(,t_64xi32 ,(codegen Vuu)))]
-       [(i32x32 _) (generate `hi t_16xi32 `(,t_32xi32 ,(codegen Vuu)))])]
+     (if (hvx-pair? (interpret-hvx Vuu))
+         (generate `hi t_32xi32 `(,t_64xi32 ,(codegen Vuu)))
+         (generate `hi t_16xi32 `(,t_32xi32 ,(codegen Vuu))))]
     
     ;;vcombine
     [(vcombine Vu Vv)
@@ -119,10 +126,16 @@
     
     ;;valign
     [(valign Vu Vv Rt)
-     (match (list (interpret-hvx Vu) (interpret-hvx Vv) (interpret-hvx Rt))
-       [(list (i32x32 _)(i32x32 _)(int32_t _)) (generate `valignb t_32xi32 `(list (,t_32xi32 ,(codegen Vu)) (,t_32xi32 ,(codegen Vv)) (,t_i32 ,(eval-to-int Rt))))]
-       [(list (i32x32 _)(i32x32 _) integer) (generate `valignbi t_32xi32 `(list (,t_32xi32 ,(codegen Vu)) (,t_32xi32 ,(codegen Vv)) (,t_i32 ,(eval-to-int Rt))))])]
-        
+     (match (interpret-hvx Rt)
+       [(int32_t _) (generate `valignb t_32xi32 `(list (,t_32xi32 ,(codegen Vu)) (,t_32xi32 ,(codegen Vv)) (,t_i32 ,(codegen-scalar Rt))))]
+       [integer (generate `valignbi t_32xi32 `(list (,t_32xi32 ,(codegen Vu)) (,t_32xi32 ,(codegen Vv)) (,t_i32 ,(int->8bit Rt))))])]
+
+    ;;vlalign
+    [(vlalign Vu Vv Rt)
+     (match (interpret-hvx Rt)
+       [(int32_t _) (generate `vlalignb t_32xi32 `(list (,t_32xi32 ,(codegen Vu)) (,t_32xi32 ,(codegen Vv)) (,t_i32 ,(codegen-scalar Rt))))]
+       [integer (generate `vlalignbi t_32xi32 `(list (,t_32xi32 ,(codegen Vu)) (,t_32xi32 ,(codegen Vv)) (,t_i32 ,(int->8bit Rt))))])]
+
     ;;vror
     [(vror Vu Rt) (generate `vror t_32xi32 `(list (,t_32xi32 ,(codegen Vu)) (,t_i32 ,(eval-to-int Rt))))]
      
@@ -170,7 +183,7 @@
     
     
     ;;vunpack
-    [(vunpack_2 Vu)
+    [(vunpack Vu)
      (match (interpret-hvx Vu)
        [(i8x128 _) (generate `vunpackb t_32xi32 `(,t_32xi32 ,(codegen Vu)))]
        [(i16x64 _) (generate `vunpackh t_32xi32 `(,t_32xi32 ,(codegen Vu)))]
@@ -182,13 +195,13 @@
     ;;vgather
 
     ;;vzxt
-    [(vzxt Vu)
+    [(vzxt Vu signed?)
      (match (interpret-hvx Vu)
        [(u8x128 _) (generate `vzb t_32xi32 `(,t_32xi32 ,(codegen Vu)))]
        [(u16x64 _) (generate `vzh t_32xi32 `(,t_32xi32 ,(codegen Vu)))])]
     
     ;;vsxt
-    [(vsxt Vu)
+    [(vsxt Vu signed?)
      (match (interpret-hvx Vu)
        [(i8x128 _) (generate `vsb t_32xi32 `(,t_32xi32 ,(codegen Vu)))]
        [(i16x64 _) (generate `vsh t_32xi32 `(,t_32xi32 ,(codegen Vu)))])]
@@ -305,8 +318,8 @@
      (match (list (interpret-hvx Vuu) (interpret-hvx Rt))
        [(list (i16x64x2 _ _) (int16_t _)) (generate `vdmpyhisat t_32xi32 `(list (,t_64xi32 ,(codegen Vuu)) (,t_i32 ,(codegen-scalar Rt))))]
        [(list (i16x64x2 _ _) (uint16_t _)) (generate `vdmpyhsuisat t_32xi32 `(list (,t_64xi32 ,(codegen Vuu)) (,t_i32 ,(codegen-scalar Rt))))]
-       [(list (u8x128x2 _ _) (int8_t _)) (generate `vdmpybus.dv t_64xi32 `(list (,t_64xi32 ,(codegen Vuu)) (,t_i32 ,(codegen-scalar Rt))))]
-       [(list (i16x64x2 _ _) (int8_t _)) (generate `vdmpyhb.dv t_64xi32 `(list (,t_64xi32 ,(codegen Vuu)) (,t_i32 ,(codegen-scalar Rt))))])]
+       [(list (u8x128x2 _ _) (cons (int8_t _) (int8_t _))) (generate `vdmpybus.dv t_64xi32 `(list (,t_64xi32 ,(codegen Vuu)) (,t_i32 ,(codegen-scalar Rt))))]
+       [(list (i16x64x2 _ _) (cons (int8_t _) (int8_t _))) (generate `vdmpyhb.dv t_64xi32 `(list (,t_64xi32 ,(codegen Vuu)) (,t_i32 ,(codegen-scalar Rt))))])]
     
     ;;vdmpy-acc
     [(vdmpy-acc Vd Vu Rt)
@@ -321,8 +334,8 @@
      (match (list (interpret-hvx Vuu) (interpret-hvx Rt))
        [(list (i16x64x2 _ _) (int16_t _)) (generate `vdmpyhisat.acc t_32xi32 `(list (,t_32xi32 ,(codegen Vdd)) (,t_64xi32 ,(codegen Vuu)) (,t_i32 ,(codegen-scalar Rt))))]
        [(list (i16x64x2 _ _) (uint16_t _)) (generate `vdmpyhsuisat.acc t_32xi32 `(list (,t_32xi32 ,(codegen Vdd)) (,t_64xi32 ,(codegen Vuu)) (,t_i32 ,(codegen-scalar Rt))))]
-       [(list (u8x128x2 _ _) (int8_t _)) (generate `vdmpybus.dv.acc t_64xi32 `(list (,t_64xi32 ,(codegen Vdd)) (,t_64xi32 ,(codegen Vuu)) (,t_i32 ,(codegen-scalar Rt))))]
-       [(list (i16x64x2 _ _) (int8_t _)) (generate `vdmpyhb.dv.acc t_64xi32 `(list (,t_64xi32 ,(codegen Vdd)) (,t_64xi32 ,(codegen Vuu)) (,t_i32 ,(codegen-scalar Rt))))])]
+       [(list (u8x128x2 _ _) (cons (int8_t _) (int8_t _))) (generate `vdmpybus.dv.acc t_64xi32 `(list (,t_64xi32 ,(codegen Vdd)) (,t_64xi32 ,(codegen Vuu)) (,t_i32 ,(codegen-scalar Rt))))]
+       [(list (i16x64x2 _ _) (cons (int8_t _) (int8_t _))) (generate `vdmpyhb.dv.acc t_64xi32 `(list (,t_64xi32 ,(codegen Vdd)) (,t_64xi32 ,(codegen Vuu)) (,t_i32 ,(codegen-scalar Rt))))])]
     
     ;;vtmpy
     [(vtmpy Vuu Rt)
@@ -353,14 +366,14 @@
     ;;vrmpy-p
     [(vrmpy-p Vuu Rt u1)
      (match (list (interpret-hvx Vuu) (interpret-hvx Rt))
-       [(list (u8x128x2 _ _) (uint8_t _)) (generate `vrmpyubi t_64xi32 `(list (,t_64xi32 (codegen Vuu)) (,t_i32 ,(codegen-scalar Rt)) (,t_i32 ,(eval-to-int u1))))]
-       [(list (u8x128x2 _ _) (int8_t _)) (generate `vrmpybusi t_64xi32 `(list (,t_64xi32 (codegen Vuu)) (,t_i32 ,(codegen-scalar Rt)) (,t_i32 ,(eval-to-int u1))))])]
+       [(list (u8x128x2 _ _) (list (uint8_t _) (uint8_t _) (uint8_t _) (uint8_t _))) (generate `vrmpyubi t_64xi32 `(list (,t_64xi32 (codegen Vuu)) (,t_i32 ,(codegen-scalar Rt)) (,t_i32 ,(eval-to-int u1))))]
+       [(list (u8x128x2 _ _) (list (int8_t _) (int8_t _) (int8_t _) (int8_t _))) (generate `vrmpybusi t_64xi32 `(list (,t_64xi32 (codegen Vuu)) (,t_i32 ,(codegen-scalar Rt)) (,t_i32 ,(eval-to-int u1))))])]
     
     ;;vrmpy-p-acc
     [(vrmpy-p-acc Vdd Vuu Rt u1)
      (match (list (interpret-hvx Vuu) (interpret-hvx Rt))
-       [(list (u8x128x2 _ _) (uint8_t _)) (generate `vrmpyubi.acc t_64xi32 `(list (,t_64xi32 ,(codegen Vdd)) (,t_64xi32 (codegen Vuu)) (,t_i32 ,(codegen-scalar Rt)) (,t_i32 ,(eval-to-int u1))))]
-       [(list (u8x128x2 _ _) (int8_t _)) (generate `vrmpybusi.acc t_64xi32 `(list (,t_64xi32 ,(codegen Vdd)) (,t_64xi32 (codegen Vuu)) (,t_i32 ,(codegen-scalar Rt)) (,t_i32 ,(eval-to-int u1))))])]
+       [(list (u8x128x2 _ _) (list (uint8_t _) (uint8_t _) (uint8_t _) (uint8_t _))) (generate `vrmpyubi.acc t_64xi32 `(list (,t_64xi32 ,(codegen Vdd)) (,t_64xi32 (codegen Vuu)) (,t_i32 ,(codegen-scalar Rt)) (,t_i32 ,(eval-to-int u1))))]
+       [(list (u8x128x2 _ _) (list (int8_t _) (int8_t _) (int8_t _) (int8_t _))) (generate `vrmpybusi.acc t_64xi32 `(list (,t_64xi32 ,(codegen Vdd)) (,t_64xi32 (codegen Vuu)) (,t_i32 ,(codegen-scalar Rt)) (,t_i32 ,(eval-to-int u1))))])]
     
     ;;vavg
     [(vavg Vu Vv rnd?)
@@ -453,3 +466,4 @@
     [_ (read (open-input-string (format "~a" p)))]))
     
 (provide (rename-out [codegen llvm_codegen]))
+(provide codegen-scalar)

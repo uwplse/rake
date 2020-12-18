@@ -54,7 +54,7 @@
      ]
     
     ;;vshuffo
-    [(vshuffo Vu Vv signed?)
+    [(vshuffo_2 Vu Vv signed?)
      (match (list (interpret-hvx Vu) (interpret-hvx Vv))
        [(list (i8x128 _)(i8x128 _)) (format "~aVb_vshuffo_VbVb(~a, ~a)" prefix (codegen Vu) (codegen Vv))]
        [(list (i16x64 _)(i16x64 _)) (format "~aVh_vshuffo_VhVh(~a, ~a)" prefix (codegen Vu) (codegen Vv))])
@@ -89,7 +89,14 @@
     [(valign Vu Vv Rt)
      (match (interpret-hvx Rt)
        [(int32_t _) (format "~aV_valign_VVR(~a, ~a, ~a)" prefix (codegen Vu) (codegen Vv) (eval-to-int Rt))]
-       [integer (format "~aV_vsalign_VVI(~a, ~a, ~a)" prefix (codegen Vu) (codegen Vv) (eval-to-int Rt))])
+       [integer (format "~aV_valign_VVI(~a, ~a, ~a)" prefix (codegen Vu) (codegen Vv) (eval-to-int Rt))])
+     ]
+
+    ;;vlalign
+    [(vlalign Vu Vv Rt)
+     (match (interpret-hvx Rt)
+       [(int32_t _) (format "~aV_vlalign_VVR(~a, ~a, ~a)" prefix (codegen Vu) (codegen Vv) (eval-to-int Rt))]
+       [integer (format "~aV_vlalign_VVI(~a, ~a, ~a)" prefix (codegen Vu) (codegen Vv) (eval-to-int Rt))])
      ]
     
     ;;vror
@@ -142,7 +149,7 @@
      ]
     
     ;;vpacko
-    [(vpacko Vu Vv signed?)
+    [(vpacko_2 Vu Vv signed?)
      (match (list (interpret-hvx Vu) (interpret-hvx Vv))
        [(list (i32x32 _)(i32x32 _)) (format "~aVh_vpacko_VwVw(~a, ~a)" prefix (codegen Vu) (codegen Vv))]
        [(list (i16x64 _)(i16x64 _)) (format "~aVb_vpacko_VhVh(~a, ~a)" prefix (codegen Vu) (codegen Vv))])
@@ -162,14 +169,14 @@
     ;;vgather
 
     ;;vzxt
-    [(vzxt Vu)
+    [(vzxt Vu signed?)
      (match (interpret-hvx Vu)
        [(u8x128 _) (format "~aWuh_vzxt_Vub(~a)" prefix (codegen Vu))]
        [(u16x64 _) (format "~aWuw_vzxt_Vuh(~a)" prefix (codegen Vu))])
      ]
     
     ;;vsxt
-    [(vsxt Vu)
+    [(vsxt Vu signed?)
      (match (interpret-hvx Vu)
        [(i8x128 _) (format "~aWh_vsxt_Vb(~a)" prefix (codegen Vu))]
        [(i16x64 _) (format "~aWw_vsxt_Vh(~a)" prefix (codegen Vu))])
@@ -341,15 +348,15 @@
     ;;vrmpy-p
     [(vrmpy-p Vuu Rt u1)
      (match (list (interpret-hvx Vuu) (interpret-hvx Rt))
-       [(list (u8x128x2 _ _) (uint8_t _)) (format "~aWuw_vrmpy_WubRubI(~a, ~a, ~a)" prefix (codegen Vuu) (eval-to-int Rt) (eval-to-int u1))]
-       [(list (u8x128x2 _ _) (int8_t _)) (format "~aWw_vrmpy_WubRbI(~a, ~a, ~a)" prefix (codegen Vuu) (eval-to-int Rt) (eval-to-int u1))]
+       [(list (u8x128x2 _ _) (list (uint8_t _) (uint8_t _) (uint8_t _) (uint8_t _))) (format "~aWuw_vrmpy_WubRubI(~a, ~a, ~a)" prefix (codegen Vuu) (eval-to-int Rt) (eval-to-int u1))]
+       [(list (u8x128x2 _ _) (list (int8_t _) (int8_t _) (int8_t _) (int8_t _))) (format "~aWw_vrmpy_WubRbI(~a, ~a, ~a)" prefix (codegen Vuu) (eval-to-int Rt) (eval-to-int u1))]
     )]
     
     ;;vrmpy-p-acc
     [(vrmpy-p-acc Vdd Vuu Rt u1)
      (match (list (interpret-hvx Vuu) (interpret-hvx Rt))
-       [(list (u8x128x2 _ _) (uint8_t _)) (format "~aWuw_vrmpyacc_WuwWubRubI(~a, ~a, ~a, ~a)" prefix (codegen Vdd) (codegen Vuu) (eval-to-int Rt) (eval-to-int u1))]
-       [(list (u8x128x2 _ _) (int8_t _)) (format "~aWw_vrmpyacc_WwWubRbI(~a, ~a, ~a, ~a)" prefix (codegen Vdd) (codegen Vuu) (eval-to-int Rt) (eval-to-int u1))]
+       [(list (u8x128x2 _ _) (list (uint8_t _) (uint8_t _) (uint8_t _) (uint8_t _))) (format "~aWuw_vrmpyacc_WuwWubRubI(~a, ~a, ~a, ~a)" prefix (codegen Vdd) (codegen Vuu) (eval-to-int Rt) (eval-to-int u1))]
+       [(list (u8x128x2 _ _) (list (int8_t _) (int8_t _) (int8_t _) (int8_t _))) (format "~aWw_vrmpyacc_WwWubRbI(~a, ~a, ~a, ~a)" prefix (codegen Vdd) (codegen Vuu) (eval-to-int Rt) (eval-to-int u1))]
     )]
     
     ;;vavg
