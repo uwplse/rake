@@ -54,7 +54,7 @@
      ]
     
     ;;vshuffo
-    [(vshuffo Vu Vv signed?)
+    [(vshuffo_2 Vu Vv signed?)
      (match (list (interpret-hvx Vu) (interpret-hvx Vv))
        [(list (i8x128 _)(i8x128 _)) (format "~aVb_vshuffo_VbVb(~a, ~a)" prefix (codegen Vu) (codegen Vv))]
        [(list (i16x64 _)(i16x64 _)) (format "~aVh_vshuffo_VhVh(~a, ~a)" prefix (codegen Vu) (codegen Vv))])
@@ -142,7 +142,7 @@
      ]
     
     ;;vpacko
-    [(vpacko Vu Vv signed?)
+    [(vpacko_2 Vu Vv signed?)
      (match (list (interpret-hvx Vu) (interpret-hvx Vv))
        [(list (i32x32 _)(i32x32 _)) (format "~aVh_vpacko_VwVw(~a, ~a)" prefix (codegen Vu) (codegen Vv))]
        [(list (i16x64 _)(i16x64 _)) (format "~aVb_vpacko_VhVh(~a, ~a)" prefix (codegen Vu) (codegen Vv))])
@@ -162,14 +162,14 @@
     ;;vgather
 
     ;;vzxt
-    [(vzxt Vu)
+    [(vzxt Vu signed?)
      (match (interpret-hvx Vu)
        [(u8x128 _) (format "~aWuh_vzxt_Vub(~a)" prefix (codegen Vu))]
        [(u16x64 _) (format "~aWuw_vzxt_Vuh(~a)" prefix (codegen Vu))])
      ]
     
     ;;vsxt
-    [(vsxt Vu)
+    [(vsxt Vu signed?)
      (match (interpret-hvx Vu)
        [(i8x128 _) (format "~aWh_vsxt_Vb(~a)" prefix (codegen Vu))]
        [(i16x64 _) (format "~aWw_vsxt_Vh(~a)" prefix (codegen Vu))])
