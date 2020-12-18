@@ -89,7 +89,14 @@
     [(valign Vu Vv Rt)
      (match (interpret-hvx Rt)
        [(int32_t _) (format "~aV_valign_VVR(~a, ~a, ~a)" prefix (codegen Vu) (codegen Vv) (eval-to-int Rt))]
-       [integer (format "~aV_vsalign_VVI(~a, ~a, ~a)" prefix (codegen Vu) (codegen Vv) (eval-to-int Rt))])
+       [integer (format "~aV_valign_VVI(~a, ~a, ~a)" prefix (codegen Vu) (codegen Vv) (eval-to-int Rt))])
+     ]
+
+    ;;vlalign
+    [(vlalign Vu Vv Rt)
+     (match (interpret-hvx Rt)
+       [(int32_t _) (format "~aV_vlalign_VVR(~a, ~a, ~a)" prefix (codegen Vu) (codegen Vv) (eval-to-int Rt))]
+       [integer (format "~aV_vlalign_VVI(~a, ~a, ~a)" prefix (codegen Vu) (codegen Vv) (eval-to-int Rt))])
      ]
     
     ;;vror
@@ -341,15 +348,15 @@
     ;;vrmpy-p
     [(vrmpy-p Vuu Rt u1)
      (match (list (interpret-hvx Vuu) (interpret-hvx Rt))
-       [(list (u8x128x2 _ _) (uint8_t _)) (format "~aWuw_vrmpy_WubRubI(~a, ~a, ~a)" prefix (codegen Vuu) (eval-to-int Rt) (eval-to-int u1))]
-       [(list (u8x128x2 _ _) (int8_t _)) (format "~aWw_vrmpy_WubRbI(~a, ~a, ~a)" prefix (codegen Vuu) (eval-to-int Rt) (eval-to-int u1))]
+       [(list (u8x128x2 _ _) (list (uint8_t _) (uint8_t _) (uint8_t _) (uint8_t _))) (format "~aWuw_vrmpy_WubRubI(~a, ~a, ~a)" prefix (codegen Vuu) (eval-to-int Rt) (eval-to-int u1))]
+       [(list (u8x128x2 _ _) (list (int8_t _) (int8_t _) (int8_t _) (int8_t _))) (format "~aWw_vrmpy_WubRbI(~a, ~a, ~a)" prefix (codegen Vuu) (eval-to-int Rt) (eval-to-int u1))]
     )]
     
     ;;vrmpy-p-acc
     [(vrmpy-p-acc Vdd Vuu Rt u1)
      (match (list (interpret-hvx Vuu) (interpret-hvx Rt))
-       [(list (u8x128x2 _ _) (uint8_t _)) (format "~aWuw_vrmpyacc_WuwWubRubI(~a, ~a, ~a, ~a)" prefix (codegen Vdd) (codegen Vuu) (eval-to-int Rt) (eval-to-int u1))]
-       [(list (u8x128x2 _ _) (int8_t _)) (format "~aWw_vrmpyacc_WwWubRbI(~a, ~a, ~a, ~a)" prefix (codegen Vdd) (codegen Vuu) (eval-to-int Rt) (eval-to-int u1))]
+       [(list (u8x128x2 _ _) (list (uint8_t _) (uint8_t _) (uint8_t _) (uint8_t _))) (format "~aWuw_vrmpyacc_WuwWubRubI(~a, ~a, ~a, ~a)" prefix (codegen Vdd) (codegen Vuu) (eval-to-int Rt) (eval-to-int u1))]
+       [(list (u8x128x2 _ _) (list (int8_t _) (int8_t _) (int8_t _) (int8_t _))) (format "~aWw_vrmpyacc_WwWubRbI(~a, ~a, ~a, ~a)" prefix (codegen Vdd) (codegen Vuu) (eval-to-int Rt) (eval-to-int u1))]
     )]
     
     ;;vavg

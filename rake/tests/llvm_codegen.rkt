@@ -37,42 +37,49 @@
      #t))
 
   (define out-exp '(llvm.hexagon.V6.vasrhubrndsat.128B
-    32xi32
+    int32x32
     (list
-     (32xi32
+     (int32x32
       (llvm.hexagon.V6.vmpyihb.acc.128B
-       32xi32
+       int32x32
        (list
-        (32xi32
+        (int32x32
          (llvm.hexagon.V6.vaddh.128B
-          32xi32
+          int32x32
           (list
-           (32xi32 (llvm.hexagon.V6.vread.128B 32xi32 (list (i32 buf) (i32 x))))
-           (32xi32
+           (int32x32
+            (llvm.hexagon.V6.vread.128B int32x32 (list (int32 buf) (int32 x))))
+           (int32x32
             (llvm.hexagon.V6.vread.128B
-             32xi32
-             (list (i32 buf) (i32 (+ 2 x))))))))
-        (32xi32
-         (llvm.hexagon.V6.vread.128B 32xi32 (list (i32 buf) (i32 (+ 1 x)))))
-        (i32 2))))
-     (32xi32
+             int32x32
+             (list (int32 buf) (int32 (+ 2 x))))))))
+        (int32x32
+         (llvm.hexagon.V6.vread.128B
+          int32x32
+          (list (int32 buf) (int32 (+ 1 x)))))
+        (int32 2))))
+     (int32x32
       (llvm.hexagon.V6.vmpyihb.acc.128B
-       32xi32
+       int32x32
        (list
-        (32xi32
+        (int32x32
          (llvm.hexagon.V6.vaddh.128B
-          32xi32
+          int32x32
           (list
-           (32xi32
-            (llvm.hexagon.V6.vread.128B 32xi32 (list (i32 buf) (i32 (+ 64 x)))))
-           (32xi32
+           (int32x32
             (llvm.hexagon.V6.vread.128B
-             32xi32
-             (list (i32 buf) (i32 (+ 66 x))))))))
-        (32xi32
-         (llvm.hexagon.V6.vread.128B 32xi32 (list (i32 buf) (i32 (+ 65 x)))))
-        (i32 2))))
-     (i32 4))))
+             int32x32
+             (list (int32 buf) (int32 (+ 64 x)))))
+           (int32x32
+            (llvm.hexagon.V6.vread.128B
+             int32x32
+             (list (int32 buf) (int32 (+ 66 x))))))))
+        (int32x32
+         (llvm.hexagon.V6.vread.128B
+          int32x32
+          (list (int32 buf) (int32 (+ 65 x)))))
+        (int32 2))))
+     (int32 4))))
   (check-equal? (llvm_codegen program) out-exp)
 
   (printf "Test Passed: Gaussian 3x3 stage 2\n"))
