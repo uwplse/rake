@@ -24,7 +24,6 @@
       (~a (format "~X" (+ 256 val)) #:width 2 #:left-pad-string "0" #:align 'right)))
   
 (define (codegen-scalar Rt)
-  (println Rt)
   (read
    (open-input-string
     (match Rt
