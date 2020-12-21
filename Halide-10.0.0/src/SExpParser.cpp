@@ -185,7 +185,6 @@ Expr SExpParser::parse(string &sexp, Type expected_type) {
     while (!sexp.empty()) {
         auto result = get_token(sexp, token);
         user_assert(result);
-
         if (token.type == TokenType::LeftParen) {
             // next token dictates which kind of expression
             // we're parsing
@@ -208,7 +207,7 @@ Expr SExpParser::parse(string &sexp, Type expected_type) {
             return IntImm::make(expected_type, token.num);
         } else if (token.type == TokenType::Symbol) {
             // For now, assume a Var
-            user_assert(expected_type != Type()) << "Unknown type for var at " << sexp << "\n";
+            user_assert(expected_type != Type()) << "Unknown type for var (" << token.str << ") at " << sexp << "\n";
             return Variable::make(expected_type, token.str);
         } else {
             // error
@@ -263,7 +262,7 @@ void sexp_parser_test() {
         (int32 2))))
      (int32 4))))";
     
-    string s3 = R"(llvm.hexagon.V6.vmpybus.acc.128B
+    string s3 = R"((llvm.hexagon.V6.vmpybus.acc.128B
  int32x64
  (list
   (int32x64
@@ -340,7 +339,7 @@ void sexp_parser_test() {
         (int32 input)
         (int32
          (+ -2 (+ (+ (* 8 t19.s) (- 0 t42)) (* -2 input.stride.1))))))))))
-  (int32 1)))";
+  (int32 1))))";
 
     debug(0) << p.parse(s) << "\n";
     debug(0) << p.parse(s2) << "\n";

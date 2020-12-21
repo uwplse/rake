@@ -2803,7 +2803,7 @@ class IROptimizer : public IRMutator {
 
             while (fgets(buf, 10000, fp) != NULL) {
                 // Do whatever you want here...
-                printf("%s", buf);
+                debug(0) << buf;
             }
 
             if(pclose(fp))  {
