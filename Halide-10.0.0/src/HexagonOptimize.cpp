@@ -2764,8 +2764,8 @@ class IROptimizer : public IRMutator {
                 << "(define spec (synthesis-spec halide-expr (list)))\n"
                 << "(define hvx-expr (synthesize-hvx spec 'halide-ir 'greedy))\n"
                 << "\n"
-                << "(define out (open-output-file \"sexp.out\"))\n"
-                << "(write (llvm-codegen hvx-expr) out)"
+                << "(define out (open-output-file \"sexp.out\" #:exists 'replace))\n"
+                << "(pretty-write (llvm-codegen hvx-expr) out)\n"
                 << "(close-output-port out)";
 
             std::ofstream rakeInputF;
@@ -2788,8 +2788,8 @@ class IROptimizer : public IRMutator {
                 << "(define spec (synthesis-spec halide-expr (list)))\n"
                 << "(define hvx-expr (synthesize-hvx spec 'halide-ir 'greedy))\n"
                 << "\n"
-                << "(define out (open-output-file \"sexp.out\"))\n"
-                << "(write (llvm-codegen hvx-expr) out)"
+                << "(define out (open-output-file \"sexp.out\" #:exists 'replace))\n"
+                << "(pretty-write (llvm-codegen hvx-expr) out)\n"
                 << "(close-output-port out)";
             rakeInputF.close();
 

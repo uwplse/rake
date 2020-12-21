@@ -468,7 +468,12 @@
             [(list (u16x64 _) (u16x64 _)) (generate `vrounduwuh t_32xi32 `(list (,t_32xi32 ,(codegen Vu)) (,t_32xi32 ,(codegen Vv))))]
             [(list (u32x32 _) (u32x32 _)) (generate `vrounduwuh t_32xi32 `(list (,t_32xi32 ,(codegen Vu)) (,t_32xi32 ,(codegen Vv))))]
             [(list (i32x32 _) (i32x32 _)) (generate `vroundwuh t_32xi32 `(list (,t_32xi32 ,(codegen Vu)) (,t_32xi32 ,(codegen Vv))))]))]
+
+    [(+ a b) (read (open-input-string (format "(+ ~a ~a)" (codegen a) (codegen b))))]
+    [(- a b) (read (open-input-string (format "(- ~a ~a)" (codegen a) (codegen b))))]
+    [(* a b) (read (open-input-string (format "(* ~a ~a)" (codegen a) (codegen b))))]
+    [(- a)   (read (open-input-string (format "(- 0 ~a)" (codegen a))))]
     
     [_ (read (open-input-string (format "~a" p)))]))
     
-(provide (rename-out [codegen llvm_codegen]))
+(provide (rename-out [codegen llvm-codegen]))

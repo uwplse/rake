@@ -263,7 +263,7 @@ void sexp_parser_test() {
         (int32 2))))
      (int32 4))))";
     
-    string s3 = R"'(llvm.hexagon.V6.vmpybus.acc.128B
+    string s3 = R"(llvm.hexagon.V6.vmpybus.acc.128B
   int32x64
   (list
    (int32x64
