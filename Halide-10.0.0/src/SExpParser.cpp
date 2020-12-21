@@ -264,84 +264,87 @@ void sexp_parser_test() {
      (int32 4))))";
     
     string s3 = R"(llvm.hexagon.V6.vmpybus.acc.128B
-  int32x64
-  (list
-   (int32x64
-    (llvm.hexagon.V6.vmpabus.acc.128B
-     int32x64
-     (list
-      (int32x64
-       (llvm.hexagon.V6.vmpabus.128B
-        int32x32
-        (list
-         (int32x64
-          (llvm.hexagon.V6.vcombine.128B
-           int32x64
-           (list
-            (int32x32
-             (llvm.hexagon.V6.vshuffb.128B
-              int32x32
-              (list
-               (int32x32
-                (llvm.hexagon.V6.vread.128B
-                 int32x32
-                 (list
-                  (int32 input)
-                  (int32
-                   (+ -2 (+ (- input.stride.1) (+ (* 8 t19.s) (- t42)))))))))))
-            (int32x32
-             (llvm.hexagon.V6.vshuffb.128B
-              int32x32
-              (list
-               (int32x32
-                (llvm.hexagon.V6.vread.128B
-                 int32x32
-                 (list
-                  (int32 input)
-                  (int32 (+ -2 (+ (* 8 t19.s) (- t42)))))))))))))
-         (int32 0x06040604))))
-      (int32x64
-       (llvm.hexagon.V6.vcombine.128B
-        int32x64
-        (list
-         (int32x32
-          (llvm.hexagon.V6.vshuffb.128B
-           int32x32
-           (list
-            (int32x32
-             (llvm.hexagon.V6.vread.128B
-              int32x32
-              (list
-               (int32 input)
-               (int32
-                (+ -2 (+ (+ (* 8 t19.s) (- t42)) (* 2 input.stride.1))))))))))
-         (int32x32
-          (llvm.hexagon.V6.vshuffb.128B
-           int32x32
-           (list
-            (int32x32
-             (llvm.hexagon.V6.vread.128B
-              int32x32
-              (list
-               (int32 input)
-               (int32
-                (+ -2 (+ input.stride.1 (+ (* 8 t19.s) (- t42))))))))))))))
-      (int32 0x04010401))))
-   (int32x32
-    (llvm.hexagon.V6.vshuffb.128B
-     int32x32
-     (list
-      (int32x32
-       (llvm.hexagon.V6.vread.128B
-        int32x32
-        (list
-         (int32 input)
-         (int32 (+ -2 (+ (+ (* 8 t19.s) (- t42)) (* -2 input.stride.1))))))))))
-   (int32 1)))";
+ int32x64
+ (list
+  (int32x64
+   (llvm.hexagon.V6.vmpabus.acc.128B
+    int32x64
+    (list
+     (int32x64
+      (llvm.hexagon.V6.vmpabus.128B
+       int32x32
+       (list
+        (int32x64
+         (llvm.hexagon.V6.vcombine.128B
+          int32x64
+          (list
+           (int32x32
+            (llvm.hexagon.V6.vshuffb.128B
+             int32x32
+             (list
+              (int32x32
+               (llvm.hexagon.V6.vread.128B
+                int32x32
+                (list
+                 (int32 input)
+                 (int32
+                  (+
+                   -2
+                   (+ (- 0 input.stride.1) (+ (* 8 t19.s) (- 0 t42)))))))))))
+           (int32x32
+            (llvm.hexagon.V6.vshuffb.128B
+             int32x32
+             (list
+              (int32x32
+               (llvm.hexagon.V6.vread.128B
+                int32x32
+                (list
+                 (int32 input)
+                 (int32 (+ -2 (+ (* 8 t19.s) (- 0 t42)))))))))))))
+        (int32 0x06040604))))
+     (int32x64
+      (llvm.hexagon.V6.vcombine.128B
+       int32x64
+       (list
+        (int32x32
+         (llvm.hexagon.V6.vshuffb.128B
+          int32x32
+          (list
+           (int32x32
+            (llvm.hexagon.V6.vread.128B
+             int32x32
+             (list
+              (int32 input)
+              (int32
+               (+ -2 (+ (+ (* 8 t19.s) (- 0 t42)) (* 2 input.stride.1))))))))))
+        (int32x32
+         (llvm.hexagon.V6.vshuffb.128B
+          int32x32
+          (list
+           (int32x32
+            (llvm.hexagon.V6.vread.128B
+             int32x32
+             (list
+              (int32 input)
+              (int32
+               (+ -2 (+ input.stride.1 (+ (* 8 t19.s) (- 0 t42))))))))))))))
+     (int32 0x04010401))))
+  (int32x32
+   (llvm.hexagon.V6.vshuffb.128B
+    int32x32
+    (list
+     (int32x32
+      (llvm.hexagon.V6.vread.128B
+       int32x32
+       (list
+        (int32 input)
+        (int32
+         (+ -2 (+ (+ (* 8 t19.s) (- 0 t42)) (* -2 input.stride.1))))))))))
+  (int32 1)))";
 
     debug(0) << p.parse(s) << "\n";
     debug(0) << p.parse(s2) << "\n";
-    //debug(0) << p.parse(s3) << "\n";
+    debug(0) << p.parse(s3) << "\n";
 }
 
 }
