@@ -80,7 +80,8 @@
      (vmpye t0 c0)
      (vmpye-acc t0 t1 c0)
      ;; Shift-left
-     (vasl t0 (shl-const))))
+     (vasl t0 (shl-const))
+     ))
   ??hvx-conv-instr)
 
 (define (get-hvx-conv-w-isa weights)
@@ -95,30 +96,34 @@
     (define Rt (cons c0 c1))
     (define Rt4 (list c0 c1 (int-const) (int-const)))
     (choose*
+     ;; Widening cast
+     (vzxt t0 (choose* #t #f))
+     (vsxt t0 (choose* #t #f))
+
      ;; Addition
-     ;(vadd-w t0 t1)
-     ;(vadd-w-acc t0 t1 t2)
+     (vadd-w t0 t1)
+     (vadd-w-acc t0 t1 t2)
 
      ;; Vec-Sca multiplies
-     ;(vmpy t0 c0)
+     (vmpy t0 c0)
      (vmpy-acc t0 t1 c0)
      
      (vmpa t1 Rt)
      (vmpa-acc t0 t1 Rt)
 
-     ;(vdmpy t0 Rt)
-     ;(vdmpy-sw t0 Rt)
-     ;(vdmpy-acc t0 t1 Rt)
-     ;(vdmpy-sw-acc t0 t1 Rt)
+     (vdmpy t0 Rt)
+     (vdmpy-sw t0 Rt)
+     (vdmpy-acc t0 t1 Rt)
+     (vdmpy-sw-acc t0 t1 Rt)
 
-     ;(vtmpy t0 Rt)
-     ;(vtmpy-acc t0 t1 Rt)
+     (vtmpy t0 Rt)
+     (vtmpy-acc t0 t1 Rt)
 
-     ;(vrmpy t0 Rt4)
-     ;(vrmpy-acc t0 t1 Rt4)
+     (vrmpy t0 Rt4)
+     (vrmpy-acc t0 t1 Rt4)
 
-     ;(vrmpy-p t0 Rt4 (bool-const))
-     ;(vrmpy-p-acc t0 t1 Rt4 (bool-const))
+     (vrmpy-p t0 Rt4 (bool-const))
+     (vrmpy-p-acc t0 t1 Rt4 (bool-const))
      ))
   ??hvx-conv-instr)
 
@@ -149,8 +154,8 @@
     (define t0 (apply choose* registers))
     (define t1 (apply choose* registers))
     (choose*
-     (vshuffo_2 t0 t1 signed?)
-     (vpacko t0 t1 signed?)))
+     (vshuffo-n t0 t1 signed?)
+     (vpacko-n t0 t1 signed?)))
   ??hvx-hi-instr)
 
 (provide hvx-instr-limit-exceeded? hvx-instr-bnd generate-hvx-grammar increment-hvx-instr-bnd reset-hvx-instr-bnd)
