@@ -28,6 +28,7 @@
 (struct vcombine (Vu Vv) #:transparent)
 (struct vshuffe (Vu Vv) #:transparent)
 (struct vshuffo (Vu Vv) #:transparent)
+(struct vshuffo-n (Vu Vv signed?) #:transparent)
 (struct vshuffoe (Vu Vv) #:transparent)
 (struct vswap (Qt Vu Vv) #:transparent)
 (struct vmux (Qt Vu Vv) #:transparent)
@@ -43,6 +44,7 @@
 (struct vpack (Vu Vv) #:transparent)
 (struct vpacke (Vu Vv) #:transparent)
 (struct vpacko (Vu Vv) #:transparent)
+(struct vpacko-n (Vu Vv signed?) #:transparent)
 (struct vunpack (Vu) #:transparent)
 (struct vunpacko (Vu) #:transparent)
 (struct vlut (Vu Vv) #:transparent)
@@ -82,8 +84,6 @@
 (struct vasr-acc (Vd Vu Rt) #:transparent)
 (struct vasr-n (Vu Vv Rt round? sat? unsigned?) #:transparent)
 (struct vround (Vu Vv signed?) #:transparent)
-(struct vshuffo_2 (Vu Vv signed?) #:transparent)
-(struct vpacko_2 (Vu Vv signed?) #:transparent)
 
 ;; New instructions types we introduce to abstract away data-movement.
 ;; These instr types should never exist in output code.

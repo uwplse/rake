@@ -20,11 +20,44 @@
 ;; Constant weight function. Implements the crudest base-line cost model.
 (define (const-weight p)
   (match p
+    ;; HVX instructions for vector creation
     [(vread buf loc) 1]
+    [(vreadp buf loc) 1]
     [(vsplat Rt) 1]
-    [(gather* buff-reads) 1]
-    [(gather buff-reads gid) 1]
-    [(swizzle vec) 1]
+
+    ;; HVX instructions for data swizzling
+    [(lo Vuu) 1]
+    [(hi Vuu) 1]
+    [(vcombine Vu Vv) 1]
+    [(vshuffe Vu Vv) 1]
+    [(vshuffo Vu Vv) 1]
+    [(vshuffo-n Vu Vv signed?) 1]
+    [(vshuffoe Vu Vv) 1]
+    [(vswap Qt Vu Vv) 1]
+    [(vmux Qt Vu Vv) 1]
+    [(vsat Vu Vv) 1]
+    [(valign Vu Vv Rt) 1]
+    [(vlalign Vu Vv Rt) 1]
+    [(vror Vu Rt) 1]
+    [(vrotr Vu Vv) 1]
+    [(vdeal Vu) 1]
+    [(vdeale Vu Vv) 1]
+    [(vshuff Vu) 1]
+    [(vtranspose Vu Vv Rt) 1]
+    [(vpack Vu Vv) 1]
+    [(vpacke Vu Vv) 1]
+    [(vpacko Vu Vv) 1]
+    [(vpacko-n Vu Vv signed?) 1]
+    [(vunpack Vu) 1]
+    [(vunpacko Vu) 1]
+    [(vlut Vu Vv) 1]
+    [(vgather Rt Mu Vv) 1]
+
+    ;; HVX instructions for type-casting
+    [(vzxt Vu signed?) 1]
+    [(vsxt Vu signed?) 1]
+
+    ;; HVX instructions for data processing
     [(vadd Vu Vv sat?) 1]
     [(vadd-w Vu Vv) 1]
     [(vadd-w-acc Vdd Vu Vv) 1]
@@ -46,13 +79,21 @@
     [(vrmpy-acc Vd Vu Rt) 1]
     [(vrmpy-p Vuu Rt u1) 1]
     [(vrmpy-p-acc Vdd Vuu Rt u1) 1]
+    [(vavg Vu Vv rnd?) 1]
+    [(vnavg Vu Vv) 1]
+    [(vasl Vu Rt) 1]
+    [(vlsr Vu Rt) 1]
     [(vasr Vu Rt) 1]
     [(vasr-acc Vd Vu Rt) 1]
     [(vasr-n Vu Vv Rt round? sat? unsigned?) 1]
-    [(vshuffo Vd Vu) 1]
-    [(vpacko Vd Vu) 1]
-    [(vshuffo_2 Vd Vu signed?) 1]
-    [(vpacko_2 Vd Vu signed?) 1]
+    [(vround Vu Vv signed?) 1]
+
+    ;; New instructions types we introduce to abstract away data-movement.
+    ;; These instr types should never exist in output code.
+    [(gather* buff-reads) 1]
+    [(gather buff-reads gid) 1]
+    [(swizzle vec) 1]
+    
     [_ 0]))
    
 ;;; This is the most crude cost-model.
