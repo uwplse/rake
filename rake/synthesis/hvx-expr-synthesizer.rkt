@@ -24,8 +24,8 @@
        (define hvx-sub-spec (hvx-expr-spec sub-expr ir-expr-sol ir-expr-ctx ir-expr-axioms))
        (define hvx-sub-expr (synthesize-hvx-expr hvx-sub-spec))
        (display "Lifting IR to HVX...\n")
-       (display "====================\n")
-       (display (format "IR Operation: ~a\n\n" ir-expr))
+       (display "====================\n\n")
+       (display (format "IR Operation: \n\n~a\n\n" (pretty-format ir-expr)))
        (reset-hvx-instr-bnd)
        (synthesize-equiv-hvx spec sub-expr hvx-sub-expr))]
     
@@ -34,8 +34,8 @@
        (define hvx-sub-spec (hvx-expr-spec sub-expr ir-expr-sol ir-expr-ctx ir-expr-axioms))
        (define hvx-sub-expr (synthesize-hvx-expr hvx-sub-spec))
        (display "Lifting IR to HVX...\n")
-       (display "====================\n")
-       (display (format "IR Operation: ~a\n\n" ir-expr))
+       (display "====================\n\n")
+       (display (format "IR Operation: \n\n~a\n\n" (pretty-format ir-expr)))
        (reset-hvx-instr-bnd)
        (synthesize-equiv-hvx spec sub-expr hvx-sub-expr))]
 
@@ -44,8 +44,8 @@
        (define hvx-sub-spec (hvx-expr-spec sub-expr ir-expr-sol ir-expr-ctx ir-expr-axioms))
        (define hvx-sub-expr (synthesize-hvx-expr hvx-sub-spec))
        (display "Lifting IR to HVX...\n")
-       (display "====================\n")
-       (display (format "IR Operation: ~a\n\n" ir-expr))
+       (display "====================\n\n")
+       (display (format "IR Operation: \n\n~a\n\n" (pretty-format ir-expr)))
        (reset-hvx-instr-bnd)
        (synthesize-equiv-hvx spec sub-expr hvx-sub-expr))]
 
@@ -54,20 +54,20 @@
        (define hvx-sub-spec (hvx-expr-spec sub-expr ir-expr-sol ir-expr-ctx ir-expr-axioms))
        (define hvx-sub-expr (synthesize-hvx-expr hvx-sub-spec))
        (display "Lifting IR to HVX...\n")
-       (display "====================\n")
-       (display (format "IR Operation: ~a\n\n" ir-expr))
+       (display "====================\n\n")
+       (display (format "IR Operation: \n\n~a\n\n" (pretty-format ir-expr)))
        (reset-hvx-instr-bnd)
        (synthesize-equiv-hvx spec sub-expr hvx-sub-expr))]
 
     [(load-data opts)
      (begin
        (display "Lifting IR to HVX...\n")
-       (display "====================\n")
-       (display (format "IR Operation: ~a\n\n" ir-expr))
+       (display "====================\n\n")
+       (display (format "IR Operation: \n\n~a\n\n" (pretty-format ir-expr)))
        (define hvx-expr (gather* opts))
        (display "Successfully found an equivalent HVX expression.\n\n")
-       (debug (format "~a\n\n" hvx-expr))
-       (debug (format "Synthesis time: 0 seconds\n\n"))
+       (debug (format "~a\n" (pretty-format hvx-expr)))
+       (debug (format "Synthesis time: 0 seconds\n"))
        hvx-expr)]
 
     [_ (error "NYI")]))
@@ -77,10 +77,9 @@
   (if (not (hvx-instr-limit-exceeded?))
       (begin
         (display "Generating HVX Grammar...\n")
-        (display "=========================\n")
-        (debug (format "Number of instructions: ~a\n" (hvx-instr-bnd)))
-        (debug (format "Set of instructions: Specialized\n\n"))
-
+        (debug (format "Number of instructions: ~a" (hvx-instr-bnd)))
+        (debug (format "Set of instructions: Specialized\n"))
+        
         (define ??hvx-expr-grm (generate-hvx-grammar (hvx-expr-spec-expr spec) sub-expr hvx-sub-expr))
         (define st (current-seconds))
         (define res (synthesize-optimal spec ??hvx-expr-grm basic-expr-cost hvx-sub-expr))
@@ -137,12 +136,12 @@
     [(unsat? sol) (cond
                     [(void? curr-best-sol) sol]
                     [else (display (format "Failed to find an equivalent HVX expression with cost lower than ~a.\n\n" curr-best-cost))
-                          (debug (format "Synthesis time: ~a seconds\n\n" runtime))
+                          (debug (format "Synthesis time: ~a seconds\n" runtime))
                           curr-best-sol])]
     [else (display "Successfully found an equivalent HVX expression.\n\n")
-          (debug (format "~a\n\n" (evaluate synthesized-hvx-expr sol)))
-          (debug (format "Expression cost: ~a\n\n" (cost-model (evaluate synthesized-hvx-expr sol))))
-          (debug (format "Synthesis time: ~a seconds\n\n" runtime))
+          (debug (format "~a\n" (pretty-format (evaluate synthesized-hvx-expr sol))))
+          (debug (format "Expression cost: ~a\n" (cost-model (evaluate synthesized-hvx-expr sol))))
+          (debug (format "Synthesis time: ~a seconds\n" runtime))
           (display "Searching for a more optimal solution...\n\n")
           (synthesize-optimal spec ??hvx-expr-grm cost-model hvx-sub-expr (evaluate synthesized-hvx-expr sol))]))
 
