@@ -15,20 +15,35 @@
 
 (require rake/synthesis/grammar/swizzle)
 
-(define (synthesize-swizzles halide-spec hvx-expr-sketch ctx axioms)
-  (display "Synthesizing Data Swizzles...\n")
-  (display "=============================\n\n")
+(define (synthesize-swizzles halide-spec hvx-expr-sketch ctx axioms [mode 'incremental])
+  (display "Synthesizing Data Swizzle Spec...\n")
+  (display "=================================\n\n")
 
   (display "Synthesizing spec...\n\n")
 
   ;; The visitor clones each node in the AST, converting it from a graph to a tree
-  (define gather-id 0)
+  (define next-id 0)
   (define (iden node)
     (match node
-      [(gather* opts) (set! gather-id (add1 gather-id)) (gather opts gather-id)]
+      [(gather* opts) (set! next-id (add1 next-id)) (gather opts next-id)]
       [_ node]))
   (set! hvx-expr-sketch (visit-hvx hvx-expr-sketch iden))
 
+  ;; Synthesize a hash-table spec
+  (define-values (sketch-is-correct? hvx-expr-spec) (synthesize-swizzle-spec halide-spec hvx-expr-sketch axioms ctx))
+
+  ;; Synthesize instructions
+  (when sketch-is-correct?
+    (display "Synthesizing Swizzle implementations...\n")
+    (display "=======================================\n\n")
+
+    (define starting-vecs (extract-loads-as-hvx-vecs halide-spec))
+    
+    (cond
+      [(eq? mode 'one-shot) (synthesize-impl-oneshot starting-vecs hvx-expr-sketch hvx-expr-spec axioms ctx)]
+      [(eq? mode 'incremental) (synthesize-impl-incremental starting-vecs hvx-expr-sketch hvx-expr-spec axioms ctx)])))
+
+(define (synthesize-swizzle-spec halide-spec hvx-expr-sketch axioms ctx)
   (define VEC_LANES (num-elems-hal halide-spec))
   
   (hash-clear! hvx-gather-tables)
@@ -57,16 +72,15 @@
                             #:guarantee (lane-eq? interpreted-o-expr interpreted-s-expr lane)))
     (set! sols (append sols (list sol))))
   (define runtime (- (current-seconds) st))
+  
   (define correct? (not (for/or ([sol sols]) (unsat? sol))))
 
   (display (if correct? "Successfull!\n\n" "Failed.\n\n"))
-  
-  (debug (format "Synthesis time: ~a seconds\n\n" runtime))
+  (display (format "Synthesis time: ~a seconds\n\n" runtime))
 
+  (define hvx-expr-spec (void))
   (when correct?
-
-    (display "Synthesizing instructions...\n\n")
-    
+    ;; Prepare synthesis spec
     (define tbls (set->list (list->set (flatten (for/list ([sol sols]) (hash-keys (model sol)))))))
     (define (repl-gather-with-swizzle-spec node)
       (match node
@@ -79,68 +93,166 @@
            [(and (set-member? tbls (car gather-tbls)))
             (serve-vec (car gather-tbls) oType opts sols)])]
         [_ node]))
-    (define hvx-expr-spec (visit-hvx hvx-expr-sketch repl-gather-with-swizzle-spec))
-
-    ;; Synthesize swizzle instructions
-    (define starting-vecs (extract-loads-as-hvx-vecs halide-spec))
-    (define (repl-gather-with-swizzle-grm node)
-      (match node
-        [(gather opts gid) (??hvx-swizzle-expr starting-vecs)]
-        [_ node]))
-    (define hvx-expr-grm (visit-hvx hvx-expr-sketch repl-gather-with-swizzle-grm))  
-
-    ;(define interpreted-o-expr (interpret-halide halide-spec))
-    (define interpreted-o-expr (interpret-hvx hvx-expr-spec))
-    (define interpreted-f-expr (interpret-hvx hvx-expr-grm))
-
-    (define (hvx-vec-eq? oe se)
-      (define N (num-elems-hvx se))
-      (cond
-        [(hvx-pair? se)
-         (for ([lane 4])
-           (set-curr-cn-hvx lane)
-           (assert (eq? (v0-elem-hvx oe lane) (v0-elem-hvx se lane))))
-         (for ([lane (in-range (- (quotient N 2) 4) (quotient N 2))])
-           (set-curr-cn-hvx lane)
-           (assert (eq? (v0-elem-hvx oe lane) (v0-elem-hvx se lane))))
-         (for ([lane (in-range (quotient N 2) (+ (quotient N 2) 4))])
-           (set-curr-cn-hvx lane)
-           (assert (eq? (v1-elem-hvx oe (- lane (quotient N 2))) (v1-elem-hvx se (- lane (quotient N 2))))))
-         (for ([lane (in-range (- N 4) N)])
-           (set-curr-cn-hvx lane)
-           (assert (eq? (v1-elem-hvx oe (- lane (quotient N 2))) (v1-elem-hvx se (- lane (quotient N 2))))))]
-        [else
-         (for ([lane 4])
-           (assert (eq? (elem-hvx oe lane) (elem-hvx se lane))))
-         (for ([lane (in-range (- N 4) N)])
-           (assert (eq? (elem-hvx oe lane) (elem-hvx se lane))))]))
-    
-    (clear-asserts!)
-    (for ([axiom axioms]) (assert axiom))
-    (define st (current-seconds))
-    (define sol (synthesize #:forall ctx
-                            #:guarantee (hvx-vec-eq? interpreted-o-expr interpreted-f-expr)))
-    (println (unsat? sol))
-    (define runtime (- (current-seconds) st))
-
-    (debug (format "~a\n" (evaluate hvx-expr-grm sol)))
-    
-    (debug (format "\nSwizzle Synthesis time: ~a seconds\n\n" runtime))
+    (set! hvx-expr-spec (visit-hvx hvx-expr-sketch repl-gather-with-swizzle-spec)))
   
-    (if (unsat? sol) sol (evaluate hvx-expr-grm sol))))
+  (values correct? hvx-expr-spec))
 
-    ;(println hvx-expr-spec)
-    ;(println hvx-expr-grm)
-  
-    ;(set-curr-cn-hvx 0)
-    ;(println (v0-elem-hvx interpreted-o-expr 0))
-    ;(set-curr-cn-hvx 1)
-    ;(println (v0-elem-hvx  interpreted-o-expr 1))
-  
-    ;(println (v0-elem-hvx (interpret-hvx hvx-expr-grm) 0))
+(define (hvx-vec-eq? oe se)
+  (define N (num-elems-hvx se))
+  (cond
+    [(hvx-pair? se)
+     (for ([lane 2])
+       (set-curr-cn-hvx lane)
+       (assert (eq? (v0-elem-hvx oe lane) (v0-elem-hvx se lane))))
+     (for ([lane (in-range (- (quotient N 2) 2) (quotient N 2))])
+       (set-curr-cn-hvx lane)
+       (assert (eq? (v0-elem-hvx oe lane) (v0-elem-hvx se lane))))
+     (for ([lane (in-range (quotient N 2) (+ (quotient N 2) 2))])
+       (set-curr-cn-hvx lane)
+       (assert (eq? (v1-elem-hvx oe (- lane (quotient N 2))) (v1-elem-hvx se (- lane (quotient N 2))))))
+     (for ([lane (in-range (- N 2) N)])
+       (set-curr-cn-hvx lane)
+       (assert (eq? (v1-elem-hvx oe (- lane (quotient N 2))) (v1-elem-hvx se (- lane (quotient N 2))))))]
+    [else
+     (for ([lane 2])
+       (set-curr-cn-hvx lane)
+       (assert (eq? (elem-hvx oe lane) (elem-hvx se lane))))
+     (for ([lane (in-range 63 65)])
+       (set-curr-cn-hvx lane)
+       (assert (eq? (elem-hvx oe lane) (elem-hvx se lane))))
+     (for ([lane (in-range (- N 2) N)])
+       (set-curr-cn-hvx lane)
+       (assert (eq? (elem-hvx oe lane) (elem-hvx se lane))))]))
+
+(define (synthesize-impl-oneshot starting-vecs hvx-expr-sketch hvx-expr-spec axioms ctx)
+  ;; Replace all swizzle nodes with swizzle grammar
+  (define (repl-gather-with-swizzle-grm node)
+    (match node
+      [(gather opts gid) (??hvx-swizzle-expr starting-vecs)]
+      [_ node]))
+  (define hvx-expr-grm (visit-hvx hvx-expr-sketch repl-gather-with-swizzle-grm))  
+
+  (define interpreted-o-expr (interpret-hvx hvx-expr-spec))
+  (define interpreted-f-expr (interpret-hvx hvx-expr-grm))
     
-    ;(println (v0-elem-hvx (interpret-hvx hvx-expr-grm) 1))
+  (clear-asserts!)
+  (for ([axiom axioms]) (assert axiom))
+  (define st (current-seconds))
+  (define sol (synthesize #:forall ctx
+                          #:guarantee (hvx-vec-eq? interpreted-o-expr interpreted-f-expr)))
+  (println (unsat? sol))
+  (define runtime (- (current-seconds) st))
 
+  (display (format "~a\n" (evaluate hvx-expr-grm sol)))
+    
+  (display (format "\nSwizzle Synthesis time: ~a seconds\n\n" runtime))
+  
+  (if (unsat? sol) sol (evaluate hvx-expr-grm sol)))
+
+(define (synthesize-impl-incremental starting-vecs hvx-expr-sketch hvx-expr-spec axioms ctx)
+  ;; Extract set of swizzle nodes to be synthesized
+  (define swizzle-nodes (list))
+  (define (register-gather-node node)
+    (match node
+      [(gather opts gid) (set! swizzle-nodes (append (list node) swizzle-nodes)) node]
+      [_ node]))
+  (visit-hvx hvx-expr-sketch register-gather-node)
+    
+  ;; Synthesize an implementation for each swizzle node incrementally
+  (dynamically-synthesize-swizzle-nodes swizzle-nodes starting-vecs hvx-expr-sketch hvx-expr-spec axioms ctx (list)))
+
+(define (dynamically-synthesize-swizzle-nodes swizzle-nodes starting-vecs hvx-expr-sketch hvx-expr-spec axioms ctx discarded-sols)
+  (cond
+    [(empty? swizzle-nodes)
+     (display "Implementations found for all swizzle nodes! Wohoo!\n\n")
+     (display (format "Final expression: \n\n~a\n\n" (pretty-format hvx-expr-sketch)))
+     (values #t hvx-expr-sketch)]
+    [else
+     ;; Synthesize an implementation for the first node in the list 
+     (define swizzle-node (first swizzle-nodes))
+  
+     (display (format "## Swizzle node id: ~a\n\n" (gather-id swizzle-node)))
+  
+     (reset-swizzle-instr-bnd)
+     (define-values (node-impl-found? updated-hvx-expr-sketch)
+       (synthesize-swizzle-impl swizzle-node starting-vecs hvx-expr-sketch hvx-expr-spec axioms ctx discarded-sols))
+  
+     (cond
+       [node-impl-found?
+        (define-values (successful? complete-expr)
+          (dynamically-synthesize-swizzle-nodes (cdr swizzle-nodes) starting-vecs updated-hvx-expr-sketch hvx-expr-spec axioms ctx (list)))
+        (cond
+          [successful? (values #t complete-expr)]
+          [else
+           (display (format "\nBacktracking. Attempting to synthesize a different implementation for swizzle node with id: ~a\n\n" (gather-id swizzle-node)))
+           (dynamically-synthesize-swizzle-nodes swizzle-nodes starting-vecs hvx-expr-sketch hvx-expr-spec axioms ctx (append (list updated-hvx-expr-sketch) discarded-sols))])]
+       [else (values #f (unsat))])]))
+
+(define (synthesize-swizzle-impl swizzle-node starting-vecs hvx-expr-sketch hvx-expr-spec axioms ctx discarded-sols)
+  (if (swizzle-instr-bnd-exceeded?)
+      (begin
+        (display "Max instruction bound exceeded.\n")
+        (values #f (unsat)))
+      (begin
+        (display (format "Number of instructions allowed: ~a\n\n" (get-swizzle-instr-bnd)))
+            
+        ;; Replace swizzle node with swizzle grammar
+        (define (repl-gather-with-swizzle-grm node)
+          (match node
+            [(gather opts gid) (if (equal? gid (gather-id swizzle-node)) (??hvx-swizzle-expr starting-vecs) node)]
+            [_ node]))
+        (define hvx-expr-grm (visit-hvx hvx-expr-sketch repl-gather-with-swizzle-grm))
+
+        (define interpreted-o-expr (interpret-hvx hvx-expr-spec))
+        (define interpreted-f-expr (interpret-hvx hvx-expr-grm))
+
+        ;(pretty-print hvx-expr-grm)
+;
+;        (set-curr-cn-hvx 0)
+;        (pretty-print (elem-hvx interpreted-o-expr 0))
+;        (pretty-print (elem-hvx interpreted-f-expr 0))
+;        (set-curr-cn-hvx 64)
+;        (pretty-print (elem-hvx interpreted-o-expr 64))
+;        (pretty-print (elem-hvx interpreted-f-expr 64))
+
+        (clear-asserts!)
+        (for ([axiom axioms]) (assert axiom))
+        (define st (current-seconds))
+        (define sol (synthesize #:forall ctx
+                                #:guarantee (begin
+                                              (hvx-vec-eq? interpreted-o-expr interpreted-f-expr)
+                                              (for ([discarded-sol discarded-sols])
+                                                (assert (not (equal-hvx? discarded-sol hvx-expr-grm)))))))
+        (define runtime (- (current-seconds) st))
+        
+        (cond
+          [(unsat? sol)
+           (display "Could not find implementation. Increasing recursive bound.\n\n")
+           (display (format "Synthesis time: ~a seconds\n\n" runtime))
+           (incr-swizzle-instr-bnd)
+           (synthesize-swizzle-impl swizzle-node starting-vecs hvx-expr-sketch hvx-expr-spec axioms ctx discarded-sols)]
+          [else
+           (display "Swizzle node implementation found!\n\n")
+           (display (format "~a\n\n" (pretty-format (evaluate hvx-expr-grm sol))))
+           (display (format "Synthesis time: ~a seconds\n\n" runtime))
+           (values #t (evaluate hvx-expr-grm sol))]))))
+
+(define (equal-hvx? expr1 expr2)
+  ;(display (format "Comparing ~a with ~a\n\n" expr1 expr2))
+  (match (cons expr1 expr2)
+    [(cons (vmpy-acc Vdd0 Vu0 Rt0) (vmpy-acc Vdd1 Vu1 Rt1)) (and (equal-hvx? Vdd0 Vdd1) (equal-hvx? Vu0 Vu1) (equal-hvx? Rt0 Rt1))]
+    [(cons (vmpa-acc Vdd0 Vuu0 Rt0) (vmpa-acc Vdd1 Vuu1 Rt1)) (and (equal-hvx? Vdd0 Vdd1) (equal-hvx? Vuu0 Vuu1) (equal-hvx? Rt0 Rt1))]
+    [(cons (vmpa Vuu0 Rt0) (vmpa Vuu1 Rt1)) (and (equal-hvx? Vuu0 Vuu1) (equal-hvx? Rt0 Rt1))]
+
+    ;; Compare Swizzles
+    [(cons (vshuff Vu0) (vshuff Vu1)) (equal-hvx? Vu0 Vu1)]
+    [(cons (gather _ _) (gather _ _)) #t]
+    
+    ;; Compare scalar registers
+    [(cons (cons (int8_t v0) (int8_t v1)) (cons (int8_t v2) (int8_t v3))) (and (equal? v0 v2) (equal? v1 v3))]
+    
+    [_ (equal? expr1 expr2)]))
+  
 ;    (define (vec-eq? oe se)
 ;      (define N (num-elems-hvx se))
 ;      (cond
@@ -174,14 +286,14 @@
 ;       (define gather-tbls (hash-ref hvx-gather-tables gid))
 ;       (define oType (evaluate (hash-ref hvx-gather-types gid) (list-ref sols 0)))
 ;       (cond
-         ;[(and (set-member? tbls (car gather-tbls)) (set-member? tbls (cdr gather-tbls)))
+;[(and (set-member? tbls (car gather-tbls)) (set-member? tbls (cdr gather-tbls)))
 ;          (serve-vec-pair (car gather-tbls) (cdr gather-tbls) oType  opts sols)]
 ;         [(and (set-member? tbls (car gather-tbls)))
 ;          (serve-vec (car gather-tbls) oType opts sols)])]
 
 
 ;; Extract the set of buffer reads
-  ;(set! mem-map (encode-data halide-spec))
+;(set! mem-map (encode-data halide-spec))
 
 ;(define (encode-data p)
 ;  (define buff-reads (extract-buf-reads-hal p))
