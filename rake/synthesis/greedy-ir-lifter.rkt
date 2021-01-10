@@ -17,7 +17,7 @@
 
 (define (synthesize-ir-expr-greedy halide-expr axioms)
   (display "Lifting input expression to IR...\n")
-  (display "=================================\n")
+  (display "=================================\n\n")
 
   ;; Extract the set of buffer reads
   (define buff-reads (extract-buf-reads-hal halide-expr))
@@ -32,8 +32,8 @@
         (debug (format "Synthesis time: ~a seconds\n\n" runtime)))
       (begin
         (display "Successfully found an equivalent IR expression.\n\n")
-        (debug (format "~a\n\n" (car res)))
-        (debug (format "Synthesis time: ~a seconds\n\n" runtime))
+        (debug (car res))
+        (debug (format "\nSynthesis time: ~a seconds\n" runtime))
         res)))
 
 ;; Define bottom-up synthesis loop for ir-expr generation
@@ -61,10 +61,54 @@
       ;[(ramp buf base stride len) (cons (load-data buff-reads) (model))]
 
       ;; Shuffles
-      ;[(slice_vectors vec base stride len) (lambda (i) ((interpret vec) (+ (interpret base) (* i (interpret stride)))))]
-      ;[(concat_vectors v1 v2) (lambda (i) (if (< i (num-elems-hal v1)) ((interpret v1) i) ((interpret v2) (- i (num-elems-hal v1)))))]
-
       [(dynamic_shuffle vec idxs st end) (cons (load-data buff-reads) (model))]
+
+      [(slice_vectors vec base stride len)
+       (define lifted-vec (car (synthesize-ir-expr vec buff-reads axioms)))
+
+       (define ir-expr (unsat))
+       
+       (when (load-data? lifted-vec)
+         (set! ir-expr (cons (load-data buff-reads) (model))))
+       
+       ;; Try folding into sub-expr
+       (when (unsat? ir-expr)
+         (set! ir-expr (fold-into-subexpr lifted-vec halide-expr axioms add-consts sub-consts mul-consts div-consts)))
+       
+       (when (unsat? ir-expr)
+         (error "NYI: extend ir-expr when encountering slice_vectors" ir-expr))
+
+       ;; Return synthesized expr
+       (if (not (unsat? ir-expr))
+           ir-expr
+           (error "Could not lift" halide-expr))]
+
+      [(concat_vectors v1 v2)
+       (define lifted-v1 (car (synthesize-ir-expr v1 buff-reads axioms)))
+       (define lifted-v2 (car (synthesize-ir-expr v2 buff-reads axioms)))
+
+       (define ir-expr (unsat))
+       
+       (when (and (load-data? lifted-v1) (load-data? lifted-v2))
+         (set! ir-expr (cons (load-data buff-reads) (model))))
+       
+       ;; Try folding into lhs sub-expr
+       (when (unsat? ir-expr)
+         (set! ir-expr (fold-into-subexpr lifted-v1 halide-expr axioms add-consts sub-consts mul-consts div-consts)))
+       
+       ;; If that didn't work, try folding into rhs sub-expr
+       (when (unsat? ir-expr)
+         (set! ir-expr (fold-into-subexpr lifted-v2 halide-expr axioms add-consts sub-consts mul-consts div-consts)))
+       
+       ;; If that didn't work, extend the ir-expr with a new instruction
+       (define sub-expr (choose* lifted-v1 lifted-v2))
+       (when (unsat? ir-expr)
+         (error "NYI: extend ir-expr when encountering concat_vec" ir-expr))
+
+       ;; Return synthesized expr
+       (if (not (unsat? ir-expr))
+           ir-expr
+           (error "Could not lift" halide-expr))]
       
       ;; Type Casts
       ;[(uint8x32 vec) (lambda (i) (cpp-cast ((interpret vec) i) 'uint8))]
@@ -72,7 +116,7 @@
       [(uint8x128 vec)
        (define lifted-vec (car (synthesize-ir-expr vec buff-reads axioms)))
        (define lifted-sub-exprs (get-subexpr-list lifted-vec))
-       
+
        ;; Try to fold the expr into the ir sub-expr
        (define ir-expr (rec-fold (reverse lifted-sub-exprs) halide-expr axioms add-consts sub-consts mul-consts div-consts))
 
@@ -211,6 +255,18 @@
          (define conv-op (convolve sub-expr kernel saturation-func output-type))
          (set! ir-expr (run-synthesizer halide-expr conv-op axioms)))
 
+       ;; If even that did not work, extend the ir-expr with a new instruction
+       (set! sub-expr (choose* lifted-v1 lifted-v2))
+       (when (unsat? ir-expr)
+         (define weights (if (empty? mul-consts) (list (void)) (list (apply choose* mul-consts))))
+         (define saturation-func nop)
+         (define output-type (type ((interpret-halide halide-expr) 0)))
+         (define radius 1)
+         (define ktype WMT_GENERAL)
+         (define kernel (weight-matrix radius (take weights radius) ktype))
+         (define conv-op (convolve sub-expr kernel saturation-func output-type))
+         (set! ir-expr (run-synthesizer halide-expr conv-op axioms)))
+       
        (if (not (unsat? ir-expr))
            ir-expr
            (error "Could not lift" halide-expr))]
@@ -268,7 +324,7 @@
     
       ;; Base case
       [_ (error "NGL, did not expect" halide-expr)]))
-
+  
   ;(debug (format "Expr so far: ~a\n" lifted-expr))
   ;(debug (format "Exiting ~a\n" halide-expr))
 
@@ -279,12 +335,19 @@
   (define int-shiftr-gen (get-generator-func (map log2 (filter pow2? div-consts))))
   
   (define outT (type ((interpret-halide halide-expr) 0)))
+
+  ;(println "\n====================")
+  ;(println (format "Curent expr: ~a" lifted-sub-expr))
+  ;(println (format "Fold expr: ~a with type ~a" halide-expr outT))
   
   (define synthesized-expr (match lifted-sub-expr
                              [(load-data opts) lifted-sub-expr]
                              [(broadcast sca) (broadcast sca)]
                              [(cast sub-expr type) (cast sub-expr outT)]
-                             [(arith-shift-right sub-expr n round? output-type) (arith-shift-right sub-expr (int-shiftr-gen) (choose* #t #f) outT)]
+                             [(arith-shift-right sub-expr n round? output-type)
+                              (choose*
+                               (arith-shift-right sub-expr (int-shiftr-gen) (choose* #t #f) outT)
+                               (packhi sub-expr (signedT? outT)))]
                              [(const-add sub-expr const-val saturation-func output-type)
                               (define saturation-func (choose* nop (cond [(eq? outT 'int8) sat8] [(eq? outT 'uint8) satu8] [(eq? outT 'int16) sat16] [(eq? outT 'uint16) satu16])))
                               (define output-type (cond
@@ -340,7 +403,7 @@
       (assert (eq? (oe i) (elem-ir se i)))
       (set-curr-cn-ir (+ i (/ VEC_LANES 2) 1))
       (assert (eq? (oe (+ i (/ VEC_LANES 2) 1)) (elem-ir se (+ i (/ VEC_LANES 2) 1))))))
-
+  
   ;; Synthesize expression
   (clear-asserts!)
   (for ([axiom axioms]) (assert axiom))
