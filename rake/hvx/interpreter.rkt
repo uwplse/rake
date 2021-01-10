@@ -23,8 +23,8 @@
 
     ;;;;;;;;;;;;;;;; Instructions for data movement ;;;;;;;;;;;;;;;;
     
-    [(lo Vuu) (v0 (interpret Vuu))]
-    [(hi Vuu) (v1 (interpret Vuu))]
+    [(lo Vuu) (when (hvx-pair? (interpret Vuu)) (v0 (interpret Vuu)))]
+    [(hi Vuu) (when (hvx-pair? (interpret Vuu)) (v1 (interpret Vuu)))]
 
     [(vcombine Vu Vv)
      (match (list (interpret Vu) (interpret Vv))
@@ -55,6 +55,18 @@
        [(list (u8x128 v0) (u8x128 v1)) (u8x128 (lambda (i) (if (even? i) (v1 (+ i 1)) (v0 i))))]
        [(list (i16x64 v0) (i16x64 v1)) (i16x64 (lambda (i) (if (even? i) (v1 (+ i 1)) (v0 i))))]
        [(list (u16x64 v0) (u16x64 v1)) (u16x64 (lambda (i) (if (even? i) (v1 (+ i 1)) (v0 i))))])]
+
+    ;; Extract n/2 bits
+    [(vshuffo-n Vd Vu signed?)
+     (match (list (interpret Vd) (interpret Vu) (interpret signed?))
+       [(list (i16x64 v0) (i16x64 v1) #t) (i8x128 (lambda (i) (if (even? i) (i8hi (v1 (quotient i 2))) (i8hi (v0 (quotient i 2))))))]
+       [(list (i16x64 v0) (i16x64 v1) #f) (u8x128 (lambda (i) (if (even? i) (u8hi (v1 (quotient i 2))) (u8hi (v0 (quotient i 2))))))]
+       [(list (u16x64 v0) (u16x64 v1) #t) (i8x128 (lambda (i) (if (even? i) (i8hi (v1 (quotient i 2))) (i8hi (v0 (quotient i 2))))))]
+       [(list (u16x64 v0) (u16x64 v1) #f) (u8x128 (lambda (i) (if (even? i) (u8hi (v1 (quotient i 2))) (u8hi (v0 (quotient i 2))))))]
+       [(list (i32x32 v0) (i32x32 v1) #t) (i16x64 (lambda (i) (if (even? i) (i16hi (v1 (quotient i 2))) (i16hi (v0 (quotient i 2))))))]
+       [(list (i32x32 v0) (i32x32 v1) #f) (u16x64 (lambda (i) (if (even? i) (u16hi (v1 (quotient i 2))) (u16hi (v0 (quotient i 2))))))]
+       [(list (u32x32 v0) (u32x32 v1) #t) (i16x64 (lambda (i) (if (even? i) (i16hi (v1 (quotient i 2))) (i16hi (v0 (quotient i 2))))))]
+       [(list (u32x32 v0) (u32x32 v1) #f) (u16x64 (lambda (i) (if (even? i) (u16hi (v1 (quotient i 2))) (u16hi (v0 (quotient i 2))))))])]
 
     [(vshuffoe Vu Vv)
      (match (list (interpret Vu) (interpret Vv))
@@ -91,30 +103,30 @@
 
     [(vror Vu Rt)
      (match (interpret Vu)
-       [(i8x128 v0) (i8x128 (lambda (i) (v0 (let ([idx (+ i Rt)]) (if (< idx 128) idx (- idx 128))))))]
-       [(u8x128 v0) (u8x128 (lambda (i) (v0 (let ([idx (+ i Rt)]) (if (< idx 128) idx (- idx 128))))))]
-       [(i16x64 v0) (i16x64 (lambda (i) (v0 (let ([idx (+ i Rt)]) (if (< idx 64) idx (- idx 64))))))]
-       [(u16x64 v0) (u16x64 (lambda (i) (v0 (let ([idx (+ i Rt)]) (if (< idx 64) idx (- idx 64))))))]
-       [(i32x32 v0) (i32x32 (lambda (i) (v0 (let ([idx (+ i Rt)]) (if (< idx 32) idx (- idx 32))))))]
-       [(u32x32 v0) (u32x32 (lambda (i) (v0 (let ([idx (+ i Rt)]) (if (< idx 32) idx (- idx 32))))))])]
+       [(i8x128 v0) (i8x128 (lambda (i) (assert (<= 0 Rt 126)) (v0 (let ([idx (+ i Rt)]) (if (< idx 128) idx (- idx 127))))))]
+       [(u8x128 v0) (u8x128 (lambda (i) (assert (<= 0 Rt 126)) (v0 (let ([idx (+ i Rt)]) (if (< idx 128) idx (- idx 127))))))]
+       [(i16x64 v0) (i16x64 (lambda (i) (assert (<= 0 Rt 62)) (v0 (let ([idx (+ i Rt)]) (if (< idx 64) idx (- idx 63))))))]
+       [(u16x64 v0) (u16x64 (lambda (i) (assert (<= 0 Rt 62)) (v0 (let ([idx (+ i Rt)]) (if (< idx 64) idx (- idx 63))))))]
+       [(i32x32 v0) (i32x32 (lambda (i) (assert (<= 0 Rt 30)) (v0 (let ([idx (+ i Rt)]) (if (< idx 32) idx (- idx 31))))))]
+       [(u32x32 v0) (u32x32 (lambda (i) (assert (<= 0 Rt 30)) (v0 (let ([idx (+ i Rt)]) (if (< idx 32) idx (- idx 31))))))])]
 
     [(valign Vu Vv Rt)
      (match (list (interpret Vu) (interpret Vv))
-       [(list (i8x128 v0) (i8x128 v1)) (i8x128 (lambda (i) (if (< i (- 128 Rt)) (v1 (+ i Rt)) (v0 (modulo (+ i Rt) 128)))))]
-       [(list (u8x128 v0) (u8x128 v1)) (u8x128 (lambda (i) (if (< i (- 128 Rt)) (v1 (+ i Rt)) (v0 (modulo (+ i Rt) 128)))))]
-       [(list (i16x64 v0) (i16x64 v1)) (i16x64 (lambda (i) (if (< i (- 64 Rt)) (v1 (+ i Rt)) (v0 (modulo (+ i Rt) 64)))))]
-       [(list (u16x64 v0) (u16x64 v1)) (u16x64 (lambda (i) (if (< i (- 64 Rt)) (v1 (+ i Rt)) (v0 (modulo (+ i Rt) 64)))))]
-       [(list (i32x32 v0) (i32x32 v1)) (i32x32 (lambda (i) (if (< i (- 32 Rt)) (v1 (+ i Rt)) (v0 (modulo (+ i Rt) 32)))))]
-       [(list (u32x32 v0) (u32x32 v1)) (u32x32 (lambda (i) (if (< i (- 32 Rt)) (v1 (+ i Rt)) (v0 (modulo (+ i Rt) 32)))))])]
+       [(list (i8x128 v0) (i8x128 v1)) (i8x128 (lambda (i) (assert (<= 0 Rt 127)) (if (< i (- 128 Rt)) (v1 (+ i Rt)) (v0 (modulo (+ i Rt) 128)))))]
+       [(list (u8x128 v0) (u8x128 v1)) (u8x128 (lambda (i) (assert (<= 0 Rt 127)) (if (< i (- 128 Rt)) (v1 (+ i Rt)) (v0 (modulo (+ i Rt) 128)))))]
+       [(list (i16x64 v0) (i16x64 v1)) (i16x64 (lambda (i) (assert (<= 0 Rt 63)) (if (< i (- 64 Rt)) (v1 (+ i Rt)) (v0 (modulo (+ i Rt) 64)))))]
+       [(list (u16x64 v0) (u16x64 v1)) (u16x64 (lambda (i) (assert (<= 0 Rt 63)) (if (< i (- 64 Rt)) (v1 (+ i Rt)) (v0 (modulo (+ i Rt) 64)))))]
+       [(list (i32x32 v0) (i32x32 v1)) (i32x32 (lambda (i) (assert (<= 0 Rt 31)) (if (< i (- 32 Rt)) (v1 (+ i Rt)) (v0 (modulo (+ i Rt) 32)))))]
+       [(list (u32x32 v0) (u32x32 v1)) (u32x32 (lambda (i) (assert (<= 0 Rt 31)) (if (< i (- 32 Rt)) (v1 (+ i Rt)) (v0 (modulo (+ i Rt) 32)))))])]
     
     [(vlalign Vu Vv Rt)
      (match (list (interpret Vu) (interpret Vv))
-       [(list (i8x128 v0) (i8x128 v1)) (i8x128 (lambda (i) (if (< i Rt) (v1 (+ (- 128 Rt) i)) (v0 (- i Rt)))))]
-       [(list (u8x128 v0) (u8x128 v1)) (u8x128 (lambda (i) (if (< i Rt) (v1 (+ (- 128 Rt) i)) (v0 (- i Rt)))))]
-       [(list (i16x64 v0) (i16x64 v1)) (i16x64 (lambda (i) (if (< i Rt) (v1 (+ (- 64 Rt) i)) (v0 (- i Rt)))))]
-       [(list (u16x64 v0) (u16x64 v1)) (u16x64 (lambda (i) (if (< i Rt) (v1 (+ (- 64 Rt) i)) (v0 (- i Rt)))))]
-       [(list (i32x32 v0) (i32x32 v1)) (i32x32 (lambda (i) (if (< i Rt) (v1 (+ (- 32 Rt) i)) (v0 (- i Rt)))))]
-       [(list (u32x32 v0) (u32x32 v1)) (u32x32 (lambda (i) (if (< i Rt) (v1 (+ (- 32 Rt) i)) (v0 (- i Rt)))))])]
+       [(list (i8x128 v0) (i8x128 v1)) (i8x128 (lambda (i) (assert (<= 0 Rt 127)) (if (< i Rt) (v1 (+ (- 128 Rt) i)) (v0 (- i Rt)))))]
+       [(list (u8x128 v0) (u8x128 v1)) (u8x128 (lambda (i) (assert (<= 0 Rt 127)) (if (< i Rt) (v1 (+ (- 128 Rt) i)) (v0 (- i Rt)))))]
+       [(list (i16x64 v0) (i16x64 v1)) (i16x64 (lambda (i) (assert (<= 0 Rt 63)) (if (< i Rt) (v1 (+ (- 64 Rt) i)) (v0 (- i Rt)))))]
+       [(list (u16x64 v0) (u16x64 v1)) (u16x64 (lambda (i) (assert (<= 0 Rt 63)) (if (< i Rt) (v1 (+ (- 64 Rt) i)) (v0 (- i Rt)))))]
+       [(list (i32x32 v0) (i32x32 v1)) (i32x32 (lambda (i) (assert (<= 0 Rt 31)) (if (< i Rt) (v1 (+ (- 32 Rt) i)) (v0 (- i Rt)))))]
+       [(list (u32x32 v0) (u32x32 v1)) (u32x32 (lambda (i) (assert (<= 0 Rt 31)) (if (< i Rt) (v1 (+ (- 32 Rt) i)) (v0 (- i Rt)))))])]
     
     ;(struct vswap (Qt Vu Vv) #:transparent)
     ;(struct vmux (Qt Vu Vv) #:transparent)
@@ -522,28 +534,16 @@
        [(list (i32x32 v0) (i32x32 v1) #f) (u16x64 (lambda (i) (satu16 (if (even? i) (round (v1 (quotient i 2))) (round (v0 (quotient i 2)))))))]
        [(list (u32x32 v0) (u32x32 v1) _)  (u16x64 (lambda (i) (satu16 (if (even? i) (round (v1 (quotient i 2))) (round (v0 (quotient i 2)))))))])]
 
-    ;; Extract n/2 bits
-    [(vshuffo_2 Vd Vu signed?)
+    [(vpacko-n Vd Vu signed?)
      (match (list (interpret Vd) (interpret Vu) (interpret signed?))
-       [(list (i16x64 v0) (i16x64 v1) #t) (i8x128 (lambda (i) (if (even? i) (i8hi (v1 (quotient i 2))) (i8hi (v0 (quotient i 2))))))]
-       [(list (i16x64 v0) (i16x64 v1) #f) (u8x128 (lambda (i) (if (even? i) (u8hi (v1 (quotient i 2))) (u8hi (v0 (quotient i 2))))))]
-       [(list (u16x64 v0) (u16x64 v1) #t) (i8x128 (lambda (i) (if (even? i) (i8hi (v1 (quotient i 2))) (i8hi (v0 (quotient i 2))))))]
-       [(list (u16x64 v0) (u16x64 v1) #f) (u8x128 (lambda (i) (if (even? i) (u8hi (v1 (quotient i 2))) (u8hi (v0 (quotient i 2))))))]
-       [(list (i32x32 v0) (i32x32 v1) #t) (i16x64 (lambda (i) (if (even? i) (i16hi (v1 (quotient i 2))) (i16hi (v0 (quotient i 2))))))]
-       [(list (i32x32 v0) (i32x32 v1) #f) (u16x64 (lambda (i) (if (even? i) (u16hi (v1 (quotient i 2))) (u16hi (v0 (quotient i 2))))))]
-       [(list (u32x32 v0) (u32x32 v1) #t) (i16x64 (lambda (i) (if (even? i) (i16hi (v1 (quotient i 2))) (i16hi (v0 (quotient i 2))))))]
-       [(list (u32x32 v0) (u32x32 v1) #f) (u16x64 (lambda (i) (if (even? i) (u16hi (v1 (quotient i 2))) (u16hi (v0 (quotient i 2))))))])]
-
-    [(vpacko_2 Vd Vu signed?)
-     (match (list (interpret Vd) (interpret Vu) (interpret signed?))
-       [(list (i16x64 v0) (i16x64 v1) #t) (i8x128 (lambda (i) (if (< i 32) (i8hi (v1 i)) (i8hi (v0 (- i 32))))))]
-       [(list (i16x64 v0) (i16x64 v1) #f) (u8x128 (lambda (i) (if (< i 32) (u8hi (v1 i)) (u8hi (v0 (- i 32))))))]
-       [(list (u16x64 v0) (u16x64 v1) #t) (i8x128 (lambda (i) (if (< i 32) (i8hi (v1 i)) (i8hi (v0 (- i 32))))))]
-       [(list (u16x64 v0) (u16x64 v1) #f) (u8x128 (lambda (i) (if (< i 32) (u8hi (v1 i)) (u8hi (v0 (- i 32))))))]
-       [(list (i32x32 v0) (i32x32 v1) #t) (i16x64 (lambda (i) (if (< i 16) (i16hi (v1 i)) (i16hi (v0 (- i 32))))))]
-       [(list (i32x32 v0) (i32x32 v1) #f) (u16x64 (lambda (i) (if (< i 16) (u16hi (v1 i)) (u16hi (v0 (- i 32))))))]
-       [(list (u32x32 v0) (u32x32 v1) #t) (i16x64 (lambda (i) (if (< i 16) (i16hi (v1 i)) (i16hi (v0 (- i 32))))))]
-       [(list (u32x32 v0) (u32x32 v1) #f) (u16x64 (lambda (i) (if (< i 16) (u16hi (v1 i)) (u16hi (v0 (- i 32))))))])]
+       [(list (i16x64 v0) (i16x64 v1) #t) (i8x128 (lambda (i) (if (< i 64) (i8hi (v1 i)) (i8hi (v0 (- i 64))))))]
+       [(list (i16x64 v0) (i16x64 v1) #f) (u8x128 (lambda (i) (if (< i 64) (u8hi (v1 i)) (u8hi (v0 (- i 64))))))]
+       [(list (u16x64 v0) (u16x64 v1) #t) (i8x128 (lambda (i) (if (< i 64) (i8hi (v1 i)) (i8hi (v0 (- i 64))))))]
+       [(list (u16x64 v0) (u16x64 v1) #f) (u8x128 (lambda (i) (if (< i 64) (u8hi (v1 i)) (u8hi (v0 (- i 64))))))]
+       [(list (i32x32 v0) (i32x32 v1) #t) (i16x64 (lambda (i) (if (< i 32) (i16hi (v1 i)) (i16hi (v0 (- i 32))))))]
+       [(list (i32x32 v0) (i32x32 v1) #f) (u16x64 (lambda (i) (if (< i 32) (u16hi (v1 i)) (u16hi (v0 (- i 32))))))]
+       [(list (u32x32 v0) (u32x32 v1) #t) (i16x64 (lambda (i) (if (< i 32) (i16hi (v1 i)) (i16hi (v0 (- i 32))))))]
+       [(list (u32x32 v0) (u32x32 v1) #f) (u16x64 (lambda (i) (if (< i 32) (u16hi (v1 i)) (u16hi (v0 (- i 32))))))])]
 
     [(vsxt Vu signed?)
      (let ([sxt16 (lambda (val) (zero-extend (eval val) (bitvector 16)))] [sxt32 (lambda (val) (zero-extend (eval val) (bitvector 32)))])
