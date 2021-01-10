@@ -11,55 +11,56 @@
 
 ;; Extract vectors
 (define (extract-loads-as-hvx-vecs expr)
-  (match expr
-    ;; Constructors
-    ;[(x32 sca) (list (vsplat sca))]
-    ;[(x64 sca) (list (vsplat sca))]
-    ;[(x128 sca) (list (vsplat sca))]
-    ;[(x256 sca) (list (vsplat sca))]
-    [(x32 sca) (list)]
-    [(x64 sca) (list)]
-    [(x128 sca) (list)]
-    [(x256 sca) (list)]
+  (list->set
+   (match expr
+     ;; Constructors
+     ;[(x32 sca) (list (vsplat sca))]
+     ;[(x64 sca) (list (vsplat sca))]
+     ;[(x128 sca) (list (vsplat sca))]
+     ;[(x256 sca) (list (vsplat sca))]
+     [(x32 sca) (list)]
+     [(x64 sca) (list)]
+     [(x128 sca) (list)]
+     [(x256 sca) (list)]
 
-    [(ramp base stride len) (list)]
-    [(load buf idxs)
-     (match idxs
-       [(ramp base stride len) (list (cons buf base))]
-       [_ (error "NYI: Extracting vec from:" expr)])]
+     [(ramp base stride len) (list)]
+     [(load buf idxs)
+      (match idxs
+        [(ramp base stride len) (list (cons buf base))]
+        [_ (error "NYI: Extracting vec from:" expr)])]
 
-    [(slice_vectors vec base stride len) (extract-loads-as-hvx-vecs vec)]
-    [(concat_vectors v1 v2) (append (extract-loads-as-hvx-vecs v1) (extract-loads-as-hvx-vecs v2))]
+     [(slice_vectors vec base stride len) (extract-loads-as-hvx-vecs vec)]
+     [(concat_vectors v1 v2) (set-union (extract-loads-as-hvx-vecs v1) (extract-loads-as-hvx-vecs v2))]
 
-    ;; Type Casts
-    [(uint8x32 vec) (extract-loads-as-hvx-vecs vec)]
-    [(uint16x32 vec) (extract-loads-as-hvx-vecs vec)]
-    [(uint32x32 vec) (extract-loads-as-hvx-vecs vec)]
-    [(int8x32 vec) (extract-loads-as-hvx-vecs vec)]
-    [(int16x32 vec) (extract-loads-as-hvx-vecs vec)]
-    [(int32x32 vec) (extract-loads-as-hvx-vecs vec)]
-    [(uint8x64 vec) (extract-loads-as-hvx-vecs vec)]
-    [(uint16x64 vec) (extract-loads-as-hvx-vecs vec)]
-    [(uint32x64 vec) (extract-loads-as-hvx-vecs vec)]
-    [(int8x64 vec) (extract-loads-as-hvx-vecs vec)]
-    [(int16x64 vec) (extract-loads-as-hvx-vecs vec)]
-    [(int32x64 vec) (extract-loads-as-hvx-vecs vec)]
-    [(uint8x128 vec) (extract-loads-as-hvx-vecs vec)]
-    [(uint16x128 vec) (extract-loads-as-hvx-vecs vec)]
-    [(uint32x128 vec) (extract-loads-as-hvx-vecs vec)]
-    [(int8x128 vec) (extract-loads-as-hvx-vecs vec)]
-    [(int16x128 vec) (extract-loads-as-hvx-vecs vec)]
-    [(int32x128 vec) (extract-loads-as-hvx-vecs vec)]
-    [(uint8x256 vec) (extract-loads-as-hvx-vecs vec)]
+     ;; Type Casts
+     [(uint8x32 vec) (extract-loads-as-hvx-vecs vec)]
+     [(uint16x32 vec) (extract-loads-as-hvx-vecs vec)]
+     [(uint32x32 vec) (extract-loads-as-hvx-vecs vec)]
+     [(int8x32 vec) (extract-loads-as-hvx-vecs vec)]
+     [(int16x32 vec) (extract-loads-as-hvx-vecs vec)]
+     [(int32x32 vec) (extract-loads-as-hvx-vecs vec)]
+     [(uint8x64 vec) (extract-loads-as-hvx-vecs vec)]
+     [(uint16x64 vec) (extract-loads-as-hvx-vecs vec)]
+     [(uint32x64 vec) (extract-loads-as-hvx-vecs vec)]
+     [(int8x64 vec) (extract-loads-as-hvx-vecs vec)]
+     [(int16x64 vec) (extract-loads-as-hvx-vecs vec)]
+     [(int32x64 vec) (extract-loads-as-hvx-vecs vec)]
+     [(uint8x128 vec) (extract-loads-as-hvx-vecs vec)]
+     [(uint16x128 vec) (extract-loads-as-hvx-vecs vec)]
+     [(uint32x128 vec) (extract-loads-as-hvx-vecs vec)]
+     [(int8x128 vec) (extract-loads-as-hvx-vecs vec)]
+     [(int16x128 vec) (extract-loads-as-hvx-vecs vec)]
+     [(int32x128 vec) (extract-loads-as-hvx-vecs vec)]
+     [(uint8x256 vec) (extract-loads-as-hvx-vecs vec)]
 
-    ;; Operations
-    [(vec-add v1 v2) (append (extract-loads-as-hvx-vecs v1) (extract-loads-as-hvx-vecs v2))]
-    [(vec-sub v1 v2) (append (extract-loads-as-hvx-vecs v1) (extract-loads-as-hvx-vecs v2))]
-    [(vec-div v1 v2) (append (extract-loads-as-hvx-vecs v1) (extract-loads-as-hvx-vecs v2))]
-    [(vec-mul v1 v2) (append (extract-loads-as-hvx-vecs v1) (extract-loads-as-hvx-vecs v2))]
+     ;; Operations
+     [(vec-add v1 v2) (set-union (extract-loads-as-hvx-vecs v1) (extract-loads-as-hvx-vecs v2))]
+     [(vec-sub v1 v2) (set-union (extract-loads-as-hvx-vecs v1) (extract-loads-as-hvx-vecs v2))]
+     [(vec-div v1 v2) (set-union (extract-loads-as-hvx-vecs v1) (extract-loads-as-hvx-vecs v2))]
+     [(vec-mul v1 v2) (set-union (extract-loads-as-hvx-vecs v1) (extract-loads-as-hvx-vecs v2))]
     
-    ;; Base case
-    [_ (error "Don't know how to get live ops from:" expr)]))
+     ;; Base case
+     [_ (error "Don't know how to get live ops from:" expr)])))
 
 ;; Extract buffer reads
 (define (extract-buf-reads expr)

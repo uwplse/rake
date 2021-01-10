@@ -1,5 +1,7 @@
 #lang rosette
 
+(require racket/pretty)
+
 (require rake/cpp/types)
 (require rosette/lib/match)
 
@@ -7,7 +9,7 @@
 (define debug-flag-set? #f)
 (define (debug-on) (set! debug-flag-set? #t))
 (define (debug-off) (set! debug-flag-set? #f))
-(define (debug expr) (when debug-flag-set? (display expr)))
+(define (debug expr) (when debug-flag-set? (pretty-display expr)))
 
 ;; For tracking types of variables
 (define type-dict (make-hash))

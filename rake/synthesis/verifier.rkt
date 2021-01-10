@@ -21,7 +21,7 @@
 
   (define interpreted-s-expr (interpret-hvx hvx-expr))
   (define interpreted-o-expr (interpret-halide halide-spec))
-
+  
   ;; Verify multiple lanes at once (Slower...takes 1554 seconds (128 lanes) for baseline gaussian stage 2 example)
   (define (equiv-output? oe se)
     (for ([lane 8])
@@ -40,7 +40,7 @@
                           #:guarantee (equiv-output? interpreted-o-expr interpreted-s-expr)))
   (define runtime (- (current-seconds) st))
   (define correct? (not (unsat? sol)))
-
+  
   ;; Verify all lanes incrementally (Faster...takes 30 seconds for baseline gaussian stage 2 example)
   (define (lane-eq? oe se lane)
     (cond
