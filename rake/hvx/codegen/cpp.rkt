@@ -456,6 +456,18 @@
             [(list (u32x32 _) (u32x32 _)) (format "~aVuh_vround_VuwVuw_sat(~a, ~a)" prefix (codegen Vu) (codegen Vv))]
             [(list (i32x32 _) (i32x32 _)) (format "~aVuh_vround_VwVw_sat(~a, ~a)" prefix (codegen Vu) (codegen Vv))]))]
 
+    ;vabs
+    [(vabs Vu sat?)
+     (if sat?
+         (match Vu
+           [(i8x128 _) (format "~aVb_vabs_Vb_sat(~a, ~a)" prefix (codegen Vu))]
+           [(i16x64 _) (format "~aVh_vabs_Vh_sat(~a, ~a)" prefix (codegen Vu))]
+           [(i32x32 _) (format "~aVw_vabs_Vw_sat(~a, ~a)" prefix (codegen Vu))])
+         (match Vu
+           [(i8x128 _) (format "~aVb_vabs_Vb(~a, ~a)" prefix (codegen Vu))]
+           [(i16x64 _) (format "~aVh_vabs_Vh(~a, ~a)" prefix (codegen Vu))]
+           [(i32x32 _) (format "~aVw_vabs_Vw(~a, ~a)" prefix (codegen Vu))]))]
+    
     ;;To convert syntax in racket to cpp
     [(+ a b) (format "~a + ~a" b a)]
     

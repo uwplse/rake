@@ -469,6 +469,18 @@
             [(list (u32x32 _) (u32x32 _)) (generate `vrounduwuh t_32xi32 `(list (,t_32xi32 ,(codegen Vu)) (,t_32xi32 ,(codegen Vv))))]
             [(list (i32x32 _) (i32x32 _)) (generate `vroundwuh t_32xi32 `(list (,t_32xi32 ,(codegen Vu)) (,t_32xi32 ,(codegen Vv))))]))]
 
+    ;vabs
+    [(vabs Vu sat?)
+     (if sat?
+         (match Vu
+           [(i8x128 _) (generate `vabsb.sat t_32xi32 `(list (,t_32xi32 ,(codegen Vu))))]
+           [(i16x64 _) (generate `vabsh.sat t_32xi32 `(list (,t_32xi32 ,(codegen Vu))))]
+           [(i32x32 _) (generate `vabsw.sat t_32xi32 `(list (,t_32xi32 ,(codegen Vu))))])
+         (match Vu
+           [(i8x128 _) (generate `vabsb t_32xi32 `(list (,t_32xi32 ,(codegen Vu))))]
+           [(i16x64 _) (generate `vabsh t_32xi32 `(list (,t_32xi32 ,(codegen Vu))))]
+           [(i32x32 _) (generate `vabsw t_32xi32 `(list (,t_32xi32 ,(codegen Vu))))]))]
+    
     [(+ a b) (read (open-input-string (format "(+ ~a ~a)" (codegen a) (codegen b))))]
     [(- a b) (read (open-input-string (format "(- ~a ~a)" (codegen a) (codegen b))))]
     [(* a b) (read (open-input-string (format "(* ~a ~a)" (codegen a) (codegen b))))]

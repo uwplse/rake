@@ -616,6 +616,12 @@
          [(uint8_t? val) (uint8_t (bvlshr (eval val) (eval c)))]
          [(uint16_t? val) (uint16_t (bvlshr (eval val) (eval c)))]
          [(uint32_t? val) (uint32_t (bvlshr (eval val) (eval c)))]))]
+
+    [(vabs Vu sat?)
+     (match (interpret Vu)
+       [(i8x128 Vu) (i8x128 (lambda (i) (if sat? (sat8 (abs (Vu i) 'int8)) (abs (Vu i) 'int8))))]
+       [(i16x64 Vu) (i16x64 (lambda (i) (if sat? (sat16 (abs (Vu i) 'int16)) (abs (Vu i) 'int16))))]
+       [(i32x32 Vu) (i32x32 (lambda (i) (if sat? (sat32 (abs (Vu i) 'int32)) (abs (Vu i) 'int32))))])]
     
     [_ p]))
 
@@ -819,5 +825,10 @@
 ;       (cons
 ;        (lambda (i) (op (vec (apply choose* (build-list 128 values)))))
 ;        (lambda (i) (op (vec (apply choose* (build-list 128 values)))))))))
+
+(define (abs val outT)
+  (define valbv (eval (cpp-cast val outT)))
+  (define zero (eval (cpp-cast 0 outT)))
+  (mk-typed-expr (if (bvslt valbv zero) (bvneg valbv) valbv) outT))
 
 (provide (rename-out [interpret interpret-hvx] [set-curr-cn set-curr-cn-hvx] [gather-tables hvx-gather-tables] [gather-types hvx-gather-types]))
