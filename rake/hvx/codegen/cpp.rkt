@@ -54,7 +54,7 @@
      ]
     
     ;;vshuffo
-    [(vshuffo_2 Vu Vv signed?)
+    [(vshuffo-n Vu Vv signed?)
      (match (list (interpret-hvx Vu) (interpret-hvx Vv))
        [(list (i8x128 _)(i8x128 _)) (format "~aVb_vshuffo_VbVb(~a, ~a)" prefix (codegen Vu) (codegen Vv))]
        [(list (i16x64 _)(i16x64 _)) (format "~aVh_vshuffo_VhVh(~a, ~a)" prefix (codegen Vu) (codegen Vv))])
@@ -149,7 +149,7 @@
      ]
     
     ;;vpacko
-    [(vpacko_2 Vu Vv signed?)
+    [(vpacko-n Vu Vv signed?)
      (match (list (interpret-hvx Vu) (interpret-hvx Vv))
        [(list (i32x32 _)(i32x32 _)) (format "~aVh_vpacko_VwVw(~a, ~a)" prefix (codegen Vu) (codegen Vv))]
        [(list (i16x64 _)(i16x64 _)) (format "~aVb_vpacko_VhVh(~a, ~a)" prefix (codegen Vu) (codegen Vv))])
@@ -469,7 +469,11 @@
            [(i32x32 _) (format "~aVw_vabs_Vw(~a, ~a)" prefix (codegen Vu))]))]
     
     ;;To convert syntax in racket to cpp
-    [(+ a b) (format "~a + ~a" b a)]
+    [(+ a b) (format "~a + ~a" a b)]
+    [(- a b) (format "~a - ~a" a b)]
+    [(* a b) (format "~a * ~a" a b)]
+    [(- a)   (format "- ~a" a)]
+
     
     [_ (format "~a" p)]))
     
