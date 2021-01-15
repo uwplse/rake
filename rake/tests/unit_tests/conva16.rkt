@@ -118,5 +118,5 @@
           (int32x32 #(struct:u8x128 Vu))
           (int32 2))))))
      (int32 4))))
-  (check-equal? (llvm_codegen program) out-exp)
+  (check-equal? (llvm-codegen program) out-exp)
   (printf "Test Passed: Conv3x3a16\n"))

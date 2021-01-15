@@ -351,5 +351,5 @@
               (int32 0x140f140f)))))))
         (int32 12)))))))
   
-  (check-equal? (llvm_codegen program) out-exp)
+  (check-equal? (llvm-codegen program) out-exp)
   (printf "Test Passed: Gaussian 7x7\n"))

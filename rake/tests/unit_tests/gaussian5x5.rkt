@@ -15,7 +15,7 @@
   (init-var-types (make-hash (list (cons buf 'int16))))
   
   (define program
-    (vshuffo_2
+    (vshuffo-n
      (vmpyi-acc
       (vmpyi-acc
        (vadd
@@ -123,6 +123,6 @@
              int32x32
              (list (int32 buf) (int32 (+ 66 x))))))))
         (int32 4)))))))
-  (check-equal? (llvm_codegen program) out-exp)
+  (check-equal? (llvm-codegen program) out-exp)
 
   (printf "Test Passed: Gaussian 5x5\n"))
