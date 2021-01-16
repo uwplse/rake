@@ -472,11 +472,11 @@
     ;vabs
     [(vabs Vu sat?)
      (if sat?
-         (match Vu
+         (match (interpret-hvx Vu)
            [(i8x128 _) (generate `vabsb.sat t_32xi32 `(list (,t_32xi32 ,(codegen Vu))))]
            [(i16x64 _) (generate `vabsh.sat t_32xi32 `(list (,t_32xi32 ,(codegen Vu))))]
            [(i32x32 _) (generate `vabsw.sat t_32xi32 `(list (,t_32xi32 ,(codegen Vu))))])
-         (match Vu
+         (match (interpret-hvx Vu)
            [(i8x128 _) (generate `vabsb t_32xi32 `(list (,t_32xi32 ,(codegen Vu))))]
            [(i16x64 _) (generate `vabsh t_32xi32 `(list (,t_32xi32 ,(codegen Vu))))]
            [(i32x32 _) (generate `vabsw t_32xi32 `(list (,t_32xi32 ,(codegen Vu))))]))]

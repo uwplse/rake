@@ -459,11 +459,11 @@
     ;vabs
     [(vabs Vu sat?)
      (if sat?
-         (match Vu
+         (match (interpret-hvx Vu)
            [(i8x128 _) (format "~aVb_vabs_Vb_sat(~a, ~a)" prefix (codegen Vu))]
            [(i16x64 _) (format "~aVh_vabs_Vh_sat(~a, ~a)" prefix (codegen Vu))]
            [(i32x32 _) (format "~aVw_vabs_Vw_sat(~a, ~a)" prefix (codegen Vu))])
-         (match Vu
+         (match (interpret-hvx Vu)
            [(i8x128 _) (format "~aVb_vabs_Vb(~a, ~a)" prefix (codegen Vu))]
            [(i16x64 _) (format "~aVh_vabs_Vh(~a, ~a)" prefix (codegen Vu))]
            [(i32x32 _) (format "~aVw_vabs_Vw(~a, ~a)" prefix (codegen Vu))]))]
