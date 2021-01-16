@@ -626,8 +626,8 @@
     [(vsat Vu Vv)
      (match (list (interpret Vu) (interpret Vv))
        [(list (i32x32 v0) (i32x32 v1)) (i16x64 (lambda (i) (concat (sat16 (v0 i)) (sat16 (v1 i)))))]
-       [(list (i16x64 v0) (i16x64 v1)) (u8x128 (lambda (i) (concat (usat8 (v0 i)) (usat8 (v1 i)))))]
-       [(list (u32x32 v0) (u32x32 v1)) (u16x64 (lambda (i) (concat (usat16 (v0 i)) (usat16 (v1 i)))))])]
+       [(list (i16x64 v0) (i16x64 v1)) (u8x128 (lambda (i) (concat (satu8 (v0 i)) (satu8 (v1 i)))))]
+       [(list (u32x32 v0) (u32x32 v1)) (u16x64 (lambda (i) (concat (satu16 (v0 i)) (satu16 (v1 i)))))])]
     
     [_ p]))
 
