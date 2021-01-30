@@ -262,7 +262,7 @@ void sexp_parser_test() {
         (int32 2))))
      (int32 4))))";
     
-    string gaussian5x5 = R"(llvm.hexagon.V6.vshuffoh.128B
+    string gaussian5x5 = R"((llvm.hexagon.V6.vshuffoh.128B
     int32x32
     (list
      (int32x32
@@ -340,9 +340,9 @@ void sexp_parser_test() {
             (llvm.hexagon.V6.vread.128B
              int32x32
              (list (int32 buf) (int32 (+ 66 x))))))))
-        (int32 4))))))";
+        (int32 4)))))))";
 
-    string gaussian7x7 = R"(llvm.hexagon.V6.vshuffeh.128B
+    string gaussian7x7 = R"(`(llvm.hexagon.V6.vshuffeh.128B
     int32x32
     (list
      (int32x32
@@ -634,90 +634,84 @@ void sexp_parser_test() {
                       int32x32
                       (list (int32 buf) (int32 (+ 66 x)))))))))))
               (int32 0x140f140f)))))))
-        (int32 12))))))";
+        (int32 12)))))))";
 
-    string conv3x3a16 = R"(llvm.hexagon.V6.vasrhsat.128B
+    string conv3x3a16 = R"((llvm.hexagon.V6.vasrhsat.128B
     int32x32
     (list
      (int32x32
       (llvm.hexagon.V6.hi.128B
        int32x32
-       (int32x64
-        (llvm.hexagon.V6.vmpybus.acc.128B
-         int32x64
-         (list
-          (int32x64
-           (llvm.hexagon.V6.vdmpybus.dv.acc.128B
-            int32x64
-            (list
-             (int32x64
-              (llvm.hexagon.V6.vmpabus.acc.128B
-               int32x64
-               (list
-                (int32x64
-                 (llvm.hexagon.V6.vdmpybus.dv.acc.128B
-                  int32x64
-                  (list
-                   (int32x64
-                    (llvm.hexagon.V6.vdmpybus.dv.128B
-                     int32x64
-                     (list
-                      (int32x64 #(struct:u8x128x2 Vu Vv))
-                      (int32 0x02020202))))
-                   (int32x64
-                    (llvm.hexagon.V6.vcombine.128B
-                     int32x64
-                     (list
-                      (int32x32 #(struct:u8x128 Vu))
-                      (int32x32 #(struct:u8x128 Vu)))))
-                   (int32 0x02020202))))
-                (int32x64 #(struct:u8x128x2 Vu Vv))
-                (int32 0x02020202))))
-             (int32x64 #(struct:u8x128x2 Vu Vv))
-             (int32 0x02020202))))
-          (int32x32 #(struct:u8x128 Vu))
-          (int32 2))))))
+       (list
+        (int32x64
+         (llvm.hexagon.V6.vmpybus.acc.128B
+          int32x64
+          (list
+           (int32x64
+            (llvm.hexagon.V6.vdmpybus.dv.acc.128B
+             int32x64
+             (list
+              (int32x64
+               (llvm.hexagon.V6.vmpabus.acc.128B
+                int32x64
+                (list
+                 (int32x64
+                  (llvm.hexagon.V6.vdmpybus.dv.acc.128B
+                   int32x64
+                   (list
+                    (int32x64
+                     (llvm.hexagon.V6.vdmpybus.dv.128B
+                      int32x64
+                      (list (int32x64 VuVu) (int32 0x02020202))))
+                    (int32x64
+                     (llvm.hexagon.V6.vcombine.128B
+                      int32x64
+                      (list (int32x32 Vu) (int32x32 Vu))))
+                    (int32 0x02020202))))
+                 (int32x64 VuVu)
+                 (int32 0x02020202))))
+              (int32x64 VuVu)
+              (int32 0x02020202))))
+           (int32x32 Vu)
+           (int32 2)))))))
      (int32x32
       (llvm.hexagon.V6.lo.128B
        int32x32
-       (int32x64
-        (llvm.hexagon.V6.vmpybus.acc.128B
-         int32x64
-         (list
-          (int32x64
-           (llvm.hexagon.V6.vdmpybus.dv.acc.128B
-            int32x64
-            (list
-             (int32x64
-              (llvm.hexagon.V6.vmpabus.acc.128B
-               int32x64
-               (list
-                (int32x64
-                 (llvm.hexagon.V6.vdmpybus.dv.acc.128B
-                  int32x64
-                  (list
-                   (int32x64
-                    (llvm.hexagon.V6.vdmpybus.dv.128B
-                     int32x64
-                     (list
-                      (int32x64 #(struct:u8x128x2 Vu Vv))
-                      (int32 0x02020202))))
-                   (int32x64
-                    (llvm.hexagon.V6.vcombine.128B
-                     int32x64
-                     (list
-                      (int32x32 #(struct:u8x128 Vu))
-                      (int32x32 #(struct:u8x128 Vu)))))
-                   (int32 0x02020202))))
-                (int32x64 #(struct:u8x128x2 Vu Vv))
-                (int32 0x02020202))))
-             (int32x64 #(struct:u8x128x2 Vu Vv))
-             (int32 0x02020202))))
-          (int32x32 #(struct:u8x128 Vu))
-          (int32 2))))))
-     (int32 4)))";
+       (list
+        (int32x64
+         (llvm.hexagon.V6.vmpybus.acc.128B
+          int32x64
+          (list
+           (int32x64
+            (llvm.hexagon.V6.vdmpybus.dv.acc.128B
+             int32x64
+             (list
+              (int32x64
+               (llvm.hexagon.V6.vmpabus.acc.128B
+                int32x64
+                (list
+                 (int32x64
+                  (llvm.hexagon.V6.vdmpybus.dv.acc.128B
+                   int32x64
+                   (list
+                    (int32x64
+                     (llvm.hexagon.V6.vdmpybus.dv.128B
+                      int32x64
+                      (list (int32x64 VuVu) (int32 0x02020202))))
+                    (int32x64
+                     (llvm.hexagon.V6.vcombine.128B
+                      int32x64
+                      (list (int32x32 Vu) (int32x32 Vu))))
+                    (int32 0x02020202))))
+                 (int32x64 VuVu)
+                 (int32 0x02020202))))
+              (int32x64 VuVu)
+              (int32 0x02020202))))
+           (int32x32 Vu)
+           (int32 2)))))))
+     (int32 4))))";
 
-    string conv3x3a32 = R"(llvm.hexagon.V6.vlalignbi.128B
+    string conv3x3a32 = R"((llvm.hexagon.V6.vlalignbi.128B
     int32x32
     (list
      (int32x32
@@ -739,8 +733,8 @@ void sexp_parser_test() {
                  (int32x64
                   (llvm.hexagon.V6.vrmpybusi.128B
                    int32x64
-                   (list (int32x64 (codegen Vuu)) (int32 0x02020202) (int32 0))))
-                 (int32x64 (codegen Vuu))
+                   (list (int32x64 VuVu) (int32 0x02020202) (int32 0))))
+                 (int32x64 VuVu)
                  (int32 0x02020202)
                  (int32 0)))))))
            (int32x32
@@ -754,8 +748,8 @@ void sexp_parser_test() {
                  (int32x64
                   (llvm.hexagon.V6.vrmpybusi.128B
                    int32x64
-                   (list (int32x64 (codegen Vuu)) (int32 0x02020202) (int32 0))))
-                 (int32x64 (codegen Vuu))
+                   (list (int32x64 VuVu) (int32 0x02020202) (int32 0))))
+                 (int32x64 VuVu)
                  (int32 0x02020202)
                  (int32 0)))))))
            (int32 4))))
@@ -774,8 +768,8 @@ void sexp_parser_test() {
                  (int32x64
                   (llvm.hexagon.V6.vrmpybusi.128B
                    int32x64
-                   (list (int32x64 (codegen Vuu)) (int32 0x02020202) (int32 1))))
-                 (int32x64 (codegen Vuu))
+                   (list (int32x64 VuVu) (int32 0x02020202) (int32 1))))
+                 (int32x64 VuVu)
                  (int32 0x02020202)
                  (int32 1)))))))
            (int32x32
@@ -789,15 +783,15 @@ void sexp_parser_test() {
                  (int32x64
                   (llvm.hexagon.V6.vrmpybusi.128B
                    int32x64
-                   (list (int32x64 (codegen Vuu)) (int32 0x02020202) (int32 1))))
-                 (int32x64 (codegen Vuu))
+                   (list (int32x64 VuVu) (int32 0x02020202) (int32 1))))
+                 (int32x64 VuVu)
                  (int32 0x02020202)
                  (int32 1)))))))
            (int32 4)))))))
-     (int32x32 #(struct:u8x128 Vu))
-     (int32 0x01010101)))";
+     (int32x32 Vu)
+     (int32 0x01010101))))";
 
-    string sobel3x3 = R"(llvm.hexagon.V6.vsathub.128B
+    string sobel3x3 = R"((llvm.hexagon.V6.vsathub.128B
     int32x32
     (list
      (int32x32
@@ -815,10 +809,7 @@ void sexp_parser_test() {
               (int32x64
                (llvm.hexagon.V6.vmpabus.acc.128B
                 int32x64
-                (list
-                 (int32x64 #(struct:i16x64x2 Vu Vv))
-                 (int32x64 #(struct:u8x128x2 Vu Vv))
-                 (int32 0x02020202))))))))))
+                (list (int32x64 VuVu) (int32x64 VuVu) (int32 0x02020202))))))))))
         (int32x32
          (llvm.hexagon.V6.vabsh.128B
           int32x32
@@ -831,8 +822,8 @@ void sexp_parser_test() {
                (llvm.hexagon.V6.vmpabus.acc.128B
                 int32x64
                 (list
-                 (int32x64 #(struct:i16x64x2 Vu Vv))
-                 (int32x64 #(struct:u8x128x2 Vu Vv))
+                 (int32x64 VuVu)
+                 (int32x64 VuVu)
                  (int32 0x02020202)))))))))))))
      (int32x32
       (llvm.hexagon.V6.vaddh.128B
@@ -849,10 +840,7 @@ void sexp_parser_test() {
               (int32x64
                (llvm.hexagon.V6.vmpabus.acc.128B
                 int32x64
-                (list
-                 (int32x64 #(struct:i16x64x2 Vu Vv))
-                 (int32x64 #(struct:u8x128x2 Vu Vv))
-                 (int32 0x02020202))))))))))
+                (list (int32x64 VuVu) (int32x64 VuVu) (int32 0x02020202))))))))))
         (int32x32
          (llvm.hexagon.V6.vabsh.128B
           int32x32
@@ -865,17 +853,24 @@ void sexp_parser_test() {
                (llvm.hexagon.V6.vmpabus.acc.128B
                 int32x64
                 (list
-                 (int32x64 #(struct:i16x64x2 Vu Vv))
-                 (int32x64 #(struct:u8x128x2 Vu Vv))
-                 (int32 0x02020202)))))))))))))))";
+                 (int32x64 VuVu)
+                 (int32x64 VuVu)
+                 (int32 0x02020202))))))))))))))))";
 
+    string gaussian7x7p1 = R"((llvm.hexagon.V6.vmpahb.acc.128B int32x64 (list (int32x64 (llvm.hexagon.V6.vmpahb.128B int32x32 (list (int32x64 (llvm.hexagon.V6.vcombine.128B int32x64 (list (int32x32 (llvm.hexagon.V6.vaddh.128B int32x32 (list (int32x32 (llvm.hexagon.V6.vread.128B int32x32 (list (int32 buf) (int32 (+ 64 x))))) (int32x32 (llvm.hexagon.V6.vread.128B int32x32 (list (int32 buf) (int32 (+ 66 x)))))))) (int32x32 (llvm.hexagon.V6.vaddh.128B int32x32 (list (int32x32 (llvm.hexagon.V6.vread.128B int32x32 (list (int32 buf) (int32 (+ 65 x))))) (int32x32 (llvm.hexagon.V6.vread.128B int32x32 (list (int32 buf) (int32 (+ 67 x))))))))))) (int32 0x140f140f)))) (int32x64 (llvm.hexagon.V6.vcombine.128B int32x64 (list (int32x32 (llvm.hexagon.V6.vaddh.128B int32x32 (list (int32x32 (llvm.hexagon.V6.vread.128B int32x32 (list (int32 buf) (int32 (+ 64 x))))) (int32x32 (llvm.hexagon.V6.vread.128B int32x32 (list (int32 buf) (int32 (+ 66 x)))))))) (int32x32 (llvm.hexagon.V6.vaddh.128B int32x32 (list (int32x32 (llvm.hexagon.V6.vread.128B int32x32 (list (int32 buf) (int32 (+ 64 x))))) (int32x32 (llvm.hexagon.V6.vread.128B int32x32 (list (int32 buf) (int32 (+ 66 x))))))))))) (int32 0x140f140f))))";
+    string gaussian7x7p2 = R"((llvm.hexagon.V6.vshuffeh.128B int32x32 (list (int32x32 (llvm.hexagon.V6.vasrw.128B int32x32 (list (int32x32 (llvm.hexagon.V6.hi.128B int32x32 (list (int32x64 VuVu)))) (int32x32 (llvm.hexagon.V6.lo.128B int32x32 (list (int32x64 VuVu)))) (int32 12)))) (int32x32 (llvm.hexagon.V6.vasrw.128B int32x32 (list (int32x32 (llvm.hexagon.V6.hi.128B int32x32 (list (int32x64 VuVu)))) (int32x32 (llvm.hexagon.V6.lo.128B int32x32 (list (int32x64 VuVu)))) (int32 12))))))";
+    string vasrw = R"((llvm.hexagon.V6.vasrw.128B int32x32 (list (int32x32 (llvm.hexagon.V6.hi.128B int32x32 (list (int32x64 VuVu)))) (int32x32 (llvm.hexagon.V6.lo.128B int32x32 (list (int32x64 VuVu)))) (int32 12))))";
     debug(0) << p.parse(s) << "\n";
     debug(0) << p.parse(gaussian3x3) << "\n";
     debug(0) << p.parse(gaussian5x5) << "\n";
-    debug(0) << p.parse(gaussian7x7) << "\n";
+    //debug(0) << p.parse(gaussian7x7) << "\n";
     debug(0) << p.parse(conv3x3a16) << "\n";
     debug(0) << p.parse(conv3x3a32) << "\n";
     debug(0) << p.parse(sobel3x3) << "\n";
+
+    //debug(0) << p.parse(gaussian7x7p1) << "\n";
+    //debug(0) << p.parse(gaussian7x7p2) << "\n";
+    //debug(0) << p.parse(vasrw) << "\n";
 }
 
 }
