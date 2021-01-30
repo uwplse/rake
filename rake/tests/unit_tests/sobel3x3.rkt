@@ -55,10 +55,7 @@
               (int32x64
                (llvm.hexagon.V6.vmpabus.acc.128B
                 int32x64
-                (list
-                 (int32x64 #(struct:i16x64x2 Vu Vv))
-                 (int32x64 #(struct:u8x128x2 Vu Vv))
-                 (int32 0x02020202))))))))))
+                (list (int32x64 VuVu) (int32x64 VuVu) (int32 0x02020202))))))))))
         (int32x32
          (llvm.hexagon.V6.vabsh.128B
           int32x32
@@ -71,8 +68,8 @@
                (llvm.hexagon.V6.vmpabus.acc.128B
                 int32x64
                 (list
-                 (int32x64 #(struct:i16x64x2 Vu Vv))
-                 (int32x64 #(struct:u8x128x2 Vu Vv))
+                 (int32x64 VuVu)
+                 (int32x64 VuVu)
                  (int32 0x02020202)))))))))))))
      (int32x32
       (llvm.hexagon.V6.vaddh.128B
@@ -89,10 +86,7 @@
               (int32x64
                (llvm.hexagon.V6.vmpabus.acc.128B
                 int32x64
-                (list
-                 (int32x64 #(struct:i16x64x2 Vu Vv))
-                 (int32x64 #(struct:u8x128x2 Vu Vv))
-                 (int32 0x02020202))))))))))
+                (list (int32x64 VuVu) (int32x64 VuVu) (int32 0x02020202))))))))))
         (int32x32
          (llvm.hexagon.V6.vabsh.128B
           int32x32
@@ -105,8 +99,8 @@
                (llvm.hexagon.V6.vmpabus.acc.128B
                 int32x64
                 (list
-                 (int32x64 #(struct:i16x64x2 Vu Vv))
-                 (int32x64 #(struct:u8x128x2 Vu Vv))
+                 (int32x64 VuVu)
+                 (int32x64 VuVu)
                  (int32 0x02020202))))))))))))))))  
   (check-equal? (llvm-codegen program) out-exp)
   (printf "Test Passed: Sobel3x3\n"))

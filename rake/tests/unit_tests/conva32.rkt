@@ -82,8 +82,8 @@
                  (int32x64
                   (llvm.hexagon.V6.vrmpybusi.128B
                    int32x64
-                   (list (int32x64 (codegen Vuu)) (int32 0x02020202) (int32 0))))
-                 (int32x64 (codegen Vuu))
+                   (list (int32x64 VuVu) (int32 0x02020202) (int32 0))))
+                 (int32x64 VuVu)
                  (int32 0x02020202)
                  (int32 0)))))))
            (int32x32
@@ -97,8 +97,8 @@
                  (int32x64
                   (llvm.hexagon.V6.vrmpybusi.128B
                    int32x64
-                   (list (int32x64 (codegen Vuu)) (int32 0x02020202) (int32 0))))
-                 (int32x64 (codegen Vuu))
+                   (list (int32x64 VuVu) (int32 0x02020202) (int32 0))))
+                 (int32x64 VuVu)
                  (int32 0x02020202)
                  (int32 0)))))))
            (int32 4))))
@@ -117,8 +117,8 @@
                  (int32x64
                   (llvm.hexagon.V6.vrmpybusi.128B
                    int32x64
-                   (list (int32x64 (codegen Vuu)) (int32 0x02020202) (int32 1))))
-                 (int32x64 (codegen Vuu))
+                   (list (int32x64 VuVu) (int32 0x02020202) (int32 1))))
+                 (int32x64 VuVu)
                  (int32 0x02020202)
                  (int32 1)))))))
            (int32x32
@@ -132,12 +132,12 @@
                  (int32x64
                   (llvm.hexagon.V6.vrmpybusi.128B
                    int32x64
-                   (list (int32x64 (codegen Vuu)) (int32 0x02020202) (int32 1))))
-                 (int32x64 (codegen Vuu))
+                   (list (int32x64 VuVu) (int32 0x02020202) (int32 1))))
+                 (int32x64 VuVu)
                  (int32 0x02020202)
                  (int32 1)))))))
            (int32 4)))))))
-     (int32x32 #(struct:u8x128 Vu))
+     (int32x32 Vu)
      (int32 0x01010101))))
   
   (check-equal? (llvm-codegen program) out-exp)

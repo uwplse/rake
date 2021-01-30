@@ -4,6 +4,7 @@
 (require rake/hvx/ast/types)
 (require rake/hvx/codegen/llvm)
 (require rake/util)
+(require rake/hvx/interpreter)
 
 (require rackunit)
 
@@ -38,85 +39,79 @@
      #f))
 
 
-  (define out-exp  '(llvm.hexagon.V6.vasrhsat.128B
+  (define out-exp  `(llvm.hexagon.V6.vasrhsat.128B
     int32x32
     (list
      (int32x32
       (llvm.hexagon.V6.hi.128B
        int32x32
-       (int32x64
-        (llvm.hexagon.V6.vmpybus.acc.128B
-         int32x64
-         (list
-          (int32x64
-           (llvm.hexagon.V6.vdmpybus.dv.acc.128B
-            int32x64
-            (list
-             (int32x64
-              (llvm.hexagon.V6.vmpabus.acc.128B
-               int32x64
-               (list
-                (int32x64
-                 (llvm.hexagon.V6.vdmpybus.dv.acc.128B
-                  int32x64
-                  (list
-                   (int32x64
-                    (llvm.hexagon.V6.vdmpybus.dv.128B
-                     int32x64
-                     (list
-                      (int32x64 #(struct:u8x128x2 Vu Vv))
-                      (int32 0x02020202))))
-                   (int32x64
-                    (llvm.hexagon.V6.vcombine.128B
-                     int32x64
-                     (list
-                      (int32x32 #(struct:u8x128 Vu))
-                      (int32x32 #(struct:u8x128 Vu)))))
-                   (int32 0x02020202))))
-                (int32x64 #(struct:u8x128x2 Vu Vv))
-                (int32 0x02020202))))
-             (int32x64 #(struct:u8x128x2 Vu Vv))
-             (int32 0x02020202))))
-          (int32x32 #(struct:u8x128 Vu))
-          (int32 2))))))
+       (list
+        (int32x64
+         (llvm.hexagon.V6.vmpybus.acc.128B
+          int32x64
+          (list
+           (int32x64
+            (llvm.hexagon.V6.vdmpybus.dv.acc.128B
+             int32x64
+             (list
+              (int32x64
+               (llvm.hexagon.V6.vmpabus.acc.128B
+                int32x64
+                (list
+                 (int32x64
+                  (llvm.hexagon.V6.vdmpybus.dv.acc.128B
+                   int32x64
+                   (list
+                    (int32x64
+                     (llvm.hexagon.V6.vdmpybus.dv.128B
+                      int32x64
+                      (list (int32x64 VuVu) (int32 0x02020202))))
+                    (int32x64
+                     (llvm.hexagon.V6.vcombine.128B
+                      int32x64
+                      (list (int32x32 Vu) (int32x32 Vu))))
+                    (int32 0x02020202))))
+                 (int32x64 VuVu)
+                 (int32 0x02020202))))
+              (int32x64 VuVu)
+              (int32 0x02020202))))
+           (int32x32 Vu)
+           (int32 2)))))))
      (int32x32
       (llvm.hexagon.V6.lo.128B
        int32x32
-       (int32x64
-        (llvm.hexagon.V6.vmpybus.acc.128B
-         int32x64
-         (list
-          (int32x64
-           (llvm.hexagon.V6.vdmpybus.dv.acc.128B
-            int32x64
-            (list
-             (int32x64
-              (llvm.hexagon.V6.vmpabus.acc.128B
-               int32x64
-               (list
-                (int32x64
-                 (llvm.hexagon.V6.vdmpybus.dv.acc.128B
-                  int32x64
-                  (list
-                   (int32x64
-                    (llvm.hexagon.V6.vdmpybus.dv.128B
-                     int32x64
-                     (list
-                      (int32x64 #(struct:u8x128x2 Vu Vv))
-                      (int32 0x02020202))))
-                   (int32x64
-                    (llvm.hexagon.V6.vcombine.128B
-                     int32x64
-                     (list
-                      (int32x32 #(struct:u8x128 Vu))
-                      (int32x32 #(struct:u8x128 Vu)))))
-                   (int32 0x02020202))))
-                (int32x64 #(struct:u8x128x2 Vu Vv))
-                (int32 0x02020202))))
-             (int32x64 #(struct:u8x128x2 Vu Vv))
-             (int32 0x02020202))))
-          (int32x32 #(struct:u8x128 Vu))
-          (int32 2))))))
+       (list
+        (int32x64
+         (llvm.hexagon.V6.vmpybus.acc.128B
+          int32x64
+          (list
+           (int32x64
+            (llvm.hexagon.V6.vdmpybus.dv.acc.128B
+             int32x64
+             (list
+              (int32x64
+               (llvm.hexagon.V6.vmpabus.acc.128B
+                int32x64
+                (list
+                 (int32x64
+                  (llvm.hexagon.V6.vdmpybus.dv.acc.128B
+                   int32x64
+                   (list
+                    (int32x64
+                     (llvm.hexagon.V6.vdmpybus.dv.128B
+                      int32x64
+                      (list (int32x64 VuVu) (int32 0x02020202))))
+                    (int32x64
+                     (llvm.hexagon.V6.vcombine.128B
+                      int32x64
+                      (list (int32x32 Vu) (int32x32 Vu))))
+                    (int32 0x02020202))))
+                 (int32x64 VuVu)
+                 (int32 0x02020202))))
+              (int32x64 VuVu)
+              (int32 0x02020202))))
+           (int32x32 Vu)
+           (int32 2)))))))
      (int32 4))))
   (check-equal? (llvm-codegen program) out-exp)
   (printf "Test Passed: Conv3x3a16\n"))
