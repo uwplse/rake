@@ -327,6 +327,7 @@ struct ModuleContents {
     std::map<std::string, std::string> metadata_name_map;
     bool any_strict_float{false};
     std::unique_ptr<AutoSchedulerResults> auto_scheduler_results;
+    FuncValueBounds func_bounds;
 };
 
 template<>
@@ -375,6 +376,14 @@ void Module::set_auto_scheduler_results(const AutoSchedulerResults &auto_schedul
 
 void Module::set_any_strict_float(bool any_strict_float) {
     contents->any_strict_float = any_strict_float;
+}
+
+void Module::set_func_value_bounds(Halide::Internal::FuncValueBounds func_bounds) {
+    contents->func_bounds = func_bounds;
+}
+
+Halide::Internal::FuncValueBounds Module::get_func_value_bounds() const {
+    return contents->func_bounds;
 }
 
 const Target &Module::target() const {
@@ -432,7 +441,9 @@ void Module::append(const Internal::LoweredFunc &function) {
 }
 
 void Module::append(const Module &module) {
-    contents->submodules.push_back(module);
+    Module copy(module);
+    copy.set_func_value_bounds(get_func_value_bounds());
+    contents->submodules.push_back(copy);
 }
 
 void Module::append(const ExternalCode &external_code) {

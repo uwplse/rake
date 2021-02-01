@@ -481,7 +481,7 @@ void CodeGen_Hexagon::compile_func(const LoweredFunc &f,
     body = optimize_hexagon_instructions_rules(body, target);
 #else
     debug(1) << "Optimizing Hexagon instructions using synthesis...\n";
-    body = optimize_hexagon_instructions_synthesis(body);
+    body = optimize_hexagon_instructions_synthesis(body, this->func_value_bounds);
 #endif
 
     debug(1) << "Adding calls to qurt_hvx_lock, if necessary...\n";

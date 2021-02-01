@@ -948,8 +948,7 @@ private:
                            op->image, op->param, const_true(), ModulusRemainder());
             interval = Interval::single_point(load_min);
         } else {
-            // Otherwise use the bounds of the type
-            bounds_of_type(op->type);
+            bounds_of_func(op->name, 0, op->type);
         }
     }
 

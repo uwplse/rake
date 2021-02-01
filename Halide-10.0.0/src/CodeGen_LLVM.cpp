@@ -639,6 +639,8 @@ void CodeGen_LLVM::init_codegen(const std::string &name, bool any_strict_float) 
 }
 
 std::unique_ptr<llvm::Module> CodeGen_LLVM::compile(const Module &input) {
+    this->func_value_bounds = input.get_func_value_bounds();
+    
     init_codegen(input.name(), input.any_strict_float());
 
     internal_assert(module && context && builder)

@@ -160,6 +160,8 @@ Module lower(const vector<Function> &output_funcs,
     debug(1) << "Computing bounds of each function's value\n";
     FuncValueBounds func_bounds = compute_function_value_bounds(order, env);
 
+    result_module.set_func_value_bounds(func_bounds);
+    
     // This pass injects nested definitions of variable names, so we
     // can't simplify statements from here until we fix them up. (We
     // can still simplify Exprs).

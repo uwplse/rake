@@ -2286,465 +2286,577 @@ public:
 // Synthesis based hvx expression optimizer
 class IROptimizer : public IRMutator {
 
+public:
+    IROptimizer(FuncValueBounds fvb): func_value_bounds(fvb) {}
+    
+private:
+
+    class InferVarEncoding : public IRVisitor {
+    public:
+        using IRVisitor::visit;
+
+        InferVarEncoding(std::string n)
+            : var_name(n), indexing(false), computation(false) {
+            inside_indexing_expr.push(false);
+        }
+
+        void visit(const Variable *op) override {
+            if (op->name == var_name && inside_indexing_expr.top())
+                indexing = true;
+        }
+
+        void visit(const Call *op) override {
+            if (op->name == std::string("dynamic_shuffle")) {
+                op->args[0].accept(this);
+                inside_indexing_expr.push(true);
+                for (unsigned int i = 1; i < op->args.size(); i++)
+                    op->args[i].accept(this);
+                inside_indexing_expr.pop();
+            } else
+                IRVisitor::visit(op);
+        }
+
+        void visit(const Load *op) override {
+            inside_indexing_expr.push(true);
+            op->index.accept(this);
+            inside_indexing_expr.pop();
+            
+            IRVisitor::visit(op);
+        }
+
+        bool for_indexing() {
+            return indexing;
+        }
+        bool for_computation() {
+            return computation;
+        }
+
     private:
+        std::string var_name;
 
-        class RacketPrinter : public VariadicVisitor<RacketPrinter, std::string, std::string> {
-        private:
-            class InferVarEncoding : public IRVisitor {
-            public:
-                using IRVisitor::visit;
+        bool indexing;
+        bool computation;
 
-                InferVarEncoding(std::string n) : var_name(n), indexing(false), computation(false) {
-                    inside_indexing_expr.push(false);
-                }
+        std::stack<bool> inside_indexing_expr;
+    };
 
-                void visit(const Variable *op) override {
-                    if (op->name == var_name && inside_indexing_expr.top())
-                        indexing = true;
-                }
+    class RacketPrinter : public VariadicVisitor<RacketPrinter, std::string, std::string> {
+    public:
+        RacketPrinter (std::ostream &s) : printer(s) {
+            indent.push(1);
+            bv_enc.push(true);
+        }
 
-                void visit(const Call *op) override {
-                    if (op->name == std::string("dynamic_shuffle")) {
-                        op->args[0].accept(this);
-                        inside_indexing_expr.push(true);
-                        for(unsigned int i=1; i<op->args.size(); i++)
-                            op->args[i].accept(this);
-                        inside_indexing_expr.pop();
-                    }
-                    else
-                        IRVisitor::visit(op);
-                }
+        void bvEncPush(bool v) { bv_enc.push(v); }
+        void bvEncPop() { bv_enc.pop(); }
 
-                bool for_indexing() { return indexing; }
-                bool for_computation() { return computation; }
+        /** Convert IR to racket S-expressions */
 
-            private:
-                std::string var_name;
+        // Leaf nodes
+        std::string visit(const Variable *op) {
+            return tabs() + op->name;
+        }
 
-                bool indexing;
-                bool computation;
-
-                std::stack<bool> inside_indexing_expr;
-            };
-
-        public:
-            RacketPrinter (std::ostream &s) : printer(s) {
-                indent.push(1);
-                bv_enc.push(true);
-            }
-
-            /** Convert IR to racket S-expressions */
-
-            // Leaf nodes
-            std::string visit(const Variable *op) {
-                return tabs() + op->name;
-            }
-
-            std::string visit(const IntImm *op) {
-                if (bv_enc.top())
-                    return tabs() + "(int" + std::to_string(op->type.bits()) + "_t (bv " +
-                           std::to_string(op->value) + " " + std::to_string(op->type.bits()) + "))";
-                else
-                    return tabs() + std::to_string(op->value);
-            }
-
-            std::string visit(const UIntImm *op) {
-                if (bv_enc.top())
-                    return tabs() + "(uint" + std::to_string(op->type.bits()) + "_t (bv " +
-                           std::to_string(op->value) + " " + std::to_string(op->type.bits()) + "))";
-                else
-                    return tabs() + std::to_string(op->value);
-            }
-
-            std::string visit(const FloatImm *op) {
+        std::string visit(const IntImm *op) {
+            if (bv_enc.top())
+                return tabs() + "(int" + std::to_string(op->type.bits()) + "_t (bv " +
+                        std::to_string(op->value) + " " + std::to_string(op->type.bits()) + "))";
+            else
                 return tabs() + std::to_string(op->value);
-            }
+        }
 
-            std::string visit(const StringImm *op) {
-                return tabs() + op->value;
-            }
+        std::string visit(const UIntImm *op) {
+            if (bv_enc.top())
+                return tabs() + "(uint" + std::to_string(op->type.bits()) + "_t (bv " +
+                        std::to_string(op->value) + " " + std::to_string(op->type.bits()) + "))";
+            else
+                return tabs() + std::to_string(op->value);
+        }
 
-            // Operators
-            std::string visit(const Broadcast *op) {
-                indent.push(0);
-                std::string rkt_type =  std::to_string(op->lanes);
-                std::string rkt_val = dispatch(op->value);
-                indent.pop();
+        std::string visit(const FloatImm *op) {
+            return tabs() + std::to_string(op->value);
+        }
 
-                return tabs() + "(x" + rkt_type + " " + rkt_val + ")";
-            }
+        std::string visit(const StringImm *op) {
+            return tabs() + op->value;
+        }
 
-            std::string visit(const Cast *op) {
-                std::ostringstream stream;
-                stream << op->type;
+        // Operators
+        std::string visit(const Broadcast *op) {
+            indent.push(0);
+            std::string rkt_type =  std::to_string(op->lanes);
+            std::string rkt_val = dispatch(op->value);
+            indent.pop();
 
-                indent.push(indent.top()+1);
-                std::string rkt_type =  stream.str();
-                std::string rkt_val = dispatch(op->value);
-                indent.pop();
+            return tabs() + "(x" + rkt_type + " " + rkt_val + ")";
+        }
 
-                return tabs() + "(" + rkt_type + "\n" + rkt_val + ")";
-            }
+        std::string visit(const Cast *op) {
+            std::ostringstream stream;
+            stream << op->type;
 
-            std::string visit(const Let *op) {
-                InferVarEncoding ive(op->name);
-                op->body.accept(&ive);
+            indent.push(indent.top()+1);
+            std::string rkt_type =  stream.str();
+            std::string rkt_val = dispatch(op->value);
+            indent.pop();
 
-                if (ive.for_indexing() && !ive.for_computation())
-                    bv_enc.push(false);
-                std::string rkt_val = dispatch(op->value);
-                if (ive.for_indexing() && !ive.for_computation())
-                    bv_enc.pop();
+            return tabs() + "(" + rkt_type + "\n" + rkt_val + ")";
+        }
 
-                indent.push(indent.top()+1);
-                std::string rkt_bdy = dispatch(op->body);
-                indent.pop();
+        std::string visit(const Let *op) {
+            InferVarEncoding ive(op->name);
+            op->body.accept(&ive);
 
-                return tabs() + "(let ([" + op->name + " " + rkt_val + "])\n" + rkt_bdy + ")";
-            }
-
-            std::string visit(const Call *op) {
-                if (op->name == std::string("dynamic_shuffle")) {
-                    indent.push(indent.top()+1);
-                    std::string rkt_args = "\n" + dispatch(op->args[0]);
-                    bv_enc.push(false);
-                    for(unsigned int i=1; i<op->args.size(); i++)
-                        rkt_args += "\n" + dispatch(op->args[i]);
-                    bv_enc.pop();
-                    indent.pop();
-
-                    return tabs() + "(" + op->name + rkt_args + ")";
-                }
-                else {
-                    std::string rkt_args = "";
-
-                    indent.push(indent.top()+1);
-                    for(unsigned int i=0; i<op->args.size(); i++)
-                        rkt_args += "\n" + dispatch(op->args[i]);
-                    indent.pop();
-
-                    return tabs() + "(" + op->name + rkt_args + ")";
-                }
-            }
-
-            std::string visit(const Load *op) {
-                indent.push(0);
+            if (ive.for_indexing() && !ive.for_computation())
                 bv_enc.push(false);
-                std::string rkt_idx = dispatch(op->index);
+            std::string rkt_val = dispatch(op->value);
+            if (ive.for_indexing() && !ive.for_computation())
+                bv_enc.pop();
+
+            indent.push(indent.top()+1);
+            std::string rkt_bdy = dispatch(op->body);
+            indent.pop();
+
+            return tabs() + "(let ([" + op->name + " " + rkt_val + "])\n" + rkt_bdy + ")";
+        }
+
+        std::string visit(const Call *op) {
+            if (op->name == std::string("dynamic_shuffle")) {
+                indent.push(indent.top()+1);
+                std::string rkt_args = "\n" + dispatch(op->args[0]);
+                bv_enc.push(false);
+                for(unsigned int i=1; i<op->args.size(); i++)
+                    rkt_args += "\n" + dispatch(op->args[i]);
                 bv_enc.pop();
                 indent.pop();
 
+                return tabs() + "(" + op->name + rkt_args + ")";
+            }
+            else {
+                std::string rkt_args = "";
+
+                indent.push(indent.top()+1);
+                for(unsigned int i=0; i<op->args.size(); i++)
+                    rkt_args += "\n" + dispatch(op->args[i]);
+                indent.pop();
+
+                return tabs() + "(" + op->name + rkt_args + ")";
+            }
+        }
+
+        std::string visit(const Load *op) {
+            indent.push(0);
+            bv_enc.push(false);
+            std::string rkt_idx = dispatch(op->index);
+            bv_enc.pop();
+            indent.pop();
+            
+            // Hacky exception for now
+            if (op->name.compare("scalar_indices") == 0)
+                return tabs() + "(" + op->name + " " + rkt_idx + ")";    
+            else 
                 return tabs() + "(load " + op->name + " " + rkt_idx + ")";
+            
+        }
+
+        std::string visit(const Ramp *op) {
+            indent.push(0);
+            bv_enc.push(false);
+            std::string rkt_base = dispatch(op->base);
+            std::string rkt_stride = dispatch(op->stride);
+            std::string rkt_lanes = std::to_string(op->lanes);
+            bv_enc.pop();
+            indent.pop();
+
+            return tabs() + "(ramp " + rkt_base + " " + rkt_stride + " " + rkt_lanes + ")";
+        }
+
+        std::string visit(const Add *op) {
+            if (op->type.is_vector()) {
+                indent.push(indent.top()+1);
+                std::string rkt_lhs = dispatch(op->a);
+                std::string rkt_rhs = dispatch(op->b);
+                indent.pop();
+
+                return tabs() + "(vec-add\n" + rkt_lhs + "\n" + rkt_rhs + ")";
+            }
+            else {
+                indent.push(0);
+                std::string rkt_lhs = dispatch(op->a);
+                std::string rkt_rhs = dispatch(op->b);
+                indent.pop();
+
+                return tabs() + "(+ " + rkt_lhs + " " + rkt_rhs + ")";
             }
 
-            std::string visit(const Ramp *op) {
+        }
+
+        std::string visit(const Sub *op) {
+            if (op->type.is_vector()) {
+                indent.push(indent.top()+1);
+                std::string rkt_lhs = dispatch(op->a);
+                std::string rkt_rhs = dispatch(op->b);
+                indent.pop();
+
+                return tabs() + "(vec-sub\n" + rkt_lhs + "\n" + rkt_rhs + ")";
+            }
+            else {
+                indent.push(0);
+                std::string rkt_lhs = dispatch(op->a);
+                std::string rkt_rhs = dispatch(op->b);
+                indent.pop();
+
+                return tabs() + "(- " + rkt_lhs + " " + rkt_rhs + ")";
+            }
+        }
+
+        std::string visit(const Mul *op) {
+            if (op->type.is_vector()) {
+                indent.push(indent.top()+1);
+                std::string rkt_lhs = dispatch(op->a);
+                std::string rkt_rhs = dispatch(op->b);
+                indent.pop();
+
+                return tabs() + "(vec-mul\n" + rkt_lhs + "\n" + rkt_rhs + ")";
+            } else {
+                indent.push(0);
+                std::string rkt_lhs = dispatch(op->a);
+                std::string rkt_rhs = dispatch(op->b);
+                indent.pop();
+
+                return "(* " + rkt_lhs + " " + rkt_rhs + ")";
+            }
+        }
+
+        std::string visit(const Div *op) {
+            if (op->type.is_vector()) {
+                indent.push(indent.top()+1);
+                std::string rkt_lhs = dispatch(op->a);
+                std::string rkt_rhs = dispatch(op->b);
+                indent.pop();
+
+                return tabs() + "(vec-div\n" + rkt_lhs + "\n" + rkt_rhs + ")";
+            } else {
+                indent.push(0);
+                std::string rkt_lhs = dispatch(op->a);
+                std::string rkt_rhs = dispatch(op->b);
+                indent.pop();
+
+                return tabs() +  "(quotient " + rkt_lhs + " " + rkt_rhs + ")";
+            }
+        }
+
+        std::string visit(const Mod *op) { printer.print(op); return NYI(); }
+
+        std::string visit(const Min *op) {
+            if (op->type.is_vector()) {
+                indent.push(indent.top()+1);
+                std::string rkt_lhs = dispatch(op->a);
+                std::string rkt_rhs = dispatch(op->b);
+                indent.pop();
+
+                return tabs() + "(vec-min\n" + rkt_lhs + "\n" + rkt_rhs + ")";
+            } else {
+                indent.push(0);
+                std::string rkt_lhs = dispatch(op->a);
+                std::string rkt_rhs = dispatch(op->b);
+                indent.pop();
+
+                return tabs() + "(min " + rkt_lhs + " " + rkt_rhs + ")";
+            }
+        }
+
+        std::string visit(const Max *op) {
+            if (op->type.is_vector()) {
+                indent.push(indent.top()+1);
+                std::string rkt_lhs = dispatch(op->a);
+                std::string rkt_rhs = dispatch(op->b);
+                indent.pop();
+
+                return tabs() + "(vec-max\n" + rkt_lhs + "\n" + rkt_rhs + ")";
+            } else {
+                indent.push(0);
+                std::string rkt_lhs = dispatch(op->a);
+                std::string rkt_rhs = dispatch(op->b);
+                indent.pop();
+
+                return tabs() + "(max " + rkt_lhs + " " + rkt_rhs + ")";
+            }
+        }
+
+        std::string visit(const EQ *op) { printer.print(op); return NYI(); }
+        std::string visit(const NE *op) { printer.print(op); return NYI(); }
+        std::string visit(const LT *op) { printer.print(op); return NYI(); }
+        std::string visit(const LE *op) { printer.print(op); return NYI(); }
+        std::string visit(const GT *op) { printer.print(op); return NYI(); }
+        std::string visit(const GE *op) { printer.print(op); return NYI(); }
+        std::string visit(const And *op) { printer.print(op); return NYI(); }
+        std::string visit(const Or *op) { printer.print(op); return NYI(); }
+        std::string visit(const Not *op) { printer.print(op); return NYI(); }
+        std::string visit(const Select *op) { printer.print(op); return NYI(); }
+        std::string visit(const IfThenElse *op) { printer.print(op); return NYI(); }
+
+        std::string visit(const Shuffle *op) {
+            if(op->is_slice()){
+                indent.push(indent.top()+1);
+                std::string rkt_vec = dispatch(op->vectors[0]);
+                indent.pop();
                 indent.push(0);
                 bv_enc.push(false);
-                std::string rkt_base = dispatch(op->base);
-                std::string rkt_stride = dispatch(op->stride);
-                std::string rkt_lanes = std::to_string(op->lanes);
+                std::string rkt_base = std::to_string(op->slice_begin());
+                std::string rkt_stride = std::to_string(op->slice_stride());
+                std::string rkt_len = std::to_string(op->indices.size());
                 bv_enc.pop();
                 indent.pop();
 
-                return tabs() + "(ramp " + rkt_base + " " + rkt_stride + " " + rkt_lanes + ")";
+                return tabs() + "(slice_vectors\n" + rkt_vec + " " + rkt_base
+                        + " " + rkt_stride + " " + rkt_len + ")";
+            }
+            else if(op->is_concat()){
+                indent.push(indent.top()+1);
+                std::string rkt_lhs = dispatch(op->vectors[0]);
+                std::string rkt_rhs = dispatch(op->vectors[1]);
+                indent.pop();
+
+                return tabs() + "(concat_vectors\n" + rkt_lhs + "\n" + rkt_rhs + ")";
             }
 
-            std::string visit(const Add *op) {
-                if (op->type.is_vector()) {
-                    indent.push(indent.top()+1);
-                    std::string rkt_lhs = dispatch(op->a);
-                    std::string rkt_rhs = dispatch(op->b);
-                    indent.pop();
+            return NYI();
+        }
 
-                    return tabs() + "(vec-add\n" + rkt_lhs + "\n" + rkt_rhs + ")";
-                }
-                else {
-                    indent.push(0);
-                    std::string rkt_lhs = dispatch(op->a);
-                    std::string rkt_rhs = dispatch(op->b);
-                    indent.pop();
+        std::string visit(const VectorReduce * op) {
+            printer.print(op); return NYI();
+        }
 
-                    return tabs() + "(+ " + rkt_lhs + " " + rkt_rhs + ")";
-                }
+        /** Currently we do not do any re-writring at the Stmt level */
+        std::string visit(const LetStmt *op) { return NYI(); }
+        std::string visit(const AssertStmt *op) { return NYI(); }
+        std::string visit(const For *op) { return NYI(); }
+        std::string visit(const Provide *op) { return NYI(); }
+        std::string visit(const Store *op) { return NYI(); }
+        std::string visit(const Allocate *op) { return NYI(); }
+        std::string visit(const Evaluate *op) { return NYI(); }
+        std::string visit(const ProducerConsumer *op) { return NYI(); }
+        std::string visit(const Block *op) { return NYI(); }
+        std::string visit(const Realize *op) { return NYI(); }
+        std::string visit(const Prefetch *op) { return NYI(); }
+        std::string visit(const Free *op) { return NYI(); }
+        std::string visit(const Acquire *op) { return NYI(); }
+        std::string visit(const Fork *op) { return NYI(); }
 
+    private:
+            
+        IRPrinter printer;
+        std::stack<int> indent;
+        std::stack<bool> bv_enc;
+
+        std::string tabs () {
+            std::string ret = "";
+            for (int i=0; i<indent.top(); i++) ret += " ";
+            return ret;
+        }
+
+        std::string NYI () {
+            debug(0) << "\nNYI. \n";
+            exit(0);
+            return "";
+        }
+
+    };
+
+    class InferSymbolics : public IRVisitor {
+
+    public:
+        using IRVisitor::visit;
+
+        InferSymbolics(std::map<std::string, Expr> lvs, Scope<Interval> &bnds, FuncValueBounds fvb)
+            : external_let_vars(lvs), bounds(bnds), func_value_bounds(fvb) {
+        }
+
+        void visit(const Variable * op) override {
+            if (op->type.is_vector()) {
+                debug(0) << "Var Found: " << op->name << "\n";
+                debug(0) << "Bound: " << bounds_of_expr_in_scope(op, bounds, func_value_bounds).min << "\n";
+                debug(0) << "Bound: " << bounds_of_expr_in_scope(op, bounds, func_value_bounds).max << "\n";
             }
 
-            std::string visit(const Sub *op) {
-                if (op->type.is_vector()) {
-                    indent.push(indent.top()+1);
-                    std::string rkt_lhs = dispatch(op->a);
-                    std::string rkt_rhs = dispatch(op->b);
-                    indent.pop();
-
-                    return tabs() + "(vec-sub\n" + rkt_lhs + "\n" + rkt_rhs + ")";
-                }
-                else {
-                    indent.push(0);
-                    std::string rkt_lhs = dispatch(op->a);
-                    std::string rkt_rhs = dispatch(op->b);
-                    indent.pop();
-
-                    return tabs() + "(- " + rkt_lhs + " " + rkt_rhs + ")";
-                }
-            }
-
-            std::string visit(const Mul *op) {
-                if (op->type.is_vector()) {
-                    indent.push(indent.top()+1);
-                    std::string rkt_lhs = dispatch(op->a);
-                    std::string rkt_rhs = dispatch(op->b);
-                    indent.pop();
-
-                    return tabs() + "(vec-mul\n" + rkt_lhs + "\n" + rkt_rhs + ")";
-                } else {
-                    indent.push(0);
-                    std::string rkt_lhs = dispatch(op->a);
-                    std::string rkt_rhs = dispatch(op->b);
-                    indent.pop();
-
-                    return "(* " + rkt_lhs + " " + rkt_rhs + ")";
-                }
-            }
-
-            std::string visit(const Div *op) {
-                if (op->type.is_vector()) {
-                    indent.push(indent.top()+1);
-                    std::string rkt_lhs = dispatch(op->a);
-                    std::string rkt_rhs = dispatch(op->b);
-                    indent.pop();
-
-                    return tabs() + "(vec-div\n" + rkt_lhs + "\n" + rkt_rhs + ")";
-                } else {
-                    indent.push(0);
-                    std::string rkt_lhs = dispatch(op->a);
-                    std::string rkt_rhs = dispatch(op->b);
-                    indent.pop();
-
-                    return tabs() +  "(quotient " + rkt_lhs + " " + rkt_rhs + ")";
-                }
-            }
-
-            std::string visit(const Mod *op) { printer.print(op); return NYI(); }
-
-            std::string visit(const Min *op) {
-                if (op->type.is_vector()) {
-                    indent.push(indent.top()+1);
-                    std::string rkt_lhs = dispatch(op->a);
-                    std::string rkt_rhs = dispatch(op->b);
-                    indent.pop();
-
-                    return tabs() + "(vec-min\n" + rkt_lhs + "\n" + rkt_rhs + ")";
-                } else {
-                    indent.push(0);
-                    std::string rkt_lhs = dispatch(op->a);
-                    std::string rkt_rhs = dispatch(op->b);
-                    indent.pop();
-
-                    return tabs() + "(min " + rkt_lhs + " " + rkt_rhs + ")";
-                }
-            }
-
-            std::string visit(const Max *op) {
-                if (op->type.is_vector()) {
-                    indent.push(indent.top()+1);
-                    std::string rkt_lhs = dispatch(op->a);
-                    std::string rkt_rhs = dispatch(op->b);
-                    indent.pop();
-
-                    return tabs() + "(vec-max\n" + rkt_lhs + "\n" + rkt_rhs + ")";
-                } else {
-                    indent.push(0);
-                    std::string rkt_lhs = dispatch(op->a);
-                    std::string rkt_rhs = dispatch(op->b);
-                    indent.pop();
-
-                    return tabs() + "(max " + rkt_lhs + " " + rkt_rhs + ")";
-                }
-            }
-
-            std::string visit(const EQ *op) { printer.print(op); return NYI(); }
-            std::string visit(const NE *op) { printer.print(op); return NYI(); }
-            std::string visit(const LT *op) { printer.print(op); return NYI(); }
-            std::string visit(const LE *op) { printer.print(op); return NYI(); }
-            std::string visit(const GT *op) { printer.print(op); return NYI(); }
-            std::string visit(const GE *op) { printer.print(op); return NYI(); }
-            std::string visit(const And *op) { printer.print(op); return NYI(); }
-            std::string visit(const Or *op) { printer.print(op); return NYI(); }
-            std::string visit(const Not *op) { printer.print(op); return NYI(); }
-            std::string visit(const Select *op) { printer.print(op); return NYI(); }
-            std::string visit(const IfThenElse *op) { printer.print(op); return NYI(); }
-
-            std::string visit(const Shuffle *op) {
-                if(op->is_slice()){
-                    indent.push(indent.top()+1);
-                    std::string rkt_vec = dispatch(op->vectors[0]);
-                    indent.pop();
-                    indent.push(0);
-                    bv_enc.push(false);
-                    std::string rkt_base = std::to_string(op->slice_begin());
-                    std::string rkt_stride = std::to_string(op->slice_stride());
-                    std::string rkt_len = std::to_string(op->indices.size());
-                    bv_enc.pop();
-                    indent.pop();
-
-                    return tabs() + "(slice_vectors\n" + rkt_vec + " " + rkt_base
-                           + " " + rkt_stride + " " + rkt_len + ")";
-                }
-                else if(op->is_concat()){
-                    indent.push(indent.top()+1);
-                    std::string rkt_lhs = dispatch(op->vectors[0]);
-                    std::string rkt_rhs = dispatch(op->vectors[1]);
-                    indent.pop();
-
-                    return tabs() + "(concat_vectors\n" + rkt_lhs + "\n" + rkt_rhs + ")";
-                }
-
-                return NYI();
-            }
-
-            std::string visit(const VectorReduce * op) {
-                printer.print(op); return NYI();
-            }
-
-            /** Currently we do not do any re-writring at the Stmt level */
-            std::string visit(const LetStmt *op) { return NYI(); }
-            std::string visit(const AssertStmt *op) { return NYI(); }
-            std::string visit(const For *op) { return NYI(); }
-            std::string visit(const Provide *op) { return NYI(); }
-            std::string visit(const Store *op) { return NYI(); }
-            std::string visit(const Allocate *op) { return NYI(); }
-            std::string visit(const Evaluate *op) { return NYI(); }
-            std::string visit(const ProducerConsumer *op) { return NYI(); }
-            std::string visit(const Block *op) { return NYI(); }
-            std::string visit(const Realize *op) { return NYI(); }
-            std::string visit(const Prefetch *op) { return NYI(); }
-            std::string visit(const Free *op) { return NYI(); }
-            std::string visit(const Acquire *op) { return NYI(); }
-            std::string visit(const Fork *op) { return NYI(); }
-
-        private:
-            IRPrinter printer;
-            std::stack<int> indent;
-            std::stack<bool> bv_enc;
-
-            std::string tabs () {
-                std::string ret = "";
-                for (int i=0; i<indent.top(); i++) ret += " ";
-                return ret;
-            }
-
-            std::string NYI () {
-                debug(0) << "\nNYI. \n";
-                exit(0);
-                return "";
-            }
-
-        };
-
-        class InferSymbolics : public IRVisitor {
-        public:
-            using IRVisitor::visit;
-
-            void visit(const Variable * op) override {
+            if (external_let_vars.count(op->name)) {
+                external_let_vars[op->name].accept(this);
+                live_lets.insert(op->name);
+            } else {
                 live_vars.insert(op);
             }
+        }
 
-            void visit(const Let * op) override {
-                local_vars.insert(op->name);
-                IRVisitor::visit(op);
+        void visit(const Let * op) override {
+            local_vars.insert(op->name);
+            IRVisitor::visit(op);
+        }
+
+        void visit(const Load * op) override {
+            debug(0) << "Load Found: " << op->name << "\n";
+            debug(0) << "Bound: " << bounds_of_expr_in_scope(op, bounds, func_value_bounds).min << "\n";
+            debug(0) << "Bound: " << bounds_of_expr_in_scope(op, bounds, func_value_bounds).max << "\n";
+            buffers.insert(std::pair<std::string,Type>(op->name,
+                                                        (op->type.is_vector() ? op->type.element_of() : op->type)));
+
+            IRVisitor::visit(op);
+        }
+
+        std::set<const Variable*> getSymVars() {
+            std::set<const Variable*> l;
+            for (auto var : live_vars) {
+                if (local_vars.count(var->name) + external_let_vars.count(var->name) == 0)
+                    l.insert(var);
             }
+            return l;
+        }
 
-            void visit(const Load * op) override {
-                buffers.insert(std::pair<std::string,Type>(op->name,
-                                                           (op->type.is_vector() ? op->type.element_of() : op->type)));
-                IRVisitor::visit(op);
-            }
+        std::set<std::pair<std::string,Type>> getSymBufs() {
+            return buffers;
+        }
 
-            std::set<const Variable*> getSymVars() {
-                std::set<const Variable*> l;
-                for (auto var : live_vars) {
-                    if (local_vars.count(var->name) == 0)
-                        l.insert(var);
-                }
-                return l;
-            }
+        std::set<std::string> getLiveLets() {
+            return live_lets;
+        }
 
-            std::set<std::pair<std::string,Type>> getSymBufs() {
-                return buffers;
-            }
+    private:
+        std::map<std::string, Expr> external_let_vars;
+        Scope<Interval> & bounds;
+        FuncValueBounds func_value_bounds;
 
-        private:
-            std::set<const Variable*> live_vars;
-            std::set<std::string> local_vars;
-            std::set<std::pair<std::string,Type>> buffers;
-        };
+        std::set<std::string> live_lets;
+        std::set<const Variable*> live_vars;
+        std::set<std::string> local_vars;
+        std::set<std::pair<std::string,Type>> buffers;
+    };
 
     private:
         using IRMutator::visit;
 
         int expr_id = 0;
 
+        FuncValueBounds func_value_bounds;
+        Scope<Interval> bounds;
+
         std::map<std::string,Expr> let_vars;
+        std::vector<std::string> let_decl_order;
 
         Stmt visit(const LetStmt *stmt) override {
+            debug(0) << "Let Found: " << stmt->name << " = " << stmt->value << "\n";
+            bounds.push(stmt->name, bounds_of_expr_in_scope(stmt->value, bounds, func_value_bounds));
             let_vars[stmt->name] = stmt->value;
+            let_decl_order.push_back(stmt->name);
             return IRMutator::visit(stmt);
         }
 
         Stmt visit(const Store *stmt) override {
+            bounds.push(stmt->name, bounds_of_expr_in_scope(stmt->value, bounds, func_value_bounds));
+
             if (stmt->value.node_type() == IRNodeType::Load)
                 return IRMutator::visit(stmt);
 
             debug(0) << "\nOptimizing expression:\n" << stmt->value << "\n\n";
 
-            //debug(0) << "Translating expr to Racket\n";
+            int x;
+            std::cin >> x;
+
+            if (x == 0)
+                return IRMutator::visit(stmt);
+
             RacketPrinter specPrinter(std::cout);
-            //debug(0) << specPrinter.dispatch(stmt->value) << "\n\n";
             std::string expr = specPrinter.dispatch(stmt->value);
 
-            //debug(0) << "Inferring Symbolic Inputs...\n";
-            InferSymbolics symFinder;
+            InferSymbolics symFinder(let_vars, bounds, func_value_bounds);
             stmt->value.accept(&symFinder);
-
+ 
             //IRPrinter printer = IRPrinter(std::cout);
             //for (auto var : symFinder.getSymVars())
             //  debug(0) << var->name << "\n";
-
             //for (auto buf : symFinder.getSymBufs())
             //  debug(0) << buf.first << "\n";
 
             debug(0) << "Generating synthesis specification...\n";
 
+            std::stringstream axioms;
             std::stringstream sym_bufs;
             std::stringstream sym_buf_types;
+
+            axioms << "(define axioms \n"
+                   << "  (list ";
+
             sym_buf_types << "(init-var-types (make-hash (list";
             for (auto buf : symFinder.getSymBufs()) {
-                sym_bufs << "(define-symbolic " << buf.first << " (~> integer? (bitvector "
-                         << buf.second.bits() << ")))\n";
-                sym_buf_types << " (cons " << buf.first << " '" << buf.second << ")";
+                // Make a special case for scalar indices. Janky solution, will
+                // fix later. (Simple analysis to identify induction vars etc since
+                // we use different encodings)
+                if (buf.first.compare("scalar_indices") == 0) {
+                    sym_bufs << "(define-symbolic " << buf.first << " (~> integer? integer?))\n";
+                } else {
+                    sym_bufs << "(define-symbolic " << buf.first << " (~> integer? (bitvector "
+                             << buf.second.bits() << ")))\n";
+                    sym_buf_types << " (cons " << buf.first << " '" << buf.second << ")";
+
+                    std::pair<std::string, int> key(buf.first, 0);
+                    if (func_value_bounds.count(key)) {
+                        axioms << "\n   (values-range-from "
+                               << buf.first
+                               << specPrinter.dispatch(func_value_bounds[key].min)
+                               << specPrinter.dispatch(func_value_bounds[key].max) << ")";
+                    }
+                }
             }
 
             std::stringstream sym_vars;
             for (auto var : symFinder.getSymVars()) {
                 if (var->type.is_vector()) {
-                    if (1) {
-                        sym_bufs << "(define-symbolic " << var->name << "-buf (~> integer? (bitvector "
-                                 << var->type.bits() << ")))\n";
-                        sym_buf_types << " (cons " << var->name << "-buf '" << var->type.element_of() << ")";
+                    sym_bufs << "(define-symbolic " << var->name << "-buf (~> integer? (bitvector "
+                             << var->type.bits() << ")))\n";
+                    sym_buf_types << " (cons " << var->name << "-buf '" << var->type.element_of() << ")";
 
-                        sym_vars << "(define " << var->name << " (load " << var->name
-                                 << "-buf (ramp 0 1 " << var->type.lanes() << ")))\n";
-                    }
-                    else {
-                        sym_bufs << "(define " << var->name << specPrinter.dispatch(let_vars[var->name]) <<  " (~> integer? (bitvector "
-                                 << var->type.bits() << ")))\n";
-                        sym_buf_types << " (cons " << var->name << " '" << var->type << ")";
-                    }
-                }
-                else
+                    sym_vars << "(define " << var->name << " (load " << var->name
+                             << "-buf (ramp 0 1 " << var->type.lanes() << ")))\n";
+
+                    axioms << "\n   (values-range-from "
+                           << var->name << "-buf"
+                           << specPrinter.dispatch(bounds_of_expr_in_scope(var, bounds, func_value_bounds).min)
+                           << specPrinter.dispatch(bounds_of_expr_in_scope(var, bounds, func_value_bounds).max) << ")";
+                } else {
                     sym_vars << "(define-symbolic " << var->name << " integer?)\n";
+                }
             }
             sym_buf_types << ")))\n";
+
+            axioms << "))\n";
+
+            // Order let-stmts so we don't use any vars before they are defined
+            std::set<std::string> live_lets = symFinder.getLiveLets();
+            std::vector<std::string> ordered_live_lets(live_lets.begin(), live_lets.end());
+            std::sort(
+                ordered_live_lets.begin(),
+                ordered_live_lets.end(),
+                [this](std::string n1, std::string n2) -> int 
+                { 
+                    int pos1 = std::find(let_decl_order.begin(), let_decl_order.end(), n1) - let_decl_order.begin();
+                    int pos2 = std::find(let_decl_order.begin(), let_decl_order.end(), n2) - let_decl_order.begin();
+                    return pos1 < pos2;
+                }
+            );
+
+            std::stringstream let_stmts;
+            for (auto var_name : ordered_live_lets) {
+                Expr val = let_vars[var_name];
+                InferVarEncoding ive(var_name);
+                stmt->value.accept(&ive);
+
+                if (ive.for_indexing() && !ive.for_computation()) {
+                    specPrinter.bvEncPush(false);
+                    let_stmts << "(define " << var_name << specPrinter.dispatch(val) << ")\n";
+                    specPrinter.bvEncPop();
+                } else {
+                    let_stmts << "(define " << var_name << specPrinter.dispatch(val) << ")\n";
+                }
+            }
 
             debug(0)
                 << "#lang rosette\n"
@@ -2757,11 +2869,13 @@ class IROptimizer : public IRMutator {
                 << "\n"
                 << sym_bufs.str()
                 << sym_buf_types.str() << "\n"
+                << axioms.str() << "\n"
                 << sym_vars.str() << "\n"
+                << let_stmts.str() << "\n"
                 << "(define halide-expr\n"
                 << expr << ")\n"
                 << "\n"
-                << "(define spec (synthesis-spec halide-expr (list)))\n"
+                << "(define spec (synthesis-spec halide-expr axioms))\n"
                 << "(define hvx-expr (synthesize-hvx spec 'halide-ir 'greedy))\n"
                 << "\n"
                 << "(define out (open-output-file \"sexp.out\" #:exists 'replace))\n"
@@ -2782,10 +2896,12 @@ class IROptimizer : public IRMutator {
                 << "\n"
                 << sym_bufs.str()
                 << sym_buf_types.str() << "\n"
+                << axioms.str() << "\n"
                 << sym_vars.str() << "\n"
+                << let_stmts.str() << "\n"
                 << "(define halide-expr\n" << expr << ")\n"
                 << "\n"
-                << "(define spec (synthesis-spec halide-expr (list)))\n"
+                << "(define spec (synthesis-spec halide-expr axioms))\n"
                 << "(define hvx-expr (synthesize-hvx spec 'halide-ir 'greedy))\n"
                 << "\n"
                 << "(define out (open-output-file \"sexp.out\" #:exists 'replace))\n"
@@ -2812,15 +2928,11 @@ class IROptimizer : public IRMutator {
             }
 
             SExpParser p;
-            //std::ifstream in("expr_" + std::to_string(expr_id) + ".sexp");
             std::ifstream in("sexp.out");
             std::string s((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
             debug(0) << p.parse(s) << "\n";
 
-            int x;
-            std::cin >> x;
-
-            return IRMutator::visit(stmt);
+            return Store::make(stmt->name, p.parse(s), stmt->index, stmt->param, stmt->predicate, stmt->alignment);
         }
     };
 
@@ -2868,7 +2980,7 @@ Stmt optimize_hexagon_instructions_rules(Stmt s, Target t) {
     return s;
 }
 
-Stmt optimize_hexagon_instructions_synthesis(Stmt s) {
+Stmt optimize_hexagon_instructions_synthesis(Stmt s, FuncValueBounds fvb) {
     // Convert some expressions to an equivalent form which get better
     // optimized in later stages for hexagon
     s = RearrangeExpressions().mutate(s);
@@ -2876,15 +2988,13 @@ Stmt optimize_hexagon_instructions_synthesis(Stmt s) {
     // s = substitute_in_all_lets(s);
     // s = common_subexpression_elimination(s, true, true);
 
-    debug(1) << s << "\n\n";
-
-    s = IROptimizer().mutate(s);
-
-    exit(0);
-
     debug(0) << s << "\n\n";
 
-    //s = common_subexpression_elimination(s);
+    s = IROptimizer(fvb).mutate(s);
+
+    s = common_subexpression_elimination(s);
+
+    debug(0) << s << "\n\n";
 
     exit(0);
 

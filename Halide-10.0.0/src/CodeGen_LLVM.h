@@ -163,6 +163,8 @@ protected:
     llvm::MDNode *default_fp_math_md;
     llvm::MDNode *strict_fp_math_md;
     std::vector<LoweredArgument> current_function_args;
+    
+    FuncValueBounds func_value_bounds;
     //@}
 
     /** The target we're generating code for */

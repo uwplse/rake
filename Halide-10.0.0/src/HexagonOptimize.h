@@ -7,6 +7,7 @@
 
 #include "Expr.h"
 #include "Target.h"
+#include "Bounds.h"
 
 namespace Halide {
 namespace Internal {
@@ -33,7 +34,7 @@ Stmt scatter_gather_generator(Stmt s);
 Stmt optimize_hexagon_instructions_rules(Stmt s, Target t);
 
 /** Optimize IR for HVX using synthesis */
-Stmt optimize_hexagon_instructions_synthesis(Stmt s);
+Stmt optimize_hexagon_instructions_synthesis(Stmt s, FuncValueBounds fvb);
 
 /** Generate deinterleave or interleave operations, operating on
  * groups of vectors at a time. */
