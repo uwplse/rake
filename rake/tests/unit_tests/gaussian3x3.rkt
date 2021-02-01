@@ -80,6 +80,6 @@
           (list (int32 buf) (int32 (+ 65 x)))))
         (int32 2))))
      (int32 4))))
-  (check-equal? (llvm_codegen program) out-exp)
+  (check-equal? (llvm-codegen program) out-exp)
 
   (printf "Test Passed: Gaussian 3x3 stage 2\n"))

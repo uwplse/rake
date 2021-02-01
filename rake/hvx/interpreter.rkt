@@ -635,6 +635,18 @@
          [(uint8_t? val) (uint8_t (bvlshr (eval val) (eval c)))]
          [(uint16_t? val) (uint16_t (bvlshr (eval val) (eval c)))]
          [(uint32_t? val) (uint32_t (bvlshr (eval val) (eval c)))]))]
+
+    [(vabs Vu sat?)
+     (match (interpret Vu)
+       [(i8x128 Vu) (i8x128 (lambda (i) (if sat? (sat8 (abs (Vu i) 'int8)) (abs (Vu i) 'int8))))]
+       [(i16x64 Vu) (i16x64 (lambda (i) (if sat? (sat16 (abs (Vu i) 'int16)) (abs (Vu i) 'int16))))]
+       [(i32x32 Vu) (i32x32 (lambda (i) (if sat? (sat32 (abs (Vu i) 'int32)) (abs (Vu i) 'int32))))])]
+
+    [(vsat Vu Vv)
+     (match (list (interpret Vu) (interpret Vv))
+       [(list (i32x32 v0) (i32x32 v1)) (i16x64 (lambda (i) (concat (sat16 (v0 i)) (sat16 (v1 i)))))]
+       [(list (i16x64 v0) (i16x64 v1)) (u8x128 (lambda (i) (concat (satu8 (v0 i)) (satu8 (v1 i)))))]
+       [(list (u32x32 v0) (u32x32 v1)) (u16x64 (lambda (i) (concat (satu16 (v0 i)) (satu16 (v1 i)))))])]
     
     [_ p]))
 

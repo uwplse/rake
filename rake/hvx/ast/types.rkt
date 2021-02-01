@@ -87,6 +87,7 @@
 (struct vasr-acc (Vd Vu Rt) #:transparent)
 (struct vasr-n (Vu Vv Rt round? sat? unsigned?) #:transparent)
 (struct vround (Vu Vv signed?) #:transparent)
+(struct vabs (Vu sat?) #:transparent)
 
 ;; New instructions types we introduce to abstract away data-movement.
 ;; These instr types should never exist in output code.

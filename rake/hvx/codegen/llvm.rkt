@@ -281,7 +281,7 @@
        [(list (i32x32 _) (uint8_t _)) (generate `vmpyiwub.acc t_32xi32 `(list (,t_32xi32 ,(codegen Vd)) (,t_32xi32 ,(codegen Vu)) (,t_i32 ,(codegen-scalar Rt))))])]
  
     ;;vmpye-acc
-    [(vmpye-acc Vd Vu Rt) (generate `vmpyuhe.acc t_32xi32 `(list (,t_32xi32 (codegen Vd)) (,t_32xi32 ,(codegen Vu)) (,t_i32 ,(codegen-scalar Rt))))]
+    [(vmpye-acc Vd Vu Rt) (generate `vmpyuhe.acc t_32xi32 `(list (,t_32xi32 ,(codegen Vd)) (,t_32xi32 ,(codegen Vu)) (,t_i32 ,(codegen-scalar Rt))))]
 
     ;;vmpa
     [(vmpa Vuu Rt)
@@ -369,17 +369,17 @@
     [(vrmpy-p Vuu Rt u1)
      (match (list (interpret-hvx Vuu) (interpret-hvx Rt))
        [(list (u8x128x2 _ _) (list (uint8_t _) (uint8_t _) (uint8_t _) (uint8_t _)))
-        (generate `vrmpyubi t_64xi32 `(list (,t_64xi32 (codegen Vuu)) (,t_i32 ,(codegen-scalar Rt)) (,t_i32 ,(bool->int u1))))]
+        (generate `vrmpyubi t_64xi32 `(list (,t_64xi32 ,(codegen Vuu)) (,t_i32 ,(codegen-scalar Rt)) (,t_i32 ,(bool->int u1))))]
        [(list (u8x128x2 _ _) (list (int8_t _) (int8_t _) (int8_t _) (int8_t _)))
-        (generate `vrmpybusi t_64xi32 `(list (,t_64xi32 (codegen Vuu)) (,t_i32 ,(codegen-scalar Rt)) (,t_i32 ,(bool->int u1))))])]
+        (generate `vrmpybusi t_64xi32 `(list (,t_64xi32 ,(codegen Vuu)) (,t_i32 ,(codegen-scalar Rt)) (,t_i32 ,(bool->int u1))))])]
     
     ;;vrmpy-p-acc
     [(vrmpy-p-acc Vdd Vuu Rt u1)
      (match (list (interpret-hvx Vuu) (interpret-hvx Rt))
        [(list (u8x128x2 _ _) (list (uint8_t _) (uint8_t _) (uint8_t _) (uint8_t _)))
-        (generate `vrmpyubi.acc t_64xi32 `(list (,t_64xi32 ,(codegen Vdd)) (,t_64xi32 (codegen Vuu)) (,t_i32 ,(codegen-scalar Rt)) (,t_i32 ,(bool->int u1))))]
+        (generate `vrmpyubi.acc t_64xi32 `(list (,t_64xi32 ,(codegen Vdd)) (,t_64xi32 ,(codegen Vuu)) (,t_i32 ,(codegen-scalar Rt)) (,t_i32 ,(bool->int u1))))]
        [(list (u8x128x2 _ _) (list (int8_t _) (int8_t _) (int8_t _) (int8_t _)))
-        (generate `vrmpybusi.acc t_64xi32 `(list (,t_64xi32 ,(codegen Vdd)) (,t_64xi32 (codegen Vuu)) (,t_i32 ,(codegen-scalar Rt)) (,t_i32 ,(bool->int u1))))])]
+        (generate `vrmpybusi.acc t_64xi32 `(list (,t_64xi32 ,(codegen Vdd)) (,t_64xi32 ,(codegen Vuu)) (,t_i32 ,(codegen-scalar Rt)) (,t_i32 ,(bool->int u1))))])]
     
     ;;vavg
     [(vavg Vu Vv rnd?)
@@ -429,8 +429,8 @@
     ;;vasr-acc
     [(vasr-acc Vd Vu Rt)
      (match (interpret-hvx Vu)
-       [(i16x64 _) (generate `vasrh.acc t_32xi32 `(list (,t_32xi32 (codegen Vd)) (,t_32xi32 ,(codegen Vu)) (,t_i32 ,(codegen-scalar Rt))))]
-       [(i32x32 _) (generate `vasrw.acc t_32xi32 `(list (,t_32xi32 (codegen Vd)) (,t_32xi32 ,(codegen Vu)) (,t_i32 ,(codegen-scalar Rt))))])]
+       [(i16x64 _) (generate `vasrh.acc t_32xi32 `(list (,t_32xi32 ,(codegen Vd)) (,t_32xi32 ,(codegen Vu)) (,t_i32 ,(codegen-scalar Rt))))]
+       [(i32x32 _) (generate `vasrw.acc t_32xi32 `(list (,t_32xi32 ,(codegen Vd)) (,t_32xi32 ,(codegen Vu)) (,t_i32 ,(codegen-scalar Rt))))])]
     
     ;;vasr-n
     [(vasr-n Vu Vv Rt round? sat? unsigned?)
@@ -469,10 +469,36 @@
             [(list (u32x32 _) (u32x32 _)) (generate `vrounduwuh t_32xi32 `(list (,t_32xi32 ,(codegen Vu)) (,t_32xi32 ,(codegen Vv))))]
             [(list (i32x32 _) (i32x32 _)) (generate `vroundwuh t_32xi32 `(list (,t_32xi32 ,(codegen Vu)) (,t_32xi32 ,(codegen Vv))))]))]
 
+    ;vabs
+    [(vabs Vu sat?)
+     (if sat?
+         (match (interpret-hvx Vu)
+           [(i8x128 _) (generate `vabsb.sat t_32xi32 `(list (,t_32xi32 ,(codegen Vu))))]
+           [(i16x64 _) (generate `vabsh.sat t_32xi32 `(list (,t_32xi32 ,(codegen Vu))))]
+           [(i32x32 _) (generate `vabsw.sat t_32xi32 `(list (,t_32xi32 ,(codegen Vu))))])
+         (match (interpret-hvx Vu)
+           [(i8x128 _) (generate `vabsb t_32xi32 `(list (,t_32xi32 ,(codegen Vu))))]
+           [(i16x64 _) (generate `vabsh t_32xi32 `(list (,t_32xi32 ,(codegen Vu))))]
+           [(i32x32 _) (generate `vabsw t_32xi32 `(list (,t_32xi32 ,(codegen Vu))))]))]
+    
     [(+ a b) (read (open-input-string (format "(+ ~a ~a)" (codegen a) (codegen b))))]
     [(- a b) (read (open-input-string (format "(- ~a ~a)" (codegen a) (codegen b))))]
     [(* a b) (read (open-input-string (format "(* ~a ~a)" (codegen a) (codegen b))))]
     [(- a)   (read (open-input-string (format "(- 0 ~a)" (codegen a))))]
+
+    [(i8x128 Vu) (read (open-input-string (format "~a" Vu)))]
+    [(u8x128 Vu) (read (open-input-string (format "~a" Vu)))]
+    [(i16x64 Vu) (read (open-input-string (format "~a" Vu)))]
+    [(u16x64 Vu) (read (open-input-string (format "~a" Vu)))]
+    [(i32x32 Vu) (read (open-input-string (format "~a" Vu)))]
+    [(u32x32 Vu) (read (open-input-string (format "~a" Vu)))]
+    
+    [(i8x128x2 Vu Vv) (read (open-input-string (format "~a~a" Vu Vu)))]
+    [(u8x128x2 Vu Vv) (read (open-input-string (format "~a~a" Vu Vu)))]
+    [(i16x64x2 Vu Vv) (read (open-input-string (format "~a~a" Vu Vu)))]
+    [(u16x64x2 Vu Vv) (read (open-input-string (format "~a~a" Vu Vu)))]
+    [(i32x32x2 Vu Vv) (read (open-input-string (format "~a~a" Vu Vu)))]
+    [(u32x32x2 Vu Vv) (read (open-input-string (format "~a~a" Vu Vu)))]
     
     [_ (read (open-input-string (format "~a" p)))]))
     
