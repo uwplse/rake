@@ -13,7 +13,7 @@
 ;; a weight function. By default, all instructions have an equal cost.
 (define (basic-expr-cost p [weightf const-weight])
   (define cost 0)
-  (define (update-cost instr) (set! cost (+ cost (weightf instr))))
+  (define (update-cost instr [arg-pos -1]) (set! cost (+ cost (weightf instr))))
   (visit-hvx p update-cost)
   cost)
 
@@ -91,7 +91,9 @@
     ;; New instructions types we introduce to abstract away data-movement.
     ;; These instr types should never exist in output code.
     [(gather* buff-reads) 1]
-    [(gather buff-reads gid) 1]
+    [(gather-vec buff-reads) 1]
+    [(gather-vecp buff-reads) 1]
+    [(swizzle* vec) 1]
     [(swizzle vec) 1]
     
     [_ 0]))
