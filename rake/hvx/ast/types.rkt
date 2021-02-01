@@ -1,6 +1,9 @@
 #lang rosette
 
 (require rosette/lib/match)
+(require rake/cpp/types)
+
+(struct hvx-ast-node (id))
 
 ;; HVX vector types
 (struct i8x128 (Vu) #:transparent)
@@ -87,11 +90,121 @@
 
 ;; New instructions types we introduce to abstract away data-movement.
 ;; These instr types should never exist in output code.
-(struct gather (buff-reads id))
 (struct gather* (buff-reads))
-(struct swizzle (vec) #:transparent)
+(struct gather-vec (buff-reads) #:super struct:hvx-ast-node)
+(struct gather-vecp (buff-reads) #:super struct:hvx-ast-node)
+(struct swizzle* (vec) #:transparent)
+(struct swizzle (vec) #:transparent #:super struct:hvx-ast-node)
 (struct serve-vec (vec type opts sols))
 (struct serve-vec-pair (v0 v1 type opts sols))
+
+;; Type signatures
+(struct instr-sig (ret-val args) #:transparent)
+
+(define (instr-forms instr)
+  (cond
+    ;; HVX instructions for type-casting
+    [(eq? vzxt instr) (list
+                       (instr-sig 'i16x64x2 (list 'u8x128 #t))
+                       (instr-sig 'i16x64x2 (list 'i8x128 #t))
+                       (instr-sig 'i32x32x2 (list 'u16x64 #t))
+                       (instr-sig 'i32x32x2 (list 'i16x64 #t))
+                       (instr-sig 'u16x64x2 (list 'u8x128 #f))
+                       (instr-sig 'u16x64x2 (list 'i8x128 #f))
+                       (instr-sig 'u32x32x2 (list 'u16x64 #f))
+                       (instr-sig 'u32x32x2 (list 'i16x64 #f)))]
+           
+    [(eq? vsxt instr) (list
+                       (instr-sig 'i16x64x2 (list 'u8x128 #t))
+                       (instr-sig 'i16x64x2 (list 'i8x128 #t))
+                       (instr-sig 'i32x32x2 (list 'u16x64 #t))
+                       (instr-sig 'i32x32x2 (list 'i16x64 #t))
+                       (instr-sig 'u16x64x2 (list 'u8x128 #f))
+                       (instr-sig 'u16x64x2 (list 'i8x128 #f))
+                       (instr-sig 'u32x32x2 (list 'u16x64 #f))
+                       (instr-sig 'u32x32x2 (list 'i16x64 #f)))]
+
+    ;; HVX instructions for data processing
+    ;[vadd 
+    [(eq? vadd-w instr) (list
+                         (instr-sig 'i16x64x2 (list 'u8x128 'u8x128))
+                         (instr-sig 'i32x32x2 (list 'u16x64 'u16x64))
+                         (instr-sig 'i32x32x2 (list 'i16x64 'i16x64)))]
+    [(eq? vadd-w-acc instr) (list
+                             (instr-sig 'i16x64x2 (list 'i16x64x2 'u8x128 'u8x128))
+                             (instr-sig 'i32x32x2 (list 'i32x32x2 'u16x64 'u16x64))
+                             (instr-sig 'i32x32x2 (list 'i32x32x2 'i16x64 'i16x64)))]
+    [(eq? vmpy instr) (list
+                       (instr-sig 'i16x64x2 (list 'u8x128 'int8))
+                       (instr-sig 'u16x64x2 (list 'u8x128 'uint8))
+                       (instr-sig 'i32x32x2 (list 'i16x64 'int16))
+                       (instr-sig 'u32x32x2 (list 'u16x64 'uint16)))]
+    ;[vmpyi
+    ;[vmpye
+    [(eq? vmpy-acc instr) (list
+                           (instr-sig 'i16x64x2 (list 'i16x64x2 'u8x128 'int8))
+                           (instr-sig 'u16x64x2 (list 'u16x64x2 'u8x128 'uint8))
+                           (instr-sig 'i32x32x2 (list 'i32x32x2 'i16x64 'int16))
+                           (instr-sig 'u32x32x2 (list 'u32x32x2 'u16x64 'uint16)))]
+    ;[vmpyi-acc
+    ;[vmpye-acc
+    [(eq? vmpa instr) (list
+                       (instr-sig 'i16x64x2 (list 'u8x128x2 'int8x2))
+                       (instr-sig 'i16x64x2 (list 'u8x128x2 'uint8x2))
+                       (instr-sig 'i32x32x2 (list 'u16x64x2 'int8x2))
+                       (instr-sig 'i32x32x2 (list 'i16x64x2 'int8x2)))]
+    [(eq? vmpa-acc instr) (list
+                           (instr-sig 'i16x64x2 (list 'i16x64x2 'u8x128x2 'int8x2))
+                           (instr-sig 'i16x64x2 (list 'i16x64x2 'u8x128x2 'uint8x2))
+                           (instr-sig 'i32x32x2 (list 'i32x32x2 'u16x64x2 'int8x2))
+                           (instr-sig 'i32x32x2 (list 'i32x32x2 'i16x64x2 'int8x2)))]
+    [(eq? vdmpy instr) (list
+                        (instr-sig 'i16x64 (list 'u8x128 'int8x2))
+                        (instr-sig 'i32x32 (list 'i16x64 'int8x2))
+                        (instr-sig 'i32x32 (list 'i16x64 'int16x2))
+                        (instr-sig 'i32x32 (list 'i16x64 'uint16x2))
+                        (instr-sig 'i32x32 (list 'i16x64x2 'int16x2))
+                        (instr-sig 'i32x32 (list 'i16x64x2 'uint16x2)))]
+    [(eq? vdmpy-sw instr) (list
+                           (instr-sig 'i16x64x2 (list 'u8x128x2 'int8x2))
+                           (instr-sig 'i32x32x2 (list 'i16x64x2 'int8x2)))]
+ 
+    [(eq? vdmpy-acc instr) (list
+                            (instr-sig 'i16x64 (list 'i16x64 'u8x128 'int8x2))
+                            (instr-sig 'i32x32 (list 'i32x32 'i16x64 'int8x2))
+                            (instr-sig 'i32x32 (list 'i32x32 'i16x64 'int16x2))
+                            (instr-sig 'i32x32 (list 'i32x32 'i16x64 'uint16x2))
+                            (instr-sig 'i32x32 (list 'i32x32 'i16x64x2 'int16x2))
+                            (instr-sig 'i32x32 (list 'i32x32'i16x64x2 'uint16x2)))]
+    [(eq? vdmpy-sw-acc instr) (list
+                               (instr-sig 'i16x64x2 (list 'i16x64x2 'u8x128x2 'int8x2))
+                               (instr-sig 'i32x32x2 (list 'i32x32x2 'i16x64x2 'int8x2)))]
+ 
+
+    [(eq? vtmpy instr) (list
+                        (instr-sig 'i16x64x2 (list 'i8x128x2 'int8x2))
+                        (instr-sig 'i16x64x2 (list 'u8x128x2 'int8x2))
+                        (instr-sig 'i32x32x2 (list 'i16x64x2 'int8x2)))]
+
+    [(eq? vtmpy-acc instr) (list
+                            (instr-sig 'i16x64x2 (list 'i16x64x2 'i8x128x2 'int8x2))
+                            (instr-sig 'i16x64x2 (list 'i16x64x2 'u8x128x2 'int8x2))
+                            (instr-sig 'i32x32x2 (list 'i32x32x2 'i16x64x2 'int8x2)))]
+    
+    ;[vrmpy
+    ;[vrmpy-acc
+    ;[vrmpy-p
+    ;[vrmpy-p-acc
+    ;[vavg
+    ;[vnavg
+    ;[vasl
+    ;[vlsr
+    ;[vasr
+    ;[vasr-acc
+    ;[vasr-n
+    ;[vround
+    [else (error "Unknown instruction:" instr)]))
+
 
 ;; Sine utility methods for HVX types
 (define (v0 vec-p)
