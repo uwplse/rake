@@ -23,8 +23,8 @@
 
     ;;;;;;;;;;;;;;;; Instructions for data movement ;;;;;;;;;;;;;;;;
     
-    [(lo Vuu) (when (hvx-pair? (interpret Vuu)) (v0 (interpret Vuu)))]
-    [(hi Vuu) (when (hvx-pair? (interpret Vuu)) (v1 (interpret Vuu)))]
+    [(lo Vuu) (v0 (interpret Vuu))]
+    [(hi Vuu) (v1 (interpret Vuu))]
 
     [(vcombine Vu Vv)
      (match (list (interpret Vu) (interpret Vv))
@@ -127,18 +127,39 @@
        [(list (u16x64 v0) (u16x64 v1)) (u16x64 (lambda (i) (assert (<= 0 Rt 63)) (if (< i Rt) (v1 (+ (- 64 Rt) i)) (v0 (- i Rt)))))]
        [(list (i32x32 v0) (i32x32 v1)) (i32x32 (lambda (i) (assert (<= 0 Rt 31)) (if (< i Rt) (v1 (+ (- 32 Rt) i)) (v0 (- i Rt)))))]
        [(list (u32x32 v0) (u32x32 v1)) (u32x32 (lambda (i) (assert (<= 0 Rt 31)) (if (< i Rt) (v1 (+ (- 32 Rt) i)) (v0 (- i Rt)))))])]
+
+    [(vtranspose Vu Vv Rt)
+     (match (list (interpret Vu) (interpret Vv))
+       ;[(list (i8x128 v0) (i8x128 v1))
+        ;(i8x128x2 (lambda (i) (assert (<= 0 Rt 127)) (if (< i Rt) (v1 (+ (- 128 Rt) i)) (v0 (- i Rt)))))]
+       ;[(list (u8x128 v0) (u8x128 v1))
+        ;(u8x128 (lambda (i) (assert (<= 0 Rt 127)) (if (< i Rt) (v1 (+ (- 128 Rt) i)) (v0 (- i Rt)))))]
+       [(list (i16x64 v0) (i16x64 v1))
+        (i16x64x2
+         (lambda (i) (if (even? i) (v1 (quotient i 2)) (v0 (quotient i 2))))
+         (lambda (i) (if (even? i) (v1 (+ (quotient i 2) 32)) (v0 (+ (quotient i 2) 32)))))]
+       ;[(list (u16x64 v0) (u16x64 v1))
+        ;(u16x64 (lambda (i) (assert (<= 0 Rt 63)) (if (< i Rt) (v1 (+ (- 64 Rt) i)) (v0 (- i Rt)))))]
+       ;[(list (i32x32 v0) (i32x32 v1))
+        ;(i32x32 (lambda (i) (assert (<= 0 Rt 31)) (if (< i Rt) (v1 (+ (- 32 Rt) i)) (v0 (- i Rt)))))]
+       ;[(list (u32x32 v0) (u32x32 v1))
+        ;(u32x32 (lambda (i) (assert (<= 0 Rt 31)) (if (< i Rt) (v1 (+ (- 32 Rt) i)) (v0 (- i Rt)))))]
+       )]
     
     ;(struct vswap (Qt Vu Vv) #:transparent)
     ;(struct vmux (Qt Vu Vv) #:transparent)
     
-    ;(struct vtranspose (Vu Vv Rt) #:transparent)
     ;(struct vlut (Vu Vv) #:transparent)
     ;(struct vgather (Rt Mu Vv) #:transparent)
     
     ;;;;;;;;; New constructs to abstract away data movement;;;;;;;;;
+
+    ;[(swizzle* vec) (get-from-vec* buff-reads)]
+    [(swizzle vec) (get-from-vec (interpret vec) (hvx-ast-node-id p))]
     
-    [(gather buff-reads gid) (get-from-buf buff-reads gid)]
     [(gather* buff-reads) (get-from-buf* buff-reads)]
+    [(gather-vec buff-reads) (get-vec-from-buf buff-reads (hvx-ast-node-id p))]
+    [(gather-vecp buff-reads) (get-vecp-from-buf buff-reads (hvx-ast-node-id p))]
 
     [(serve-vec vec otype opts sols)
      (otype
@@ -157,8 +178,6 @@
         (list-ref
          (filter (lambda(v) (eq? (type v) (elem-type otype))) (list-ref opts curr-cn))
          ((evaluate v1 (list-ref sols curr-cn)) i))))]
-    
-    ;[(swizzle vec) (get-from-vec (interpret vec))]
     
     ;;;;;;;;;;;;;;;; Instructions for data processing ;;;;;;;;;;;;;;;;
 
@@ -253,7 +272,7 @@
          (lambda (i) (multiply (lhs (* i 2)) rhs 'uint32))
          (lambda (i) (multiply (lhs (+ (* i 2) 1)) rhs 'uint32)))]
        [(list (i16x64 lhs) (int16_t v))
-        (i16x64x2
+        (i32x32x2
          (lambda (i) (multiply (lhs (* i 2)) rhs 'int32))
          (lambda (i) (multiply (lhs (+ (* i 2) 1)) rhs 'int32)))])]
 
@@ -736,6 +755,28 @@
     ['int32 32]
     ['uint32 32]))
 
+(define (get-from-vec vec gid)
+  (define-values (p? outType Vu Vv) (cond
+                                   [(i8x128? vec) (values #f i8x128 (i8x128-Vu vec) (void))]
+                                   [(u8x128? vec) (values #f u8x128 (u8x128-Vu vec) (void))]
+                                   [(i16x64? vec) (values #f i16x64 (i16x64-Vu vec) (void))]
+                                   [(u16x64? vec) (values #f u16x64 (u16x64-Vu vec) (void))]
+                                   [(i32x32? vec) (values #f i32x32 (i32x32-Vu vec) (void))]
+                                   [(u32x32? vec) (values #f u32x32 (u32x32-Vu vec) (void))]
+                                   [(i8x128x2? vec) (values #t i8x128x2 (i8x128x2-Vu vec) (i8x128x2-Vv vec))]
+                                   [(u8x128x2? vec) (values #t u8x128x2 (u8x128x2-Vu vec) (u8x128x2-Vv vec))]
+                                   [(i16x64x2? vec) (values #t i16x64x2 (i16x64x2-Vu vec) (i16x64x2-Vv vec))]
+                                   [(u16x64x2? vec) (values #t u16x64x2 (u16x64x2-Vu vec) (u16x64x2-Vv vec))]
+                                   [(i32x32x2? vec) (values #t i32x32x2 (i32x32x2-Vu vec) (i32x32x2-Vv vec))]
+                                   [(u32x32x2? vec) (values #t u32x32x2 (u32x32x2-Vu vec) (u32x32x2-Vv vec))]))
+
+  (define-symbolic* idx-tbl1 (~> integer? integer?))
+  (define-symbolic* idx-tbl2 (~> integer? integer?))
+  
+  (if p?
+      (outType (lambda (i) ((choose* Vu Vv) (idx-tbl1 i))) (lambda (i) ((choose* Vu Vv) (idx-tbl2 i))))
+      (outType (lambda (i) (Vu (idx-tbl1 i))))))
+
 ;; The curr-cn flag is used to restrict the set of values a gather returns when the expression is being evaluated for
 ;; any particular channel
 (define curr-cn 0)
@@ -772,7 +813,7 @@
     (lambda (i) (list-ref (filter (lambda(v) (eq? (type v) elemType)) (list-ref buff-reads curr-cn)) (idx-tbl1 i)))
     (lambda (i) (list-ref (filter (lambda(v) (eq? (type v) elemType)) (list-ref buff-reads curr-cn)) (idx-tbl2 i))))))
 
-(define (get-from-buf buff-reads gid)
+(define (get-vec-from-buf buff-reads gid)
   (define cn-reads (list-ref buff-reads 0))
   (define elemType (apply choose* (map (lambda(v) (type v)) cn-reads)))
   (define opts (filter (lambda(v) (eq? (type v) elemType)) cn-reads))
@@ -783,6 +824,18 @@
                     [(eq? elemType 'uint8) u8x128]
                     [(eq? elemType 'uint16) u16x64]
                     [(eq? elemType 'uint32) u32x32]))
+
+  (define-symbolic* idx-tbl1 (~> integer? integer?))
+  
+  (hash-set! gather-tables gid idx-tbl1)
+  (hash-set! gather-types gid vecType)
+
+  (vecType (lambda (i) (list-ref (filter (lambda(v) (eq? (type v) elemType)) (list-ref buff-reads curr-cn)) (idx-tbl1 i)))))
+
+(define (get-vecp-from-buf buff-reads gid)
+  (define cn-reads (list-ref buff-reads 0))
+  (define elemType (apply choose* (map (lambda(v) (type v)) cn-reads)))
+  (define opts (filter (lambda(v) (eq? (type v) elemType)) cn-reads))
   (define vecpType (cond
                     [(eq? elemType 'int8) i8x128x2]
                     [(eq? elemType 'int16) i16x64x2]
@@ -794,30 +847,16 @@
   (define-symbolic* idx-tbl1 (~> integer? integer?))
   (define-symbolic* idx-tbl2 (~> integer? integer?))
 
-  (define-symbolic* p? boolean?)
-  
   (hash-set! gather-tables gid (cons idx-tbl1 idx-tbl2))
-  (hash-set! gather-types gid (if p? vecpType vecType))
+  (hash-set! gather-types gid vecpType)
   
-  (if p?
-   (vecpType
-    (lambda (i) (list-ref (filter (lambda(v) (eq? (type v) elemType)) (list-ref buff-reads curr-cn)) (idx-tbl1 i)))
-    (lambda (i) (list-ref (filter (lambda(v) (eq? (type v) elemType)) (list-ref buff-reads curr-cn)) (idx-tbl2 i))))
-   (vecType
-    (lambda (i) (list-ref (filter (lambda(v) (eq? (type v) elemType)) (list-ref buff-reads curr-cn)) (idx-tbl1 i))))))
+  (vecpType
+   (lambda (i) (list-ref (filter (lambda(v) (eq? (type v) elemType)) (list-ref buff-reads curr-cn)) (idx-tbl1 i)))
+   (lambda (i) (list-ref (filter (lambda(v) (eq? (type v) elemType)) (list-ref buff-reads curr-cn)) (idx-tbl2 i)))))
 
-;(define (get-from-vec vec)
-;  (define op (choose* sxt16 zxt16 sxt32 zxt32))
-;  (if (pair? vec)
-;      (choose*
-;       (lambda (i) ((choose* lo8 hi8 lo16 hi16) ((choose* (car vec) (cdr vec)) (apply choose* (build-list 128 values)))))
-;       (cons
-;        (lambda (i) ((choose* (car vec) (cdr vec)) (apply choose* (build-list 128 values))))
-;        (lambda (i) ((choose* (car vec) (cdr vec)) (apply choose* (build-list 128 values))))))
-;      (choose*
-;       (lambda (i) (vec (apply choose* (build-list 128 values))))
-;       (cons
-;        (lambda (i) (op (vec (apply choose* (build-list 128 values)))))
-;        (lambda (i) (op (vec (apply choose* (build-list 128 values)))))))))
-
-(provide (rename-out [interpret interpret-hvx] [set-curr-cn set-curr-cn-hvx] [gather-tables hvx-gather-tables] [gather-types hvx-gather-types]))
+(provide
+ (rename-out
+  [interpret interpret-hvx]
+  [set-curr-cn set-curr-cn-hvx]
+  [gather-tables hvx-gather-tables]
+  [gather-types hvx-gather-types]))
