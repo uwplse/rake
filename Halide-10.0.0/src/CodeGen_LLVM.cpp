@@ -2610,6 +2610,15 @@ void CodeGen_LLVM::visit(const Call *op) {
     // cue for llvm to generate particular ops. In general these are
     // handled in the standard library, but ones with e.g. varying
     // types are handled here.
+    if (op->call_type == Call::CallType::PureExtern && starts_with(op->name, "llvm.")){
+        vector<Value *> args;
+        llvm::Function *fn = module->getFunction(op->name);
+        for(auto arg : op->args){
+            args.push_back(codegen(arg));
+        }
+        value = builder->CreateCall(fn, args);
+        value = builder->CreateBitCast(value, llvm_type_of(op->type));
+    }
     if (op->is_intrinsic(Call::debug_to_file)) {
         internal_assert(op->args.size() == 3);
         const StringImm *filename = op->args[0].as<StringImm>();

@@ -2765,17 +2765,22 @@ private:
                 return IRMutator::visit(stmt);
             }else if(x == 1){
                 SExpParser p;
-                std::string s = R"((llvm.hexagon.V6.vread.128B int32x32 (list (int32 input) (int32 (+ -2 (* -2 rows.s0.x.x))))))";
+                std::string s = R"((llvm.hexagon.V6.vread.128B uint8x128 (list (int32 input) (int32 (+ -2 (* -2 rows.s0.x.x))))))";
                 debug(0) << "Input S-expressions:\n" << s << "\n";
-                debug(0) << "Output AST:\n" << p.parse(s) << "\n";
-                return Store::make(stmt->name, p.parse(s), stmt->index, stmt->param, stmt->predicate, stmt->alignment);
+                auto parsed =  p.parse(s);
+                debug(0) << "Output AST:\n" << parsed << "\n";
+                return Store::make(stmt->name, parsed, stmt->index, stmt->param, stmt->predicate, stmt->alignment);
             }
             else {
                 SExpParser p;
-                std::string s = R"((llvm.hexagon.V6.vmpahb.128B int32x32 (list (int32x64 (llvm.hexagon.V6.vcombine.128B int32x64 (list (int32x32 (llvm.hexagon.V6.vread.128B int32x32 (list (int32 input) (int32 (+ -2 rows.s0.x.x))))) (int32x32 (llvm.hexagon.V6.vread.128B int32x32 (list (int32 input) (int32 (+ -2 (* -2 rows.s0.x.x))))))))) (int32 42))))";
+                std::string s = R"((llvm.hexagon.V6.vmpahb.128B int32x64 (list (int32x64 (llvm.hexagon.V6.vcombine.128B int32x64 (list (int32x32 (llvm.hexagon.V6.vread.128B int32x32 (list (int32 input) (int32 (+ -2 rows.s0.x.x))))) (int32x32 (llvm.hexagon.V6.vread.128B int32x32 (list (int32 input) (int32 (+ -2 (* -2 rows.s0.x.x))))))))) (int32 42))))";
                 debug(0) << "Input S-expressions:\n" << s << "\n";
-                debug(0) << "Output AST:\n" << p.parse(s) << "\n";
-                return Store::make(stmt->name, p.parse(s), stmt->index, stmt->param, stmt->predicate, stmt->alignment);
+                auto parsed = p.parse(s);
+                debug(0) << "Output AST:\n" << parsed << "\n";
+                auto stored = Store::make(stmt->name, p.parse(s), stmt->index, stmt->param, stmt->predicate, stmt->alignment);
+                debug(0) << "With Store:\n" << stored << "\n";
+                return stored;
+
             }
 
             RacketPrinter specPrinter(std::cout);
@@ -3010,7 +3015,7 @@ Stmt optimize_hexagon_instructions_synthesis(Stmt s, FuncValueBounds fvb) {
 
     debug(0) << s << "\n\n";
 
-    exit(0);
+    //exit(0);
 
     //debug(0) << s << "\n";
 

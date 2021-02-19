@@ -177,7 +177,7 @@ Expr SExpParser::parse_intrinsic(Token &tok, string &sexp) {
     close_sexp(sexp);
 
     // Not sure about the call type here
-    return Call::make(return_type, func_name, params, Call::CallType::PureIntrinsic);
+    return Call::make(return_type, func_name, params, Call::CallType::PureExtern);
 }
 
 Expr SExpParser::parse(string &sexp, Type expected_type) {
