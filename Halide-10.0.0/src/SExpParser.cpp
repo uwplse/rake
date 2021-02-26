@@ -44,7 +44,7 @@ bool get_token(string &sexp, Token &token) {
             sexp = sexp.substr(it - sexp.begin());
             return true;
         }
-    } else if (isdigit(sexp[0])) {
+    } else if (isdigit(sexp[0]) || (sexp[0] == '-' && isdigit(sexp[1]))) {
         bool found_x = false;
         bool found_dot = false;
         auto it = sexp.begin();
@@ -227,7 +227,7 @@ Expr SExpParser::parse(string &sexp, Type expected_type) {
 void sexp_parser_test() {
     SExpParser p;
 
-    string s = "(llvm.hexagon.V6.vread.128B int32x32 (list (int32 buf) (int32 (+ 2 x))))";
+    string s = "(llvm.hexagon.V6.vread.128B int32x32 (list (int32 buf) (int32 (+ -2 x))))";
 
     string gaussian3x3 = R"((llvm.hexagon.V6.vasrhubrndsat.128B
     int32x32
