@@ -26,8 +26,8 @@
     [(vsplat Rt) 1]
 
     ;; HVX instructions for data swizzling
-    [(lo Vuu) 1]
-    [(hi Vuu) 1]
+    [(lo Vuu) 0.1]
+    [(hi Vuu) 0.1]
     [(vcombine Vu Vv) 1]
     [(vshuffe Vu Vv) 1]
     [(vshuffo Vu Vv) 1]
@@ -45,8 +45,8 @@
     [(vshuff Vu) 1]
     [(vtranspose Vu Vv Rt) 1]
     [(vpack Vu Vv) 1]
-    [(vpacke Vu Vv) 1]
-    [(vpacko Vu Vv) 1]
+    [(vpacke Vu Vv signed?) 1]
+    [(vpacko Vu Vv signed?) 1]
     [(vpacko-n Vu Vv signed?) 1]
     [(vunpack Vu) 1]
     [(vunpacko Vu) 1]
@@ -95,6 +95,8 @@
     [(gather-vecp buff-reads) 1]
     [(swizzle* vec) 1]
     [(swizzle vec) 1]
+    [(??vread buf-opts idxs) 1]
+    [(??vreadp buf-opts idxs) 1]
     
     [_ 0]))
    

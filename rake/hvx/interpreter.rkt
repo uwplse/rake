@@ -103,30 +103,30 @@
 
     [(vror Vu Rt)
      (match (interpret Vu)
-       [(i8x128 v0) (i8x128 (lambda (i) (assert (<= 0 Rt 126)) (v0 (let ([idx (+ i Rt)]) (if (< idx 128) idx (- idx 127))))))]
-       [(u8x128 v0) (u8x128 (lambda (i) (assert (<= 0 Rt 126)) (v0 (let ([idx (+ i Rt)]) (if (< idx 128) idx (- idx 127))))))]
-       [(i16x64 v0) (i16x64 (lambda (i) (assert (<= 0 Rt 62)) (v0 (let ([idx (+ i Rt)]) (if (< idx 64) idx (- idx 63))))))]
-       [(u16x64 v0) (u16x64 (lambda (i) (assert (<= 0 Rt 62)) (v0 (let ([idx (+ i Rt)]) (if (< idx 64) idx (- idx 63))))))]
-       [(i32x32 v0) (i32x32 (lambda (i) (assert (<= 0 Rt 30)) (v0 (let ([idx (+ i Rt)]) (if (< idx 32) idx (- idx 31))))))]
-       [(u32x32 v0) (u32x32 (lambda (i) (assert (<= 0 Rt 30)) (v0 (let ([idx (+ i Rt)]) (if (< idx 32) idx (- idx 31))))))])]
+       [(i8x128 v0) (i8x128 (lambda (i) (assert (<= 1 Rt 126)) (v0 (let ([idx (+ i Rt)]) (if (< idx 128) idx (- idx 127))))))]
+       [(u8x128 v0) (u8x128 (lambda (i) (assert (<= 1 Rt 126)) (v0 (let ([idx (+ i Rt)]) (if (< idx 128) idx (- idx 127))))))]
+       [(i16x64 v0) (i16x64 (lambda (i) (assert (<= 1 Rt 62)) (v0 (let ([idx (+ i Rt)]) (if (< idx 64) idx (- idx 63))))))]
+       [(u16x64 v0) (u16x64 (lambda (i) (assert (<= 1 Rt 62)) (v0 (let ([idx (+ i Rt)]) (if (< idx 64) idx (- idx 63))))))]
+       [(i32x32 v0) (i32x32 (lambda (i) (assert (<= 1 Rt 30)) (v0 (let ([idx (+ i Rt)]) (if (< idx 32) idx (- idx 31))))))]
+       [(u32x32 v0) (u32x32 (lambda (i) (assert (<= 1 Rt 30)) (v0 (let ([idx (+ i Rt)]) (if (< idx 32) idx (- idx 31))))))])]
 
     [(valign Vu Vv Rt)
      (match (list (interpret Vu) (interpret Vv))
-       [(list (i8x128 v0) (i8x128 v1)) (i8x128 (lambda (i) (assert (<= 0 Rt 127)) (if (< i (- 128 Rt)) (v1 (+ i Rt)) (v0 (modulo (+ i Rt) 128)))))]
-       [(list (u8x128 v0) (u8x128 v1)) (u8x128 (lambda (i) (assert (<= 0 Rt 127)) (if (< i (- 128 Rt)) (v1 (+ i Rt)) (v0 (modulo (+ i Rt) 128)))))]
-       [(list (i16x64 v0) (i16x64 v1)) (i16x64 (lambda (i) (assert (<= 0 Rt 63)) (if (< i (- 64 Rt)) (v1 (+ i Rt)) (v0 (modulo (+ i Rt) 64)))))]
-       [(list (u16x64 v0) (u16x64 v1)) (u16x64 (lambda (i) (assert (<= 0 Rt 63)) (if (< i (- 64 Rt)) (v1 (+ i Rt)) (v0 (modulo (+ i Rt) 64)))))]
-       [(list (i32x32 v0) (i32x32 v1)) (i32x32 (lambda (i) (assert (<= 0 Rt 31)) (if (< i (- 32 Rt)) (v1 (+ i Rt)) (v0 (modulo (+ i Rt) 32)))))]
-       [(list (u32x32 v0) (u32x32 v1)) (u32x32 (lambda (i) (assert (<= 0 Rt 31)) (if (< i (- 32 Rt)) (v1 (+ i Rt)) (v0 (modulo (+ i Rt) 32)))))])]
+       [(list (i8x128 v0) (i8x128 v1)) (i8x128 (lambda (i) (assert (<= 1 Rt 127)) (if (< i (- 128 Rt)) (v1 (+ i Rt)) (v0 (modulo (+ i Rt) 128)))))]
+       [(list (u8x128 v0) (u8x128 v1)) (u8x128 (lambda (i) (assert (<= 1 Rt 127)) (if (< i (- 128 Rt)) (v1 (+ i Rt)) (v0 (modulo (+ i Rt) 128)))))]
+       [(list (i16x64 v0) (i16x64 v1)) (i16x64 (lambda (i) (assert (<= 1 Rt 63)) (if (< i (- 64 Rt)) (v1 (+ i Rt)) (v0 (modulo (+ i Rt) 64)))))]
+       [(list (u16x64 v0) (u16x64 v1)) (u16x64 (lambda (i) (assert (<= 1 Rt 63)) (if (< i (- 64 Rt)) (v1 (+ i Rt)) (v0 (modulo (+ i Rt) 64)))))]
+       [(list (i32x32 v0) (i32x32 v1)) (i32x32 (lambda (i) (assert (<= 1 Rt 31)) (if (< i (- 32 Rt)) (v1 (+ i Rt)) (v0 (modulo (+ i Rt) 32)))))]
+       [(list (u32x32 v0) (u32x32 v1)) (u32x32 (lambda (i) (assert (<= 1 Rt 31)) (if (< i (- 32 Rt)) (v1 (+ i Rt)) (v0 (modulo (+ i Rt) 32)))))])]
     
     [(vlalign Vu Vv Rt)
      (match (list (interpret Vu) (interpret Vv))
-       [(list (i8x128 v0) (i8x128 v1)) (i8x128 (lambda (i) (assert (<= 0 Rt 127)) (if (< i Rt) (v1 (+ (- 128 Rt) i)) (v0 (- i Rt)))))]
-       [(list (u8x128 v0) (u8x128 v1)) (u8x128 (lambda (i) (assert (<= 0 Rt 127)) (if (< i Rt) (v1 (+ (- 128 Rt) i)) (v0 (- i Rt)))))]
-       [(list (i16x64 v0) (i16x64 v1)) (i16x64 (lambda (i) (assert (<= 0 Rt 63)) (if (< i Rt) (v1 (+ (- 64 Rt) i)) (v0 (- i Rt)))))]
-       [(list (u16x64 v0) (u16x64 v1)) (u16x64 (lambda (i) (assert (<= 0 Rt 63)) (if (< i Rt) (v1 (+ (- 64 Rt) i)) (v0 (- i Rt)))))]
-       [(list (i32x32 v0) (i32x32 v1)) (i32x32 (lambda (i) (assert (<= 0 Rt 31)) (if (< i Rt) (v1 (+ (- 32 Rt) i)) (v0 (- i Rt)))))]
-       [(list (u32x32 v0) (u32x32 v1)) (u32x32 (lambda (i) (assert (<= 0 Rt 31)) (if (< i Rt) (v1 (+ (- 32 Rt) i)) (v0 (- i Rt)))))])]
+       [(list (i8x128 v0) (i8x128 v1)) (i8x128 (lambda (i) (assert (<= 1 Rt 127)) (if (< i Rt) (v1 (+ (- 128 Rt) i)) (v0 (- i Rt)))))]
+       [(list (u8x128 v0) (u8x128 v1)) (u8x128 (lambda (i) (assert (<= 1 Rt 127)) (if (< i Rt) (v1 (+ (- 128 Rt) i)) (v0 (- i Rt)))))]
+       [(list (i16x64 v0) (i16x64 v1)) (i16x64 (lambda (i) (assert (<= 1 Rt 63)) (if (< i Rt) (v1 (+ (- 64 Rt) i)) (v0 (- i Rt)))))]
+       [(list (u16x64 v0) (u16x64 v1)) (u16x64 (lambda (i) (assert (<= 1 Rt 63)) (if (< i Rt) (v1 (+ (- 64 Rt) i)) (v0 (- i Rt)))))]
+       [(list (i32x32 v0) (i32x32 v1)) (i32x32 (lambda (i) (assert (<= 1 Rt 31)) (if (< i Rt) (v1 (+ (- 32 Rt) i)) (v0 (- i Rt)))))]
+       [(list (u32x32 v0) (u32x32 v1)) (u32x32 (lambda (i) (assert (<= 1 Rt 31)) (if (< i Rt) (v1 (+ (- 32 Rt) i)) (v0 (- i Rt)))))])]
 
     [(vtranspose Vu Vv Rt)
      (match (list (interpret Vu) (interpret Vv))
@@ -135,9 +135,15 @@
        ;[(list (u8x128 v0) (u8x128 v1))
         ;(u8x128 (lambda (i) (assert (<= 0 Rt 127)) (if (< i Rt) (v1 (+ (- 128 Rt) i)) (v0 (- i Rt)))))]
        [(list (i16x64 v0) (i16x64 v1))
-        (i16x64x2
-         (lambda (i) (if (even? i) (v1 (quotient i 2)) (v0 (quotient i 2))))
-         (lambda (i) (if (even? i) (v1 (+ (quotient i 2) 32)) (v0 (+ (quotient i 2) 32)))))]
+        (cond
+          [(eq? Rt 1)
+           (i16x64x2
+            (lambda (i) (if (even? i) (v1 (quotient i 2)) (v0 (quotient i 2))))
+            (lambda (i) (if (even? i) (v1 (+ (quotient i 2) 32)) (v0 (+ (quotient i 2) 32)))))]
+          [(eq? Rt 2)
+           (i16x64x2
+            (lambda (i) (if (even? (quotient i 2)) (v1 (+ (quotient i 2) (remainder i 2))) (v0 (+ (quotient i 2) (remainder i 2)))))
+            (lambda (i) (if (even? (quotient i 2)) (v1 (+ (quotient i 2) (remainder i 2) 32)) (v0 (+ (quotient i 2) (remainder i 2) 32)))))])]
        ;[(list (u16x64 v0) (u16x64 v1))
         ;(u16x64 (lambda (i) (assert (<= 0 Rt 63)) (if (< i Rt) (v1 (+ (- 64 Rt) i)) (v0 (- i Rt)))))]
        ;[(list (i32x32 v0) (i32x32 v1))
@@ -178,6 +184,27 @@
         (list-ref
          (filter (lambda(v) (eq? (type v) (elem-type otype))) (list-ref opts curr-cn))
          ((evaluate v1 (list-ref sols curr-cn)) i))))]
+
+    [(??vread buf-opts load-idxs)
+     (define-symbolic i integer?)
+     (define buf (list-ref buf-opts i))
+     (define-symbolic b integer?)
+     (define idx (list-ref (hash-ref load-idxs buf) b))
+     (interpret (vread buf idx))]
+;     (match elem-type
+;       ['uint8  (u8x128 (lambda (i) ))]
+;       ['uint16 (u16x64 (lambda (i) ))]
+;       ['uint32 (u32x32 (lambda (i) ))]
+;       ['int8   (i8x128 (lambda (i) ))]
+;       ['int16  (i16x64 (lambda (i) ))]
+;       ['int32  (i32x32 (lambda (i) ))])]
+
+    [(??vreadp buf-opts load-idxs)
+     (define-symbolic i integer?)
+     (define buf (list-ref buf-opts i))
+     (define-symbolic b integer?)
+     (define idx (list-ref (hash-ref load-idxs buf) b))
+     (interpret (vreadp buf idx))]
     
     ;;;;;;;;;;;;;;;; Instructions for data processing ;;;;;;;;;;;;;;;;
 
@@ -211,15 +238,15 @@
 
        ;; Always saturate for unsigned types
        [(list (u8x128x2 lhs-v0 lhs-v1) (u8x128x2 rhs-v0 rhs-v1))
-        (i8x128x2
+        (u8x128x2
          (lambda (i) (add-sat (lhs-v0 i) (rhs-v0 i) 'uint8))
          (lambda (i) (add-sat (lhs-v1 i) (rhs-v1 i) 'uint8)))]
        [(list (u16x64x2 lhs-v0 lhs-v1) (u16x64x2 rhs-v0 rhs-v1))
-        (i16x64x2
+        (u16x64x2
          (lambda (i) (add-sat (lhs-v0 i) (rhs-v0 i) 'uint16))
          (lambda (i) (add-sat (lhs-v1 i) (rhs-v1 i) 'uint16)))]
        [(list (u32x32x2 lhs-v0 lhs-v1) (u32x32x2 rhs-v0 rhs-v1))
-        (i32x32x2
+        (u32x32x2
          (lambda (i) (add-sat (lhs-v0 i) (rhs-v0 i) 'uint32))
          (lambda (i) (add-sat (lhs-v1 i) (rhs-v1 i) 'uint32)))])]
 
@@ -380,7 +407,7 @@
        [(list (i16x64 data) (cons (uint16_t w1) (uint16_t w2))) (i32x32 (lambda (i) (sat32 (multiply-add (data (* i 2)) (uint16_t w1) (data (+ (* i 2) 1)) (uint16_t w2) 'int64))))]
        [(list (i16x64x2 data-v0 data-v1) (cons (int16_t w1) (int16_t w2))) (i32x32 (lambda (i) (sat32 (multiply-add (data-v0 (+ (* i 2) 1)) (int16_t w1) (data-v1 (* i 2)) (int16_t w2) 'int64))))]
        [(list (i16x64x2 data-v0 data-v1) (cons (uint16_t w1) (uint16_t w2))) (i32x32 (lambda (i) (sat32 (multiply-add (data-v0 (+ (* i 2) 1)) (int16_t w1) (data-v1 (* i 2)) (int16_t w2) 'int64))))])]
-
+    
     ;; Reduce (via sum) two vector-scalar multiplies in a sliding window
     [(vdmpy-sw Vuu Rt)
      (match (list (interpret Vuu) (interpret Rt))
@@ -553,8 +580,8 @@
        [(list (i32x32 v0) (i32x32 v1) #f) (u16x64 (lambda (i) (satu16 (if (even? i) (round (v1 (quotient i 2))) (round (v0 (quotient i 2)))))))]
        [(list (u32x32 v0) (u32x32 v1) _)  (u16x64 (lambda (i) (satu16 (if (even? i) (round (v1 (quotient i 2))) (round (v0 (quotient i 2)))))))])]
 
-    [(vpacko-n Vd Vu signed?)
-     (match (list (interpret Vd) (interpret Vu) (interpret signed?))
+    [(vpacko-n Vu Vv signed?)
+     (match (list (interpret Vu) (interpret Vv) (interpret signed?))
        [(list (i16x64 v0) (i16x64 v1) #t) (i8x128 (lambda (i) (if (< i 64) (i8hi (v1 i)) (i8hi (v0 (- i 64))))))]
        [(list (i16x64 v0) (i16x64 v1) #f) (u8x128 (lambda (i) (if (< i 64) (u8hi (v1 i)) (u8hi (v0 (- i 64))))))]
        [(list (u16x64 v0) (u16x64 v1) #t) (i8x128 (lambda (i) (if (< i 64) (i8hi (v1 i)) (i8hi (v0 (- i 64))))))]
@@ -782,8 +809,24 @@
                                    [(i32x32x2? vec) (values #t i32x32x2 (i32x32x2-Vu vec) (i32x32x2-Vv vec))]
                                    [(u32x32x2? vec) (values #t u32x32x2 (u32x32x2-Vu vec) (u32x32x2-Vv vec))]))
 
-  (define-symbolic* idx-tbl1 (~> integer? integer?))
-  (define-symbolic* idx-tbl2 (~> integer? integer?))
+  (define-symbolic idx-tbl1 (~> integer? integer?))
+  (define-symbolic idx-tbl2 (~> integer? integer?))
+  
+  (define-symbolic idx integer?)
+  (assert
+   (cond
+     [(eq? outType i8x128) (forall (list idx) (<= 0 (idx-tbl1 idx) 127))]
+     [(eq? outType u8x128) (forall (list idx) (<= 0 (idx-tbl1 idx) 127))]
+     [(eq? outType i16x64) (forall (list idx) (<= 0 (idx-tbl1 idx) 63))]
+     [(eq? outType u16x64) (forall (list idx) (<= 0 (idx-tbl1 idx) 63))]
+     [(eq? outType i32x32) (forall (list idx) (<= 0 (idx-tbl1 idx) 31))]
+     [(eq? outType u32x32) (forall (list idx) (<= 0 (idx-tbl1 idx) 31))]
+     [(eq? outType i8x128x2) (forall (list idx) (and (<= 0 (idx-tbl1 idx) 127) (<= 0 (idx-tbl2 idx) 127)))]
+     [(eq? outType u8x128x2) (forall (list idx) (and (<= 0 (idx-tbl1 idx) 127) (<= 0 (idx-tbl2 idx) 127)))]
+     [(eq? outType i16x64x2) (forall (list idx) (and (<= 0 (idx-tbl1 idx) 63) (<= 0 (idx-tbl2 idx) 63)))]
+     [(eq? outType u16x64x2) (forall (list idx) (and (<= 0 (idx-tbl1 idx) 63) (<= 0 (idx-tbl2 idx) 63)))]
+     [(eq? outType i32x32x2) (forall (list idx) (and (<= 0 (idx-tbl1 idx) 31) (<= 0 (idx-tbl2 idx) 31)))]
+     [(eq? outType u32x32x2) (forall (list idx) (and (<= 0 (idx-tbl1 idx) 31) (<= 0 (idx-tbl2 idx) 31)))]))
   
   (if p?
       (outType (lambda (i) ((choose* Vu Vv) (idx-tbl1 i))) (lambda (i) ((choose* Vu Vv) (idx-tbl2 i))))

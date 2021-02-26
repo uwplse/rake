@@ -67,6 +67,45 @@
       (equal-expr? (vrmpy-p-acc-Vdd expr1) (vrmpy-p-acc-Vdd expr2))
       (equal-expr? (vrmpy-p-acc-Vuu expr1) (vrmpy-p-acc-Vuu expr2))
       (equal-expr? (vrmpy-p-acc-u1 expr1) (vrmpy-p-acc-u1 expr2)))]
+
+    [(and (vadd? expr1) (vadd? expr2))
+     (and
+      (equal-expr? (vadd-Vu expr1) (vadd-Vu expr2))
+      (equal-expr? (vadd-Vv expr1) (vadd-Vv expr2))
+      (equal-expr? (vadd-sat? expr1) (vadd-sat? expr2)))]
+
+    [(and (vmpyi? expr1) (vmpyi? expr2))
+     (and
+      (equal-expr? (vmpyi-Vu expr1) (vmpyi-Vu expr2))
+      (equal-expr? (vmpyi-Rt expr1) (vmpyi-Rt expr2)))]
+
+    [(and (vmpyi-acc? expr1) (vmpyi-acc? expr2))
+     (and
+      (equal-expr? (vmpyi-acc-Vd expr1) (vmpyi-acc-Vd expr2))
+      (equal-expr? (vmpyi-acc-Vu expr1) (vmpyi-acc-Vu expr2))
+      (equal-expr? (vmpyi-acc-Rt expr1) (vmpyi-acc-Rt expr2)))]
+
+    [(and (vmpye? expr1) (vmpye? expr2))
+     (and
+      (equal-expr? (vmpye-Vu expr1) (vmpye-Vu expr2))
+      (equal-expr? (vmpye-Rt expr1) (vmpye-Rt expr2)))]
+
+    [(and (vmpye-acc? expr1) (vmpye-acc? expr2))
+     (and
+      (equal-expr? (vmpye-acc-Vd expr1) (vmpye-acc-Vd expr2))
+      (equal-expr? (vmpye-acc-Vu expr1) (vmpye-acc-Vu expr2))
+      (equal-expr? (vmpye-acc-Rt expr1) (vmpye-acc-Rt expr2)))]
+    
+    [(and (vasl? expr1) (vasl? expr2))
+     (and
+      (equal-expr? (vasl-Vu expr1) (vasl-Vu expr2))
+      (equal-expr? (vasl-Rt expr1) (vasl-Rt expr2)))]
+
+    [(and (vpacko-n? expr1) (vpacko-n? expr2))
+     (and
+      (equal-expr? (vpacko-n-Vu expr1) (vpacko-n-Vu expr2))
+      (equal-expr? (vpacko-n-Vv expr1) (vpacko-n-Vv expr2))
+      (equal-expr? (vpacko-n-signed? expr1) (vpacko-n-signed? expr2)))]
     
     ;; Compare Swizzles
     [(and (vcombine? expr1) (vcombine? expr2))
@@ -76,7 +115,7 @@
     [(and (vshuff? expr1) (vshuff? expr2))
      (equal-expr? (vcombine-Vu expr1) (vcombine-Vu expr2))]
     
-    [(and (swizzle? expr1) (swizzle? expr2)) #t]
+    [(and (swizzle? expr1) (swizzle? expr2)) (equal-expr? (swizzle-vec expr1)  (swizzle-vec expr2))]
     [(and (gather*? expr1) (gather*? expr1)) #t]
     [(and (gather-vec? expr1) (gather-vec? expr1)) #t]
     [(and (gather-vecp? expr1) (gather-vecp? expr1)) #t]

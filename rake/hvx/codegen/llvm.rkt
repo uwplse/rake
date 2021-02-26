@@ -173,7 +173,7 @@
        [(list (u32x32 _)(u32x32 _)) (generate `vpackwuh.sat t_32xi32 `(list (,t_32xi32 ,(codegen Vu)) (,t_32xi32 ,(codegen Vv))))])]
     
     ;;vpacke
-    [(vpacke Vu Vv)
+    [(vpacke Vu Vv signed?)
      (match (list (interpret-hvx Vu) (interpret-hvx Vv))
        [(list (i32x32 _)(i32x32 _)) (generate `vpackeh t_32xi32 `(list (,t_32xi32 ,(codegen Vu)) (,t_32xi32 ,(codegen Vv))))]
        [(list (i16x64 _)(i16x64 _)) (generate `vpackeb t_32xi32 `(list (,t_32xi32 ,(codegen Vu)) (,t_32xi32 ,(codegen Vv))))])]
