@@ -184,14 +184,14 @@
       [(vec-add v1 v2)
        (define lifted-v1 (car (synthesize-ir-expr v1 buff-reads axioms)))
        (define lifted-v2 (car (synthesize-ir-expr v2 buff-reads axioms)))
-       
+
        ;; Try folding into lhs sub-expr
        (define ir-expr (fold-into-subexpr lifted-v1 halide-expr axioms add-consts sub-consts mul-consts div-consts))
-       
+
        ;; If that didn't work, try folding into rhs sub-expr
        (when (unsat? ir-expr)
          (set! ir-expr (fold-into-subexpr lifted-v2 halide-expr axioms add-consts sub-consts mul-consts div-consts)))
-       
+
        ;; If that didn't work, try to replace the ir sub-expr with a new fused expr
        (define sub-expr (choose* (get-subexpr-ir lifted-v1) (get-subexpr-ir lifted-v2)))
        (when (unsat? ir-expr)
@@ -218,7 +218,6 @@
        (when (unsat? ir-expr)
          ;; Const add
          (define output-type (type ((interpret-halide halide-expr) 0)))
-         (println halide-expr)
          (define const-add-op (const-add sub-expr (apply choose* add-consts) nop output-type))
          (set! ir-expr (run-synthesizer halide-expr const-add-op axioms)))
          
@@ -327,7 +326,7 @@
   
   ;(debug (format "Expr so far: ~a\n" lifted-expr))
   ;(debug (format "Exiting ~a\n" halide-expr))
-
+  
   lifted-expr)
 
 ;; Try to fold the expr into the ir sub-expr
@@ -403,7 +402,7 @@
       (assert (eq? (oe i) (elem-ir se i)))
       (set-curr-cn-ir (+ i (/ VEC_LANES 2) 1))
       (assert (eq? (oe (+ i (/ VEC_LANES 2) 1)) (elem-ir se (+ i (/ VEC_LANES 2) 1))))))
-  
+
   ;; Synthesize expression
   (clear-asserts!)
   (for ([axiom axioms]) (assert axiom))

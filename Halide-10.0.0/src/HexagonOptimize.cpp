@@ -2763,7 +2763,8 @@ private:
 
             if (x == 0){
                 return IRMutator::visit(stmt);
-            }else if(x == 1){
+            }
+            /*else if(x == 1){
                 SExpParser p;
                 std::string s = R"((llvm.hexagon.V6.vread.128B uint8x128 (list (int32 input) (int32 (+ -2 (* -2 rows.s0.x.x))))))";
                 debug(0) << "Input S-expressions:\n" << s << "\n";
@@ -2781,7 +2782,7 @@ private:
                 debug(0) << "With Store:\n" << stored << "\n";
                 return stored;
 
-            }
+            }*/
 
             RacketPrinter specPrinter(std::cout);
             std::string expr = specPrinter.dispatch(stmt->value);
@@ -2902,7 +2903,7 @@ private:
                 << "(close-output-port out)";
 
             std::ofstream rakeInputF;
-            std::string filename = "expr_" + std::to_string(expr_id++) + ".rkt";
+            std::string filename = "expr_" + std::to_string(expr_id) + ".rkt";
             rakeInputF.open (filename.c_str());
             rakeInputF
                 << "#lang rosette\n"
@@ -2928,7 +2929,7 @@ private:
                 //<< "(close-output-port out)";
             rakeInputF.close();
 
-            /*char buf[10000];
+            char buf[10000];
             FILE *fp;
             std::string cmd = "racket expr_" + std::to_string(expr_id++) + ".rkt";
             if ((fp = popen(cmd.c_str(), "r")) == NULL) {
@@ -2944,15 +2945,15 @@ private:
             if(pclose(fp))  {
                 printf("Command not found or exited with error status\n");
                 exit(0);
-            }*/
+            }
 
-            //SExpParser p;
-            //std::ifstream in("sexp.out");
-            //std::string s((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
-            //debug(0) << p.parse(s) << "\n";
+            SExpParser p;
+            std::ifstream in("sexp.out");
+            std::string s((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
+            debug(0) << p.parse(s) << "\n";
 
-            //return Store::make(stmt->name, p.parse(s), stmt->index, stmt->param, stmt->predicate, stmt->alignment);
-            return IRMutator::visit(stmt);
+            return Store::make(stmt->name, p.parse(s), stmt->index, stmt->param, stmt->predicate, stmt->alignment);
+            //return IRMutator::visit(stmt);
         }
     };
 
