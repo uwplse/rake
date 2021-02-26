@@ -56,8 +56,6 @@
           [else
            (display (format "Backtracking. Attempting to synthesize a different implementation for swizzle node with id: ~a\n\n" node-id))
            (hash-set! cache (hvx-ast-node-id (second swizzle-nodes)) (make-hash))
-           ;(pretty-print hvx-expr-sketch)
-           ;(pretty-print updated-hvx-expr-sketch)
            (dynamically-synthesize-swizzle-nodes swizzle-nodes starting-vecs hvx-expr-sketch hvx-expr-spec axioms ctx (append (list updated-hvx-expr-sketch) discarded-sols))])]
        [else (values #f (unsat))])]))
 
@@ -81,8 +79,6 @@
           (find-next-swizzle (rest candidate-swizzle-exprs))]
          [else
 
-          ;(pretty-print candidate-swizzle)
-          
           ;; Replace swizzle node with swizzle grammar
           (define (repl-gather-with-swizzle-grm node)
             (match node
@@ -91,8 +87,7 @@
               [(swizzle vecs) (if (equal? (hvx-ast-node-id node) target-node-id) candidate-swizzle node)]
               [_ node]))
           (define hvx-expr-grm (visit-hvx hvx-expr-sketch repl-gather-with-swizzle-grm))
-          ;(pretty-print hvx-expr-grm)
-
+          
           (define interpreted-o-expr (interpret-hvx hvx-expr-spec))
           (define VEC_LANES (num-elems-hvx interpreted-o-expr))
           
@@ -131,9 +126,6 @@
           (cond
             [correct?
              (pretty-print hvx-expr-grm)
-             ;(set-curr-cn-hvx 0)
-             ;(println (elem-hvx interpreted-o-expr 0))
-             ;(println (elem-hvx (interpret-hvx hvx-expr-grm) 0))
              (display "\nSuccessfully found a swizzle implementation.\n")
              (display "\n")
              hvx-expr-grm]
@@ -196,8 +188,6 @@
     [else
      (define lane (first lanes-used-in-synth))
      (define interpreted-f-expr (interpret-hvx hvx-expr-grm))
-     ;(println interpreted-f-expr)
-     ;(println (elem-hvx interpreted-f-expr 0))
      (define sol (synthesize #:forall ctx
                              #:guarantee (begin
                                            (lane-eq-hvx? interpreted-o-expr interpreted-f-expr lane)
