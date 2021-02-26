@@ -640,7 +640,7 @@ void CodeGen_LLVM::init_codegen(const std::string &name, bool any_strict_float) 
 
 std::unique_ptr<llvm::Module> CodeGen_LLVM::compile(const Module &input) {
     this->func_value_bounds = input.get_func_value_bounds();
-    
+
     init_codegen(input.name(), input.any_strict_float());
 
     internal_assert(module && context && builder)
@@ -2610,6 +2610,22 @@ void CodeGen_LLVM::visit(const Call *op) {
     // cue for llvm to generate particular ops. In general these are
     // handled in the standard library, but ones with e.g. varying
     // types are handled here.
+    if (op->call_type == Call::CallType::PureExtern && starts_with(op->name, "llvm.")) {
+        debug(0) << "Codegen llvm intrinsic: " << Expr(op) << "\n";
+        vector<Value *> args;
+        llvm::Function *fn = module->getFunction(op->name);
+        internal_assert(fn) << "Could not find llvm intrinsic function\n";
+        for (const Expr &arg : op->args) {
+            // Gross hack to ignore the type of buffer pointers
+            if (const Variable *var = arg.as<Variable>()) {
+                args.push_back(sym_get(var->name));
+            } else {
+                args.push_back(codegen(arg));
+            }
+        }
+        value = builder->CreateCall(fn, args);
+        value = builder->CreateBitCast(value, llvm_type_of(op->type));
+    }
     if (op->is_intrinsic(Call::debug_to_file)) {
         internal_assert(op->args.size() == 3);
         const StringImm *filename = op->args[0].as<StringImm>();

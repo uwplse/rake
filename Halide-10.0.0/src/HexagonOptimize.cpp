@@ -2761,8 +2761,27 @@ private:
             int x;
             std::cin >> x;
 
-            if (x == 0)
+            if (x == 0){
                 return IRMutator::visit(stmt);
+            }else if(x == 1){
+                SExpParser p;
+                std::string s = R"((llvm.hexagon.V6.vread.128B uint8x128 (list (int32 input) (int32 (+ -2 (* -2 rows.s0.x.x))))))";
+                debug(0) << "Input S-expressions:\n" << s << "\n";
+                auto parsed =  p.parse(s);
+                debug(0) << "Output AST:\n" << parsed << "\n";
+                return Store::make(stmt->name, parsed, stmt->index, stmt->param, stmt->predicate, stmt->alignment);
+            }
+            else {
+                SExpParser p;
+                std::string s = R"((llvm.hexagon.V6.vmpahb.128B int32x64 (list (int32x64 (llvm.hexagon.V6.vcombine.128B int32x64 (list (int32x32 (llvm.hexagon.V6.vread.128B int32x32 (list (int32 input) (int32 (+ -2 rows.s0.x.x))))) (int32x32 (llvm.hexagon.V6.vread.128B int32x32 (list (int32 input) (int32 (+ -2 (* -2 rows.s0.x.x))))))))) (int32 42))))";
+                debug(0) << "Input S-expressions:\n" << s << "\n";
+                auto parsed = p.parse(s);
+                debug(0) << "Output AST:\n" << parsed << "\n";
+                auto stored = Store::make(stmt->name, p.parse(s), stmt->index, stmt->param, stmt->predicate, stmt->alignment);
+                debug(0) << "With Store:\n" << stored << "\n";
+                return stored;
+
+            }
 
             RacketPrinter specPrinter(std::cout);
             std::string expr = specPrinter.dispatch(stmt->value);
