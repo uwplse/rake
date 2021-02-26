@@ -1,5 +1,6 @@
 #include "SExpParser.h"
 #include "IR.h"
+#include "IROperator.h"
 
 using namespace std;
 
@@ -175,6 +176,10 @@ Expr SExpParser::parse_intrinsic(Token &tok, string &sexp) {
     auto params = parse_param_list(sexp);
 
     close_sexp(sexp);
+    if(func_name.find("vread") != std::string::npos){
+      Expr index = Ramp::make(params[1], 1, return_type.lanes());
+      return Load::make(return_type, params[0].as<Variable>()->name, index, Buffer<>(), Parameter(), const_true(return_type.lanes()), ModulusRemainder());
+    }
 
     // Not sure about the call type here
     return Call::make(return_type, func_name, params, Call::CallType::PureExtern);
