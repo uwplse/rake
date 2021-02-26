@@ -1,50 +1,37 @@
 #lang rosette
 
 (require rake/synthesis/spec)
-(require rake/synthesis/greedy-ir-lifter)
-(require rake/synthesis/incremental-ir-lifter)
+(require rake/synthesis/ir-expr-synthesizer)
 (require rake/synthesis/hvx-expr-synthesizer)
 (require rake/synthesis/verifier)
-(require rake/synthesis/swizzler)
-(require rake/hvx/codegen/llvm)
 
-(define (synthesize-hvx spec [spec-lang 'halide-ir] [lifting-algo 'greedy])
+(define (synthesize-hvx spec [spec-lang 'halide-ir] [lifting-algo 'greedy] [lowering-algo 'enumerative] [swizzling-algo 'enumerative])
   (cond
     [(eq? spec-lang 'halide-ir)
      (define halide-expr (synthesis-spec-expr spec))
      (define halide-expr-axioms (synthesis-spec-axioms spec))
      
-     (define stage1-res
-       (cond
-         [(eq? lifting-algo 'incremental) (synthesize-ir-expr-incr halide-expr halide-expr-axioms)]
-         [(eq? lifting-algo 'greedy) (synthesize-ir-expr-greedy halide-expr halide-expr-axioms)]))
+     (define-values (lifting-success? ir-expr ir-expr-sol)
+       (synthesize-ir-expr halide-expr halide-expr-axioms lifting-algo))
 
-     (when (not (void? stage1-res))
-       (define ir-expr (car stage1-res))
-       (define ir-expr-sol (cdr stage1-res))
+     (when lifting-success?
+       ;; Synthesize equivalent HVX expression
+       (define-values (successful? hvx-expr)
+         (synthesize-hvx-expr halide-expr halide-expr-axioms ir-expr ir-expr-sol lowering-algo swizzling-algo))
 
-       ;; Define the ir specification for stage 1
-       (define hvx-spec (hvx-expr-spec ir-expr ir-expr-sol (symbolics halide-expr) halide-expr-axioms))
-
-       ;; Synthesize equivalent HVX expression for each Op in the IR
-       (define hvx-expr-sketch (synthesize-hvx-expr hvx-spec))
-
-       ;; Synthesize data-movement
-       (define hvx-expr (synthesize-swizzles halide-expr hvx-expr-sketch (symbolics halide-expr) halide-expr-axioms))
-
-       (define gen-code #f)
-       (when (not (unsat? hvx-expr))
+       (define verifies? #f)
+       (when successful?
          ;; Full expr verification
-         (set! gen-code (verify-equiv? halide-expr hvx-expr (symbolics halide-expr) halide-expr-axioms))
+         (set! verifies? #t);(verify-equiv? halide-expr hvx-expr (symbolics halide-expr) halide-expr-axioms))
 
-         (if gen-code
+         (if verifies?
              (begin (display "Synthesized solution is correct.\n\n") hvx-expr)
              (begin (display "Synthesized solution is incorrect.\n\n") #f)))
 
-       (when gen-code
-         (println (llvm_codegen hvx-expr))))
-     ]
+       (when (not verifies?) (exit))
 
-    [else (error "Input specification is provided in a language I don't understand:" spec-lang)]))
+       hvx-expr)]
+
+    [else (error (format "Input specification is provided in a language Rake currently does not support: '~a. Supported IRs: ['halide-ir]" spec-lang))]))
 
 (provide synthesize-hvx)

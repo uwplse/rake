@@ -84,4 +84,3 @@
         (void))))
 
 (provide synthesize-ir-expr-incr)
- ;(except-out (all-defined-out) interpret set-curr-cn curr-cn elem) (rename-out [interpret interpret-ir] [set-curr-cn set-curr-cn-ir] [elem elem-ir]))

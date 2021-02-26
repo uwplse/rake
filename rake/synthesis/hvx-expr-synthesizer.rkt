@@ -2,148 +2,47 @@
 
 (require rake/util)
 
-(require rake/synthesis/ir)
 (require rake/synthesis/spec)
-(require rake/synthesis/grammar/hvx)
+(require rake/synthesis/lowering/hvx-template-synthesizer-incr)
+(require rake/synthesis/lowering/hvx-template-synthesizer-enum)
+(require rake/synthesis/hvx-swizzle-synthesizer)
 
-(require rake/hvx/ast/types)
-(require rake/hvx/cost-model)
-(require rake/hvx/interpreter)
+(define (synthesize-hvx-expr halide-expr halide-expr-axioms ir-expr ir-expr-sol [lowering-algo 'enumerative] [swizzling-algo 'enumerative])
+  (match lowering-algo
+    ['incremental (backtracking-search-incr halide-expr halide-expr-axioms ir-expr ir-expr-sol (list) swizzling-algo)]
+    ['enumerative (backtracking-search-enum halide-expr halide-expr-axioms ir-expr ir-expr-sol swizzling-algo)]
+    [_ (error (format "Unrecognized lowering algorithm specified: '~a. Supported algorithms: ['incremental, 'enumerative]" lowering-algo))]))
 
-(define MC_BND 1)
+(define (backtracking-search-incr halide-expr halide-expr-axioms ir-expr ir-expr-sol invalid-sketches swizzling-algo)
+  ;; Define the ir specification for template synthesis
+  (define hvx-spec (hvx-expr-spec ir-expr ir-expr-sol (symbolics halide-expr) halide-expr-axioms invalid-sketches))
 
-(define (synthesize-hvx-expr spec)
-  (define ir-expr (hvx-expr-spec-expr spec))
-  (define ir-expr-sol (hvx-expr-spec-sol spec))
-  (define ir-expr-ctx (hvx-expr-spec-ctx spec))
-  (define ir-expr-axioms (hvx-expr-spec-axioms spec))
+  ;; Synthesize equivalent HVX expression
+  (define ir-to-hvx (make-hash))
+  (define hvx-expr-sketch (synthesize-hvx-template-incr hvx-spec ir-to-hvx))
   
-  (match ir-expr
-    [(packhi sub-expr signed?)
-     (begin
-       (define hvx-sub-spec (hvx-expr-spec sub-expr ir-expr-sol ir-expr-ctx ir-expr-axioms))
-       (define hvx-sub-expr (synthesize-hvx-expr hvx-sub-spec))
-       (display "Lifting IR to HVX...\n")
-       (display "====================\n\n")
-       (display (format "IR Operation: \n\n~a\n\n" (pretty-format ir-expr)))
-       (reset-hvx-instr-bnd)
-       (synthesize-equiv-hvx spec sub-expr hvx-sub-expr))]
-    
-    [(arith-shift-right sub-expr n round? outputType)
-     (begin
-       (define hvx-sub-spec (hvx-expr-spec sub-expr ir-expr-sol ir-expr-ctx ir-expr-axioms))
-       (define hvx-sub-expr (synthesize-hvx-expr hvx-sub-spec))
-       (display "Lifting IR to HVX...\n")
-       (display "====================\n\n")
-       (display (format "IR Operation: \n\n~a\n\n" (pretty-format ir-expr)))
-       (reset-hvx-instr-bnd)
-       (synthesize-equiv-hvx spec sub-expr hvx-sub-expr))]
+  ;; Synthesize data-movement
+  (define-values (successful? hvx-expr)
+    (synthesize-hvx-swizzles halide-expr hvx-expr-sketch (symbolics halide-expr) halide-expr-axioms swizzling-algo))
 
-    [(convolve sub-expr kernel saturateFunc outputType)
-     (begin
-       (define hvx-sub-spec (hvx-expr-spec sub-expr ir-expr-sol ir-expr-ctx ir-expr-axioms))
-       (define hvx-sub-expr (synthesize-hvx-expr hvx-sub-spec))
-       (display "Lifting IR to HVX...\n")
-       (display "====================\n\n")
-       (display (format "IR Operation: \n\n~a\n\n" (pretty-format ir-expr)))
-       (reset-hvx-instr-bnd)
-       (synthesize-equiv-hvx spec sub-expr hvx-sub-expr))]
+  (if successful?
+      (values successful? hvx-expr)
+      (backtracking-search-incr halide-expr halide-expr-axioms ir-expr ir-expr-sol (append invalid-sketches (list ir-to-hvx)) swizzling-algo)))
 
-    [(cast sub-expr type)
-     (begin
-       (define hvx-sub-spec (hvx-expr-spec sub-expr ir-expr-sol ir-expr-ctx ir-expr-axioms))
-       (define hvx-sub-expr (synthesize-hvx-expr hvx-sub-spec))
-       (display "Lifting IR to HVX...\n")
-       (display "====================\n\n")
-       (display (format "IR Operation: \n\n~a\n\n" (pretty-format ir-expr)))
-       (reset-hvx-instr-bnd)
-       (synthesize-equiv-hvx spec sub-expr hvx-sub-expr))]
+(define (backtracking-search-enum halide-expr halide-expr-axioms ir-expr ir-expr-sol swizzling-algo)
+  ;; Define the ir specification for template synthesis
+  (define hvx-spec (hvx-expr-spec ir-expr ir-expr-sol (symbolics halide-expr) halide-expr-axioms (list)))
 
-    [(load-data opts)
-     (begin
-       (display "Lifting IR to HVX...\n")
-       (display "====================\n\n")
-       (display (format "IR Operation: \n\n~a\n\n" (pretty-format ir-expr)))
-       (define hvx-expr (gather* opts))
-       (display "Successfully found an equivalent HVX expression.\n\n")
-       (debug (format "~a\n" (pretty-format hvx-expr)))
-       (debug (format "Synthesis time: 0 seconds\n"))
-       hvx-expr)]
-
-    [_ (error "NYI")]))
-
-;; Define modular synthesis loop for HVX expression generation
-(define (synthesize-equiv-hvx spec sub-expr hvx-sub-expr)
-  (if (not (hvx-instr-limit-exceeded?))
-      (begin
-        (display "Generating HVX Grammar...\n")
-        (debug (format "Number of instructions: ~a" (hvx-instr-bnd)))
-        (debug (format "Set of instructions: Specialized\n"))
-        
-        (define ??hvx-expr-grm (generate-hvx-grammar (hvx-expr-spec-expr spec) sub-expr hvx-sub-expr))
-        (define st (current-seconds))
-        (define res (synthesize-optimal spec ??hvx-expr-grm basic-expr-cost hvx-sub-expr))
-        
-        (if (eq? res (unsat))
-            (begin
-              (display "Failed to find an equivalent HVX expression.\n\n")
-              (increment-hvx-instr-bnd)
-              (synthesize-equiv-hvx spec sub-expr hvx-sub-expr))
-            res))
-      (begin
-        (display "Maximum instruction bound reached. Giving up.\n\n")
-        (exit)
-        (void))))
-
-(define (synthesize-optimal spec ??hvx-expr-grm cost-model hvx-sub-expr [curr-best-sol (void)])
-  (define ir-expr (hvx-expr-spec-expr spec))
-  (define ir-expr-sol (hvx-expr-spec-sol spec))
-  (define ir-expr-ctx (hvx-expr-spec-ctx spec))
-  (define ir-expr-axioms (hvx-expr-spec-axioms spec))
-
-  (define synthesized-hvx-expr (??hvx-expr-grm))
-
-  (define (bounded-eq? oe se lanes)    
-    (for ([i lanes])
-      (cond
-        [(hvx-pair? se)
-         (set-curr-cn-ir i)
-         (set-curr-cn-hvx i)
-         (assert (eq? (evaluate (elem-ir oe i) ir-expr-sol) (v0-elem-hvx se i)))
-         (set-curr-cn-ir (+ i 1))
-         (set-curr-cn-hvx (+ i 1))
-         (assert (eq? (evaluate (elem-ir oe (+ i 1)) ir-expr-sol) (v1-elem-hvx se (+ i 1))))]
-        [else
-         (set-curr-cn-ir i)
-         (set-curr-cn-hvx i)
-         (assert (eq? (evaluate (elem-ir oe i) ir-expr-sol) (elem-hvx se i)))
-         (set-curr-cn-ir (+ i 1))
-         (set-curr-cn-hvx (+ i 1))
-         (assert (eq? (evaluate (elem-ir oe (+ i 1)) ir-expr-sol) (elem-hvx se (+ i 1))))])))
-
-  (define curr-best-cost (if (void? curr-best-sol) +inf.0 (cost-model curr-best-sol)))
+  ;; Synthesize equivalent HVX template (compute instructions)
+  (define ir-to-hvx (make-hash))
+  (define hvx-expr-sketch (synthesize-hvx-template-enum hvx-spec ir-to-hvx))
   
-  (clear-asserts!)
-  (for ([axiom ir-expr-axioms]) (assert axiom))
-  (define st (current-seconds))
-  (define sol (synthesize #:forall ir-expr-ctx
-                          #:guarantee (begin
-                                       (bounded-eq? (interpret-ir ir-expr) (interpret-hvx synthesized-hvx-expr) MC_BND)
-                                       (when (not (eq? curr-best-cost +inf.0)) (assert (< (cost-model synthesized-hvx-expr) curr-best-cost))))))
-  (define runtime (- (current-seconds) st))
+  ;; Synthesize data-movement
+  (define-values (successful? hvx-expr)
+    (synthesize-hvx-swizzles halide-expr hvx-expr-sketch (symbolics halide-expr) halide-expr-axioms swizzling-algo))
 
-  (cond
-    [(unsat? sol) (cond
-                    [(void? curr-best-sol) sol]
-                    [else (display (format "Failed to find an equivalent HVX expression with cost lower than ~a.\n\n" curr-best-cost))
-                          (debug (format "Synthesis time: ~a seconds\n" runtime))
-                          curr-best-sol])]
-    [else (display "Successfully found an equivalent HVX expression.\n\n")
-          (debug (format "~a\n" (pretty-format (evaluate synthesized-hvx-expr sol))))
-          (debug (format "Expression cost: ~a\n" (cost-model (evaluate synthesized-hvx-expr sol))))
-          (debug (format "Synthesis time: ~a seconds\n" runtime))
-          (display "Searching for a more optimal solution...\n\n")
-          (synthesize-optimal spec ??hvx-expr-grm cost-model hvx-sub-expr (evaluate synthesized-hvx-expr sol))]))
+  (if successful?
+      (values successful? hvx-expr)
+      (backtracking-search-enum halide-expr halide-expr-axioms ir-expr ir-expr-sol swizzling-algo)))
 
 (provide synthesize-hvx-expr)
- ;(except-out (all-defined-out) interpret set-curr-cn curr-cn elem) (rename-out [interpret interpret-ir] [set-curr-cn set-curr-cn-ir] [elem elem-ir]))
