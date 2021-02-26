@@ -2876,14 +2876,14 @@ private:
                 << expr << ")\n"
                 << "\n"
                 << "(define spec (synthesis-spec halide-expr axioms))\n"
-                << "(define hvx-expr (synthesize-hvx spec 'halide-ir 'greedy))\n"
+                << "(define hvx-expr (synthesize-hvx spec 'halide-ir 'greedy 'enumerative 'enumerative))\n"
                 << "\n"
                 << "(define out (open-output-file \"sexp.out\" #:exists 'replace))\n"
                 << "(pretty-write (llvm-codegen hvx-expr) out)\n"
                 << "(close-output-port out)";
 
             std::ofstream rakeInputF;
-            std::string filename = "expr_" + std::to_string(expr_id) + ".rkt";
+            std::string filename = "expr_" + std::to_string(expr_id++) + ".rkt";
             rakeInputF.open (filename.c_str());
             rakeInputF
                 << "#lang rosette\n"
@@ -2902,14 +2902,14 @@ private:
                 << "(define halide-expr\n" << expr << ")\n"
                 << "\n"
                 << "(define spec (synthesis-spec halide-expr axioms))\n"
-                << "(define hvx-expr (synthesize-hvx spec 'halide-ir 'greedy))\n"
-                << "\n"
-                << "(define out (open-output-file \"sexp.out\" #:exists 'replace))\n"
-                << "(pretty-write (llvm-codegen hvx-expr) out)\n"
-                << "(close-output-port out)";
+                << "(define hvx-expr (synthesize-hvx spec 'halide-ir 'greedy 'enumerative 'enumerative))\n";
+                //<< "\n";
+                //<< "(define out (open-output-file \"sexp.out\" #:exists 'replace))\n"
+                //<< "(pretty-write (llvm-codegen hvx-expr) out)\n"
+                //<< "(close-output-port out)";
             rakeInputF.close();
 
-            char buf[10000];
+            /*char buf[10000];
             FILE *fp;
             std::string cmd = "racket expr_" + std::to_string(expr_id++) + ".rkt";
             if ((fp = popen(cmd.c_str(), "r")) == NULL) {
@@ -2925,14 +2925,15 @@ private:
             if(pclose(fp))  {
                 printf("Command not found or exited with error status\n");
                 exit(0);
-            }
+            }*/
 
-            SExpParser p;
-            std::ifstream in("sexp.out");
-            std::string s((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
-            debug(0) << p.parse(s) << "\n";
+            //SExpParser p;
+            //std::ifstream in("sexp.out");
+            //std::string s((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
+            //debug(0) << p.parse(s) << "\n";
 
-            return Store::make(stmt->name, p.parse(s), stmt->index, stmt->param, stmt->predicate, stmt->alignment);
+            //return Store::make(stmt->name, p.parse(s), stmt->index, stmt->param, stmt->predicate, stmt->alignment);
+            return IRMutator::visit(stmt);
         }
     };
 
@@ -2996,7 +2997,7 @@ Stmt optimize_hexagon_instructions_synthesis(Stmt s, FuncValueBounds fvb) {
 
     debug(0) << s << "\n\n";
 
-    exit(0);
+    //exit(0);
 
     //debug(0) << s << "\n";
 
