@@ -2614,6 +2614,7 @@ void CodeGen_LLVM::visit(const Call *op) {
         debug(0) << "Codegen llvm intrinsic: " << Expr(op) << "\n";
         vector<Value *> args;
         llvm::Function *fn = module->getFunction(op->name);
+        internal_assert(fn) << "Could not find llvm intrinsic function\n";
         for (const Expr &arg : op->args) {
             // Gross hack to ignore the type of buffer pointers
             if (const Variable *var = arg.as<Variable>()) {
