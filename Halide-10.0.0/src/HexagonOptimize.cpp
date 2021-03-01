@@ -2959,9 +2959,10 @@ private:
             SExpParser p;
             std::ifstream in("sexp.out");
             std::string s((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
-            debug(0) << p.parse(s) << "\n";
+            auto parsed = p.parse(s);
+            debug(0) << parsed << "\n";
 
-            return Store::make(stmt->name, p.parse(s), stmt->index, stmt->param, stmt->predicate, stmt->alignment);
+            return Store::make(stmt->name, parsed, stmt->index, stmt->param, stmt->predicate, stmt->alignment);
             //return IRMutator::visit(stmt);
         }
     };

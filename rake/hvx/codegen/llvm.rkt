@@ -163,6 +163,7 @@
        [(u16x64 _) (generate `vshuffh t_32xi32 `(list (,t_32xi32 ,(codegen Vu))))])]
     
     ;;vtranspose
+    [(vtranspose Vu Vv Rt) (generate `vshuffvdd t_32xi32 `(list (,t_32xi32 ,(codegen Vu)) (,t_32xi32 ,(codegen Vv)) (,t_i32 ,(codegen-scalar Rt))))]
     
     ;;vpack
     [(vpack Vu Vv)
