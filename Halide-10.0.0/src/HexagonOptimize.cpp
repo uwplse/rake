@@ -2744,6 +2744,15 @@ private:
 
         Stmt visit(const LetStmt *stmt) override {
             debug(0) << "Let Found: " << stmt->name << " = " << stmt->value << "\n";
+            
+            // We don't want to track lets all the way back to where variables are extracted from
+            // the scalar_indices array
+            // Temp duct-tape solution
+            RacketPrinter specPrinter(std::cout);
+            std::string expr = specPrinter.dispatch(stmt->value);
+            if (expr.rfind(" (scalar_indices ", 0) == 0) 
+                return IRMutator::visit(stmt);
+
             bounds.push(stmt->name, bounds_of_expr_in_scope(stmt->value, bounds, func_value_bounds));
             let_vars[stmt->name] = stmt->value;
             let_decl_order.push_back(stmt->name);
@@ -2792,7 +2801,7 @@ private:
  
             //IRPrinter printer = IRPrinter(std::cout);
             //for (auto var : symFinder.getSymVars())
-            //  debug(0) << var->name << "\n";
+              //debug(0) << var->name << "\n";
             //for (auto buf : symFinder.getSymBufs())
             //  debug(0) << buf.first << "\n";
 
@@ -2922,11 +2931,11 @@ private:
                 << "(define halide-expr\n" << expr << ")\n"
                 << "\n"
                 << "(define spec (synthesis-spec halide-expr axioms))\n"
-                << "(define hvx-expr (synthesize-hvx spec 'halide-ir 'greedy 'enumerative 'enumerative))\n";
-                //<< "\n";
-                //<< "(define out (open-output-file \"sexp.out\" #:exists 'replace))\n"
-                //<< "(pretty-write (llvm-codegen hvx-expr) out)\n"
-                //<< "(close-output-port out)";
+                << "(define hvx-expr (synthesize-hvx spec 'halide-ir 'greedy 'enumerative 'enumerative))\n"
+                << "\n"
+                << "(define out (open-output-file \"sexp.out\" #:exists 'replace))\n"
+                << "(pretty-write (llvm-codegen hvx-expr) out)\n"
+                << "(close-output-port out)";
             rakeInputF.close();
 
             char buf[10000];
