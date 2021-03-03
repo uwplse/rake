@@ -57,13 +57,39 @@
 (define t_64xi32 `int32x64)
 (define t_128xi1 `int1x128)
 
+(define (p-type p)
+  (match (interpret-hvx p)
+    [(int8_t v) (string->sexp "int8")]
+    [(int16_t v) (string->sexp "int16")]
+    [(int32_t v) (string->sexp "int32")]
+    [(int64_t v) (string->sexp "int64")]
+    [(uint8_t v) (string->sexp "uint8")]
+    [(uint16_t v) (string->sexp "uint16")]
+    [(uint32_t v) (string->sexp "uint32")]
+    [(uint64_t v) (string->sexp "uint64")]
+    [(i8x128 data) (string->sexp "int8x128")]
+    [(u8x128 data) (string->sexp "uint8x128")]
+    [(i16x64 data) (string->sexp "int16x64")]
+    [(u16x64 data) (string->sexp "uint16x64")]
+    [(i32x32 data) (string->sexp "int32x32")]
+    [(u32x32 data) (string->sexp "uint32x32")]
+    [(i8x128x2 data-v0 data-v1) (string->sexp "int8x256")]
+    [(u8x128x2 data-v0 data-v1) (string->sexp "uint8x256")]
+    [(i16x64x2 data-v0 data-v1) (string->sexp "int16x128")]
+    [(u16x64x2 data-v0 data-v1) (string->sexp "uint16x128")]
+    [(i32x32x2 data-v0 data-v1) (string->sexp "int32x64")]
+    [(u32x32x2 data-v0 data-v1) (string->sexp "uint32x64")]))
+
+(define (string->sexp s)
+  (read (open-input-string (format "~a" s))))
+
 (define (codegen p)
   ;;(printf (format "~a\n" p))
   (match p
 
     ;;vread
     [(vread buf loc)
-     (generate `vread t_32xi32 `(list (,t_i32 ,(codegen buf)) (,t_i32 ,(codegen loc))))]
+     (generate `vread (p-type p) `(list (,t_i32 ,(codegen buf)) (,t_i32 ,(codegen loc))))]
 
     ;;vsplat
     [(vsplat Rt)
@@ -76,24 +102,24 @@
     ;;lo
     [(lo Vuu)
      (if (hvx-pair? (interpret-hvx Vuu))
-         (generate `lo t_32xi32 `(list (,t_64xi32 ,(codegen Vuu))))
-         (generate `lo t_16xi32 `(list (,t_32xi32 ,(codegen Vuu)))))]
+         (generate `lo (p-type p) `(list (,t_64xi32 ,(codegen Vuu))))
+         (generate `lo (p-type p) `(list (,t_32xi32 ,(codegen Vuu)))))]
 
     ;;hi
     [(hi Vuu)
      (if (hvx-pair? (interpret-hvx Vuu))
-         (generate `hi t_32xi32 `(list (,t_64xi32 ,(codegen Vuu))))
-         (generate `hi t_16xi32 `(list (,t_32xi32 ,(codegen Vuu)))))]
+         (generate `hi (p-type p) `(list (,t_64xi32 ,(codegen Vuu))))
+         (generate `hi (p-type p) `(list (,t_32xi32 ,(codegen Vuu)))))]
     
     ;;vcombine
     [(vcombine Vu Vv)
      (match (list (interpret-hvx Vu) (interpret-hvx Vv))
-       [(list (i8x128 _) (i8x128 _)) (generate `vcombine t_64xi32 `(list (,t_32xi32 ,(codegen Vu)) (,t_32xi32 ,(codegen Vv))))]
-       [(list (u8x128 _) (u8x128 _)) (generate `vcombine t_64xi32 `(list (,t_32xi32 ,(codegen Vu)) (,t_32xi32 ,(codegen Vv))))]
-       [(list (i16x64 _) (i16x64 _)) (generate `vcombine t_64xi32 `(list (,t_32xi32 ,(codegen Vu)) (,t_32xi32 ,(codegen Vv))))]
-       [(list (u16x64 _) (u16x64 _)) (generate `vcombine t_64xi32 `(list (,t_32xi32 ,(codegen Vu)) (,t_32xi32 ,(codegen Vv))))]
-       [(list (i32x32 _) (i32x32 _)) (generate `vcombine t_64xi32 `(list (,t_32xi32 ,(codegen Vu)) (,t_32xi32 ,(codegen Vv))))]
-       [(list (u32x32 _) (u32x32 _)) (generate `vcombine t_64xi32 `(list (,t_32xi32 ,(codegen Vu)) (,t_32xi32 ,(codegen Vv))))])]
+       [(list (i8x128 _) (i8x128 _)) (generate `vcombine (p-type p) `(list (,t_32xi32 ,(codegen Vu)) (,t_32xi32 ,(codegen Vv))))]
+       [(list (u8x128 _) (u8x128 _)) (generate `vcombine (p-type p) `(list (,t_32xi32 ,(codegen Vu)) (,t_32xi32 ,(codegen Vv))))]
+       [(list (i16x64 _) (i16x64 _)) (generate `vcombine (p-type p) `(list (,t_32xi32 ,(codegen Vu)) (,t_32xi32 ,(codegen Vv))))]
+       [(list (u16x64 _) (u16x64 _)) (generate `vcombine (p-type p) `(list (,t_32xi32 ,(codegen Vu)) (,t_32xi32 ,(codegen Vv))))]
+       [(list (i32x32 _) (i32x32 _)) (generate `vcombine (p-type p) `(list (,t_32xi32 ,(codegen Vu)) (,t_32xi32 ,(codegen Vv))))]
+       [(list (u32x32 _) (u32x32 _)) (generate `vcombine (p-type p) `(list (,t_32xi32 ,(codegen Vu)) (,t_32xi32 ,(codegen Vv))))])]
     
     ;;vshuffe
     [(vshuffe Vu Vv)
@@ -163,7 +189,8 @@
        [(u16x64 _) (generate `vshuffh t_32xi32 `(list (,t_32xi32 ,(codegen Vu))))])]
     
     ;;vtranspose
-    [(vtranspose Vu Vv Rt) (generate `vshuffvdd t_32xi32 `(list (,t_32xi32 ,(codegen Vu)) (,t_32xi32 ,(codegen Vv)) (,t_i32 ,(codegen-scalar Rt))))]
+    [(vtranspose Vu Vv Rt)
+     (generate `vshuffvdd (p-type p) `(list (,t_32xi32 ,(codegen Vu)) (,t_32xi32 ,(codegen Vv)) (,t_i32 Rt)))]
     
     ;;vpack
     [(vpack Vu Vv)
@@ -206,8 +233,8 @@
     ;;vsxt
     [(vsxt Vu signed?)
      (match (interpret-hvx Vu)
-       [(i8x128 _) (generate `vsb t_32xi32 `(list (,t_32xi32 ,(codegen Vu))))]
-       [(i16x64 _) (generate `vsh t_32xi32 `(list (,t_32xi32 ,(codegen Vu))))])]
+       [(i8x128 _) (generate `vsb (p-type p) `(list (,t_32xi32 ,(codegen Vu))))]
+       [(i16x64 _) (generate `vsh (p-type p) `(list (,t_32xi32 ,(codegen Vu))))])]
     
     ;;vadd
     [(vadd Vu Vv sat?)
@@ -300,13 +327,15 @@
     [(vmpa-acc Vdd Vuu Rt)
      (match (list (interpret-hvx Vdd) (interpret-hvx Vuu) (interpret-hvx Rt))
        [(list (i16x64x2 _ _) (u8x128x2 _ _) (cons (int8_t w1) (int8_t w2)))
-        (generate `vmpabus.acc t_64xi32 `(list (,t_64xi32 ,(codegen Vdd)) (,t_64xi32 ,(codegen Vuu)) (,t_i32 ,(codegen-scalar Rt))))]
+        (generate `vmpabus.acc (p-type p) `(list (,t_64xi32 ,(codegen Vdd)) (,t_64xi32 ,(codegen Vuu)) (,t_i32 ,(codegen-scalar Rt))))]
        [(list (i16x64x2 _ _) (u8x128x2 _ _) (cons (uint8_t w1) (uint8_t w2)))
-        (generate `vmpabuu.acc t_64xi32 `(list (,t_64xi32 ,(codegen Vdd)) (,t_64xi32 ,(codegen Vuu)) (,t_i32 ,(codegen-scalar Rt))))]
+        (generate `vmpabuu.acc (p-type p) `(list (,t_64xi32 ,(codegen Vdd)) (,t_64xi32 ,(codegen Vuu)) (,t_i32 ,(codegen-scalar Rt))))]
        [(list (i32x32x2 _ _) (u16x64x2 _ _) (cons (int8_t w1) (int8_t w2)))
-        (generate `vmpauhb.acc t_64xi32 `(list (,t_64xi32 ,(codegen Vdd)) (,t_64xi32 ,(codegen Vuu)) (,t_i32 ,(codegen-scalar Rt))))]
+        (generate `vmpauhb.acc (p-type p) `(list (,t_64xi32 ,(codegen Vdd)) (,t_64xi32 ,(codegen Vuu)) (,t_i32 ,(codegen-scalar Rt))))]
        [(list (i32x32x2 _ _) (i16x64x2 _ _) (cons (int8_t w1) (int8_t w2)))
-        (generate `vmpahb.acc t_64xi32 `(list (,t_64xi32 ,(codegen Vdd)) (,t_64xi32 ,(codegen Vuu)) (,t_i32 ,(codegen-scalar Rt))))])]
+        (generate `vmpahb.acc (p-type p) `(list (,t_64xi32 ,(codegen Vdd)) (,t_64xi32 ,(codegen Vuu)) (,t_i32 ,(codegen-scalar Rt))))]
+       [(list (i32x32x2 _ _) (i16x64x2 _ _) (cons (uint8_t w1) (uint8_t w2)))
+        (generate `vmpahb.acc (p-type p) `(list (,t_64xi32 ,(codegen Vdd)) (,t_64xi32 ,(codegen Vuu)) (,t_i32 ,(codegen-scalar Rt))))])]
     
     ;;vdmpy
     [(vdmpy Vu Rt)
