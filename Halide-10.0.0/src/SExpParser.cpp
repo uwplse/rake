@@ -31,7 +31,7 @@ bool get_token(string &sexp, Token &token) {
         token.type = TokenType::RightParen;
         sexp = sexp.substr(1);
         return true;
-    } else if (isalpha(sexp[0]) || is_binop(sexp[0])) {
+    } else if (isalpha(sexp[0]) || (is_binop(sexp[0]) && isspace(sexp[1]))) {
         auto it = sexp.begin();
         while (it != sexp.end() && !isspace(*it) && *it !=')') {
             it++;
@@ -865,6 +865,190 @@ void sexp_parser_test() {
     string gaussian7x7p1 = R"((llvm.hexagon.V6.vmpahb.acc.128B int32x64 (list (int32x64 (llvm.hexagon.V6.vmpahb.128B int32x32 (list (int32x64 (llvm.hexagon.V6.vcombine.128B int32x64 (list (int32x32 (llvm.hexagon.V6.vaddh.128B int32x32 (list (int32x32 (llvm.hexagon.V6.vread.128B int32x32 (list (int32 buf) (int32 (+ 64 x))))) (int32x32 (llvm.hexagon.V6.vread.128B int32x32 (list (int32 buf) (int32 (+ 66 x)))))))) (int32x32 (llvm.hexagon.V6.vaddh.128B int32x32 (list (int32x32 (llvm.hexagon.V6.vread.128B int32x32 (list (int32 buf) (int32 (+ 65 x))))) (int32x32 (llvm.hexagon.V6.vread.128B int32x32 (list (int32 buf) (int32 (+ 67 x))))))))))) (int32 0x140f140f)))) (int32x64 (llvm.hexagon.V6.vcombine.128B int32x64 (list (int32x32 (llvm.hexagon.V6.vaddh.128B int32x32 (list (int32x32 (llvm.hexagon.V6.vread.128B int32x32 (list (int32 buf) (int32 (+ 64 x))))) (int32x32 (llvm.hexagon.V6.vread.128B int32x32 (list (int32 buf) (int32 (+ 66 x)))))))) (int32x32 (llvm.hexagon.V6.vaddh.128B int32x32 (list (int32x32 (llvm.hexagon.V6.vread.128B int32x32 (list (int32 buf) (int32 (+ 64 x))))) (int32x32 (llvm.hexagon.V6.vread.128B int32x32 (list (int32 buf) (int32 (+ 66 x))))))))))) (int32 0x140f140f))))";
     string gaussian7x7p2 = R"((llvm.hexagon.V6.vshuffeh.128B int32x32 (list (int32x32 (llvm.hexagon.V6.vasrw.128B int32x32 (list (int32x32 (llvm.hexagon.V6.hi.128B int32x32 (list (int32x64 VuVu)))) (int32x32 (llvm.hexagon.V6.lo.128B int32x32 (list (int32x64 VuVu)))) (int32 12)))) (int32x32 (llvm.hexagon.V6.vasrw.128B int32x32 (list (int32x32 (llvm.hexagon.V6.hi.128B int32x32 (list (int32x64 VuVu)))) (int32x32 (llvm.hexagon.V6.lo.128B int32x32 (list (int32x64 VuVu)))) (int32 12))))))";
     string vasrw = R"((llvm.hexagon.V6.vasrw.128B int32x32 (list (int32x32 (llvm.hexagon.V6.hi.128B int32x32 (list (int32x64 VuVu)))) (int32x32 (llvm.hexagon.V6.lo.128B int32x32 (list (int32x64 VuVu)))) (int32 12))))";
+    string neg_number_issue = R"((llvm.hexagon.V6.vshuffvdd.128B
+ int16x128
+ (list
+  (int32x32
+   (llvm.hexagon.V6.hi.128B
+    int16x64
+    (list
+     (int32x64
+      (llvm.hexagon.V6.vmpabus.acc.128B
+       int16x128
+       (list
+        (int32x64
+         (llvm.hexagon.V6.vmpybus.acc.128B
+          int32x64
+          (list
+           (int32x64
+            (llvm.hexagon.V6.vmpabus.128B
+             int32x32
+             (list
+              (int32x64
+               (llvm.hexagon.V6.vcombine.128B
+                uint8x256
+                (list
+                 (int32x32
+                  (llvm.hexagon.V6.vread.128B
+                   uint8x128
+                   (list
+                    (int32 input)
+                    (int32
+                     (+
+                      -2
+                      (+
+                       (+
+                        (* 128 rows.s0.x.x)
+                        (+ (* output.s0.y.y input.stride.1) (- 0 t20)))
+                       (- 0 input.stride.1)))))))
+                 (int32x32
+                  (llvm.hexagon.V6.vread.128B
+                   uint8x128
+                   (list
+                    (int32 input)
+                    (int32
+                     (+
+                      -2
+                      (+
+                       (+
+                        (* 128 rows.s0.x.x)
+                        (+ (* output.s0.y.y input.stride.1) (- 0 t20)))
+                       (* 2 input.stride.1))))))))))
+              (int32 0x01040104))))
+           (int32x32
+            (llvm.hexagon.V6.vread.128B
+             uint8x128
+             (list
+              (int32 input)
+              (int32
+               (+
+                -2
+                (+
+                 (+
+                  (* 128 rows.s0.x.x)
+                  (+ (* output.s0.y.y input.stride.1) (- 0 t20)))
+                 (* -2 input.stride.1)))))))
+           (int32 1))))
+        (int32x64
+         (llvm.hexagon.V6.vcombine.128B
+          uint8x256
+          (list
+           (int32x32
+            (llvm.hexagon.V6.vread.128B
+             uint8x128
+             (list
+              (int32 input)
+              (int32
+               (+
+                -2
+                (+
+                 (* 128 rows.s0.x.x)
+                 (+ (* output.s0.y.y input.stride.1) (- 0 t20))))))))
+           (int32x32
+            (llvm.hexagon.V6.vread.128B
+             uint8x128
+             (list
+              (int32 input)
+              (int32
+               (+
+                -2
+                (+
+                 input.stride.1
+                 (+
+                  (* 128 rows.s0.x.x)
+                  (+ (* output.s0.y.y input.stride.1) (- 0 t20))))))))))))
+        (int32 0x04060406)))))))
+  (int32x32
+   (llvm.hexagon.V6.lo.128B
+    int16x64
+    (list
+     (int32x64
+      (llvm.hexagon.V6.vmpabus.acc.128B
+       int16x128
+       (list
+        (int32x64
+         (llvm.hexagon.V6.vmpybus.acc.128B
+          int32x64
+          (list
+           (int32x64
+            (llvm.hexagon.V6.vmpabus.128B
+             int32x32
+             (list
+              (int32x64
+               (llvm.hexagon.V6.vcombine.128B
+                uint8x256
+                (list
+                 (int32x32
+                  (llvm.hexagon.V6.vread.128B
+                   uint8x128
+                   (list
+                    (int32 input)
+                    (int32
+                     (+
+                      -2
+                      (+
+                       (+
+                        (* 128 rows.s0.x.x)
+                        (+ (* output.s0.y.y input.stride.1) (- 0 t20)))
+                       (- 0 input.stride.1)))))))
+                 (int32x32
+                  (llvm.hexagon.V6.vread.128B
+                   uint8x128
+                   (list
+                    (int32 input)
+                    (int32
+                     (+
+                      -2
+                      (+
+                       (+
+                        (* 128 rows.s0.x.x)
+                        (+ (* output.s0.y.y input.stride.1) (- 0 t20)))
+                       (* 2 input.stride.1))))))))))
+              (int32 0x01040104))))
+           (int32x32
+            (llvm.hexagon.V6.vread.128B
+             uint8x128
+             (list
+              (int32 input)
+              (int32
+               (+
+                -2
+                (+
+                 (+
+                  (* 128 rows.s0.x.x)
+                  (+ (* output.s0.y.y input.stride.1) (- 0 t20)))
+                 (* -2 input.stride.1)))))))
+           (int32 1))))
+        (int32x64
+         (llvm.hexagon.V6.vcombine.128B
+          uint8x256
+          (list
+           (int32x32
+            (llvm.hexagon.V6.vread.128B
+             uint8x128
+             (list
+              (int32 input)
+              (int32
+               (+
+                -2
+                (+
+                 (* 128 rows.s0.x.x)
+                 (+ (* output.s0.y.y input.stride.1) (- 0 t20))))))))
+           (int32x32
+            (llvm.hexagon.V6.vread.128B
+             uint8x128
+             (list
+              (int32 input)
+              (int32
+               (+
+                -2
+                (+
+                 input.stride.1
+                 (+
+                  (* 128 rows.s0.x.x)
+                  (+ (* output.s0.y.y input.stride.1) (- 0 t20))))))))))))
+        (int32 0x04060406)))))))
+  (int32 Rt))))";
     debug(0) << p.parse(s) << "\n";
     debug(0) << p.parse(gaussian3x3) << "\n";
     debug(0) << p.parse(gaussian5x5) << "\n";
@@ -872,6 +1056,7 @@ void sexp_parser_test() {
     debug(0) << p.parse(conv3x3a16) << "\n";
     debug(0) << p.parse(conv3x3a32) << "\n";
     debug(0) << p.parse(sobel3x3) << "\n";
+    debug(0) << p.parse(neg_number_issue) << "\n";
 
     //debug(0) << p.parse(gaussian7x7p1) << "\n";
     //debug(0) << p.parse(gaussian7x7p2) << "\n";
