@@ -2773,7 +2773,7 @@ private:
             if (x == 0){
                 return IRMutator::visit(stmt);
             }
-            /*else if(x == 1){
+            /*if(x == 2){
                 SExpParser p;
                 std::string s = R"((llvm.hexagon.V6.vread.128B uint8x128 (list (int32 input) (int32 (+ -2 (* -2 rows.s0.x.x))))))";
                 debug(0) << "Input S-expressions:\n" << s << "\n";
@@ -2781,6 +2781,7 @@ private:
                 debug(0) << "Output AST:\n" << parsed << "\n";
                 return Store::make(stmt->name, parsed, stmt->index, stmt->param, stmt->predicate, stmt->alignment);
             }
+            /*
             else {
                 SExpParser p;
                 std::string s = R"((llvm.hexagon.V6.vmpahb.128B int32x64 (list (int32x64 (llvm.hexagon.V6.vcombine.128B int32x64 (list (int32x32 (llvm.hexagon.V6.vread.128B int32x32 (list (int32 input) (int32 (+ -2 rows.s0.x.x))))) (int32x32 (llvm.hexagon.V6.vread.128B int32x32 (list (int32 input) (int32 (+ -2 (* -2 rows.s0.x.x))))))))) (int32 42))))";
@@ -2792,6 +2793,198 @@ private:
                 return stored;
 
             }*/
+            if(x == 1){
+                SExpParser p;
+                std::string s = 
+R"((llvm.hexagon.V6.vshuffvdd.128B
+ int16x128
+ (list
+  (int32x32
+   (llvm.hexagon.V6.hi.128B
+    int16x64
+    (list
+     (int32x64
+      (llvm.hexagon.V6.vmpabus.acc.128B
+       int16x128
+       (list
+        (int32x64
+         (llvm.hexagon.V6.vmpybus.acc.128B
+          int32x64
+          (list
+           (int32x64
+            (llvm.hexagon.V6.vmpabus.128B
+             int32x32
+             (list
+              (int32x64
+               (llvm.hexagon.V6.vcombine.128B
+                uint8x256
+                (list
+                 (int32x32
+                  (llvm.hexagon.V6.vread.128B
+                   uint8x128
+                   (list
+                    (int32 input)
+                    (int32
+                     (+
+                      -2
+                      (+
+                       (+
+                        (* 128 rows.s0.x.x)
+                        (+ (* output.s0.y.y input.stride.1) (- 0 t20)))
+                       (- 0 input.stride.1)))))))
+                 (int32x32
+                  (llvm.hexagon.V6.vread.128B
+                   uint8x128
+                   (list
+                    (int32 input)
+                    (int32
+                     (+
+                      -2
+                      (+
+                       (+
+                        (* 128 rows.s0.x.x)
+                        (+ (* output.s0.y.y input.stride.1) (- 0 t20)))
+                       (* 2 input.stride.1))))))))))
+              (int32 0x01040104))))
+           (int32x32
+            (llvm.hexagon.V6.vread.128B
+             uint8x128
+             (list
+              (int32 input)
+              (int32
+               (+
+                -2
+                (+
+                 (+
+                  (* 128 rows.s0.x.x)
+                  (+ (* output.s0.y.y input.stride.1) (- 0 t20)))
+                 (* -2 input.stride.1)))))))
+           (int32 1))))
+        (int32x64
+         (llvm.hexagon.V6.vcombine.128B
+          uint8x256
+          (list
+           (int32x32
+            (llvm.hexagon.V6.vread.128B
+             uint8x128
+             (list
+              (int32 input)
+              (int32
+               (+
+                -2
+                (+
+                 (* 128 rows.s0.x.x)
+                 (+ (* output.s0.y.y input.stride.1) (- 0 t20))))))))
+           (int32x32
+            (llvm.hexagon.V6.vread.128B
+             uint8x128
+             (list
+              (int32 input)
+              (int32
+               (+
+                -2
+                (+
+                 input.stride.1
+                 (+
+                  (* 128 rows.s0.x.x)
+                  (+ (* output.s0.y.y input.stride.1) (- 0 t20))))))))))))
+        (int32 0x04060406)))))))
+  (int32x32
+   (llvm.hexagon.V6.lo.128B
+    int16x64
+    (list
+     (int32x64
+      (llvm.hexagon.V6.vmpabus.acc.128B
+       int16x128
+       (list
+        (int32x64
+         (llvm.hexagon.V6.vmpybus.acc.128B
+          int32x64
+          (list
+           (int32x64
+            (llvm.hexagon.V6.vmpabus.128B
+             int32x32
+             (list
+              (int32x64
+               (llvm.hexagon.V6.vcombine.128B
+                uint8x256
+                (list
+                 (int32x32
+                  (llvm.hexagon.V6.vread.128B
+                   uint8x128
+                   (list
+                    (int32 input)
+                    (int32
+                     (+
+                      -2
+                      (+
+                       (+
+                        (* 128 rows.s0.x.x)
+                        (+ (* output.s0.y.y input.stride.1) (- 0 t20)))
+                       (- 0 input.stride.1)))))))
+                 (int32x32
+                  (llvm.hexagon.V6.vread.128B
+                   uint8x128
+                   (list
+                    (int32 input)
+                    (int32
+                     (+
+                      -2
+                      (+
+                       (+
+                        (* 128 rows.s0.x.x)
+                        (+ (* output.s0.y.y input.stride.1) (- 0 t20)))
+                       (* 2 input.stride.1))))))))))
+              (int32 0x01040104))))
+           (int32x32
+            (llvm.hexagon.V6.vread.128B
+             uint8x128
+             (list
+              (int32 input)
+              (int32
+               (+
+                -2
+                (+
+                 (+
+                  (* 128 rows.s0.x.x)
+                  (+ (* output.s0.y.y input.stride.1) (- 0 t20)))
+                 (* -2 input.stride.1)))))))
+           (int32 1))))
+        (int32x64
+         (llvm.hexagon.V6.vcombine.128B
+          uint8x256
+          (list
+           (int32x32
+            (llvm.hexagon.V6.vread.128B
+             uint8x128
+             (list
+              (int32 input)
+              (int32
+               (+
+                -2
+                (+
+                 (* 128 rows.s0.x.x)
+                 (+ (* output.s0.y.y input.stride.1) (- 0 t20))))))))
+           (int32x32
+            (llvm.hexagon.V6.vread.128B
+             uint8x128
+             (list
+              (int32 input)
+              (int32
+               (+
+                -2
+                (+
+                 input.stride.1
+                 (+
+                  (* 128 rows.s0.x.x)
+                  (+ (* output.s0.y.y input.stride.1) (- 0 t20))))))))))))
+        (int32 0x04060406)))))))
+  (int32 Rt))))";
+                debug(0) << "Input S-expressions:\n" << s << "\n";
+                auto parsed =  p.parse(s);
+                debug(0) << "Output AST:\n" << parsed << "\n";
+                return Store::make(stmt->name, parsed, stmt->index, stmt->param, stmt->predicate, stmt->alignment);
+            }
 
             RacketPrinter specPrinter(std::cout);
             std::string expr = specPrinter.dispatch(stmt->value);
