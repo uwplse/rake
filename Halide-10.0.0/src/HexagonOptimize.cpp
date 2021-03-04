@@ -2979,7 +2979,7 @@ R"((llvm.hexagon.V6.vshuffvdd.128B
                   (* 128 rows.s0.x.x)
                   (+ (* output.s0.y.y input.stride.1) (- 0 t20))))))))))))
         (int32 0x04060406)))))))
-  (int32 Rt))))";
+  (int32 1))))";
                 debug(0) << "Input S-expressions:\n" << s << "\n";
                 auto parsed =  p.parse(s);
                 debug(0) << "Output AST:\n" << parsed << "\n";

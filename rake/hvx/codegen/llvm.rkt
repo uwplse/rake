@@ -190,7 +190,7 @@
     
     ;;vtranspose
     [(vtranspose Vu Vv Rt)
-     (generate `vshuffvdd (p-type p) `(list (,t_32xi32 ,(codegen Vu)) (,t_32xi32 ,(codegen Vv)) (,t_i32 Rt)))]
+     (generate `vshuffvdd (p-type p) `(list (,t_32xi32 ,(codegen Vu)) (,t_32xi32 ,(codegen Vv)) (,t_i32 ,Rt)))]
     
     ;;vpack
     [(vpack Vu Vv)
