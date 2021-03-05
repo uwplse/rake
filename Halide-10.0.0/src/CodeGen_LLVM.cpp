@@ -2622,9 +2622,16 @@ void CodeGen_LLVM::visit(const Call *op) {
             } else {
                 args.push_back(codegen(arg));
             }
+            args.back()->dump();
         }
+        for (size_t i = 0; i < args.size(); i++) {
+            args[i] = builder->CreateBitCast(args[i], fn->getFunctionType()->getParamType(i));
+        }
+        fn->dump();
         value = builder->CreateCall(fn, args);
+        value->dump();
         value = builder->CreateBitCast(value, llvm_type_of(op->type));
+        return;
     }
     if (op->is_intrinsic(Call::debug_to_file)) {
         internal_assert(op->args.size() == 3);
