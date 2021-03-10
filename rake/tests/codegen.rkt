@@ -41,6 +41,6 @@
 
   ;; Feel free to relax or even remove this check. I only added the string so that you have a target
   ;; to shoot for.
-  (check-equal? (llvm_codegen program) out-prog-str)
+  (check-equal? (llvm-codegen program) out-prog-str)
 
   (printf "Test Passed: Gaussian 3x3 stage 2\n"))
