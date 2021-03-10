@@ -1,5 +1,7 @@
 #lang rosette
 
+(require racket/engine)
+
 (require rake/util)
 
 (require rake/synthesis/ir)
@@ -65,7 +67,7 @@
          (when (not (hash-has-key? ranked-candidates ir-expr))
            (hash-set! ranked-candidates ir-expr (enumerate-hvx-exprs (hvx-expr-spec-expr spec) hvx-sub-expr)))
 
-         (synthesize-equiv-hvx-enum spec outputType hvx-sub-expr (hash-ref ranked-candidates ir-expr)))]
+         (synthesize-equiv-hvx-enum spec outputType hvx-sub-expr (hash-ref ranked-candidates ir-expr) discarded-sols))]
 
       [(cast sub-expr type)
        (begin
@@ -96,7 +98,7 @@
   hvx-expr)
 
 ;; Define enumerative synthesis loop for HVX exppression generation
-(define (synthesize-equiv-hvx-enum spec output-type hvx-sub-expr ranked-candidates-exprs)
+(define (synthesize-equiv-hvx-enum spec output-type hvx-sub-expr ranked-candidates-exprs discarded-sols)
   (define ir-expr (hvx-expr-spec-expr spec))
   (define ir-expr-sol (hvx-expr-spec-sol spec))
   (define ir-expr-ctx (hvx-expr-spec-ctx spec))
@@ -111,7 +113,11 @@
          (assert (eq? (evaluate (elem-ir oe i) ir-expr-sol) (v0-elem-hvx se i)))
          (set-curr-cn-ir (+ i 1))
          (set-curr-cn-hvx (+ i 1))
-         (assert (eq? (evaluate (elem-ir oe (+ i 1)) ir-expr-sol) (v1-elem-hvx se (+ i 1))))]
+         (assert (eq? (evaluate (elem-ir oe (+ i 1)) ir-expr-sol) (v1-elem-hvx se i)))
+         ;(set-curr-cn-ir (+ i 2))
+         ;(set-curr-cn-hvx (+ i 2))
+         ;(assert (eq? (evaluate (elem-ir oe (+ i 2)) ir-expr-sol) (v1-elem-hvx se (+ i 2))))
+         ]
         [else
          (set-curr-cn-ir i)
          (set-curr-cn-hvx i)
@@ -119,7 +125,6 @@
          (set-curr-cn-ir (+ i 1))
          (set-curr-cn-hvx (+ i 1))
          (assert (eq? (evaluate (elem-ir oe (+ i 1)) ir-expr-sol) (elem-hvx se (+ i 1))))])))
-
   (define (find-next-impl candidate-hvx-exprs)
     (cond
       [(empty? candidate-hvx-exprs) (unsat)]
@@ -130,23 +135,43 @@
          [else
           (hash-clear! hvx-gather-tables)
           (hash-clear! hvx-gather-types)
+          
+          (define original-expr (interpret-ir ir-expr))
+          (define synthesized-expr (interpret-hvx candidate-expr))
 
-          (define st (current-milliseconds))
-          (define sol (synthesize #:forall ir-expr-ctx
-                                  #:guarantee (bounded-eq? (interpret-ir ir-expr) (interpret-hvx candidate-expr) MC_BND)))
-          (hash-set! cache candidate-expr sol)
-          (define runtime (- (current-milliseconds) st))
-          (display (format "Synthesis time: ~ams\n" runtime))
-          (set! total-synth-time (+ total-synth-time runtime))
+          (define synthesizer
+            (engine
+             (λ (_)
+               (define st (current-milliseconds))
+               (define sol (synthesize #:forall ir-expr-ctx
+                                       #:guarantee (begin
+                                                     (bounded-eq? original-expr synthesized-expr MC_BND)
+                                                     (for ([discarded-sol discarded-sols])
+                                                       (assert (not (equal-expr-hvx? discarded-sol candidate-expr)))))))
+               ;(hash-set! cache candidate-expr sol)
+               (define runtime (- (current-milliseconds) st))
+               (display (format "Synthesis time: ~ams\n" runtime))
+               (set! total-synth-time (+ total-synth-time runtime))
+               
+               sol)))
+
+          (engine-run 600000 synthesizer)
+          
+          (define sol (engine-result synthesizer))
 
           (cond
+            [(eq? sol #f)
+             (display (format "Time-out: 10mins\n"))
+             (hash-set! cache candidate-expr (unsat))
+             (find-next-impl (rest candidate-hvx-exprs))]
             [(unsat? sol)
+             (hash-set! cache candidate-expr sol)
              (find-next-impl (rest candidate-hvx-exprs))]
             [else
              (display "\nSuccessfully found an equivalent HVX expression.\n\n")
-             (pretty-print (evaluate candidate-expr (hash-ref cache candidate-expr)))
+             (pretty-print (evaluate candidate-expr sol))
              (display "\n")
-             (evaluate candidate-expr (hash-ref cache candidate-expr))])])]))
+             (evaluate candidate-expr sol)])])]))
 
   (define (search-candidates sorted-costs ranked-candidates-exprs)
     (cond
@@ -200,6 +225,23 @@
 
   (define synthesized-hvx-expr (??hvx-expr-grm))
 
+;  (println synthesized-hvx-expr)
+;  (println discarded-sols)
+;
+;  (set-curr-cn-ir 0)
+;  (set-curr-cn-hvx 0)
+;
+;  (println (evaluate (elem-ir (interpret-ir ir-expr) 0) ir-expr-sol))
+;  (println (elem-hvx (interpret-hvx synthesized-hvx-expr) 0))
+;
+;  (set-curr-cn-ir 1)
+;  (set-curr-cn-hvx 1)
+;
+;  (println (evaluate (elem-ir (interpret-ir ir-expr) 1) ir-expr-sol))
+;  (println (elem-hvx (interpret-hvx synthesized-hvx-expr) 1))
+;
+;  (exit)
+  
   (define (bounded-eq? oe se lanes)
     (for ([i lanes])
       (cond

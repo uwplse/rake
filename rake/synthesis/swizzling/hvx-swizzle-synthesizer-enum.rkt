@@ -112,16 +112,16 @@
                
                correct?)))
 
-          (engine-run 15000 synthesizer)
+          (engine-run 30000 synthesizer)
 
           (define correct? (engine-result synthesizer))
           (cond
             [(hash-has-key? enum-history candidate-swizzle)
              (set! total-synth-time (+ total-synth-time runtime))]
             [else
-             (display (format "Synthesizer timed out after: 15s\n"))
+             (display (format "Synthesizer timed out after: 30s\n"))
              (hash-set! enum-history candidate-swizzle #f)
-             (set! total-synth-time (+ total-synth-time 15000))])
+             (set! total-synth-time (+ total-synth-time 30000))])
           
           (cond
             [correct?
@@ -187,6 +187,7 @@
     [(empty? lanes-used-in-synth) (values #t hvx-expr-grm)]
     [else
      (define lane (first lanes-used-in-synth))
+     ;(display (format "Checking lane ~a\n" lane))
      (define interpreted-f-expr (interpret-hvx hvx-expr-grm))
      (define sol (synthesize #:forall ctx
                              #:guarantee (begin

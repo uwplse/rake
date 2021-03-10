@@ -24,9 +24,9 @@
      [(x256 sca) (list)]
 
      [(ramp base stride len) (list)]
-     [(load buf idxs)
+     [(load buf idxs align)
       (match idxs
-        [(ramp base stride len) (list (cons buf base))]
+        [(ramp base stride len) (list (list buf base align))]
         [_ (error "NYI: Extracting vec from:" expr)])]
 
      [(slice_vectors vec base stride len) (extract-loads-as-hvx-vecs vec)]
@@ -163,7 +163,7 @@
     [(x256 sca) (list)]
 
     [(ramp base stride len) (list)]
-    [(load buf idxs) (list)]
+    [(load buf idxs align) (list)]
 
     ;; Type Casts
     [(uint8x32 vec) (extract-add-consts vec)]
@@ -211,7 +211,7 @@
     [(x256 sca) (list)]
 
     [(ramp base stride len) (list)]
-    [(load buf idxs) (list)]
+    [(load buf idxs align) (list)]
 
     ;; Type Casts
     [(uint8x32 vec) (extract-sub-consts vec)]
@@ -259,7 +259,7 @@
     [(x256 sca) (list)]
 
     [(ramp base stride len) (list)]
-    [(load buf idxs) (list)]
+    [(load buf idxs align) (list)]
 
     ;; Type Casts
     [(uint8x32 vec) (extract-mul-consts vec)]
@@ -307,7 +307,7 @@
     [(x256 sca) (list)]
 
     [(ramp base stride len) (list)]
-    [(load buf idxs) (list)]
+    [(load buf idxs align) (list)]
 
     ;; Type Casts
     [(uint8x32 vec) (extract-div-consts vec)]

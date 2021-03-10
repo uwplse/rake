@@ -15,7 +15,7 @@
     [(x256 sca) (lambda (i) (interpret sca))]
 
     [(ramp base stride len) (lambda (i) (+ (interpret base) (* i (interpret stride))))]
-    [(load buf idxs) (lambda (i) (get (interpret buf) ((interpret idxs) i)))]
+    [(load buf idxs alignment) (lambda (i) (get (interpret buf) ((interpret idxs) i)))]
 
     ;; Type Casts
     [(uint8x32 vec) (lambda (i) (cpp-cast ((interpret vec) i) 'uint8))]

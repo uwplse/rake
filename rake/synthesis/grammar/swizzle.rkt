@@ -39,13 +39,13 @@
            (define reads (list))
            (for ([buf bufs])
              (for ([idx (hash-ref idxs buf)])
-               (set! reads (set-add reads (vread buf idx)))))
+               (set! reads (set-add reads (vread buf (car idx) (second idx))))))
            (apply choose* reads)]
           [(??vreadp bufs idxs)
            (define reads (list))
            (for ([buf bufs])
              (for ([idx (hash-ref idxs buf)])
-               (set! reads (set-add reads (vreadp buf idx)))))
+               (set! reads (set-add reads (vreadp buf (car idx) (second idx))))))
            (apply choose* reads)]
           [_ instr]))
       (visit-hvx candidate-expr fix-reads)))

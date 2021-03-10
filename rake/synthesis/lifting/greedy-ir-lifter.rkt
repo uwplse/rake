@@ -57,7 +57,7 @@
       [(x128 sca) (cons (broadcast sca) (model))]
       [(x256 sca) (cons (broadcast sca) (model))]
 
-      [(load buf idxs) (cons (load-data buff-reads) (model))]
+      [(load buf idxs align) (cons (load-data buff-reads) (model))]
       ;[(ramp buf base stride len) (cons (load-data buff-reads) (model))]
 
       ;; Shuffles
@@ -400,8 +400,9 @@
     (for ([i lanes])
       (set-curr-cn-ir i)
       (assert (eq? (oe i) (elem-ir se i)))
-      (set-curr-cn-ir (+ i (/ VEC_LANES 2) 1))
-      (assert (eq? (oe (+ i (/ VEC_LANES 2) 1)) (elem-ir se (+ i (/ VEC_LANES 2) 1))))))
+      ;(set-curr-cn-ir (+ i (/ VEC_LANES 2) 1))
+      ;(assert (eq? (oe (+ i (/ VEC_LANES 2) 1)) (elem-ir se (+ i (/ VEC_LANES 2) 1))))
+      ))
 
   ;; Synthesize expression
   (clear-asserts!)

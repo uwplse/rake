@@ -9,6 +9,7 @@
 (require rake/cpp/cast)
 (require rake/hvx/interpreter)
 (require rake/hvx/ast/types)
+(require rake/hvx/ast/visitor)
 (require rake/hvx/cost-model)
 (require rake/synthesis/ir)
 
@@ -49,25 +50,137 @@
     ['uint16 (set 'u16x64 'u16x64x2)]
     ['uint32 (set 'u32x32 'u32x32x2)]))
 
+(define (root-instr expr)
+  (match expr
+    [(vzxt Vu signed?) vzxt]
+    [(vsxt Vu signed?) vsxt]
+    [(vadd Vu Vv sat?) vadd]
+    [(vadd-w Vu Vv) vadd-w]
+    [(vadd-w-acc Vdd Vu Vv) vadd-w-acc]
+    [(vmpy Vu Rt) vmpy]
+    [(vmpyi Vu Rt) vmpyi]
+    [(vmpye Vu Rt) vmpye]
+    [(vmpy-acc Vdd Vu Rt) vmpy-acc]
+    [(vmpyi-acc Vd Vu Rt) vmpyi-acc]
+    [(vmpye-acc Vd Vu Rt) vmpye-acc]
+    [(vmpa Vuu Rt) vmpa]
+    [(vmpa-acc Vdd Vuu Rt) vmpa-acc]
+    [(vdmpy Vu Rt) vdmpy]
+    [(vdmpy-sw Vuu Rt) vdmpy-sw]
+    [(vdmpy-acc Vd Vu Rt) vdmpy-acc]
+    [(vdmpy-sw-acc Vdd Vuu Rt) vdmpy-sw-acc]
+    [(vtmpy Vuu Rt) vtmpy]
+    [(vtmpy-acc Vdd Vuu Rt) vtmpy-acc]
+    [(vrmpy Vu Rt) vrmpy]
+    [(vrmpy-acc Vd Vu Rt) vrmpy-acc]
+    [(vrmpy-p Vuu Rt u1) vrmpy-p]
+    [(vrmpy-p-acc Vdd Vuu Rt u1) vrmpy-p-acc]
+    [_ (void)]))
+
+(define (child-instr expr)
+  (match expr
+    [(vadd-w-acc Vdd Vu Vv) (root-instr Vdd)]
+    [(vmpy-acc Vdd Vu Rt) (root-instr Vdd)]
+    [(vmpyi-acc Vd Vu Rt) (root-instr Vd)]
+    [(vmpye-acc Vd Vu Rt) (root-instr Vd)]
+    [(vmpa-acc Vdd Vuu Rt) (root-instr Vdd)]
+    [(vdmpy-acc Vd Vu Rt) (root-instr Vd)]
+    [(vdmpy-sw-acc Vdd Vuu Rt) (root-instr Vdd)]
+    [(vtmpy-acc Vdd Vuu Rt) (root-instr Vdd)]
+    [(vrmpy-acc Vd Vu Rt) (root-instr Vd)]
+    [(vrmpy-p-acc Vdd Vuu Rt u1) (root-instr Vdd)]
+    [_ (void)]))
+
+(define (instr-order instr)
+  (cond
+    [(eq? instr gather*) 0]
+
+    [(eq? instr vadd) 0]
+    [(eq? instr vmpyi) 0]
+    [(eq? instr vmpye) 0]
+    [(eq? instr vasl) 0]
+
+    [(eq? instr vmpyi-acc) 1]
+    [(eq? instr vmpye-acc) 2]
+    
+    [(eq? instr vzxt) 0]
+    [(eq? instr vsxt) 0]
+    [(eq? instr vadd-w) 0]
+    [(eq? instr vmpy) 0]
+    [(eq? instr vmpa) 0]
+    [(eq? instr vdmpy) 0]
+    [(eq? instr vdmpy-sw) 0]
+    [(eq? instr vtmpy) 0]
+
+    [(eq? instr vadd-w-acc) 6]
+    [(eq? instr vmpy-acc) 5]
+    [(eq? instr vmpa-acc) 4]
+    [(eq? instr vdmpy-acc) 3]
+    [(eq? instr vdmpy-sw-acc) 2]
+    [(eq? instr vtmpy-acc) 1]))
+
+(define (max-unique-inputs expr)
+  (match expr
+    [(vzxt Vu signed?) (max-unique-inputs Vu)]
+    [(vsxt Vu signed?) (max-unique-inputs Vu)]
+    [(vadd Vu Vv sat?) (+ (max-unique-inputs Vu) (max-unique-inputs Vv))]
+    [(vadd-w Vu Vv) (+ (max-unique-inputs Vu) (max-unique-inputs Vv))]
+    [(vadd-w-acc Vdd Vu Vv) (+ (max-unique-inputs Vdd) (max-unique-inputs Vu) (max-unique-inputs Vv))]
+    [(vmpy Vu Rt) (max-unique-inputs Vu)]
+    [(vmpyi Vu Rt)(max-unique-inputs Vu)]
+    [(vmpye Vu Rt) (max-unique-inputs Vu)]
+    [(vmpy-acc Vdd Vu Rt) (+ (max-unique-inputs Vdd) (max-unique-inputs Vu))]
+    [(vmpyi-acc Vd Vu Rt) (+ (max-unique-inputs Vd) (max-unique-inputs Vu))]
+    [(vmpye-acc Vd Vu Rt) (+ (max-unique-inputs Vd) (max-unique-inputs Vu))]
+    [(vmpa Vuu Rt) (* 2 (max-unique-inputs Vuu))]
+    [(vmpa-acc Vdd Vuu Rt) (+ (max-unique-inputs Vdd) (* 2 (max-unique-inputs Vuu)))]
+    [(vdmpy Vu Rt) (* 4 (max-unique-inputs Vu))]
+    [(vdmpy-sw Vuu Rt) (* 2 (max-unique-inputs Vuu))]
+    [(vdmpy-acc Vd Vu Rt) (+ (max-unique-inputs Vd) (* 2 (max-unique-inputs Vu)))]
+    [(vdmpy-sw-acc Vdd Vuu Rt) (+ (max-unique-inputs Vdd) (* 2 (max-unique-inputs Vuu)))]
+    [(vtmpy Vuu Rt) (* 3 (max-unique-inputs Vuu))]
+    [(vtmpy-acc Vdd Vuu Rt) (+ (max-unique-inputs Vdd) (* 3 (max-unique-inputs Vuu)))]
+    [(vrmpy Vu Rt) (* 4 (max-unique-inputs Vu))]
+    [(vrmpy-acc Vd Vu Rt) (+ (max-unique-inputs Vd) (* 4 (max-unique-inputs Vu)))]
+    [(vrmpy-p Vuu Rt u1) (* 4 (max-unique-inputs Vuu))]
+    [(vrmpy-p-acc Vdd Vuu Rt u1) (+ (max-unique-inputs Vdd) (* 4 (max-unique-inputs Vuu)))]
+    [(gather* buff-opts) 1]))
+
 (define (enumerate-hvx-exprs ir-expr hvx-sub-expr)
-  
   (define-values (isa weights)
     (match ir-expr
       [(convolve data kernel saturateFunc outputType)
        (values
         (if (eq? (type (elem-ir (interpret-ir data) 0)) outputType)
             (list vadd vmpyi vmpyi-acc vmpye vmpye-acc vasl)
-            (list vzxt vsxt vadd-w vadd-w-acc vmpy vmpy-acc vmpa vmpa-acc vdmpy vdmpy-sw vdmpy-acc vdmpy-sw-acc vtmpy vtmpy-acc))
+            (list vzxt vsxt vadd-w vadd-w-acc vmpy vmpy-acc vmpa vmpa-acc vdmpy vdmpy-acc vtmpy vtmpy-acc)) ; vdmpy-sw-acc vdmpy-sw
         kernel)]
       [_ (begin (println "NYI") (exit))]))
-
   
   (set! int-consts (set->list (list->set (weight-matrix-vals weights))))
 
   (define elemT (type (elem-ir (interpret-ir ir-expr) 0)))
   
-  (define candidates (enumerate (enum-types elemT) isa hvx-sub-expr 3))
+  (define candidates (time (enumerate (enum-types elemT) isa hvx-sub-expr 3 15)))
 
+  ;; Fill in param grammars
+  (define (fill-arg-grammars node [pos -1])
+    (match node
+      [#t #t]
+      [#f #f]
+      ['bool (bool-const)]
+      ['int8 (int8-const)]
+      ['uint8 (uint8-const)]
+      ['int16 (int16-const)]
+      ['uint16 (uint16-const)]
+      ['int8x2 (cons (int8-const) (int8-const))]
+      ['uint8x2 (cons (uint8-const) (uint8-const))]
+      ['int16x2 (cons (int16-const) (int16-const))]
+      ['uint16x2 (cons (uint16-const) (uint16-const))]
+      [_ node]))
+  (set! candidates (for/set ([candidate candidates]) (visit-hvx candidate fill-arg-grammars)))
+  
+  ;; Rank em
   (define ranked-candidates (make-hash))
   (for ([candidate-expr candidates])
     (define candidate-expr-cost (basic-expr-cost candidate-expr))
@@ -75,28 +188,57 @@
       (hash-set! ranked-candidates candidate-expr-cost (set)))
     (hash-set! ranked-candidates candidate-expr-cost (set-add (hash-ref ranked-candidates candidate-expr-cost) candidate-expr)))
 
-;  (for ([cost (hash-keys ranked-candidates)])
-;    (display (format "~a => ~a\n" cost (set-count (hash-ref ranked-candidates cost)))))
+  ;(for ([cost (hash-keys ranked-candidates)])
+   ; (display (format "~a => ~a\n" cost (set-count (hash-ref ranked-candidates cost)))))
   
-  ranked-candidates)
+  ;; Pruning
+  (define pruned-ranked-candidates (make-hash))
+  (for ([cost (hash-keys ranked-candidates)])
+    (define pruned-candidates (mutable-set))
 
+    ;; Based on instr ordering
+    (for ([candidate (hash-ref ranked-candidates cost)])
+      (define prune? #f)
+      (define (check-instr-ordering node [pos -1])
+        (define r-instr (root-instr node))
+        (define c-instr (child-instr node))
+        (when (not (void? c-instr))
+          (define parent-order (instr-order r-instr))
+          (define child-order (instr-order c-instr))
+          (when (> child-order parent-order)
+            (set! prune? #t)))
+        node)
+      (visit-hvx candidate check-instr-ordering)
+
+      ;; Pruning -- based on conv radius
+      (define conv-radius-spec (weight-matrix-rad weights))
+      (define conv-radius-sk (max-unique-inputs candidate))
+
+      (set! prune? (or prune? (not (eq? conv-radius-sk conv-radius-spec))))
+      
+      (when (not prune?)
+        (set-add! pruned-candidates candidate)))
+    (display (format "~a => ~a\n" cost (set-count pruned-candidates)))
+    (hash-set! pruned-ranked-candidates cost pruned-candidates))
+
+  pruned-ranked-candidates)
+  
 ;  (make-hash (list (cons 6 (set
 ;
-;                            (vmpyi-acc
-;                             (vadd
-;                              hvx-sub-expr
-;                              (vmpyi-acc
+;                            (vtmpy-acc
+;                             (vtmpy-acc
+;                              (vdmpy-sw-acc
+;                               (vmpy
+;                                hvx-sub-expr
+;                                (int8_t (choose (bv #x02 8) (bv #x01 8) (bv #x04 8))))
 ;                               hvx-sub-expr
-;                               hvx-sub-expr
-;                               (int8_t (bv #x06 8)))
-;                              #f)
-;                             (vadd
+;                               (cons (int8_t (choose (bv #x02 8) (bv #x01 8) (bv #x04 8))) (int8_t (choose (bv #x02 8) (bv #x01 8) (bv #x04 8)))))
 ;                              hvx-sub-expr
-;                              hvx-sub-expr
-;                              #f)
-;                             (int8_t (bv #x04 8)))
-;                               
-;                            
+;                              (cons (int8_t (choose (bv #x02 8) (bv #x01 8) (bv #x04 8))) (int8_t (choose (bv #x02 8) (bv #x01 8) (bv #x04 8)))))
+;                             hvx-sub-expr
+;                             (cons (int8_t (choose (bv #x02 8) (bv #x01 8) (bv #x04 8))) (int8_t (choose (bv #x02 8) (bv #x01 8) (bv #x04 8)))))
+;;                               
+;;                            
 ;;                            (vmpyi-acc
 ;;                             (vmpyi-acc
 ;;                              (vadd hvx-sub-expr hvx-sub-expr #f)
@@ -107,7 +249,9 @@
 ;                            
 ;                            )))))
 
-(define (enumerate types instr-set base-expr depth)
+(define database (make-hash))
+
+(define (enumerate types instr-set base-expr depth max-cost)
   (cond
     ;; Recursive base case
     [(<= depth 0)
@@ -118,43 +262,52 @@
      (if (set-empty? (set-intersect types base-types)) (set) (set base-expr))]
     ;[(<= depth 0) (if (set-empty? (set-intersect types (set 'u8x128 'u8x128x2))) (set) (set base-expr))]
     [else
-     (define candidates (set))
-     (set! candidates (set-union candidates (enumerate types instr-set base-expr (sub1 depth))))
-     (for ([instr instr-set])
-       (for ([sig (instr-forms instr)])
-         (when (set-member? types (instr-sig-ret-val sig))
-           (define arg-opts (list))
-           (for ([arg (instr-sig-args sig)])
-             (define opts (match arg
-                            [#t (list #t)]
-                            [#f (list #f)]
-                            ['bool (list (bool-const))]
-                            ['int8 (list (int8-const))]
-                            ['uint8 (list (uint8-const))]
-                            ['int16 (list (int16-const))]
-                            ['uint16 (list (uint16-const))]
-                            ['int8x2 (list (cons (int8-const) (int8-const)))]
-                            ['uint8x2 (list (cons (uint8-const) (uint8-const)))]
-                            ['int16x2 (list (cons (int16-const) (int16-const)))]
-                            ['uint16x2 (list (cons (uint16-const) (uint16-const)))]
-                            [_ (set->list (enumerate (set arg) instr-set base-expr (sub1 depth)))]))
-             (set! arg-opts (append arg-opts (list opts))))
-           (define sig-exprs
-             (list->set
-              (match (length arg-opts)
-                [1 (cartesian-product (list instr) (first arg-opts))]
-                [2 (cartesian-product (list instr) (first arg-opts) (second arg-opts))]
-                [3 (cartesian-product (list instr) (first arg-opts) (second arg-opts) (third arg-opts))]
-                [_ (error "NYI: enumeration instrs with the following number of args:" (length arg-opts))])))
-           (set! sig-exprs (for/set ([sig-expr sig-exprs]) (match (length sig-expr)
-                                                              [2 ((list-ref sig-expr 0) (list-ref sig-expr 1))]
-                                                              [3 ((list-ref sig-expr 0) (list-ref sig-expr 1) (list-ref sig-expr 2))]
-                                                              [4 ((list-ref sig-expr 0) (list-ref sig-expr 1) (list-ref sig-expr 2) (list-ref sig-expr 3))]
-                                                              [_ (error "NYI. Sig-expr of size" (length sig-expr))])))
-           (set! candidates (set-union candidates sig-exprs)))))
-     candidates]))
+     (define key (list types instr-set base-expr depth))
+     (cond
+       [(hash-has-key? database key) (hash-ref database key)]
+       [else
+        (define candidates (set))
+        (set! candidates (set-union candidates (enumerate types instr-set base-expr (sub1 depth) max-cost)))
+        (for ([instr instr-set])
+          (for ([sig (instr-forms instr)])
+            (when (set-member? types (instr-sig-ret-val sig))
+              (define arg-opts (list))
+              (for ([arg (instr-sig-args sig)])
+                (define opts (match arg
+                               [#t (list #t)]
+                               [#f (list #f)]
+                               ['bool (list 'bool)]
+                               ['int8 (list 'int8)]
+                               ['uint8 (list 'uint8)]
+                               ['int16 (list 'int16)]
+                               ['uint16 (list 'uint16)]
+                               ['int8x2 (list 'int8x2)]
+                               ['uint8x2 (list 'uint8x2)]
+                               ['int16x2 (list 'int16x2)]
+                               ['uint16x2 (list 'uint16x2)]
+                               [_ (set->list (enumerate (set arg) instr-set base-expr (sub1 depth) max-cost))]))
+                (set! arg-opts (append arg-opts (list opts))))
+              (define sig-exprs
+                (list->set
+                 (match (length arg-opts)
+                   [1 (cartesian-product (list instr) (first arg-opts))]
+                   [2 (cartesian-product (list instr) (first arg-opts) (second arg-opts))]
+                   [3 (cartesian-product (list instr) (first arg-opts) (second arg-opts) (third arg-opts))]
+                   [_ (error "NYI: enumeration instrs with the following number of args:" (length arg-opts))])))
+              (set! sig-exprs (for/set ([sig-expr sig-exprs]) (match (length sig-expr)
+                                                                [2 ((list-ref sig-expr 0) (list-ref sig-expr 1))]
+                                                                [3 ((list-ref sig-expr 0) (list-ref sig-expr 1) (list-ref sig-expr 2))]
+                                                                [4 ((list-ref sig-expr 0) (list-ref sig-expr 1) (list-ref sig-expr 2) (list-ref sig-expr 3))]
+                                                                [_ (error "NYI. Sig-expr of size" (length sig-expr))])))
+              (set! candidates (set-union candidates sig-exprs)))))
+        ;(hash-set! database key candidates)
+        ;candidates
 
-;(set-count (enumerate (set 'i16x64x2 'i16x64) (list vzxt vsxt vadd-w vadd-w-acc vmpy vmpy-acc vmpa vmpa-acc vdmpy vdmpy-sw vdmpy-acc vdmpy-sw-acc vtmpy vtmpy-acc) (gather* 1) 1))
+        (define filtered-res (list->set (filter (lambda (e) (<= (basic-expr-cost e) max-cost)) (set->list candidates))))
+        (hash-set! database key filtered-res)
+        filtered-res
+        
+        ])]))
 
 (define (??hvx-expr out-types hvx-sub-expr weights depth)
   (if (<= depth 0)
@@ -325,8 +478,11 @@
   (define (??hvx-asr-instr registers)
     (define t0 (apply choose* registers))
     (define t1 (apply choose* registers))
+    (define t2 (lo t0))
+    (define t3 (hi t0))
     (choose*
      (vasr-n t0 t1 i8-n round? (bool-const) signed?)
+     (let-expr 't0 t0 (vasr-n (hi 't0) (lo 't0) i8-n round? (bool-const) signed?))
      ))
   ??hvx-asr-instr)
 

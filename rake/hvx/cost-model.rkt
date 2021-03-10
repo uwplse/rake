@@ -21,8 +21,8 @@
 (define (const-weight p)
   (match p
     ;; HVX instructions for vector creation
-    [(vread buf loc) 1]
-    [(vreadp buf loc) 1]
+    [(vread buf loc align) 1]
+    [(vreadp buf loc align) 1]
     [(vsplat Rt) 1]
 
     ;; HVX instructions for data swizzling

@@ -13,19 +13,21 @@
   (push-trace p)
   (define outp
     (match p
+      ;; Let Exprs
+      [(let-expr var val body) (let-expr (transform var) (visit val transform) (visit body transform))]
+      
       ;; HVX instructions for vector creation
-      [(vread buf loc) (transform (vread buf loc))]
-      [(vreadp buf loc) (transform (vreadp buf loc))]
-      [(vsplat Rt) (transform (vsplat Rt))]
+      [(vread buf loc align) (transform (vread buf loc align))]
+      [(vreadp buf loc align) (transform (vreadp buf loc align))]
+      [(vsplat Rt) (transform (vsplat (visit Rt)))]
 
-      ;; lo hi vcombine vshuff vshuffe vshuffo vshuffoe vdeal vdeale valign vror vtranspose
       ;; HVX instructions for data swizzling
       [(lo Vuu) (transform (lo (visit Vuu transform)))]
       [(hi Vuu) (transform (hi (visit Vuu transform)))]
       [(vcombine Vu Vv) (transform (vcombine (visit Vu transform) (visit Vv transform)))]
       [(vshuffe Vu Vv) (transform (vshuffe (visit Vu transform) (visit Vv transform)))]
       [(vshuffo Vu Vv) (transform (vshuffo (visit Vu transform) (visit Vv transform)))]
-      [(vshuffo-n Vu Vv signed?) (transform (vshuffo-n (visit Vu transform) (visit Vv transform) (visit signed?)))]
+      [(vshuffo-n Vu Vv signed?) (transform (vshuffo-n (visit Vu transform) (visit Vv transform) (visit signed? transform)))]
       [(vshuffoe Vu Vv) (transform (vshuffoe (visit Vu transform) (visit Vv transform)))]
       ;[(vswap Qt Vu Vv)
       ;[(vmux Qt Vu Vv)
@@ -39,8 +41,8 @@
       [(vshuff Vu) (transform (vshuff (visit Vu transform)))]
       [(vtranspose Vu Vv Rt) (transform (vtranspose (visit Vu transform) (visit Vv transform) (visit Rt transform)))]
       ;[(vpack Vu Vv)
-      [(vpacke Vu Vv signed?) (transform (vpacke (visit Vu transform) (visit Vv transform) signed?))]
-      [(vpacko Vu Vv signed?) (transform (vpacko (visit Vu transform) (visit Vv transform) signed?))]
+      [(vpacke Vu Vv signed?) (transform (vpacke (visit Vu transform) (visit Vv transform) (visit signed? transform)))]
+      [(vpacko Vu Vv signed?) (transform (vpacko (visit Vu transform) (visit Vv transform) (visit signed? transform)))]
       [(vpacko-n Vu Vv signed?) (transform (vpacko-n (visit Vu transform) (visit Vv transform) (visit signed? transform)))]
       [(vunpack Vu) (transform (vunpack (visit Vu transform)))]
       ;[(vunpacko Vu)
@@ -93,7 +95,7 @@
       [(??vread buf-opts idxs) (transform (??vread (visit buf-opts transform) (visit idxs transform)))]
       [(??vreadp buf-opts idxs) (transform (??vreadp (visit buf-opts transform) (visit idxs transform)))]
     
-      [_ p]))
+      [_ (transform p)]))
 
   (pop-trace)
     

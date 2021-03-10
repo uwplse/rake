@@ -10,8 +10,9 @@
 (struct x128 (sca) #:transparent)
 (struct x256 (sca) #:transparent)
 
+(struct aligned (mod rem) #:transparent)
 (struct ramp (base stride len) #:transparent)
-(struct load (buf idxs) #:transparent)
+(struct load (buf idxs alignment) #:transparent)
 
 ;; Type Casts
 (struct uint8x32 (vec) #:transparent)
@@ -69,7 +70,7 @@
     [(x256 sca) 256]
 
     [(ramp base stride len) len]
-    [(load buf idxs) (vec-len idxs)]
+    [(load buf idxs alignment) (vec-len idxs)]
 
     ;; Type Casts
     [(uint8x32 vec) 32]

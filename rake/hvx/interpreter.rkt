@@ -4,6 +4,10 @@
 (require rake/cpp/cast)
 (require rake/util)
 (require rake/hvx/ast/types)
+(require rake/hvx/ast/visitor)
+(require rake/hvx/comparator)
+
+;(require rake/halide/ir/types)
 
 (require rosette/lib/match)
 (require rosette/lib/angelic)
@@ -14,10 +18,21 @@
 (define (interpret p)
   (match p
 
+    ;[(sca-max v1 v2) (max (interpret v1) (interpret v2))]
+
+    ;;;;;;;;;;;;;;;;;;;;;;;;; Let Expressions ;;;;;;;;;;;;;;;;;;;;;;;;
+
+    [(let-expr var val body)
+     (define (repl-var node)
+       (cond
+         [(eq? node var) val]
+         [else node]))
+     (interpret (visit-hvx body repl-var))]
+    
     ;;;;;;;;;;;;;;;;; Instructions for vector creation ;;;;;;;;;;;;;;;
     
-    [(vread buf loc) ((get-vec-type buf) (lambda (i) (get buf (+ loc i))))]
-    [(vreadp buf loc) ((get-vecp-type buf) (lambda (i) (get buf (+ loc i))) (lambda (i) (get buf (+ loc i (get-offset buf)))))]
+    [(vread buf loc align) ((get-vec-type buf) (lambda (i) (get buf (+ loc i))))]
+    [(vreadp buf loc align) ((get-vecp-type buf) (lambda (i) (get buf (+ loc i))) (lambda (i) (get buf (+ loc i (get-offset buf)))))]
 
     ;[(vsplat Rt) (lambda (i) Rt)]
 
@@ -112,12 +127,12 @@
 
     [(valign Vu Vv Rt)
      (match (list (interpret Vu) (interpret Vv))
-       [(list (i8x128 v0) (i8x128 v1)) (i8x128 (lambda (i) (assert (<= 1 Rt 127)) (if (< i (- 128 Rt)) (v1 (+ i Rt)) (v0 (modulo (+ i Rt) 128)))))]
-       [(list (u8x128 v0) (u8x128 v1)) (u8x128 (lambda (i) (assert (<= 1 Rt 127)) (if (< i (- 128 Rt)) (v1 (+ i Rt)) (v0 (modulo (+ i Rt) 128)))))]
-       [(list (i16x64 v0) (i16x64 v1)) (i16x64 (lambda (i) (assert (<= 1 Rt 63)) (if (< i (- 64 Rt)) (v1 (+ i Rt)) (v0 (modulo (+ i Rt) 64)))))]
-       [(list (u16x64 v0) (u16x64 v1)) (u16x64 (lambda (i) (assert (<= 1 Rt 63)) (if (< i (- 64 Rt)) (v1 (+ i Rt)) (v0 (modulo (+ i Rt) 64)))))]
-       [(list (i32x32 v0) (i32x32 v1)) (i32x32 (lambda (i) (assert (<= 1 Rt 31)) (if (< i (- 32 Rt)) (v1 (+ i Rt)) (v0 (modulo (+ i Rt) 32)))))]
-       [(list (u32x32 v0) (u32x32 v1)) (u32x32 (lambda (i) (assert (<= 1 Rt 31)) (if (< i (- 32 Rt)) (v1 (+ i Rt)) (v0 (modulo (+ i Rt) 32)))))])]
+       [(list (i8x128 v0) (i8x128 v1)) (i8x128 (lambda (i) (assert (not (equal-expr-hvx? Vu Vv))) (assert (<= 1 Rt 127)) (if (< i (- 128 Rt)) (v1 (+ i Rt)) (v0 (modulo (+ i Rt) 128)))))]
+       [(list (u8x128 v0) (u8x128 v1)) (u8x128 (lambda (i) (assert (not (equal-expr-hvx? Vu Vv))) (assert (<= 1 Rt 127)) (if (< i (- 128 Rt)) (v1 (+ i Rt)) (v0 (modulo (+ i Rt) 128)))))]
+       [(list (i16x64 v0) (i16x64 v1)) (i16x64 (lambda (i) (assert (not (equal-expr-hvx? Vu Vv))) (assert (<= 1 Rt 63)) (if (< i (- 64 Rt)) (v1 (+ i Rt)) (v0 (modulo (+ i Rt) 64)))))]
+       [(list (u16x64 v0) (u16x64 v1)) (u16x64 (lambda (i) (assert (not (equal-expr-hvx? Vu Vv))) (assert (<= 1 Rt 63)) (if (< i (- 64 Rt)) (v1 (+ i Rt)) (v0 (modulo (+ i Rt) 64)))))]
+       [(list (i32x32 v0) (i32x32 v1)) (i32x32 (lambda (i) (assert (not (equal-expr-hvx? Vu Vv))) (assert (<= 1 Rt 31)) (if (< i (- 32 Rt)) (v1 (+ i Rt)) (v0 (modulo (+ i Rt) 32)))))]
+       [(list (u32x32 v0) (u32x32 v1)) (u32x32 (lambda (i) (assert (not (equal-expr-hvx? Vu Vv))) (assert (<= 1 Rt 31)) (if (< i (- 32 Rt)) (v1 (+ i Rt)) (v0 (modulo (+ i Rt) 32)))))])]
     
     [(vlalign Vu Vv Rt)
      (match (list (interpret Vu) (interpret Vv))
@@ -190,7 +205,7 @@
      (define buf (list-ref buf-opts i))
      (define-symbolic b integer?)
      (define idx (list-ref (hash-ref load-idxs buf) b))
-     (interpret (vread buf idx))]
+     (interpret (vread buf (car idx) (cdr idx)))]
 ;     (match elem-type
 ;       ['uint8  (u8x128 (lambda (i) ))]
 ;       ['uint16 (u16x64 (lambda (i) ))]
@@ -204,7 +219,7 @@
      (define buf (list-ref buf-opts i))
      (define-symbolic b integer?)
      (define idx (list-ref (hash-ref load-idxs buf) b))
-     (interpret (vreadp buf idx))]
+     (interpret (vreadp buf (car idx) (cdr idx)))]
     
     ;;;;;;;;;;;;;;;; Instructions for data processing ;;;;;;;;;;;;;;;;
 

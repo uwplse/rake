@@ -5,6 +5,9 @@
 
 (struct hvx-ast-node (id))
 
+;; Let exprs
+(struct let-expr (var val body) #:transparent)
+
 ;; HVX vector types
 (struct i8x128 (Vu) #:transparent)
 (struct u8x128 (Vu) #:transparent)
@@ -21,8 +24,8 @@
 (struct u32x32x2 (Vu Vv) #:transparent)
      
 ;; HVX instructions for vector creation
-(struct vread (buf loc) #:transparent)
-(struct vreadp (buf loc) #:transparent)
+(struct vread (buf loc align) #:transparent)
+(struct vreadp (buf loc align) #:transparent)
 (struct vsplat (Rt) #:transparent)
 
 ;; HVX instructions for data swizzling

@@ -39,14 +39,12 @@
     (display "=======================================\n\n")
 
     (define starting-vecs (extract-loads-as-hvx-vecs halide-spec))
-
+    
     (match swizzling-algo
       ['naive (synthesize-hvx-swizzles-naive starting-vecs hvx-expr-sketch hvx-expr-spec axioms ctx)]
       ['incremental (synthesize-hvx-swizzles-incr starting-vecs hvx-expr-sketch hvx-expr-spec axioms ctx)]
       ['enumerative (synthesize-hvx-swizzles-enum starting-vecs hvx-expr-sketch hvx-expr-spec axioms ctx)]
       [_ (error (format "Unrecognized lowering algorithm specified: '~a. Supported algorithms: ['naive, 'incremental, 'enumerative]" swizzling-algo))])))
-
-(require rake/cpp/types)
 
 (define (synthesize-swizzle-spec halide-spec hvx-expr-sketch axioms ctx)
   (define VEC_LANES (num-elems-hal halide-spec))
@@ -56,7 +54,7 @@
   
   (define interpreted-s-expr (interpret-hvx hvx-expr-sketch))
   (define interpreted-o-expr (interpret-halide halide-spec))
-
+  
   ;; Synthesize spec hash-table, one lane at a time
   (define sols (list))
   (clear-asserts!)
