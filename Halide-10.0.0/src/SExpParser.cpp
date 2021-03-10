@@ -100,6 +100,10 @@ Expr SExpParser::parse_binop(Token &tok, string &sexp, Type expected_type) {
         return Mul::make(a, b);
     } else if (tok.str == "/") {
         return Div::make(a, b);
+    } else if (tok.str == "min") {
+        return Min::make(a, b);
+    } else if (tok.str == "max") {
+        return Max::make(a, b);
     } else {
         user_assert(false);
         return Expr();
@@ -201,7 +205,9 @@ Expr SExpParser::parse(string &sexp, Type expected_type) {
             } else if (token.str == "+" ||
                        token.str == "-" ||
                        token.str == "*" ||
-                       token.str == "/") {
+                       token.str == "/" ||
+                       token.str == "min" ||
+                       token.str == "max") {
                 return parse_binop(token, sexp, expected_type);
             }
         } else if (token.type == TokenType::FloatNumber) {
@@ -1041,7 +1047,7 @@ void sexp_parser_test() {
               (int32 input)
               (int32
                (+
-                -2
+                (max -2 5)
                 (+
                  input.stride.1
                  (+
