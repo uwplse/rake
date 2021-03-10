@@ -5,18 +5,18 @@
 #include "ExprUsesVar.h"
 #include "HexagonAlignment.h"
 #include "IREquality.h"
-#include "IRPrinter.h"
 #include "IRMatch.h"
 #include "IRMutator.h"
 #include "IROperator.h"
+#include "IRPrinter.h"
 #include "Lerp.h"
+#include "SExpParser.h"
 #include "Scope.h"
 #include "Simplify.h"
 #include "Substitute.h"
-#include "SExpParser.h"
+#include <fstream>
 #include <unordered_map>
 #include <utility>
-#include <fstream>
 
 namespace Halide {
 namespace Internal {
@@ -2287,10 +2287,11 @@ public:
 class IROptimizer : public IRMutator {
 
 public:
-    IROptimizer(FuncValueBounds fvb): func_value_bounds(fvb) {}
-    
-private:
+    IROptimizer(FuncValueBounds fvb)
+        : func_value_bounds(fvb) {
+    }
 
+private:
     class InferVarEncoding : public IRVisitor {
     public:
         using IRVisitor::visit;
@@ -2320,7 +2321,7 @@ private:
             inside_indexing_expr.push(true);
             op->index.accept(this);
             inside_indexing_expr.pop();
-            
+
             IRVisitor::visit(op);
         }
 
@@ -2342,13 +2343,18 @@ private:
 
     class RacketPrinter : public VariadicVisitor<RacketPrinter, std::string, std::string> {
     public:
-        RacketPrinter (std::ostream &s) : printer(s) {
+        RacketPrinter(std::ostream &s)
+            : printer(s) {
             indent.push(1);
             bv_enc.push(true);
         }
 
-        void bvEncPush(bool v) { bv_enc.push(v); }
-        void bvEncPop() { bv_enc.pop(); }
+        void bvEncPush(bool v) {
+            bv_enc.push(v);
+        }
+        void bvEncPop() {
+            bv_enc.pop();
+        }
 
         /** Convert IR to racket S-expressions */
 
@@ -2360,7 +2366,7 @@ private:
         std::string visit(const IntImm *op) {
             if (bv_enc.top())
                 return tabs() + "(int" + std::to_string(op->type.bits()) + "_t (bv " +
-                        std::to_string(op->value) + " " + std::to_string(op->type.bits()) + "))";
+                       std::to_string(op->value) + " " + std::to_string(op->type.bits()) + "))";
             else
                 return tabs() + std::to_string(op->value);
         }
@@ -2368,7 +2374,7 @@ private:
         std::string visit(const UIntImm *op) {
             if (bv_enc.top())
                 return tabs() + "(uint" + std::to_string(op->type.bits()) + "_t (bv " +
-                        std::to_string(op->value) + " " + std::to_string(op->type.bits()) + "))";
+                       std::to_string(op->value) + " " + std::to_string(op->type.bits()) + "))";
             else
                 return tabs() + std::to_string(op->value);
         }
@@ -2384,7 +2390,7 @@ private:
         // Operators
         std::string visit(const Broadcast *op) {
             indent.push(0);
-            std::string rkt_type =  std::to_string(op->lanes);
+            std::string rkt_type = std::to_string(op->lanes);
             std::string rkt_val = dispatch(op->value);
             indent.pop();
 
@@ -2395,8 +2401,8 @@ private:
             std::ostringstream stream;
             stream << op->type;
 
-            indent.push(indent.top()+1);
-            std::string rkt_type =  stream.str();
+            indent.push(indent.top() + 1);
+            std::string rkt_type = stream.str();
             std::string rkt_val = dispatch(op->value);
             indent.pop();
 
@@ -2413,7 +2419,7 @@ private:
             if (ive.for_indexing() && !ive.for_computation())
                 bv_enc.pop();
 
-            indent.push(indent.top()+1);
+            indent.push(indent.top() + 1);
             std::string rkt_bdy = dispatch(op->body);
             indent.pop();
 
@@ -2422,21 +2428,20 @@ private:
 
         std::string visit(const Call *op) {
             if (op->name == std::string("dynamic_shuffle")) {
-                indent.push(indent.top()+1);
+                indent.push(indent.top() + 1);
                 std::string rkt_args = "\n" + dispatch(op->args[0]);
                 bv_enc.push(false);
-                for(unsigned int i=1; i<op->args.size(); i++)
+                for (unsigned int i = 1; i < op->args.size(); i++)
                     rkt_args += "\n" + dispatch(op->args[i]);
                 bv_enc.pop();
                 indent.pop();
 
                 return tabs() + "(" + op->name + rkt_args + ")";
-            }
-            else {
+            } else {
                 std::string rkt_args = "";
 
-                indent.push(indent.top()+1);
-                for(unsigned int i=0; i<op->args.size(); i++)
+                indent.push(indent.top() + 1);
+                for (unsigned int i = 0; i < op->args.size(); i++)
                     rkt_args += "\n" + dispatch(op->args[i]);
                 indent.pop();
 
@@ -2450,13 +2455,12 @@ private:
             std::string rkt_idx = dispatch(op->index);
             bv_enc.pop();
             indent.pop();
-            
+
             // Hacky exception for now
             if (op->name.compare("scalar_indices") == 0)
-                return tabs() + "(" + op->name + " " + rkt_idx + ")";    
-            else 
+                return tabs() + "(" + op->name + " " + rkt_idx + ")";
+            else
                 return tabs() + "(load " + op->name + " " + rkt_idx + ")";
-            
         }
 
         std::string visit(const Ramp *op) {
@@ -2473,14 +2477,13 @@ private:
 
         std::string visit(const Add *op) {
             if (op->type.is_vector()) {
-                indent.push(indent.top()+1);
+                indent.push(indent.top() + 1);
                 std::string rkt_lhs = dispatch(op->a);
                 std::string rkt_rhs = dispatch(op->b);
                 indent.pop();
 
                 return tabs() + "(vec-add\n" + rkt_lhs + "\n" + rkt_rhs + ")";
-            }
-            else {
+            } else {
                 indent.push(0);
                 std::string rkt_lhs = dispatch(op->a);
                 std::string rkt_rhs = dispatch(op->b);
@@ -2488,19 +2491,17 @@ private:
 
                 return tabs() + "(+ " + rkt_lhs + " " + rkt_rhs + ")";
             }
-
         }
 
         std::string visit(const Sub *op) {
             if (op->type.is_vector()) {
-                indent.push(indent.top()+1);
+                indent.push(indent.top() + 1);
                 std::string rkt_lhs = dispatch(op->a);
                 std::string rkt_rhs = dispatch(op->b);
                 indent.pop();
 
                 return tabs() + "(vec-sub\n" + rkt_lhs + "\n" + rkt_rhs + ")";
-            }
-            else {
+            } else {
                 indent.push(0);
                 std::string rkt_lhs = dispatch(op->a);
                 std::string rkt_rhs = dispatch(op->b);
@@ -2512,7 +2513,7 @@ private:
 
         std::string visit(const Mul *op) {
             if (op->type.is_vector()) {
-                indent.push(indent.top()+1);
+                indent.push(indent.top() + 1);
                 std::string rkt_lhs = dispatch(op->a);
                 std::string rkt_rhs = dispatch(op->b);
                 indent.pop();
@@ -2530,7 +2531,7 @@ private:
 
         std::string visit(const Div *op) {
             if (op->type.is_vector()) {
-                indent.push(indent.top()+1);
+                indent.push(indent.top() + 1);
                 std::string rkt_lhs = dispatch(op->a);
                 std::string rkt_rhs = dispatch(op->b);
                 indent.pop();
@@ -2542,15 +2543,18 @@ private:
                 std::string rkt_rhs = dispatch(op->b);
                 indent.pop();
 
-                return tabs() +  "(quotient " + rkt_lhs + " " + rkt_rhs + ")";
+                return tabs() + "(quotient " + rkt_lhs + " " + rkt_rhs + ")";
             }
         }
 
-        std::string visit(const Mod *op) { printer.print(op); return NYI(); }
+        std::string visit(const Mod *op) {
+            printer.print(op);
+            return NYI();
+        }
 
         std::string visit(const Min *op) {
             if (op->type.is_vector()) {
-                indent.push(indent.top()+1);
+                indent.push(indent.top() + 1);
                 std::string rkt_lhs = dispatch(op->a);
                 std::string rkt_rhs = dispatch(op->b);
                 indent.pop();
@@ -2568,7 +2572,7 @@ private:
 
         std::string visit(const Max *op) {
             if (op->type.is_vector()) {
-                indent.push(indent.top()+1);
+                indent.push(indent.top() + 1);
                 std::string rkt_lhs = dispatch(op->a);
                 std::string rkt_rhs = dispatch(op->b);
                 indent.pop();
@@ -2584,21 +2588,54 @@ private:
             }
         }
 
-        std::string visit(const EQ *op) { printer.print(op); return NYI(); }
-        std::string visit(const NE *op) { printer.print(op); return NYI(); }
-        std::string visit(const LT *op) { printer.print(op); return NYI(); }
-        std::string visit(const LE *op) { printer.print(op); return NYI(); }
-        std::string visit(const GT *op) { printer.print(op); return NYI(); }
-        std::string visit(const GE *op) { printer.print(op); return NYI(); }
-        std::string visit(const And *op) { printer.print(op); return NYI(); }
-        std::string visit(const Or *op) { printer.print(op); return NYI(); }
-        std::string visit(const Not *op) { printer.print(op); return NYI(); }
-        std::string visit(const Select *op) { printer.print(op); return NYI(); }
-        std::string visit(const IfThenElse *op) { printer.print(op); return NYI(); }
+        std::string visit(const EQ *op) {
+            printer.print(op);
+            return NYI();
+        }
+        std::string visit(const NE *op) {
+            printer.print(op);
+            return NYI();
+        }
+        std::string visit(const LT *op) {
+            printer.print(op);
+            return NYI();
+        }
+        std::string visit(const LE *op) {
+            printer.print(op);
+            return NYI();
+        }
+        std::string visit(const GT *op) {
+            printer.print(op);
+            return NYI();
+        }
+        std::string visit(const GE *op) {
+            printer.print(op);
+            return NYI();
+        }
+        std::string visit(const And *op) {
+            printer.print(op);
+            return NYI();
+        }
+        std::string visit(const Or *op) {
+            printer.print(op);
+            return NYI();
+        }
+        std::string visit(const Not *op) {
+            printer.print(op);
+            return NYI();
+        }
+        std::string visit(const Select *op) {
+            printer.print(op);
+            return NYI();
+        }
+        std::string visit(const IfThenElse *op) {
+            printer.print(op);
+            return NYI();
+        }
 
         std::string visit(const Shuffle *op) {
-            if(op->is_slice()){
-                indent.push(indent.top()+1);
+            if (op->is_slice()) {
+                indent.push(indent.top() + 1);
                 std::string rkt_vec = dispatch(op->vectors[0]);
                 indent.pop();
                 indent.push(0);
@@ -2609,11 +2646,9 @@ private:
                 bv_enc.pop();
                 indent.pop();
 
-                return tabs() + "(slice_vectors\n" + rkt_vec + " " + rkt_base
-                        + " " + rkt_stride + " " + rkt_len + ")";
-            }
-            else if(op->is_concat()){
-                indent.push(indent.top()+1);
+                return tabs() + "(slice_vectors\n" + rkt_vec + " " + rkt_base + " " + rkt_stride + " " + rkt_len + ")";
+            } else if (op->is_concat()) {
+                indent.push(indent.top() + 1);
                 std::string rkt_lhs = dispatch(op->vectors[0]);
                 std::string rkt_rhs = dispatch(op->vectors[1]);
                 indent.pop();
@@ -2624,44 +2659,72 @@ private:
             return NYI();
         }
 
-        std::string visit(const VectorReduce * op) {
-            printer.print(op); return NYI();
+        std::string visit(const VectorReduce *op) {
+            printer.print(op);
+            return NYI();
         }
 
         /** Currently we do not do any re-writring at the Stmt level */
-        std::string visit(const LetStmt *op) { return NYI(); }
-        std::string visit(const AssertStmt *op) { return NYI(); }
-        std::string visit(const For *op) { return NYI(); }
-        std::string visit(const Provide *op) { return NYI(); }
-        std::string visit(const Store *op) { return NYI(); }
-        std::string visit(const Allocate *op) { return NYI(); }
-        std::string visit(const Evaluate *op) { return NYI(); }
-        std::string visit(const ProducerConsumer *op) { return NYI(); }
-        std::string visit(const Block *op) { return NYI(); }
-        std::string visit(const Realize *op) { return NYI(); }
-        std::string visit(const Prefetch *op) { return NYI(); }
-        std::string visit(const Free *op) { return NYI(); }
-        std::string visit(const Acquire *op) { return NYI(); }
-        std::string visit(const Fork *op) { return NYI(); }
+        std::string visit(const LetStmt *op) {
+            return NYI();
+        }
+        std::string visit(const AssertStmt *op) {
+            return NYI();
+        }
+        std::string visit(const For *op) {
+            return NYI();
+        }
+        std::string visit(const Provide *op) {
+            return NYI();
+        }
+        std::string visit(const Store *op) {
+            return NYI();
+        }
+        std::string visit(const Allocate *op) {
+            return NYI();
+        }
+        std::string visit(const Evaluate *op) {
+            return NYI();
+        }
+        std::string visit(const ProducerConsumer *op) {
+            return NYI();
+        }
+        std::string visit(const Block *op) {
+            return NYI();
+        }
+        std::string visit(const Realize *op) {
+            return NYI();
+        }
+        std::string visit(const Prefetch *op) {
+            return NYI();
+        }
+        std::string visit(const Free *op) {
+            return NYI();
+        }
+        std::string visit(const Acquire *op) {
+            return NYI();
+        }
+        std::string visit(const Fork *op) {
+            return NYI();
+        }
 
     private:
-            
         IRPrinter printer;
         std::stack<int> indent;
         std::stack<bool> bv_enc;
 
-        std::string tabs () {
+        std::string tabs() {
             std::string ret = "";
-            for (int i=0; i<indent.top(); i++) ret += " ";
+            for (int i = 0; i < indent.top(); i++)
+                ret += " ";
             return ret;
         }
 
-        std::string NYI () {
+        std::string NYI() {
             debug(0) << "\nNYI. \n";
             exit(0);
             return "";
         }
-
     };
 
     class InferSymbolics : public IRVisitor {
@@ -2673,7 +2736,7 @@ private:
             : external_let_vars(lvs), bounds(bnds), func_value_bounds(fvb) {
         }
 
-        void visit(const Variable * op) override {
+        void visit(const Variable *op) override {
             if (op->type.is_vector()) {
                 debug(0) << "Var Found: " << op->name << "\n";
                 debug(0) << "Bound: " << bounds_of_expr_in_scope(op, bounds, func_value_bounds).min << "\n";
@@ -2688,23 +2751,23 @@ private:
             }
         }
 
-        void visit(const Let * op) override {
+        void visit(const Let *op) override {
             local_vars.insert(op->name);
             IRVisitor::visit(op);
         }
 
-        void visit(const Load * op) override {
+        void visit(const Load *op) override {
             debug(0) << "Load Found: " << op->name << "\n";
             debug(0) << "Bound: " << bounds_of_expr_in_scope(op, bounds, func_value_bounds).min << "\n";
             debug(0) << "Bound: " << bounds_of_expr_in_scope(op, bounds, func_value_bounds).max << "\n";
-            buffers.insert(std::pair<std::string,Type>(op->name,
+            buffers.insert(std::pair<std::string, Type>(op->name,
                                                         (op->type.is_vector() ? op->type.element_of() : op->type)));
 
             IRVisitor::visit(op);
         }
 
-        std::set<const Variable*> getSymVars() {
-            std::set<const Variable*> l;
+        std::set<const Variable *> getSymVars() {
+            std::set<const Variable *> l;
             for (auto var : live_vars) {
                 if (local_vars.count(var->name) + external_let_vars.count(var->name) == 0)
                     l.insert(var);
@@ -2712,7 +2775,7 @@ private:
             return l;
         }
 
-        std::set<std::pair<std::string,Type>> getSymBufs() {
+        std::set<std::pair<std::string, Type>> getSymBufs() {
             return buffers;
         }
 
@@ -2722,58 +2785,59 @@ private:
 
     private:
         std::map<std::string, Expr> external_let_vars;
-        Scope<Interval> & bounds;
+        Scope<Interval> &bounds;
         FuncValueBounds func_value_bounds;
 
         std::set<std::string> live_lets;
-        std::set<const Variable*> live_vars;
+        std::set<const Variable *> live_vars;
         std::set<std::string> local_vars;
-        std::set<std::pair<std::string,Type>> buffers;
+        std::set<std::pair<std::string, Type>> buffers;
     };
 
-    private:
-        using IRMutator::visit;
+private:
+    using IRMutator::visit;
 
-        int expr_id = 0;
+    int expr_id = 0;
 
-        FuncValueBounds func_value_bounds;
-        Scope<Interval> bounds;
+    FuncValueBounds func_value_bounds;
+    Scope<Interval> bounds;
 
-        std::map<std::string,Expr> let_vars;
-        std::vector<std::string> let_decl_order;
+    std::map<std::string, Expr> let_vars;
+    std::vector<std::string> let_decl_order;
 
-        Stmt visit(const LetStmt *stmt) override {
-            debug(0) << "Let Found: " << stmt->name << " = " << stmt->value << "\n";
-            
-            // We don't want to track lets all the way back to where variables are extracted from
-            // the scalar_indices array
-            // Temp duct-tape solution
-            RacketPrinter specPrinter(std::cout);
-            std::string expr = specPrinter.dispatch(stmt->value);
-            if (expr.rfind(" (scalar_indices ", 0) == 0) 
-                return IRMutator::visit(stmt);
+    Stmt visit(const LetStmt *stmt) override {
+        debug(0) << "Let Found: " << stmt->name << " = " << stmt->value << "\n";
 
-            bounds.push(stmt->name, bounds_of_expr_in_scope(stmt->value, bounds, func_value_bounds));
-            let_vars[stmt->name] = stmt->value;
-            let_decl_order.push_back(stmt->name);
+        // We don't want to track lets all the way back to where variables are extracted from
+        // the scalar_indices array
+        // Temp duct-tape solution
+        RacketPrinter specPrinter(std::cout);
+        std::string expr = specPrinter.dispatch(stmt->value);
+        if (expr.rfind(" (scalar_indices ", 0) == 0)
+            return IRMutator::visit(stmt);
+
+        bounds.push(stmt->name, bounds_of_expr_in_scope(stmt->value, bounds, func_value_bounds));
+        let_vars[stmt->name] = stmt->value;
+        let_decl_order.push_back(stmt->name);
+        return IRMutator::visit(stmt);
+    }
+
+    Stmt visit(const Store *stmt) override {
+        bounds.push(stmt->name, bounds_of_expr_in_scope(stmt->value, bounds, func_value_bounds));
+
+        if (stmt->value.node_type() == IRNodeType::Load)
+            return IRMutator::visit(stmt);
+
+        debug(0) << "\nOptimizing expression:\n"
+                 << stmt->value << "\n\n";
+
+        int x;
+        std::cin >> x;
+
+        if (x == 0) {
             return IRMutator::visit(stmt);
         }
-
-        Stmt visit(const Store *stmt) override {
-            bounds.push(stmt->name, bounds_of_expr_in_scope(stmt->value, bounds, func_value_bounds));
-
-            if (stmt->value.node_type() == IRNodeType::Load)
-                return IRMutator::visit(stmt);
-
-            debug(0) << "\nOptimizing expression:\n" << stmt->value << "\n\n";
-
-            int x;
-            std::cin >> x;
-
-            if (x == 0){
-                return IRMutator::visit(stmt);
-            }
-            /*else if(x == 1){
+        /*if(x == 2){
                 SExpParser p;
                 std::string s = R"((llvm.hexagon.V6.vread.128B uint8x128 (list (int32 input) (int32 (+ -2 (* -2 rows.s0.x.x))))))";
                 debug(0) << "Input S-expressions:\n" << s << "\n";
@@ -2781,6 +2845,7 @@ private:
                 debug(0) << "Output AST:\n" << parsed << "\n";
                 return Store::make(stmt->name, parsed, stmt->index, stmt->param, stmt->predicate, stmt->alignment);
             }
+            /*
             else {
                 SExpParser p;
                 std::string s = R"((llvm.hexagon.V6.vmpahb.128B int32x64 (list (int32x64 (llvm.hexagon.V6.vcombine.128B int32x64 (list (int32x32 (llvm.hexagon.V6.vread.128B int32x32 (list (int32 input) (int32 (+ -2 rows.s0.x.x))))) (int32x32 (llvm.hexagon.V6.vread.128B int32x32 (list (int32 input) (int32 (+ -2 (* -2 rows.s0.x.x))))))))) (int32 42))))";
@@ -2792,179 +2857,373 @@ private:
                 return stored;
 
             }*/
-
-            RacketPrinter specPrinter(std::cout);
-            std::string expr = specPrinter.dispatch(stmt->value);
-
-            InferSymbolics symFinder(let_vars, bounds, func_value_bounds);
-            stmt->value.accept(&symFinder);
- 
-            //IRPrinter printer = IRPrinter(std::cout);
-            //for (auto var : symFinder.getSymVars())
-              //debug(0) << var->name << "\n";
-            //for (auto buf : symFinder.getSymBufs())
-            //  debug(0) << buf.first << "\n";
-
-            debug(0) << "Generating synthesis specification...\n";
-
-            std::stringstream axioms;
-            std::stringstream sym_bufs;
-            std::stringstream sym_buf_types;
-
-            axioms << "(define axioms \n"
-                   << "  (list ";
-
-            sym_buf_types << "(init-var-types (make-hash (list";
-            for (auto buf : symFinder.getSymBufs()) {
-                // Make a special case for scalar indices. Janky solution, will
-                // fix later. (Simple analysis to identify induction vars etc since
-                // we use different encodings)
-                if (buf.first.compare("scalar_indices") == 0) {
-                    sym_bufs << "(define-symbolic " << buf.first << " (~> integer? integer?))\n";
-                } else {
-                    sym_bufs << "(define-symbolic " << buf.first << " (~> integer? (bitvector "
-                             << buf.second.bits() << ")))\n";
-                    sym_buf_types << " (cons " << buf.first << " '" << buf.second << ")";
-
-                    std::pair<std::string, int> key(buf.first, 0);
-                    if (func_value_bounds.count(key)) {
-                        axioms << "\n   (values-range-from "
-                               << buf.first
-                               << specPrinter.dispatch(func_value_bounds[key].min)
-                               << specPrinter.dispatch(func_value_bounds[key].max) << ")";
-                    }
-                }
-            }
-
-            std::stringstream sym_vars;
-            for (auto var : symFinder.getSymVars()) {
-                if (var->type.is_vector()) {
-                    sym_bufs << "(define-symbolic " << var->name << "-buf (~> integer? (bitvector "
-                             << var->type.bits() << ")))\n";
-                    sym_buf_types << " (cons " << var->name << "-buf '" << var->type.element_of() << ")";
-
-                    sym_vars << "(define " << var->name << " (load " << var->name
-                             << "-buf (ramp 0 1 " << var->type.lanes() << ")))\n";
-
-                    axioms << "\n   (values-range-from "
-                           << var->name << "-buf"
-                           << specPrinter.dispatch(bounds_of_expr_in_scope(var, bounds, func_value_bounds).min)
-                           << specPrinter.dispatch(bounds_of_expr_in_scope(var, bounds, func_value_bounds).max) << ")";
-                } else {
-                    sym_vars << "(define-symbolic " << var->name << " integer?)\n";
-                }
-            }
-            sym_buf_types << ")))\n";
-
-            axioms << "))\n";
-
-            // Order let-stmts so we don't use any vars before they are defined
-            std::set<std::string> live_lets = symFinder.getLiveLets();
-            std::vector<std::string> ordered_live_lets(live_lets.begin(), live_lets.end());
-            std::sort(
-                ordered_live_lets.begin(),
-                ordered_live_lets.end(),
-                [this](std::string n1, std::string n2) -> int 
-                { 
-                    int pos1 = std::find(let_decl_order.begin(), let_decl_order.end(), n1) - let_decl_order.begin();
-                    int pos2 = std::find(let_decl_order.begin(), let_decl_order.end(), n2) - let_decl_order.begin();
-                    return pos1 < pos2;
-                }
-            );
-
-            std::stringstream let_stmts;
-            for (auto var_name : ordered_live_lets) {
-                Expr val = let_vars[var_name];
-                InferVarEncoding ive(var_name);
-                stmt->value.accept(&ive);
-
-                if (ive.for_indexing() && !ive.for_computation()) {
-                    specPrinter.bvEncPush(false);
-                    let_stmts << "(define " << var_name << specPrinter.dispatch(val) << ")\n";
-                    specPrinter.bvEncPop();
-                } else {
-                    let_stmts << "(define " << var_name << specPrinter.dispatch(val) << ")\n";
-                }
-            }
-
-            debug(0)
-                << "#lang rosette\n"
-                << "\n"
-                << "(require rake)\n"
-                << "(require rake/halide)\n"
-                << "\n"
-                << "(error-print-width 100000)\n"
-                << "(debug-on)\n"
-                << "\n"
-                << sym_bufs.str()
-                << sym_buf_types.str() << "\n"
-                << axioms.str() << "\n"
-                << sym_vars.str() << "\n"
-                << let_stmts.str() << "\n"
-                << "(define halide-expr\n"
-                << expr << ")\n"
-                << "\n"
-                << "(define spec (synthesis-spec halide-expr axioms))\n"
-                << "(define hvx-expr (synthesize-hvx spec 'halide-ir 'greedy 'enumerative 'enumerative))\n"
-                << "\n"
-                << "(define out (open-output-file \"sexp.out\" #:exists 'replace))\n"
-                << "(pretty-write (llvm-codegen hvx-expr) out)\n"
-                << "(close-output-port out)";
-
-            std::ofstream rakeInputF;
-            std::string filename = "expr_" + std::to_string(expr_id) + ".rkt";
-            rakeInputF.open (filename.c_str());
-            rakeInputF
-                << "#lang rosette\n"
-                << "\n"
-                << "(require rake)\n"
-                << "(require rake/halide)\n"
-                << "\n"
-                << "(error-print-width 100000)\n"
-                << "(debug-on)\n"
-                << "\n"
-                << sym_bufs.str()
-                << sym_buf_types.str() << "\n"
-                << axioms.str() << "\n"
-                << sym_vars.str() << "\n"
-                << let_stmts.str() << "\n"
-                << "(define halide-expr\n" << expr << ")\n"
-                << "\n"
-                << "(define spec (synthesis-spec halide-expr axioms))\n"
-                << "(define hvx-expr (synthesize-hvx spec 'halide-ir 'greedy 'enumerative 'enumerative))\n"
-                << "\n"
-                << "(define out (open-output-file \"sexp.out\" #:exists 'replace))\n"
-                << "(pretty-write (llvm-codegen hvx-expr) out)\n"
-                << "(close-output-port out)";
-            rakeInputF.close();
-
-            char buf[10000];
-            FILE *fp;
-            std::string cmd = "racket expr_" + std::to_string(expr_id++) + ".rkt";
-            if ((fp = popen(cmd.c_str(), "r")) == NULL) {
-                printf("Error opening pipe!\n");
-                exit(0);
-            }
-
-            while (fgets(buf, 10000, fp) != NULL) {
-                // Do whatever you want here...
-                debug(0) << buf;
-            }
-
-            if(pclose(fp))  {
-                printf("Command not found or exited with error status\n");
-                exit(0);
-            }
-
+        if (x == 1) {
             SExpParser p;
-            std::ifstream in("sexp.out");
-            std::string s((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
-            debug(0) << p.parse(s) << "\n";
-
-            return Store::make(stmt->name, p.parse(s), stmt->index, stmt->param, stmt->predicate, stmt->alignment);
-            //return IRMutator::visit(stmt);
+            std::string s =
+                R"((llvm.hexagon.V6.vshuffvdd.128B
+ int16x128
+ (list
+  (int32x32
+   (llvm.hexagon.V6.hi.128B
+    int16x64
+    (list
+     (int32x64
+      (llvm.hexagon.V6.vmpabus.acc.128B
+       int16x128
+       (list
+        (int32x64
+         (llvm.hexagon.V6.vmpybus.acc.128B
+          int32x64
+          (list
+           (int32x64
+            (llvm.hexagon.V6.vmpabus.128B
+             int32x64
+             (list
+              (int32x64
+               (llvm.hexagon.V6.vcombine.128B
+                uint8x256
+                (list
+                 (int32x32
+                  (llvm.hexagon.V6.vread.128B
+                   uint8x128
+                   (list
+                    (int32 input)
+                    (int32
+                     (+
+                      -2
+                      (+
+                       (+
+                        (* 128 rows.s0.x.x)
+                        (+ (* output.s0.y.y input.stride.1) (- 0 t20)))
+                       (- 0 input.stride.1)))))))
+                 (int32x32
+                  (llvm.hexagon.V6.vread.128B
+                   uint8x128
+                   (list
+                    (int32 input)
+                    (int32
+                     (+
+                      -2
+                      (+
+                       (+
+                        (* 128 rows.s0.x.x)
+                        (+ (* output.s0.y.y input.stride.1) (- 0 t20)))
+                       (* 2 input.stride.1))))))))))
+              (int32 0x01040104))))
+           (int32x32
+            (llvm.hexagon.V6.vread.128B
+             uint8x128
+             (list
+              (int32 input)
+              (int32
+               (+
+                -2
+                (+
+                 (+
+                  (* 128 rows.s0.x.x)
+                  (+ (* output.s0.y.y input.stride.1) (- 0 t20)))
+                 (* -2 input.stride.1)))))))
+           (int32 1))))
+        (int32x64
+         (llvm.hexagon.V6.vcombine.128B
+          uint8x256
+          (list
+           (int32x32
+            (llvm.hexagon.V6.vread.128B
+             uint8x128
+             (list
+              (int32 input)
+              (int32
+               (+
+                -2
+                (+
+                 (* 128 rows.s0.x.x)
+                 (+ (* output.s0.y.y input.stride.1) (- 0 t20))))))))
+           (int32x32
+            (llvm.hexagon.V6.vread.128B
+             uint8x128
+             (list
+              (int32 input)
+              (int32
+               (+
+                -2
+                (+
+                 input.stride.1
+                 (+
+                  (* 128 rows.s0.x.x)
+                  (+ (* output.s0.y.y input.stride.1) (- 0 t20))))))))))))
+        (int32 0x04060406)))))))
+  (int32x32
+   (llvm.hexagon.V6.lo.128B
+    int16x64
+    (list
+     (int32x64
+      (llvm.hexagon.V6.vmpabus.acc.128B
+       int16x128
+       (list
+        (int32x64
+         (llvm.hexagon.V6.vmpybus.acc.128B
+          int32x64
+          (list
+           (int32x64
+            (llvm.hexagon.V6.vmpabus.128B
+             int32x64
+             (list
+              (int32x64
+               (llvm.hexagon.V6.vcombine.128B
+                uint8x256
+                (list
+                 (int32x32
+                  (llvm.hexagon.V6.vread.128B
+                   uint8x128
+                   (list
+                    (int32 input)
+                    (int32
+                     (+
+                      -2
+                      (+
+                       (+
+                        (* 128 rows.s0.x.x)
+                        (+ (* output.s0.y.y input.stride.1) (- 0 t20)))
+                       (- 0 input.stride.1)))))))
+                 (int32x32
+                  (llvm.hexagon.V6.vread.128B
+                   uint8x128
+                   (list
+                    (int32 input)
+                    (int32
+                     (+
+                      -2
+                      (+
+                       (+
+                        (* 128 rows.s0.x.x)
+                        (+ (* output.s0.y.y input.stride.1) (- 0 t20)))
+                       (* 2 input.stride.1))))))))))
+              (int32 0x01040104))))
+           (int32x32
+            (llvm.hexagon.V6.vread.128B
+             uint8x128
+             (list
+              (int32 input)
+              (int32
+               (+
+                -2
+                (+
+                 (+
+                  (* 128 rows.s0.x.x)
+                  (+ (* output.s0.y.y input.stride.1) (- 0 t20)))
+                 (* -2 input.stride.1)))))))
+           (int32 1))))
+        (int32x64
+         (llvm.hexagon.V6.vcombine.128B
+          uint8x256
+          (list
+           (int32x32
+            (llvm.hexagon.V6.vread.128B
+             uint8x128
+             (list
+              (int32 input)
+              (int32
+               (+
+                -2
+                (+
+                 (* 128 rows.s0.x.x)
+                 (+ (* output.s0.y.y input.stride.1) (- 0 t20))))))))
+           (int32x32
+            (llvm.hexagon.V6.vread.128B
+             uint8x128
+             (list
+              (int32 input)
+              (int32
+               (+
+                -2
+                (+
+                 input.stride.1
+                 (+
+                  (* 128 rows.s0.x.x)
+                  (+ (* output.s0.y.y input.stride.1) (- 0 t20))))))))))))
+        (int32 0x04060406)))))))
+  (int32 1))))";
+            debug(0) << "Input S-expressions:\n"
+                     << s << "\n";
+            auto parsed = p.parse(s);
+            debug(0) << "Output AST:\n"
+                     << parsed << "\n";
+            return Store::make(stmt->name, parsed, stmt->index, stmt->param, stmt->predicate, stmt->alignment);
         }
-    };
+
+        RacketPrinter specPrinter(std::cout);
+        std::string expr = specPrinter.dispatch(stmt->value);
+
+        InferSymbolics symFinder(let_vars, bounds, func_value_bounds);
+        stmt->value.accept(&symFinder);
+
+        //IRPrinter printer = IRPrinter(std::cout);
+        //for (auto var : symFinder.getSymVars())
+        //debug(0) << var->name << "\n";
+        //for (auto buf : symFinder.getSymBufs())
+        //  debug(0) << buf.first << "\n";
+
+        debug(0) << "Generating synthesis specification...\n";
+
+        std::stringstream axioms;
+        std::stringstream sym_bufs;
+        std::stringstream sym_buf_types;
+
+        axioms << "(define axioms \n"
+               << "  (list ";
+
+        sym_buf_types << "(init-var-types (make-hash (list";
+        for (auto buf : symFinder.getSymBufs()) {
+            // Make a special case for scalar indices. Janky solution, will
+            // fix later. (Simple analysis to identify induction vars etc since
+            // we use different encodings)
+            if (buf.first.compare("scalar_indices") == 0) {
+                sym_bufs << "(define-symbolic " << buf.first << " (~> integer? integer?))\n";
+            } else {
+                sym_bufs << "(define-symbolic " << buf.first << " (~> integer? (bitvector "
+                         << buf.second.bits() << ")))\n";
+                sym_buf_types << " (cons " << buf.first << " '" << buf.second << ")";
+
+                std::pair<std::string, int> key(buf.first, 0);
+                if (func_value_bounds.count(key)) {
+                    axioms << "\n   (values-range-from "
+                           << buf.first
+                           << specPrinter.dispatch(func_value_bounds[key].min)
+                           << specPrinter.dispatch(func_value_bounds[key].max) << ")";
+                }
+            }
+        }
+
+        std::stringstream sym_vars;
+        for (auto var : symFinder.getSymVars()) {
+            if (var->type.is_vector()) {
+                sym_bufs << "(define-symbolic " << var->name << "-buf (~> integer? (bitvector "
+                         << var->type.bits() << ")))\n";
+                sym_buf_types << " (cons " << var->name << "-buf '" << var->type.element_of() << ")";
+
+                sym_vars << "(define " << var->name << " (load " << var->name
+                         << "-buf (ramp 0 1 " << var->type.lanes() << ")))\n";
+
+                axioms << "\n   (values-range-from "
+                       << var->name << "-buf"
+                       << specPrinter.dispatch(bounds_of_expr_in_scope(var, bounds, func_value_bounds).min)
+                       << specPrinter.dispatch(bounds_of_expr_in_scope(var, bounds, func_value_bounds).max) << ")";
+            } else {
+                sym_vars << "(define-symbolic " << var->name << " integer?)\n";
+            }
+        }
+        sym_buf_types << ")))\n";
+
+        axioms << "))\n";
+
+        // Order let-stmts so we don't use any vars before they are defined
+        std::set<std::string> live_lets = symFinder.getLiveLets();
+        std::vector<std::string> ordered_live_lets(live_lets.begin(), live_lets.end());
+        std::sort(
+            ordered_live_lets.begin(),
+            ordered_live_lets.end(),
+            [this](std::string n1, std::string n2) -> int {
+                int pos1 = std::find(let_decl_order.begin(), let_decl_order.end(), n1) - let_decl_order.begin();
+                int pos2 = std::find(let_decl_order.begin(), let_decl_order.end(), n2) - let_decl_order.begin();
+                return pos1 < pos2;
+            });
+
+        std::stringstream let_stmts;
+        for (auto var_name : ordered_live_lets) {
+            Expr val = let_vars[var_name];
+            InferVarEncoding ive(var_name);
+            stmt->value.accept(&ive);
+
+            if (ive.for_indexing() && !ive.for_computation()) {
+                specPrinter.bvEncPush(false);
+                let_stmts << "(define " << var_name << specPrinter.dispatch(val) << ")\n";
+                specPrinter.bvEncPop();
+            } else {
+                let_stmts << "(define " << var_name << specPrinter.dispatch(val) << ")\n";
+            }
+        }
+
+        debug(0)
+            << "#lang rosette\n"
+            << "\n"
+            << "(require rake)\n"
+            << "(require rake/halide)\n"
+            << "\n"
+            << "(error-print-width 100000)\n"
+            << "(debug-on)\n"
+            << "\n"
+            << sym_bufs.str()
+            << sym_buf_types.str() << "\n"
+            << axioms.str() << "\n"
+            << sym_vars.str() << "\n"
+            << let_stmts.str() << "\n"
+            << "(define halide-expr\n"
+            << expr << ")\n"
+            << "\n"
+            << "(define spec (synthesis-spec halide-expr axioms))\n"
+            << "(define hvx-expr (synthesize-hvx spec 'halide-ir 'greedy 'enumerative 'enumerative))\n"
+            << "\n"
+            << "(define out (open-output-file \"sexp.out\" #:exists 'replace))\n"
+            << "(pretty-write (llvm-codegen hvx-expr) out)\n"
+            << "(close-output-port out)";
+
+        std::ofstream rakeInputF;
+        std::string filename = "expr_" + std::to_string(expr_id) + ".rkt";
+        rakeInputF.open(filename.c_str());
+        rakeInputF
+            << "#lang rosette\n"
+            << "\n"
+            << "(require rake)\n"
+            << "(require rake/halide)\n"
+            << "\n"
+            << "(error-print-width 100000)\n"
+            << "(debug-on)\n"
+            << "\n"
+            << sym_bufs.str()
+            << sym_buf_types.str() << "\n"
+            << axioms.str() << "\n"
+            << sym_vars.str() << "\n"
+            << let_stmts.str() << "\n"
+            << "(define halide-expr\n"
+            << expr << ")\n"
+            << "\n"
+            << "(define spec (synthesis-spec halide-expr axioms))\n"
+            << "(define hvx-expr (synthesize-hvx spec 'halide-ir 'greedy 'enumerative 'enumerative))\n"
+            << "\n"
+            << "(define out (open-output-file \"sexp.out\" #:exists 'replace))\n"
+            << "(pretty-write (llvm-codegen hvx-expr) out)\n"
+            << "(close-output-port out)";
+        rakeInputF.close();
+
+        char buf[10000];
+        FILE *fp;
+        std::string cmd = "racket expr_" + std::to_string(expr_id++) + ".rkt";
+        if ((fp = popen(cmd.c_str(), "r")) == NULL) {
+            printf("Error opening pipe!\n");
+            exit(0);
+        }
+
+        while (fgets(buf, 10000, fp) != NULL) {
+            // Do whatever you want here...
+            debug(0) << buf;
+        }
+
+        if (pclose(fp)) {
+            printf("Command not found or exited with error status\n");
+            exit(0);
+        }
+
+        SExpParser p;
+        std::ifstream in("sexp.out");
+        std::string s((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
+        auto parsed = p.parse(s);
+        debug(0) << parsed << "\n";
+
+        return Store::make(stmt->name, parsed, stmt->index, stmt->param, stmt->predicate, stmt->alignment);
+        //return IRMutator::visit(stmt);
+    }
+};
 
 }  // namespace
 
@@ -3031,7 +3290,7 @@ Stmt optimize_hexagon_instructions_synthesis(Stmt s, FuncValueBounds fvb) {
     //debug(0) << s << "\n";
 
     return s;
-    }
+}
 
 }  // namespace Internal
 }  // namespace Halide
