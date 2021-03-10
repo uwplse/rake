@@ -1,0 +1,1859 @@
+	.text
+	.file	"halide_buffer_t.cpp"
+	.section	.rodata.cst16,"aM",@progbits,16
+	.p2align	4                               # -- Begin function train_cost_model
+.LCPI0_0:
+	.quad	-9223372036854775808            # 0x8000000000000000
+	.quad	0                               # 0x0
+.LCPI0_5:
+	.long	0                               # 0x0
+	.long	32                              # 0x20
+	.long	1                               # 0x1
+	.long	0                               # 0x0
+.LCPI0_7:
+	.long	0                               # 0x0
+	.long	8                               # 0x8
+	.long	1                               # 0x1
+	.long	0                               # 0x0
+.LCPI0_8:
+	.long	0                               # 0x0
+	.long	40                              # 0x28
+	.long	8                               # 0x8
+	.long	0                               # 0x0
+.LCPI0_9:
+	.long	0                               # 0x0
+	.long	7                               # 0x7
+	.long	320                             # 0x140
+	.long	0                               # 0x0
+.LCPI0_10:
+	.long	0                               # 0x0
+	.long	24                              # 0x18
+	.long	1                               # 0x1
+	.long	0                               # 0x0
+.LCPI0_12:
+	.long	0                               # 0x0
+	.long	40                              # 0x28
+	.long	1                               # 0x1
+	.long	0                               # 0x0
+.LCPI0_13:
+	.long	0                               # 0x0
+	.long	7                               # 0x7
+	.long	40                              # 0x28
+	.long	0                               # 0x0
+.LCPI0_15:
+	.long	0                               # 0x0
+	.long	32                              # 0x20
+	.long	32                              # 0x20
+	.long	0                               # 0x0
+.LCPI0_16:
+	.long	0                               # 0x0
+	.long	4                               # 0x4
+	.long	1024                            # 0x400
+	.long	0                               # 0x0
+.LCPI0_21:
+	.long	0                               # 0x0
+	.long	39                              # 0x27
+	.long	24                              # 0x18
+	.long	0                               # 0x0
+.LCPI0_22:
+	.long	0                               # 0x0
+	.long	4                               # 0x4
+	.long	936                             # 0x3a8
+	.long	0                               # 0x0
+.LCPI0_25:
+	.long	32768                           # 0x8000
+	.long	0                               # 0x0
+	.long	0                               # 0x0
+	.long	0                               # 0x0
+.LCPI0_35:
+	.quad	4503599627370496                # 0x10000000000000
+	.quad	0                               # 0x0
+.LCPI0_43:
+	.long	1                               # 0x1
+	.long	0                               # 0x0
+	.long	24                              # 0x18
+	.long	1                               # 0x1
+.LCPI0_67:
+	.quad	2                               # 0x2
+	.quad	5                               # 0x5
+.LCPI0_68:
+	.quad	-9223372036854775808            # 0x8000000000000000
+	.quad	-9223372036854775808            # 0x8000000000000000
+.LCPI0_69:
+	.quad	-9223372034707292161            # 0x800000007fffffff
+	.quad	-9223372034707292161            # 0x800000007fffffff
+	.section	.rodata.cst32,"aM",@progbits,32
+	.p2align	5
+.LCPI0_1:
+	.quad	-9223372036854775296            # 0x8000000000000200
+	.quad	128                             # 0x80
+	.quad	8192                            # 0x2000
+	.quad	16384                           # 0x4000
+.LCPI0_2:
+	.quad	64                              # 0x40
+	.quad	4                               # 0x4
+	.quad	8                               # 0x8
+	.quad	2                               # 0x2
+.LCPI0_3:
+	.quad	16                              # 0x10
+	.quad	32                              # 0x20
+	.quad	256                             # 0x100
+	.quad	1024                            # 0x400
+.LCPI0_4:
+	.quad	2048                            # 0x800
+	.quad	4096                            # 0x1000
+	.quad	32768                           # 0x8000
+	.quad	65536                           # 0x10000
+.LCPI0_6:
+	.long	0                               # 0x0
+	.long	32                              # 0x20
+	.long	1                               # 0x1
+	.long	0                               # 0x0
+	.long	0                               # 0x0
+	.long	32                              # 0x20
+	.long	32                              # 0x20
+	.long	0                               # 0x0
+.LCPI0_11:
+	.long	0                               # 0x0
+	.long	24                              # 0x18
+	.long	1                               # 0x1
+	.long	0                               # 0x0
+	.long	0                               # 0x0
+	.long	39                              # 0x27
+	.long	24                              # 0x18
+	.long	0                               # 0x0
+.LCPI0_14:
+	.long	0                               # 0x0
+	.long	32                              # 0x20
+	.long	1                               # 0x1
+	.long	0                               # 0x0
+	.long	0                               # 0x0
+	.long	4                               # 0x4
+	.long	32                              # 0x20
+	.long	0                               # 0x0
+.LCPI0_17:
+	.long	0                               # 0x0
+	.long	8                               # 0x8
+	.long	1                               # 0x1
+	.long	0                               # 0x0
+	.long	0                               # 0x0
+	.long	4                               # 0x4
+	.long	8                               # 0x8
+	.long	0                               # 0x0
+.LCPI0_18:
+	.long	0                               # 0x0
+	.long	8                               # 0x8
+	.long	1                               # 0x1
+	.long	0                               # 0x0
+	.long	0                               # 0x0
+	.long	40                              # 0x28
+	.long	8                               # 0x8
+	.long	0                               # 0x0
+.LCPI0_19:
+	.long	0                               # 0x0
+	.long	7                               # 0x7
+	.long	320                             # 0x140
+	.long	0                               # 0x0
+	.long	0                               # 0x0
+	.long	4                               # 0x4
+	.long	2240                            # 0x8c0
+	.long	0                               # 0x0
+.LCPI0_20:
+	.long	0                               # 0x0
+	.long	24                              # 0x18
+	.long	1                               # 0x1
+	.long	0                               # 0x0
+	.long	0                               # 0x0
+	.long	4                               # 0x4
+	.long	24                              # 0x18
+	.long	0                               # 0x0
+.LCPI0_23:
+	.quad	0                               # 0x0
+	.quad	0                               # 0x0
+	.quad	4398046511104                   # 0x40000000000
+	.quad	274877906944                    # 0x4000000000
+.LCPI0_24:
+	.quad	64                              # 0x40
+	.quad	128                             # 0x80
+	.quad	0                               # 0x0
+	.quad	0                               # 0x0
+.LCPI0_26:
+	.quad	0                               # 0x0
+	.quad	18014398509481984               # 0x40000000000000
+	.quad	72057594037927936               # 0x100000000000000
+	.quad	288230376151711744              # 0x400000000000000
+.LCPI0_27:
+	.quad	281474976710656                 # 0x1000000000000
+	.quad	0                               # 0x0
+	.quad	0                               # 0x0
+	.quad	1125899906842624                # 0x4000000000000
+.LCPI0_28:
+	.quad	0                               # 0x0
+	.quad	1024                            # 0x400
+	.quad	2048                            # 0x800
+	.quad	0                               # 0x0
+.LCPI0_29:
+	.quad	68719476736                     # 0x1000000000
+	.quad	0                               # 0x0
+	.quad	0                               # 0x0
+	.quad	1099511627776                   # 0x10000000000
+.LCPI0_30:
+	.quad	0                               # 0x0
+	.quad	16                              # 0x10
+	.quad	32                              # 0x20
+	.quad	0                               # 0x0
+.LCPI0_31:
+	.quad	17592186044416                  # 0x100000000000
+	.quad	70368744177664                  # 0x400000000000
+	.quad	0                               # 0x0
+	.quad	0                               # 0x0
+.LCPI0_32:
+	.quad	0                               # 0x0
+	.quad	0                               # 0x0
+	.quad	256                             # 0x100
+	.quad	512                             # 0x200
+.LCPI0_33:
+	.quad	0                               # 0x0
+	.quad	17179869184                     # 0x400000000
+	.quad	0                               # 0x0
+	.quad	0                               # 0x0
+.LCPI0_34:
+	.quad	2                               # 0x2
+	.quad	0                               # 0x0
+	.quad	4                               # 0x4
+	.quad	8                               # 0x8
+.LCPI0_36:
+	.quad	0                               # 0x0
+	.quad	4096                            # 0x1000
+	.quad	8192                            # 0x2000
+	.quad	16384                           # 0x4000
+.LCPI0_37:
+	.quad	65536                           # 0x10000
+	.quad	131072                          # 0x20000
+	.quad	262144                          # 0x40000
+	.quad	524288                          # 0x80000
+.LCPI0_38:
+	.long	8                               # 0x8
+	.long	4                               # 0x4
+	.long	8                               # 0x8
+	.long	40                              # 0x28
+	.long	7                               # 0x7
+	.long	4                               # 0x4
+	.long	24                              # 0x18
+	.long	4                               # 0x4
+.LCPI0_39:
+	.quad	33554432                        # 0x2000000
+	.quad	134217728                       # 0x8000000
+	.quad	536870912                       # 0x20000000
+	.quad	2147483648                      # 0x80000000
+.LCPI0_40:
+	.quad	131072                          # 0x20000
+	.quad	524288                          # 0x80000
+	.quad	2097152                         # 0x200000
+	.quad	8388608                         # 0x800000
+.LCPI0_41:
+	.long	32                              # 0x20
+	.long	1                               # 0x1
+	.long	0                               # 0x0
+	.long	32                              # 0x20
+	.long	0                               # 0x0
+	.long	8                               # 0x8
+	.long	1                               # 0x1
+	.long	0                               # 0x0
+.LCPI0_42:
+	.long	8                               # 0x8
+	.long	1                               # 0x1
+	.long	0                               # 0x0
+	.long	40                              # 0x28
+	.long	0                               # 0x0
+	.long	7                               # 0x7
+	.long	0                               # 0x0
+	.long	24                              # 0x18
+.LCPI0_44:
+	.quad	4503599627370496                # 0x10000000000000
+	.quad	1125899906842624                # 0x4000000000000
+	.quad	9007199254740992                # 0x20000000000000
+	.quad	18014398509481984               # 0x40000000000000
+.LCPI0_45:
+	.quad	17592186044416                  # 0x100000000000
+	.quad	4398046511104                   # 0x40000000000
+	.quad	35184372088832                  # 0x200000000000
+	.quad	70368744177664                  # 0x400000000000
+.LCPI0_46:
+	.quad	36028797018963968               # 0x80000000000000
+	.quad	72057594037927936               # 0x100000000000000
+	.quad	288230376151711744              # 0x400000000000000
+	.quad	576460752303423488              # 0x800000000000000
+.LCPI0_47:
+	.quad	281474976710656                 # 0x1000000000000
+	.quad	562949953421312                 # 0x2000000000000
+	.quad	140737488355328                 # 0x800000000000
+	.quad	2251799813685248                # 0x8000000000000
+.LCPI0_48:
+	.quad	512                             # 0x200
+	.quad	2048                            # 0x800
+	.quad	8192                            # 0x2000
+	.quad	32768                           # 0x8000
+.LCPI0_49:
+	.quad	144115188075855872              # 0x200000000000000
+	.quad	2305843009213693952             # 0x2000000000000000
+	.quad	4611686018427387904             # 0x4000000000000000
+	.quad	1152921504606846976             # 0x1000000000000000
+.LCPI0_50:
+	.quad	2                               # 0x2
+	.quad	8                               # 0x8
+	.quad	32                              # 0x20
+	.quad	128                             # 0x80
+.LCPI0_51:
+	.quad	-9223370937343148032            # 0x8000010000000000
+	.quad	2199023255552                   # 0x20000000000
+	.quad	549755813888                    # 0x8000000000
+	.quad	8796093022208                   # 0x80000000000
+.LCPI0_52:
+	.long	0                               # 0x0
+	.long	4                               # 0x4
+	.long	0                               # 0x0
+	.long	32                              # 0x20
+	.long	1                               # 0x1
+	.long	0                               # 0x0
+	.long	32                              # 0x20
+	.long	0                               # 0x0
+.LCPI0_53:
+	.long	1                               # 0x1
+	.long	0                               # 0x0
+	.long	40                              # 0x28
+	.long	0                               # 0x0
+	.long	7                               # 0x7
+	.long	0                               # 0x0
+	.long	4                               # 0x4
+	.long	0                               # 0x0
+.LCPI0_54:
+	.long	39                              # 0x27
+	.long	1                               # 0x1
+	.long	1                               # 0x1
+	.long	1                               # 0x1
+	.long	1                               # 0x1
+	.long	0                               # 0x0
+	.long	32                              # 0x20
+	.long	1                               # 0x1
+.LCPI0_55:
+	.long	4                               # 0x4
+	.long	0                               # 0x0
+	.long	8                               # 0x8
+	.long	1                               # 0x1
+	.long	0                               # 0x0
+	.long	4                               # 0x4
+	.long	0                               # 0x0
+	.long	8                               # 0x8
+.LCPI0_56:
+	.quad	2097152                         # 0x200000
+	.quad	4194304                         # 0x400000
+	.quad	16777216                        # 0x1000000
+	.quad	33554432                        # 0x2000000
+.LCPI0_57:
+	.quad	32                              # 0x20
+	.quad	128                             # 0x80
+	.quad	256                             # 0x100
+	.quad	64                              # 0x40
+.LCPI0_58:
+	.quad	536870912                       # 0x20000000
+	.quad	1073741824                      # 0x40000000
+	.quad	2147483648                      # 0x80000000
+	.quad	8589934592                      # 0x200000000
+.LCPI0_59:
+	.quad	2048                            # 0x800
+	.quad	16384                           # 0x4000
+	.quad	32768                           # 0x8000
+	.quad	65536                           # 0x10000
+.LCPI0_60:
+	.quad	131072                          # 0x20000
+	.quad	524288                          # 0x80000
+	.quad	1048576                         # 0x100000
+	.quad	262144                          # 0x40000
+.LCPI0_61:
+	.quad	2                               # 0x2
+	.quad	4                               # 0x4
+	.quad	8                               # 0x8
+	.quad	16                              # 0x10
+.LCPI0_62:
+	.quad	8388608                         # 0x800000
+	.quad	67108864                        # 0x4000000
+	.quad	134217728                       # 0x8000000
+	.quad	268435456                       # 0x10000000
+.LCPI0_63:
+	.quad	512                             # 0x200
+	.quad	1024                            # 0x400
+	.quad	4096                            # 0x1000
+	.quad	8192                            # 0x2000
+.LCPI0_64:
+	.long	24                              # 0x18
+	.long	1                               # 0x1
+	.long	0                               # 0x0
+	.long	4                               # 0x4
+	.long	0                               # 0x0
+	.long	24                              # 0x18
+	.long	1                               # 0x1
+	.long	0                               # 0x0
+.LCPI0_65:
+	.quad	274877906944                    # 0x4000000000
+	.quad	549755813888                    # 0x8000000000
+	.quad	137438953472                    # 0x2000000000
+	.quad	1099511627776                   # 0x10000000000
+.LCPI0_66:
+	.quad	17179869184                     # 0x400000000
+	.quad	4294967296                      # 0x100000000
+	.quad	34359738368                     # 0x800000000
+	.quad	68719476736                     # 0x1000000000
+.LCPI0_70:
+	.quad	2048                            # 0x800
+	.quad	16384                           # 0x4000
+	.quad	9007199254740992                # 0x20000000000000
+	.quad	8192                            # 0x2000
+.LCPI0_71:
+	.quad	128                             # 0x80
+	.quad	4503599627370496                # 0x10000000000000
+	.quad	1024                            # 0x400
+	.quad	4096                            # 0x1000
+.LCPI0_72:
+	.quad	2                               # 0x2
+	.quad	140737488355328                 # 0x800000000000
+	.quad	4                               # 0x4
+	.quad	281474976710656                 # 0x1000000000000
+.LCPI0_73:
+	.quad	72057594037927936               # 0x100000000000000
+	.quad	262144                          # 0x40000
+	.quad	144115188075855872              # 0x200000000000000
+	.quad	524288                          # 0x80000
+.LCPI0_74:
+	.quad	64                              # 0x40
+	.quad	32                              # 0x20
+	.quad	256                             # 0x100
+	.quad	2251799813685248                # 0x8000000000000
+.LCPI0_75:
+	.quad	562949953421312                 # 0x2000000000000
+	.quad	8                               # 0x8
+	.quad	1125899906842624                # 0x4000000000000
+	.quad	16                              # 0x10
+.LCPI0_76:
+	.quad	18014398509481984               # 0x40000000000000
+	.quad	36028797018963968               # 0x80000000000000
+	.quad	65536                           # 0x10000
+	.quad	131072                          # 0x20000
+.LCPI0_77:
+	.quad	-9223363240761753600            # 0x8000080000000000
+	.quad	17592186044416                  # 0x100000000000
+	.quad	35184372088832                  # 0x200000000000
+	.quad	70368744177664                  # 0x400000000000
+	.section	.rodata.cst4,"aM",@progbits,4
+	.p2align	2
+.LCPI0_78:
+	.long	0xbabd3069                      # float -0.0014433983
+.LCPI0_79:
+	.long	0xbf317218                      # float -0.693147182
+.LCPI0_80:
+	.long	0xba8322ca                      # float -0.00100048748
+.LCPI0_81:
+	.long	0xb9a797f3                      # float -3.19659332E-4
+.LCPI0_82:
+	.long	0xbc0b192a                      # float -0.00848988629
+.LCPI0_83:
+	.long	0xbe2aae1f                      # float -0.166679844
+.LCPI0_84:
+	.long	0xbf800000                      # float -1
+.LCPI0_85:
+	.long	0xba9c2e66                      # float -0.00119156833
+.LCPI0_86:
+	.long	0xbd2a66bc                      # float -0.0416018814
+.LCPI0_87:
+	.long	0xbeffffde                      # float -0.499998987
+.LCPI0_88:
+	.long	0x3f800000                      # float 1
+.LCPI0_89:
+	.long	0x80000000                      # float -0
+.LCPI0_90:
+	.long	0xbe1ba6b6                      # float -0.152003139
+.LCPI0_91:
+	.long	0xbdd7c745                      # float -0.105360545
+.LCPI0_92:
+	.long	0x3f666666                      # float 0.899999976
+.LCPI0_93:
+	.long	0x3dcccccd                      # float 0.100000001
+.LCPI0_94:
+	.long	0x3f7fbe77                      # float 0.999000012
+.LCPI0_95:
+	.long	0x3a83126f                      # float 0.00100000005
+.LCPI0_96:
+	.long	0xb727c5ac                      # float -9.99999974E-6
+.LCPI0_97:
+	.long	0x2edbe6ff                      # float 1.00000001E-10
+.LCPI0_98:
+	.long	0x3727c5ac                      # float 9.99999974E-6
+	.section	.text.train_cost_model,"ax",@progbits
+	.globl	train_cost_model
+	.p2align	4, 0x90
+	.type	train_cost_model,@function
+train_cost_model:                       # @train_cost_model
+	.cfi_startproc
+# %bb.0:                                # %entry
+	pushq	%rbp
+	.cfi_def_cfa_offset 16
+	.cfi_offset %rbp, -16
+	movq	%rsp, %rbp
+	.cfi_def_cfa_register %rbp
+	pushq	%r15
+	pushq	%r14
+	pushq	%r13
+	pushq	%r12
+	pushq	%rbx
+	andq	$-32, %rsp
+	subq	$15968, %rsp                    # imm = 0x3E60
+	.cfi_offset %rbx, -56
+	.cfi_offset %r12, -48
+	.cfi_offset %r13, -40
+	.cfi_offset %r14, -32
+	.cfi_offset %r15, -24
+	vmovss	%xmm0, 236(%rsp)                # 4-byte Spill
+	movq	%rcx, %r12
+	movl	%edx, 1320(%rsp)                # 4-byte Spill
+                                        # kill: def $edi killed $edi def $rdi
+	movq	%rdi, 24(%rsp)                  # 8-byte Spill
+	xorl	%eax, %eax
+	cmpq	$0, 96(%rbp)
+	vmovq	16(%rbp), %xmm0                 # xmm0 = mem[0],zero
+	vmovq	%r9, %xmm1
+	vpunpcklqdq	%xmm0, %xmm1, %xmm0     # xmm0 = xmm1[0],xmm0[0]
+	movq	%r8, 32(%rsp)                   # 8-byte Spill
+	vmovq	%r8, %xmm1
+	vmovq	%rcx, %xmm2
+	vpunpcklqdq	%xmm1, %xmm2, %xmm1     # xmm1 = xmm2[0],xmm1[0]
+	vinserti128	$1, %xmm0, %ymm1, %ymm0
+	vmovdqu	72(%rbp), %xmm1
+	vmovq	104(%rbp), %xmm2                # xmm2 = mem[0],zero
+	vmovq	88(%rbp), %xmm3                 # xmm3 = mem[0],zero
+	vpunpcklqdq	%xmm2, %xmm3, %xmm2     # xmm2 = xmm3[0],xmm2[0]
+	vinserti128	$1, %xmm2, %ymm1, %ymm1
+	vpxor	%xmm2, %xmm2, %xmm2
+	vpcmpeqq	%ymm2, %ymm1, %ymm1
+	vpcmpeqq	%ymm2, %ymm0, %ymm0
+	vpcmpeqq	24(%rbp), %ymm2, %ymm3
+	vmovapd	.LCPI0_0(%rip), %xmm4           # xmm4 = [9223372036854775808,0]
+	vblendvpd	%ymm0, .LCPI0_1(%rip), %ymm4, %ymm0
+	vpcmpeqq	112(%rbp), %ymm2, %ymm2
+	vpand	.LCPI0_2(%rip), %ymm1, %ymm1
+	vpand	.LCPI0_3(%rip), %ymm2, %ymm2
+	vpand	.LCPI0_4(%rip), %ymm3, %ymm3
+	sete	%al
+	vpor	%ymm2, %ymm3, %ymm2
+	vorpd	%ymm2, %ymm0, %ymm0
+	vpor	%ymm0, %ymm1, %ymm0
+	vextracti128	$1, %ymm0, %xmm1
+	vpor	%xmm1, %xmm0, %xmm0
+	vpshufd	$238, %xmm0, %xmm1              # xmm1 = xmm0[2,3,2,3]
+	vpor	%xmm1, %xmm0, %xmm0
+	vmovq	%xmm0, %rcx
+	orq	%rax, %rcx
+	xorl	%eax, %eax
+	tzcntq	%rcx, %rax
+	cmpl	$16, %eax
+	jbe	.LBB0_272
+# %bb.1:                                # %no_errors_bb
+	movq	%r9, %r13
+	movl	%esi, %r15d
+	movq	48(%rbp), %r14
+	movq	40(%rbp), %rbx
+	movq	16(%r14), %rax
+	movq	%rax, 1176(%rsp)                # 8-byte Spill
+	leaq	32(%r14), %rsi
+	leaq	68(%rsp), %rdi
+	movl	$4, %edx
+	vzeroupper
+	callq	memcpy@PLT
+	movl	68(%rsp), %eax
+	movl	%eax, 1024(%rsp)                # 4-byte Spill
+	movq	24(%r14), %rax
+	movq	%rax, 1696(%rsp)                # 8-byte Spill
+	movl	36(%r14), %eax
+	movl	%eax, 1016(%rsp)                # 4-byte Spill
+	movq	40(%r14), %rax
+	movl	(%rax), %ecx
+	movq	%rcx, 744(%rsp)                 # 8-byte Spill
+	movl	4(%rax), %ecx
+	movq	%rcx, 736(%rsp)                 # 8-byte Spill
+	movl	8(%rax), %eax
+	movl	%eax, 896(%rsp)                 # 4-byte Spill
+	movq	16(%rbx), %rax
+	movq	%rax, 840(%rsp)                 # 8-byte Spill
+	leaq	32(%rbx), %rsi
+	leaq	68(%rsp), %rdi
+	movl	$4, %edx
+	callq	memcpy@PLT
+	movl	68(%rsp), %eax
+	movl	%eax, 404(%rsp)                 # 4-byte Spill
+	movq	24(%rbx), %rax
+	movq	%rax, 1688(%rsp)                # 8-byte Spill
+	movl	36(%rbx), %eax
+	movl	%eax, 1008(%rsp)                # 4-byte Spill
+	movq	40(%rbx), %rax
+	movl	(%rax), %ecx
+	movq	%rcx, 696(%rsp)                 # 8-byte Spill
+	movl	16(%rax), %ecx
+	movq	%rcx, 712(%rsp)                 # 8-byte Spill
+	vmovsd	4(%rax), %xmm0                  # xmm0 = mem[0],zero
+	vmovaps	%xmm0, 1344(%rsp)               # 16-byte Spill
+	movl	20(%rax), %ecx
+	movq	%rcx, 680(%rsp)                 # 8-byte Spill
+	movl	24(%rax), %eax
+	movl	%eax, 232(%rsp)                 # 4-byte Spill
+	movq	16(%rbp), %rbx
+	movq	16(%rbx), %rax
+	movq	%rax, 1152(%rsp)                # 8-byte Spill
+	leaq	32(%rbx), %rsi
+	leaq	68(%rsp), %rdi
+	movl	$4, %edx
+	callq	memcpy@PLT
+	movl	68(%rsp), %eax
+	movl	%eax, 400(%rsp)                 # 4-byte Spill
+	movq	24(%rbx), %rax
+	movq	%rax, 1680(%rsp)                # 8-byte Spill
+	movl	36(%rbx), %eax
+	movl	%eax, 1000(%rsp)                # 4-byte Spill
+	movq	40(%rbx), %rax
+	movl	(%rax), %ecx
+	movq	%rcx, 656(%rsp)                 # 8-byte Spill
+	movl	4(%rax), %ecx
+	movq	%rcx, 624(%rsp)                 # 8-byte Spill
+	movl	8(%rax), %eax
+	movl	%eax, 884(%rsp)                 # 4-byte Spill
+	movq	16(%r13), %rax
+	movq	%rax, 1104(%rsp)                # 8-byte Spill
+	leaq	32(%r13), %rsi
+	leaq	68(%rsp), %rdi
+	movl	$4, %edx
+	callq	memcpy@PLT
+	movl	68(%rsp), %eax
+	movl	%eax, 396(%rsp)                 # 4-byte Spill
+	movq	24(%r13), %rax
+	movq	%rax, 1672(%rsp)                # 8-byte Spill
+	movl	36(%r13), %eax
+	movl	%eax, 992(%rsp)                 # 4-byte Spill
+	movq	%r13, 752(%rsp)                 # 8-byte Spill
+	movq	40(%r13), %rax
+	movl	(%rax), %ecx
+	movq	%rcx, 608(%rsp)                 # 8-byte Spill
+	movl	4(%rax), %ecx
+	movq	%rcx, 120(%rsp)                 # 8-byte Spill
+	movl	8(%rax), %ecx
+	movl	%ecx, 876(%rsp)                 # 4-byte Spill
+	movl	16(%rax), %ecx
+	movq	%rcx, 600(%rsp)                 # 8-byte Spill
+	movl	20(%rax), %ecx
+	movq	%rcx, 576(%rsp)                 # 8-byte Spill
+	movl	24(%rax), %ecx
+	movl	%ecx, 412(%rsp)                 # 4-byte Spill
+	movl	32(%rax), %ecx
+	movq	%rcx, 592(%rsp)                 # 8-byte Spill
+	movl	36(%rax), %ecx
+	movq	%rcx, 568(%rsp)                 # 8-byte Spill
+	movl	40(%rax), %eax
+	movl	%eax, 408(%rsp)                 # 4-byte Spill
+	movq	32(%rbp), %rbx
+	movq	16(%rbx), %rax
+	movq	%rax, 1168(%rsp)                # 8-byte Spill
+	leaq	32(%rbx), %rsi
+	leaq	68(%rsp), %rdi
+	movl	$4, %edx
+	callq	memcpy@PLT
+	movl	68(%rsp), %eax
+	movl	%eax, 392(%rsp)                 # 4-byte Spill
+	movq	24(%rbx), %rax
+	movq	%rax, 1648(%rsp)                # 8-byte Spill
+	movl	36(%rbx), %eax
+	movl	%eax, 984(%rsp)                 # 4-byte Spill
+	movq	40(%rbx), %rax
+	movq	24(%rbp), %rbx
+	movl	(%rax), %ecx
+	movq	%rcx, 552(%rsp)                 # 8-byte Spill
+	movl	4(%rax), %ecx
+	movq	%rcx, 544(%rsp)                 # 8-byte Spill
+	movl	8(%rax), %eax
+	movl	%eax, 868(%rsp)                 # 4-byte Spill
+	movq	16(%rbx), %rax
+	movq	%rax, 1160(%rsp)                # 8-byte Spill
+	leaq	32(%rbx), %rsi
+	leaq	68(%rsp), %rdi
+	movl	$4, %edx
+	callq	memcpy@PLT
+	movl	68(%rsp), %eax
+	movl	%eax, 976(%rsp)                 # 4-byte Spill
+	movq	24(%rbx), %rax
+	movq	%rax, 1640(%rsp)                # 8-byte Spill
+	movl	36(%rbx), %eax
+	movl	%eax, 968(%rsp)                 # 4-byte Spill
+	movq	40(%rbx), %rax
+	movl	(%rax), %ecx
+	movq	%rcx, 536(%rsp)                 # 8-byte Spill
+	movl	4(%rax), %ecx
+	movq	%rcx, 512(%rsp)                 # 8-byte Spill
+	movl	8(%rax), %ecx
+	movl	%ecx, 864(%rsp)                 # 4-byte Spill
+	movl	16(%rax), %ecx
+	movq	%rcx, 424(%rsp)                 # 8-byte Spill
+	movl	20(%rax), %ecx
+	movq	%rcx, 416(%rsp)                 # 8-byte Spill
+	movl	24(%rax), %eax
+	movl	%eax, 468(%rsp)                 # 4-byte Spill
+	movq	136(%rbp), %rcx
+	movq	16(%rcx), %rax
+	movq	%rax, 1464(%rsp)                # 8-byte Spill
+	leaq	32(%rcx), %rsi
+	movq	%rcx, %rbx
+	leaq	68(%rsp), %rdi
+	movl	$4, %edx
+	callq	memcpy@PLT
+	movl	68(%rsp), %eax
+	movl	%eax, 960(%rsp)                 # 4-byte Spill
+	movq	24(%rbx), %rax
+	movq	%rax, 152(%rsp)                 # 8-byte Spill
+	movl	36(%rbx), %eax
+	movl	%eax, 952(%rsp)                 # 4-byte Spill
+	movq	16(%r12), %rax
+	movq	%rax, 1136(%rsp)                # 8-byte Spill
+	leaq	32(%r12), %rsi
+	leaq	68(%rsp), %rdi
+	movl	$4, %edx
+	callq	memcpy@PLT
+	movl	68(%rsp), %eax
+	movl	%eax, 944(%rsp)                 # 4-byte Spill
+	movq	24(%r12), %rax
+	movq	%rax, 112(%rsp)                 # 8-byte Spill
+	movl	36(%r12), %eax
+	movl	%eax, 388(%rsp)                 # 4-byte Spill
+	movq	%r12, 832(%rsp)                 # 8-byte Spill
+	movq	40(%r12), %rax
+	movl	(%rax), %ecx
+	movq	%rcx, 1072(%rsp)                # 8-byte Spill
+	movl	4(%rax), %ecx
+	movq	%rcx, 808(%rsp)                 # 8-byte Spill
+	movl	8(%rax), %ecx
+	movl	%ecx, 912(%rsp)                 # 4-byte Spill
+	movl	16(%rax), %ecx
+	movq	%rcx, 816(%rsp)                 # 8-byte Spill
+	movl	20(%rax), %ecx
+	movq	%rcx, 792(%rsp)                 # 8-byte Spill
+	movl	24(%rax), %ecx
+	movq	%rcx, 1128(%rsp)                # 8-byte Spill
+	movl	32(%rax), %ecx
+	movq	%rcx, 824(%rsp)                 # 8-byte Spill
+	movl	36(%rax), %ecx
+	movq	%rcx, 800(%rsp)                 # 8-byte Spill
+	movl	40(%rax), %eax
+	movl	%eax, 464(%rsp)                 # 4-byte Spill
+	movq	128(%rbp), %rbx
+	movq	16(%rbx), %rax
+	movq	%rax, 1456(%rsp)                # 8-byte Spill
+	leaq	32(%rbx), %rsi
+	leaq	68(%rsp), %rdi
+	movl	$4, %edx
+	callq	memcpy@PLT
+	movl	68(%rsp), %eax
+	movl	%eax, 384(%rsp)                 # 4-byte Spill
+	movq	24(%rbx), %rax
+	movq	%rax, 192(%rsp)                 # 8-byte Spill
+	movl	36(%rbx), %eax
+	movl	%eax, 380(%rsp)                 # 4-byte Spill
+	movq	40(%rbx), %rax
+	movq	120(%rbp), %r12
+	movl	(%rax), %r13d
+	movl	4(%rax), %r14d
+	movl	8(%rax), %eax
+	movl	%eax, 908(%rsp)                 # 4-byte Spill
+	movq	32(%rsp), %rbx                  # 8-byte Reload
+	movq	16(%rbx), %rax
+	movq	%rax, 160(%rsp)                 # 8-byte Spill
+	leaq	32(%rbx), %rsi
+	leaq	68(%rsp), %rdi
+	movl	$4, %edx
+	callq	memcpy@PLT
+	movl	68(%rsp), %eax
+	movl	%eax, 376(%rsp)                 # 4-byte Spill
+	movq	24(%rbx), %rax
+	movq	%rax, 40(%rsp)                  # 8-byte Spill
+	movl	36(%rbx), %eax
+	movl	%eax, 936(%rsp)                 # 4-byte Spill
+	movq	40(%rbx), %rax
+	movl	(%rax), %ecx
+	movq	%rcx, 256(%rsp)                 # 8-byte Spill
+	movl	4(%rax), %ecx
+	movq	%rcx, 768(%rsp)                 # 8-byte Spill
+	movl	8(%rax), %ecx
+	movl	%ecx, 904(%rsp)                 # 4-byte Spill
+	movl	16(%rax), %ecx
+	movq	%rcx, 240(%rsp)                 # 8-byte Spill
+	movl	20(%rax), %ecx
+	movq	%rcx, 776(%rsp)                 # 8-byte Spill
+	movl	24(%rax), %ecx
+	movq	%rcx, 320(%rsp)                 # 8-byte Spill
+	movl	32(%rax), %ecx
+	movq	%rcx, 216(%rsp)                 # 8-byte Spill
+	movl	36(%rax), %ecx
+	movq	%rcx, 784(%rsp)                 # 8-byte Spill
+	movl	40(%rax), %eax
+	movl	%eax, 184(%rsp)                 # 4-byte Spill
+	movq	72(%rbp), %rbx
+	movq	16(%rbx), %rax
+	movq	%rax, 1184(%rsp)                # 8-byte Spill
+	leaq	32(%rbx), %rsi
+	leaq	68(%rsp), %rdi
+	movl	$4, %edx
+	callq	memcpy@PLT
+	movl	68(%rsp), %eax
+	movl	%eax, 928(%rsp)                 # 4-byte Spill
+	movq	24(%rbx), %rax
+	movq	%rax, 144(%rsp)                 # 8-byte Spill
+	movl	36(%rbx), %eax
+	movl	%eax, 372(%rsp)                 # 4-byte Spill
+	movq	40(%rbx), %rax
+	movl	(%rax), %ecx
+	movq	%rcx, 1096(%rsp)                # 8-byte Spill
+	movl	4(%rax), %ecx
+	movq	%rcx, 432(%rsp)                 # 8-byte Spill
+	movl	8(%rax), %eax
+	movl	%eax, 900(%rsp)                 # 4-byte Spill
+	movq	16(%r12), %rax
+	movq	%rax, 1448(%rsp)                # 8-byte Spill
+	leaq	32(%r12), %rsi
+	leaq	68(%rsp), %rdi
+	movl	$4, %edx
+	callq	memcpy@PLT
+	movl	68(%rsp), %eax
+	movl	%eax, 368(%rsp)                 # 4-byte Spill
+	movq	24(%r12), %rax
+	movq	%rax, 176(%rsp)                 # 8-byte Spill
+	movl	36(%r12), %eax
+	movl	%eax, 364(%rsp)                 # 4-byte Spill
+	movq	40(%r12), %rax
+	movl	(%rax), %ecx
+	movq	%rcx, 728(%rsp)                 # 8-byte Spill
+	movl	4(%rax), %ecx
+	movq	%rcx, 704(%rsp)                 # 8-byte Spill
+	movl	8(%rax), %ecx
+	movl	%ecx, 892(%rsp)                 # 4-byte Spill
+	movl	16(%rax), %ecx
+	movq	%rcx, 720(%rsp)                 # 8-byte Spill
+	movl	20(%rax), %ecx
+	movq	%rcx, 688(%rsp)                 # 8-byte Spill
+	movl	24(%rax), %eax
+	movq	%rax, 1440(%rsp)                # 8-byte Spill
+	movq	112(%rbp), %rbx
+	movq	16(%rbx), %rax
+	movq	%rax, 1432(%rsp)                # 8-byte Spill
+	leaq	32(%rbx), %rsi
+	leaq	68(%rsp), %rdi
+	movl	$4, %edx
+	callq	memcpy@PLT
+	movl	68(%rsp), %eax
+	movl	%eax, 360(%rsp)                 # 4-byte Spill
+	movq	24(%rbx), %rax
+	movq	%rax, 136(%rsp)                 # 8-byte Spill
+	movl	36(%rbx), %eax
+	movl	%eax, 356(%rsp)                 # 4-byte Spill
+	movq	40(%rbx), %rax
+	movl	(%rax), %ecx
+	movq	%rcx, 672(%rsp)                 # 8-byte Spill
+	movl	4(%rax), %ecx
+	movq	%rcx, 648(%rsp)                 # 8-byte Spill
+	movl	8(%rax), %ecx
+	movl	%ecx, 888(%rsp)                 # 4-byte Spill
+	movl	16(%rax), %ecx
+	movq	%rcx, 664(%rsp)                 # 8-byte Spill
+	movl	20(%rax), %ecx
+	movq	%rcx, 632(%rsp)                 # 8-byte Spill
+	movl	24(%rax), %ecx
+	movl	%ecx, 924(%rsp)                 # 4-byte Spill
+	movl	32(%rax), %ecx
+	movq	%rcx, 640(%rsp)                 # 8-byte Spill
+	movl	36(%rax), %ecx
+	movq	%rcx, 616(%rsp)                 # 8-byte Spill
+	movl	40(%rax), %eax
+	movq	%rax, 1424(%rsp)                # 8-byte Spill
+	movq	88(%rbp), %rbx
+	movq	16(%rbx), %rax
+	movq	%rax, 1392(%rsp)                # 8-byte Spill
+	leaq	32(%rbx), %rsi
+	leaq	68(%rsp), %rdi
+	movl	$4, %edx
+	callq	memcpy@PLT
+	movl	68(%rsp), %eax
+	movl	%eax, 352(%rsp)                 # 4-byte Spill
+	movq	24(%rbx), %rax
+	movq	%rax, 104(%rsp)                 # 8-byte Spill
+	movl	36(%rbx), %eax
+	movl	%eax, 348(%rsp)                 # 4-byte Spill
+	movq	40(%rbx), %rax
+	movl	(%rax), %ecx
+	movl	%ecx, 456(%rsp)                 # 4-byte Spill
+	movl	4(%rax), %ecx
+	movq	%rcx, 1120(%rsp)                # 8-byte Spill
+	movl	8(%rax), %ecx
+	movl	%ecx, 880(%rsp)                 # 4-byte Spill
+	movl	16(%rax), %ecx
+	movl	%ecx, 452(%rsp)                 # 4-byte Spill
+	movl	20(%rax), %ecx
+	movq	%rcx, 584(%rsp)                 # 8-byte Spill
+	movslq	24(%rax), %rax
+	movq	%rax, 1384(%rsp)                # 8-byte Spill
+	movq	80(%rbp), %rcx
+	movq	16(%rcx), %rax
+	movq	%rax, 1376(%rsp)                # 8-byte Spill
+	leaq	32(%rcx), %rsi
+	movq	%rcx, %rbx
+	leaq	68(%rsp), %rdi
+	movl	$4, %edx
+	callq	memcpy@PLT
+	movl	68(%rsp), %eax
+	movl	%eax, 344(%rsp)                 # 4-byte Spill
+	movq	40(%rbx), %rax
+	movl	(%rax), %ecx
+	movl	%ecx, 448(%rsp)                 # 4-byte Spill
+	movl	4(%rax), %ecx
+	movq	%rcx, 56(%rsp)                  # 8-byte Spill
+	movl	8(%rax), %ecx
+	movl	%ecx, 872(%rsp)                 # 4-byte Spill
+	movl	16(%rax), %ecx
+	movl	%ecx, 228(%rsp)                 # 4-byte Spill
+	movl	20(%rax), %ecx
+	movq	%rcx, 280(%rsp)                 # 8-byte Spill
+	movl	24(%rax), %ecx
+	movl	%ecx, 916(%rsp)                 # 4-byte Spill
+	movl	32(%rax), %ecx
+	movl	%ecx, 560(%rsp)                 # 4-byte Spill
+	movl	36(%rax), %ecx
+	movq	%rcx, 272(%rsp)                 # 8-byte Spill
+	movl	40(%rax), %ecx
+	movq	%rcx, 1368(%rsp)                # 8-byte Spill
+	movl	48(%rax), %ecx
+	movl	%ecx, 224(%rsp)                 # 4-byte Spill
+	movl	52(%rax), %ecx
+	movq	%rcx, 264(%rsp)                 # 8-byte Spill
+	movl	56(%rax), %eax
+	movq	%rax, 1080(%rsp)                # 8-byte Spill
+	movq	24(%rbx), %rax
+	movq	%rax, 248(%rsp)                 # 8-byte Spill
+	movl	36(%rbx), %eax
+	movl	%eax, 340(%rsp)                 # 4-byte Spill
+	movq	104(%rbp), %rbx
+	movq	16(%rbx), %rax
+	movq	%rax, 1416(%rsp)                # 8-byte Spill
+	leaq	32(%rbx), %rsi
+	leaq	68(%rsp), %rdi
+	movl	$4, %edx
+	callq	memcpy@PLT
+	movl	68(%rsp), %eax
+	movl	%eax, 336(%rsp)                 # 4-byte Spill
+	movq	24(%rbx), %rax
+	movq	%rax, 288(%rsp)                 # 8-byte Spill
+	movl	36(%rbx), %eax
+	movl	%eax, 332(%rsp)                 # 4-byte Spill
+	movq	40(%rbx), %rax
+	movl	(%rax), %ecx
+	movl	%ecx, 528(%rsp)                 # 4-byte Spill
+	movl	16(%rax), %ecx
+	movl	%ecx, 520(%rsp)                 # 4-byte Spill
+	vmovsd	4(%rax), %xmm0                  # xmm0 = mem[0],zero
+	vmovaps	%xmm0, 1328(%rsp)               # 16-byte Spill
+	movl	20(%rax), %ecx
+	movq	%rcx, 304(%rsp)                 # 8-byte Spill
+	movl	24(%rax), %eax
+	movq	%rax, 1408(%rsp)                # 8-byte Spill
+	movq	96(%rbp), %r12
+	movq	16(%r12), %rax
+	movq	%rax, 1400(%rsp)                # 8-byte Spill
+	leaq	32(%r12), %rsi
+	leaq	68(%rsp), %rdi
+	movl	$4, %edx
+	callq	memcpy@PLT
+	leal	(%r14,%r13), %eax
+	cmpl	%r15d, %eax
+	movl	%r15d, %ecx
+	movl	%eax, 1312(%rsp)                # 4-byte Spill
+	cmovgl	%eax, %ecx
+	movq	120(%rsp), %rdx                 # 8-byte Reload
+	cmpl	$8, %edx
+	movl	$8, %eax
+	cmovgl	%edx, %eax
+	movq	%rax, 1112(%rsp)                # 8-byte Spill
+	movl	%edx, %eax
+	sarl	$31, %eax
+	andl	%edx, %eax
+	movl	%eax, 444(%rsp)                 # 4-byte Spill
+	cmpl	$8, %r14d
+	movl	$8, %eax
+	cmovll	%r14d, %eax
+	leal	-1(%r14), %r11d
+	andl	$-8, %r11d
+	addl	%eax, %r11d
+	cmpl	%r11d, %r14d
+	movq	%r14, 1088(%rsp)                # 8-byte Spill
+	cmovlel	%r14d, %r11d
+	testl	%ecx, %ecx
+	movl	$1, %r9d
+	cmovlel	%r9d, %ecx
+	movl	%r13d, %r10d
+	sarl	$31, %r10d
+	movl	%r10d, %r8d
+	movq	%r13, 1064(%rsp)                # 8-byte Spill
+	andl	%r13d, %r8d
+	movl	%ecx, %edx
+	subl	%r8d, %edx
+	leal	-1(%rdx), %eax
+	movq	%rax, 1656(%rsp)                # 8-byte Spill
+                                        # kill: def $eax killed $eax killed $rax
+	andl	$-8, %eax
+	movq	%r8, 200(%rsp)                  # 8-byte Spill
+	addl	%r8d, %eax
+	leal	-1(%rcx), %r14d
+	cmpl	%eax, %r14d
+	cmovlel	%r14d, %eax
+	cmpl	$8, %edx
+	movl	$8, %esi
+	movq	%rdx, 72(%rsp)                  # 8-byte Spill
+	cmovll	%edx, %esi
+	movq	%rsi, 1664(%rsp)                # 8-byte Spill
+	addl	%esi, %eax
+	cmpl	%ecx, %eax
+	movq	%rcx, 80(%rsp)                  # 8-byte Spill
+	cmovgl	%ecx, %eax
+	cmpl	$8, %r15d
+	movl	$8, %esi
+	cmovll	%r15d, %esi
+	movl	$-8, %ecx
+	subl	%r15d, %ecx
+	cmpl	%r15d, %ecx
+	leal	-1(%r15), %ebx
+	cmovll	%ebx, %ecx
+	movl	%ecx, %edx
+	sarl	$3, %edx
+	sarl	$31, %ecx
+	andnl	%edx, %ecx, %ecx
+	movl	%ebx, %edx
+	sarl	$3, %edx
+	cmpl	%ecx, %edx
+	cmovgl	%ecx, %edx
+	movq	%rsi, 128(%rsp)                 # 8-byte Spill
+	leal	(%rsi,%rdx,8), %edx
+	cmpl	%r15d, %edx
+	cmovgel	%r15d, %edx
+	cmpl	%edx, %eax
+	movl	%edx, 64(%rsp)                  # 4-byte Spill
+	movl	%eax, 52(%rsp)                  # 4-byte Spill
+	cmovgl	%eax, %edx
+	testl	%edx, %edx
+	cmovlel	%r9d, %edx
+	movl	%edx, 760(%rsp)                 # 4-byte Spill
+	leal	8(,%rcx,8), %eax
+	cmpl	%r15d, %eax
+	cmovgel	%r15d, %eax
+	leal	-1(%rax), %edx
+	sarl	$3, %edx
+	cmpl	%ecx, %edx
+	cmovlel	%edx, %ecx
+	leal	8(,%rcx,8), %edi
+	cmpl	%r15d, %edi
+	cmovgel	%r15d, %edi
+	cmpl	$8, %eax
+	movl	$8, %esi
+	cmovgel	%esi, %eax
+	addl	%edx, %ecx
+	leal	(%rax,%rcx,8), %eax
+	cmpl	%edi, %eax
+	cmovlel	%eax, %edi
+	leal	-1(%rdi), %eax
+	movl	64(%rbp), %ecx
+	cmpl	%ecx, %eax
+	cmovlel	%ecx, %eax
+	cmpl	%eax, %ebx
+	movl	%ebx, 188(%rsp)                 # 4-byte Spill
+	cmovlel	%ebx, %eax
+	movl	%eax, %ecx
+	sarl	$31, %ecx
+	andnl	%eax, %ecx, %eax
+	movq	40(%r12), %rcx
+	movl	(%rcx), %edx
+	movq	%rdx, 504(%rsp)                 # 8-byte Spill
+	movl	4(%rcx), %edx
+	movq	%rdx, 1048(%rsp)                # 8-byte Spill
+	movl	8(%rcx), %edx
+	movl	%edx, 860(%rsp)                 # 4-byte Spill
+	movl	16(%rcx), %edx
+	movq	%rdx, 496(%rsp)                 # 8-byte Spill
+	movl	20(%rcx), %edx
+	movq	%rdx, 1040(%rsp)                # 8-byte Spill
+	movl	24(%rcx), %esi
+	movl	32(%rcx), %edx
+	movq	%rdx, 1056(%rsp)                # 8-byte Spill
+	movl	36(%rcx), %edx
+	movq	%rdx, 1032(%rsp)                # 8-byte Spill
+	movl	40(%rcx), %ebx
+	cmpl	%r15d, %eax
+	leal	1(%rax), %eax
+	movq	%r15, 168(%rsp)                 # 8-byte Spill
+	cmovll	%r15d, %eax
+	movl	%eax, 460(%rsp)                 # 4-byte Spill
+	movl	68(%rsp), %eax
+	movl	%eax, 856(%rsp)                 # 4-byte Spill
+	movq	24(%r12), %rcx
+	movl	36(%r12), %eax
+	movl	%eax, 852(%rsp)                 # 4-byte Spill
+	movq	40(%rbp), %rax
+	movq	16(%rax), %rax
+	testq	%rax, %rax
+	movq	%r12, %r15
+	jne	.LBB0_4
+# %bb.2:                                # %_halide_buffer_is_bounds_query.exit
+	movq	120(%rsp), %rdx                 # 8-byte Reload
+	testl	%edx, %edx
+	sets	%r9b
+	cmpl	$8, %edx
+	setg	%dl
+	cmpb	%r9b, %dl
+	je	.LBB0_4
+# %bb.3:                                # %_halide_buffer_is_bounds_query.exit
+	movq	40(%rbp), %rdx
+	cmpq	$0, (%rdx)
+	je	.LBB0_363
+.LBB0_4:                                # %"assert succeeded"
+	movq	%rcx, 312(%rsp)                 # 8-byte Spill
+	movl	%r14d, 1316(%rsp)               # 4-byte Spill
+	movq	%rdi, 1704(%rsp)                # 8-byte Spill
+	movq	%rbx, 1144(%rsp)                # 8-byte Spill
+	movl	%esi, 920(%rsp)                 # 4-byte Spill
+	movl	%r10d, 1324(%rsp)               # 4-byte Spill
+	movq	48(%rbp), %r10
+	cmpq	$0, 16(%r10)
+	movq	24(%rsp), %r13                  # 8-byte Reload
+	je	.LBB0_6
+# %bb.5:
+	movq	128(%rbp), %r9
+	movq	104(%rbp), %rsi
+	movq	32(%rbp), %r14
+	movq	752(%rsp), %rdx                 # 8-byte Reload
+	movq	832(%rsp), %r10                 # 8-byte Reload
+	vmovdqa	1344(%rsp), %xmm10              # 16-byte Reload
+	vmovdqa	1328(%rsp), %xmm15              # 16-byte Reload
+	movq	120(%rbp), %r12
+	testq	%rax, %rax
+	jne	.LBB0_11
+	jmp	.LBB0_8
+.LBB0_6:                                # %_halide_buffer_is_bounds_query.exit744
+	cmpq	$0, (%r10)
+	movq	128(%rbp), %r9
+	movq	104(%rbp), %rsi
+	movq	32(%rbp), %r14
+	movq	752(%rsp), %rdx                 # 8-byte Reload
+	movq	832(%rsp), %r10                 # 8-byte Reload
+	vmovdqa	1344(%rsp), %xmm10              # 16-byte Reload
+	vmovdqa	1328(%rsp), %xmm15              # 16-byte Reload
+	movq	120(%rbp), %r12
+	je	.LBB0_10
+# %bb.7:                                # %after_bb
+	testq	%rax, %rax
+	jne	.LBB0_11
+.LBB0_8:                                # %_halide_buffer_is_bounds_query.exit758
+	movq	40(%rbp), %rax
+	cmpq	$0, (%rax)
+	jne	.LBB0_11
+# %bb.9:                                # %_halide_buffer_init.exit760
+	vmovaps	.LCPI0_6(%rip), %ymm0           # ymm0 = [0,32,1,0,0,32,32,0]
+	vmovups	%ymm0, 6752(%rsp)
+	movq	40(%rbp), %rdi
+	movq	40(%rdi), %rax
+	vxorps	%xmm0, %xmm0, %xmm0
+	vmovups	%xmm0, (%rdi)
+	movq	$0, 16(%rdi)
+	movabsq	$8590008322, %rcx               # imm = 0x200012002
+	movq	%rcx, 32(%rdi)
+	vmovaps	6752(%rsp), %xmm0
+	vmovups	%xmm0, (%rax)
+	movq	40(%rdi), %rax
+	vmovaps	6768(%rsp), %xmm0
+	vmovups	%xmm0, 16(%rax)
+	movq	$0, 24(%rdi)
+	jmp	.LBB0_11
+.LBB0_10:                               # %then_bb
+	movq	48(%rbp), %rdi
+	movq	40(%rdi), %rax
+	vxorps	%xmm0, %xmm0, %xmm0
+	vmovups	%xmm0, (%rdi)
+	movq	$0, 16(%rdi)
+	movabsq	$4295041026, %rcx               # imm = 0x100012002
+	movq	%rcx, 32(%rdi)
+	vmovaps	.LCPI0_5(%rip), %xmm0           # xmm0 = [0,32,1,0]
+	vmovups	%xmm0, (%rax)
+	movq	$0, 24(%rdi)
+	movq	40(%rbp), %rax
+	movq	16(%rax), %rax
+	testq	%rax, %rax
+	je	.LBB0_8
+.LBB0_11:                               # %after_bb17
+	movq	16(%rbp), %rbx
+	cmpq	$0, 16(%rbx)
+	jne	.LBB0_13
+# %bb.12:                               # %_halide_buffer_is_bounds_query.exit759
+	cmpq	$0, (%rbx)
+	je	.LBB0_16
+.LBB0_13:                               # %after_bb20
+	cmpq	$0, 16(%rdx)
+	jne	.LBB0_17
+.LBB0_14:                               # %_halide_buffer_is_bounds_query.exit761
+	cmpq	$0, (%rdx)
+	jne	.LBB0_17
+# %bb.15:                               # %then_bb24
+	movq	40(%rdx), %rax
+	vxorps	%xmm0, %xmm0, %xmm0
+	vmovups	%xmm0, (%rdx)
+	movq	$0, 16(%rdx)
+	movabsq	$12884975618, %rcx              # imm = 0x300012002
+	movq	%rcx, 32(%rdx)
+	vmovaps	.LCPI0_7(%rip), %xmm0           # xmm0 = [0,8,1,0]
+	vmovups	%xmm0, (%rax)
+	movq	40(%rdx), %rax
+	vmovaps	.LCPI0_8(%rip), %xmm0           # xmm0 = [0,40,8,0]
+	vmovups	%xmm0, 16(%rax)
+	movq	40(%rdx), %rax
+	vmovaps	.LCPI0_9(%rip), %xmm0           # xmm0 = [0,7,320,0]
+	vmovups	%xmm0, 32(%rax)
+	movq	$0, 24(%rdx)
+	jmp	.LBB0_17
+.LBB0_16:                               # %then_bb21
+	movq	40(%rbx), %rax
+	vxorps	%xmm0, %xmm0, %xmm0
+	vmovups	%xmm0, (%rbx)
+	movq	$0, 16(%rbx)
+	movabsq	$4295041026, %rcx               # imm = 0x100012002
+	movq	%rcx, 32(%rbx)
+	vmovaps	.LCPI0_7(%rip), %xmm0           # xmm0 = [0,8,1,0]
+	vmovups	%xmm0, (%rax)
+	movq	$0, 24(%rbx)
+	cmpq	$0, 16(%rdx)
+	je	.LBB0_14
+.LBB0_17:                               # %after_bb23
+	cmpq	$0, 16(%r14)
+	movq	136(%rbp), %r8
+	jne	.LBB0_19
+# %bb.18:                               # %_halide_buffer_is_bounds_query.exit763
+	cmpq	$0, (%r14)
+	je	.LBB0_22
+.LBB0_19:                               # %after_bb26
+	movq	24(%rbp), %rdx
+	cmpq	$0, 16(%rdx)
+	jne	.LBB0_23
+.LBB0_20:                               # %_halide_buffer_is_bounds_query.exit766
+	cmpq	$0, (%rdx)
+	jne	.LBB0_23
+# %bb.21:                               # %_halide_buffer_init.exit770
+	vmovaps	.LCPI0_11(%rip), %ymm0          # ymm0 = [0,24,1,0,0,39,24,0]
+	vmovups	%ymm0, 6784(%rsp)
+	movq	40(%rdx), %rax
+	vxorps	%xmm0, %xmm0, %xmm0
+	vmovups	%xmm0, (%rdx)
+	movq	$0, 16(%rdx)
+	movabsq	$8590008322, %rcx               # imm = 0x200012002
+	movq	%rcx, 32(%rdx)
+	vmovaps	6784(%rsp), %xmm0
+	vmovups	%xmm0, (%rax)
+	movq	40(%rdx), %rax
+	vmovaps	6800(%rsp), %xmm0
+	vmovups	%xmm0, 16(%rax)
+	movq	$0, 24(%rdx)
+	jmp	.LBB0_23
+.LBB0_22:                               # %then_bb27
+	movq	40(%r14), %rax
+	vxorps	%xmm0, %xmm0, %xmm0
+	vmovups	%xmm0, (%r14)
+	movq	$0, 16(%r14)
+	movabsq	$4295041026, %rcx               # imm = 0x100012002
+	movq	%rcx, 32(%r14)
+	vmovaps	.LCPI0_10(%rip), %xmm0          # xmm0 = [0,24,1,0]
+	vmovups	%xmm0, (%rax)
+	movq	$0, 24(%r14)
+	movq	24(%rbp), %rdx
+	cmpq	$0, 16(%rdx)
+	je	.LBB0_20
+.LBB0_23:                               # %after_bb29
+	cmpq	$0, 16(%r8)
+	jne	.LBB0_25
+# %bb.24:                               # %_halide_buffer_is_bounds_query.exit768
+	cmpq	$0, (%r8)
+	je	.LBB0_28
+.LBB0_25:                               # %after_bb32
+	cmpq	$0, 16(%r10)
+	jne	.LBB0_29
+.LBB0_26:                               # %_halide_buffer_is_bounds_query.exit771
+	cmpq	$0, (%r10)
+	jne	.LBB0_29
+# %bb.27:                               # %then_bb36
+	testl	%r13d, %r13d
+	movl	$1, %eax
+	cmovgl	%r13d, %eax
+	movq	40(%r10), %rcx
+	vxorps	%xmm0, %xmm0, %xmm0
+	vmovups	%xmm0, (%r10)
+	movq	$0, 16(%r10)
+	movabsq	$12884975618, %rdx              # imm = 0x300012002
+	movq	%rdx, 32(%r10)
+	vmovaps	.LCPI0_12(%rip), %xmm0          # xmm0 = [0,40,1,0]
+	vmovups	%xmm0, (%rcx)
+	movq	40(%r10), %rcx
+	vmovaps	.LCPI0_13(%rip), %xmm0          # xmm0 = [0,7,40,0]
+	vmovups	%xmm0, 16(%rcx)
+	movq	40(%r10), %rcx
+	movl	$0, 32(%rcx)
+	movl	%eax, 36(%rcx)
+	movq	$280, 40(%rcx)                  # imm = 0x118
+	movq	$0, 24(%r10)
+	jmp	.LBB0_29
+.LBB0_28:                               # %then_bb33
+	vxorps	%xmm0, %xmm0, %xmm0
+	vmovups	%xmm0, 16(%r8)
+	vmovups	%xmm0, (%r8)
+	movq	$73730, 32(%r8)                 # imm = 0x12002
+	cmpq	$0, 16(%r10)
+	je	.LBB0_26
+.LBB0_29:                               # %after_bb35
+	cmpq	$0, 16(%r9)
+	jne	.LBB0_31
+# %bb.30:                               # %_halide_buffer_is_bounds_query.exit772
+	cmpq	$0, (%r9)
+	je	.LBB0_34
+.LBB0_31:                               # %after_bb38
+	movq	%r11, 1360(%rsp)                # 8-byte Spill
+	movq	32(%rsp), %r11                  # 8-byte Reload
+	cmpq	$0, 16(%r11)
+	jne	.LBB0_35
+.LBB0_32:                               # %_halide_buffer_is_bounds_query.exit775
+	cmpq	$0, (%r11)
+	jne	.LBB0_35
+# %bb.33:                               # %then_bb42
+	movl	760(%rsp), %eax                 # 4-byte Reload
+	movq	200(%rsp), %rbx                 # 8-byte Reload
+	subl	%ebx, %eax
+	movq	40(%r11), %rcx
+	testl	%r13d, %r13d
+	movl	$1, %edx
+	cmovgl	%r13d, %edx
+	imull	$39, %eax, %r8d
+	vxorps	%xmm0, %xmm0, %xmm0
+	vmovups	%xmm0, (%r11)
+	movq	$0, 16(%r11)
+	movabsq	$12884975618, %rdi              # imm = 0x300012002
+	movq	%rdi, 32(%r11)
+	movl	%ebx, (%rcx)
+	movl	%eax, 4(%rcx)
+	movq	$1, 8(%rcx)
+	movq	40(%r11), %rcx
+	movabsq	$167503724544, %rdi             # imm = 0x2700000000
+	movq	%rdi, 16(%rcx)
+	movl	%eax, 24(%rcx)
+	movl	$0, 28(%rcx)
+	movq	40(%r11), %rax
+	movl	$0, 32(%rax)
+	movl	%edx, 36(%rax)
+	movl	%r8d, 40(%rax)
+	movq	120(%rbp), %r12
+	movq	136(%rbp), %r8
+	movq	832(%rsp), %r10                 # 8-byte Reload
+	movl	$0, 44(%rax)
+	movq	$0, 24(%r11)
+	jmp	.LBB0_35
+.LBB0_34:                               # %then_bb39
+	movq	40(%r9), %rax
+	vxorps	%xmm0, %xmm0, %xmm0
+	vmovups	%xmm0, (%r9)
+	movq	$0, 16(%r9)
+	movabsq	$4295041026, %rcx               # imm = 0x100012002
+	movq	%rcx, 32(%r9)
+	movq	1064(%rsp), %rcx                # 8-byte Reload
+	movl	%ecx, (%rax)
+	movl	%r11d, 4(%rax)
+	movq	$1, 8(%rax)
+	movq	$0, 24(%r9)
+	movq	%r11, 1360(%rsp)                # 8-byte Spill
+	movq	32(%rsp), %r11                  # 8-byte Reload
+	cmpq	$0, 16(%r11)
+	je	.LBB0_32
+.LBB0_35:                               # %after_bb41
+	movq	72(%rbp), %r11
+	cmpq	$0, 16(%r11)
+	jne	.LBB0_38
+# %bb.36:                               # %_halide_buffer_is_bounds_query.exit777
+	cmpq	$0, (%r11)
+	jne	.LBB0_38
+# %bb.37:                               # %then_bb45
+	movq	40(%r11), %rax
+	vxorps	%xmm0, %xmm0, %xmm0
+	vmovups	%xmm0, (%r11)
+	movq	$0, 16(%r11)
+	movabsq	$4295041026, %rcx               # imm = 0x100012002
+	movq	%rcx, 32(%r11)
+	movl	$0, (%rax)
+	movl	460(%rsp), %ecx                 # 4-byte Reload
+	movl	%ecx, 4(%rax)
+	movq	$1, 8(%rax)
+	movq	$0, 24(%r11)
+.LBB0_38:                               # %after_bb44
+	cmpq	$0, 16(%r12)
+	movq	88(%rbp), %rdx
+	movq	112(%rbp), %rdi
+	movq	80(%rbp), %rbx
+	jne	.LBB0_40
+# %bb.39:                               # %_halide_buffer_is_bounds_query.exit780
+	cmpq	$0, (%r12)
+	je	.LBB0_43
+.LBB0_40:                               # %after_bb47
+	cmpq	$0, 16(%rdi)
+	jne	.LBB0_44
+.LBB0_41:                               # %_halide_buffer_is_bounds_query.exit782
+	cmpq	$0, (%rdi)
+	jne	.LBB0_44
+# %bb.42:                               # %then_bb51
+	movq	40(%rdi), %rax
+	vxorps	%xmm0, %xmm0, %xmm0
+	vmovups	%xmm0, (%rdi)
+	movq	$0, 16(%rdi)
+	movabsq	$12884975618, %rcx              # imm = 0x300012002
+	movq	%rcx, 32(%rdi)
+	vmovaps	.LCPI0_5(%rip), %xmm0           # xmm0 = [0,32,1,0]
+	vmovups	%xmm0, (%rax)
+	movq	40(%rdi), %rax
+	vmovaps	.LCPI0_15(%rip), %xmm0          # xmm0 = [0,32,32,0]
+	vmovups	%xmm0, 16(%rax)
+	movq	40(%rdi), %rax
+	vmovaps	.LCPI0_16(%rip), %xmm0          # xmm0 = [0,4,1024,0]
+	vmovups	%xmm0, 32(%rax)
+	movq	$0, 24(%rdi)
+	jmp	.LBB0_44
+.LBB0_43:                               # %_halide_buffer_init.exit784
+	vmovaps	.LCPI0_14(%rip), %ymm0          # ymm0 = [0,32,1,0,0,4,32,0]
+	vmovups	%ymm0, 6816(%rsp)
+	movq	40(%r12), %rax
+	vxorps	%xmm0, %xmm0, %xmm0
+	vmovups	%xmm0, (%r12)
+	movq	$0, 16(%r12)
+	movabsq	$8590008322, %rcx               # imm = 0x200012002
+	movq	%rcx, 32(%r12)
+	vmovaps	6816(%rsp), %xmm0
+	vmovups	%xmm0, (%rax)
+	movq	40(%r12), %rax
+	vmovaps	6832(%rsp), %xmm0
+	vmovups	%xmm0, 16(%rax)
+	movq	$0, 24(%r12)
+	cmpq	$0, 16(%rdi)
+	je	.LBB0_41
+.LBB0_44:                               # %after_bb50
+	cmpq	$0, 16(%rdx)
+	jne	.LBB0_46
+# %bb.45:                               # %_halide_buffer_is_bounds_query.exit785
+	cmpq	$0, (%rdx)
+	je	.LBB0_49
+.LBB0_46:                               # %after_bb53
+	cmpq	$0, 16(%rbx)
+	jne	.LBB0_50
+.LBB0_47:                               # %_halide_buffer_is_bounds_query.exit788
+	cmpq	$0, (%rbx)
+	jne	.LBB0_50
+# %bb.48:                               # %then_bb57
+	vmovaps	.LCPI0_18(%rip), %ymm0          # ymm0 = [0,8,1,0,0,40,8,0]
+	vmovups	%ymm0, 6912(%rsp)
+	vmovaps	.LCPI0_19(%rip), %ymm0          # ymm0 = [0,7,320,0,0,4,2240,0]
+	vmovups	%ymm0, 6944(%rsp)
+	movq	40(%rbx), %rax
+	vxorps	%xmm0, %xmm0, %xmm0
+	vmovups	%xmm0, (%rbx)
+	movq	$0, 16(%rbx)
+	movabsq	$17179942914, %rcx              # imm = 0x400012002
+	movq	%rcx, 32(%rbx)
+	vmovups	6912(%rsp), %xmm0
+	vmovups	%xmm0, (%rax)
+	movq	40(%rbx), %rax
+	vmovups	6928(%rsp), %xmm0
+	vmovups	%xmm0, 16(%rax)
+	movq	40(%rbx), %rax
+	vmovups	6944(%rsp), %xmm0
+	vmovups	%xmm0, 32(%rax)
+	movq	40(%rbx), %rax
+	vmovups	6960(%rsp), %xmm0
+	vmovups	%xmm0, 48(%rax)
+	movq	$0, 24(%rbx)
+	jmp	.LBB0_50
+.LBB0_49:                               # %_halide_buffer_init.exit790
+	vmovaps	.LCPI0_17(%rip), %ymm0          # ymm0 = [0,8,1,0,0,4,8,0]
+	vmovups	%ymm0, 6848(%rsp)
+	movq	40(%rdx), %rax
+	vxorps	%xmm0, %xmm0, %xmm0
+	vmovups	%xmm0, (%rdx)
+	movq	$0, 16(%rdx)
+	movabsq	$8590008322, %rcx               # imm = 0x200012002
+	movq	%rcx, 32(%rdx)
+	vmovaps	6848(%rsp), %xmm0
+	vmovups	%xmm0, (%rax)
+	movq	40(%rdx), %rax
+	vmovaps	6864(%rsp), %xmm0
+	vmovups	%xmm0, 16(%rax)
+	movq	$0, 24(%rdx)
+	cmpq	$0, 16(%rbx)
+	je	.LBB0_47
+.LBB0_50:                               # %after_bb56
+	cmpq	$0, 16(%rsi)
+	jne	.LBB0_52
+# %bb.51:                               # %_halide_buffer_is_bounds_query.exit791
+	cmpq	$0, (%rsi)
+	je	.LBB0_54
+.LBB0_52:                               # %after_bb59
+	cmpq	$0, 16(%r15)
+	je	.LBB0_55
+.LBB0_53:
+	movl	$0, 296(%rsp)                   # 4-byte Folded Spill
+	cmpq	$0, 16(%rsi)
+	je	.LBB0_74
+.LBB0_57:
+	movl	$0, 488(%rsp)                   # 4-byte Folded Spill
+	cmpq	$0, 16(%rbx)
+	je	.LBB0_75
+.LBB0_58:
+	movl	$0, 480(%rsp)                   # 4-byte Folded Spill
+	cmpq	$0, 16(%rdx)
+	je	.LBB0_76
+.LBB0_59:
+	movl	$0, 472(%rsp)                   # 4-byte Folded Spill
+	cmpq	$0, 16(%rdi)
+	je	.LBB0_77
+.LBB0_60:
+	xorl	%r14d, %r14d
+	cmpq	$0, 16(%r12)
+	je	.LBB0_78
+.LBB0_61:
+	xorl	%r12d, %r12d
+	cmpq	$0, 16(%r11)
+	je	.LBB0_79
+.LBB0_62:
+	xorl	%r13d, %r13d
+	movq	32(%rsp), %rax                  # 8-byte Reload
+	cmpq	$0, 16(%rax)
+	je	.LBB0_80
+.LBB0_63:
+	xorl	%r15d, %r15d
+	cmpq	$0, 16(%r9)
+	je	.LBB0_81
+.LBB0_64:
+	xorl	%edx, %edx
+	movq	16(%rbp), %r9
+	cmpq	$0, 16(%r10)
+	je	.LBB0_82
+.LBB0_65:
+	xorl	%esi, %esi
+	movq	48(%rbp), %r10
+	cmpq	$0, 16(%r8)
+	je	.LBB0_83
+.LBB0_66:
+	xorl	%edi, %edi
+	movq	32(%rbp), %rcx
+	movq	24(%rbp), %rax
+	cmpq	$0, 16(%rax)
+	je	.LBB0_84
+.LBB0_67:
+	xorl	%ebx, %ebx
+	cmpq	$0, 16(%rcx)
+	je	.LBB0_85
+.LBB0_68:
+	xorl	%eax, %eax
+	movq	752(%rsp), %rcx                 # 8-byte Reload
+	cmpq	$0, 16(%rcx)
+	je	.LBB0_86
+.LBB0_69:
+	xorl	%r8d, %r8d
+	cmpq	$0, 16(%r9)
+	je	.LBB0_87
+.LBB0_70:
+	xorl	%r9d, %r9d
+	cmpq	$0, 16(%r10)
+	je	.LBB0_88
+.LBB0_71:
+	xorl	%r10d, %r10d
+	jmp	.LBB0_89
+.LBB0_54:                               # %_halide_buffer_init.exit796
+	vmovaps	.LCPI0_20(%rip), %ymm0          # ymm0 = [0,24,1,0,0,4,24,0]
+	vmovups	%ymm0, 6880(%rsp)
+	movq	40(%rsi), %rax
+	vxorps	%xmm0, %xmm0, %xmm0
+	vmovups	%xmm0, (%rsi)
+	movq	$0, 16(%rsi)
+	movabsq	$8590008322, %rcx               # imm = 0x200012002
+	movq	%rcx, 32(%rsi)
+	vmovaps	6880(%rsp), %xmm0
+	vmovups	%xmm0, (%rax)
+	movq	40(%rsi), %rax
+	vmovaps	6896(%rsp), %xmm0
+	vmovups	%xmm0, 16(%rax)
+	movq	$0, 24(%rsi)
+	cmpq	$0, 16(%r15)
+	jne	.LBB0_53
+.LBB0_55:                               # %_halide_buffer_is_bounds_query.exit794
+	cmpq	$0, (%r15)
+	je	.LBB0_72
+.LBB0_56:                               # %after_bb62.thread
+	cmpq	$0, (%r15)
+	sete	%al
+	movl	%eax, 296(%rsp)                 # 4-byte Spill
+	cmpq	$0, 16(%rsi)
+	jne	.LBB0_57
+.LBB0_74:
+	cmpq	$0, (%rsi)
+	sete	%al
+	movl	%eax, 488(%rsp)                 # 4-byte Spill
+	cmpq	$0, 16(%rbx)
+	jne	.LBB0_58
+.LBB0_75:
+	cmpq	$0, (%rbx)
+	sete	%cl
+	movl	%ecx, 480(%rsp)                 # 4-byte Spill
+	cmpq	$0, 16(%rdx)
+	jne	.LBB0_59
+.LBB0_76:
+	cmpq	$0, (%rdx)
+	sete	%cl
+	movl	%ecx, 472(%rsp)                 # 4-byte Spill
+	cmpq	$0, 16(%rdi)
+	jne	.LBB0_60
+.LBB0_77:
+	cmpq	$0, (%rdi)
+	sete	%r14b
+	cmpq	$0, 16(%r12)
+	jne	.LBB0_61
+.LBB0_78:
+	cmpq	$0, (%r12)
+	sete	%r12b
+	cmpq	$0, 16(%r11)
+	jne	.LBB0_62
+.LBB0_79:
+	cmpq	$0, (%r11)
+	sete	%r13b
+	movq	32(%rsp), %rax                  # 8-byte Reload
+	cmpq	$0, 16(%rax)
+	jne	.LBB0_63
+.LBB0_80:
+	cmpq	$0, (%rax)
+	sete	%r15b
+	cmpq	$0, 16(%r9)
+	jne	.LBB0_64
+.LBB0_81:
+	cmpq	$0, (%r9)
+	sete	%dl
+	movq	16(%rbp), %r9
+	cmpq	$0, 16(%r10)
+	jne	.LBB0_65
+.LBB0_82:
+	cmpq	$0, (%r10)
+	sete	%sil
+	movq	48(%rbp), %r10
+	cmpq	$0, 16(%r8)
+	jne	.LBB0_66
+.LBB0_83:
+	cmpq	$0, (%r8)
+	sete	%dil
+	movq	32(%rbp), %rcx
+	movq	24(%rbp), %rax
+	cmpq	$0, 16(%rax)
+	jne	.LBB0_67
+.LBB0_84:
+	cmpq	$0, (%rax)
+	sete	%bl
+	cmpq	$0, 16(%rcx)
+	jne	.LBB0_68
+.LBB0_85:
+	cmpq	$0, (%rcx)
+	sete	%al
+	movq	752(%rsp), %rcx                 # 8-byte Reload
+	cmpq	$0, 16(%rcx)
+	jne	.LBB0_69
+.LBB0_86:
+	cmpq	$0, (%rcx)
+	sete	%r8b
+	cmpq	$0, 16(%r9)
+	jne	.LBB0_70
+.LBB0_87:
+	cmpq	$0, (%r9)
+	sete	%r9b
+	cmpq	$0, 16(%r10)
+	jne	.LBB0_71
+.LBB0_88:
+	cmpq	$0, (%r10)
+	sete	%r10b
+.LBB0_89:                               # %_halide_buffer_is_bounds_query.exit812
+	xorl	%ecx, %ecx
+	movq	%rcx, 16(%rsp)                  # 8-byte Spill
+	movq	40(%rbp), %rcx
+	cmpq	$0, 16(%rcx)
+	movl	$0, %r11d
+	jne	.LBB0_91
+# %bb.90:
+	movq	40(%rbp), %rcx
+	cmpq	$0, (%rcx)
+	sete	%r11b
+.LBB0_91:                               # %_halide_buffer_is_bounds_query.exit813
+	orb	%r11b, %r10b
+	orb	%r10b, %r9b
+	orb	%r9b, %r8b
+	orb	%r8b, %al
+	orb	%al, %bl
+	orb	%bl, %dil
+	orb	%dil, %sil
+	orb	%sil, %dl
+	orb	%dl, %r15b
+	orb	%r15b, %r13b
+	orb	%r13b, %r12b
+	movl	%r14d, %eax
+	orb	%r12b, %al
+	movl	472(%rsp), %r14d                # 4-byte Reload
+	orb	%al, %r14b
+	movl	480(%rsp), %eax                 # 4-byte Reload
+	orb	%r14b, %al
+	movl	488(%rsp), %ecx                 # 4-byte Reload
+	orb	%al, %cl
+	movl	296(%rsp), %eax                 # 4-byte Reload
+	orb	%cl, %al
+	testb	$1, %al
+	jne	.LBB0_234
+# %bb.92:                               # %then_bb66
+	xorl	%eax, %eax
+	cmpl	$73730, 1024(%rsp)              # 4-byte Folded Reload
+                                        # imm = 0x12002
+	setne	%al
+	movq	%rax, 296(%rsp)                 # 8-byte Spill
+	xorl	%eax, %eax
+	cmpl	$1, 1016(%rsp)                  # 4-byte Folded Reload
+	sete	%al
+	movl	%eax, 1308(%rsp)                # 4-byte Spill
+	xorl	%eax, %eax
+	cmpl	$73730, 404(%rsp)               # 4-byte Folded Reload
+                                        # imm = 0x12002
+	sete	%al
+	movl	%eax, 1304(%rsp)                # 4-byte Spill
+	xorl	%eax, %eax
+	cmpl	$2, 1008(%rsp)                  # 4-byte Folded Reload
+	sete	%al
+	movl	%eax, 1300(%rsp)                # 4-byte Spill
+	xorl	%eax, %eax
+	cmpl	$73730, 400(%rsp)               # 4-byte Folded Reload
+                                        # imm = 0x12002
+	sete	%al
+	movl	%eax, 1296(%rsp)                # 4-byte Spill
+	xorl	%eax, %eax
+	cmpl	$1, 1000(%rsp)                  # 4-byte Folded Reload
+	sete	%al
+	movl	%eax, 1276(%rsp)                # 4-byte Spill
+	xorl	%r8d, %r8d
+	cmpl	$73730, 396(%rsp)               # 4-byte Folded Reload
+                                        # imm = 0x12002
+	sete	%r8b
+	xorl	%r9d, %r9d
+	cmpl	$3, 992(%rsp)                   # 4-byte Folded Reload
+	sete	%r9b
+	xorl	%eax, %eax
+	cmpl	$73730, 392(%rsp)               # 4-byte Folded Reload
+                                        # imm = 0x12002
+	sete	%al
+	movl	%eax, 1264(%rsp)                # 4-byte Spill
+	xorl	%eax, %eax
+	cmpl	$1, 984(%rsp)                   # 4-byte Folded Reload
+	sete	%al
+	movl	%eax, 1256(%rsp)                # 4-byte Spill
+	xorl	%eax, %eax
+	cmpl	$73730, 976(%rsp)               # 4-byte Folded Reload
+                                        # imm = 0x12002
+	sete	%al
+	movl	%eax, 1252(%rsp)                # 4-byte Spill
+	xorl	%eax, %eax
+	cmpl	$2, 968(%rsp)                   # 4-byte Folded Reload
+	sete	%al
+	movl	%eax, 1248(%rsp)                # 4-byte Spill
+	xorl	%eax, %eax
+	cmpl	$73730, 960(%rsp)               # 4-byte Folded Reload
+                                        # imm = 0x12002
+	sete	%al
+	movl	%eax, 1292(%rsp)                # 4-byte Spill
+	xorl	%eax, %eax
+	cmpl	$0, 952(%rsp)                   # 4-byte Folded Reload
+	sete	%al
+	movl	%eax, 1268(%rsp)                # 4-byte Spill
+	xorl	%eax, %eax
+	cmpl	$73730, 944(%rsp)               # 4-byte Folded Reload
+                                        # imm = 0x12002
+	sete	%al
+	movl	%eax, 1260(%rsp)                # 4-byte Spill
+	xorl	%ebx, %ebx
+	cmpl	$3, 388(%rsp)                   # 4-byte Folded Reload
+	sete	%bl
+	xorl	%eax, %eax
+	cmpl	$73730, 384(%rsp)               # 4-byte Folded Reload
+                                        # imm = 0x12002
+	sete	%al
+	movl	%eax, 1288(%rsp)                # 4-byte Spill
+	xorl	%eax, %eax
+	cmpl	$1, 380(%rsp)                   # 4-byte Folded Reload
+	sete	%al
+	movl	%eax, 1272(%rsp)                # 4-byte Spill
+	xorl	%eax, %eax
+	cmpl	$73730, 376(%rsp)               # 4-byte Folded Reload
+                                        # imm = 0x12002
+	sete	%al
+	movl	%eax, 1280(%rsp)                # 4-byte Spill
+	xorl	%eax, %eax
+	cmpl	$3, 936(%rsp)                   # 4-byte Folded Reload
+	sete	%al
+	movl	%eax, 1284(%rsp)                # 4-byte Spill
+	xorl	%eax, %eax
+	cmpl	$73730, 928(%rsp)               # 4-byte Folded Reload
+                                        # imm = 0x12002
+	setne	%al
+	shlq	$20, %rax
+	movq	%rax, 480(%rsp)                 # 8-byte Spill
+	xorl	%eax, %eax
+	cmpl	$1, 372(%rsp)                   # 4-byte Folded Reload
+	setne	%al
+	shlq	$21, %rax
+	movq	%rax, 472(%rsp)                 # 8-byte Spill
+	xorl	%esi, %esi
+	cmpl	$73730, 368(%rsp)               # 4-byte Folded Reload
+                                        # imm = 0x12002
+	setne	%sil
+	shlq	$22, %rsi
+	xorl	%eax, %eax
+	cmpl	$2, 364(%rsp)                   # 4-byte Folded Reload
+	setne	%al
+	shlq	$23, %rax
+	movq	%rax, 1632(%rsp)                # 8-byte Spill
+	xorl	%eax, %eax
+	cmpl	$73730, 360(%rsp)               # 4-byte Folded Reload
+                                        # imm = 0x12002
+	setne	%al
+	shlq	$24, %rax
+	movq	%rax, 1624(%rsp)                # 8-byte Spill
+	xorl	%eax, %eax
+	cmpl	$3, 356(%rsp)                   # 4-byte Folded Reload
+	setne	%al
+	shlq	$25, %rax
+	movq	%rax, 1616(%rsp)                # 8-byte Spill
+	xorl	%eax, %eax
+	cmpl	$73730, 352(%rsp)               # 4-byte Folded Reload
+                                        # imm = 0x12002
+	setne	%al
+	shlq	$26, %rax
+	movq	%rax, 1608(%rsp)                # 8-byte Spill
+	xorl	%eax, %eax
+	cmpl	$2, 348(%rsp)                   # 4-byte Folded Reload
+	setne	%al
+	shlq	$27, %rax
+	movq	%rax, 1600(%rsp)                # 8-byte Spill
+	xorl	%eax, %eax
+	cmpl	$73730, 344(%rsp)               # 4-byte Folded Reload
+                                  
