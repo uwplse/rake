@@ -39,4 +39,8 @@
    (x128 (int16_t (bv 256 16))))))
 
 (define spec (synthesis-spec halide-expr axioms))
-(define hvx-expr (synthesize-hvx spec 'hali
+(define hvx-expr (synthesize-hvx spec 'halide-ir 'greedy 'enumerative 'enumerative))
+
+(define out (open-output-file "sexp_0.out" #:exists 'replace))
+(pretty-write (llvm-codegen hvx-expr) out)
+(close-output-port out)

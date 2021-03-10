@@ -19,7 +19,7 @@
   (match p
 
     ;;vread
-    [(vread buf loc)
+    [(vread buf loc align)
      (format "~aVh_load(~a, ~a)" prefix (codegen buf) (codegen loc))
      ]
 
@@ -100,13 +100,13 @@
      ]
     
     ;;vror
-    [(vread Vu Rt)
+    [(vror Vu Rt)
      (format "~aV_vror_VR(~a, ~a)" prefix (codegen Vu) (eval-to-int Rt))
      ]
     
     ;;vrotr
-    [(vread Vu Vv)
-     (format "~aV_vrotr_VR(~a, ~a)" prefix (codegen Vu) (codegen Vv))
+    [(vrotr Vu Rt)
+     (format "~aV_vrotr_VR(~a, ~a)" prefix (codegen Vu) (codegen Rt))
      ]
     
     ;;vdeal

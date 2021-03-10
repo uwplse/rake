@@ -5,6 +5,14 @@
 (require rake/hvx/ast/types)
 (require rake/hvx/interpreter)
 
+(define t_i32 `int32)
+(define t_i16 `int16)
+(define t_i8 `int8)
+(define t_16xi32 `int32x16)
+(define t_32xi32 `int32x32)
+(define t_64xi32 `int32x64)
+(define t_128xi1 `int1x128)
+
 ;;convert integer to 8-bits integer
 (define (int->8bit N)
   (define-values [v1 v2] (quotient/remainder N 16))
@@ -50,31 +58,6 @@
                (int->hex (codegen-scalar v0)))]
       [_ (error "NYI: codegen scalar ~a" Rt)]))))
 
-(define (p-type p)
-  (match (interpret-hvx p)
-    [(int8_t v) (string->sexp "int8")]
-    [(int16_t v) (string->sexp "int16")]
-    [(int32_t v) (string->sexp "int32")]
-    [(int64_t v) (string->sexp "int64")]
-    [(uint8_t v) (string->sexp "uint8")]
-    [(uint16_t v) (string->sexp "uint16")]
-    [(uint32_t v) (string->sexp "uint32")]
-    [(uint64_t v) (string->sexp "uint64")]
-    [(i8x128 data) (string->sexp "int8x128")]
-    [(u8x128 data) (string->sexp "uint8x128")]
-    [(i16x64 data) (string->sexp "int16x64")]
-    [(u16x64 data) (string->sexp "uint16x64")]
-    [(i32x32 data) (string->sexp "int32x32")]
-    [(u32x32 data) (string->sexp "uint32x32")]
-    [(i8x128x2 data-v0 data-v1) (string->sexp "int8x256")]
-    [(u8x128x2 data-v0 data-v1) (string->sexp "uint8x256")]
-    [(i16x64x2 data-v0 data-v1) (string->sexp "int16x128")]
-    [(u16x64x2 data-v0 data-v1) (string->sexp "uint16x128")]
-    [(i32x32x2 data-v0 data-v1) (string->sexp "int32x64")]
-    [(u32x32x2 data-v0 data-v1) (string->sexp "uint32x64")]
-    [number (string->sexp "int32")]
-    [_ (error "No Matching p-type ~a" p)]))
-
 (define (string->sexp s)
   (read (open-input-string (format "~a" s))))
 
@@ -103,9 +86,6 @@
     [(u16x64x2 data-v0 data-v1) (string->sexp "uint16x128")]
     [(i32x32x2 data-v0 data-v1) (string->sexp "int32x64")]
     [(u32x32x2 data-v0 data-v1) (string->sexp "uint32x64")]))
-
-(define (string->sexp s)
-  (read (open-input-string (format "~a" s))))
 
 (define (codegen-idx idx)
   (match idx
