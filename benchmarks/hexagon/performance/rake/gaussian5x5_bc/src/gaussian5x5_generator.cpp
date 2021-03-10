@@ -11,7 +11,9 @@ public:
     GeneratorParam<bool> use_prefetch_sched{"use_prefetch_sched", true};
 
     void generate() {
-        input_16(x, y) = cast<int16_t>(input(x, y));
+        bounded_input(x, y) = BoundaryConditions::repeat_edge(input)(x, y);
+
+        input_16(x, y) = cast<int16_t>(bounded_input(x, y));
 
         rows(x, y) = input_16(x, y-2) + 4*input_16(x, y-1) + 6*input_16(x,y)+ 4*input_16(x,y+1) + input_16(x,y+2);
         cols(x,y) =  rows(x-2, y) + 4*rows(x-1, y) + 6*rows(x, y) + 4*rows(x+1, y) + rows(x+2, y);
@@ -28,25 +30,29 @@ public:
         output.dim(0).set_min(0);
         output.dim(1).set_min(0);
 
-        if (get_target().features_any_of({Target::HVX_128})) {
-            const int vector_size = get_target().has_feature(Target::HVX_128) ? 128 : 64;
+        if (get_target().features_any_of({Target::HVX_64, Target::HVX_128})) {
+            const int vector_size = 128;
             Expr input_stride = input.dim(1).stride();
-            input.dim(1).set_stride((input_stride/vector_size) * vector_size);
+            input.dim(1).set_stride((input_stride / vector_size) * vector_size);
 
             Expr output_stride = output.dim(1).stride();
-            output.dim(1).set_stride((output_stride/vector_size) * vector_size);
+            output.dim(1).set_stride((output_stride / vector_size) * vector_size);
 
             output
                 .hexagon()
-                .tile(x, y, xi, yi, vector_size, 4, TailStrategy::RoundUp)
+                .tile(x, y, xi, yi, vector_size, 8, TailStrategy::RoundUp)
                 .vectorize(xi)
                 .unroll(yi);
             rows.compute_at(Func(output), y)
-                .tile(x, y, x, y, xi, yi, vector_size, 4, TailStrategy::RoundUp)
+                .tile(x, y, x, y, xi, yi, vector_size, 8, TailStrategy::RoundUp)
                 .vectorize(xi)
                 .unroll(yi);
+            bounded_input
+                .compute_at(Func(output), y)
+                .align_storage(x, 128)
+                .vectorize(x, vector_size, TailStrategy::RoundUp);
             
-            output.prefetch(input, y, 2, PrefetchBoundStrategy::NonFaulting);
+            output.prefetch(input, y, 2);
         } else {
             const int vector_size = natural_vector_size<uint8_t>();
             output
