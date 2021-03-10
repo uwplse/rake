@@ -50,7 +50,7 @@ endif
 SHELL = bash
 CXX ?= g++
 PREFIX ?= /usr/local
-LLVM_CONFIG ?= llvm-config
+LLVM_CONFIG ?= llvm-config-10
 LLVM_COMPONENTS= $(shell $(LLVM_CONFIG) --components)
 LLVM_VERSION = $(shell $(LLVM_CONFIG) --version | sed 's/\([0-9][0-9]*\)\.\([0-9]\).*/\1.\2/')
 

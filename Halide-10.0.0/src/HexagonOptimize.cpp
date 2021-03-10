@@ -3212,7 +3212,6 @@ private:
         if (pclose(fp)) {
             printf("Command not found or exited with error status\n");
             exit(0);
-        }
 
         SExpParser p;
         std::ifstream in("sexp.out");
