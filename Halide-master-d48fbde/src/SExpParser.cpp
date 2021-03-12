@@ -182,7 +182,18 @@ Expr SExpParser::parse_intrinsic(Token &tok, string &sexp) {
     close_sexp(sexp);
     if(func_name.find("vread") != std::string::npos){
       Expr index = Ramp::make(params[1], 1, return_type.lanes());
-      return Load::make(return_type, params[0].as<Variable>()->name, index, Buffer<>(), Parameter(), const_true(return_type.lanes()), ModulusRemainder());
+      //debug(0) << params[2] << " " << params[3] << "\n";
+      return Load::make(
+        return_type, 
+        params[0].as<Variable>()->name, 
+        index, 
+        Buffer<>(), 
+        Parameter(), 
+        const_true(return_type.lanes()),
+        (params.size() == 4? 
+          ModulusRemainder(params[2].as<IntImm>()->value, params[3].as<IntImm>()->value) :
+          ModulusRemainder())
+        );
     }
 
     // Not sure about the call type here
@@ -233,7 +244,7 @@ Expr SExpParser::parse(string &sexp, Type expected_type) {
 void sexp_parser_test() {
     SExpParser p;
 
-    string s = "(llvm.hexagon.V6.vread.128B int32x32 (list (int32 buf) (int32 (+ -2 x)) (int32 (aligned 2 4))))";
+    string s = "(llvm.hexagon.V6.vread.128B int32x32 (list (int32 buf) (int32 (+ -2 x))))";
 
     string gaussian3x3 = R"((llvm.hexagon.V6.vasrhubrndsat.128B
     int32x32
