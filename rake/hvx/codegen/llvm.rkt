@@ -1,6 +1,7 @@
 #lang rosette
 
 (require rosette/lib/match)
+(require rake/halide/ir/types)
 (require rake/cpp/types)
 (require rake/hvx/ast/types)
 (require rake/hvx/interpreter)
@@ -52,10 +53,10 @@
                (int->hex (codegen-scalar v0)))]
       [(cons v0 v1)
        (format "0x~a~a~a~a"
-               (int->hex (codegen-scalar v1))
                (int->hex (codegen-scalar v0))
                (int->hex (codegen-scalar v1))
-               (int->hex (codegen-scalar v0)))]
+               (int->hex (codegen-scalar v0))
+               (int->hex (codegen-scalar v1)))]
       [_ (error "NYI: codegen scalar ~a" Rt)]))))
 
 (define (string->sexp s)
@@ -103,8 +104,14 @@
           [_ idx])]
        [(eq? op quotient)
         (format "(/ ~a ~a)" (codegen-idx (list-ref child 0)) (codegen-idx (list-ref child 1)))]
+       [(eq? op -)
+        (match (length child)
+          [1 (format "(~a 0 ~a)" op (codegen-idx (list-ref child 0)))]
+          [2 (format "(~a ~a ~a)" op (codegen-idx (list-ref child 0)) (codegen-idx (list-ref child 1)))])]
        [else
-        (format "(~a ~a ~a)" op (codegen-idx (list-ref child 0)) (codegen-idx (list-ref child 1)))])]
+        (match (length child)
+          [1 (format "(~a ~a)" op (codegen-idx (list-ref child 0)))]
+          [2 (format "(~a ~a ~a)" op (codegen-idx (list-ref child 0)) (codegen-idx (list-ref child 1)))])])]
     [_ idx]))
 
 (define (codegen p)
@@ -113,10 +120,16 @@
 
     ;;vread
     [(vread buf loc align)
-     (generate `vread (p-type p) `(list (,t_i32 ,(codegen buf)) (,t_i32 ,(read (open-input-string (codegen-idx loc))))))]
+     (generate
+        `vread (p-type p)
+        `(list
+          (,t_i32 ,(codegen buf))
+          (,t_i32 ,(string->sexp (codegen-idx loc)))
+          (,t_i32 ,(string->sexp (aligned-mod align)))
+          (,t_i32 ,(string->sexp (aligned-rem align)))))]
 
     [(vreadp buf loc align)
-     (generate `vreadp (p-type p) `(list (,t_i32 ,(codegen buf)) (,t_i32 ,(read (open-input-string (codegen-idx loc))))))]
+     (generate `vreadp (p-type p) `(list (,t_i32 ,(codegen buf)) (,t_i32 ,(string->sexp (codegen-idx loc)))))]
 
     ;;vsplat
     [(vsplat Rt)
@@ -176,9 +189,9 @@
     
     ;;valign
     [(valign Vu Vv Rt)
-     (match (interpret-hvx Rt)
-       [(int32_t _) (generate `valignb (p-type p) `(list ,(input-arg Vu) ,(input-arg Vv) (,(p-type Rt) ,(codegen-scalar Rt))))]
-       [integer (generate `valignbi (p-type p) `(list ,(input-arg Vu) ,(input-arg Vv) (,t_i32 ,Rt)))])]
+     (match (list (interpret-hvx Vu) (interpret-hvx Vv))
+       [(list (i8x128 _) (i8x128 _)) (generate `valignbi (p-type p) `(list ,(input-arg Vu) ,(input-arg Vv) (,t_i32 ,Rt)))]
+       [(list (i16x64 _) (i16x64 _)) (generate `valignbi (p-type p) `(list ,(input-arg Vu) ,(input-arg Vv) (,t_i32 ,(* Rt 2))))])]
 
     ;;vlalign
     [(vlalign Vu Vv Rt)
@@ -211,7 +224,7 @@
     
     ;;vtranspose
     [(vtranspose Vu Vv Rt)
-     (generate `vshuffvdd (p-type p) `(list ,(input-arg Vu) ,(input-arg Vv) (,(p-type Rt) ,Rt)))]
+     (generate `vshuffvdd (p-type p) `(list ,(input-arg Vu) ,(input-arg Vv) (,t_i32 ,(- Rt))))]
     
     ;;vpack
     [(vpack Vu Vv)
@@ -292,10 +305,10 @@
     ;;vmpy
     [(vmpy Vu Rt)
      (match (list (interpret-hvx Vu) (interpret-hvx Rt))
-       [(list (u8x128 _) (int8_t _)) (generate `vmpybus (p-type p) `(list ,(input-arg Vu) (,(p-type Rt) ,(codegen-scalar Rt))))]
-       [(list (u8x128 _) (uint8_t _)) (generate `vmpyub (p-type p) `(list ,(input-arg Vu) (,(p-type Rt) ,(codegen-scalar Rt))))]
-       [(list (u16x64 _) (uint16_t _)) (generate `vmpyuh (p-type p) `(list ,(input-arg Vu) (,(p-type Rt) ,(codegen-scalar Rt))))]
-       [(list (i16x64 _) (int16_t _)) (generate `vmpyh (p-type p) `(list ,(input-arg Vu) (,(p-type Rt) ,(codegen-scalar Rt))))])]
+       [(list (u8x128 _) (int8_t _)) (generate `vmpybus (p-type p) `(list ,(input-arg Vu) (,t_i32 ,(codegen-scalar Rt))))]
+       [(list (u8x128 _) (uint8_t _)) (generate `vmpyub (p-type p) `(list ,(input-arg Vu) (,t_i32 ,(codegen-scalar Rt))))]
+       [(list (u16x64 _) (uint16_t _)) (generate `vmpyuh (p-type p) `(list ,(input-arg Vu) (,t_i32 ,(codegen-scalar Rt))))]
+       [(list (i16x64 _) (int16_t _)) (generate `vmpyh (p-type p) `(list ,(input-arg Vu) (,t_i32 ,(codegen-scalar Rt))))])]
     
     ;;vmpyi
     [(vmpyi Vu Rt)
@@ -312,13 +325,13 @@
     [(vmpy-acc Vdd Vu Rt)
      (match (list (interpret-hvx Vdd) (interpret-hvx Vu) (interpret-hvx Rt))
        [(list (i16x64x2 _ _) (u8x128 _) (int8_t _))
-        (generate `vmpybus.acc (p-type p) `(list ,(input-arg Vdd) ,(input-arg Vu) (,(p-type Rt) ,(codegen-scalar Rt))))]
+        (generate `vmpybus.acc (p-type p) `(list ,(input-arg Vdd) ,(input-arg Vu) (,t_i32 ,(codegen-scalar (list Rt Rt Rt Rt)))))]
        [(list (u16x64x2 _ _) (u8x128 _) (uint8_t _))
-        (generate `vmpyub.acc (p-type p) `(list ,(input-arg Vdd) ,(input-arg Vu) (,(p-type Rt) ,(codegen-scalar Rt))))]
+        (generate `vmpyub.acc (p-type p) `(list ,(input-arg Vdd) ,(input-arg Vu) (,t_i32 ,(codegen-scalar Rt))))]
        [(list (u32x32x2 _ _) (u16x64 _) (uint16_t _))
-        (generate `vmpyuh.acc (p-type p) `(list ,(input-arg Vdd) ,(input-arg Vu) (,(p-type Rt) ,(codegen-scalar Rt))))]
+        (generate `vmpyuh.acc (p-type p) `(list ,(input-arg Vdd) ,(input-arg Vu) (,t_i32 ,(codegen-scalar Rt))))]
        [(list (i32x32x2 _ _) (i16x64 _) (int16_t _))
-        (generate `vmpyh.acc (p-type p) `(list ,(input-arg Vdd) ,(input-arg Vu) (,(p-type Rt) ,(codegen-scalar Rt))))]
+        (generate `vmpyh.acc (p-type p) `(list ,(input-arg Vdd) ,(input-arg Vu) (,t_i32 ,(codegen-scalar Rt))))]
        ;; todo:
        ; Vxx.w+=vmpy(Vu.h,Rt.h):sat ;;do not have a sat field
      )]
@@ -327,7 +340,7 @@
     [(vmpyi-acc Vd Vu Rt)
      (match (list (interpret-hvx Vu) (interpret-hvx Rt))
        [(list (i32x32 _) (int16_t _)) (generate `vmpyiwh.acc (p-type p) `(list ,(input-arg Vd) ,(input-arg Vu) (,(p-type Rt) ,(codegen-scalar Rt))))]
-       [(list (i16x64 _) (int8_t _)) (generate `vmpyihb.acc (p-type p) `(list ,(input-arg Vd) ,(input-arg Vu) (,(p-type Rt) ,(codegen-scalar Rt))))]
+       [(list (i16x64 _) (int8_t _)) (generate `vmpyihb.acc (p-type p) `(list ,(input-arg Vd) ,(input-arg Vu) (,t_i32 ,(codegen-scalar (list Rt Rt Rt Rt)))))]
        [(list (i32x32 _) (int8_t _)) (generate `vmpyiwb.acc (p-type p) `(list ,(input-arg Vd) ,(input-arg Vu) (,(p-type Rt) ,(codegen-scalar Rt))))]
        [(list (i32x32 _) (uint8_t _)) (generate `vmpyiwub.acc (p-type p) `(list ,(input-arg Vd) ,(input-arg Vu) (,(p-type Rt) ,(codegen-scalar Rt))))])]
  
@@ -338,27 +351,27 @@
     [(vmpa Vuu Rt)
      (match (list (interpret-hvx Vuu) (interpret-hvx Rt))
        [(list (u8x128x2 _ _) (cons (int8_t _) (int8_t _)))
-        (generate `vmpabus (p-type p) `(list ,(input-arg Vuu) (int8 ,(codegen-scalar Rt))))]
+        (generate `vmpabus (p-type p) `(list ,(input-arg Vuu) (,t_i32 ,(codegen-scalar Rt))))]
        [(list (u8x128x2 _ _) (cons (uint8_t _) (uint8_t _)))
-        (generate `vmpabuu (p-type p) `(list ,(input-arg Vuu) (uint8 ,(codegen-scalar Rt))))]
+        (generate `vmpabuu (p-type p) `(list ,(input-arg Vuu) (,t_i32 ,(codegen-scalar Rt))))]
        [(list (u16x64x2 _ _) (cons (int8_t _) (int8_t _)))
-        (generate `vmpauhb (p-type p) `(list ,(input-arg Vuu) (int8 ,(codegen-scalar Rt))))]
+        (generate `vmpauhb (p-type p) `(list ,(input-arg Vuu) (,t_i32 ,(codegen-scalar Rt))))]
        [(list (i16x64x2 _ _) (cons (int8_t _) (int8_t _)))
-        (generate `vmpahb (p-type p) `(list ,(input-arg Vuu) (int8 ,(codegen-scalar Rt))))])]
+        (generate `vmpahb (p-type p) `(list ,(input-arg Vuu) (,t_i32 ,(codegen-scalar Rt))))])]
     
     ;;vmpa-acc
     [(vmpa-acc Vdd Vuu Rt)
      (match (list (interpret-hvx Vdd) (interpret-hvx Vuu) (interpret-hvx Rt))
        [(list (i16x64x2 _ _) (u8x128x2 _ _) (cons (int8_t w1) (int8_t w2)))
-        (generate `vmpabus.acc (p-type p) `(list ,(input-arg Vdd) ,(input-arg Vuu) (int8 ,(codegen-scalar Rt))))]
+        (generate `vmpabus.acc (p-type p) `(list ,(input-arg Vdd) ,(input-arg Vuu) (,t_i32 ,(codegen-scalar Rt))))]
        [(list (i16x64x2 _ _) (u8x128x2 _ _) (cons (uint8_t w1) (uint8_t w2)))
-        (generate `vmpabuu.acc (p-type p) `(list ,(input-arg Vdd) ,(input-arg Vuu) (uint8 ,(codegen-scalar Rt))))]
+        (generate `vmpabuu.acc (p-type p) `(list ,(input-arg Vdd) ,(input-arg Vuu) (,t_i32 ,(codegen-scalar Rt))))]
        [(list (i32x32x2 _ _) (u16x64x2 _ _) (cons (int8_t w1) (int8_t w2)))
-        (generate `vmpauhb.acc (p-type p) `(list ,(input-arg Vdd) ,(input-arg Vuu) (int8 ,(codegen-scalar Rt))))]
+        (generate `vmpauhb.acc (p-type p) `(list ,(input-arg Vdd) ,(input-arg Vuu) (,t_i32 ,(codegen-scalar Rt))))]
        [(list (i32x32x2 _ _) (i16x64x2 _ _) (cons (int8_t w1) (int8_t w2)))
-        (generate `vmpahb.acc (p-type p) `(list ,(input-arg Vdd) ,(input-arg Vuu) (int8 ,(codegen-scalar Rt))))]
+        (generate `vmpahb.acc (p-type p) `(list ,(input-arg Vdd) ,(input-arg Vuu) (,t_i32 ,(codegen-scalar Rt))))]
        [(list (i32x32x2 _ _) (i16x64x2 _ _) (cons (uint8_t w1) (uint8_t w2)))
-        (generate `vmpahb.acc (p-type p) `(list ,(input-arg Vdd) ,(input-arg Vuu) (uint8 ,(codegen-scalar Rt))))])]
+        (generate `vmpahb.acc (p-type p) `(list ,(input-arg Vdd) ,(input-arg Vuu) (,t_i32 ,(codegen-scalar Rt))))])]
     
     ;;vdmpy
     [(vdmpy Vu Rt)
