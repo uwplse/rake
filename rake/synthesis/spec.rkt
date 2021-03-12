@@ -4,5 +4,6 @@
 
 (struct ir-expr-spec (expr ctx axioms buff-reads live-ops add-consts sub-consts mul-consts div-consts))
 (struct hvx-expr-spec (expr sol ctx axioms invalid-sketches))
+(struct arm-expr-spec (expr sol ctx axioms invalid-sketches))
 
 (provide (all-defined-out))

@@ -114,9 +114,9 @@
          (set-curr-cn-ir (+ i 1))
          (set-curr-cn-hvx (+ i 1))
          (assert (eq? (evaluate (elem-ir oe (+ i 1)) ir-expr-sol) (v1-elem-hvx se i)))
-         ;(set-curr-cn-ir (+ i 2))
-         ;(set-curr-cn-hvx (+ i 2))
-         ;(assert (eq? (evaluate (elem-ir oe (+ i 2)) ir-expr-sol) (v1-elem-hvx se (+ i 2))))
+         (set-curr-cn-ir (+ i 2))
+         (set-curr-cn-hvx (+ i 2))
+         (assert (eq? (evaluate (elem-ir oe (+ i 2)) ir-expr-sol) (v0-elem-hvx se (+ i 1))))
          ]
         [else
          (set-curr-cn-ir i)
@@ -148,7 +148,6 @@
                                                      (bounded-eq? original-expr synthesized-expr MC_BND)
                                                      (for ([discarded-sol discarded-sols])
                                                        (assert (not (equal-expr-hvx? discarded-sol candidate-expr)))))))
-               ;(hash-set! cache candidate-expr sol)
                (define runtime (- (current-milliseconds) st))
                (display (format "Synthesis time: ~ams\n" runtime))
                (set! total-synth-time (+ total-synth-time runtime))
@@ -224,23 +223,6 @@
   (define ir-expr-axioms (hvx-expr-spec-axioms spec))
 
   (define synthesized-hvx-expr (??hvx-expr-grm))
-
-;  (println synthesized-hvx-expr)
-;  (println discarded-sols)
-;
-;  (set-curr-cn-ir 0)
-;  (set-curr-cn-hvx 0)
-;
-;  (println (evaluate (elem-ir (interpret-ir ir-expr) 0) ir-expr-sol))
-;  (println (elem-hvx (interpret-hvx synthesized-hvx-expr) 0))
-;
-;  (set-curr-cn-ir 1)
-;  (set-curr-cn-hvx 1)
-;
-;  (println (evaluate (elem-ir (interpret-ir ir-expr) 1) ir-expr-sol))
-;  (println (elem-hvx (interpret-hvx synthesized-hvx-expr) 1))
-;
-;  (exit)
   
   (define (bounded-eq? oe se lanes)
     (for ([i lanes])

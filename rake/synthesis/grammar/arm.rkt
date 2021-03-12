@@ -146,7 +146,7 @@
     [(vrmpy-p-acc Vdd Vuu Rt u1) (+ (max-unique-inputs Vdd) (* 4 (max-unique-inputs Vuu)))]
     [(gather* buff-opts) 1]))
 
-(define (enumerate-hvx-exprs ir-expr hvx-sub-expr)
+(define (enumerate-arm-exprs ir-expr hvx-sub-expr)
   (define-values (isa weights)
     (match ir-expr
       [(convolve data kernel saturateFunc outputType)
@@ -498,4 +498,4 @@
      (vpacko-n t0 t1 signed?)))
   ??hvx-hi-instr)
 
-(provide hvx-instr-limit-exceeded? hvx-instr-bnd generate-hvx-grammar increment-hvx-instr-bnd reset-hvx-instr-bnd enumerate-hvx-exprs)
+(provide hvx-instr-limit-exceeded? hvx-instr-bnd generate-hvx-grammar increment-hvx-instr-bnd reset-hvx-instr-bnd enumerate-arm-exprs)
