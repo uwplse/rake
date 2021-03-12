@@ -34,7 +34,7 @@
     [(vread buf loc align) ((get-vec-type buf) (lambda (i) (get buf (+ loc i))))]
     [(vreadp buf loc align) ((get-vecp-type buf) (lambda (i) (get buf (+ loc i))) (lambda (i) (get buf (+ loc i (get-offset buf)))))]
 
-    ;[(vsplat Rt) (lambda (i) Rt)]
+    [(vsplat Rt) (i8x128 (lambda (i) Rt))]
 
     ;;;;;;;;;;;;;;;; Instructions for data movement ;;;;;;;;;;;;;;;;
     
@@ -611,7 +611,7 @@
        [(list (u32x32 v0) (u32x32 v1) #f) (u16x64 (lambda (i) (if (< i 32) (u16hi (v1 i)) (u16hi (v0 (- i 32))))))])]
 
     [(vsxt Vu signed?)
-     (let ([sxt16 (lambda (val) (zero-extend (eval val) (bitvector 16)))] [sxt32 (lambda (val) (zero-extend (eval val) (bitvector 32)))])
+     (let ([sxt16 (lambda (val) (sign-extend (eval val) (bitvector 16)))] [sxt32 (lambda (val) (zero-extend (eval val) (bitvector 32)))])
        (match (list (interpret Vu) (interpret signed?))
          [(list (u8x128 v0) #t) (i16x64x2 (lambda (i) (int16_t (sxt16 (v0 (* i 2))))) (lambda (i) (int16_t (sxt16 (v0 (+ (* i 2) 1))))))]
          [(list (i8x128 v0) #t) (i16x64x2 (lambda (i) (int16_t (sxt16 (v0 (* i 2))))) (lambda (i) (int16_t (sxt16 (v0 (+ (* i 2) 1))))))]
@@ -624,7 +624,7 @@
          [(list (i16x64 v0) #f) (u32x32x2 (lambda (i) (uint32_t (sxt32 (v0 (* i 2))))) (lambda (i) (uint32_t (sxt32 (v0 (+ (* i 2) 1))))))]))]
 
     [(vzxt Vu signed?)
-     (let ([sxt16 (lambda (val) (sign-extend (eval val) (bitvector 16)))] [sxt32 (lambda (val) (sign-extend (eval val) (bitvector 32)))])
+     (let ([sxt16 (lambda (val) (zero-extend (eval val) (bitvector 16)))] [sxt32 (lambda (val) (sign-extend (eval val) (bitvector 32)))])
        (match (list (interpret Vu) (interpret signed?))
          [(list (u8x128 v0) #t) (i16x64x2 (lambda (i) (int16_t (sxt16 (v0 (* i 2))))) (lambda (i) (int16_t (sxt16 (v0 (+ (* i 2) 1))))))]
          [(list (i8x128 v0) #t) (i16x64x2 (lambda (i) (int16_t (sxt16 (v0 (* i 2))))) (lambda (i) (int16_t (sxt16 (v0 (+ (* i 2) 1))))))]
