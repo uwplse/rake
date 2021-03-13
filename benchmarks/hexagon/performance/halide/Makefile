@@ -1,9 +1,9 @@
-HALIDE_DIR ?= /media/maaz/Data/Software/Halide-d48fbde/distrib
+HALIDE_DIR ?= ../../../../../../Software/Halide-d48fbde/distrib
 
-HEXAGON_SIM ?= /home/maaz/Software/Hexagon_SDK/3.5.2/tools/HEXAGON_Tools/8.3.07/Tools/bin/hexagon-sim
-HEXAGON_CLANG ?= /home/maaz/Software/Hexagon_SDK/3.5.2/tools/HEXAGON_Tools/8.3.07/Tools/bin/hexagon-clang++
+HEXAGON_SIM ?= /home/maaz/Qualcomm/Hexagon_SDK/3.5.2/tools/HEXAGON_Tools/8.3.07/Tools/bin/hexagon-sim
+HEXAGON_CLANG ?= /home/maaz/Qualcomm/Hexagon_SDK/3.5.2/tools/HEXAGON_Tools/8.3.07/Tools/bin/hexagon-clang++
 
-benchmarks = simple gaussian3x3 gaussian5x5 gaussian5x5_bc gaussian7x7 conv3x3a16 conv3x3a32 sobel3x3 blur3x3 dilate3x3 median3x3
+benchmarks = vmpabuu simple gaussian3x3 gaussian5x5 gaussian5x5_bc gaussian7x7 conv3x3a16 conv3x3a32 sobel3x3 blur3x3 dilate3x3 median3x3
 
 bin_dirs = $(addsuffix /bin,$(benchmarks))
 out_dirs = $(addsuffix /out,$(benchmarks))

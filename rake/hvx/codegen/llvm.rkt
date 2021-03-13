@@ -247,7 +247,8 @@
     
     ;;vtranspose
     [(vtranspose Vu Vv Rt)
-     (generate `vshuffvdd (p-type p) `(list ,(input-arg Vu) ,(input-arg Vv) (,t_i32 ,(- Rt))))]
+     (match (list (interpret-hvx Vu) (interpret-hvx Vu))
+       [(list (i16x64 _) (i16x64 _)) (generate `vshuffvdd (p-type p) `(list ,(input-arg Vu) ,(input-arg Vv) (,t_i32 ,(- (* 2 Rt)))))])]
     
     ;;vpack
     [(vpack Vu Vv)

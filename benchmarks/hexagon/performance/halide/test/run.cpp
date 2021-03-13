@@ -8,7 +8,9 @@
 
 #include "HalideBuffer.h"
 
-#if simple
+#if vmpabuu
+  #include "vmpabuu_hvx128.h"
+#elif simple
   #include "simple_hvx128.h"
 #elif gaussian3x3
   #include "gaussian3x3_hvx128.h"
@@ -133,14 +135,39 @@ int main(int argc, char **argv) {
 
   //Halide::Runtime::Buffer<int8_t> mask_buf(mask, dims, mask_shape);
 
-  #if simple
-  
-  halide_dimension_t x_dim{0, width/2, 1};
-  halide_dimension_t y_dim{0, height/2, width/2};
-  halide_dimension_t shape[2] = {x_dim, y_dim};
+  #if vmpabuu
+    halide_dimension_t x_dim{0, width, 1};
+    halide_dimension_t y_dim{0, height, width};
+    halide_dimension_t shape[2] = {x_dim, y_dim};
 
-  Halide::Runtime::Buffer<int16_t> input_buf((short*)input, dims, shape);
-  Halide::Runtime::Buffer<int16_t> output_buf((short*)output, dims, shape);
+    Halide::Runtime::Buffer<uint8_t> input_buf(input, dims, shape);
+    Halide::Runtime::Buffer<int16_t> output_buf((short*)output, dims, shape);
+
+    // Run in 128 byte mode
+    SIM_ACQUIRE_HVX;
+    SIM_SET_HVX_DOUBLE_MODE;
+    cycles = benchmark([&]() {
+        int error = vmpabuu_hvx128(input_buf, output_buf);
+        if (error != 0) {
+          printf("gaussian5x5_hvx128 pipeline failed: %d\n", error);
+        }
+      });
+    SIM_RELEASE_HVX;
+
+    for (int x=0; x<10; x++)
+      for (int y=0; y<10; y++)
+        printf("(x: %d, y: %d) ==> input-val: %d   output-val: %d\n", x, y, input_buf(x, y), output_buf(x, y));
+
+    printf("AppReported (HVX128B-mode): Image %dx%d - simple(128B): %lld cycles (%0.4f cycles/pixel)\n", (int)width, (int)height, cycles, (float)cycles/(width*height));
+  #endif
+  
+  #if simple
+    halide_dimension_t x_dim{0, width/2, 1};
+    halide_dimension_t y_dim{0, height/2, width/2};
+    halide_dimension_t shape[2] = {x_dim, y_dim};
+
+    Halide::Runtime::Buffer<int16_t> input_buf((short*)input, dims, shape);
+    Halide::Runtime::Buffer<int16_t> output_buf((short*)output, dims, shape);
 
     // Run in 128 byte mode
     SIM_ACQUIRE_HVX;
