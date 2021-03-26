@@ -26,22 +26,28 @@
       (equal-expr? (vadd-w-acc-Vv expr1) (vadd-w-acc-Vv expr2)))]
 
     [(and (vmpy? expr1) (vmpy? expr2))
-     (and (equal-expr? (vmpy-Vu expr1) (vmpy-Vu expr2)) (equal-expr? (vmpy-Rt expr1) (vmpy-Rt expr2)))]
+     (and
+      (equal-expr? (vmpy-Vu expr1) (vmpy-Vu expr2))
+      ;(equal-expr? (vmpy-Rt expr1) (vmpy-Rt expr2))
+      )]
     [(and (vmpy-acc? expr1) (vmpy-acc? expr2))
      (and
       (equal-expr? (vmpy-acc-Vdd expr1) (vmpy-acc-Vdd expr2))
       (equal-expr? (vmpy-acc-Vu expr1) (vmpy-acc-Vu expr2))
-      (equal-expr? (vmpy-acc-Rt expr1) (vmpy-acc-Rt expr2)))]
+      ;(equal-expr? (vmpy-acc-Rt expr1) (vmpy-acc-Rt expr2))
+      )]
 
     [(and (vmpa? expr1) (vmpa? expr2))
      (and
       (equal-expr? (vmpa-Vuu expr1) (vmpa-Vuu expr2))
-      (equal-expr? (vmpa-Rt expr1) (vmpa-Rt expr2)))]
+      ;(equal-expr? (vmpa-Rt expr1) (vmpa-Rt expr2))
+      )]
     [(and (vmpa-acc? expr1) (vmpa-acc? expr2))
      (and
       (equal-expr? (vmpa-acc-Vdd expr1) (vmpa-acc-Vdd expr2))
       (equal-expr? (vmpa-acc-Vuu expr1) (vmpa-acc-Vuu expr2))
-      (equal-expr? (vmpa-acc-Rt expr1) (vmpa-acc-Rt expr2)))]
+      ;(equal-expr? (vmpa-acc-Rt expr1) (vmpa-acc-Rt expr2))
+      )]
 
     [(and (vdmpy? expr1) (vdmpy? expr2))
      (and
@@ -75,12 +81,14 @@
     [(and (vrmpy? expr1) (vrmpy? expr2))
      (and
       (equal-expr? (vrmpy-Vu expr1) (vrmpy-Vu expr2))
-      (equal-expr? (vrmpy-Rt expr1) (vrmpy-Rt expr2)))]
+      ;(equal-expr? (vrmpy-Rt expr1) (vrmpy-Rt expr2))
+      )]
     [(and (vrmpy-acc? expr1) (vrmpy-acc? expr2))
      (and
       (equal-expr? (vrmpy-acc-Vd expr1) (vrmpy-acc-Vd expr2))
       (equal-expr? (vrmpy-acc-Vu expr1) (vrmpy-acc-Vu expr2))
-      (equal-expr? (vrmpy-acc-Rt expr1) (vrmpy-acc-Rt expr2)))]
+      ;(equal-expr? (vrmpy-acc-Rt expr1) (vrmpy-acc-Rt expr2))
+      )]
 
     [(and (vrmpy-p? expr1) (vrmpy-p? expr2))
      (and
@@ -103,24 +111,28 @@
     [(and (vmpyi? expr1) (vmpyi? expr2))
      (and
       (equal-expr? (vmpyi-Vu expr1) (vmpyi-Vu expr2))
-      (equal-expr? (vmpyi-Rt expr1) (vmpyi-Rt expr2)))]
+      ;(equal-expr? (vmpyi-Rt expr1) (vmpyi-Rt expr2))
+      )]
 
     [(and (vmpyi-acc? expr1) (vmpyi-acc? expr2))
      (and
       (equal-expr? (vmpyi-acc-Vd expr1) (vmpyi-acc-Vd expr2))
       (equal-expr? (vmpyi-acc-Vu expr1) (vmpyi-acc-Vu expr2))
-      (equal-expr? (vmpyi-acc-Rt expr1) (vmpyi-acc-Rt expr2)))]
+      ;(equal-expr? (vmpyi-acc-Rt expr1) (vmpyi-acc-Rt expr2))
+      )]
 
     [(and (vmpye? expr1) (vmpye? expr2))
      (and
       (equal-expr? (vmpye-Vu expr1) (vmpye-Vu expr2))
-      (equal-expr? (vmpye-Rt expr1) (vmpye-Rt expr2)))]
+      ;(equal-expr? (vmpye-Rt expr1) (vmpye-Rt expr2))
+      )]
 
     [(and (vmpye-acc? expr1) (vmpye-acc? expr2))
      (and
       (equal-expr? (vmpye-acc-Vd expr1) (vmpye-acc-Vd expr2))
       (equal-expr? (vmpye-acc-Vu expr1) (vmpye-acc-Vu expr2))
-      (equal-expr? (vmpye-acc-Rt expr1) (vmpye-acc-Rt expr2)))]
+      ;(equal-expr? (vmpye-acc-Rt expr1) (vmpye-acc-Rt expr2))
+     )]
     
     [(and (vasl? expr1) (vasl? expr2))
      (and
@@ -155,6 +167,10 @@
      (and
       (equal-expr? (vcombine-Vu expr1) (vcombine-Vu expr2))
       (equal-expr? (vcombine-Vv expr1) (vcombine-Vv expr2)))]
+    [(and (vshuffoe? expr1) (vshuffoe? expr2))
+     (and
+      (equal-expr? (vshuffoe-Vu expr1) (vshuffoe-Vu expr2))
+      (equal-expr? (vshuffoe-Vv expr1) (vshuffoe-Vv expr2)))]
     [(and (vshuff? expr1) (vshuff? expr2))
      (equal-expr? (vshuff-Vu expr1) (vshuff-Vu expr2))]
     

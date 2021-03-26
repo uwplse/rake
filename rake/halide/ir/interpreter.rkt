@@ -57,6 +57,10 @@
     [(vec-min v1 v2) (lambda (i) (do-min ((interpret v1) i) ((interpret v2) i)))]
     [(vec-max v1 v2) (lambda (i) (do-max ((interpret v1) i) ((interpret v2) i)))]
 
+    [(shift_left v1 v2) (lambda (i) (do-shl ((interpret v1) i) ((interpret v2) i)))]
+    [(shift_right v1 v2) (lambda (i) (do-shr ((interpret v1) i) ((interpret v2) i)))]
+    [(absd v1 v2) (lambda (i) (do-absd ((interpret v1) i) ((interpret v2) i)))]
+
     ;; Shuffles
     [(slice_vectors vec base stride len) (lambda (i) ((interpret vec) (+ (interpret base) (* i (interpret stride)))))]
     [(concat_vectors v1 v2) (lambda (i) (if (< i (num-elems-hal v1)) ((interpret v1) i) ((interpret v2) (- i (num-elems-hal v1)))))]
@@ -121,9 +125,16 @@
       (min lhs rhs)
       (begin
         (define outT (infer-out-type lhs rhs))
-        (if (signedT? outT)
-            (mk-typed-expr (bvsmin (eval lhs) (eval rhs)) outT)
-            (mk-typed-expr (bvumin (eval lhs) (eval rhs)) outT)))))
+        (cond
+          [(signedT? outT)
+           (define minF (match (bw outT) [8 min8] [16 min16] [32 min32]))
+           (mk-typed-expr (minF (eval lhs) (eval rhs)) outT)]
+          [else
+           (define minF (match (bw outT) [8 minu8] [16 minu16] [32 minu32]))
+           (mk-typed-expr (minF (eval lhs) (eval rhs)) outT)]
+            ;(mk-typed-expr (bvsmin (eval lhs) (eval rhs)) outT)
+            ;(mk-typed-expr (bvumin (eval lhs) (eval rhs)) outT)
+           ))))
 
 (define (do-max lhs rhs)
   (if (and (integer? lhs) (integer? rhs))
@@ -133,5 +144,46 @@
         (if (signedT? outT)
             (mk-typed-expr (bvsmax (eval lhs) (eval rhs)) outT)
             (mk-typed-expr (bvumax (eval lhs) (eval rhs)) outT)))))
+
+(define (do-shr lhs rhs)
+  (define outT (infer-out-type lhs rhs))
+  (if (signedT? outT)
+      (mk-typed-expr (bvashr (eval lhs) (eval rhs)) outT)
+      (mk-typed-expr (bvlshr (eval lhs) (eval rhs)) outT)))
+
+(define (do-shl lhs rhs)
+  (define outT (infer-out-type lhs rhs))
+  (mk-typed-expr (bvshl (eval lhs) (eval rhs)) outT))
+
+(define (do-absd lhs rhs)
+  (define outT (infer-out-type lhs rhs))
+  (define absF (match (bw lhs) [8 abs8] [16 abs16] [32 abs32]))
+  (cond
+    [(signedT? outT)
+     ;(define n (bvsub (eval lhs) (eval rhs)))
+     ;(define mask (match (bw lhs)
+      ;              [8 (bvashr n (bv 7 8))]
+       ;             [16 (bvashr n (bv 15 16))]
+        ;            [32 (bvashr n (bv 31 32))]))
+     ;(mk-typed-expr (bvxor mask (bvadd n mask)) outT)
+     ;(mk-typed-expr (if (bvsge (eval lhs) (eval rhs)) (bvsub (eval lhs) (eval rhs)) (bvsub (eval rhs) (eval lhs))) outT)
+     (mk-typed-expr (absF (bvsub (eval lhs) (eval rhs))) outT)]
+    [else
+     (mk-typed-expr (absF (bvsub (eval lhs) (eval rhs))) outT)
+     ;(mk-typed-expr (if (bvuge (eval lhs) (eval rhs)) (bvsub (eval lhs) (eval rhs)) (bvsub (eval rhs) (eval lhs))) outT)
+;     (match (bw lhs)
+;       [8
+;        (define n (bvsub (zero-extend (eval lhs) (bitvector 9)) (zero-extend (eval rhs) (bitvector 9))))
+;        (define mask (bvashr n (bv 8 9)))
+;        (mk-typed-expr (extract 7 0 (bvxor mask (bvadd n mask))) outT)]
+;       [16
+;        (define n (bvsub (zero-extend (eval lhs) (bitvector 17)) (zero-extend (eval rhs) (bitvector 17))))
+;        (define mask (bvashr n (bv 16 17)))
+;        (mk-typed-expr (extract 15 0 (bvxor mask (bvadd n mask))) outT)]
+;       [8
+;        (define n (bvsub (zero-extend (eval lhs) (bitvector 33)) (zero-extend (eval rhs) (bitvector 33))))
+;        (define mask (bvashr n (bv 32 33)))
+;        (mk-typed-expr (extract 31 0 (bvxor mask (bvadd n mask))) outT)])
+     ]))
 
 (provide (rename-out [interpret interpret-halide]))

@@ -74,7 +74,7 @@
          (reset-hvx-instr-bnd)
          (synthesize-equiv-hvx spec sub-expr hvx-sub-expr discarded-sols))]
 
-      [(load-data opts)
+      [(load-data id opts)
        (begin
          (display "Lifting IR to HVX...\n")
          (display "====================\n\n")
@@ -139,8 +139,8 @@
 
   (define curr-best-cost (if (void? curr-best-sol) +inf.0 (cost-model curr-best-sol)))
 
-  (clear-asserts!)
-  (for ([axiom ir-expr-axioms]) (assert axiom))
+  (clear-vc!)
+  (for ([axiom ir-expr-axioms]) (assume axiom))
   (define st (current-seconds))
   (define sol (synthesize #:forall ir-expr-ctx
                           #:guarantee (begin

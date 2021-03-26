@@ -5,8 +5,7 @@
 
 (require rosette/lib/match)
 
-(struct hvx-resources (load store mpy1 mpy2 shift xlane) #:transparent)
-;(struct core-slot-usage (load store mpy mpy shift xlane) #:transparent)
+(struct hvx-resource-usage (load shift permute mpy1 mpy2) #:transparent)
 
 ;; Computes a crude estimate of the cost by summing the cost of each individual
 ;; instruction in the expression. The cost of each instruction is specified using
@@ -67,14 +66,14 @@
     [(vmpy-acc Vdd Vu Rt) 1]
     [(vmpyi-acc Vd Vu Rt) 1]
     [(vmpye-acc Vd Vu Rt) 1]
-    [(vmpa Vuu Rt) 1]
-    [(vmpa-acc Vdd Vuu Rt) 1]
+    [(vmpa Vuu Rt signed?) 1]
+    [(vmpa-acc Vdd Vuu Rt signed?) 1]
     [(vdmpy Vu Rt) 1]
     [(vdmpy-sw Vuu Rt) 1]
     [(vdmpy-acc Vd Vu Rt) 1]
     [(vdmpy-sw-acc Vdd Vuu Rt) 1]
-    [(vtmpy Vuu Rt) 1]
-    [(vtmpy-acc Vdd Vuu Rt) 1]
+    [(vtmpy Vuu Rt signed?) 1]
+    [(vtmpy-acc Vdd Vuu Rt signed?) 1]
     [(vrmpy Vu Rt) 1]
     [(vrmpy-acc Vd Vu Rt) 1]
     [(vrmpy-p Vuu Rt u1) 1]
@@ -99,6 +98,46 @@
     [(??vreadp buf-opts idxs) 1]
     
     [_ 0]))
+
+(define (2pmy-instr? p)
+  (match p
+    [(vadd-w Vu Vv) 1]
+    [(vadd-w-acc Vdd Vu Vv) 1]
+    [(vmpy Vu Rt) 1]
+    [(vmpy-acc Vdd Vu Rt) 1]
+    [(vmpa Vuu Rt signed?) 1]
+    [(vmpa-acc Vdd Vuu Rt signed?) 1]
+    [(vdmpy Vu Rt) 1]
+    [(vdmpy-sw Vuu Rt) 1]
+    [(vdmpy-acc Vd Vu Rt) 1]
+    [(vdmpy-sw-acc Vdd Vuu Rt) 1]
+    [(vtmpy Vuu Rt signed?) 1]
+    [(vtmpy-acc Vdd Vuu Rt signed?) 1]
+    [(vrmpy Vu Rt) 1]
+    [(vrmpy-acc Vd Vu Rt) 1]
+    [(vrmpy-p Vuu Rt u1) 1]
+    [(vrmpy-p-acc Vdd Vuu Rt u1) 1]
+    [_ 0]))
+
+(define (vecR-instr? p)
+  (match p
+    [(vdmpy Vu Rt) 1]
+    [(vdmpy-sw Vuu Rt) 1]
+    [(vdmpy-acc Vd Vu Rt) 1]
+    [(vdmpy-sw-acc Vdd Vuu Rt) 1]
+    [(vtmpy Vuu Rt signed?) 1]
+    [(vtmpy-acc Vdd Vuu Rt signed?) 1]
+    [(vrmpy Vu Rt) 1]
+    [(vrmpy-acc Vd Vu Rt) 1]
+    [(vrmpy-p Vuu Rt u1) 1]
+    [(vrmpy-p-acc Vdd Vuu Rt u1) 1]
+    [_ 0]))
+
+(define (count-vecR-instrs p)
+  (basic-expr-cost p vecR-instr?))
+
+(define (count-2mpy-instrs p)
+  (basic-expr-cost p 2pmy-instr?))
    
 ;;; This is the most crude cost-model.
 ;(define (num-instrs-lb p)
@@ -120,4 +159,4 @@
 ;    [(vmpa-acc Vdd Vuu Rt) (+ 1 (num-instrs-lb Vdd) (num-instrs-lb Vuu))]
 ;    [(vdmpy Vu Rt) 
      
-(provide basic-expr-cost)
+(provide basic-expr-cost count-vecR-instrs count-2mpy-instrs)

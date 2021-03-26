@@ -33,8 +33,8 @@
          (set-curr-cn-hvx lane)
          (assert (eq? (oe lane) (elem-hvx se lane)))])))
   
-  (clear-asserts!)
-  (for ([axiom axioms]) (assert axiom))
+  (clear-vc!)
+  (for ([axiom axioms]) (assume axiom))
   (define st (current-seconds))
   (define sol (synthesize #:forall ctx
                           #:guarantee (equiv-output? interpreted-o-expr interpreted-s-expr)))
@@ -52,8 +52,8 @@
        (assert (eq? (oe lane) (elem-hvx se lane)))]))
   
   (define sols (list))
-  (clear-asserts!)
-  (for ([axiom axioms]) (assert axiom))
+  (clear-vc!)
+  (for ([axiom axioms]) (assume axiom))
   (set! st (current-seconds))
   (for ([lane VEC_LANES])
     (set-curr-cn-hvx lane)

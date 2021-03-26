@@ -64,20 +64,22 @@
 (struct vadd (Vu Vv sat?) #:transparent)
 (struct vadd-w (Vu Vv) #:transparent)
 (struct vadd-w-acc (Vdd Vu Vv) #:transparent)
+(struct vsub (Vu Vv sat?) #:transparent)
+(struct vsub-w (Vu Vv) #:transparent)
 (struct vmpy (Vu Rt) #:transparent)
 (struct vmpyi (Vu Rt) #:transparent)
 (struct vmpye (Vu Rt) #:transparent)
 (struct vmpy-acc (Vdd Vu Rt) #:transparent)
 (struct vmpyi-acc (Vd Vu Rt) #:transparent)
 (struct vmpye-acc (Vd Vu Rt) #:transparent)
-(struct vmpa (Vuu Rt) #:transparent)
-(struct vmpa-acc (Vdd Vuu Rt) #:transparent)
+(struct vmpa (Vuu Rt signed?) #:transparent)
+(struct vmpa-acc (Vdd Vuu Rt signed?) #:transparent)
 (struct vdmpy (Vu Rt) #:transparent)
 (struct vdmpy-sw (Vuu Rt) #:transparent)
 (struct vdmpy-acc (Vd Vu Rt) #:transparent)
 (struct vdmpy-sw-acc (Vdd Vuu Rt) #:transparent)
-(struct vtmpy (Vuu Rt) #:transparent)
-(struct vtmpy-acc (Vdd Vuu Rt) #:transparent)
+(struct vtmpy (Vuu Rt signed?) #:transparent)
+(struct vtmpy-acc (Vdd Vuu Rt signed?) #:transparent)
 (struct vrmpy (Vu Rt) #:transparent)
 (struct vrmpy-acc (Vd Vu Rt) #:transparent)
 (struct vrmpy-p (Vuu Rt u1) #:transparent)
@@ -91,6 +93,7 @@
 (struct vasr-n (Vu Vv Rt round? sat? unsigned?) #:transparent)
 (struct vround (Vu Vv signed?) #:transparent)
 (struct vabs (Vu sat?) #:transparent)
+(struct vabsdiff (Vu Vv) #:transparent)
 
 ;; New instructions types we introduce to abstract away data-movement.
 ;; These instr types should never exist in output code.
@@ -309,16 +312,19 @@
                             (instr-sig 'u32x32 (list 'u32x32 'u32x32 'uint16)))]
      
     [(eq? vmpa instr) (list
-                       (instr-sig 'i16x64x2 (list 'u8x128x2 'int8x2))
-                       (instr-sig 'i16x64x2 (list 'u8x128x2 'uint8x2))
-                       (instr-sig 'i32x32x2 (list 'u16x64x2 'int8x2))
-                       (instr-sig 'i32x32x2 (list 'i16x64x2 'int8x2)))]
+                       (instr-sig 'i16x64x2 (list 'u8x128x2 'int8x2 #t))
+                       ;(instr-sig 'i16x64x2 (list 'u8x128x2 'uint8x2 #t))
+                       (instr-sig 'u16x64x2 (list 'u8x128x2 'unt8x2 #f))
+                       (instr-sig 'i32x32x2 (list 'u16x64x2 'int8x2 #t))
+                       (instr-sig 'i32x32x2 (list 'i16x64x2 'int8x2 #t)))]
     
     [(eq? vmpa-acc instr) (list
-                           (instr-sig 'i16x64x2 (list 'i16x64x2 'u8x128x2 'int8x2))
-                           (instr-sig 'i16x64x2 (list 'i16x64x2 'u8x128x2 'uint8x2))
-                           (instr-sig 'i32x32x2 (list 'i32x32x2 'u16x64x2 'int8x2))
-                           (instr-sig 'i32x32x2 (list 'i32x32x2 'i16x64x2 'int8x2)))]
+                           (instr-sig 'i16x64x2 (list 'i16x64x2 'u8x128x2 'int8x2 #t))
+                           ;(instr-sig 'i16x64x2 (list 'i16x64x2 'u8x128x2 'uint8x2 #t))
+                           (instr-sig 'u16x64x2 (list 'u16x64x2 'u8x128x2 'uint8x2 #f))
+                           (instr-sig 'i32x32x2 (list 'i32x32x2 'u16x64x2 'int8x2 #t))
+                           (instr-sig 'i32x32x2 (list 'i32x32x2 'i16x64x2 'int8x2 #t)))]
+    
     [(eq? vdmpy instr) (list
                         (instr-sig 'i16x64 (list 'u8x128 'int8x2))
                         (instr-sig 'i32x32 (list 'i16x64 'int8x2))
@@ -326,6 +332,7 @@
                         (instr-sig 'i32x32 (list 'i16x64 'uint16x2))
                         (instr-sig 'i32x32 (list 'i16x64x2 'int16x2))
                         (instr-sig 'i32x32 (list 'i16x64x2 'uint16x2)))]
+    
     [(eq? vdmpy-sw instr) (list
                            (instr-sig 'i16x64x2 (list 'u8x128x2 'int8x2))
                            (instr-sig 'i32x32x2 (list 'i16x64x2 'int8x2)))]
@@ -337,20 +344,22 @@
                             (instr-sig 'i32x32 (list 'i32x32 'i16x64 'uint16x2))
                             (instr-sig 'i32x32 (list 'i32x32 'i16x64x2 'int16x2))
                             (instr-sig 'i32x32 (list 'i32x32'i16x64x2 'uint16x2)))]
+    
     [(eq? vdmpy-sw-acc instr) (list
                                (instr-sig 'i16x64x2 (list 'i16x64x2 'u8x128x2 'int8x2))
                                (instr-sig 'i32x32x2 (list 'i32x32x2 'i16x64x2 'int8x2)))]
- 
 
     [(eq? vtmpy instr) (list
-                        (instr-sig 'i16x64x2 (list 'i8x128x2 'int8x2))
-                        (instr-sig 'i16x64x2 (list 'u8x128x2 'int8x2))
-                        (instr-sig 'i32x32x2 (list 'i16x64x2 'int8x2)))]
+                        (instr-sig 'i16x64x2 (list 'i8x128x2 'int8x2 #t))
+                        (instr-sig 'i16x64x2 (list 'u8x128x2 'int8x2 #t))
+                        (instr-sig 'u16x64x2 (list 'u8x128x2 'uint8x2 #f))
+                        (instr-sig 'i32x32x2 (list 'i16x64x2 'int8x2 #t)))]
 
     [(eq? vtmpy-acc instr) (list
-                            (instr-sig 'i16x64x2 (list 'i16x64x2 'i8x128x2 'int8x2))
-                            (instr-sig 'i16x64x2 (list 'i16x64x2 'u8x128x2 'int8x2))
-                            (instr-sig 'i32x32x2 (list 'i32x32x2 'i16x64x2 'int8x2)))]
+                            (instr-sig 'i16x64x2 (list 'i16x64x2 'i8x128x2 'int8x2 #t))
+                            (instr-sig 'i16x64x2 (list 'i16x64x2 'u8x128x2 'int8x2 #t))
+                            (instr-sig 'u16x64x2 (list 'u16x64x2 'u8x128x2 'uint8x2 #f))
+                            (instr-sig 'i32x32x2 (list 'i32x32x2 'i16x64x2 'int8x2 #t)))]
     
     ;[vrmpy
     ;[vrmpy-acc

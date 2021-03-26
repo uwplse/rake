@@ -40,7 +40,7 @@
      (when (<= 0 lane 63)
        (assert (eq? (v0-elem-hvx oe lane) (v0-elem-hvx se lane))))
      (when (<= 64 lane 127)
-       (assert (eq? (v0-elem-hvx oe (- lane 64)) (v1-elem-hvx se (- lane 64)))))]
+       (assert (eq? (v1-elem-hvx oe (- lane 64)) (v1-elem-hvx se (- lane 64)))))]
     [else
      (set-curr-cn-hvx lane)
      (assert (eq? (elem-hvx oe lane) (elem-hvx se lane)))]))
@@ -82,6 +82,8 @@
   (define (iden node [arg-pos -1])
     (match node
       [(swizzle* vec) (set! next-id (add1 next-id)) (swizzle next-id vec)]
+      [(gather-vec opts) (set! next-id (add1 next-id)) (gather-vec next-id opts)]
+      [(gather-vecp opts) (set! next-id (add1 next-id)) (gather-vecp next-id opts)]
       [(gather* opts)
        (set! next-id (add1 next-id))
        (match (visitor-trace-peek-parent)
@@ -96,14 +98,14 @@
          [(vmpy-acc Vdd Vu Rt) (if (eq? arg-pos 0) (gather-vecp next-id opts) (gather-vec next-id opts))]
          [(vmpyi-acc Vd Vu Rt) (gather-vec next-id opts)]
          [(vmpye-acc Vd Vu Rt) (gather-vec next-id opts)]
-         [(vmpa Vuu Rt) (gather-vecp next-id opts)]
-         [(vmpa-acc Vdd Vuu Rt) (gather-vecp next-id opts)]
+         [(vmpa Vuu Rt signed?) (gather-vecp next-id opts)]
+         [(vmpa-acc Vdd Vuu Rt signed?) (gather-vecp next-id opts)]
          [(vdmpy Vu Rt) (gather-vec next-id opts)]
          [(vdmpy-sw Vuu Rt) (gather-vecp next-id opts)]
          [(vdmpy-acc Vd Vu Rt) (gather-vec next-id opts)]
          [(vdmpy-sw-acc Vdd Vuu Rt) (gather-vecp next-id opts)]
-         [(vtmpy Vuu Rt) (gather-vecp next-id opts)]
-         [(vtmpy-acc Vdd Vuu Rt) (gather-vecp next-id opts)]
+         [(vtmpy Vuu Rt signed?) (gather-vecp next-id opts)]
+         [(vtmpy-acc Vdd Vuu Rt signed?) (gather-vecp next-id opts)]
          [(vrmpy Vu Rt) (gather-vec next-id opts)]
          [(vrmpy-acc Vd Vu Rt) (gather-vec next-id opts)]
          [(vrmpy-p Vuu Rt u1) (gather-vecp next-id opts)]

@@ -55,6 +55,10 @@
 (struct vec-max (v1 v2) #:transparent)
 (struct vec-min (v1 v2) #:transparent)
 
+(struct absd (v1 v2) #:transparent)
+(struct shift_left (vec shift) #:transparent)
+(struct shift_right (vec shift) #:transparent)
+
 ;; Shuffles
 (struct slice_vectors (vec base stride len) #:transparent)
 (struct concat_vectors (v1 v2) #:transparent)
@@ -98,6 +102,12 @@
     [(vec-sub v1 v2) (vec-len v1)]
     [(vec-mul v1 v2) (vec-len v1)]
     [(vec-div v1 v2) (vec-len v1)]
+    [(vec-min v1 v2) (vec-len v1)]
+    [(vec-max v1 v2) (vec-len v1)]
+
+    [(absd v1 v2) (vec-len v1)]
+    [(shift_left vec shift) (vec-len vec)]
+    [(shift_right vec shift) (vec-len vec)]
 
     ;; Shuffles
     [(slice_vectors vec base stride len) len]

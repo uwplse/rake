@@ -20,8 +20,8 @@
   (define interpreted-o-expr (interpret-hvx hvx-expr-spec))
   (define interpreted-f-expr (interpret-hvx hvx-expr-grm))
     
-  (clear-asserts!)
-  (for ([axiom axioms]) (assert axiom))
+  (clear-vc!)
+  (for ([axiom axioms]) (assume axiom))
   (define st (current-seconds))
   (define sol (synthesize #:forall ctx
                           #:guarantee (hvx-vec-eq? interpreted-o-expr interpreted-f-expr)))

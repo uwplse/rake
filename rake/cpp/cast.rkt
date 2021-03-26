@@ -1,6 +1,7 @@
 #lang rosette
 
 (require rake/cpp/types)
+(require rake/util)
 
 (require rosette/lib/match)
 
@@ -141,16 +142,23 @@
 (define (satu8 e)
   (match e
     [(int8_t val) (if (bvslt val (bv MIN_UCHAR 8)) (uint8_t (bv MIN_UCHAR 8)) (uint8_t val))]
-    [(int16_t val) (cond
-                     [(bvslt val (bv MIN_UCHAR 16)) (uint8_t (bv MIN_UCHAR 8))]
-                     [(bvsgt val (bv MAX_UCHAR 16)) (uint8_t (bv MAX_UCHAR 8))]
-                     [else (uint8_t (extract 7 0 val))])]
+    ;[(int16_t val) (cond
+     ;                [(bvslt val (bv MIN_UCHAR 16)) (uint8_t (bv MIN_UCHAR 8))]
+      ;               [(bvsgt val (bv MAX_UCHAR 16)) (uint8_t (bv MAX_UCHAR 8))]
+       ;              [else (uint8_t (extract 7 0 val))])]
+    [(int16_t val) (uint8_t (extract 7 0 (bvsmax (bv MIN_UCHAR 16) (bvsmin val (bv MAX_UCHAR 16)))))]
+    ;[(int16_t val) (uint8_t (cond
+     ;                         [(bveq (msb val) (bv 1 1)) (bv MIN_UCHAR 8)]
+      ;                        [(bveq val (zero-extend (extract 7 0 val) (bitvector 16))) (extract 7 0 val)]
+       ;                       [else (bv MAX_UCHAR 8)]))]
     [(int32_t val) (cond
                      [(bvslt val (bv MIN_UCHAR 32)) (uint8_t (bv MIN_UCHAR 8))]
                      [(bvsgt val (bv MAX_UCHAR 32)) (uint8_t (bv MAX_UCHAR 8))]
                      [else (uint8_t (extract 7 0 val))])]
     [(uint8_t val) e]
-    [(uint16_t val) (if (bvugt val (bv MAX_UCHAR 16)) (uint8_t (bv MAX_UCHAR 8)) (uint8_t (extract 7 0 val)))]
+    [(uint16_t val) (uint8_t (extract 7 0 (minu16 val (bv MAX_UCHAR 16))))]
+    ;[(uint16_t val) (int8_t (extract 7 0 (bvsmax val (bv MAX_CHAR 16))))]
+    ;[(uint16_t val) (if (bveq val (zero-extend (extract 7 0 val) (bitvector 16))) (zero-extend (extract 7 0 val) (bitvector 8)) (bv MAX_CHAR 8))]
     [(uint32_t val) (if (bvugt val (bv MAX_UCHAR 32)) (uint8_t (bv MAX_UCHAR 8)) (uint8_t (extract 7 0 val)))]))
 
 (define (satu16 e)
@@ -163,7 +171,8 @@
                      [else (uint16_t (extract 15 0 val))])]
     [(uint8_t val) (uint16_t (zero-extend val (bitvector 16)))]
     [(uint16_t val) e]
-    [(uint32_t val) (if (bvugt val (bv MAX_USHORT 32)) (uint16_t (bv MAX_USHORT 16)) (uint16_t (extract 15 0 val)))]))
+    [(uint32_t val) (uint16_t (extract 15 0 (minu32 val (bv MAX_USHORT 32))))]))
+    ;[(uint32_t val) (if (bvugt val (bv MAX_USHORT 32)) (uint16_t (bv MAX_USHORT 16)) (uint16_t (extract 15 0 val)))]))
 
 (define (satu32 e)
   (match e

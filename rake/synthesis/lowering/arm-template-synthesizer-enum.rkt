@@ -67,6 +67,10 @@
          (when (not (hash-has-key? ranked-candidates ir-expr))
            (hash-set! ranked-candidates ir-expr (enumerate-arm-exprs (arm-expr-spec-expr spec) arm-sub-expr)))
 
+         (for ([cost (hash-keys ranked-candidates)])
+           (display (format "~a => ~a\n" cost (set-count (hash-ref ranked-candidates cost)))))
+         (exit)
+
          (synthesize-equiv-arm-enum spec outputType arm-sub-expr (hash-ref ranked-candidates ir-expr) discarded-sols))]
 
 ;      [(cast sub-expr type)
@@ -81,7 +85,7 @@
 ;         (reset-arm-instr-bnd)
 ;         (synthesize-equiv-arm spec sub-expr arm-sub-expr discarded-sols))]
 
-      [(load-data opts)
+      [(load-data id opts)
        (begin
          (display "Lifting IR to ARM...\n")
          (display "====================\n\n")
@@ -173,8 +177,8 @@
   
   (define sorted-costs (sort (hash-keys ranked-candidates-exprs) <))
   
-  (clear-asserts!)
-  (for ([axiom ir-expr-axioms]) (assert axiom))
+  (clear-vc!)
+  (for ([axiom ir-expr-axioms]) (assume axiom))
   (search-candidates sorted-costs ranked-candidates-exprs))
 
 ;;; Define incremental synthesis loop for arm expression generation

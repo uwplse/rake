@@ -12,6 +12,7 @@
 (require rake/hvx/ast/visitor)
 (require rake/hvx/cost-model)
 (require rake/synthesis/ir)
+(require rake/synthesis/swizzling/util)
 
 ;; Grammar features
 (define max-instr-bnd 3)
@@ -52,6 +53,8 @@
 
 (define (root-instr expr)
   (match expr
+    ;[(let-expr var val body) (root-instr body)]
+    
     [(vzxt Vu signed?) vzxt]
     [(vsxt Vu signed?) vsxt]
     [(vadd Vu Vv sat?) vadd]
@@ -63,14 +66,14 @@
     [(vmpy-acc Vdd Vu Rt) vmpy-acc]
     [(vmpyi-acc Vd Vu Rt) vmpyi-acc]
     [(vmpye-acc Vd Vu Rt) vmpye-acc]
-    [(vmpa Vuu Rt) vmpa]
-    [(vmpa-acc Vdd Vuu Rt) vmpa-acc]
+    [(vmpa Vuu Rt signed?) vmpa]
+    [(vmpa-acc Vdd Vuu Rt signed?) vmpa-acc]
     [(vdmpy Vu Rt) vdmpy]
     [(vdmpy-sw Vuu Rt) vdmpy-sw]
     [(vdmpy-acc Vd Vu Rt) vdmpy-acc]
     [(vdmpy-sw-acc Vdd Vuu Rt) vdmpy-sw-acc]
-    [(vtmpy Vuu Rt) vtmpy]
-    [(vtmpy-acc Vdd Vuu Rt) vtmpy-acc]
+    [(vtmpy Vuu Rt signed?) vtmpy]
+    [(vtmpy-acc Vdd Vuu Rt signed?) vtmpy-acc]
     [(vrmpy Vu Rt) vrmpy]
     [(vrmpy-acc Vd Vu Rt) vrmpy-acc]
     [(vrmpy-p Vuu Rt u1) vrmpy-p]
@@ -79,21 +82,35 @@
 
 (define (child-instr expr)
   (match expr
+    ;[(let-expr var val body) (child-instr body)]
+    
+    [(vzxt Vu signed?) (root-instr Vu)]
+    [(vsxt Vu signed?) (root-instr Vu)]
+    [(vadd-w Vu Vv) (list (root-instr Vu) (root-instr Vv))]
+    [(vmpy Vu Rt) (root-instr Vu)]
+    [(vmpa Vuu Rt signed?) (root-instr Vuu)]
+    [(vdmpy Vu Rt) (root-instr Vu)]
+    [(vtmpy Vuu Rt signed?) (root-instr Vuu)]
+    [(vrmpy Vu Rt) (root-instr Vu)]
+    
     [(vadd-w-acc Vdd Vu Vv) (root-instr Vdd)]
     [(vmpy-acc Vdd Vu Rt) (root-instr Vdd)]
     [(vmpyi-acc Vd Vu Rt) (root-instr Vd)]
     [(vmpye-acc Vd Vu Rt) (root-instr Vd)]
-    [(vmpa-acc Vdd Vuu Rt) (root-instr Vdd)]
+    [(vmpa-acc Vdd Vuu Rt signed?) (root-instr Vdd)]
     [(vdmpy-acc Vd Vu Rt) (root-instr Vd)]
     [(vdmpy-sw-acc Vdd Vuu Rt) (root-instr Vdd)]
-    [(vtmpy-acc Vdd Vuu Rt) (root-instr Vdd)]
+    [(vtmpy-acc Vdd Vuu Rt signed?) (root-instr Vdd)]
     [(vrmpy-acc Vd Vu Rt) (root-instr Vd)]
     [(vrmpy-p-acc Vdd Vuu Rt u1) (root-instr Vdd)]
     [_ (void)]))
 
 (define (instr-order instr)
   (cond
-    [(eq? instr gather*) 0]
+    [(eq? instr let-expr) -1]
+    [(eq? instr gather*) -1]
+    [(eq? instr gather-vec) -1]
+    [(eq? instr gather-vecp) -1]
 
     [(eq? instr vadd) 0]
     [(eq? instr vmpyi) 0]
@@ -121,6 +138,8 @@
 
 (define (max-unique-inputs expr)
   (match expr
+    [(let-expr var val body) 1]
+    
     [(vzxt Vu signed?) (max-unique-inputs Vu)]
     [(vsxt Vu signed?) (max-unique-inputs Vu)]
     [(vadd Vu Vv sat?) (+ (max-unique-inputs Vu) (max-unique-inputs Vv))]
@@ -132,19 +151,21 @@
     [(vmpy-acc Vdd Vu Rt) (+ (max-unique-inputs Vdd) (max-unique-inputs Vu))]
     [(vmpyi-acc Vd Vu Rt) (+ (max-unique-inputs Vd) (max-unique-inputs Vu))]
     [(vmpye-acc Vd Vu Rt) (+ (max-unique-inputs Vd) (max-unique-inputs Vu))]
-    [(vmpa Vuu Rt) (* 2 (max-unique-inputs Vuu))]
-    [(vmpa-acc Vdd Vuu Rt) (+ (max-unique-inputs Vdd) (* 2 (max-unique-inputs Vuu)))]
+    [(vmpa Vuu Rt signed?) (* 2 (max-unique-inputs Vuu))]
+    [(vmpa-acc Vdd Vuu Rt signed?) (+ (max-unique-inputs Vdd) (* 2 (max-unique-inputs Vuu)))]
     [(vdmpy Vu Rt) (* 4 (max-unique-inputs Vu))]
     [(vdmpy-sw Vuu Rt) (* 2 (max-unique-inputs Vuu))]
     [(vdmpy-acc Vd Vu Rt) (+ (max-unique-inputs Vd) (* 2 (max-unique-inputs Vu)))]
     [(vdmpy-sw-acc Vdd Vuu Rt) (+ (max-unique-inputs Vdd) (* 2 (max-unique-inputs Vuu)))]
-    [(vtmpy Vuu Rt) (* 3 (max-unique-inputs Vuu))]
-    [(vtmpy-acc Vdd Vuu Rt) (+ (max-unique-inputs Vdd) (* 3 (max-unique-inputs Vuu)))]
+    [(vtmpy Vuu Rt signed?) (* 3 (max-unique-inputs Vuu))]
+    [(vtmpy-acc Vdd Vuu Rt signed?) (+ (max-unique-inputs Vdd) (* 3 (max-unique-inputs Vuu)))]
     [(vrmpy Vu Rt) (* 4 (max-unique-inputs Vu))]
     [(vrmpy-acc Vd Vu Rt) (+ (max-unique-inputs Vd) (* 4 (max-unique-inputs Vu)))]
     [(vrmpy-p Vuu Rt u1) (* 4 (max-unique-inputs Vuu))]
     [(vrmpy-p-acc Vdd Vuu Rt u1) (+ (max-unique-inputs Vdd) (* 4 (max-unique-inputs Vuu)))]
-    [(gather* buff-opts) 1]))
+    [(gather* buff-opts) 1]
+    [(gather-vec buff-opts) 1]
+    [(gather-vecp buff-opts) 1]))
 
 (define (enumerate-hvx-exprs ir-expr hvx-sub-expr)
   (define-values (isa weights)
@@ -153,15 +174,15 @@
        (values
         (if (eq? (type (elem-ir (interpret-ir data) 0)) outputType)
             (list vadd vmpyi vmpyi-acc vmpye vmpye-acc vasl)
-            (list vzxt vsxt vadd-w vadd-w-acc vmpy vmpy-acc vmpa vmpa-acc vdmpy vdmpy-acc vtmpy vtmpy-acc)) ; vdmpy-sw-acc vdmpy-sw
+            (list vzxt vsxt vmpy vmpy-acc vmpa vmpa-acc vdmpy vdmpy-acc vtmpy vtmpy-acc)) ;vdmpy-sw-acc vdmpy-sw ;vadd-w vadd-w-acc
         kernel)]
       [_ (begin (println "NYI") (exit))]))
   
   (set! int-consts (set->list (list->set (weight-matrix-vals weights))))
 
   (define elemT (type (elem-ir (interpret-ir ir-expr) 0)))
-  
-  (define candidates (time (enumerate (enum-types elemT) isa hvx-sub-expr 3 15)))
+
+  (define candidates (time (enumerate (enum-types elemT) isa hvx-sub-expr 3 20)))
 
   ;; Fill in param grammars
   (define (fill-arg-grammars node [pos -1])
@@ -179,7 +200,10 @@
       ['uint16x2 (cons (uint16-const) (uint16-const))]
       [_ node]))
   (set! candidates (for/set ([candidate candidates]) (visit-hvx candidate fill-arg-grammars)))
-  
+
+  ;; Uniquify gathers
+  (set! candidates (for/set ([candidate candidates]) (if (gather*? candidate) candidate (specialize-gather*-nodes candidate))))
+
   ;; Rank em
   (define ranked-candidates (make-hash))
   (for ([candidate-expr candidates])
@@ -189,24 +213,34 @@
     (hash-set! ranked-candidates candidate-expr-cost (set-add (hash-ref ranked-candidates candidate-expr-cost) candidate-expr)))
 
   ;(for ([cost (hash-keys ranked-candidates)])
-   ; (display (format "~a => ~a\n" cost (set-count (hash-ref ranked-candidates cost)))))
+   ;(display (format "~a => ~a\n" cost (set-count (hash-ref ranked-candidates cost)))))
   
   ;; Pruning
   (define pruned-ranked-candidates (make-hash))
   (for ([cost (hash-keys ranked-candidates)])
     (define pruned-candidates (mutable-set))
+    ;(display (format "~a => ~a\n" cost (set-count (hash-ref ranked-candidates cost))))
 
     ;; Based on instr ordering
     (for ([candidate (hash-ref ranked-candidates cost)])
+      ;(pretty-print candidate)
+      ;(pretty-print (interpret-hvx candidate))
       (define prune? #f)
       (define (check-instr-ordering node [pos -1])
         (define r-instr (root-instr node))
         (define c-instr (child-instr node))
-        (when (not (void? c-instr))
-          (define parent-order (instr-order r-instr))
-          (define child-order (instr-order c-instr))
-          (when (> child-order parent-order)
-            (set! prune? #t)))
+        (define parent-order (instr-order r-instr))
+        (cond
+          [(list? c-instr)
+           (for ([ci c-instr])
+             (when (not (void? ci))
+               (define child-order (instr-order ci))
+               (when (>= child-order parent-order)
+                 (set! prune? #t))))]
+          [(not (void? c-instr))
+           (define child-order (instr-order c-instr))
+           (when (>= child-order parent-order)
+             (set! prune? #t))])
         node)
       (visit-hvx candidate check-instr-ordering)
 
@@ -218,19 +252,37 @@
       
       (when (not prune?)
         (set-add! pruned-candidates candidate)))
-    (display (format "~a => ~a\n" cost (set-count pruned-candidates)))
+    ;(display (format "~a => ~a\n-----\n" cost (set-count pruned-candidates)))
     (hash-set! pruned-ranked-candidates cost pruned-candidates))
 
-  pruned-ranked-candidates)
+  (define ranked-sorted-pruned-candidates (make-hash))
+  (for ([cost (hash-keys pruned-ranked-candidates)])
+    (define unsorted-candidates (set->list (hash-ref pruned-ranked-candidates cost)))
+    (define sorted-candidates (sort unsorted-candidates
+       (lambda (e1 e2)
+         (cond
+           [(< (count-2mpy-instrs e1) (count-2mpy-instrs e2)) #t]
+           [(> (count-2mpy-instrs e1) (count-2mpy-instrs e2)) #f]
+           [else (< (count-vecR-instrs e1) (count-vecR-instrs e2))]))))
+    (hash-set! ranked-sorted-pruned-candidates cost sorted-candidates))
+
+  ;(pretty-print ranked-sorted-pruned-candidates)
   
-;  (make-hash (list (cons 6 (set
+  ranked-sorted-pruned-candidates)
+  
+;  (make-hash (list (cons 8 (set
 ;
-;                            (vtmpy-acc
-;                             (vmpa hvx-sub-expr (cons (uint8_t (bv #x01 8)) (uint8_t (bv #x06 8))))
-;                             hvx-sub-expr
-;                             (cons (int8_t (bv #x04 8)) (int8_t (bv #x04 8))))
-;
-;;                               
+;                            (specialize-gather*-nodes
+;                             (vmpa-acc
+;                              (vmpa-acc
+;                               (vmpa-acc
+;                                (vtmpy hvx-sub-expr (cons (int8_t (bv #x02 8)) (int8_t (bv #x01 8))))
+;                                hvx-sub-expr
+;                                (cons (int8_t (bv #x02 8)) (int8_t (bv #x04 8))))
+;                               hvx-sub-expr
+;                               (cons (int8_t (bv #x01 8)) (int8_t (bv #x02 8))))
+;                              hvx-sub-expr
+;                              (cons (int8_t (bv #x01 8)) (int8_t (bv #x02 8)))))
 ;;                            
 ;;                            (vmpyi-acc
 ;;                             (vmpyi-acc
@@ -244,15 +296,27 @@
 
 (define database (make-hash))
 
+(define (base-types expr)
+  (cond
+    [(gather*? expr) (for/fold ([res (set)]) ([br (list-ref (gather*-buff-reads expr) 0)]) (set-union res (enum-types (type br))))]
+    [else (set (hvx-type (interpret-hvx expr)))]))
+
 (define (enumerate types instr-set base-expr depth max-cost)
   (cond
     ;; Recursive base case
     [(<= depth 0)
-     (define base-types
-       (cond
-         [(gather*? base-expr) (for/fold ([res (set)]) ([br (list-ref (gather*-buff-reads base-expr) 0)]) (set-union res (enum-types (type br))))]
-         [else (enum-types (elem-type (interpret-hvx base-expr)))]))
-     (if (set-empty? (set-intersect types base-types)) (set) (set base-expr))]
+     (cond
+       [(cons? base-expr)
+        (define base-expr-types (base-types (car base-expr)))
+        (define res (if (set-empty? (set-intersect types base-expr-types)) (set) (set (car base-expr))))
+        
+        (set! base-expr-types (base-types (cdr base-expr)))
+        (set! res (set-union res (if (set-empty? (set-intersect types base-expr-types)) (set) (set (cdr base-expr)))))
+
+        res]
+       [else
+        (define base-expr-types (base-types base-expr))
+        (if (set-empty? (set-intersect types base-expr-types)) (set) (set base-expr))])]
     ;[(<= depth 0) (if (set-empty? (set-intersect types (set 'u8x128 'u8x128x2))) (set) (set base-expr))]
     [else
      (define key (list types instr-set base-expr depth))
@@ -286,13 +350,16 @@
                    [1 (cartesian-product (list instr) (first arg-opts))]
                    [2 (cartesian-product (list instr) (first arg-opts) (second arg-opts))]
                    [3 (cartesian-product (list instr) (first arg-opts) (second arg-opts) (third arg-opts))]
+                   [4 (cartesian-product (list instr) (first arg-opts) (second arg-opts) (third arg-opts) (fourth arg-opts))]
                    [_ (error "NYI: enumeration instrs with the following number of args:" (length arg-opts))])))
               (set! sig-exprs (for/set ([sig-expr sig-exprs]) (match (length sig-expr)
                                                                 [2 ((list-ref sig-expr 0) (list-ref sig-expr 1))]
                                                                 [3 ((list-ref sig-expr 0) (list-ref sig-expr 1) (list-ref sig-expr 2))]
                                                                 [4 ((list-ref sig-expr 0) (list-ref sig-expr 1) (list-ref sig-expr 2) (list-ref sig-expr 3))]
+                                                                [5 ((list-ref sig-expr 0) (list-ref sig-expr 1) (list-ref sig-expr 2) (list-ref sig-expr 3) (list-ref sig-expr 4))]
                                                                 [_ (error "NYI. Sig-expr of size" (length sig-expr))])))
               (set! candidates (set-union candidates sig-exprs)))))
+
         ;(hash-set! database key candidates)
         ;candidates
 
@@ -309,7 +376,7 @@
             hvx-sub-expr
             (void)))
       (begin
-        (define expr-opts (list))        
+        (define expr-opts (list))
 
         (when (set-member? out-types 'int16)
 
@@ -339,7 +406,7 @@
                     
                     ;; Vec-Sca multiplies
                     (vmpy u8t0 c0)
-                    (vmpa u8t0 Rt)
+                    (vmpa u8t0 Rt #t)
                     (vdmpy u8t0 Rt)
                     (vdmpy-sw u8t0 Rt)
                     (vtmpy u8t0 Rt)))))
@@ -351,7 +418,7 @@
                    (list
                     (vadd-w-acc i16t0 u8t0 u8t1)
                     (vmpy-acc i16t0 u8t0 c0)     
-                    (vmpa-acc i16t0 u8t0 Rt)
+                    (vmpa-acc i16t0 u8t0 Rt #t)
                     (vdmpy-acc i16t0 u8t0 Rt)
                     (vdmpy-sw-acc i16t0 u8t0 Rt)
                     (vtmpy-acc i16t0 u8t0 Rt)))))
@@ -387,10 +454,11 @@
                          ;(println outType)
                          (get-hvx-upcast-isa type)]
                         [(packhi data signed?) (get-hvx-hi-isa signed?)]
+                        [(abs-diff data1 data2) (get-hvx-absdiff-isa)]
                         [_ (begin (println "NYI") (exit))]))
-  
+
   (define (??ir-expr)
-    (define r0 hvx-sub-expr)
+    (define r0 (apply choose* (flatten (list hvx-sub-expr))))
     (define r1 (??hvx-instr (list r0)))
     (define r2 (??hvx-instr (list r0 r1)))
     (define r3 (??hvx-instr (list r0 r1 r2)))
@@ -445,8 +513,8 @@
      (vmpy t0 c0)
      (vmpy-acc t0 t1 c0)
      
-     (vmpa t1 Rt)
-     (vmpa-acc t0 t1 Rt)
+     (vmpa t1 Rt #t)
+     (vmpa-acc t0 t1 Rt #t)
 
      (vdmpy t0 Rt)
      (vdmpy-sw t0 Rt)
@@ -496,6 +564,23 @@
     (choose*
      (vshuffo-n t0 t1 signed?)
      (vpacko-n t0 t1 signed?)))
+  ??hvx-hi-instr)
+
+;; HVX instructions for abs diffing
+(define (get-hvx-absdiff-isa)
+  (define (??hvx-hi-instr registers)
+    (define t0 (apply choose* registers))
+    (define t1 (apply choose* registers))
+    (choose*
+     (vabsdiff t0 t1)
+     (vabs t0 #f)
+     (vsub t0 t1 #f)
+     (let-expr 't0 t0
+       (let-expr 't1 t1
+         (vcombine
+          (vabsdiff (hi t0) (hi t1))
+          (vabsdiff (lo t0) (lo t1)))))
+     ))
   ??hvx-hi-instr)
 
 (provide hvx-instr-limit-exceeded? hvx-instr-bnd generate-hvx-grammar increment-hvx-instr-bnd reset-hvx-instr-bnd enumerate-hvx-exprs)

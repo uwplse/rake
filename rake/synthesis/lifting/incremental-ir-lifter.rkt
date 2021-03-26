@@ -61,8 +61,8 @@
         (display "============\n")
 
         ;; Synthesize expression
-        (clear-asserts!)
-        (for ([axiom (ir-expr-spec-axioms spec)]) (assert axiom))
+        (clear-vc!)
+        (for ([axiom (ir-expr-spec-axioms spec)]) (assume axiom))
         (define st (current-seconds))
         (define sol (synthesize #:forall (ir-expr-spec-ctx spec)
                                 #:guarantee (bounded-eq? (interpret-halide orig-expr) (interpret-ir synthesized-expr) MC_BND)))

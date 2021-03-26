@@ -41,7 +41,7 @@
 
 (define (infer-outT expr)
   (match expr
-    [(load-data data) (apply choose* (map (lambda(v) (type v)) (list-ref data 0)))]
+    [(load-data id data) (apply choose* (map (lambda(v) (type v)) (list-ref data 0)))]
     [(convolve _ _ _ outT) outT]
     [(const-add _ _ _ outT) outT]
     [(const-divide t0 _ ) (infer-outT t0)]
@@ -114,7 +114,7 @@
     (define ops (get-ir-ops t0 live-ops int-weights-gen int-divisor-gen int-shiftr-gen int-offsets-gen add-consts div-consts))
     (if (empty? ops) t0 (apply choose* ops)))
   (define (??ir-expr)
-    (define r0 (load-data data))
+    (define r0 (load-data 1 data))
     (define r1 (??ir-instr r0))
     (define r2 (??ir-instr r1))
     (define r3 (??ir-instr r2))
@@ -127,7 +127,7 @@
 (define (generate-ir-grammar-bu lifted-sub-expr)
   (define (??ir-expr)
     (match lifted-sub-expr
-      [(load-data opts) lifted-sub-expr]
+      [(load-data id opts) lifted-sub-expr]
       [_ (error "Well fuck")]))
   ??ir-expr)
 

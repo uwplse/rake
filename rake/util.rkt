@@ -86,6 +86,14 @@
 
   vecs)
 
+(define (merge-sols sol1 sol2)
+  (define merged-sol (list))
+  (for ([k (in-dict-keys (model sol1))])
+    (set! merged-sol (append merged-sol (list (cons k (hash-ref (model sol1) k))))))
+  (for ([k (in-dict-keys (model sol2))])
+    (set! merged-sol (append merged-sol (list (cons k (hash-ref (model sol2) k))))))
+  (sat (make-immutable-hash merged-sol)))
+
 ;; Utility functions
 (define (nop v) v)
 
@@ -95,6 +103,9 @@
 (define (u8lo v) (uint8_t (extract 7 0 (eval v))))
 (define (i16lo v) (int16_t (extract 15 0 (eval v))))
 (define (u16lo v) (uint16_t (extract 15 0 (eval v))))
+(define (i32lo v) (int32_t (extract 31 0 (eval v))))
+(define (u32lo v) (uint32_t (extract 31 0 (eval v))))
+
 (define (i8hi v) (int8_t (extract 15 8 (eval v))))
 (define (u8hi v) (uint8_t (extract 15 8 (eval v))))
 (define (i16hi v) (int16_t (extract 31 16 (eval v))))
@@ -104,6 +115,46 @@
 (define (sxt16 v) (int16_t (sign-extend (eval v) (bitvector 16))))
 (define (zxt32 v) (uint32_t (zero-extend (eval v) (bitvector 32))))
 (define (sxt32 v) (int32_t (sign-extend (eval v) (bitvector 32))))
+
+(define (abs8 v) (bvsub (bvxor v (bvashr v (bv 7 8))) (bvashr v (bv 7 8))))
+(define (abs16 v) (bvsub (bvxor v (bvashr v (bv 15 16))) (bvashr v (bv 15 16))))
+(define (abs32 v) (bvsub (bvxor v (bvashr v (bv 31 32))) (bvashr v (bv 31 32))))
+
+(define (min8 a b)
+  (define diff (bvsub a b))
+  (define dsgn (bvashr diff (bv 7 8)))
+  (bvadd b (bvand diff dsgn)))
+
+(define (min16 a b)
+  (define diff (bvsub a b))
+  (define dsgn (bvashr diff (bv 15 16)))
+  (bvadd b (bvand diff dsgn)))
+
+(define (min32 a b)
+  (define diff (bvsub a b))
+  (define dsgn (bvashr diff (bv 31 32)))
+  (bvadd b (bvand diff dsgn)))
+
+(define (minu8 a0 b0)
+  (define a (zero-extend a0 (bitvector 9)))
+  (define b (zero-extend b0 (bitvector 9)))
+  (define diff (bvsub a b))
+  (define dsgn (bvashr diff (bv 8 9)))
+  (extract 7 0 (bvadd b (bvand diff dsgn))))
+
+(define (minu16 a0 b0)
+  (define a (zero-extend a0 (bitvector 17)))
+  (define b (zero-extend b0 (bitvector 17)))
+  (define diff (bvsub a b))
+  (define dsgn (bvashr diff (bv 16 17)))
+  (extract 15 0 (bvadd b (bvand diff dsgn))))
+
+(define (minu32 a0 b0)
+  (define a (zero-extend a0 (bitvector 33)))
+  (define b (zero-extend b0 (bitvector 33)))
+  (define diff (bvsub a b))
+  (define dsgn (bvashr diff (bv 32 33)))
+  (extract 31 0 (bvadd b (bvand diff dsgn))))
 
 (define (get-caller-id obj) (eq-hash-code obj))
 

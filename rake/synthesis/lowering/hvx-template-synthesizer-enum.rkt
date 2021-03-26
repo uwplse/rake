@@ -8,6 +8,8 @@
 (require rake/synthesis/spec)
 (require rake/synthesis/grammar/hvx)
 
+(require rake/halide/ir/interpreter)
+
 (require rake/hvx/ast/types)
 (require rake/hvx/cost-model)
 (require rake/hvx/interpreter)
@@ -23,6 +25,7 @@
 (define (synthesize-hvx-template spec ir-to-hvx)
   (define ir-expr (hvx-expr-spec-expr spec))
   (define ir-expr-sol (hvx-expr-spec-sol spec))
+  (define ir-expr-annotations (hvx-expr-spec-annot spec))
   (define ir-expr-ctx (hvx-expr-spec-ctx spec))
   (define ir-expr-axioms (hvx-expr-spec-axioms spec))
   (define ir-expr-invalid-sketches (hvx-expr-spec-invalid-sketches spec))
@@ -32,19 +35,36 @@
     (match ir-expr
       [(packhi sub-expr signed?)
        (begin
-         (define hvx-sub-spec (hvx-expr-spec sub-expr ir-expr-sol ir-expr-ctx ir-expr-axioms ir-expr-invalid-sketches))
-         (define hvx-sub-expr (synthesize-hvx-template hvx-sub-spec ir-to-hvx))
-         
-         (display "Lifting IR to HVX...\n")
-         (display "====================\n\n")
-         (display (format "IR Operation: \n\n~a\n\n" (pretty-format ir-expr)))
+         (define new-expr (void))
+         (for ([inv-sk ir-expr-invalid-sketches] #:when (void? new-expr))
+           ;; Set sub-expr to be the same as before
+           (define hvx-sub-expr (hash-ref inv-sk sub-expr))
+           ;; But synthesize new outer-instruction(s)
+           (display "Lifting IR to HVX...\n")
+           (display "====================\n\n")
+           (display (format "IR Operation: \n\n~a\n\n" (pretty-format ir-expr)))
 
-         (reset-hvx-instr-bnd)
-         (synthesize-equiv-hvx spec sub-expr hvx-sub-expr discarded-sols))]
+           (reset-hvx-instr-bnd)
+           (define res (synthesize-equiv-hvx spec sub-expr hvx-sub-expr discarded-sols))
+           (when (not (void? res))
+             (set! new-expr res)))
+             
+         (cond
+           [(void? new-expr)
+            (define hvx-sub-spec (hvx-expr-spec sub-expr ir-expr-sol ir-expr-ctx ir-expr-axioms ir-expr-invalid-sketches))
+            (define hvx-sub-expr (synthesize-hvx-template hvx-sub-spec ir-to-hvx))
+         
+            (display "Lifting IR to HVX...\n")
+            (display "====================\n\n")
+            (display (format "IR Operation: \n\n~a\n\n" (pretty-format ir-expr)))
+
+            (reset-hvx-instr-bnd)
+            (synthesize-equiv-hvx spec sub-expr hvx-sub-expr discarded-sols)]
+           [else new-expr]))]
     
       [(arith-shift-right sub-expr n round? outputType)
        (begin
-         (define hvx-sub-spec (hvx-expr-spec sub-expr ir-expr-sol ir-expr-ctx ir-expr-axioms ir-expr-invalid-sketches))
+         (define hvx-sub-spec (hvx-expr-spec sub-expr ir-expr-sol ir-expr-annotations ir-expr-ctx ir-expr-axioms ir-expr-invalid-sketches))
          (define hvx-sub-expr (synthesize-hvx-template hvx-sub-spec ir-to-hvx))
        
          (display "Lifting IR to HVX...\n")
@@ -56,22 +76,25 @@
 
       [(convolve sub-expr kernel saturateFunc outputType)
        (begin
-         (define hvx-sub-spec (hvx-expr-spec sub-expr ir-expr-sol ir-expr-ctx ir-expr-axioms ir-expr-invalid-sketches))
+         (define hvx-sub-spec (hvx-expr-spec sub-expr ir-expr-sol ir-expr-annotations ir-expr-ctx ir-expr-axioms ir-expr-invalid-sketches))
          (define hvx-sub-expr (synthesize-hvx-template hvx-sub-spec ir-to-hvx))
          
          (display "Lifting IR to HVX...\n")
          (display "====================\n\n")
          (display (format "IR Operation: \n\n~a\n\n" (pretty-format ir-expr)))
-
+         
          ;; If not already available, enumerate ranked candidate translations
          (when (not (hash-has-key? ranked-candidates ir-expr))
            (hash-set! ranked-candidates ir-expr (enumerate-hvx-exprs (hvx-expr-spec-expr spec) hvx-sub-expr)))
 
-         (synthesize-equiv-hvx-enum spec outputType hvx-sub-expr (hash-ref ranked-candidates ir-expr) discarded-sols))]
+         (define-values (res sol) (synthesize-equiv-hvx-enum spec outputType hvx-sub-expr (hash-ref ranked-candidates ir-expr) discarded-sols))
+         (println res)
+         (exit)
+         res)]
 
       [(cast sub-expr type)
        (begin
-         (define hvx-sub-spec (hvx-expr-spec sub-expr ir-expr-sol ir-expr-ctx ir-expr-axioms ir-expr-invalid-sketches))
+         (define hvx-sub-spec (hvx-expr-spec sub-expr ir-expr-sol ir-expr-annotations ir-expr-ctx ir-expr-axioms ir-expr-invalid-sketches))
          (define hvx-sub-expr (synthesize-hvx-template hvx-sub-spec ir-to-hvx))
          
          (display "Lifting IR to HVX...\n")
@@ -81,7 +104,50 @@
          (reset-hvx-instr-bnd)
          (synthesize-equiv-hvx spec sub-expr hvx-sub-expr discarded-sols))]
 
-      [(load-data opts)
+      [(saturate sub-expr round? signedOut?)
+       (begin
+         (define hvx-sub-spec (hvx-expr-spec sub-expr ir-expr-sol ir-expr-annotations ir-expr-ctx ir-expr-axioms ir-expr-invalid-sketches))
+         (define hvx-sub-expr (synthesize-hvx-template hvx-sub-spec ir-to-hvx))
+         
+         (display "Lifting IR to HVX...\n")
+         (display "====================\n\n")
+         (display (format "IR Operation: \n\n~a\n\n" (pretty-format ir-expr)))
+         
+         (reset-hvx-instr-bnd)
+         (synthesize-equiv-hvx spec sub-expr hvx-sub-expr discarded-sols))]
+
+      [(abs-diff sub-expr1 sub-expr2)
+       (begin
+         (define hvx-sub-spec1 (hvx-expr-spec sub-expr1 ir-expr-sol ir-expr-annotations ir-expr-ctx ir-expr-axioms ir-expr-invalid-sketches))
+         (define hvx-sub-expr1 (synthesize-hvx-template hvx-sub-spec1 ir-to-hvx))
+         
+         (define hvx-sub-spec2 (hvx-expr-spec sub-expr2 ir-expr-sol ir-expr-annotations ir-expr-ctx ir-expr-axioms ir-expr-invalid-sketches))
+         (define hvx-sub-expr2 (synthesize-hvx-template hvx-sub-spec2 ir-to-hvx))
+         
+         (display "Lifting IR to HVX...\n")
+         (display "====================\n\n")
+         (display (format "IR Operation: \n\n~a\n\n" (pretty-format ir-expr)))
+         
+         (reset-hvx-instr-bnd)
+         (synthesize-equiv-hvx spec (cons sub-expr1 sub-expr2) (cons hvx-sub-expr1 hvx-sub-expr2) discarded-sols))]
+      
+      [(zip-data sub-expr1 sub-expr2)
+       (begin
+         (define hvx-sub-spec1 (hvx-expr-spec sub-expr1 ir-expr-sol ir-expr-annotations ir-expr-ctx ir-expr-axioms ir-expr-invalid-sketches))
+         (define hvx-sub-expr1 (synthesize-hvx-template hvx-sub-spec1 ir-to-hvx))
+         
+         (define hvx-sub-spec2 (hvx-expr-spec sub-expr2 ir-expr-sol ir-expr-annotations ir-expr-ctx ir-expr-axioms ir-expr-invalid-sketches))
+         (define hvx-sub-expr2 (synthesize-hvx-template hvx-sub-spec2 ir-to-hvx))
+         
+         ;(display "Lifting IR to HVX...\n")
+         ;(display "====================\n\n")
+         ;(display (format "IR Operation: \n\n~a\n\n" (pretty-format ir-expr)))
+         
+         ;(reset-hvx-instr-bnd)
+         ;(synthesize-equiv-hvx spec sub-expr hvx-sub-expr discarded-sols)
+         (cons hvx-sub-expr1 hvx-sub-expr2))]
+
+      [(load-data id opts)
        (begin
          (display "Lifting IR to HVX...\n")
          (display "====================\n\n")
@@ -97,34 +163,153 @@
   (hash-set! ir-to-hvx ir-expr hvx-expr)
   hvx-expr)
 
-;; Define enumerative synthesis loop for HVX exppression generation
-(define (synthesize-equiv-hvx-enum spec output-type hvx-sub-expr ranked-candidates-exprs discarded-sols)
-  (define ir-expr (hvx-expr-spec-expr spec))
-  (define ir-expr-sol (hvx-expr-spec-sol spec))
-  (define ir-expr-ctx (hvx-expr-spec-ctx spec))
-  (define ir-expr-axioms (hvx-expr-spec-axioms spec))
-  
+(define (test-synth ir-expr-ctx ir-expr-sol original-expr candidate-expr discarded-sols)
+  (display (format "Trying 1 lane\n"))
+  (define synthesized-expr (interpret-hvx candidate-expr))
+
   (define (bounded-eq? oe se lanes)
     (for ([i lanes])
       (cond
         [(hvx-pair? se)
          (set-curr-cn-ir i)
          (set-curr-cn-hvx i)
-         (assert (eq? (evaluate (elem-ir oe i) ir-expr-sol) (v0-elem-hvx se i)))
-         (set-curr-cn-ir (+ i 1))
-         (set-curr-cn-hvx (+ i 1))
-         (assert (eq? (evaluate (elem-ir oe (+ i 1)) ir-expr-sol) (v1-elem-hvx se i)))
-         (set-curr-cn-ir (+ i 2))
-         (set-curr-cn-hvx (+ i 2))
-         (assert (eq? (evaluate (elem-ir oe (+ i 2)) ir-expr-sol) (v0-elem-hvx se (+ i 1))))
-         ]
+         (assert (eq? (evaluate (elem-ir oe i) ir-expr-sol) (v0-elem-hvx se i)))]
         [else
          (set-curr-cn-ir i)
          (set-curr-cn-hvx i)
-         (assert (eq? (evaluate (elem-ir oe i) ir-expr-sol) (elem-hvx se i)))
-         (set-curr-cn-ir (+ i 1))
-         (set-curr-cn-hvx (+ i 1))
-         (assert (eq? (evaluate (elem-ir oe (+ i 1)) ir-expr-sol) (elem-hvx se (+ i 1))))])))
+         (assert (eq? (evaluate (elem-ir oe i) ir-expr-sol) (elem-hvx se i)))])))
+  
+  (define st0 (current-milliseconds))
+  (define sol0 (synthesize #:forall ir-expr-ctx
+                           #:guarantee (begin
+                                         (bounded-eq? original-expr synthesized-expr MC_BND)
+                                         (for ([discarded-sol discarded-sols])
+                                           (assert (not (equal-expr-hvx? discarded-sol candidate-expr)))))))  
+  (define runtime0 (- (current-milliseconds) st0))
+  (display (format "Synthesis time: ~ams\n" runtime0))
+  (set! total-synth-time (+ total-synth-time runtime0))
+
+  (cond
+    [(unsat? sol0) sol0]
+    [else
+     (display (format "Trying 2 lanes\n"))
+     (define synthesized-expr (interpret-hvx candidate-expr))
+
+     (define (bounded-eq? oe se lanes)
+       (for ([i lanes])
+         (cond
+           [(hvx-pair? se)
+            (set-curr-cn-ir i)
+            (set-curr-cn-hvx i)
+            (assert (eq? (evaluate (elem-ir oe i) ir-expr-sol) (v0-elem-hvx se i)))
+            (set-curr-cn-ir (+ i 1))
+            (set-curr-cn-hvx (+ i 1))
+            (assert (eq? (evaluate (elem-ir oe (+ i 1)) ir-expr-sol) (v1-elem-hvx se i)))]
+           [else
+            (set-curr-cn-ir i)
+            (set-curr-cn-hvx i)
+            (assert (eq? (evaluate (elem-ir oe i) ir-expr-sol) (elem-hvx se i)))
+            (set-curr-cn-ir (+ i 1))
+            (set-curr-cn-hvx (+ i 1))
+            (assert (eq? (evaluate (elem-ir oe (+ i 1)) ir-expr-sol) (elem-hvx se (+ i 1))))])))
+
+     
+     (set-curr-cn-ir 0)
+     (println (evaluate (elem-ir original-expr 0) ir-expr-sol))
+     (set-curr-cn-ir 1)
+     (println (evaluate (elem-ir original-expr 1) ir-expr-sol))
+     (set-curr-cn-ir 2)
+     (println (evaluate (elem-ir original-expr 2) ir-expr-sol))
+     (set-curr-cn-ir 3)
+     (println (evaluate (elem-ir original-expr 3) ir-expr-sol))
+     
+     (define st (current-milliseconds))
+     (define sol (synthesize #:forall ir-expr-ctx
+                             #:guarantee (begin
+                                           (bounded-eq? original-expr synthesized-expr MC_BND)
+                                           (for ([discarded-sol discarded-sols])
+                                             (assert (not (equal-expr-hvx? discarded-sol candidate-expr)))))))  
+     (define runtime (- (current-milliseconds) st))
+     (display (format "Synthesis time: ~ams\n" runtime))
+     (set! total-synth-time (+ total-synth-time runtime))
+
+     (cond
+       [(unsat? sol) sol]
+       [else
+        ;(pretty-print (evaluate candidate-expr sol))
+     
+        ;(display (format "Trying 4 lanes!\n"))
+     
+        (set! synthesized-expr (interpret-hvx (evaluate candidate-expr sol)))
+
+        (define (bounded-eq2? oe se lanes)
+          (for ([i lanes])
+            (cond
+              [(hvx-pair? se)
+               (set-curr-cn-ir i)
+               (set-curr-cn-hvx i)
+               (assert (eq? (evaluate (elem-ir oe i) ir-expr-sol) (v0-elem-hvx se i)))
+               (set-curr-cn-ir (+ i 1))
+               (set-curr-cn-hvx (+ i 1))
+               (assert (eq? (evaluate (elem-ir oe (+ i 1)) ir-expr-sol) (v1-elem-hvx se i)))
+               (set-curr-cn-ir (+ i 2))
+               (set-curr-cn-hvx (+ i 2))
+               (assert (eq? (evaluate (elem-ir oe (+ i 2)) ir-expr-sol) (v0-elem-hvx se (+ i 1))))
+               (set-curr-cn-ir (+ i 3))
+               (set-curr-cn-hvx (+ i 3))
+               (assert (eq? (evaluate (elem-ir oe (+ i 3)) ir-expr-sol) (v1-elem-hvx se (+ i 1))))]
+              [else
+               (set-curr-cn-ir i)
+               (set-curr-cn-hvx i)
+               (assert (eq? (evaluate (elem-ir oe i) ir-expr-sol) (elem-hvx se i)))
+               (set-curr-cn-ir (+ i 1))
+               (set-curr-cn-hvx (+ i 1))
+               (assert (eq? (evaluate (elem-ir oe (+ i 1)) ir-expr-sol) (elem-hvx se (+ i 1))))])))
+     
+        (define st1 (current-milliseconds))
+        (define sol1 (synthesize #:forall ir-expr-ctx
+                                 #:guarantee (bounded-eq2? original-expr synthesized-expr MC_BND)))
+        (define runtime1 (- (current-milliseconds) st1))
+        (display (format "Synthesis time: ~ams\n" runtime1))
+        (set! total-synth-time (+ total-synth-time runtime1))
+
+        (cond
+          [(unsat? sol1) (test-synth ir-expr-ctx ir-expr-sol original-expr candidate-expr (set-add discarded-sols (evaluate candidate-expr sol)))]
+          [else sol])])]))
+
+;; Define enumerative synthesis loop for HVX exppression generation
+(define (synthesize-equiv-hvx-enum spec output-type hvx-sub-expr ranked-candidates-exprs discarded-sols)
+  (define ir-expr (hvx-expr-spec-expr spec))
+  (define ir-expr-sol (hvx-expr-spec-sol spec))
+  (define ir-expr-annot (hvx-expr-spec-annot spec))
+  (define ir-expr-ctx (hvx-expr-spec-ctx spec))
+  (define ir-expr-axioms (hvx-expr-spec-axioms spec))
+  
+;  (define (bounded-eq? oe se lanes)
+;    (for ([i lanes])
+;      (cond
+;        [(hvx-pair? se)
+;         (set-curr-cn-ir i)
+;         (set-curr-cn-hvx i)
+;         (assert (eq? (evaluate (elem-ir oe i) ir-expr-sol) (v0-elem-hvx se i)))
+;         (set-curr-cn-ir (+ i 1))
+;         (set-curr-cn-hvx (+ i 1))
+;         (assert (eq? (evaluate (elem-ir oe (+ i 1)) ir-expr-sol) (v1-elem-hvx se i)))
+;         ;(set-curr-cn-ir (+ i 2))
+;         ;(set-curr-cn-hvx (+ i 2))
+;         ;(assert (eq? (evaluate (elem-ir oe (+ i 2)) ir-expr-sol) (v0-elem-hvx se (+ i 1))))
+;         ;(set-curr-cn-ir (+ i 3))
+;         ;(set-curr-cn-hvx (+ i 3))
+;         ;(assert (eq? (evaluate (elem-ir oe (+ i 3)) ir-expr-sol) (v1-elem-hvx se (+ i 1))))
+;         ]
+;        [else
+;         (set-curr-cn-ir i)
+;         (set-curr-cn-hvx i)
+;         (assert (eq? (evaluate (elem-ir oe i) ir-expr-sol) (elem-hvx se i)))
+;         (set-curr-cn-ir (+ i 1))
+;         (set-curr-cn-hvx (+ i 1))
+;         (assert (eq? (evaluate (elem-ir oe (+ i 1)) ir-expr-sol) (elem-hvx se (+ i 1))))])))
+  
   (define (find-next-impl candidate-hvx-exprs)
     (cond
       [(empty? candidate-hvx-exprs) (unsat)]
@@ -133,34 +318,39 @@
        (cond
          [(hash-has-key? cache candidate-expr) (find-next-impl (rest candidate-hvx-exprs))]
          [else
+
+          (pretty-print candidate-expr)
+          
           (hash-clear! hvx-gather-tables)
           (hash-clear! hvx-gather-types)
           
-          (define original-expr (interpret-ir ir-expr))
+          ;(define original-expr (interpret-ir ir-expr))
+          (define original-expr (interpret-halide (hash-ref ir-expr-annot ir-expr)))
           (define synthesized-expr (interpret-hvx candidate-expr))
-
+          
           (define synthesizer
             (engine
              (λ (_)
-               (define st (current-milliseconds))
-               (define sol (synthesize #:forall ir-expr-ctx
-                                       #:guarantee (begin
-                                                     (bounded-eq? original-expr synthesized-expr MC_BND)
-                                                     (for ([discarded-sol discarded-sols])
-                                                       (assert (not (equal-expr-hvx? discarded-sol candidate-expr)))))))
-               (define runtime (- (current-milliseconds) st))
-               (display (format "Synthesis time: ~ams\n" runtime))
-               (set! total-synth-time (+ total-synth-time runtime))
-               
+;               (define st (current-milliseconds))
+;               (define sol (synthesize #:forall ir-expr-ctx
+;                                       #:guarantee (begin
+;                                                     (bounded-eq? original-expr synthesized-expr MC_BND)
+;                                                     (for ([discarded-sol discarded-sols])
+;                                                       (assert (not (equal-expr-hvx? discarded-sol candidate-expr)))))))
+;               (define runtime (- (current-milliseconds) st))
+;               (display (format "Synthesis time: ~ams\n" runtime))
+;               (set! total-synth-time (+ total-synth-time runtime))
+               (define sol (test-synth ir-expr-ctx ir-expr-sol original-expr candidate-expr discarded-sols))
+                 
                sol)))
 
-          (engine-run 600000 synthesizer)
+          (engine-run 300000 synthesizer)
           
           (define sol (engine-result synthesizer))
 
           (cond
             [(eq? sol #f)
-             (display (format "Time-out: 10mins\n"))
+             (display (format "Time-out: 5mins\n"))
              (hash-set! cache candidate-expr (unsat))
              (find-next-impl (rest candidate-hvx-exprs))]
             [(unsat? sol)
@@ -170,7 +360,7 @@
              (display "\nSuccessfully found an equivalent HVX expression.\n\n")
              (pretty-print (evaluate candidate-expr sol))
              (display "\n")
-             (evaluate candidate-expr sol)])])]))
+             (values (evaluate candidate-expr sol) sol)])])]))
 
   (define (search-candidates sorted-costs ranked-candidates-exprs)
     (cond
@@ -191,8 +381,8 @@
   
   (define sorted-costs (sort (hash-keys ranked-candidates-exprs) <))
   
-  (clear-asserts!)
-  (for ([axiom ir-expr-axioms]) (assert axiom))
+  (clear-vc!)
+  (for ([axiom ir-expr-axioms]) (assume axiom))
   (search-candidates sorted-costs ranked-candidates-exprs))
 
 ;; Define incremental synthesis loop for HVX expression generation
@@ -223,6 +413,9 @@
   (define ir-expr-axioms (hvx-expr-spec-axioms spec))
 
   (define synthesized-hvx-expr (??hvx-expr-grm))
+
+  ;(println synthesized-hvx-expr)
+  ;(println synthesized-hvx-expr)
   
   (define (bounded-eq? oe se lanes)
     (for ([i lanes])
@@ -244,8 +437,8 @@
 
   (define curr-best-cost (if (void? curr-best-sol) +inf.0 (cost-model curr-best-sol)))
 
-  (clear-asserts!)
-  (for ([axiom ir-expr-axioms]) (assert axiom))
+  (clear-vc!)
+  (for ([axiom ir-expr-axioms]) (assume axiom))
   (define st (current-seconds))
   (define sol (synthesize #:forall ir-expr-ctx
                           #:guarantee (begin

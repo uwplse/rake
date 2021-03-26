@@ -58,9 +58,15 @@
      [(vec-sub v1 v2) (set-union (extract-loads-as-hvx-vecs v1) (extract-loads-as-hvx-vecs v2))]
      [(vec-div v1 v2) (set-union (extract-loads-as-hvx-vecs v1) (extract-loads-as-hvx-vecs v2))]
      [(vec-mul v1 v2) (set-union (extract-loads-as-hvx-vecs v1) (extract-loads-as-hvx-vecs v2))]
+     [(vec-max v1 v2) (set-union (extract-loads-as-hvx-vecs v1) (extract-loads-as-hvx-vecs v2))]
+     [(vec-min v1 v2) (set-union (extract-loads-as-hvx-vecs v1) (extract-loads-as-hvx-vecs v2))]
+
+     [(shift_left v1 v2) (set-union (extract-loads-as-hvx-vecs v1) (extract-loads-as-hvx-vecs v2))]
+     [(shift_right v1 v2) (set-union (extract-loads-as-hvx-vecs v1) (extract-loads-as-hvx-vecs v2))]
+     [(absd v1 v2) (set-union (extract-loads-as-hvx-vecs v1) (extract-loads-as-hvx-vecs v2))]
     
      ;; Base case
-     [_ (error "Don't know how to get live ops from:" expr)])))
+     [_ (error "Don't know how to get loads from:" expr)])))
 
 ;; Extract buffer reads
 (define (extract-buf-reads expr)
@@ -78,9 +84,11 @@
     [(expression op operands ...)
 
      ;; Silly workaround -- ask rosette folks how to do this properly
-     (define-symbolic hack (~> integer? (bitvector 16)))
+     (define-symbolic hack (~> integer? integer?))
      (define hack2 (hack 0))
+     (define hack3 (if (< (hack 0) 0) 1 2))
      (define app (match hack2 [(expression op2 ops2 ...) op2]))
+     (define ite (match hack3 [(expression op2 ops2 ...) op2]))
      
      (cond
        [(eq? op bvadd) (flatten (for/list ([operand operands]) (extract-lane-buf-reads operand)))]
@@ -92,6 +100,13 @@
        [(eq? op extract) (flatten (for/list ([operand operands]) (extract-lane-buf-reads operand)))]
        [(eq? op zero-extend) (flatten (for/list ([operand operands]) (extract-lane-buf-reads operand)))]
        [(eq? op sign-extend) (flatten (for/list ([operand operands]) (extract-lane-buf-reads operand)))]
+       [(eq? op bvule) (flatten (for/list ([operand operands]) (extract-lane-buf-reads operand)))]
+       [(eq? op bvsle) (flatten (for/list ([operand operands]) (extract-lane-buf-reads operand)))]
+       [(eq? op bvand) (flatten (for/list ([operand operands]) (extract-lane-buf-reads operand)))]
+       [(eq? op bvxor) (flatten (for/list ([operand operands]) (extract-lane-buf-reads operand)))]
+       [(eq? op bvashr) (flatten (for/list ([operand operands]) (extract-lane-buf-reads operand)))]
+       [(eq? op bvshl) (flatten (for/list ([operand operands]) (extract-lane-buf-reads operand)))]
+       [(eq? op ite) (flatten (for/list ([operand operands]) (extract-lane-buf-reads operand)))]
        [(eq? op app) (list (mk-typed-expr expr (var-type (list-ref operands 0))))]
        [else (error "NYI: extract buffer reads from" expr)])]
      
@@ -149,6 +164,12 @@
     [(vec-mul v1 v2) (if (or (broadcast? v1) (broadcast? v2))
                          (append (list 'vec-sca-mul) (extract-live-ops v1) (extract-live-ops v2))
                          (append (list 'vec-vec-mul) (extract-live-ops v1) (extract-live-ops v2)))]
+    [(vec-max v1 v2) (append (list 'min) (extract-live-ops v1) (extract-live-ops v2))]
+    [(vec-min v1 v2) (append (list 'max) (extract-live-ops v1) (extract-live-ops v2))]
+
+    [(shift_left v1 v2) (append (list 'vec-sca-mul) (extract-live-ops v1) (extract-live-ops v2))]
+    [(shift_right v1 v2) (append (list 'vec-sca-div) (extract-live-ops v1) (extract-live-ops v2))]
+    [(absd v1 v2) (append (list 'absd) (extract-live-ops v1) (extract-live-ops v2))]
     
     ;; Base case
     [_ (error "Don't know how to get live ops from:" expr)]))
@@ -198,9 +219,15 @@
     [(vec-sub v1 v2) (append (extract-add-consts v1) (extract-add-consts v2))]
     [(vec-mul v1 v2) (append (extract-add-consts v1) (extract-add-consts v2))]
     [(vec-div v1 v2) (append (extract-add-consts v1) (extract-add-consts v2))]
+    [(vec-min v1 v2) (append (extract-add-consts v1) (extract-add-consts v2))]
+    [(vec-max v1 v2) (append (extract-add-consts v1) (extract-add-consts v2))]
+
+    [(shift_left v1 v2) (append (extract-add-consts v1) (extract-add-consts v2))]
+    [(shift_right v1 v2) (append (extract-add-consts v1) (extract-add-consts v2))]
+    [(absd v1 v2) (append (extract-add-consts v1) (extract-add-consts v2))]
     
     ;; Base case
-    [_ (error "Don't know how to extract consts from:" expr)]))
+    [_ (error "Don't know how to extract add consts from:" expr)]))
 
 (define (extract-sub-consts expr)
   (match expr
@@ -241,6 +268,14 @@
                       (if (broadcast? v2) (extract-consts v2) (extract-sub-consts v2)))]
     [(vec-mul v1 v2) (append (extract-sub-consts v1) (extract-sub-consts v2))]
     [(vec-div v1 v2) (append (extract-sub-consts v1) (extract-sub-consts v2))]
+    [(vec-min v1 v2) (append (extract-sub-consts v1) (extract-sub-consts v2))]
+    [(vec-max v1 v2) (append (extract-sub-consts v1) (extract-sub-consts v2))]
+
+    [(shift_left v1 v2) (append (extract-sub-consts v1) (extract-sub-consts v2))]
+    [(shift_right v1 v2) (append (extract-sub-consts v1) (extract-sub-consts v2))]
+    [(absd v1 v2) (append
+                   (if (broadcast? v1) (extract-consts v1) (extract-sub-consts v1))
+                   (if (broadcast? v2) (extract-consts v2) (extract-sub-consts v2)))]
 
     ;; Shuffles
     [(slice_vectors vec base stride len) (extract-sub-consts vec)]
@@ -289,6 +324,15 @@
                       (if (broadcast? v1) (extract-consts v1) (extract-mul-consts v1))
                       (if (broadcast? v2) (extract-consts v2) (extract-mul-consts v2)))]
     [(vec-div v1 v2) (append (extract-mul-consts v1) (extract-mul-consts v2))]
+    [(vec-min v1 v2) (append (extract-mul-consts v1) (extract-mul-consts v2))]
+    [(vec-max v1 v2) (append (extract-mul-consts v1) (extract-mul-consts v2))]
+    
+
+    [(shift_left v1 v2) (append
+                         (if (broadcast? v1) (two^ (extract-consts v1)) (extract-mul-consts v1))
+                         (if (broadcast? v2) (two^ (extract-consts v2)) (extract-mul-consts v2)))]
+    [(shift_right v1 v2) (append (extract-mul-consts v1) (extract-mul-consts v2))]
+    [(absd v1 v2) (append (extract-mul-consts v1) (extract-mul-consts v2))]
 
     ;; Shuffles
     [(slice_vectors vec base stride len) (extract-mul-consts vec)]
@@ -335,7 +379,14 @@
     [(vec-sub v1 v2) (append (extract-div-consts v1) (extract-div-consts v2))]
     [(vec-mul v1 v2) (append (extract-div-consts v1) (extract-div-consts v2))]
     [(vec-div v1 v2) (if (broadcast? v2) (extract-consts v2) (extract-div-consts v2))]
+    [(vec-min v1 v2) (append (extract-div-consts v1) (extract-div-consts v2))]
+    [(vec-max v1 v2) (append (extract-div-consts v1) (extract-div-consts v2))]
+    
 
+    [(shift_left v1 v2) (extract-div-consts v1) (extract-div-consts v2)]
+    [(shift_right v1 v2) (if (broadcast? v2) (two^ (extract-consts v2)) (extract-div-consts v2))]
+    [(absd v1 v2) (extract-div-consts v1) (extract-div-consts v2)]
+    
     ;; Shuffles
     [(slice_vectors vec base stride len) (extract-div-consts vec)]
     [(concat_vectors v1 v2) (append (extract-div-consts v1) (extract-div-consts v2))]
@@ -343,6 +394,16 @@
     
     ;; Base case
     [_ (error "Don't know how to extract consts from:" expr)]))
+
+(define (two^ consts)
+  (for/list ([n consts])
+    (match n
+      [(int8_t v) (int8_t (bvshl (bv 1 8) v))]
+      [(uint8_t v) (uint8_t (bvshl (bv 1 8) v))]
+      [(int16_t v) (int16_t (bvshl (bv 1 16) v))]
+      [(uint16_t v) (uint16_t (bvshl (bv 1 16) v))]
+      [(int32_t v) (int32_t (bvshl (bv 1 32) v))]
+      [(uint32_t v) (uint32_t (bvshl (bv 1 32) v))])))
 
 (define (broadcast? vec)
   (define v (strip-halide-casts vec))

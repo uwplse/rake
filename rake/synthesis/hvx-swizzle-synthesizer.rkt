@@ -16,17 +16,17 @@
 (require rake/synthesis/swizzling/hvx-swizzle-synthesizer-enum)
 
 (define (synthesize-hvx-swizzles halide-spec hvx-expr-sketch ctx axioms [swizzling-algo 'enumerative])
-  (display "Synthesizing Data Swizzle Spec...\n")
-  (display "=================================\n\n")
+  ;(display "Synthesizing Data Swizzle Spec...\n")
+  ;(display "=================================\n\n")
   
-  (display "Synthesizing spec...\n\n")
+  ;(display "Synthesizing spec...\n\n")
 
   ;; Pre-processing. Replace gather* with gather-vec and gather-vecp
   (set! hvx-expr-sketch (specialize-gather*-nodes hvx-expr-sketch))
 
   ;; Synthesize a hash-table spec
   (define-values (sketch-is-correct? hvx-expr-spec)
-    (synthesize-swizzle-spec halide-spec hvx-expr-sketch axioms ctx))
+    (values #t halide-spec));(synthesize-swizzle-spec halide-spec hvx-expr-sketch axioms ctx))
 
   ;; Add a swizzle at the end to allow the synthesizer to distribute data movement before
   ;; and after the computation
@@ -34,17 +34,19 @@
     (set! hvx-expr-sketch (swizzle 0 hvx-expr-sketch)))
   
   ;; Synthesize instructions
-  (when sketch-is-correct?
-    (display "Synthesizing Swizzle implementations...\n")
-    (display "=======================================\n\n")
+  (cond
+    [sketch-is-correct?
+     (display "Synthesizing Swizzle implementations...\n")
+     (display "=======================================\n\n")
 
-    (define starting-vecs (extract-loads-as-hvx-vecs halide-spec))
+     (define starting-vecs (extract-loads-as-hvx-vecs halide-spec))
     
-    (match swizzling-algo
-      ['naive (synthesize-hvx-swizzles-naive starting-vecs hvx-expr-sketch hvx-expr-spec axioms ctx)]
-      ['incremental (synthesize-hvx-swizzles-incr starting-vecs hvx-expr-sketch hvx-expr-spec axioms ctx)]
-      ['enumerative (synthesize-hvx-swizzles-enum starting-vecs hvx-expr-sketch hvx-expr-spec axioms ctx)]
-      [_ (error (format "Unrecognized lowering algorithm specified: '~a. Supported algorithms: ['naive, 'incremental, 'enumerative]" swizzling-algo))])))
+     (match swizzling-algo
+       ['naive (synthesize-hvx-swizzles-naive starting-vecs hvx-expr-sketch hvx-expr-spec axioms ctx)]
+       ['incremental (synthesize-hvx-swizzles-incr starting-vecs hvx-expr-sketch hvx-expr-spec axioms ctx)]
+       ['enumerative (synthesize-hvx-swizzles-enum starting-vecs hvx-expr-sketch hvx-expr-spec axioms ctx)]
+       [_ (error (format "Unrecognized lowering algorithm specified: '~a. Supported algorithms: ['naive, 'incremental, 'enumerative]" swizzling-algo))])]
+    [else (values sketch-is-correct? (void))]))
 
 (define (synthesize-swizzle-spec halide-spec hvx-expr-sketch axioms ctx)
   (define VEC_LANES (num-elems-hal halide-spec))
@@ -54,11 +56,11 @@
   
   (define interpreted-s-expr (interpret-hvx hvx-expr-sketch))
   (define interpreted-o-expr (interpret-halide halide-spec))
-  
+
   ;; Synthesize spec hash-table, one lane at a time
   (define sols (list))
-  (clear-asserts!)
-  (for ([axiom axioms]) (assert axiom))
+  (clear-vc!)
+  (for ([axiom axioms]) (assume axiom))
   (define st (current-seconds))
 
   (define lanes-used-in-synth (synthesis-vec-lanes interpreted-s-expr VEC_LANES))
@@ -67,6 +69,7 @@
       [(member lane lanes-used-in-synth)
        (define sol (synthesize #:forall ctx
                                #:guarantee (lane-eq? interpreted-o-expr interpreted-s-expr lane)))
+       (println sol)
        (set! sols (append sols (list sol)))]
       [else
        (set! sols (append sols (list (sat))))]))
@@ -96,7 +99,7 @@
          (serve-vec-pair (car gather-tbls) (cdr gather-tbls) oType  opts sols)]
         [_ node]))
     (set! hvx-expr-spec (visit-hvx hvx-expr-sketch repl-gather-with-swizzle-spec)))
-  
+
   (values correct? hvx-expr-spec))
 
 (provide synthesize-hvx-swizzles)

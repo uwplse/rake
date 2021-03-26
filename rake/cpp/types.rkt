@@ -92,6 +92,15 @@
     [(uint16_t v) 16]
     [(uint32_t v) 32]
     [(uint64_t v) 64]
+    
+    ['int8 8]
+    ['int16 16]
+    ['int32 32]
+    ['int64 64]
+    ['uint8 8]
+    ['uint16 16]
+    ['uint32 32]
+    ['uint64 64]
     [_ (error "Cannot infer bit-width: ~a" e)]))
 
 (provide (all-defined-out))

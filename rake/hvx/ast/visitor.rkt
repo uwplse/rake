@@ -4,6 +4,7 @@
 (require rake/hvx/ast/types)
 
 (define trace (list))
+(define (trace-length) (length trace))
 (define (peek-trace) (first trace))
 (define (peek-parent-trace) (second trace))
 (define (push-trace node) (set! trace (cons node trace)))
@@ -63,14 +64,14 @@
       [(vmpy-acc Vdd Vu Rt) (transform (vmpy-acc (visit Vdd transform 0) (visit Vu transform 1) (visit Rt transform 2)))]
       [(vmpyi-acc Vd Vu Rt) (transform (vmpyi-acc (visit Vd transform) (visit Vu transform) (visit Rt transform)))]
       [(vmpye-acc Vd Vu Rt) (transform (vmpye-acc (visit Vd transform) (visit Vu transform) (visit Rt transform)))]
-      [(vmpa Vuu Rt) (transform (vmpa (visit Vuu transform) (visit Rt transform)))]
-      [(vmpa-acc Vdd Vuu Rt) (transform (vmpa-acc (visit Vdd transform) (visit Vuu transform) (visit Rt transform)))]
+      [(vmpa Vuu Rt signed?) (transform (vmpa (visit Vuu transform) (visit Rt transform) (visit signed? transform)))]
+      [(vmpa-acc Vdd Vuu Rt signed?) (transform (vmpa-acc (visit Vdd transform) (visit Vuu transform) (visit Rt transform) (visit signed? transform)))]
       [(vdmpy Vu Rt) (transform (vdmpy (visit Vu transform) (visit Rt transform)))]
       [(vdmpy-sw Vuu Rt) (transform (vdmpy-sw (visit Vuu transform) (visit Rt transform)))]
       [(vdmpy-acc Vd Vu Rt) (transform (vdmpy-acc (visit Vd transform) (visit Vu transform) (visit Rt transform)))]
       [(vdmpy-sw-acc Vdd Vuu Rt) (transform (vdmpy-sw-acc (visit Vdd transform) (visit Vuu transform) (visit Rt transform)))]
-      [(vtmpy Vuu Rt) (transform (vtmpy (visit Vuu transform) (visit Rt transform)))]
-      [(vtmpy-acc Vdd Vuu Rt) (transform (vtmpy-acc (visit Vdd transform) (visit Vuu transform) (visit Rt transform)))]
+      [(vtmpy Vuu Rt signed?) (transform (vtmpy (visit Vuu transform) (visit Rt transform) (visit signed? transform)))]
+      [(vtmpy-acc Vdd Vuu Rt signed?) (transform (vtmpy-acc (visit Vdd transform) (visit Vuu transform) (visit Rt transform) (visit signed? transform)))]
       [(vrmpy Vu Rt) (transform (vrmpy (visit Vu transform) (visit Rt transform)))]
       [(vrmpy-acc Vd Vu Rt) (transform (vrmpy-acc (visit Vd transform) (visit Vu transform) (visit Rt transform)))]
       [(vrmpy-p Vuu Rt u1) (transform (vrmpy-p (visit Vuu transform) (visit Rt transform) (visit u1 transform)))]

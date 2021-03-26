@@ -188,7 +188,7 @@
 
   (cond
     [(eq? (length symbolics-expr1) (length symbolics-expr2)) 
-     (clear-asserts!)
+     (clear-vc!)
      (for/or ([permuted-symbolics-expr2 (permutations symbolics-expr2)])
        (define sol
          ;(time
