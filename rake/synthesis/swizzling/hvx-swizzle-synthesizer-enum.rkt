@@ -2,6 +2,8 @@
 
 (require racket/engine)
 
+(require rake/halide/ir/interpreter)
+
 (require rake/hvx/ast/types)
 (require rake/hvx/ast/visitor)
 (require rake/hvx/interpreter)
@@ -78,7 +80,6 @@
          [(and (hash-has-key? enum-history candidate-swizzle) (eq? (hash-ref enum-history candidate-swizzle) #f))
           (find-next-swizzle (rest candidate-swizzle-exprs))]
          [else
-
           ;; Replace swizzle node with swizzle grammar
           (define (repl-gather-with-swizzle-grm node)
             (match node
@@ -88,18 +89,18 @@
               [_ node]))
           (define hvx-expr-grm (visit-hvx hvx-expr-sketch repl-gather-with-swizzle-grm))
           
-          (define interpreted-o-expr (interpret-hvx hvx-expr-spec))
-          (define VEC_LANES (num-elems-hvx interpreted-o-expr))
-          
+          (define interpreted-o-expr (interpret-halide hvx-expr-spec))
+          (define VEC_LANES (num-elems-hvx (interpret-hvx hvx-expr-grm)))
+
           (define runtime 0)
           
           (define synthesizer
             (engine
              (λ (_)
-               (clear-asserts!)
-               (for ([axiom axioms]) (assert axiom))
+               (clear-vc!)
+               (for ([axiom axioms]) (assume axiom))
                (define st (current-milliseconds))
-               (define lanes-used-in-synth (synthesis-vec-lanes interpreted-o-expr VEC_LANES))
+               (define lanes-used-in-synth (synthesis-vec-lanes (interpret-hvx hvx-expr-grm) VEC_LANES))
                (define-values (correct? hvx-expr-grm-updated)
                  (incr-lane-synthesis-loop interpreted-o-expr hvx-expr-grm ctx discarded-sols lanes-used-in-synth))
 
@@ -112,16 +113,16 @@
                
                correct?)))
 
-          (engine-run 30000 synthesizer)
+          (engine-run 300000 synthesizer)
 
           (define correct? (engine-result synthesizer))
           (cond
             [(hash-has-key? enum-history candidate-swizzle)
              (set! total-synth-time (+ total-synth-time runtime))]
             [else
-             (display (format "Synthesizer timed out after: 30s\n"))
+             (display (format "Synthesizer timed out after: 5mins\n"))
              (hash-set! enum-history candidate-swizzle #f)
-             (set! total-synth-time (+ total-synth-time 30000))])
+             (set! total-synth-time (+ total-synth-time 300000))])
           
           (cond
             [correct?
@@ -130,6 +131,7 @@
              (display "\n")
              hvx-expr-grm]
             [else
+             (hash-set! enum-history candidate-swizzle #f)
              (find-next-swizzle (rest candidate-swizzle-exprs))])])]))
 
   (define (search-candidates sorted-costs ranked-candidates)
@@ -170,7 +172,7 @@
          [else
           (enumerate-hvx-gather-exprs
            (hvx-type (interpret-hvx swizzle-node))
-           (list lo hi vcombine vshuff vshuffe vshuffo vshuffoe vdeal vdeale valign vror vtranspose vpacke vpacko vunpack)
+           (list lo hi vshuff vshuffe vshuffo vshuffoe vcombine vdeal vdeale valign vror vtranspose vpacke vpacko vunpack)
            load-idxs
            3)])))
   
@@ -178,8 +180,8 @@
   
   (define sorted-costs (sort (hash-keys ranked-candidates) <))
   
-  (clear-asserts!)
-  (for ([axiom axioms]) (assert axiom))
+  (clear-vc!)
+  (for ([axiom axioms]) (assume axiom))
   (search-candidates sorted-costs ranked-candidates))
 
 (define (incr-lane-synthesis-loop interpreted-o-expr hvx-expr-grm ctx discarded-sols lanes-used-in-synth)
@@ -188,16 +190,19 @@
     [else
      (define lane (first lanes-used-in-synth))
      ;(display (format "Checking lane ~a\n" lane))
+
      (define interpreted-f-expr (interpret-hvx hvx-expr-grm))
+
      (define sol (synthesize #:forall ctx
                              #:guarantee (begin
-                                           (lane-eq-hvx? interpreted-o-expr interpreted-f-expr lane)
+                                           (lane-eq? interpreted-o-expr interpreted-f-expr lane)
                                            (for ([discarded-sol discarded-sols])
                                              (assert (not (equal-expr-hvx? discarded-sol hvx-expr-grm)))))))
      (cond
        [(unsat? sol) (values #f hvx-expr-grm)]
        [else
         (define hvx-expr-grm-updated (evaluate hvx-expr-grm sol))
+        ;(pretty-print hvx-expr-grm-updated)
         (define-values (correct? updated-hvx-expr-grm)
           (incr-lane-synthesis-loop interpreted-o-expr hvx-expr-grm-updated ctx discarded-sols (rest lanes-used-in-synth)))
         (cond
