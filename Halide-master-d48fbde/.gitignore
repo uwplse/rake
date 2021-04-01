@@ -1,5 +1,3 @@
-CMakeUserPresets.json
-
 /tutorial/figures/tmp/trace.bin
 /apps/*/bin
 /apps/*/cmake_build
@@ -37,7 +35,6 @@ xcuserdata
 in.png
 _build
 a.out
-*.bc
 *.cubin
 tags
 src/*.top
