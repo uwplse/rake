@@ -614,7 +614,7 @@ Expr lower_rounding_shift_left(const Expr &a, const Expr &b) {
 Expr lower_rounding_shift_right(const Expr &a, const Expr &b) {
     Expr round = simplify(make_shift_right(make_one(a.type()) << max(b, 0), 1));
     if ((a.type().is_uint() && a.type().bits() <= 32) || a.type().bits() < 32) {
-        return narrow(widening_add(a, round) >> b);
+        return (a + round) >> b;
     } else {
         // Avoid widening arithmetic when signed integer overflow is undefined,
         // or when the intermediate would be 128 bits.

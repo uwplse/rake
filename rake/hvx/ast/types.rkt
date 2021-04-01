@@ -47,7 +47,7 @@
 (struct vdeale (Vu Vv) #:transparent)
 (struct vshuff (Vu) #:transparent)
 (struct vtranspose (Vu Vv Rt) #:transparent)
-(struct vpack (Vu Vv) #:transparent)
+(struct vpack (Vu Vv signed?) #:transparent)
 (struct vpacke (Vu Vv signed?) #:transparent)
 (struct vpacko (Vu Vv signed?) #:transparent)
 (struct vpacko-n (Vu Vv signed?) #:transparent)
@@ -55,6 +55,7 @@
 (struct vunpacko (Vu) #:transparent)
 (struct vlut (Vu Vv) #:transparent)
 (struct vgather (Rt Mu Vv) #:transparent)
+(struct vinterleave (Vuu) #:transparent)
 
 ;; HVX instructions for type-casting
 (struct vzxt (Vu signed?) #:transparent)
@@ -106,6 +107,8 @@
 (struct serve-vec-pair (v0 v1 type opts sols))
 (struct ??vread (buf-opts load-idxs) #:transparent)
 (struct ??vreadp (buf-opts load-idxs) #:transparent)
+
+(struct abstr-sub-expr (id vec) #:transparent)
 
 ;; Type signatures
 (struct instr-sig (ret-val args) #:transparent)
@@ -223,7 +226,12 @@
                           (instr-sig 'u32x32x2 (list 'u16x64)))]
 
     [(eq? vtranspose instr) (list
-                             (instr-sig 'i16x64x2 (list 'i16x64 'i16x64 'const)))]
+                             (instr-sig 'i16x64x2 (list 'i16x64 'i16x64 'const))
+                             (instr-sig 'u16x64x2 (list 'u16x64 'u16x64 'const)))]
+
+    [(eq? vinterleave instr) (list
+                              (instr-sig 'i16x64x2 (list 'i16x64x2))
+                              (instr-sig 'u16x64x2 (list 'u16x64x2)))]
 
     ;(struct vlut (Vu Vv) #:transparent)
     ;(struct vgather (Rt Mu Vv) #:transparent)

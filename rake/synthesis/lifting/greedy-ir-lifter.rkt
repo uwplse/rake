@@ -16,8 +16,15 @@
 (define MC_BND 1)
 
 (define load-data-id -1)
+(define (get-load-id) (set! load-data-id (add1 load-data-id)) load-data-id)
+
+(define node-id 99)
+(define (get-node-id) (set! node-id (add1 node-id)) node-id)
+
 (define annotations (make-hash))
 (define learned-axioms (list))
+
+(define buff-reads-copy (list))
 
 (define (synthesize-ir-expr-greedy halide-expr axioms)
   (display "Lifting input expression to IR...\n")
@@ -30,6 +37,7 @@
 
   ;; Extract the set of buffer reads
   (define buff-reads (extract-buf-reads-hal halide-expr))
+  (set! buff-reads-copy buff-reads)
 
   (define st (current-seconds))
   (define res (synthesize-ir-expr halide-expr buff-reads axioms))
@@ -63,20 +71,18 @@
   (define lifted-expr
     (match halide-expr
       ;; Constructors
-      [(x32 sca) (cons (broadcast sca) (sat))]
-      [(x64 sca) (cons (broadcast sca) (sat))]
-      [(x128 sca) (cons (broadcast sca) (sat))]
-      [(x256 sca) (cons (broadcast sca) (sat))]
+      [(x32 sca) (cons (broadcast (get-node-id) sca) (sat))]
+      [(x64 sca) (cons (broadcast (get-node-id) sca) (sat))]
+      [(x128 sca) (cons (broadcast (get-node-id) sca) (sat))]
+      [(x256 sca) (cons (broadcast (get-node-id) sca) (sat))]
 
       [(load buf idxs align)
-       (set! load-data-id (add1 load-data-id))
-       (cons (load-data load-data-id buff-reads) (sat))]
+       (cons (load-data (get-load-id) buff-reads) (sat))]
       ;[(ramp buf base stride len) (cons (load-data buff-reads) (sat))]
 
       ;; Shuffles
       [(dynamic_shuffle vec idxs st end)
-       (set! load-data-id (add1 load-data-id))
-       (cons (load-data buff-reads) (sat))]
+       (cons (load-data (get-load-id) buff-reads) (sat))]
 
       [(slice_vectors vec base stride len)
        (define lifted-vec (car (synthesize-ir-expr vec buff-reads axioms)))
@@ -105,7 +111,7 @@
        (define ir-expr (unsat))
        
        (when (and (load-data? lifted-v1) (load-data? lifted-v2))
-         (set! ir-expr (cons (load-data buff-reads) (sat))))
+         (set! ir-expr (cons (load-data (get-load-id) buff-reads) (sat))))
        
        ;; Try folding into lhs sub-expr
        (when (unsat? ir-expr)
@@ -141,14 +147,14 @@
        ;; If that didn't work, try to replace the ir sub-expr with a new fused expr
        (define sub-expr (get-subexpr-ir lifted-vec))
        (when (and (unsat? ir-expr) (not (void? sub-expr)))
-         (define synthesized-expr (choose* (downcast sub-expr) (upcast sub-expr) (cast sub-expr 'uint8)))
+         (define synthesized-expr (choose* (downcast sub-expr) (upcast sub-expr) (cast (get-node-id) sub-expr 'uint8)))
          (define sol (run-synthesizer halide-expr synthesized-expr axioms sub-sol))
          (when (not (unsat? sol))
            (set! ir-expr (evaluate synthesized-expr sol))))
 
        ;; If that didn't work, extend the expression with a new instruction
        (when (unsat? ir-expr)
-         (set! ir-expr (run-synthesizer halide-expr (cast lifted-vec 'uint8) axioms sub-sol)))
+         (set! ir-expr (run-synthesizer halide-expr (cast (get-node-id) lifted-vec 'uint8) axioms sub-sol)))
        
        (if (not (unsat? ir-expr))
            ir-expr
@@ -171,14 +177,14 @@
        ;; If that didn't work, try to replace the ir sub-expr with a new fused expr
        (define sub-expr (get-subexpr-ir lifted-vec))
        (when (and (unsat? ir-expr) (not (void? sub-expr)))
-         (define synthesized-expr (choose* (downcast sub-expr) (upcast sub-expr) (cast sub-expr 'int16)))
+         (define synthesized-expr (choose* (downcast sub-expr) (upcast sub-expr) (cast (get-node-id) sub-expr 'int16)))
          (define sol (run-synthesizer halide-expr synthesized-expr axioms))
          (when (not (unsat? sol))
            (set! ir-expr (evaluate synthesized-expr sol))))
 
        ;; If that didn't work, extend the expression with a new instruction
        (when (unsat? ir-expr)
-         (set! ir-expr (run-synthesizer halide-expr (cast lifted-vec 'uint16) axioms)))
+         (set! ir-expr (run-synthesizer halide-expr (cast (get-node-id) lifted-vec 'uint16) axioms)))
        
        (if (not (unsat? ir-expr))
            ir-expr
@@ -195,14 +201,14 @@
        ;; If that didn't work, try to replace the ir sub-expr with a new fused expr
        (define sub-expr (get-subexpr-ir lifted-vec))
        (when (and (unsat? ir-expr) (not (void? sub-expr)))
-         (define synthesized-expr (choose* (downcast sub-expr) (upcast sub-expr) (cast sub-expr 'int16)))
+         (define synthesized-expr (choose* (downcast sub-expr) (upcast sub-expr) (cast (get-node-id) sub-expr 'int16)))
          (define sol (run-synthesizer halide-expr synthesized-expr axioms))
          (when (not (unsat? sol))
            (set! ir-expr (evaluate synthesized-expr sol))))
 
        ;; If that didn't work, extend the expression with a new instruction
        (when (unsat? ir-expr)
-         (set! ir-expr (run-synthesizer halide-expr (cast lifted-vec 'int16) axioms)))
+         (set! ir-expr (run-synthesizer halide-expr (cast (get-node-id) lifted-vec 'int16) axioms)))
        
        (if (not (unsat? ir-expr))
            ir-expr
@@ -226,14 +232,14 @@
        ;; If that didn't work, try to replace the ir sub-expr with a new fused expr
        (define sub-expr (get-subexpr-ir lifted-vec))
        (when (and (unsat? ir-expr) (not (void? sub-expr)))
-         (define synthesized-expr (choose* (downcast sub-expr) (upcast sub-expr) (cast sub-expr 'int32)))
+         (define synthesized-expr (choose* (downcast sub-expr) (upcast sub-expr) (cast (get-node-id) sub-expr 'int32)))
          (define sol (run-synthesizer halide-expr synthesized-expr axioms))
          (when (not (unsat? sol))
            (set! ir-expr (evaluate synthesized-expr sol))))
 
        ;; If that didn't work, extend the expression with a new instruction
        (when (unsat? ir-expr)
-         (set! ir-expr (run-synthesizer halide-expr (cast lifted-vec 'int32) axioms)))
+         (set! ir-expr (run-synthesizer halide-expr (cast (get-node-id) lifted-vec 'int32) axioms)))
        
        (if (not (unsat? ir-expr))
            ir-expr
@@ -263,11 +269,17 @@
          (define radius 2)
          (define ktype WMT_GENERAL)
          (define kernel (weight-matrix radius (take weights radius) ktype))
-         (define conv-op (convolve sub-expr kernel saturation-func output-type))
+         (define conv-op (convolve (get-node-id) sub-expr kernel saturation-func output-type))
          (set! ir-expr (run-synthesizer halide-expr conv-op axioms)))
 
        ;; If even that did not work, extend the ir-expr with a new instruction
-       (set! sub-expr (choose* lifted-v1 lifted-v2 (zip-data lifted-v1 lifted-v2)))
+       (set! sub-expr (choose* lifted-v1 lifted-v2))
+       (when (and (unsat? ir-expr) (not (empty? add-consts)))
+         ;; Const add
+         (define output-type (type ((interpret-halide halide-expr) 0)))
+         (define const-add-op (const-add (get-node-id) sub-expr (apply choose* add-consts) nop output-type))
+         (set! ir-expr (run-synthesizer halide-expr const-add-op axioms)))
+       (set! sub-expr (choose* lifted-v1 lifted-v2))
        (when (unsat? ir-expr)
          ;; Conv
          (define output-type (type ((interpret-halide halide-expr) 0)))
@@ -275,16 +287,23 @@
          (define radius 2)
          (define ktype WMT_GENERAL)
          (define kernel (weight-matrix radius (take weights radius) ktype))
-         (define conv-op (convolve sub-expr kernel nop output-type))
+         (define conv-op (convolve (get-node-id) sub-expr kernel nop output-type))
          
          ;; Merge sols
          (define merged-sol (merge-sols (cdr res-v1) (cdr res-v2)))
          (set! ir-expr (run-synthesizer halide-expr conv-op axioms merged-sol)))
+       (set! sub-expr (zip-data (get-node-id) lifted-v1 lifted-v2))
        (when (unsat? ir-expr)
-         ;; Const add
+         ;; Conv
          (define output-type (type ((interpret-halide halide-expr) 0)))
-         (define const-add-op (const-add sub-expr (apply choose* add-consts) nop output-type))
-         (set! ir-expr (run-synthesizer halide-expr const-add-op axioms)))
+         (define weights (list (int8_t (bv 1 8)) (int8_t (bv 1 8))))
+         (define radius 2)
+         (define ktype WMT_GENERAL)
+         (define kernel (weight-matrix radius (take weights radius) ktype))
+         (define conv-op (convolve (get-node-id) sub-expr kernel nop output-type))
+         ;; Merge sols
+         (define merged-sol (merge-sols (cdr res-v1) (cdr res-v2)))
+         (set! ir-expr (run-synthesizer halide-expr conv-op axioms merged-sol)))
 
        ;; Return synthesized expr
        (if (not (unsat? ir-expr))
@@ -316,7 +335,7 @@
          (define radius 1)
          (define ktype WMT_GENERAL)
          (define kernel (weight-matrix radius (take weights radius) ktype))
-         (define conv-op (convolve sub-expr kernel saturation-func output-type))
+         (define conv-op (convolve (get-node-id) sub-expr kernel saturation-func output-type))
          (set! ir-expr (run-synthesizer halide-expr conv-op axioms)))
 
        ;; If even that did not work, extend the ir-expr with a new instruction
@@ -328,7 +347,7 @@
          (define radius 1)
          (define ktype WMT_GENERAL)
          (define kernel (weight-matrix radius (take weights radius) ktype))
-         (define conv-op (convolve sub-expr kernel saturation-func output-type))
+         (define conv-op (convolve (get-node-id) sub-expr kernel saturation-func output-type))
          (set! ir-expr (run-synthesizer halide-expr conv-op axioms)))
        
        (if (not (unsat? ir-expr))
@@ -352,14 +371,14 @@
          (define div-op (const-divide sub-expr (int-divisor-gen)))
          (set! ir-expr (run-synthesizer halide-expr div-op axioms)))
        (when (unsat? ir-expr)
-         (define div-op (packhi sub-expr (bool-const)))
+         (define div-op (packhi (get-node-id) sub-expr (bool-const)))
          (set! ir-expr (run-synthesizer halide-expr div-op axioms)))
        (when (and (unsat? ir-expr) (not (void? int-shiftr-gen)))
-         (define div-op (logic-shift-right sub-expr (int-shiftr-gen)))
+         (define div-op (logic-shift-right (get-node-id) sub-expr (int-shiftr-gen)))
          (set! ir-expr (run-synthesizer halide-expr div-op axioms)))
        (when (and (unsat? ir-expr) (not (void? int-shiftr-gen)))
          (define output-type (type ((interpret-halide halide-expr) 0)))
-         (define div-op (arith-shift-right sub-expr (int-shiftr-gen) (bool-const) output-type))
+         (define div-op (arith-shift-right (get-node-id) sub-expr (int-shiftr-gen) (bool-const) output-type))
          (set! ir-expr (run-synthesizer halide-expr div-op axioms)))
 
        ;; If even that did not work, extend the ir-expr with a new instruction
@@ -368,14 +387,14 @@
          (define div-op (const-divide sub-expr (int-divisor-gen)))
          (set! ir-expr (run-synthesizer halide-expr div-op axioms)))
        (when (unsat? ir-expr)
-         (define div-op (packhi sub-expr (bool-const)))
+         (define div-op (packhi (get-node-id) sub-expr (bool-const)))
          (set! ir-expr (run-synthesizer halide-expr div-op axioms)))
        (when (and (unsat? ir-expr) (not (void? int-shiftr-gen)))
-         (define div-op (logic-shift-right sub-expr (int-shiftr-gen)))
+         (define div-op (logic-shift-right (get-node-id) sub-expr (int-shiftr-gen)))
          (set! ir-expr (run-synthesizer halide-expr div-op axioms)))
        (when (and (unsat? ir-expr) (not (void? int-shiftr-gen)))
          (define output-type (type ((interpret-halide halide-expr) 0)))
-         (define div-op (arith-shift-right sub-expr (int-shiftr-gen) (bool-const) output-type))
+         (define div-op (arith-shift-right (get-node-id) sub-expr (int-shiftr-gen) (bool-const) output-type))
          (set! ir-expr (run-synthesizer halide-expr div-op axioms)))
        
        ;; Return synthesized expr
@@ -401,15 +420,37 @@
        
        ;; If even that did not work, extend the ir-expr with a new instruction
        (when (unsat? ir-expr)
-         (set! ir-expr (run-synthesizer halide-expr (minimum lifted-v1 lifted-v2) axioms merged-sol)))
+         (set! ir-expr (run-synthesizer halide-expr (minimum (get-node-id) lifted-v1 lifted-v2) axioms merged-sol)))
 
        ;; Return synthesized expr
        (if (not (unsat? ir-expr))
            ir-expr
            (error "Could not lift" halide-expr))]
       
-      ;[(vec-max v1 v2)
-       ;(lambda (i) (do-max ((interpret v1) i) ((interpret v2) i)))]
+      [(vec-max v1 v2)
+       (define res-v1 (synthesize-ir-expr v1 buff-reads axioms))
+       (define res-v2 (synthesize-ir-expr v2 buff-reads axioms))
+
+       (define lifted-v1 (car res-v1))
+       (define lifted-v2 (car res-v2))
+
+       (define merged-sol (merge-sols (cdr res-v1) (cdr res-v2)))
+       
+       ;; Try folding into lhs sub-expr
+       (define ir-expr (fold-into-subexpr lifted-v1 halide-expr axioms add-consts sub-consts mul-consts div-consts merged-sol))
+
+       ;; If that didn't work, try folding into rhs sub-expr
+       (when (unsat? ir-expr)
+         (set! ir-expr (fold-into-subexpr lifted-v2 halide-expr axioms add-consts sub-consts mul-consts div-consts merged-sol)))
+       
+       ;; If even that did not work, extend the ir-expr with a new instruction
+       (when (unsat? ir-expr)
+         (set! ir-expr (run-synthesizer halide-expr (maximum (get-node-id) lifted-v1 lifted-v2) axioms merged-sol)))
+
+       ;; Return synthesized expr
+       (if (not (unsat? ir-expr))
+           ir-expr
+           (error "Could not lift" halide-expr))]
 
       [(shift_left v1 v2)
        (define lifted-v1 (car (synthesize-ir-expr v1 buff-reads axioms)))
@@ -431,7 +472,7 @@
          (define radius 1)
          (define ktype WMT_GENERAL)
          (define kernel (weight-matrix radius (take weights radius) ktype))
-         (define conv-op (convolve sub-expr kernel saturation-func output-type))
+         (define conv-op (convolve (get-node-id) sub-expr kernel saturation-func output-type))
          (set! ir-expr (run-synthesizer halide-expr conv-op axioms)))
 
        ;; If even that did not work, extend the ir-expr with a new instruction
@@ -443,7 +484,7 @@
          (define radius 1)
          (define ktype WMT_GENERAL)
          (define kernel (weight-matrix radius (take weights radius) ktype))
-         (define conv-op (convolve sub-expr kernel saturation-func output-type))
+         (define conv-op (convolve (get-node-id) sub-expr kernel saturation-func output-type))
          (set! ir-expr (run-synthesizer halide-expr conv-op axioms)))
        
        ;; Return synthesized expr
@@ -465,27 +506,27 @@
        ;; If that didn't work, try to replace the ir sub-expr with a new fused expr
        (define sub-expr (choose* (get-subexpr-ir lifted-v1) (get-subexpr-ir lifted-v2)))
        (when (unsat? ir-expr)
-         (define div-op (packhi sub-expr (bool-const)))
+         (define div-op (packhi (get-node-id) sub-expr (bool-const)))
          (set! ir-expr (run-synthesizer halide-expr div-op axioms)))
        (when (and (unsat? ir-expr) (not (void? int-shiftr-gen)))
-         (define div-op (logic-shift-right sub-expr (int-shiftr-gen)))
+         (define div-op (logic-shift-right (get-node-id) sub-expr (int-shiftr-gen)))
          (set! ir-expr (run-synthesizer halide-expr div-op axioms)))
        (when (and (unsat? ir-expr) (not (void? int-shiftr-gen)))
          (define output-type (type ((interpret-halide halide-expr) 0)))
-         (define div-op (arith-shift-right sub-expr (int-shiftr-gen) (bool-const) output-type))
+         (define div-op (arith-shift-right (get-node-id) sub-expr (int-shiftr-gen) (bool-const) output-type))
          (set! ir-expr (run-synthesizer halide-expr div-op axioms)))
 
        ;; If even that did not work, extend the ir-expr with a new instruction
        (set! sub-expr (choose* lifted-v1 lifted-v2))
        (when (unsat? ir-expr)
-         (define div-op (packhi sub-expr (bool-const)))
+         (define div-op (packhi (get-node-id) sub-expr (bool-const)))
          (set! ir-expr (run-synthesizer halide-expr div-op axioms)))
        (when (and (unsat? ir-expr) (not (void? int-shiftr-gen)))
-         (define div-op (logic-shift-right sub-expr (int-shiftr-gen)))
+         (define div-op (logic-shift-right (get-node-id) sub-expr (int-shiftr-gen)))
          (set! ir-expr (run-synthesizer halide-expr div-op axioms)))
        (when (and (unsat? ir-expr) (not (void? int-shiftr-gen)))
          (define output-type (type ((interpret-halide halide-expr) 0)))
-         (define div-op (arith-shift-right sub-expr (int-shiftr-gen) (bool-const) output-type))
+         (define div-op (arith-shift-right (get-node-id) sub-expr (int-shiftr-gen) (bool-const) output-type))
          (set! ir-expr (run-synthesizer halide-expr div-op axioms)))
        
        ;; Return synthesized expr
@@ -507,11 +548,11 @@
        ;; If that didn't work, try to replace the ir sub-expr with a new fused expr
        (define sub-expr (choose* (get-subexpr-ir lifted-v1) (get-subexpr-ir lifted-v2)))
        (when (unsat? ir-expr)
-         (set! ir-expr (run-synthesizer halide-expr (abs-diff sub-expr sub-expr) axioms)))
+         (set! ir-expr (run-synthesizer halide-expr (abs-diff (get-node-id) sub-expr sub-expr) axioms)))
 
        ;; If even that did not work, extend the ir-expr with a new instruction
        (when (unsat? ir-expr)
-         (set! ir-expr (run-synthesizer halide-expr (abs-diff lifted-v1 lifted-v2) axioms)))
+         (set! ir-expr (run-synthesizer halide-expr (abs-diff (get-node-id) lifted-v1 lifted-v2) axioms)))
        
        ;; Return synthesized expr
        (if (not (unsat? ir-expr))
@@ -566,19 +607,19 @@
   ;(println (format "Fold expr: ~a with type ~a" halide-expr outT))
   
   (define synthesized-expr (match lifted-sub-expr
-                             [(load-data id opts) lifted-sub-expr]
-                             [(broadcast sca) (broadcast sca)]
-                             [(cast sub-expr type) (cast sub-expr outT)]
+                             [(load-data opts) lifted-sub-expr]
+                             [(broadcast sca) (broadcast (get-node-id) sca)]
+                             [(cast sub-expr type) (cast (get-node-id) sub-expr outT)]
                              [(abs-diff sub-expr1 sub-expr2) (void)]
                              [(zip-data sub-expr1 sub-expr2) (void)]
                              [(arith-shift-right sub-expr n round? output-type)
                               (choose*
-                               (arith-shift-right sub-expr (int-shiftr-gen) (choose* #t #f) outT)
-                               (packhi sub-expr (signedT? outT)))]
+                               (arith-shift-right (get-node-id) sub-expr (int-shiftr-gen) (choose* #t #f) outT)
+                               (packhi (get-node-id) sub-expr (signedT? outT)))]
                              [(minimum sub-expr1 sub-expr2)
                               (choose*
-                               (saturate sub-expr1 (choose* #t #f) (signedT? outT))
-                               (saturate sub-expr2 (choose* #t #f) (signedT? outT)))]
+                               (saturate (get-node-id) sub-expr1 (choose* #t #f) (signedT? outT))
+                               (saturate (get-node-id) sub-expr2 (choose* #t #f) (signedT? outT)))]
                              [(const-add sub-expr const-val saturation-func output-type)
                               (define saturation-func (choose* nop (cond [(eq? outT 'int8) sat8] [(eq? outT 'uint8) satu8] [(eq? outT 'int16) sat16] [(eq? outT 'uint16) satu16])))
                               (define output-type (cond
@@ -589,29 +630,32 @@
                                                     [(eq? outT 'int32) 'int32]
                                                     [(eq? outT 'uint32) 'uint32]))
                               (choose*
-                               (const-add sub-expr (apply choose* add-consts) saturation-func output-type)
-                               (saturate sub-expr #t (signedT? output-type))
-                               (arith-shift-right sub-expr (int-shiftr-gen) #t output-type))]
+                               (const-add (get-node-id) sub-expr (apply choose* add-consts) saturation-func output-type)
+                               (saturate (get-node-id) sub-expr #t (signedT? output-type))
+                               (arith-shift-right (get-node-id) sub-expr (int-shiftr-gen) #t output-type))]
                              [(convolve sub-expr kernel saturation-func output-type)
                               (cond
                                 [(vec-add? halide-expr)
-                                 (define (weights-gen) (apply choose* (append (list (int8_t (bv 1 8))) mul-consts)))
-                                 (define weights (append
-                                                  (if (vec-mul? halide-expr)
-                                                      (begin
-                                                        (define factor (weights-gen))
-                                                        (map (lambda(v) (int8_t (bvmul (eval (cpp-cast v 'int8)) (eval (cpp-cast factor 'int8))))) (weight-matrix-vals kernel)))
-                                                      (weight-matrix-vals kernel))
-                                                  (list (weights-gen))))
-                                 (define radius (choose* (weight-matrix-rad kernel) (add1 (weight-matrix-rad kernel))))
-                                 (define ktype WMT_GENERAL)
-                                 (define k (weight-matrix radius (take weights radius) ktype))
-                                 (convolve sub-expr k saturation-func output-type)]
+                                 (cond
+                                   [(<= (add1 (weight-matrix-rad kernel)) 5)
+                                    (define (weights-gen) (apply choose* (append (list (int8_t (bv 1 8))) mul-consts)))
+                                    (define weights (append (weight-matrix-vals kernel) (list (weights-gen))))
+                                    (define radius (choose* (weight-matrix-rad kernel) (add1 (weight-matrix-rad kernel))))
+                                    (define ktype WMT_GENERAL)
+                                    (define k (weight-matrix radius (take weights radius) ktype))
+                                    (convolve (get-node-id) sub-expr k saturation-func output-type)]
+                                   [else
+                                    (define (weights-gen) (apply choose* (append (list (int8_t (bv 1 8))) mul-consts)))
+                                    (define weights (list (weights-gen) (weights-gen)))
+                                    (define radius (choose* 1 2))
+                                    (define ktype WMT_GENERAL)
+                                    (define k (weight-matrix radius (take weights radius) ktype))
+                                    (convolve-acc (get-node-id) lifted-sub-expr (load-data (get-load-id) buff-reads-copy) k saturation-func output-type)])]
                                 [(cast-op? halide-expr)
                                  (cond
                                    [(> (bw output-type) (bw outT))
                                     (define saturation-func (cond [(eq? output-type 'int8) sat8] [(eq? output-type 'uint8) satu8] [(eq? output-type 'int16) sat16] [(eq? output-type 'uint16) satu16]))
-                                    (convolve sub-expr kernel saturation-func output-type)]
+                                    (convolve (get-node-id) sub-expr kernel saturation-func output-type)]
                                    [else
                                     (define output-type (cond
                                                           [(eq? outT 'int8) (choose* 'int8 'int16 'uint16 'int32 'uint32)]
@@ -620,7 +664,8 @@
                                                           [(eq? outT 'uint16) (choose* 'uint16 'int32 'uint32)]
                                                           [(eq? outT 'int32) 'int32]
                                                           [(eq? outT 'uint32) 'uint32]))
-                                    (convolve sub-expr kernel saturation-func output-type)])]
+                                    (convolve (get-node-id) sub-expr kernel saturation-func output-type)])]
+                                [(vec-div? halide-expr) halide-expr]
                                 [else
                                  ;(define (weights-gen)
                                  ;  (define x (apply choose* (append (list (int8_t (bv 1 8))) mul-consts)))
@@ -649,7 +694,69 @@
                                  (define radius (choose* (weight-matrix-rad kernel) (add1 (weight-matrix-rad kernel))))
                                  (define ktype WMT_GENERAL)
                                  (define k (weight-matrix radius (take weights radius) ktype))
-                                 (convolve sub-expr k saturation-func output-type)])]
+                                 (convolve (get-node-id) sub-expr k saturation-func output-type)])]
+                             [(convolve-acc acc sub-expr kernel saturation-func output-type)
+                              (cond
+                                [(vec-add? halide-expr)
+                                 (cond
+                                   [(<= (add1 (weight-matrix-rad kernel)) 5)
+                                    (define (weights-gen) (apply choose* (append (list (int8_t (bv 1 8))) mul-consts)))
+                                    (define weights (append (weight-matrix-vals kernel) (list (weights-gen))))
+                                    (define radius (choose* (weight-matrix-rad kernel) (add1 (weight-matrix-rad kernel))))
+                                    (define ktype WMT_GENERAL)
+                                    (define k (weight-matrix radius (take weights radius) ktype))
+                                    (convolve-acc (get-node-id) acc sub-expr k saturation-func output-type)]
+                                   [else
+                                    (define (weights-gen) (apply choose* (append (list (int8_t (bv 1 8))) mul-consts)))
+                                    (define weights (list (weights-gen) (weights-gen)))
+                                    (define radius (choose* 1 2))
+                                    (define ktype WMT_GENERAL)
+                                    (define k (weight-matrix radius (take weights radius) ktype))
+                                    (convolve-acc (get-node-id) lifted-sub-expr (load-data (get-load-id) buff-reads-copy) k saturation-func output-type)])]
+                                [(cast-op? halide-expr)
+                                 (cond
+                                   [(> (bw output-type) (bw outT))
+                                    (define saturation-func (cond [(eq? output-type 'int8) sat8] [(eq? output-type 'uint8) satu8] [(eq? output-type 'int16) sat16] [(eq? output-type 'uint16) satu16]))
+                                    (convolve-acc (get-node-id) acc sub-expr kernel saturation-func output-type)]
+                                   [else
+                                    (define output-type (cond
+                                                          [(eq? outT 'int8) (choose* 'int8 'int16 'uint16 'int32 'uint32)]
+                                                          [(eq? outT 'uint8) (choose* 'uint8 'int16 'uint16 'int32 'uint32)]
+                                                          [(eq? outT 'int16) (choose* 'int16 'int32 'uint32)]
+                                                          [(eq? outT 'uint16) (choose* 'uint16 'int32 'uint32)]
+                                                          [(eq? outT 'int32) 'int32]
+                                                          [(eq? outT 'uint32) 'uint32]))
+                                    (convolve-acc (get-node-id) acc sub-expr kernel saturation-func output-type)])]
+                                [(vec-div? halide-expr) halide-expr]
+                                [else
+                                 ;(define (weights-gen)
+                                 ;  (define x (apply choose* (append (list (int8_t (bv 1 8))) mul-consts)))
+                                 ;  (define y (apply choose* (append (list (int8_t (bv 1 8))) mul-consts)))
+                                 ;  (choose*
+                                 ;   x
+                                 ;   (int8_t (bvadd (eval (cpp-cast x 'int16)) (eval (cpp-cast y 'int16))))
+                                 ;   (int8_t (bvmul (eval (cpp-cast x 'int16)) (eval (cpp-cast y 'int16))))))
+                                 ;(define weights (list (weights-gen) (weights-gen) (weights-gen) (weights-gen) (weights-gen) (weights-gen) (weights-gen) (weights-gen) (weights-gen) (weights-gen)))
+                                 (define (weights-gen) (apply choose* (append (list (int8_t (bv 1 8))) mul-consts)))
+                                 (define weights (append
+                                                  (if (vec-mul? halide-expr)
+                                                      (begin
+                                                        (define factor (weights-gen))
+                                                        (map (lambda(v) (int8_t (bvmul (eval (cpp-cast v 'int8)) (eval (cpp-cast factor 'int8))))) (weight-matrix-vals kernel)))
+                                                      (weight-matrix-vals kernel))
+                                                  (list (weights-gen))))
+;                                 (define saturation-func (choose* nop (cond [(eq? outT 'int8) sat8] [(eq? outT 'uint8) satu8] [(eq? outT 'int16) sat16] [(eq? outT 'uint16) satu16])))
+;                                 (define output-type (cond
+;                                                       [(eq? outT 'int8) (choose* 'int8 'int16 'uint16 'int32 'uint32)]
+;                                                       [(eq? outT 'uint8) (choose* 'uint8 'int16 'uint16 'int32 'uint32)]
+;                                                       [(eq? outT 'int16) (choose* 'int16 'int32 'uint32)]
+;                                                       [(eq? outT 'uint16) (choose* 'uint16 'int32 'uint32)]
+;                                                       [(eq? outT 'int32) 'int32]
+;                                                       [(eq? outT 'uint32) 'uint32]))
+                                 (define radius (choose* (weight-matrix-rad kernel) (add1 (weight-matrix-rad kernel))))
+                                 (define ktype WMT_GENERAL)
+                                 (define k (weight-matrix radius (take weights radius) ktype))
+                                 (convolve-acc (get-node-id) acc sub-expr k saturation-func output-type)])]
                              [_ (error "Oops 0" lifted-sub-expr)]))
 
   (run-synthesizer halide-expr synthesized-expr axioms sub-sol))
@@ -676,16 +783,20 @@
   ;(set-curr-cn-ir 0)
   ;(println ((interpret-halide original-expr) 0))
   ;(println (elem-ir (interpret-ir synthesized-expr) 0))
-  ;(when (and (convolve? synthesized-expr) (uint8x128? original-expr))
-   ; (assume (list-ref learned-axioms 1))
+  ;(when (convolve-acc? synthesized-expr)
+    ;(assume (list-ref learned-axioms 1))
     ;(println (evaluate (elem-ir (interpret-ir synthesized-expr) 0) sub-sol))
     ;)
-  (for ([axiom learned-axioms]) (assume axiom))
+  ;(for ([axiom learned-axioms]) (assume axiom))
   (define sol (synthesize #:forall (symbolics original-expr)
                           #:guarantee (bounded-eq? (interpret-halide original-expr) (interpret-ir synthesized-expr) MC_BND)))
   (define runtime (- (current-seconds) st))
 
-  ;(display (format "Ran synthesizer for ~a seconds.\n" runtime))
+  ;(when (convolve-acc? synthesized-expr)
+    ;(println sol)
+    ;(exit))
+  
+  (display (format "Ran synthesizer for ~a seconds.\n" runtime))
 
   (cond
     [(unsat? sol) sol]
@@ -693,34 +804,38 @@
      (define res-sol (merge-sols sol sub-sol))
      (set! learned-axioms (set-add learned-axioms (eq? ((interpret-halide original-expr) 0) (evaluate (elem-ir (interpret-ir synthesized-expr) 0) res-sol))))
      (define res-expr (evaluate synthesized-expr res-sol))
-     (hash-set! annotations res-expr original-expr)
+     (hash-set! annotations (ir-node-id res-expr) original-expr)
      (cons res-expr res-sol)]))
 
 ;; Get the sub-expr of an IR expr
 (define (get-subexpr-ir ir-expr)
   (match ir-expr
-    [(load-data id opts) (void)]
+    [(load-data opts) (void)]
     [(broadcast sca) (void)]
     [(cast sub-expr type) sub-expr]
     [(arith-shift-right sub-expr n round? output-type) sub-expr]
     [(const-add sub-expr const-val saturation-func output-type) sub-expr]
     [(convolve sub-expr kernel satF outT) sub-expr]
+    [(convolve-acc acc sub-expr kernel satF outT) (list acc sub-expr)]
     [(abs-diff sub-expr1 sub-expr2) (list sub-expr1 sub-expr2)]
     [(minimum sub-expr1 sub-expr2) (list sub-expr1 sub-expr2)]
+    [(maximum sub-expr1 sub-expr2) (list sub-expr1 sub-expr2)]
     [(zip-data sub-expr1 sub-expr2) (list sub-expr1 sub-expr2)]
     [_ (error "oops 1" ir-expr)]))
 
 (define (get-subexpr-list ir-expr)
   (define sub-exprs (flatten (list ir-expr)))
   (match ir-expr
-    [(load-data id opts) sub-exprs]
+    [(load-data opts) sub-exprs]
     [(broadcast sca) sub-exprs]
     [(cast sub-expr type) (append sub-exprs (get-subexpr-list sub-expr))]
     [(arith-shift-right sub-expr n round? output-type) (append sub-exprs (get-subexpr-list sub-expr))]
     [(const-add sub-expr const-val saturation-func output-type) (append sub-exprs (get-subexpr-list sub-expr))]
     [(convolve sub-expr kernel satF outT) (append sub-exprs (get-subexpr-list sub-expr))]
+    [(convolve-acc acc sub-expr kernel satF outT) (append sub-exprs (get-subexpr-list sub-expr))]
     [(abs-diff sub-expr1 sub-expr2) (append sub-exprs (get-subexpr-list sub-expr1) (get-subexpr-list sub-expr2))]
     [(minimum sub-expr1 sub-expr2) (append sub-exprs (get-subexpr-list sub-expr1) (get-subexpr-list sub-expr2))]
+    [(maximum sub-expr1 sub-expr2) (append sub-exprs (get-subexpr-list sub-expr1) (get-subexpr-list sub-expr2))]
     [(zip-data sub-expr1 sub-expr2) (append sub-exprs (get-subexpr-list sub-expr1) (get-subexpr-list sub-expr2))]
     [_ (error "oops 2" ir-expr)]))
 

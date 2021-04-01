@@ -181,7 +181,7 @@ Expr SExpParser::parse_intrinsic(Token &tok, string &sexp) {
 
     close_sexp(sexp);
     if(func_name.find("vread") != std::string::npos){
-      Expr index = Ramp::make(params[1], 1, return_type.lanes());
+      Expr index = (return_type.lanes() == 1 ? params[1] : Ramp::make(params[1], 1, return_type.lanes()));
       //debug(0) << params[2] << " " << params[3] << "\n";
       return Load::make(
         return_type, 
@@ -210,7 +210,7 @@ Expr SExpParser::parse(string &sexp, Type expected_type) {
             // we're parsing
             result = get_token(sexp, token);
             user_assert(result && token.type == TokenType::Symbol);
-            if (starts_with(token.str, "llvm")) {
+            if (starts_with(token.str, "llvm") || starts_with(token.str, "halide")) {
                 // this is an intrinsic
                  return parse_intrinsic(token, sexp);
             } else if (token.str == "+"   ||
@@ -244,7 +244,9 @@ Expr SExpParser::parse(string &sexp, Type expected_type) {
 void sexp_parser_test() {
     SExpParser p;
 
-    string s = "(llvm.hexagon.V6.vread.128B int32x32 (list (int32 buf) (int32 (+ -2 x))))";
+    string s = R"((llvm.hexagon.V6.vread.128B
+                       int32
+                       (list (int32 mask) (int32 8)))))))";
 
     string gaussian3x3 = R"((llvm.hexagon.V6.vasrhubrndsat.128B
     int32x32

@@ -15,9 +15,14 @@
 (define cache (make-hash))
 (define ranked-candidate-sets (make-hash))
 
-(define (synthesize-hvx-swizzles-enum starting-vecs hvx-expr-sketch hvx-expr-spec axioms ctx)
+(define offset 0)
+
+(define (synthesize-hvx-swizzles-enum starting-vecs hvx-expr-sketch hvx-expr-spec axioms ctx [test #f])
   (hash-clear! cache)
   (hash-clear! ranked-candidate-sets)
+
+  (when test
+    (set! offset 64))
   
   ;; Extract set of swizzle nodes to be synthesized
   (define swizzle-nodes (list))
@@ -80,6 +85,8 @@
          [(and (hash-has-key? enum-history candidate-swizzle) (eq? (hash-ref enum-history candidate-swizzle) #f))
           (find-next-swizzle (rest candidate-swizzle-exprs))]
          [else
+          ;(println candidate-swizzle)
+          
           ;; Replace swizzle node with swizzle grammar
           (define (repl-gather-with-swizzle-grm node)
             (match node
@@ -88,6 +95,8 @@
               [(swizzle vecs) (if (equal? (hvx-ast-node-id node) target-node-id) candidate-swizzle node)]
               [_ node]))
           (define hvx-expr-grm (visit-hvx hvx-expr-sketch repl-gather-with-swizzle-grm))
+
+          ;(pretty-print hvx-expr-grm)
           
           (define interpreted-o-expr (interpret-halide hvx-expr-spec))
           (define VEC_LANES (num-elems-hvx (interpret-hvx hvx-expr-grm)))
@@ -113,14 +122,14 @@
                
                correct?)))
 
-          (engine-run 300000 synthesizer)
+          (engine-run 10800000 synthesizer)
 
           (define correct? (engine-result synthesizer))
           (cond
             [(hash-has-key? enum-history candidate-swizzle)
              (set! total-synth-time (+ total-synth-time runtime))]
             [else
-             (display (format "Synthesizer timed out after: 5mins\n"))
+             (display (format "Synthesizer timed out after: 10mins\n"))
              (hash-set! enum-history candidate-swizzle #f)
              (set! total-synth-time (+ total-synth-time 300000))])
           
@@ -158,7 +167,7 @@
      (hash-has-key? load-idxs key)
      (hash-set! load-idxs key (append (hash-ref load-idxs key) (list val)))
      (hash-set! load-idxs key (list val))))
-
+  
   (when (not (hash-has-key? ranked-candidate-sets target-node-id))
     (hash-set!
        ranked-candidate-sets
@@ -167,12 +176,12 @@
          [(swizzle? swizzle-node)
           (enumerate-hvx-swizzle-exprs
            (hvx-type (interpret-hvx swizzle-node))
-           (list lo hi vcombine vshuff vshuffe vshuffo vshuffoe vdeal vdeale valign vror vtranspose vpacke vpacko vunpack)
+           (list lo hi vinterleave vcombine vshuff vshuffe vshuffo vshuffoe vdeal vdeale valign vror vtranspose vpacke vpacko vunpack)
            (list (swizzle-vec hvx-expr-sketch)))]
          [else
           (enumerate-hvx-gather-exprs
            (hvx-type (interpret-hvx swizzle-node))
-           (list lo hi vshuff vshuffe vshuffo vshuffoe vcombine vdeal vdeale valign vror vtranspose vpacke vpacko vunpack)
+           (list lo hi vinterleave vshuff vshuffe vshuffo vshuffoe vcombine vdeal vdeale valign vror vtranspose vpacke vpacko vunpack)
            load-idxs
            3)])))
   
@@ -189,17 +198,21 @@
     [(empty? lanes-used-in-synth) (values #t hvx-expr-grm)]
     [else
      (define lane (first lanes-used-in-synth))
-     ;(display (format "Checking lane ~a\n" lane))
+     (display (format "Checking lane ~a\n" lane))
 
      (define interpreted-f-expr (interpret-hvx hvx-expr-grm))
 
+     ;(println (interpreted-o-expr (+ offset 0)))
+     ;(set-curr-cn-hvx 0)
+     ;(println (elem-hvx interpreted-f-expr 0))
+     
      (define sol (synthesize #:forall ctx
                              #:guarantee (begin
-                                           (lane-eq? interpreted-o-expr interpreted-f-expr lane)
+                                           (lane-eq? interpreted-o-expr interpreted-f-expr lane offset)
                                            (for ([discarded-sol discarded-sols])
                                              (assert (not (equal-expr-hvx? discarded-sol hvx-expr-grm)))))))
      (cond
-       [(unsat? sol) (values #f hvx-expr-grm)]
+       [(not (sat? sol)) (values #f hvx-expr-grm)]
        [else
         (define hvx-expr-grm-updated (evaluate hvx-expr-grm sol))
         ;(pretty-print hvx-expr-grm-updated)

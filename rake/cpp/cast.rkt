@@ -146,11 +146,12 @@
      ;                [(bvslt val (bv MIN_UCHAR 16)) (uint8_t (bv MIN_UCHAR 8))]
       ;               [(bvsgt val (bv MAX_UCHAR 16)) (uint8_t (bv MAX_UCHAR 8))]
        ;              [else (uint8_t (extract 7 0 val))])]
-    [(int16_t val) (uint8_t (extract 7 0 (bvsmax (bv MIN_UCHAR 16) (bvsmin val (bv MAX_UCHAR 16)))))]
+    ;[(int16_t val) (uint8_t (extract 7 0 (bvsmax (bv MIN_UCHAR 16) (bvsmin val (bv MAX_UCHAR 16)))))]
     ;[(int16_t val) (uint8_t (cond
      ;                         [(bveq (msb val) (bv 1 1)) (bv MIN_UCHAR 8)]
       ;                        [(bveq val (zero-extend (extract 7 0 val) (bitvector 16))) (extract 7 0 val)]
        ;                       [else (bv MAX_UCHAR 8)]))]
+    [(int16_t val) (uint8_t (extract 7 0 (max16 (bv MIN_UCHAR 16) (min16 val (bv MAX_UCHAR 16)))))]
     [(int32_t val) (cond
                      [(bvslt val (bv MIN_UCHAR 32)) (uint8_t (bv MIN_UCHAR 8))]
                      [(bvsgt val (bv MAX_UCHAR 32)) (uint8_t (bv MAX_UCHAR 8))]

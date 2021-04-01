@@ -70,7 +70,7 @@
 
 ;; Extract buffer reads
 (define (extract-buf-reads expr)
-  (for/fold ([buff-reads '()]) ([i (num-elems-hal expr)]) (append buff-reads (list (extract-lane-buf-reads ((interpret-halide expr) i))))))
+  (for/fold ([buff-reads '()]) ([i (num-elems-hal expr)]) (append buff-reads (list (set->list (list->set (extract-lane-buf-reads ((interpret-halide expr) i))))))))
   
 (define (extract-lane-buf-reads expr)
   (match expr
@@ -107,7 +107,7 @@
        [(eq? op bvashr) (flatten (for/list ([operand operands]) (extract-lane-buf-reads operand)))]
        [(eq? op bvshl) (flatten (for/list ([operand operands]) (extract-lane-buf-reads operand)))]
        [(eq? op ite) (flatten (for/list ([operand operands]) (extract-lane-buf-reads operand)))]
-       [(eq? op app) (list (mk-typed-expr expr (var-type (list-ref operands 0))))]
+       [(eq? op app) (if (empty? (symbolics (cdr operands))) (list) (list (mk-typed-expr expr (var-type (list-ref operands 0)))))]
        [else (error "NYI: extract buffer reads from" expr)])]
      
     [_ (list)]))
@@ -164,8 +164,8 @@
     [(vec-mul v1 v2) (if (or (broadcast? v1) (broadcast? v2))
                          (append (list 'vec-sca-mul) (extract-live-ops v1) (extract-live-ops v2))
                          (append (list 'vec-vec-mul) (extract-live-ops v1) (extract-live-ops v2)))]
-    [(vec-max v1 v2) (append (list 'min) (extract-live-ops v1) (extract-live-ops v2))]
-    [(vec-min v1 v2) (append (list 'max) (extract-live-ops v1) (extract-live-ops v2))]
+    [(vec-max v1 v2) (append (list 'max) (extract-live-ops v1) (extract-live-ops v2))]
+    [(vec-min v1 v2) (append (list 'min) (extract-live-ops v1) (extract-live-ops v2))]
 
     [(shift_left v1 v2) (append (list 'vec-sca-mul) (extract-live-ops v1) (extract-live-ops v2))]
     [(shift_right v1 v2) (append (list 'vec-sca-div) (extract-live-ops v1) (extract-live-ops v2))]
@@ -326,7 +326,6 @@
     [(vec-div v1 v2) (append (extract-mul-consts v1) (extract-mul-consts v2))]
     [(vec-min v1 v2) (append (extract-mul-consts v1) (extract-mul-consts v2))]
     [(vec-max v1 v2) (append (extract-mul-consts v1) (extract-mul-consts v2))]
-    
 
     [(shift_left v1 v2) (append
                          (if (broadcast? v1) (two^ (extract-consts v1)) (extract-mul-consts v1))
@@ -382,7 +381,6 @@
     [(vec-min v1 v2) (append (extract-div-consts v1) (extract-div-consts v2))]
     [(vec-max v1 v2) (append (extract-div-consts v1) (extract-div-consts v2))]
     
-
     [(shift_left v1 v2) (extract-div-consts v1) (extract-div-consts v2)]
     [(shift_right v1 v2) (if (broadcast? v2) (two^ (extract-consts v2)) (extract-div-consts v2))]
     [(absd v1 v2) (extract-div-consts v1) (extract-div-consts v2)]

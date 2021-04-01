@@ -156,6 +156,42 @@
   (define dsgn (bvashr diff (bv 32 33)))
   (extract 31 0 (bvadd b (bvand diff dsgn))))
 
+(define (max8 a b)
+  (define diff (bvsub a b))
+  (define dsgn (bvashr diff (bv 7 8)))
+  (bvsub a (bvand diff dsgn)))
+
+(define (max16 a b)
+  (define diff (bvsub a b))
+  (define dsgn (bvashr diff (bv 15 16)))
+  (bvsub a (bvand diff dsgn)))
+
+(define (max32 a b)
+  (define diff (bvsub a b))
+  (define dsgn (bvashr diff (bv 31 32)))
+  (bvsub a (bvand diff dsgn)))
+
+(define (maxu8 a0 b0)
+  (define a (zero-extend a0 (bitvector 9)))
+  (define b (zero-extend b0 (bitvector 9)))
+  (define diff (bvsub a b))
+  (define dsgn (bvashr diff (bv 8 9)))
+  (extract 7 0 (bvsub a (bvand diff dsgn))))
+
+(define (maxu16 a0 b0)
+  (define a (zero-extend a0 (bitvector 17)))
+  (define b (zero-extend b0 (bitvector 17)))
+  (define diff (bvsub a b))
+  (define dsgn (bvashr diff (bv 16 17)))
+  (extract 15 0 (bvsub a (bvand diff dsgn))))
+
+(define (maxu32 a0 b0)
+  (define a (zero-extend a0 (bitvector 33)))
+  (define b (zero-extend b0 (bitvector 33)))
+  (define diff (bvsub a b))
+  (define dsgn (bvashr diff (bv 32 33)))
+  (extract 31 0 (bvsub a (bvand diff dsgn))))
+
 (define (get-caller-id obj) (eq-hash-code obj))
 
 (provide (all-defined-out))

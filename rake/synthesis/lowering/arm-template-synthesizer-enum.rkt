@@ -85,7 +85,7 @@
 ;         (reset-arm-instr-bnd)
 ;         (synthesize-equiv-arm spec sub-expr arm-sub-expr discarded-sols))]
 
-      [(load-data id opts)
+      [(load-data opts)
        (begin
          (display "Lifting IR to ARM...\n")
          (display "====================\n\n")

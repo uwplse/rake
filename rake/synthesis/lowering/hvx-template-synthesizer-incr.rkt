@@ -74,7 +74,7 @@
          (reset-hvx-instr-bnd)
          (synthesize-equiv-hvx spec sub-expr hvx-sub-expr discarded-sols))]
 
-      [(load-data id opts)
+      [(load-data opts)
        (begin
          (display "Lifting IR to HVX...\n")
          (display "====================\n\n")

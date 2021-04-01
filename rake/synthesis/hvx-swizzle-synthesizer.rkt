@@ -15,7 +15,7 @@
 (require rake/synthesis/swizzling/hvx-swizzle-synthesizer-incr)
 (require rake/synthesis/swizzling/hvx-swizzle-synthesizer-enum)
 
-(define (synthesize-hvx-swizzles halide-spec hvx-expr-sketch ctx axioms [swizzling-algo 'enumerative])
+(define (synthesize-hvx-swizzles halide-spec hvx-expr-sketch ctx axioms [swizzling-algo 'enumerative] [test #f])
   ;(display "Synthesizing Data Swizzle Spec...\n")
   ;(display "=================================\n\n")
   
@@ -44,7 +44,7 @@
      (match swizzling-algo
        ['naive (synthesize-hvx-swizzles-naive starting-vecs hvx-expr-sketch hvx-expr-spec axioms ctx)]
        ['incremental (synthesize-hvx-swizzles-incr starting-vecs hvx-expr-sketch hvx-expr-spec axioms ctx)]
-       ['enumerative (synthesize-hvx-swizzles-enum starting-vecs hvx-expr-sketch hvx-expr-spec axioms ctx)]
+       ['enumerative (synthesize-hvx-swizzles-enum starting-vecs hvx-expr-sketch hvx-expr-spec axioms ctx test)]
        [_ (error (format "Unrecognized lowering algorithm specified: '~a. Supported algorithms: ['naive, 'incremental, 'enumerative]" swizzling-algo))])]
     [else (values sketch-is-correct? (void))]))
 

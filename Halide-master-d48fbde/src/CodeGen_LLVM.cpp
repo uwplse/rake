@@ -2580,12 +2580,16 @@ void CodeGen_LLVM::visit(const Call *op) {
         
         // Enum instr id reference https://docs.hdoc.io/hdoc/llvm-project/e9812764BC1FD580D.html OR
         // https://codebrowser.bddppq.com/tvm/include/llvm-9/llvm/IR/IntrinsicEnums.inc.html
-        if (op->name == std::string("llvm.hexagon.V6.vmpabuu.acc.128B"))
+        if (op->name == std::string("llvm.hexagon.V6.vshufoeb.128B"))
+            fn = llvm::Intrinsic::getDeclaration(module.get(), llvm::Intrinsic::hexagon_V6_vshufoeb_128B);
+        else if (op->name == std::string("llvm.hexagon.V6.vmpabuu.acc.128B"))
             fn = llvm::Intrinsic::getDeclaration(module.get(), llvm::Intrinsic::hexagon_V6_vmpabuu_acc_128B);
         else if (op->name == std::string("llvm.hexagon.V6.valignbi.128B"))
             fn = llvm::Intrinsic::getDeclaration(module.get(), llvm::Intrinsic::hexagon_V6_valignbi_128B);
         else if (op->name == std::string("llvm.hexagon.V6.vaddh.128B"))
             fn = llvm::Intrinsic::getDeclaration(module.get(), llvm::Intrinsic::hexagon_V6_vaddh_128B);
+        else if (op->name == std::string("llvm.hexagon.V6.vdealb.128B"))
+            fn = llvm::Intrinsic::getDeclaration(module.get(), llvm::Intrinsic::hexagon_V6_vdealb_128B);
         else
             fn = module->getFunction(op->name);
         

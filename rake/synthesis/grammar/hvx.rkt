@@ -112,6 +112,8 @@
     [(eq? instr gather-vec) -1]
     [(eq? instr gather-vecp) -1]
 
+    [(eq? instr abstr-sub-expr) -1]
+
     [(eq? instr vadd) 0]
     [(eq? instr vmpyi) 0]
     [(eq? instr vmpye) 0]
@@ -153,7 +155,7 @@
     [(vmpye-acc Vd Vu Rt) (+ (max-unique-inputs Vd) (max-unique-inputs Vu))]
     [(vmpa Vuu Rt signed?) (* 2 (max-unique-inputs Vuu))]
     [(vmpa-acc Vdd Vuu Rt signed?) (+ (max-unique-inputs Vdd) (* 2 (max-unique-inputs Vuu)))]
-    [(vdmpy Vu Rt) (* 4 (max-unique-inputs Vu))]
+    [(vdmpy Vu Rt) (* 2 (max-unique-inputs Vu))]
     [(vdmpy-sw Vuu Rt) (* 2 (max-unique-inputs Vuu))]
     [(vdmpy-acc Vd Vu Rt) (+ (max-unique-inputs Vd) (* 2 (max-unique-inputs Vu)))]
     [(vdmpy-sw-acc Vdd Vuu Rt) (+ (max-unique-inputs Vdd) (* 2 (max-unique-inputs Vuu)))]
@@ -163,9 +165,12 @@
     [(vrmpy-acc Vd Vu Rt) (+ (max-unique-inputs Vd) (* 4 (max-unique-inputs Vu)))]
     [(vrmpy-p Vuu Rt u1) (* 4 (max-unique-inputs Vuu))]
     [(vrmpy-p-acc Vdd Vuu Rt u1) (+ (max-unique-inputs Vdd) (* 4 (max-unique-inputs Vuu)))]
+    
     [(gather* buff-opts) 1]
     [(gather-vec buff-opts) 1]
-    [(gather-vecp buff-opts) 1]))
+    [(gather-vecp buff-opts) 1]
+
+    [(abstr-sub-expr _ _) 1]))
 
 (define (enumerate-hvx-exprs ir-expr hvx-sub-expr)
   (define-values (isa weights)
@@ -176,13 +181,19 @@
             (list vadd vmpyi vmpyi-acc vmpye vmpye-acc vasl)
             (list vzxt vsxt vmpy vmpy-acc vmpa vmpa-acc vdmpy vdmpy-acc vtmpy vtmpy-acc)) ;vdmpy-sw-acc vdmpy-sw ;vadd-w vadd-w-acc
         kernel)]
-      [_ (begin (println "NYI") (exit))]))
+      [(convolve-acc acc data kernel saturateFunc outputType)
+       (values
+        (if (eq? (type (elem-ir (interpret-ir data) 0)) outputType)
+            (list vadd vmpyi vmpyi-acc vmpye vmpye-acc vasl)
+            (list vzxt vsxt vmpy vmpy-acc vmpa vmpa-acc vdmpy vdmpy-acc vtmpy vtmpy-acc)) ;vdmpy-sw-acc vdmpy-sw ;vadd-w vadd-w-acc
+        kernel)]
+      [_ (begin (println "NYI 0") (exit))]))
   
   (set! int-consts (set->list (list->set (weight-matrix-vals weights))))
 
   (define elemT (type (elem-ir (interpret-ir ir-expr) 0)))
 
-  (define candidates (time (enumerate (enum-types elemT) isa hvx-sub-expr 3 20)))
+  (define candidates (time (enumerate (enum-types elemT) isa hvx-sub-expr 4 20)))
 
   ;; Fill in param grammars
   (define (fill-arg-grammars node [pos -1])
@@ -235,17 +246,17 @@
            (for ([ci c-instr])
              (when (not (void? ci))
                (define child-order (instr-order ci))
-               (when (>= child-order parent-order)
+               (when (or (> child-order parent-order) (eq? parent-order 0))
                  (set! prune? #t))))]
           [(not (void? c-instr))
            (define child-order (instr-order c-instr))
-           (when (>= child-order parent-order)
+           (when (or (> child-order parent-order) (eq? parent-order 0))
              (set! prune? #t))])
         node)
       (visit-hvx candidate check-instr-ordering)
 
       ;; Pruning -- based on conv radius
-      (define conv-radius-spec (weight-matrix-rad weights))
+      (define conv-radius-spec (if (convolve-acc? ir-expr) (add1 (weight-matrix-rad weights)) (weight-matrix-rad weights)))
       (define conv-radius-sk (max-unique-inputs candidate))
 
       (set! prune? (or prune? (not (eq? conv-radius-sk conv-radius-spec))))
@@ -276,13 +287,18 @@
 ;                             (vmpa-acc
 ;                              (vmpa-acc
 ;                               (vmpa-acc
-;                                (vtmpy hvx-sub-expr (cons (int8_t (bv #x02 8)) (int8_t (bv #x01 8))))
+;                                (vmpa-acc
+;                                 (vmpy
+;                                  hvx-sub-expr
+;                                  (int8-const))
+;                                 hvx-sub-expr
+;                                 (cons (int8-const) (int8-const)) #t)
 ;                                hvx-sub-expr
-;                                (cons (int8_t (bv #x02 8)) (int8_t (bv #x04 8))))
+;                                (cons (int8-const) (int8-const)) #t)
 ;                               hvx-sub-expr
-;                               (cons (int8_t (bv #x01 8)) (int8_t (bv #x02 8))))
+;                               (cons (int8-const) (int8-const)) #t)
 ;                              hvx-sub-expr
-;                              (cons (int8_t (bv #x01 8)) (int8_t (bv #x02 8)))))
+;                              (cons (int8-const) (int8-const)) #t))
 ;;                            
 ;;                            (vmpyi-acc
 ;;                             (vmpyi-acc
@@ -309,7 +325,7 @@
        [(cons? base-expr)
         (define base-expr-types (base-types (car base-expr)))
         (define res (if (set-empty? (set-intersect types base-expr-types)) (set) (set (car base-expr))))
-        
+
         (set! base-expr-types (base-types (cdr base-expr)))
         (set! res (set-union res (if (set-empty? (set-intersect types base-expr-types)) (set) (set (cdr base-expr)))))
 
@@ -453,21 +469,40 @@
                          ;(println (type (elem-ir (interpret-ir sub-expr) 0)))
                          ;(println outType)
                          (get-hvx-upcast-isa type)]
+                        [(saturate data round? signedOut?)
+                         (if round?
+                             (get-hvx-rnd-sat-isa signedOut?)
+                             (get-hvx-sat-isa signedOut?))]
                         [(packhi data signed?) (get-hvx-hi-isa signed?)]
                         [(abs-diff data1 data2) (get-hvx-absdiff-isa)]
                         [_ (begin (println "NYI") (exit))]))
 
-  (define (??ir-expr)
-    (define r0 (apply choose* (flatten (list hvx-sub-expr))))
-    (define r1 (??hvx-instr (list r0)))
-    (define r2 (??hvx-instr (list r0 r1)))
-    (define r3 (??hvx-instr (list r0 r1 r2)))
-    (cond
-      [(eq? curr-instr-bnd 1) (??hvx-instr (list r0))]
-      [(eq? curr-instr-bnd 2) r2]
-      [(eq? curr-instr-bnd 3) r3]
-      [else r3]))
-  ??ir-expr)
+  (cond
+    [(pair? hvx-sub-expr)
+     (define (??ir-expr)
+       (define r0 (car hvx-sub-expr))
+       (define r1 (cdr hvx-sub-expr))
+       (define r2 (??hvx-instr (list r0 r1)))
+       (define r3 (??hvx-instr (list r0 r1 r2)))
+       (define r4 (??hvx-instr (list r0 r1 r2 r3)))
+       (cond
+         [(eq? curr-instr-bnd 1) (??hvx-instr (list r0 r1))]
+         [(eq? curr-instr-bnd 2) r3]
+         [(eq? curr-instr-bnd 3) r4]
+         [else r4]))
+     ??ir-expr]
+    [else
+     (define (??ir-expr)
+       (define r0 hvx-sub-expr)
+       (define r1 (??hvx-instr (list r0)))
+       (define r2 (??hvx-instr (list r0 r1)))
+       (define r3 (??hvx-instr (list r0 r1 r2)))
+       (cond
+         [(eq? curr-instr-bnd 1) (??hvx-instr (list r0))]
+         [(eq? curr-instr-bnd 2) r2]
+         [(eq? curr-instr-bnd 3) r3]
+         [else r3]))
+     ??ir-expr]))
 
 ;; HVX instructions for synthesizing convolutions
 (define (get-hvx-conv-isa weights)
@@ -543,6 +578,7 @@
     (define t3 (hi t0))
     (choose*
      (vasr-n t0 t1 i8-n round? (bool-const) signed?)
+     (vdeal (vasr-n t0 t1 i8-n round? (bool-const) signed?))
      (let-expr 't0 t0 (vasr-n (hi 't0) (lo 't0) i8-n round? (bool-const) signed?))
      ))
   ??hvx-asr-instr)
@@ -554,6 +590,26 @@
     (choose*
      (vsxt t0 #t)
      (vzxt t0 #t)))
+  ??hvx-hi-instr)
+
+;; HVX instructions for saturating
+(define (get-hvx-sat-isa signedOut?)
+  (define (??hvx-hi-instr registers)
+    (define t0 (apply choose* registers))
+    (define t1 (apply choose* registers))
+    (choose*
+     (vpack t0 t1 signedOut?)
+     (vsat t0 t1)
+     (let-expr 't2 t0 (vsat (hi 't2) (lo 't2)))
+     (let-expr 't0 t0 (vpack (hi 't0) (lo 't0) signedOut?))))
+  ??hvx-hi-instr)
+
+(define (get-hvx-rnd-sat-isa signedOut?)
+  (define (??hvx-hi-instr registers)
+    (define t0 (apply choose* registers))
+    (define t1 (apply choose* registers))
+    (choose*
+     (vround t0 t1 signedOut?)))
   ??hvx-hi-instr)
 
 ;; HVX instructions for extracting upper bits
@@ -578,8 +634,8 @@
      (let-expr 't0 t0
        (let-expr 't1 t1
          (vcombine
-          (vabsdiff (hi t0) (hi t1))
-          (vabsdiff (lo t0) (lo t1)))))
+          (vabsdiff (lo 't0) (lo 't1))
+          (vabsdiff (hi 't0) (hi 't1)))))
      ))
   ??hvx-hi-instr)
 

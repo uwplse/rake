@@ -32,7 +32,7 @@
       [(vshuffoe Vu Vv) (transform (vshuffoe (visit Vu transform) (visit Vv transform)))]
       ;[(vswap Qt Vu Vv)
       ;[(vmux Qt Vu Vv)
-      ;[(vsat Vu Vv)
+      [(vsat Vu Vv) (transform (vsat (visit Vu transform) (visit Vv transform)))]
       [(valign Vu Vv Rt) (transform (valign (visit Vu transform) (visit Vv transform) (visit Rt transform)))]
       [(vlalign Vu Vv Rt) (transform (vlalign (visit Vu transform) (visit Vv transform) (visit Rt transform)))]
       [(vror Vu Rt) (transform (vror (visit Vu transform) (visit Rt transform)))]
@@ -41,7 +41,8 @@
       [(vdeale Vu Vv) (transform (vdeale (visit Vu transform) (visit Vv transform)))]
       [(vshuff Vu) (transform (vshuff (visit Vu transform)))]
       [(vtranspose Vu Vv Rt) (transform (vtranspose (visit Vu transform) (visit Vv transform) (visit Rt transform)))]
-      ;[(vpack Vu Vv)
+      [(vinterleave Vuu) (transform (vinterleave (visit Vuu transform)))]
+      [(vpack Vu Vv signed?) (transform (vpack (visit Vu transform) (visit Vv transform) (visit signed? transform)))]
       [(vpacke Vu Vv signed?) (transform (vpacke (visit Vu transform) (visit Vv transform) (visit signed? transform)))]
       [(vpacko Vu Vv signed?) (transform (vpacko (visit Vu transform) (visit Vv transform) (visit signed? transform)))]
       [(vpacko-n Vu Vv signed?) (transform (vpacko-n (visit Vu transform) (visit Vv transform) (visit signed? transform)))]
@@ -58,6 +59,8 @@
       [(vadd Vu Vv sat?) (transform (vadd (visit Vu transform) (visit Vv transform) (visit sat? transform)))]
       [(vadd-w Vu Vv) (transform (vadd-w (visit Vu transform) (visit Vv transform)))]
       [(vadd-w-acc Vdd Vu Vv) (transform (vadd-w-acc (visit Vdd transform 0) (visit Vu transform 1) (visit Vv transform 2)))]
+      [(vsub Vu Vv sat?) (transform (vsub (visit Vu transform) (visit Vv transform) (visit sat? transform)))]
+      [(vsub-w Vu Vv) (transform (vsub-w (visit Vu transform) (visit Vv transform)))]
       [(vmpy Vu Rt) (transform (vmpy (visit Vu transform) (visit Rt transform)))]
       [(vmpyi Vu Rt) (transform (vmpyi (visit Vu transform) (visit Rt transform)))]
       [(vmpye Vu Rt) (transform (vmpye (visit Vu transform) (visit Rt transform)))]
@@ -84,6 +87,8 @@
       [(vasr-acc Vd Vu Rt) (transform (vasr-acc (visit Vd transform) (visit Vu transform) (visit Rt transform)))]
       [(vasr-n Vu Vv Rt round? sat? unsigned?) (transform (vasr-n (visit Vu transform) (visit Vv transform) (visit Rt transform) (visit round? transform) (visit sat? transform) (visit unsigned? transform)))]
       [(vround Vu Vv signed?) (transform (vround (visit Vu transform) (visit Vv transform) (visit signed? transform)))]
+      [(vabs Vu sat?) (transform (vabs (visit Vu transform) (visit sat? transform)))]
+      [(vabsdiff Vu Vv) (transform (vabsdiff (visit Vu transform) (visit Vv transform)))]
     
       ;; New instructions types we introduce to abstract away data-movement.
       ;; These instr types should never exist in output code.

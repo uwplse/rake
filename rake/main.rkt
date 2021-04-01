@@ -10,7 +10,7 @@
 (require rake/synthesis/spec)
 
 (provide
- debug-on debug-off init-var-types
+ debug-on debug-off init-var-types get
  (all-from-out rake/hvx/cost-model)
  (all-from-out rake/hvx/codegen/llvm)
  (all-from-out rake/cpp/types)

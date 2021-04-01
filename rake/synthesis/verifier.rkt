@@ -15,53 +15,30 @@
 
   (define VEC_LANES (num-elems-hal halide-spec))
 
-  ;; The visitor clones each node in the AST, converting it from a graph to a tree
-  (define (iden node) node)
-  (set! hvx-expr (visit-hvx hvx-expr iden))
-
   (define interpreted-s-expr (interpret-hvx hvx-expr))
   (define interpreted-o-expr (interpret-halide halide-spec))
   
-  ;; Verify multiple lanes at once (Slower...takes 1554 seconds (128 lanes) for baseline gaussian stage 2 example)
-  (define (equiv-output? oe se)
-    (for ([lane 8])
-      (cond
-        [(hvx-pair? se)
-         (set-curr-cn-hvx lane)
-         (assert (eq? (oe lane) (v0-elem-hvx se lane)))]
-        [else
-         (set-curr-cn-hvx lane)
-         (assert (eq? (oe lane) (elem-hvx se lane)))])))
-  
-  (clear-vc!)
-  (for ([axiom axioms]) (assume axiom))
-  (define st (current-seconds))
-  (define sol (synthesize #:forall ctx
-                          #:guarantee (equiv-output? interpreted-o-expr interpreted-s-expr)))
-  (define runtime (- (current-seconds) st))
-  (define correct? (not (unsat? sol)))
-  
-  ;; Verify all lanes incrementally (Faster...takes 30 seconds for baseline gaussian stage 2 example)
+  ;; Verify all lanes incrementally
   (define (lane-eq? oe se lane)
     (cond
       [(hvx-pair? se)
-       (set-curr-cn-hvx lane)
        (assert (eq? (oe lane) (v0-elem-hvx se lane)))]
       [else
-       (set-curr-cn-hvx lane)
        (assert (eq? (oe lane) (elem-hvx se lane)))]))
   
   (define sols (list))
   (clear-vc!)
   (for ([axiom axioms]) (assume axiom))
-  (set! st (current-seconds))
+  (define st (current-seconds))
   (for ([lane VEC_LANES])
-    (set-curr-cn-hvx lane)
     (define sol (synthesize #:forall ctx
                             #:guarantee (lane-eq? interpreted-o-expr interpreted-s-expr lane)))
+    ;(println (interpreted-o-expr lane))
+    ;(println (elem-hvx interpreted-s-expr lane))
+    ;(println sol)
     (set! sols (append sols (list sol))))
-  (set! runtime (- (current-seconds) st))
-  (set! correct? (and correct? (eq? (vec-len halide-spec) (num-elems-hvx interpreted-s-expr)) (not (for/or ([sol sols]) (unsat? sol)))))
+  (define runtime (- (current-seconds) st))
+  (define correct? (and (eq? (vec-len halide-spec) (num-elems-hvx interpreted-s-expr)) (not (for/or ([sol sols]) (unsat? sol)))))
   
   ;; Print solution
   (debug (format "Verification time: ~a seconds\n\n" runtime))

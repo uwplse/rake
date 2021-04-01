@@ -141,9 +141,16 @@
       (max lhs rhs)
       (begin
         (define outT (infer-out-type lhs rhs))
-        (if (signedT? outT)
-            (mk-typed-expr (bvsmax (eval lhs) (eval rhs)) outT)
-            (mk-typed-expr (bvumax (eval lhs) (eval rhs)) outT)))))
+        (cond
+          [(signedT? outT)
+           (define maxF (match (bw outT) [8 max8] [16 max16] [32 max32]))
+           (mk-typed-expr (maxF (eval lhs) (eval rhs)) outT)]
+          [else
+           (define maxF (match (bw outT) [8 maxu8] [16 maxu16] [32 maxu32]))
+           (mk-typed-expr (maxF (eval lhs) (eval rhs)) outT)]
+            ;(mk-typed-expr (bvsmax (eval lhs) (eval rhs)) outT)
+            ;(mk-typed-expr (bvumax (eval lhs) (eval rhs)) outT)
+           ))))
 
 (define (do-shr lhs rhs)
   (define outT (infer-out-type lhs rhs))

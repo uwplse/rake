@@ -2668,6 +2668,8 @@ private:
             // Hacky exception for now
             if (op->name.compare("scalar_indices") == 0)
                 return tabs() + "(" + op->name + " " + rkt_idx + ")";
+            else if (op->type.is_scalar())
+                return tabs() + "(get " + op->name + " " + rkt_idx + ")";
             else
                 return tabs() + "(load " + op->name + " " + rkt_idx + " " + alignment + ")";
         }
@@ -3064,7 +3066,7 @@ private:
         }
 
         RacketPrinter specPrinter(std::cout, let_vars);
-        std::string expr = specPrinter.dispatch(stmt->value);
+        std::string expr = specPrinter.dispatch(lower_intrinsics(stmt->value));
 
         InferSymbolics symFinder(let_vars, bounds, func_value_bounds);
         stmt->value.accept(&symFinder);
@@ -3175,7 +3177,7 @@ private:
             << "(define spec (synthesis-spec halide-expr axioms))\n"
             << "(define hvx-expr (synthesize-hvx spec 'halide-ir 'greedy 'enumerative 'enumerative))\n"
             << "\n"
-            << "(define out (open-output-file \"sexp.out\" #:exists 'replace))\n"
+            << "(define out (open-output-file \"sexp_" << expr_id << ".out\" #:exists 'replace))\n"
             << "(pretty-write (llvm-codegen hvx-expr) out)\n"
             << "(close-output-port out)";
 
@@ -3193,8 +3195,8 @@ private:
             << "\n"
             << sym_bufs.str()
             << sym_buf_types.str() << "\n"
-            << axioms.str() << "\n"
             << sym_vars.str() << "\n"
+            << axioms.str() << "\n"
             << let_stmts.str() << "\n"
             << "(define halide-expr\n"
             << expr << ")\n"
@@ -3209,7 +3211,7 @@ private:
 
         std::ifstream cache("sexp_" + std::to_string(expr_id) + ".out");
         if (!cache.good()) {
-            char buf[10000];
+            char buf[1000];
             FILE *fp;
             std::string cmd = "racket expr_" + std::to_string(expr_id) + ".rkt";
             if ((fp = popen(cmd.c_str(), "r")) == NULL) {
@@ -3217,7 +3219,7 @@ private:
                 exit(0);
             }
 
-            while (fgets(buf, 10000, fp) != NULL) {
+            while (fgets(buf, 100, fp) != NULL) {
                 debug(0) << buf;
             }
 

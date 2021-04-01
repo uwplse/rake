@@ -20,22 +20,22 @@
        (list (- num_lanes 2) (- num_lanes 1))))) ;; Last two lanes of vec1
 
 ;; Check equality between lanes of Halide IR and HVX expressions
-(define (lane-eq? oe se lane)
+(define (lane-eq? oe se lane [offset 0])
   (cond
-    [(i16x64x2? se)
+    [(or (i16x64x2? se) (u16x64x2? se))
      (set-curr-cn-hvx lane)
      (when (<= 0 lane 63)
        (assert (eq? (oe lane) (v0-elem-hvx se lane))))
      (when (<= 64 lane 127)
        (assert (eq? (oe lane) (v1-elem-hvx se (- lane 64)))))]
     [else
-     (set-curr-cn-hvx lane)
-     (assert (eq? (oe lane) (elem-hvx se lane)))]))
+     (set-curr-cn-hvx (+ offset lane))
+     (assert (eq? (oe (+ offset lane)) (elem-hvx se lane)))]))
 
 ;; Check equality between lanes of two HVX expressions
 (define (lane-eq-hvx? oe se lane)
   (cond
-    [(i16x64x2? se)
+    [(or (i16x64x2? se) (u16x64x2? se))
      (set-curr-cn-hvx lane)
      (when (<= 0 lane 63)
        (assert (eq? (v0-elem-hvx oe lane) (v0-elem-hvx se lane))))
