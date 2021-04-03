@@ -4,31 +4,34 @@ target datalayout = "e-m:e-p:32:32:32-a:0-n16:32-i64:64:64-i32:32:32-i16:16:16-i
 target triple = "hexagon"
 
 ; Function Attrs: nounwind readonly
-define dso_local inreg <64 x i32> @getllvm(i16* noalias nocapture readonly %src) local_unnamed_addr #0 {
+define dso_local inreg <32 x i32> @getllvm(i16* noalias nocapture readonly %src) local_unnamed_addr #0 {
 entry:
   %0 = bitcast i16* %src to <32 x i32>*
   %add.ptr = getelementptr inbounds i16, i16* %src, i32 1
   %1 = bitcast i16* %add.ptr to <32 x i32>*
   %2 = load <32 x i32>, <32 x i32>* %0, align 128, !tbaa !2
   %3 = load <32 x i32>, <32 x i32>* %1, align 128, !tbaa !2
-  %4 = tail call <64 x i32> @llvm.hexagon.V6.vcombine.128B(<32 x i32> %2, <32 x i32> %3)
+  %4 = tail call <32 x i32> @llvm.hexagon.V6.vabsdiffuh.128B(<32 x i32> %2, <32 x i32> %3)
+  ret <32 x i32> %4
+}
+
+; Function Attrs: nounwind readnone
+declare <32 x i32> @llvm.hexagon.V6.vabsdiffuh.128B(<32 x i32>, <32 x i32>) #1
+
+; Function Attrs: nounwind readonly
+define dso_local inreg <64 x i32> @getllvm2(i8* noalias nocapture readonly %src) local_unnamed_addr #0 {
+entry:
+  %0 = bitcast i8* %src to <64 x i32>*
+  %add.ptr = getelementptr inbounds i8, i8* %src, i32 1
+  %1 = bitcast i8* %add.ptr to <64 x i32>*
+  %2 = load <64 x i32>, <64 x i32>* %0, align 256, !tbaa !2
+  %3 = load <64 x i32>, <64 x i32>* %1, align 256, !tbaa !2
+  %4 = tail call <64 x i32> @llvm.hexagon.V6.vadduhsat.dv.128B(<64 x i32> %2, <64 x i32> %3)
   ret <64 x i32> %4
 }
 
 ; Function Attrs: nounwind readnone
-declare <64 x i32> @llvm.hexagon.V6.vcombine.128B(<32 x i32>, <32 x i32>) #1
-
-; Function Attrs: nounwind readonly
-define dso_local inreg <64 x i32> @getllvm2(i16* noalias nocapture readonly %src) local_unnamed_addr #0 {
-entry:
-  %0 = bitcast i16* %src to <64 x i32>*
-  %1 = load <64 x i32>, <64 x i32>* %0, align 256, !tbaa !2
-  %2 = tail call <64 x i32> @llvm.hexagon.V6.vmpauhb.128B(<64 x i32> %1, i32 33817092)
-  ret <64 x i32> %2
-}
-
-; Function Attrs: nounwind readnone
-declare <64 x i32> @llvm.hexagon.V6.vmpauhb.128B(<64 x i32>, i32) #1
+declare <64 x i32> @llvm.hexagon.V6.vadduhsat.dv.128B(<64 x i32>, <64 x i32>) #1
 
 ; Function Attrs: nounwind readonly
 define dso_local inreg <64 x i32> @getllvm3(i16* noalias nocapture readonly %src) local_unnamed_addr #0 {

@@ -28,7 +28,7 @@ public:
         output.dim(0).set_min(0);
         output.dim(1).set_min(0);
 
-        if (get_target().features_any_of({Target::HVX_64, Target::HVX_128})) {
+        if (get_target().features_any_of({Target::HVX_128})) {
             const int vector_size = get_target().has_feature(Target::HVX_128) ? 128 : 64;
             Expr input_stride = input.dim(1).stride();
             input.dim(1).set_stride((input_stride/vector_size) * vector_size);
@@ -89,6 +89,17 @@ public:
                 .tile(x, y, xi, yi, vector_size, 4, TailStrategy::RoundUp)
                 .vectorize(xi)
                 .unroll(yi);
+
+            /*output
+                .hexagon()
+                .tile(x, y, xi, yi, vector_size, 4, TailStrategy::RoundUp)
+                .vectorize(xi)
+                .unroll(yi);
+            rows.compute_at(Func(output), y)
+                .tile(x, y, x, y, xi, yi, vector_size, 4, TailStrategy::RoundUp)
+                .vectorize(xi)
+                .align_storage(x, 128)
+                .unroll(yi);*/
 
             output.prefetch(input, y, 1, PrefetchBoundStrategy::NonFaulting);
         } else {

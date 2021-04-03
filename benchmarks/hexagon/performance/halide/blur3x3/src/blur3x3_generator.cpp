@@ -22,15 +22,15 @@ public:
         blur_y.dim(0).set_min(0);
         blur_y.dim(1).set_min(0);
 
-        if (get_target().features_any_of({Target::HVX_64, Target::HVX_128})) {
-            const int vector_size = get_target().has_feature(Target::HVX_128) ? 128 : 64;
+        if (get_target().features_any_of({Target::HVX_128})) {
+            /*const int vector_size = get_target().has_feature(Target::HVX_128) ? 128 : 64;
             Expr input_stride = input.dim(1).stride();
             input.dim(1).set_stride((input_stride/vector_size) * vector_size);
 
             Expr output_stride = blur_y.dim(1).stride();
             blur_y.dim(1).set_stride((output_stride/vector_size) * vector_size);
 
-            Expr ht = blur_y.dim(1).extent();
+            Expr ht = blur_y.dim(1).extent();*/
 
             /*
             // 0.5594
@@ -61,14 +61,27 @@ public:
             blur_y.prefetch(input, y, 2, PrefetchBoundStrategy::NonFaulting);
             */
 
+            const int vector_size = 128;
+
+            blur_y.compute_root()
+                .hexagon()
+                .prefetch(input, y, 2)
+                .split(y, y, yi, 128)
+                .parallel(y)
+                .vectorize(x, vector_size * 2);
+            blur_x
+                .store_at(blur_y, y)
+                .compute_at(blur_y, yi)
+                .vectorize(x, vector_size);
+
             // Halide Repo 0.3769
-            blur_y
+            /*blur_y
                 .hexagon()
                 .tile(x, y, xi, yi, vector_size, 4, TailStrategy::RoundUp)
                 .vectorize(xi)
                 .unroll(yi);
 
-            blur_y.prefetch(input, y, 1, PrefetchBoundStrategy::NonFaulting);
+            blur_y.prefetch(input, y, 1, PrefetchBoundStrategy::NonFaulting);*/
 
         }
     }

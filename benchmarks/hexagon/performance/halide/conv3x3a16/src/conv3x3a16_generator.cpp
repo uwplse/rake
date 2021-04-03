@@ -30,10 +30,14 @@ public:
         input.dim(0).set_min(0);
         input.dim(1).set_min(0);
 
+        mask.dim(0).set_min(0);
+        mask.dim(1).set_min(0);
+        mask.dim(1).set_stride(3);
+
         output.dim(0).set_min(0);
         output.dim(1).set_min(0);
 
-        if (get_target().features_any_of({Target::HVX_64, Target::HVX_128})) {
+        if (get_target().features_any_of({Target::HVX_128})) {
             const int vector_size = get_target().has_feature(Target::HVX_128) ? 128 : 64;
             Expr input_stride = input.dim(1).stride();
             input.dim(1).set_stride((input_stride/vector_size) * vector_size);
@@ -45,12 +49,12 @@ public:
             
             output
                 .hexagon()
-                .split(y, yo, y, ht/2)
+                .split(y, yo, y, ht / 2)
                 .tile(x, y, xi, yi, vector_size, 4, TailStrategy::RoundUp)
                 .vectorize(xi)
                 .unroll(yi);
             if (use_prefetch_sched) {
-                output.prefetch(input, y, 2);
+                output.prefetch(input, y, 2, PrefetchBoundStrategy::NonFaulting);
             }
             if (use_parallel_sched) {
                 // output.split(y, yo, y, 128).parallel(yo);

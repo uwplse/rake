@@ -22,14 +22,6 @@ public:
                         rows(x+2, y) * 6 + rows(x+3, y);
 
         output(x, y)  = u8_sat(cols(x, y) >> 12);
-
-        /*cols(x, y) = input_32(x-3, y) + input_32(x-2, y) * 6 + input_32(x-1, y) * 15 + input_32(x, y) * 20 + 
-                        input_32(x+1, y) * 15 + input_32(x+2, y) * 6 + input_32(x+3, y);
-        
-        rows(x,y) =  cols(x, y-3) + cols(x, y-2) * 6 + cols(x, y-1) * 15 + cols(x, y) * 20 + cols(x, y+1) * 15 + 
-                        cols(x, y+2) * 6 + cols(x, y+3);
-
-        output(x, y)  = u8_sat(rows(x, y) >> 12);*/
     }
 
     void schedule() {
@@ -41,7 +33,7 @@ public:
         output.dim(0).set_min(0);
         output.dim(1).set_min(0);
 
-        if (get_target().features_any_of({Target::HVX_64, Target::HVX_128})) {
+        if (get_target().features_any_of({Target::HVX_128})) {
             const int vector_size = get_target().has_feature(Target::HVX_128) ? 128 : 64;
             Expr input_stride = input.dim(1).stride();
             input.dim(1).set_stride((input_stride/vector_size) * vector_size);

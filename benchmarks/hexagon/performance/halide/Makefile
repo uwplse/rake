@@ -22,7 +22,7 @@ $(benchmarks): %: %/bin %/out %/profile
 
 	export LD_LIBRARY_PATH=$(HALIDE_DIR)/lib; ./$@/bin/$@_generator \
 		-o $@/bin \
-		-g $@ -e static_library,stmt,h,llvm_assembly \
+		-g $@ -e static_library,stmt,h,llvm_assembly,assembly \
 		-f $@_hvx128 target=hexagon-32-noos-no_bounds_query-no_asserts-hvx_128
 
 	$(HEXAGON_CLANG) \

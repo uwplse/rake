@@ -1,0 +1,30 @@
+sudo apt update
+sudo add-apt-repository ppa:plt/racket
+sudo apt update
+
+mkdir dependencies
+cd dependencies/
+
+cat /proc/cpuinfo  | grep 'name'| uniq
+cat /proc/cpuinfo  | grep process| wc -l
+
+mkdir installers
+cd installers/
+
+wget https://mirror.racket-lang.org/installers/8.0/racket-8.0-x86_64-linux-cs.sh
+chmod +x racket-8.0-x86_64-linux-cs.sh
+./racket-8.0-x86_64-linux-cs.sh
+[no and /bin/local]
+
+
+sudo apt-get install libfontconfig
+sudo apt-get install libcairo2
+sudo apt-get install libpango-1.0-0
+sudo apt-get install libpangocairo-1.0-0
+sudo apt-get install libjpeg62
+
+raco pkg install rosette
+
+
+
+git clone git@github.com:uwplse/rake.git

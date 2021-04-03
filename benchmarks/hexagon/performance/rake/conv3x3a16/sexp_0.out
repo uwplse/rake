@@ -1,0 +1,542 @@
+(llvm.hexagon.V6.vasrhubsat.128B
+ uint8x128
+ (list
+  (int16x64
+   (llvm.hexagon.V6.hi.128B
+    int16x64
+    (list
+     (int16x128
+      (llvm.hexagon.V6.vmpabus.acc.128B
+       int16x128
+       (list
+        (int16x128
+         (llvm.hexagon.V6.vmpabus.acc.128B
+          int16x128
+          (list
+           (int16x128
+            (llvm.hexagon.V6.vmpabus.acc.128B
+             int16x128
+             (list
+              (int16x128
+               (llvm.hexagon.V6.vmpabus.acc.128B
+                int16x128
+                (list
+                 (int16x128
+                  (llvm.hexagon.V6.vmpybus.128B
+                   int16x128
+                   (list
+                    (uint8x128
+                     (llvm.hexagon.V6.vread.128B
+                      uint8x128
+                      (list
+                       (int32 input)
+                       (int32
+                        (+
+                         1
+                         (+
+                          (* 128 output.s0.x.x)
+                          (*
+                           input.stride.1
+                           (+
+                            (max
+                             (* output.s0.y.yo (/ output.extent.1 2))
+                             (+ output.extent.1 (- 0 (/ output.extent.1 2))))
+                            (* 4 output.s0.y.y.y))))))
+                       (int32 128)
+                       (int32 1))))
+                    (int32
+                     (halide.hexagon.dup4.b
+                      int32
+                      (list
+                       (int8
+                        (llvm.hexagon.V6.vread.128B
+                         int8
+                         (list (int32 mask) (int32 5))))))))))
+                 (uint8x256
+                  (llvm.hexagon.V6.vcombine.128B
+                   uint8x256
+                   (list
+                    (uint8x128
+                     (llvm.hexagon.V6.vread.128B
+                      uint8x128
+                      (list
+                       (int32 input)
+                       (int32
+                        (+
+                         1
+                         (+
+                          input.stride.1
+                          (+
+                           (* 128 output.s0.x.x)
+                           (*
+                            input.stride.1
+                            (+
+                             (max
+                              (* output.s0.y.yo (/ output.extent.1 2))
+                              (+ output.extent.1 (- 0 (/ output.extent.1 2))))
+                             (* 4 output.s0.y.y.y)))))))
+                       (int32 128)
+                       (int32 1))))
+                    (uint8x128
+                     (llvm.hexagon.V6.vread.128B
+                      uint8x128
+                      (list
+                       (int32 input)
+                       (int32
+                        (+
+                         input.stride.1
+                         (+
+                          (* 128 output.s0.x.x)
+                          (*
+                           input.stride.1
+                           (+
+                            (max
+                             (* output.s0.y.yo (/ output.extent.1 2))
+                             (+ output.extent.1 (- 0 (/ output.extent.1 2))))
+                            (* 4 output.s0.y.y.y))))))
+                       (int32 128)
+                       (int32 0)))))))
+                 (int32
+                  (halide.hexagon.interleave.b.dup2.h
+                   int32
+                   (list
+                    (int8
+                     (llvm.hexagon.V6.vread.128B
+                      int8
+                      (list (int32 mask) (int32 8))))
+                    (int8
+                     (llvm.hexagon.V6.vread.128B
+                      int8
+                      (list (int32 mask) (int32 7))))))))))
+              (uint8x256
+               (llvm.hexagon.V6.vcombine.128B
+                uint8x256
+                (list
+                 (uint8x128
+                  (llvm.hexagon.V6.vread.128B
+                   uint8x128
+                   (list
+                    (int32 input)
+                    (int32
+                     (+
+                      1
+                      (+
+                       (+
+                        (* 128 output.s0.x.x)
+                        (*
+                         input.stride.1
+                         (+
+                          (max
+                           (* output.s0.y.yo (/ output.extent.1 2))
+                           (+ output.extent.1 (- 0 (/ output.extent.1 2))))
+                          (* 4 output.s0.y.y.y))))
+                       (- 0 input.stride.1))))
+                    (int32 1)
+                    (int32 0))))
+                 (uint8x128
+                  (llvm.hexagon.V6.vread.128B
+                   uint8x128
+                   (list
+                    (int32 input)
+                    (int32
+                     (+
+                      (* 128 output.s0.x.x)
+                      (*
+                       input.stride.1
+                       (+
+                        (max
+                         (* output.s0.y.yo (/ output.extent.1 2))
+                         (+ output.extent.1 (- 0 (/ output.extent.1 2))))
+                        (* 4 output.s0.y.y.y)))))
+                    (int32 128)
+                    (int32 0)))))))
+              (int32
+               (halide.hexagon.interleave.b.dup2.h
+                int32
+                (list
+                 (int8
+                  (llvm.hexagon.V6.vread.128B
+                   int8
+                   (list (int32 mask) (int32 2))))
+                 (int8
+                  (llvm.hexagon.V6.vread.128B
+                   int8
+                   (list (int32 mask) (int32 4))))))))))
+           (uint8x256
+            (llvm.hexagon.V6.vcombine.128B
+             uint8x256
+             (list
+              (uint8x128
+               (llvm.hexagon.V6.vread.128B
+                uint8x128
+                (list
+                 (int32 input)
+                 (int32
+                  (+
+                   -1
+                   (+
+                    input.stride.1
+                    (+
+                     (* 128 output.s0.x.x)
+                     (*
+                      input.stride.1
+                      (+
+                       (max
+                        (* output.s0.y.yo (/ output.extent.1 2))
+                        (+ output.extent.1 (- 0 (/ output.extent.1 2))))
+                       (* 4 output.s0.y.y.y)))))))
+                 (int32 128)
+                 (int32 127))))
+              (uint8x128
+               (llvm.hexagon.V6.vread.128B
+                uint8x128
+                (list
+                 (int32 input)
+                 (int32
+                  (+
+                   (+
+                    (* 128 output.s0.x.x)
+                    (*
+                     input.stride.1
+                     (+
+                      (max
+                       (* output.s0.y.yo (/ output.extent.1 2))
+                       (+ output.extent.1 (- 0 (/ output.extent.1 2))))
+                      (* 4 output.s0.y.y.y))))
+                   (- 0 input.stride.1)))
+                 (int32 1)
+                 (int32 0)))))))
+           (int32
+            (halide.hexagon.interleave.b.dup2.h
+             int32
+             (list
+              (int8
+               (llvm.hexagon.V6.vread.128B int8 (list (int32 mask) (int32 6))))
+              (int8
+               (llvm.hexagon.V6.vread.128B
+                int8
+                (list (int32 mask) (int32 1))))))))))
+        (uint8x256
+         (llvm.hexagon.V6.vcombine.128B
+          uint8x256
+          (list
+           (uint8x128
+            (llvm.hexagon.V6.vread.128B
+             uint8x128
+             (list
+              (int32 input)
+              (int32
+               (+
+                -1
+                (+
+                 (* 128 output.s0.x.x)
+                 (*
+                  input.stride.1
+                  (+
+                   (max
+                    (* output.s0.y.yo (/ output.extent.1 2))
+                    (+ output.extent.1 (- 0 (/ output.extent.1 2))))
+                   (* 4 output.s0.y.y.y))))))
+              (int32 128)
+              (int32 127))))
+           (uint8x128
+            (llvm.hexagon.V6.vread.128B
+             uint8x128
+             (list
+              (int32 input)
+              (int32
+               (+
+                -1
+                (+
+                 (+
+                  (* 128 output.s0.x.x)
+                  (*
+                   input.stride.1
+                   (+
+                    (max
+                     (* output.s0.y.yo (/ output.extent.1 2))
+                     (+ output.extent.1 (- 0 (/ output.extent.1 2))))
+                    (* 4 output.s0.y.y.y))))
+                 (- 0 input.stride.1))))
+              (int32 1)
+              (int32 0)))))))
+        (int32
+         (halide.hexagon.interleave.b.dup2.h
+          int32
+          (list
+           (int8
+            (llvm.hexagon.V6.vread.128B int8 (list (int32 mask) (int32 3))))
+           (int8
+            (llvm.hexagon.V6.vread.128B
+             int8
+             (list (int32 mask) (int32 0)))))))))))))
+  (int16x64
+   (llvm.hexagon.V6.lo.128B
+    int16x64
+    (list
+     (int16x128
+      (llvm.hexagon.V6.vmpabus.acc.128B
+       int16x128
+       (list
+        (int16x128
+         (llvm.hexagon.V6.vmpabus.acc.128B
+          int16x128
+          (list
+           (int16x128
+            (llvm.hexagon.V6.vmpabus.acc.128B
+             int16x128
+             (list
+              (int16x128
+               (llvm.hexagon.V6.vmpabus.acc.128B
+                int16x128
+                (list
+                 (int16x128
+                  (llvm.hexagon.V6.vmpybus.128B
+                   int16x128
+                   (list
+                    (uint8x128
+                     (llvm.hexagon.V6.vread.128B
+                      uint8x128
+                      (list
+                       (int32 input)
+                       (int32
+                        (+
+                         1
+                         (+
+                          (* 128 output.s0.x.x)
+                          (*
+                           input.stride.1
+                           (+
+                            (max
+                             (* output.s0.y.yo (/ output.extent.1 2))
+                             (+ output.extent.1 (- 0 (/ output.extent.1 2))))
+                            (* 4 output.s0.y.y.y))))))
+                       (int32 128)
+                       (int32 1))))
+                    (int32
+                     (halide.hexagon.dup4.b
+                      int32
+                      (list
+                       (int8
+                        (llvm.hexagon.V6.vread.128B
+                         int8
+                         (list (int32 mask) (int32 5))))))))))
+                 (uint8x256
+                  (llvm.hexagon.V6.vcombine.128B
+                   uint8x256
+                   (list
+                    (uint8x128
+                     (llvm.hexagon.V6.vread.128B
+                      uint8x128
+                      (list
+                       (int32 input)
+                       (int32
+                        (+
+                         1
+                         (+
+                          input.stride.1
+                          (+
+                           (* 128 output.s0.x.x)
+                           (*
+                            input.stride.1
+                            (+
+                             (max
+                              (* output.s0.y.yo (/ output.extent.1 2))
+                              (+ output.extent.1 (- 0 (/ output.extent.1 2))))
+                             (* 4 output.s0.y.y.y)))))))
+                       (int32 128)
+                       (int32 1))))
+                    (uint8x128
+                     (llvm.hexagon.V6.vread.128B
+                      uint8x128
+                      (list
+                       (int32 input)
+                       (int32
+                        (+
+                         input.stride.1
+                         (+
+                          (* 128 output.s0.x.x)
+                          (*
+                           input.stride.1
+                           (+
+                            (max
+                             (* output.s0.y.yo (/ output.extent.1 2))
+                             (+ output.extent.1 (- 0 (/ output.extent.1 2))))
+                            (* 4 output.s0.y.y.y))))))
+                       (int32 128)
+                       (int32 0)))))))
+                 (int32
+                  (halide.hexagon.interleave.b.dup2.h
+                   int32
+                   (list
+                    (int8
+                     (llvm.hexagon.V6.vread.128B
+                      int8
+                      (list (int32 mask) (int32 8))))
+                    (int8
+                     (llvm.hexagon.V6.vread.128B
+                      int8
+                      (list (int32 mask) (int32 7))))))))))
+              (uint8x256
+               (llvm.hexagon.V6.vcombine.128B
+                uint8x256
+                (list
+                 (uint8x128
+                  (llvm.hexagon.V6.vread.128B
+                   uint8x128
+                   (list
+                    (int32 input)
+                    (int32
+                     (+
+                      1
+                      (+
+                       (+
+                        (* 128 output.s0.x.x)
+                        (*
+                         input.stride.1
+                         (+
+                          (max
+                           (* output.s0.y.yo (/ output.extent.1 2))
+                           (+ output.extent.1 (- 0 (/ output.extent.1 2))))
+                          (* 4 output.s0.y.y.y))))
+                       (- 0 input.stride.1))))
+                    (int32 1)
+                    (int32 0))))
+                 (uint8x128
+                  (llvm.hexagon.V6.vread.128B
+                   uint8x128
+                   (list
+                    (int32 input)
+                    (int32
+                     (+
+                      (* 128 output.s0.x.x)
+                      (*
+                       input.stride.1
+                       (+
+                        (max
+                         (* output.s0.y.yo (/ output.extent.1 2))
+                         (+ output.extent.1 (- 0 (/ output.extent.1 2))))
+                        (* 4 output.s0.y.y.y)))))
+                    (int32 128)
+                    (int32 0)))))))
+              (int32
+               (halide.hexagon.interleave.b.dup2.h
+                int32
+                (list
+                 (int8
+                  (llvm.hexagon.V6.vread.128B
+                   int8
+                   (list (int32 mask) (int32 2))))
+                 (int8
+                  (llvm.hexagon.V6.vread.128B
+                   int8
+                   (list (int32 mask) (int32 4))))))))))
+           (uint8x256
+            (llvm.hexagon.V6.vcombine.128B
+             uint8x256
+             (list
+              (uint8x128
+               (llvm.hexagon.V6.vread.128B
+                uint8x128
+                (list
+                 (int32 input)
+                 (int32
+                  (+
+                   -1
+                   (+
+                    input.stride.1
+                    (+
+                     (* 128 output.s0.x.x)
+                     (*
+                      input.stride.1
+                      (+
+                       (max
+                        (* output.s0.y.yo (/ output.extent.1 2))
+                        (+ output.extent.1 (- 0 (/ output.extent.1 2))))
+                       (* 4 output.s0.y.y.y)))))))
+                 (int32 128)
+                 (int32 127))))
+              (uint8x128
+               (llvm.hexagon.V6.vread.128B
+                uint8x128
+                (list
+                 (int32 input)
+                 (int32
+                  (+
+                   (+
+                    (* 128 output.s0.x.x)
+                    (*
+                     input.stride.1
+                     (+
+                      (max
+                       (* output.s0.y.yo (/ output.extent.1 2))
+                       (+ output.extent.1 (- 0 (/ output.extent.1 2))))
+                      (* 4 output.s0.y.y.y))))
+                   (- 0 input.stride.1)))
+                 (int32 1)
+                 (int32 0)))))))
+           (int32
+            (halide.hexagon.interleave.b.dup2.h
+             int32
+             (list
+              (int8
+               (llvm.hexagon.V6.vread.128B int8 (list (int32 mask) (int32 6))))
+              (int8
+               (llvm.hexagon.V6.vread.128B
+                int8
+                (list (int32 mask) (int32 1))))))))))
+        (uint8x256
+         (llvm.hexagon.V6.vcombine.128B
+          uint8x256
+          (list
+           (uint8x128
+            (llvm.hexagon.V6.vread.128B
+             uint8x128
+             (list
+              (int32 input)
+              (int32
+               (+
+                -1
+                (+
+                 (* 128 output.s0.x.x)
+                 (*
+                  input.stride.1
+                  (+
+                   (max
+                    (* output.s0.y.yo (/ output.extent.1 2))
+                    (+ output.extent.1 (- 0 (/ output.extent.1 2))))
+                   (* 4 output.s0.y.y.y))))))
+              (int32 128)
+              (int32 127))))
+           (uint8x128
+            (llvm.hexagon.V6.vread.128B
+             uint8x128
+             (list
+              (int32 input)
+              (int32
+               (+
+                -1
+                (+
+                 (+
+                  (* 128 output.s0.x.x)
+                  (*
+                   input.stride.1
+                   (+
+                    (max
+                     (* output.s0.y.yo (/ output.extent.1 2))
+                     (+ output.extent.1 (- 0 (/ output.extent.1 2))))
+                    (* 4 output.s0.y.y.y))))
+                 (- 0 input.stride.1))))
+              (int32 1)
+              (int32 0)))))))
+        (int32
+         (halide.hexagon.interleave.b.dup2.h
+          int32
+          (list
+           (int8
+            (llvm.hexagon.V6.vread.128B int8 (list (int32 mask) (int32 3))))
+           (int8
+            (llvm.hexagon.V6.vread.128B
+             int8
+             (list (int32 mask) (int32 0)))))))))))))
+  (int32 4)))

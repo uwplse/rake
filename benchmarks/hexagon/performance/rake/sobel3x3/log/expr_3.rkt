@@ -1,0 +1,78 @@
+#lang rosette
+
+(require rake)
+(require rake/halide)
+
+(error-print-width 100000)
+(debug-on)
+
+(define-symbolic input (~> integer? (bitvector 8)))
+(init-var-types (make-hash (list (cons input 'uint8))))
+
+(define-symbolic output.s0.x.x integer?)
+(define-symbolic output.s0.y.y integer?)
+(define-symbolic input.stride.1 integer?)
+
+(define axioms 
+  (list ))
+
+(define t99 (+ (* output.s0.x.x 128) (* (+ (* output.s0.y.y 4) 3) input.stride.1)))
+(define t101.s (load input (ramp (+ (+ (* input.stride.1 -1) t99) -1) 1 128) (aligned 1 0)))
+(define t102.s (load input (ramp (+ (+ (* input.stride.1 -1) t99) 1) 1 128) (aligned 1 0)))
+(define t104.s (load input (ramp (+ (+ input.stride.1 t99) -1) 1 128) (aligned 128 127)))
+(define t105.s (load input (ramp (+ (+ input.stride.1 t99) 1) 1 128) (aligned 128 1)))
+
+(define halide-expr
+ (uint8x128
+  (vec-min
+   (vec-add
+    (absd
+     (vec-add
+      (vec-add
+       (shift_left
+        (uint16x128
+         (load input (ramp (+ (* input.stride.1 -1) t99) 1 128) (aligned 1 0)))
+        (x128 (uint16_t (bv 1 16))))
+       (uint16x128
+        t101.s))
+      (uint16x128
+       t102.s))
+     (vec-add
+      (vec-add
+       (shift_left
+        (uint16x128
+         (load input (ramp (+ input.stride.1 t99) 1 128) (aligned 128 0)))
+        (x128 (uint16_t (bv 1 16))))
+       (uint16x128
+        t104.s))
+      (uint16x128
+       t105.s)))
+    (absd
+     (vec-add
+      (vec-add
+       (shift_left
+        (uint16x128
+         (load input (ramp (+ t99 -1) 1 128) (aligned 128 127)))
+        (x128 (uint16_t (bv 1 16))))
+       (uint16x128
+        t101.s))
+      (uint16x128
+       t104.s))
+     (vec-add
+      (vec-add
+       (shift_left
+        (uint16x128
+         (load input (ramp (+ t99 1) 1 128) (aligned 128 1)))
+        (x128 (uint16_t (bv 1 16))))
+       (uint16x128
+        t102.s))
+      (uint16x128
+       t105.s))))
+   (x128 (uint16_t (bv 255 16))))))
+
+(define spec (synthesis-spec halide-expr axioms))
+(define hvx-expr (synthesize-hvx spec 'halide-ir 'greedy 'enumerative 'enumerative))
+
+(define out (open-output-file "sexp_3.out" #:exists 'replace))
+(pretty-write (llvm-codegen hvx-expr) out)
+(close-output-port out)

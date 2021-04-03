@@ -198,7 +198,7 @@
     [(empty? lanes-used-in-synth) (values #t hvx-expr-grm)]
     [else
      (define lane (first lanes-used-in-synth))
-     (display (format "Checking lane ~a\n" lane))
+     ;(display (format "Checking lane ~a\n" lane))
 
      (define interpreted-f-expr (interpret-hvx hvx-expr-grm))
 
