@@ -16,7 +16,6 @@ chmod +x racket-8.0-x86_64-linux-cs.sh
 ./racket-8.0-x86_64-linux-cs.sh
 [no and /bin/local]
 
-
 sudo apt-get install libfontconfig
 sudo apt-get install libcairo2
 sudo apt-get install libpango-1.0-0
@@ -25,6 +24,23 @@ sudo apt-get install libjpeg62
 
 raco pkg install rosette
 
-
+ssh-keygen -t ed25519 -C "maaz.c10@gmail.com"
+cat ~/.ssh/id_ed25519.pub
+[Add key to github account]
 
 git clone git@github.com:uwplse/rake.git
+cd rake
+git pull origin master
+
+cd ~/dependencies/installers
+wget https://apt.llvm.org/llvm.sh
+sudo ./llvm.sh 12
+
+sudo apt install make
+sudo apt install g++-9
+sudo cp /usr/bin/g++-9 /usr/bin/g++
+sudo apt install zlib1g-dev
+
+cd ~/rake/Halide-master-d48fbde/
+make
+

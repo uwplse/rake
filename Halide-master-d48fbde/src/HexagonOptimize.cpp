@@ -3060,10 +3060,10 @@ private:
         int x;
         std::cin >> x;
 
-        if (x == 0) {
-            expr_id++;
-            return IRMutator::visit(stmt);
-        }
+        //if (x == 0) {
+            //expr_id++;
+            //return IRMutator::visit(stmt);
+        //}
 
         RacketPrinter specPrinter(std::cout, let_vars);
         std::string expr = specPrinter.dispatch(lower_intrinsics(stmt->value));
@@ -3228,8 +3228,12 @@ private:
                 exit(0);
             }
         }
+        
+        expr_id++;
 
-        std::ifstream in("sexp_" + std::to_string(expr_id) + ".out");
+        return IRMutator::visit(stmt);
+
+        /*std::ifstream in("sexp_" + std::to_string(expr_id) + ".out");
         std::string s((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
         SExpParser p;
         Expr optimized = p.parse(s);
@@ -3237,7 +3241,7 @@ private:
 
         expr_id++;
 
-        return Store::make(stmt->name, optimized, stmt->index, stmt->param, stmt->predicate, stmt->alignment);
+        return Store::make(stmt->name, optimized, stmt->index, stmt->param, stmt->predicate, stmt->alignment);*/
     }
 };
 
