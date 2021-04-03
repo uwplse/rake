@@ -128,7 +128,7 @@
          (lambda (i) (multiply-add (data-v0 (+ (* i 2) 1)) (int8_t w1) (data-v1 (* i 2)) (int8_t w2) 'int32)))])]
     
     ;; Reduce (via sum) two vector-scalar multiplies in a sliding window with an additional accumulate
-    [(vtmpy Vuu Rt)
+    [(vtmpy Vuu Rt signed?)
      (match (list (interpret Vuu) (interpret Rt))
        [(list (i8x128x2 data-v0 data-v1) (cons (int8_t w1) (int8_t w2)))
         (i16x64x2

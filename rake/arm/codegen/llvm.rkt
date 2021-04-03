@@ -227,7 +227,7 @@
      (generate `vshuffvdd (p-type p) `(list ,(input-arg Vu) ,(input-arg Vv) (,t_i32 ,(- Rt))))]
     
     ;;vpack
-    [(vpack Vu Vv)
+    [(vpack Vu Vv signed?)
      (match (list (interpret-hvx Vu) (interpret-hvx Vv))
        [(list (i16x64 _)(i16x64 _)) (generate `vpackhb.sat (p-type p) `(list ,(input-arg Vu) ,(input-arg Vv)))]
        [(list (i32x32 _)(i32x32 _)) (generate `vpackwh.sat (p-type p) `(list ,(input-arg Vu) ,(input-arg Vv)))]

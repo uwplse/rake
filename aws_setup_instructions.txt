@@ -41,6 +41,9 @@ sudo apt install g++-9
 sudo cp /usr/bin/g++-9 /usr/bin/g++
 sudo apt install zlib1g-dev
 
+cd ~/rake/rake
+raco pkg install
+
 cd ~/rake/Halide-master-d48fbde/
 make
 

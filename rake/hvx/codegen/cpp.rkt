@@ -133,7 +133,7 @@
     ;;vtranspose
     
     ;;vpack
-    [(vpack Vu Vv)
+    [(vpack Vu Vv signed?)
      (match (list (interpret-hvx Vu) (interpret-hvx Vv))
        [(list (i32x32 _)(i32x32 _)) (format "~aVh_vpack_VwVw_sat(~a, ~a)" prefix (codegen Vu) (codegen Vv))]
        [(list (i16x64 _)(i16x64 _)) (format "~aVb_vpack_VhVh_sat(~a, ~a)" prefix (codegen Vu) (codegen Vv))]
