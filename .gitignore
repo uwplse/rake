@@ -11,3 +11,4 @@ Halide-master-d48fbde/include/Halide.h.gch/Halide.default.gch
 Halide-master-d48fbde/include/Halide.h.gch/Halide.test.gch
 *.o
 Halide-master-d48fbde/.vs/**/*
+Halide-master-d48fbde/.vs/slnx.sqlite
