@@ -3209,7 +3209,10 @@ private:
             << "(close-output-port out)";
         rakeInputF.close();
 
-        std::ifstream cache("sexp_" + std::to_string(expr_id) + ".out");
+        expr_id++;
+        return IRMutator::visit(stmt);
+
+        /*std::ifstream cache("sexp_" + std::to_string(expr_id) + ".out");
         if (!cache.good()) {
             char buf[1000];
             FILE *fp;
@@ -3228,12 +3231,8 @@ private:
                 exit(0);
             }
         }
-        
-        expr_id++;
 
-        return IRMutator::visit(stmt);
-
-        /*std::ifstream in("sexp_" + std::to_string(expr_id) + ".out");
+        std::ifstream in("sexp_" + std::to_string(expr_id) + ".out");
         std::string s((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
         SExpParser p;
         Expr optimized = p.parse(s);
