@@ -8,6 +8,8 @@
   (cond
     [(signed? (get buffer idx))
      (forall (list idx) (and (bvsle (buffer idx) (eval ub)) (bvsge (buffer idx) (eval lb))))]
+    [(signed? (get buffer idx))
+     (forall (list idx) (and (bvule (buffer idx) (eval ub)) (bvuge (buffer idx) (eval lb))))]
     [else (error "NYI: range axiom for type ~a" (get buffer idx))]))
 
 (provide (all-defined-out))
