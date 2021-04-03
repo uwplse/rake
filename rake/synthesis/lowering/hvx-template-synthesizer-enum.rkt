@@ -463,7 +463,7 @@
   (define original-expr (hash-ref ir-expr-annot (ir-node-id ir-expr)))
   (define synthesized-hvx-expr (??hvx-expr-grm))
 
-  (println synthesized-hvx-expr)
+  ;(println synthesized-hvx-expr)
   ;(set-curr-cn-hvx 0)
   ;(println ((interpret-halide original-expr) 0))
   ;(when (u8x128? (interpret-hvx synthesized-hvx-expr))
