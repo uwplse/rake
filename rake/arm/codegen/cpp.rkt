@@ -133,7 +133,7 @@
     ;;vtranspose
     
     ;;vpack
-    [(vpack Vu Vv)
+    [(vpack Vu Vv signed?)
      (match (list (interpret-hvx Vu) (interpret-hvx Vv))
        [(list (i32x32 _)(i32x32 _)) (format "~aVh_vpack_VwVw_sat(~a, ~a)" prefix (codegen Vu) (codegen Vv))]
        [(list (i16x64 _)(i16x64 _)) (format "~aVb_vpack_VhVh_sat(~a, ~a)" prefix (codegen Vu) (codegen Vv))]
@@ -262,7 +262,7 @@
      (format "~aVuw_vmpyeacc_VuwVuhRuh(~a, ~a, ~a)" prefix (codegen Vd) (codegen Vu) (int->8bit (eval-to-int Rt)))]
    
     ;;vmpa
-    [(vmpa Vuu Rt)
+    [(vmpa Vuu Rt signed?)
      (match (list (interpret-hvx Vuu) (interpret-hvx Rt))
        [(list (u8x128x2 _ _) (int8_t _)) (format "~aWh_vmpa_WubRb(~a, ~a)" prefix (codegen Vuu) (eval-to-int Rt))]
        [(list (u8x128x2 _ _) (uint8_t _)) (format "~aWh_vmpa_WubRub(~a, ~a)" prefix (codegen Vuu) (eval-to-int Rt))]
@@ -271,7 +271,7 @@
      )]
     
     ;;vmpa-acc
-    [(vmpa-acc Vdd Vuu Rt)
+    [(vmpa-acc Vdd Vuu Rt signed?)
      (match (list (interpret-hvx Vuu) (interpret-hvx Rt))
        [(list (u8x128x2 _ _) (int8_t _)) (format "~aWh_vmpaacc_WhWubRb(~a, ~a, ~a)" prefix (codegen Vdd) (codegen Vuu) (eval-to-int Rt))]
        [(list (u8x128x2 _ _) (uint8_t _)) (format "~aWh_vmpaacc_WhWubRub(~a, ~a, ~a)" prefix (codegen Vdd) (codegen Vuu) (eval-to-int Rt))]
@@ -316,7 +316,7 @@
      )]
     
     ;;vtmpy
-    [(vtmpy Vuu Rt)
+    [(vtmpy Vuu Rt signed?)
      (match (list (interpret-hvx Vuu) (interpret-hvx Rt))
        [(list (i8x128x2 _ _) (int8_t _)) (format "~aWh_vtmpy_WbRb(~a, ~a)" prefix (codegen Vuu) (eval-to-int Rt))]
        [(list (u8x128x2 _ _) (int8_t _)) (format "~aWh_vtmpy_WubRb(~a, ~a)" prefix (codegen Vuu) (eval-to-int Rt))]
@@ -324,7 +324,7 @@
      )]
     
     ;;vtmpy-acc
-    [(vtmpy-acc Vdd Vuu Rt)
+    [(vtmpy-acc Vdd Vuu Rt signed?)
      (match (list (interpret-hvx Vuu) (interpret-hvx Rt))
        [(list (i8x128x2 _ _) (int8_t _)) (format "~aWh_vtmpyacc_WhWbRb(~a, ~a, ~a)" prefix (codegen Vdd) (codegen Vuu) (eval-to-int Rt))]
        [(list (u8x128x2 _ _) (int8_t _)) (format "~aWh_vtmpyacc_WhWubRb(~a, ~a, ~a)" prefix (codegen Vdd) (codegen Vuu) (eval-to-int Rt))]
