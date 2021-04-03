@@ -145,7 +145,7 @@
 
     ;; Reduce (via sum) two vector-scalar multiplies in a sliding window with an additional accumulate.
     ;; Also accumulate the output into the target register
-    [(vtmpy-acc Vdd Vuu Rt)
+    [(vtmpy-acc Vdd Vuu Rt signed?)
      (match (list (interpret Vdd) (interpret Vuu) (interpret Rt))
        [(list (i16x64x2 acc-v0 acc-v1) (i8x128x2 data-v0 data-v1) (cons (int8_t w1) (int8_t w2)))
         (i16x64x2
