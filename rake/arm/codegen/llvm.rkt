@@ -348,7 +348,7 @@
     [(vmpye-acc Vd Vu Rt) (generate `vmpyuhe.acc (p-type p) `(list ,(input-arg Vd) ,(input-arg Vu) (,(p-type Rt) ,(codegen-scalar Rt))))]
 
     ;;(
-    [(vmpa Vuu Rt)
+    [(vmpa Vuu Rt signed?)
      (match (list (interpret-hvx Vuu) (interpret-hvx Rt))
        [(list (u8x128x2 _ _) (cons (int8_t _) (int8_t _)))
         (generate `vmpabus (p-type p) `(list ,(input-arg Vuu) (,t_i32 ,(codegen-scalar Rt))))]
@@ -360,7 +360,7 @@
         (generate `vmpahb (p-type p) `(list ,(input-arg Vuu) (,t_i32 ,(codegen-scalar Rt))))])]
     
     ;;vmpa-acc
-    [(vmpa-acc Vdd Vuu Rt)
+    [(vmpa-acc Vdd Vuu Rt signed?)
      (match (list (interpret-hvx Vdd) (interpret-hvx Vuu) (interpret-hvx Rt))
        [(list (i16x64x2 _ _) (u8x128x2 _ _) (cons (int8_t w1) (int8_t w2)))
         (generate `vmpabus.acc (p-type p) `(list ,(input-arg Vdd) ,(input-arg Vuu) (,t_i32 ,(codegen-scalar Rt))))]
@@ -406,14 +406,14 @@
        [(list (i16x64x2 _ _) (cons (int8_t _) (int8_t _))) (generate `vdmpyhb.dv.acc (p-type p) `(list ,(input-arg Vdd) ,(input-arg Vuu) (int8 ,(codegen-scalar Rt))))])]
     
     ;;vtmpy
-    [(vtmpy Vuu Rt)
+    [(vtmpy Vuu Rt signed?)
      (match (list (interpret-hvx Vuu) (interpret-hvx Rt))
        [(list (i8x128x2 _ _) (int8_t _)) (generate `vtmpyb (p-type p) `(list ,(input-arg Vuu) (,(p-type Rt) ,(codegen-scalar Rt))))]
        [(list (u8x128x2 _ _) (int8_t _)) (generate `vtmpybus (p-type p) `(list ,(input-arg Vuu) (,(p-type Rt) ,(codegen-scalar Rt))))]
        [(list (i16x64x2 _ _) (int8_t _)) (generate `vtmpyhb (p-type p) `(list ,(input-arg Vuu) (,(p-type Rt) ,(codegen-scalar Rt))))])]
     
     ;;vtmpy-acc
-    [(vtmpy-acc Vdd Vuu Rt)
+    [(vtmpy-acc Vdd Vuu Rt signed?)
      (match (list (interpret-hvx Vuu) (interpret-hvx Rt))
        [(list (i8x128x2 _ _) (int8_t _)) (generate `vtmpyb.acc (p-type p) `(list ,(input-arg Vdd) ,(input-arg Vuu) (,(p-type Rt) ,(codegen-scalar Rt))))]
        [(list (u8x128x2 _ _) (int8_t _)) (generate `vtmpybus.acc (p-type p) `(list ,(input-arg Vdd) ,(input-arg Vuu) (,(p-type Rt) ,(codegen-scalar Rt))))]
