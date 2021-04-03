@@ -3057,8 +3057,8 @@ private:
         debug(0) << "\nOptimizing expression: " << expr_id << "\n"
                  << stmt->value << "\n\n";
 
-        int x;
-        std::cin >> x;
+        //int x;
+        //std::cin >> x;
 
         //if (x == 0) {
             //expr_id++;
