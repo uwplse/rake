@@ -193,7 +193,7 @@
 
   (define elemT (type (elem-ir (interpret-ir ir-expr) 0)))
 
-  (define candidates (time (enumerate (enum-types elemT) isa hvx-sub-expr 4 20)))
+  (define candidates (time (enumerate (enum-types elemT) isa hvx-sub-expr 3 20)))
 
   ;; Fill in param grammars
   (define (fill-arg-grammars node [pos -1])

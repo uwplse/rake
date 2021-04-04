@@ -17,12 +17,11 @@
 
 (define offset 0)
 
-(define (synthesize-hvx-swizzles-enum starting-vecs hvx-expr-sketch hvx-expr-spec axioms ctx [test #f])
+(define (synthesize-hvx-swizzles-enum starting-vecs hvx-expr-sketch hvx-expr-spec axioms ctx [verif-offset 0])
   (hash-clear! cache)
   (hash-clear! ranked-candidate-sets)
 
-  (when test
-    (set! offset 64))
+  (set! offset verif-offset)
   
   ;; Extract set of swizzle nodes to be synthesized
   (define swizzle-nodes (list))

@@ -160,7 +160,31 @@
            ir-expr
            (error "Could not lift" halide-expr))]
       
-      ;[(uint8x256 vec) (lambda (i) (cpp-cast ((interpret vec) i) 'uint8))]
+      [(uint8x256 vec)
+       (define res-vec (synthesize-ir-expr vec buff-reads axioms))
+       (define lifted-vec (car res-vec))
+       (define lifted-sub-exprs (get-subexpr-list lifted-vec))
+
+       (define sub-sol (cdr res-vec))
+
+       ;; Try to fold the expr into the ir sub-expr
+       (define ir-expr (rec-fold (reverse lifted-sub-exprs) halide-expr axioms add-consts sub-consts mul-consts div-consts sub-sol))
+
+       ;; If that didn't work, try to replace the ir sub-expr with a new fused expr
+       (define sub-expr (get-subexpr-ir lifted-vec))
+       (when (and (unsat? ir-expr) (not (void? sub-expr)))
+         (define synthesized-expr (choose* (downcast sub-expr) (upcast sub-expr) (cast (get-node-id) sub-expr 'uint8)))
+         (define sol (run-synthesizer halide-expr synthesized-expr axioms sub-sol))
+         (when (not (unsat? sol))
+           (set! ir-expr (evaluate synthesized-expr sol))))
+
+       ;; If that didn't work, extend the expression with a new instruction
+       (when (unsat? ir-expr)
+         (set! ir-expr (run-synthesizer halide-expr (cast (get-node-id) lifted-vec 'uint8) axioms sub-sol)))
+       
+       (if (not (unsat? ir-expr))
+           ir-expr
+           (error "Could not lift" halide-expr))]
 
       ;[(int8x32 vec) (lambda (i) (cpp-cast ((interpret vec) i) 'int8))]
       ;[(int8x64 vec) (lambda (i) (cpp-cast ((interpret vec) i) 'int8))]

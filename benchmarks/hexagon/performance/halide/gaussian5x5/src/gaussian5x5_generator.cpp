@@ -11,7 +11,7 @@ public:
     GeneratorParam<bool> use_prefetch_sched{ "use_prefetch_sched", true };
 
     void generate() {
-        bounded_input(x, y) = BoundaryConditions::constant_exterior(input, 0)(x, y);
+        bounded_input(x, y) = BoundaryConditions::repeat_edge(input)(x, y);
 
         Func input_16("input_16");
         input_16(x, y) = cast<int16_t>(bounded_input(x, y));
@@ -44,7 +44,7 @@ public:
             output.dim(1).set_stride((output_stride / vector_size) * vector_size);
             output
                 .hexagon()
-                .tile(x, y, xi, yi, vector_size * 2, 4, TailStrategy::RoundUp)
+                .tile(x, y, xi, yi, vector_size, 4, TailStrategy::RoundUp)
                 .vectorize(xi)
                 .unroll(yi);
             rows.compute_at(Func(output), y)
