@@ -27,7 +27,6 @@ public:
 
         input.dim(0).set_min(0);
         input.dim(1).set_min(0);
-        input.dim(1).set_stride(1024);
 
         output.dim(0).set_min(0);
         output.dim(1).set_min(0);
