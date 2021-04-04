@@ -661,7 +661,7 @@
                               (cond
                                 [(vec-add? halide-expr)
                                  (cond
-                                   [(<= (add1 (weight-matrix-rad kernel)) 5)
+                                   [(<= (add1 (weight-matrix-rad kernel)) 10)
                                     (define (weights-gen) (apply choose* (append (list (int8_t (bv 1 8))) mul-consts)))
                                     (define weights (append (weight-matrix-vals kernel) (list (weights-gen))))
                                     (define radius (choose* (weight-matrix-rad kernel) (add1 (weight-matrix-rad kernel))))
@@ -723,7 +723,7 @@
                               (cond
                                 [(vec-add? halide-expr)
                                  (cond
-                                   [(<= (add1 (weight-matrix-rad kernel)) 5)
+                                   [(<= (add1 (weight-matrix-rad kernel)) 10)
                                     (define (weights-gen) (apply choose* (append (list (int8_t (bv 1 8))) mul-consts)))
                                     (define weights (append (weight-matrix-vals kernel) (list (weights-gen))))
                                     (define radius (choose* (weight-matrix-rad kernel) (add1 (weight-matrix-rad kernel))))

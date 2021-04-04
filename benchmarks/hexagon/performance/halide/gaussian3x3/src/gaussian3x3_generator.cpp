@@ -38,59 +38,7 @@ public:
 
             Expr ht = output.dim(1).extent();
 
-            // 0.2808 cycles/pixel
             /*output
-                .hexagon()
-                .split(y, yo, y, ht/2)
-                .tile(x, y, xi, yi, vector_size, 4, TailStrategy::RoundUp)
-                .vectorize(xi);
-
-            rows
-                .store_at(Func(output), yo)
-                .compute_at(Func(output), y)
-                .align_storage(x, vector_size)
-                .vectorize(x, vector_size, TailStrategy::RoundUp);
-
-            output.parallel(yo);
-            output.prefetch(input, y, 2, PrefetchBoundStrategy::NonFaulting);*/
-
-            // SW Attempt: Parallel loop error
-            /*rows.compute_at(Func(output), xi).store_at(Func(output), yi);
-
-            output
-                .hexagon()
-                .tile(x, y, xi, yi, vector_size, 4, TailStrategy::RoundUp)
-                .vectorize(xi);*/
-
-            // Halide Repo 0.2514
-            /*output
-                .hexagon()
-                .tile(x, y, xi, yi, vector_size*2, 4, TailStrategy::RoundUp)
-                .vectorize(xi)
-                .unroll(yi);
-            rows.compute_at(Func(output), y)
-                .tile(x, y, x, y, xi, yi, vector_size, 4, TailStrategy::RoundUp)
-                .vectorize(xi)
-                .unroll(yi);
-            
-            output.prefetch(input, y, 2, PrefetchBoundStrategy::NonFaulting);
-
-            // 0.2435 cycles/pixel
-            output
-                .hexagon()
-                .split(y, y, yi, 4)
-                .vectorize(x, vector_size, TailStrategy::RoundUp);*/
-            
-
-            // Halide: 0.1979 cycles/pixel
-            // SDK:    0.1412 cycles/pixel
-            /*output
-                .hexagon()
-                .tile(x, y, xi, yi, vector_size, 4, TailStrategy::RoundUp)
-                .vectorize(xi)
-                .unroll(yi);*/
-
-            output
                 .hexagon()
                 .tile(x, y, xi, yi, vector_size, 4, TailStrategy::RoundUp)
                 .vectorize(xi)
@@ -99,6 +47,12 @@ public:
                 .tile(x, y, x, y, xi, yi, vector_size, 4, TailStrategy::RoundUp)
                 .vectorize(xi)
                 .align_storage(x, 128)
+                .unroll(yi);*/
+
+            output
+                .hexagon()
+                .tile(x, y, xi, yi, vector_size, 4, TailStrategy::RoundUp)
+                .vectorize(xi)
                 .unroll(yi);
 
             output.prefetch(input, y, 1, PrefetchBoundStrategy::NonFaulting);
