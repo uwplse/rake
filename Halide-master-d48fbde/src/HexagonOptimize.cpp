@@ -3072,6 +3072,10 @@ private:
         if (stmt->value.node_type() == IRNodeType::Load)
             return IRMutator::visit(stmt);
 
+        const Call *c = stmt->value.as<Call>();
+        if (c && c->is_intrinsic(Call::dynamic_shuffle))
+            return IRMutator::visit(stmt);
+
         debug(0) << "\nOptimizing expression: " << expr_id << "\n"
                  << stmt->value << "\n\n";
 
