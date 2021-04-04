@@ -15,14 +15,23 @@
 (require rake/synthesis/swizzling/hvx-swizzle-synthesizer-incr)
 (require rake/synthesis/swizzling/hvx-swizzle-synthesizer-enum)
 
-(define (synthesize-hvx-swizzles halide-spec hvx-expr-sketch ctx axioms [swizzling-algo 'enumerative] [test #f])
+(define (synthesize-hvx-swizzles halide-spec hvx-expr-sketch ctx axioms [swizzling-algo 'enumerative] [verif-offset 0])
   ;(display "Synthesizing Data Swizzle Spec...\n")
   ;(display "=================================\n\n")
   
   ;(display "Synthesizing spec...\n\n")
 
   ;; Pre-processing. Replace gather* with gather-vec and gather-vecp
-  (set! hvx-expr-sketch (specialize-gather*-nodes hvx-expr-sketch))
+  (set! hvx-expr-sketch
+    (cond
+      [(gather*? hvx-expr-sketch)
+       (println halide-spec)
+       (println (vec-len halide-spec))
+       (println (interpret-halide halide-spec))
+       (exit)
+       1]
+      [else
+       (specialize-gather*-nodes hvx-expr-sketch)]))
 
   ;; Synthesize a hash-table spec
   (define-values (sketch-is-correct? hvx-expr-spec)
@@ -44,7 +53,7 @@
      (match swizzling-algo
        ['naive (synthesize-hvx-swizzles-naive starting-vecs hvx-expr-sketch hvx-expr-spec axioms ctx)]
        ['incremental (synthesize-hvx-swizzles-incr starting-vecs hvx-expr-sketch hvx-expr-spec axioms ctx)]
-       ['enumerative (synthesize-hvx-swizzles-enum starting-vecs hvx-expr-sketch hvx-expr-spec axioms ctx test)]
+       ['enumerative (synthesize-hvx-swizzles-enum starting-vecs hvx-expr-sketch hvx-expr-spec axioms ctx verif-offset)]
        [_ (error (format "Unrecognized lowering algorithm specified: '~a. Supported algorithms: ['naive, 'incremental, 'enumerative]" swizzling-algo))])]
     [else (values sketch-is-correct? (void))]))
 

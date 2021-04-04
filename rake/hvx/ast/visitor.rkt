@@ -111,4 +111,5 @@
  (rename-out
   [visit visit-hvx]
   [peek-trace visitor-trace-peek]
-  [peek-parent-trace visitor-trace-peek-parent]))
+  [peek-parent-trace visitor-trace-peek-parent]
+  [trace-length visitor-trace-length]))
