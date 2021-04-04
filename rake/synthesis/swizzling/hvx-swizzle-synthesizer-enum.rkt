@@ -211,7 +211,8 @@
                                            (for ([discarded-sol discarded-sols])
                                              (assert (not (equal-expr-hvx? discarded-sol hvx-expr-grm)))))))
      (cond
-       [(not (sat? sol)) (values #f hvx-expr-grm)]
+       [(unsat? sol) (values #f hvx-expr-grm)]
+       [(unknown? sol) (values #f hvx-expr-grm)]
        [else
         (define hvx-expr-grm-updated (evaluate hvx-expr-grm sol))
         ;(pretty-print hvx-expr-grm-updated)
