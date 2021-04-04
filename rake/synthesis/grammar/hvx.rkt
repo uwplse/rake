@@ -285,20 +285,32 @@
 ;
 ;                            (specialize-gather*-nodes
 ;                             (vmpa-acc
-;                              (vmpa-acc
-;                               (vmpa-acc
-;                                (vmpa-acc
-;                                 (vmpy
-;                                  hvx-sub-expr
-;                                  (int8-const))
-;                                 hvx-sub-expr
-;                                 (cons (int8-const) (int8-const)) #t)
-;                                hvx-sub-expr
-;                                (cons (int8-const) (int8-const)) #t)
-;                               hvx-sub-expr
-;                               (cons (int8-const) (int8-const)) #t)
-;                              hvx-sub-expr
-;                              (cons (int8-const) (int8-const)) #t))
+;                              (vtmpy-acc
+;                               (vtmpy-acc
+;                                (vzxt hvx-sub-expr #t)
+;                                hvx-sub-expr 
+;                                (cons (int8_t (bv #x02 8)) (int8_t (bv #x04 8))) #t)
+;                               hvx-sub-expr 
+;                               (cons (int8_t (bv #x02 8)) (int8_t (bv #x01 8))) #t)
+;                              hvx-sub-expr 
+;                              (cons (int8_t (bv #x02 8)) (int8_t (bv #x02 8))) #t))
+;                             
+;;                            (specialize-gather*-nodes
+;;                             (vmpa-acc
+;;                              (vmpa-acc
+;;                               (vmpa-acc
+;;                                (vmpa-acc
+;;                                 (vmpy
+;;                                  hvx-sub-expr
+;;                                  (int8-const))
+;;                                 hvx-sub-expr
+;;                                 (cons (int8-const) (int8-const)) #t)
+;;                                hvx-sub-expr
+;;                                (cons (int8-const) (int8-const)) #t)
+;;                               hvx-sub-expr
+;;                               (cons (int8-const) (int8-const)) #t)
+;;                              hvx-sub-expr
+;;                              (cons (int8-const) (int8-const)) #t))
 ;;                            
 ;;                            (vmpyi-acc
 ;;                             (vmpyi-acc
