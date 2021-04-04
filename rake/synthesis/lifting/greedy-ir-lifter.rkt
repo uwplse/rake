@@ -811,7 +811,7 @@
     ;(assume (list-ref learned-axioms 1))
     ;(println (evaluate (elem-ir (interpret-ir synthesized-expr) 0) sub-sol))
     ;)
-  ;(for ([axiom learned-axioms]) (assume axiom))
+  (for ([axiom learned-axioms]) (assume axiom))
   (define sol (synthesize #:forall (symbolics original-expr)
                           #:guarantee (bounded-eq? (interpret-halide original-expr) (interpret-ir synthesized-expr) MC_BND)))
   (define runtime (- (current-seconds) st))
