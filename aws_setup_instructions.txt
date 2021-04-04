@@ -47,3 +47,5 @@ raco pkg install
 cd ~/rake/Halide-master-d48fbde/
 make
 
+alias base='cd ~/rake'
+alias sync='git pull origin master'

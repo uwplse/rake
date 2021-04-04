@@ -210,6 +210,6 @@
        [else
         (values successful? hvx-expr)])]
     [else
-     (backtracking-search-enum halide-expr halide-expr-axioms ir-expr ir-expr-sol (append invalid-sketches (list ir-to-hvx)) swizzling-algo)]))
+     (backtracking-search-enum halide-expr halide-expr-axioms ir-expr ir-expr-sol ir-annotations (append invalid-sketches (list ir-to-hvx)) swizzling-algo ir-to-hvx)]))
 
 (provide synthesize-hvx-expr)
