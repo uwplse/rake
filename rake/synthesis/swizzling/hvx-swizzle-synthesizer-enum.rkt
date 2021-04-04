@@ -213,13 +213,15 @@
      (cond
        [(unsat? sol) (values #f hvx-expr-grm)]
        [(unknown? sol) (values #f hvx-expr-grm)]
-       [else
+       [(sat? sol)
         (define hvx-expr-grm-updated (evaluate hvx-expr-grm sol))
         ;(pretty-print hvx-expr-grm-updated)
         (define-values (correct? updated-hvx-expr-grm)
           (incr-lane-synthesis-loop interpreted-o-expr hvx-expr-grm-updated ctx discarded-sols (rest lanes-used-in-synth)))
         (cond
           [correct? (values correct? updated-hvx-expr-grm)]
-          [else (incr-lane-synthesis-loop interpreted-o-expr hvx-expr-grm ctx (append discarded-sols (list hvx-expr-grm-updated)) lanes-used-in-synth)])])]))
+          [else (incr-lane-synthesis-loop interpreted-o-expr hvx-expr-grm ctx (append discarded-sols (list hvx-expr-grm-updated)) lanes-used-in-synth)])]
+       [else
+        (error "Unexpected solver output:" sol)])]))
 
 (provide synthesize-hvx-swizzles-enum)
