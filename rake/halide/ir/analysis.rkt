@@ -26,7 +26,22 @@
      [(ramp base stride len) (list)]
      [(load buf idxs align)
       (match idxs
-        [(ramp base stride len) (list (list buf base align))]
+        [(ramp base stride len)
+         (define elem-bw (bw (hash-ref type-dict buf)))
+         (define tile-w (* len elem-bw))
+         (cond
+           [(eq? tile-w 1024)
+            (list (list buf base align))]
+           [(eq? tile-w 2048)
+            (list
+             (list buf base align)
+             (list buf (+ base (quotient 1024 elem-bw)) align))]
+           [(eq? tile-w 4096)
+            (list
+             (list buf base align)
+             (list buf (+ base (quotient 1024 elem-bw)) align)
+             (list buf (+ base (quotient 2048 elem-bw)) align)
+             (list buf (+ base (quotient 3072 elem-bw)) align))])]
         [_ (error "NYI: Extracting vec from:" expr)])]
 
      [(slice_vectors vec base stride len) (extract-loads-as-hvx-vecs vec)]
