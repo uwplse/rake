@@ -16,12 +16,14 @@
 (define ranked-candidate-sets (make-hash))
 
 (define offset 0)
+(define lane-offset 0)
 
-(define (synthesize-hvx-swizzles-enum starting-vecs hvx-expr-sketch hvx-expr-spec axioms ctx [verif-offset 0])
+(define (synthesize-hvx-swizzles-enum starting-vecs hvx-expr-sketch hvx-expr-spec axioms ctx [verif-offset 0] [cn-offset 0])
   (hash-clear! cache)
   (hash-clear! ranked-candidate-sets)
 
   (set! offset verif-offset)
+  (set! lane-offset cn-offset)
   
   ;; Extract set of swizzle nodes to be synthesized
   (define swizzle-nodes (list))
@@ -192,6 +194,9 @@
   (for ([axiom axioms]) (assume axiom))
   (search-candidates sorted-costs ranked-candidates))
 
+(require rake/cpp/cast)
+(require rake/cpp/types)
+
 (define (incr-lane-synthesis-loop interpreted-o-expr hvx-expr-grm ctx discarded-sols lanes-used-in-synth)
   (cond
     [(empty? lanes-used-in-synth) (values #t hvx-expr-grm)]
@@ -201,13 +206,15 @@
 
      (define interpreted-f-expr (interpret-hvx hvx-expr-grm))
 
-     ;(println (interpreted-o-expr (+ offset 0)))
-     ;(set-curr-cn-hvx 0)
-     ;(println (elem-hvx interpreted-f-expr 0))
+;     (println lanes-used-in-synth)
+;     (println interpreted-f-expr)
+;     (println (interpreted-o-expr (+ offset 0)))
+;     (set-curr-cn-hvx 0)
+;     (println (cpp-cast (v0-elem-hvx interpreted-f-expr 0) (type (interpreted-o-expr (+ offset 0)))))
      
      (define sol (synthesize #:forall ctx
                              #:guarantee (begin
-                                           (lane-eq? interpreted-o-expr interpreted-f-expr lane offset)
+                                           (lane-eq? interpreted-o-expr interpreted-f-expr lane offset lane-offset)
                                            (for ([discarded-sol discarded-sols])
                                              (assert (not (equal-expr-hvx? discarded-sol hvx-expr-grm)))))))
      (cond

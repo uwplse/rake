@@ -1,5 +1,8 @@
 #lang rosette
 
+(require rake/cpp/types)
+(require rake/cpp/cast)
+
 (require rake/hvx/ast/types)
 (require rake/hvx/ast/visitor)
 (require rake/hvx/interpreter)
@@ -20,16 +23,16 @@
        (list (- num_lanes 2) (- num_lanes 1))))) ;; Last two lanes of vec1
 
 ;; Check equality between lanes of Halide IR and HVX expressions
-(define (lane-eq? oe se lane [offset 0])
+(define (lane-eq? oe se lane [offset 0]  [lane-offset 0])
   (cond
     [(or (i16x64x2? se) (u16x64x2? se))
      (set-curr-cn-hvx lane)
      (when (<= 0 lane 63)
-       (assert (eq? (oe lane) (v0-elem-hvx se lane))))
+       (assert (eq? (oe lane) (cpp-cast (v0-elem-hvx se lane) (type (oe lane))))))
      (when (<= 64 lane 127)
-       (assert (eq? (oe lane) (v1-elem-hvx se (- lane 64)))))]
+       (assert (eq? (oe lane) (cpp-cast (v1-elem-hvx se (- lane 64)) (type (oe lane))))))]
     [else
-     (set-curr-cn-hvx (+ offset lane))
+     (set-curr-cn-hvx (+ offset lane lane-offset))
      (assert (eq? (oe (+ offset lane)) (elem-hvx se lane)))]))
 
 ;; Check equality between lanes of two HVX expressions
