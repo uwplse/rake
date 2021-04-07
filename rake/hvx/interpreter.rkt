@@ -707,6 +707,29 @@
        [(list (i32x32 v0) (i32x32 v1) #f) (u16x64 (lambda (i) (satu16 (if (even? i) (round (v1 (quotient i 2))) (round (v0 (quotient i 2)))))))]
        [(list (u32x32 v0) (u32x32 v1) _)  (u16x64 (lambda (i) (satu16 (if (even? i) (round (v1 (quotient i 2))) (round (v0 (quotient i 2)))))))])]
 
+    [(vunpack Vu)
+     (let ([sxt16 (lambda (val) (sign-extend (eval val) (bitvector 16)))]
+           [sxt32 (lambda (val) (zero-extend (eval val) (bitvector 32)))]
+           [zxt16 (lambda (val) (zero-extend (eval val) (bitvector 16)))]
+           [zxt32 (lambda (val) (sign-extend (eval val) (bitvector 32)))])
+       (match (interpret Vu)
+         [(i8x128 v0)
+          (i16x64x2
+           (lambda (i) (sxt16 (v0 i)))
+           (lambda (i) (sxt16 (v0 (+ i 64)))))]
+         [(u8x128 v0)
+          (u16x64x2
+           (lambda (i) (zxt16 (v0 i)))
+           (lambda (i) (zxt16 (v0 (+ i 64)))))]
+         [(i16x64 v0)
+          (i32x32x2
+           (lambda (i) (sxt32 (v0 i)))
+           (lambda (i) (sxt32 (v0 (+ i 32)))))]
+         [(u16x64 v0)
+          (u32x32x2
+           (lambda (i) (zxt32 (v0 i)))
+           (lambda (i) (zxt32 (v0 (+ i 32)))))]))]
+
     [(vpack Vu Vv signed?)
      (match (list (interpret Vu) (interpret Vv))
        [(list (i16x64 v0) (i16x64 v1))

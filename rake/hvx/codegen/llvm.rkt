@@ -112,6 +112,10 @@
     [(i32x32x2 data-v0 data-v1) (string->sexp "int32x64")]
     [(u32x32x2 data-v0 data-v1) (string->sexp "uint32x64")]))
 
+(define (double-len t)
+  (match t
+    ['int32x64 'int32x128]))
+
 (define (codegen-idx idx)
   (match idx
     [(expression op child ...)
@@ -139,16 +143,21 @@
     [_ idx]))
 
 (define (codegen p)
-  ;(printf (format "~a\n" p))
+  ;(printf (format "Codegen: ~a\n" p))
   (match p
 
+    [(list v0 v1)
+     (generate `concat_vectors (double-len (p-type (first p))) `(list ,(input-arg v0) ,(input-arg v1)))]
+    
     ;;let-exprs
     [(let-expr var val body)
      (define (repl-var node)
        (cond
          [(eq? node var) val]
          [else node]))
-     (codegen (visit-hvx body repl-var))]
+     (cond
+       [(list? body) (codegen (for/list ([e body]) (visit-hvx e repl-var)))]
+       [else (codegen (visit-hvx body repl-var))])]
     
     ;;vread
     [(vread buf loc align)
