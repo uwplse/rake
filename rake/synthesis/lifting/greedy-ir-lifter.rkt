@@ -147,7 +147,7 @@
        ;; If that didn't work, try to replace the ir sub-expr with a new fused expr
        (define sub-expr (get-subexpr-ir lifted-vec))
        (when (and (unsat? ir-expr) (not (void? sub-expr)))
-         (define synthesized-expr (choose* (downcast sub-expr) (upcast sub-expr) (cast (get-node-id) sub-expr 'uint8)))
+         (define synthesized-expr (choose* (cast (get-node-id) sub-expr 'uint8)))
          (define sol (run-synthesizer halide-expr synthesized-expr axioms sub-sol))
          (when (not (unsat? sol))
            (set! ir-expr (evaluate synthesized-expr sol))))
