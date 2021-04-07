@@ -671,24 +671,31 @@
     
     ;; Narrowing arithmetic shift-right with (all elems right-shifted by the same value)
     [(vasr-n Vu Vv Rt round? sat? unsigned?)
-     (match (list (interpret Vu) (interpret Vv) (interpret Rt) (interpret round?) (interpret sat?) (interpret unsigned?))
-       [(list (i16x64 v0) (i16x64 v1) (int8_t n) #f _ #t) (u8x128 (lambda (i) (satu8 (asr (if (even? i) (v1 (quotient i 2)) (v0 (quotient i 2))) (int8_t n)))))]
-       [(list (i16x64 v0) (i16x64 v1) (int8_t n) #f _ #f) (i8x128 (lambda (i) (sat8 (asr (if (even? i) (v1 (quotient i 2)) (v0 (quotient i 2))) (int8_t n)))))]
-       [(list (i16x64 v0) (i16x64 v1) (int8_t n) #t _ #t) (u8x128 (lambda (i) (satu8 (round-asr (if (even? i) (v1 (quotient i 2)) (v0 (quotient i 2))) (int8_t n)))))]
-       [(list (i16x64 v0) (i16x64 v1) (int8_t n) #t _ #f) (i8x128 (lambda (i) (sat8 (round-asr (if (even? i) (v1 (quotient i 2)) (v0 (quotient i 2))) (int8_t n)))))]
+     (match (list (interpret Vu) (interpret Vv) (interpret Rt)) ;(interpret round?) (interpret sat?) (interpret unsigned?)
+       [(list (i16x64 v0) (i16x64 v1) (int8_t n))
+        (cond
+          [(and (not round?) unsigned?) (u8x128 (lambda (i) (satu8 (asr (if (even? i) (v1 (quotient i 2)) (v0 (quotient i 2))) (int8_t n)))))]
+          [(and (not round?) (not unsigned?)) (i8x128 (lambda (i) (sat8 (asr (if (even? i) (v1 (quotient i 2)) (v0 (quotient i 2))) (int8_t n)))))]
+          [(and round? unsigned?) (u8x128 (lambda (i) (satu8 (round-asr (if (even? i) (v1 (quotient i 2)) (v0 (quotient i 2))) (int8_t n)))))]
+          [(and round? (not unsigned?)) (i8x128 (lambda (i) (sat8 (round-asr (if (even? i) (v1 (quotient i 2)) (v0 (quotient i 2))) (int8_t n)))))])]
 
-       [(list (u16x64 v0) (u16x64 v1) (int8_t n) #f _ _) (u8x128 (lambda (i) (satu8 (asr (if (even? i) (v1 (quotient i 2)) (v0 (quotient i 2))) (int8_t n)))))]
-       [(list (u16x64 v0) (u16x64 v1) (int8_t n) #t _ _) (u8x128 (lambda (i) (satu8 (round-asr (if (even? i) (v1 (quotient i 2)) (v0 (quotient i 2))) (int8_t n)))))]
+       [(list (u16x64 v0) (u16x64 v1) (int8_t n))
+        (cond
+          [(not round?) (u8x128 (lambda (i) (satu8 (asr (if (even? i) (v1 (quotient i 2)) (v0 (quotient i 2))) (int8_t n)))))]
+          [round? (u8x128 (lambda (i) (satu8 (round-asr (if (even? i) (v1 (quotient i 2)) (v0 (quotient i 2))) (int8_t n)))))])]
 
-       [(list (i32x32 v0) (i32x32 v1) (int8_t n) #f _ #t) (u16x64 (lambda (i) (satu16 (asr (if (even? i) (v1 (quotient i 2)) (v0 (quotient i 2))) (int8_t n)))))]
-       [(list (i32x32 v0) (i32x32 v1) (int8_t n) #t _ #t) (u16x64 (lambda (i) (satu16 (round-asr (if (even? i) (v1 (quotient i 2)) (v0 (quotient i 2))) (int8_t n)))))]
-
-       [(list (i32x32 v0) (i32x32 v1) (int8_t n) #f #t #f) (i16x64 (lambda (i) (sat16 (asr (if (even? i) (v1 (quotient i 2)) (v0 (quotient i 2))) (int8_t n)))))]
-       [(list (i32x32 v0) (i32x32 v1) (int8_t n) #f #f #f) (i16x64 (lambda (i) (cpp-cast (round-asr (if (even? i) (v1 (quotient i 2)) (v0 (quotient i 2))) (int8_t n)) 'int16)))]
-       [(list (i32x32 v0) (i32x32 v1) (int8_t n) #t _ #f) (i16x64 (lambda (i) (sat16 (round-asr (if (even? i) (v1 (quotient i 2)) (v0 (quotient i 2))) (int8_t n)))))]
+       [(list (i32x32 v0) (i32x32 v1) (int8_t n))
+        (cond
+          [(and (not round?) unsigned?) (u16x64 (lambda (i) (satu16 (asr (if (even? i) (v1 (quotient i 2)) (v0 (quotient i 2))) (int8_t n)))))]
+          [(and round unsigned?) (u16x64 (lambda (i) (satu16 (round-asr (if (even? i) (v1 (quotient i 2)) (v0 (quotient i 2))) (int8_t n)))))]
+          [(and (not round?) sat? (not unsigned?)) (i16x64 (lambda (i) (sat16 (asr (if (even? i) (v1 (quotient i 2)) (v0 (quotient i 2))) (int8_t n)))))]
+          [(and (not round?) (not sat?) (not unsigned?)) (i16x64 (lambda (i) (cpp-cast (round-asr (if (even? i) (v1 (quotient i 2)) (v0 (quotient i 2))) (int8_t n)) 'int16)))]
+          [(and round? (not unsigned?)) (i16x64 (lambda (i) (sat16 (round-asr (if (even? i) (v1 (quotient i 2)) (v0 (quotient i 2))) (int8_t n)))))])]
        
-       [(list (u32x32 v0) (u32x32 v1) (int8_t n) #f _ _) (u16x64 (lambda (i) (satu16 (asr (if (even? i) (v1 (quotient i 2)) (v0 (quotient i 2))) (int8_t n)))))]
-       [(list (u32x32 v0) (u32x32 v1) (int8_t n) #t _ _) (u16x64 (lambda (i) (satu16 (round-asr (if (even? i) (v1 (quotient i 2)) (v0 (quotient i 2))) (int8_t n)))))])]
+       [(list (u32x32 v0) (u32x32 v1) (int8_t n) )
+        (cond
+          [(not round?) (u16x64 (lambda (i) (satu16 (asr (if (even? i) (v1 (quotient i 2)) (v0 (quotient i 2))) (int8_t n)))))]
+          [round? (u16x64 (lambda (i) (satu16 (round-asr (if (even? i) (v1 (quotient i 2)) (v0 (quotient i 2))) (int8_t n)))))])])]
 
     ;; Rounding
     [(vround Vd Vu signed?)
@@ -701,13 +708,17 @@
        [(list (u32x32 v0) (u32x32 v1) _)  (u16x64 (lambda (i) (satu16 (if (even? i) (round (v1 (quotient i 2))) (round (v0 (quotient i 2)))))))])]
 
     [(vpack Vu Vv signed?)
-     (match (list (interpret Vu) (interpret Vv) (interpret signed?))
-       [(list (i16x64 v0) (i16x64 v1) #t) (i8x128 (lambda (i) (if (< i 64) (sat8 (v1 i)) (sat8 (v0 (- i 64))))))]
-       [(list (i16x64 v0) (i16x64 v1) #f) (u8x128 (lambda (i) (if (< i 64) (satu8 (v1 i)) (satu8 (v0 (- i 64))))))]
+     (match (list (interpret Vu) (interpret Vv))
+       [(list (i16x64 v0) (i16x64 v1))
+        (if signed?
+            (i8x128 (lambda (i) (if (< i 64) (sat8 (v1 i)) (sat8 (v0 (- i 64))))))
+            (u8x128 (lambda (i) (if (< i 64) (satu8 (v1 i)) (satu8 (v0 (- i 64)))))))]
        ;[(list (u16x64 v0) (u16x64 v1) #t) (i8x128 (lambda (i) (if (< i 64) (i8hi (v1 i)) (i8hi (v0 (- i 64))))))]
        ;[(list (u16x64 v0) (u16x64 v1) #f) (u8x128 (lambda (i) (if (< i 64) (u8hi (v1 i)) (u8hi (v0 (- i 64))))))]
-       [(list (i32x32 v0) (i32x32 v1) #t) (i16x64 (lambda (i) (if (< i 32) (sat16 (v1 i)) (sat16 (v0 (- i 32))))))]
-       [(list (i32x32 v0) (i32x32 v1) #f) (u16x64 (lambda (i) (if (< i 32) (satu16 (v1 i)) (satu16 (v0 (- i 32))))))]
+       [(list (i32x32 v0) (i32x32 v1))
+        (if signed?
+            (i16x64 (lambda (i) (if (< i 32) (sat16 (v1 i)) (sat16 (v0 (- i 32))))))
+            (u16x64 (lambda (i) (if (< i 32) (satu16 (v1 i)) (satu16 (v0 (- i 32)))))))]
        ;[(list (u32x32 v0) (u32x32 v1) #t) (i16x64 (lambda (i) (if (< i 32) (i16hi (v1 i)) (i16hi (v0 (- i 32))))))]
        ;[(list (u32x32 v0) (u32x32 v1) #f) (u16x64 (lambda (i) (if (< i 32) (u16hi (v1 i)) (u16hi (v0 (- i 32))))))]
        )]
@@ -737,17 +748,17 @@
          [(list (i16x64 v0) #f) (u32x32x2 (lambda (i) (uint32_t (sxt32 (v0 (* i 2))))) (lambda (i) (uint32_t (sxt32 (v0 (+ (* i 2) 1))))))]))]
 
     [(vzxt Vu signed?)
-     (let ([sxt16 (lambda (val) (zero-extend (eval val) (bitvector 16)))] [sxt32 (lambda (val) (sign-extend (eval val) (bitvector 32)))])
+     (let ([zxt16 (lambda (val) (zero-extend (eval val) (bitvector 16)))] [zxt32 (lambda (val) (sign-extend (eval val) (bitvector 32)))])
        (match (list (interpret Vu) (interpret signed?))
-         [(list (u8x128 v0) #t) (i16x64x2 (lambda (i) (int16_t (sxt16 (v0 (* i 2))))) (lambda (i) (int16_t (sxt16 (v0 (+ (* i 2) 1))))))]
-         [(list (i8x128 v0) #t) (i16x64x2 (lambda (i) (int16_t (sxt16 (v0 (* i 2))))) (lambda (i) (int16_t (sxt16 (v0 (+ (* i 2) 1))))))]
-         [(list (u16x64 v0) #t) (i32x32x2 (lambda (i) (int32_t (sxt32 (v0 (* i 2))))) (lambda (i) (int32_t (sxt32 (v0 (+ (* i 2) 1))))))]
-         [(list (i16x64 v0) #t) (i32x32x2 (lambda (i) (int32_t (sxt32 (v0 (* i 2))))) (lambda (i) (int32_t (sxt32 (v0 (+ (* i 2) 1))))))]
+         [(list (u8x128 v0) #t) (i16x64x2 (lambda (i) (int16_t (zxt16 (v0 (* i 2))))) (lambda (i) (int16_t (zxt16 (v0 (+ (* i 2) 1))))))]
+         [(list (i8x128 v0) #t) (i16x64x2 (lambda (i) (int16_t (zxt16 (v0 (* i 2))))) (lambda (i) (int16_t (zxt16 (v0 (+ (* i 2) 1))))))]
+         [(list (u16x64 v0) #t) (i32x32x2 (lambda (i) (int32_t (zxt32 (v0 (* i 2))))) (lambda (i) (int32_t (zxt32 (v0 (+ (* i 2) 1))))))]
+         [(list (i16x64 v0) #t) (i32x32x2 (lambda (i) (int32_t (zxt32 (v0 (* i 2))))) (lambda (i) (int32_t (zxt32 (v0 (+ (* i 2) 1))))))]
 
-         [(list (u8x128 v0) #f) (u16x64x2 (lambda (i) (uint16_t (sxt16 (v0 (* i 2))))) (lambda (i) (uint16_t (sxt16 (v0 (+ (* i 2) 1))))))]
-         [(list (i8x128 v0) #f) (u16x64x2 (lambda (i) (uint16_t (sxt16 (v0 (* i 2))))) (lambda (i) (uint16_t (sxt16 (v0 (+ (* i 2) 1))))))]
-         [(list (u16x64 v0) #f) (u32x32x2 (lambda (i) (uint32_t (sxt32 (v0 (* i 2))))) (lambda (i) (uint32_t (sxt32 (v0 (+ (* i 2) 1))))))]
-         [(list (i16x64 v0) #f) (u32x32x2 (lambda (i) (uint32_t (sxt32 (v0 (* i 2))))) (lambda (i) (uint32_t (sxt32 (v0 (+ (* i 2) 1))))))]))]
+         [(list (u8x128 v0) #f) (u16x64x2 (lambda (i) (uint16_t (zxt16 (v0 (* i 2))))) (lambda (i) (uint16_t (zxt16 (v0 (+ (* i 2) 1))))))]
+         [(list (i8x128 v0) #f) (u16x64x2 (lambda (i) (uint16_t (zxt16 (v0 (* i 2))))) (lambda (i) (uint16_t (zxt16 (v0 (+ (* i 2) 1))))))]
+         [(list (u16x64 v0) #f) (u32x32x2 (lambda (i) (uint32_t (zxt32 (v0 (* i 2))))) (lambda (i) (uint32_t (zxt32 (v0 (+ (* i 2) 1))))))]
+         [(list (i16x64 v0) #f) (u32x32x2 (lambda (i) (uint32_t (zxt32 (v0 (* i 2))))) (lambda (i) (uint32_t (zxt32 (v0 (+ (* i 2) 1))))))]))]
     
     ;; ---- Everything below this line in the interpreter is tentative ----
     
