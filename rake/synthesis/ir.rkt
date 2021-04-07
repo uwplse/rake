@@ -430,6 +430,8 @@
            (cond
              [(eq? outputType 'uint16) (satu16 out)]
              [(eq? outputType 'int16) (sat16 out)]
+             [(eq? outputType 'uint8) (cpp-cast (satu16 out) 'uint8)]
+             [(eq? outputType 'int8) (cpp-cast (sat16 out) 'int8)]
              [(eq? outputType 'int32) (mk-typed-expr (bvashr (eval v) (eval c)) outputType)])])))]
 
     [(logic-shift-right data n)
