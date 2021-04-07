@@ -73,19 +73,45 @@
       [(convolve-acc acc sub-expr kernel saturateFunc outputType)
        (define-values (successful1? hvx-acc)
          (synthesize-hvx-expr halide-expr halide-expr-axioms acc ir-expr-sol ir-annotations lowering-algo swizzling-algo #f))
-
        (define-values (successful2? hvx-sub-expr)
          (synthesize-hvx-expr halide-expr halide-expr-axioms sub-expr ir-expr-sol ir-annotations lowering-algo swizzling-algo #f))
-       
+
        (cond
          [(and successful1? successful2?)
-           (define halide-sub-expr (hash-ref ir-annotations (ir-node-id ir-expr)))
-           (hash-set! ir-to-hvx (ir-node-id acc) (if (vinterleave? hvx-acc) (vinterleave-Vuu hvx-acc) hvx-acc))
-           (hash-set! ir-to-hvx (ir-node-id sub-expr) (if (vinterleave? hvx-sub-expr) (vinterleave-Vuu hvx-sub-expr) hvx-sub-expr))
-           (match lowering-algo
-             ['incremental (backtracking-search-incr halide-sub-expr halide-expr-axioms ir-expr ir-expr-sol ir-annotations (list) swizzling-algo ir-to-hvx)]
-             ['enumerative (backtracking-search-enum halide-sub-expr halide-expr-axioms ir-expr ir-expr-sol ir-annotations (list) swizzling-algo ir-to-hvx)]
-             [_ (error (format "Unrecognized lowering algorithm specified: '~a. Supported algorithms: ['incremental, 'enumerative]" lowering-algo))])]
+          (cond
+            [(list? hvx-acc)
+             (define base 0)
+             (define successful? #t)
+             (define hvx-exprs (list))
+             (for ([acc-expr hvx-acc])
+               (when successful?
+                 (define vec (hash-ref ir-annotations (ir-node-id ir-expr)))
+                 (define len (quotient (num-elems-hal vec) (length hvx-acc)))
+                 (define halide-sub-expr (slice_vectors vec base 1 len))
+
+                 (hash-set! ir-to-hvx (ir-node-id acc) (if (vinterleave? acc-expr) (vinterleave-Vuu acc-expr) acc-expr))
+                 (hash-set! ir-to-hvx (ir-node-id sub-expr) (if (vinterleave? hvx-sub-expr) (vinterleave-Vuu hvx-sub-expr) hvx-sub-expr))
+                 (define-values (s? hvx-expr)
+                   (match lowering-algo
+                     ['incremental (backtracking-search-incr halide-sub-expr halide-expr-axioms ir-expr ir-expr-sol ir-annotations (list) swizzling-algo ir-to-hvx)]
+                     ['enumerative (backtracking-search-enum halide-sub-expr halide-expr-axioms ir-expr ir-expr-sol (hash-set (make-immutable-hash (hash->list ir-annotations)) (ir-node-id ir-expr) halide-sub-expr) (list) swizzling-algo ir-to-hvx base)]
+                     [_ (error (format "Unrecognized lowering algorithm specified: '~a. Supported algorithms: ['incremental, 'enumerative]" lowering-algo))]))
+
+                 (set! base (+ base len))
+                 (set! successful? (and successful? s?))
+                 (set! hvx-exprs (append hvx-exprs (list hvx-expr)))))
+             
+             (values successful? hvx-exprs)]
+            [else
+             (define halide-sub-expr (hash-ref ir-annotations (ir-node-id ir-expr)))
+             (hash-set! ir-to-hvx (ir-node-id acc) (if (vinterleave? hvx-acc) (vinterleave-Vuu hvx-acc) (first hvx-acc)))
+             (hash-set! ir-to-hvx (ir-node-id sub-expr) (if (vinterleave? hvx-sub-expr) (vinterleave-Vuu hvx-sub-expr) hvx-sub-expr))
+             (match lowering-algo
+               ['incremental (backtracking-search-incr halide-sub-expr halide-expr-axioms ir-expr ir-expr-sol ir-annotations (list) swizzling-algo ir-to-hvx)]
+               ['enumerative (backtracking-search-enum halide-sub-expr halide-expr-axioms ir-expr ir-expr-sol ir-annotations (list) swizzling-algo ir-to-hvx)]
+               [_ (error (format "Unrecognized lowering algorithm specified: '~a. Supported algorithms: ['incremental, 'enumerative]" lowering-algo))])
+
+             ])]
          [else (values #f (void))])]
 
 ;      [(cast sub-expr type)
@@ -160,7 +186,7 @@
          [else
           (values #t (gather* opts))])]
 
-      [_ (error "NYI")]
+      [_ (error "NYI" ir-expr)]
       ))
   
   (values successful? hvx-expr))
@@ -181,17 +207,17 @@
       (values successful? hvx-expr)
       (backtracking-search-incr halide-expr halide-expr-axioms ir-expr ir-expr-sol (append invalid-sketches (list ir-to-hvx)) swizzling-algo)))
 
-(define (backtracking-search-enum halide-expr halide-expr-axioms ir-expr ir-expr-sol ir-annotations invalid-sketches swizzling-algo [ir-to-hvx (make-hash)])
+(define (backtracking-search-enum halide-expr halide-expr-axioms ir-expr ir-expr-sol ir-annotations invalid-sketches swizzling-algo [ir-to-hvx (make-hash)] [offset 0])
   ;; Define the ir specification for template synthesis
   (define hvx-spec (hvx-expr-spec ir-expr ir-expr-sol ir-annotations (symbolics halide-expr) halide-expr-axioms invalid-sketches))
   
   ;; Synthesize equivalent HVX template (compute instructions)
   ;(define ir-to-hvx (make-hash))
-  (define hvx-expr-sketch (synthesize-hvx-template-enum hvx-spec ir-to-hvx))
+  (define hvx-expr-sketch (synthesize-hvx-template-enum hvx-spec ir-to-hvx offset))
   
   ;; Synthesize data-movement
   (define-values (successful? hvx-expr)
-    (synthesize-hvx-swizzles halide-expr hvx-expr-sketch (symbolics halide-expr) halide-expr-axioms swizzling-algo))
+    (synthesize-hvx-swizzles halide-expr hvx-expr-sketch (symbolics halide-expr) halide-expr-axioms swizzling-algo 0 offset))
 
   (cond
     [successful?
@@ -206,7 +232,21 @@
           [successful2? (values successful? (cons hvx-expr hvx-expr2))]
           [else (backtracking-search-enum halide-expr halide-expr-axioms ir-expr ir-expr-sol (append invalid-sketches (list ir-to-hvx)) swizzling-algo)])]
        [(eq? hal-elem-cnt (* 4 hvx-elem-cnt))
-        (error "NYI: Expression needs to be replicated more than 2 times to produce the output tile.")]
+        (define-values (successful2? hvx-expr2)
+          (synthesize-hvx-swizzles halide-expr hvx-expr-sketch (symbolics halide-expr) halide-expr-axioms swizzling-algo hvx-elem-cnt))
+        (cond
+          [successful2?
+           (define-values (successful3? hvx-expr3)
+             (synthesize-hvx-swizzles halide-expr hvx-expr-sketch (symbolics halide-expr) halide-expr-axioms swizzling-algo (* 2 hvx-elem-cnt)))
+           (cond
+             [successful3?
+              (define-values (successful4? hvx-expr4)
+                (synthesize-hvx-swizzles halide-expr hvx-expr-sketch (symbolics halide-expr) halide-expr-axioms swizzling-algo (* 3 hvx-elem-cnt)))
+              (cond
+                [successful4? (values successful? (list hvx-expr hvx-expr2 hvx-expr3 hvx-expr4))]
+                [else (backtracking-search-enum halide-expr halide-expr-axioms ir-expr ir-expr-sol (append invalid-sketches (list ir-to-hvx)) swizzling-algo)])]
+             [else (backtracking-search-enum halide-expr halide-expr-axioms ir-expr ir-expr-sol (append invalid-sketches (list ir-to-hvx)) swizzling-algo)])]
+          [else (backtracking-search-enum halide-expr halide-expr-axioms ir-expr ir-expr-sol (append invalid-sketches (list ir-to-hvx)) swizzling-algo)])]
        [else
         (values successful? hvx-expr)])]
     [else
