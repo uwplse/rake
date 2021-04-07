@@ -42,6 +42,13 @@
 (define (int16-const) (cpp-cast (apply choose* int-consts) 'int16))
 (define (uint16-const) (cpp-cast (apply choose* int-consts) 'uint16))
 
+(define (narrowT t)
+  (match t
+    ['int16  'int8]
+    ['int32  'int16]
+    ['uint16 'uint8]
+    ['uint32 'uint16]))
+
 (define (enum-types t)
   (match t
     ['int8   (set 'i8x128 'i8x128x2)]
@@ -142,6 +149,8 @@
   (match expr
     [(let-expr var val body) 1]
     
+    [(lo Vuu) (max-unique-inputs Vuu)]
+    
     [(vzxt Vu signed?) (max-unique-inputs Vu)]
     [(vsxt Vu signed?) (max-unique-inputs Vu)]
     [(vadd Vu Vv sat?) (+ (max-unique-inputs Vu) (max-unique-inputs Vv))]
@@ -172,29 +181,69 @@
 
     [(abstr-sub-expr _ _) 1]))
 
+(define the-rad-spec 0)
+
 (define (enumerate-hvx-exprs ir-expr hvx-sub-expr)
-  (define-values (isa weights)
+  (define-values (isa weights wf)
     (match ir-expr
       [(convolve data kernel saturateFunc outputType)
-       (values
-        (if (eq? (type (elem-ir (interpret-ir data) 0)) outputType)
-            (list vadd vmpyi vmpyi-acc vmpye vmpye-acc vasl)
-            (list vzxt vsxt vmpy vmpy-acc vmpa vmpa-acc vdmpy vdmpy-acc vtmpy vtmpy-acc)) ;vdmpy-sw-acc vdmpy-sw ;vadd-w vadd-w-acc
-        kernel)]
+       (cond
+         [(eq? (type (elem-ir (interpret-ir data) 0)) outputType)
+          (values
+           (list vadd vmpyi vmpyi-acc vmpye vmpye-acc vasl)
+           kernel 1)]
+         [(eq? (bw outputType) (* 2 (bw (type (elem-ir (interpret-ir data) 0)))))
+          (values
+           (list vzxt vsxt vmpy vmpy-acc vmpa vmpa-acc vdmpy vdmpy-acc vtmpy vtmpy-acc vrmpy vrmpy-acc vrmpy-p vrmpy-p-acc) ;vdmpy-sw-acc vdmpy-sw ;vadd-w vadd-w-acc
+           kernel 2)]
+         [(eq? (bw outputType) (* 4 (bw (type (elem-ir (interpret-ir data) 0)))))
+          (values
+           (list vzxt vsxt vmpy vmpy-acc vmpa vmpa-acc vdmpy vdmpy-acc vtmpy vtmpy-acc vrmpy vrmpy-acc vrmpy-p vrmpy-p-acc) ;vdmpy-sw-acc vdmpy-sw ;vadd-w vadd-w-acc
+           kernel 4)])]
       [(convolve-acc acc data kernel saturateFunc outputType)
-       (values
-        (if (eq? (type (elem-ir (interpret-ir data) 0)) outputType)
-            (list vadd vmpyi vmpyi-acc vmpye vmpye-acc vasl)
-            (list vzxt vsxt vmpy vmpy-acc vmpa vmpa-acc vdmpy vdmpy-acc vtmpy vtmpy-acc)) ;vdmpy-sw-acc vdmpy-sw ;vadd-w vadd-w-acc
-        kernel)]
+       (cond
+         [(eq? (type (elem-ir (interpret-ir data) 0)) outputType)
+          (values
+           (list vadd vmpyi vmpyi-acc vmpye vmpye-acc vasl)
+           kernel 1)]
+         [(eq? (bw outputType) (* 2 (bw (type (elem-ir (interpret-ir data) 0)))))
+          (values
+           (list vzxt vsxt vmpy vmpy-acc vmpa vmpa-acc vdmpy vdmpy-acc vtmpy vtmpy-acc vrmpy vrmpy-acc vrmpy-p vrmpy-p-acc) ;vdmpy-sw-acc vdmpy-sw ;vadd-w vadd-w-acc
+           kernel 2)]
+         [(eq? (bw outputType) (* 4 (bw (type (elem-ir (interpret-ir data) 0)))))
+          (values
+           (list vzxt vsxt vmpy vmpy-acc vmpa vmpa-acc vdmpy vdmpy-acc vtmpy vtmpy-acc vrmpy vrmpy-acc vrmpy-p vrmpy-p-acc) ;vdmpy-sw-acc vdmpy-sw ;vadd-w vadd-w-acc
+           kernel 4)])]
       [_ (begin (println "NYI 0") (exit))]))
   
   (set! int-consts (set->list (list->set (weight-matrix-vals weights))))
 
   (define elemT (type (elem-ir (interpret-ir ir-expr) 0)))
 
-  (define candidates (time (enumerate (enum-types elemT) isa hvx-sub-expr 4 20)))
+  (set! the-rad-spec (if (convolve-acc? ir-expr) (add1 (weight-matrix-rad weights)) (weight-matrix-rad weights)))
+  
+  (define candidates
+    (match wf
+      [1 (time (enumerate (enum-types elemT) isa hvx-sub-expr 3 20))]
+      [2 (time (enumerate (enum-types elemT) isa hvx-sub-expr 3 20))]
+      [4
+       (define cands (time (enumerate (enum-types (narrowT elemT)) isa hvx-sub-expr 3 20)))
+;       (set! cands
+;         (for/set ([c cands])
+;           (if (signedT? (narrowT elemT))
+;               (cons
+;                (vsxt (hi c) #t)
+;                (vsxt (lo c) #t))
+;               (cons
+;                (vzxt (hi c) #f)
+;                (vzxt (lo c) #f)))))
+                     
+       (set-union
+          cands
+          (time (enumerate (enum-types elemT) isa hvx-sub-expr 4 20)))]))
 
+  ;(println (set-count candidates))
+  
   ;; Fill in param grammars
   (define (fill-arg-grammars node [pos -1])
     (match node
@@ -210,117 +259,143 @@
       ['int16x2 (cons (int16-const) (int16-const))]
       ['uint16x2 (cons (uint16-const) (uint16-const))]
       [_ node]))
-  (set! candidates (for/set ([candidate candidates]) (visit-hvx candidate fill-arg-grammars)))
-
+  (set! candidates
+    (for/list ([candidate candidates])
+      (cond
+        [(cons? candidate)
+         (cons
+          (visit-hvx (car candidate) fill-arg-grammars)
+          (visit-hvx (cdr candidate) fill-arg-grammars))]
+        [else
+         (visit-hvx candidate fill-arg-grammars)])))
+  
   ;; Uniquify gathers
-  (set! candidates (for/set ([candidate candidates]) (if (gather*? candidate) candidate (specialize-gather*-nodes candidate))))
-
+  (set! candidates
+    (for/list ([candidate candidates])
+      (cond
+        [(gather*? candidate) candidate]
+        [(cons? candidate)
+         (cons
+          (specialize-gather*-nodes (car candidate))
+          (specialize-gather*-nodes (cdr candidate)))]
+        [else
+         (specialize-gather*-nodes candidate)])))
+  
   ;; Rank em
   (define ranked-candidates (make-hash))
   (for ([candidate-expr candidates])
-    (define candidate-expr-cost (basic-expr-cost candidate-expr))
+    (define candidate-expr-cost
+      (cond
+        [(cons? candidate-expr) (exact-round (- (basic-expr-cost (car candidate-expr)) 1.1))]
+        [else (basic-expr-cost candidate-expr)]))
     (when (not (hash-has-key? ranked-candidates candidate-expr-cost))
-      (hash-set! ranked-candidates candidate-expr-cost (set)))
+      (hash-set! ranked-candidates candidate-expr-cost (list)))
     (hash-set! ranked-candidates candidate-expr-cost (set-add (hash-ref ranked-candidates candidate-expr-cost) candidate-expr)))
 
   ;(for ([cost (hash-keys ranked-candidates)])
-   ;(display (format "~a => ~a\n" cost (set-count (hash-ref ranked-candidates cost)))))
+    ;(display (format "~a => ~a\n" cost (set-count (hash-ref ranked-candidates cost)))))
   
   ;; Pruning
   (define pruned-ranked-candidates (make-hash))
   (for ([cost (hash-keys ranked-candidates)])
-    (define pruned-candidates (mutable-set))
+    (define pruned-candidates (list))
     ;(display (format "~a => ~a\n" cost (set-count (hash-ref ranked-candidates cost))))
-
+    
     ;; Based on instr ordering
     (for ([candidate (hash-ref ranked-candidates cost)])
       ;(pretty-print candidate)
       ;(pretty-print (interpret-hvx candidate))
       (define prune? #f)
-      (define (check-instr-ordering node [pos -1])
-        (define r-instr (root-instr node))
-        (define c-instr (child-instr node))
-        (define parent-order (instr-order r-instr))
-        (cond
-          [(list? c-instr)
-           (for ([ci c-instr])
-             (when (not (void? ci))
-               (define child-order (instr-order ci))
-               (when (or (> child-order parent-order) (eq? parent-order 0))
-                 (set! prune? #t))))]
-          [(not (void? c-instr))
-           (define child-order (instr-order c-instr))
-           (when (or (> child-order parent-order) (eq? parent-order 0))
-             (set! prune? #t))])
-        node)
-      (visit-hvx candidate check-instr-ordering)
 
       ;; Pruning -- based on conv radius
       (define conv-radius-spec (if (convolve-acc? ir-expr) (add1 (weight-matrix-rad weights)) (weight-matrix-rad weights)))
-      (define conv-radius-sk (max-unique-inputs candidate))
-
-      (set! prune? (or prune? (not (eq? conv-radius-sk conv-radius-spec))))
+      (define conv-radius-sk
+        (cond
+          [(cons? candidate) (max-unique-inputs (car candidate))]
+          [else (max-unique-inputs candidate)]))
+      (set! prune? (not (eq? conv-radius-sk conv-radius-spec)))
       
-      (when (not prune?)
-        (set-add! pruned-candidates candidate)))
-    ;(display (format "~a => ~a\n-----\n" cost (set-count pruned-candidates)))
-    (hash-set! pruned-ranked-candidates cost pruned-candidates))
+;      (when (not prune?)
+;        ;(pretty-print candidate)
+;        (define (check-instr-ordering node [pos -1])
+;          (define r-instr (root-instr node))
+;          (define c-instr (child-instr node))
+;          (define parent-order (instr-order r-instr))
+;          (cond
+;            [(void? c-instr) (void)]
+;            [(or (eq? vzxt r-instr) (eq? vsxt r-instr) (eq? vzxt c-instr) (eq? vsxt c-instr)) (void)]
+;            [(list? c-instr)
+;             (for ([ci c-instr])
+;               (when (not (void? ci))
+;                 (define child-order (instr-order ci))
+;                 (when (or (> child-order parent-order) (eq? parent-order 0))
+;                   ;(display (format "Pruned because: ~a ~a\n" r-instr c-instr))
+;                   (set! prune? #t))))]
+;            [else
+;             (define child-order (instr-order c-instr))
+;             (when (or (> child-order parent-order) (eq? parent-order 0))
+;               ;(display (format "Pruned because 2: ~a ~a\n" r-instr c-instr))
+;               (set! prune? #t))])
+;          node)
+;        (visit-hvx candidate check-instr-ordering))
 
+      (when (not prune?)
+        (set! pruned-candidates (append pruned-candidates (list candidate))))
+    ;(display (format "~a => ~a\n-----\n" cost (set-count pruned-candidates)))
+    (hash-set! pruned-ranked-candidates cost pruned-candidates)))
+  
   (define ranked-sorted-pruned-candidates (make-hash))
+  (define 2mpys-db (make-hash))
+  (define vecR-db (make-hash))
   (for ([cost (hash-keys pruned-ranked-candidates)])
-    (define unsorted-candidates (set->list (hash-ref pruned-ranked-candidates cost)))
+    (define unsorted-candidates (hash-ref pruned-ranked-candidates cost))
+    (for ([c unsorted-candidates])
+      (hash-set! 2mpys-db c (count-2mpy-instrs c))
+      (hash-set! vecR-db c (count-vecR-instrs c)))
+       
     (define sorted-candidates (sort unsorted-candidates
-       (lambda (e1 e2)
-         (cond
-           [(< (count-2mpy-instrs e1) (count-2mpy-instrs e2)) #t]
-           [(> (count-2mpy-instrs e1) (count-2mpy-instrs e2)) #f]
-           [else (< (count-vecR-instrs e1) (count-vecR-instrs e2))]))))
+      (lambda (e1 e2)
+        ;(define 2mpys-e1 (if (cons? e1) (count-2mpy-instrs (car e1)) (count-2mpy-instrs e1)))
+        ;(define 2mpys-e2 (if (cons? e2) (count-2mpy-instrs (car e2)) (count-2mpy-instrs e2)))
+        ;(define vecR-e1 (if (cons? e1) (count-vecR-instrs (car e1)) (count-vecR-instrs e1)))
+        ;(define vecR-e2 (if (cons? e2) (count-vecR-instrs (car e2)) (count-vecR-instrs e2)))
+        (define 2mpys-e1 (hash-ref 2mpys-db e1))
+        (define 2mpys-e2 (hash-ref 2mpys-db e2))
+        (define vecR-e1 (hash-ref 2mpys-db e1))
+        (define vecR-e2 (hash-ref 2mpys-db e2))
+        (cond
+          [(< 2mpys-e1 2mpys-e2) #t]
+          [(> 2mpys-e1 2mpys-e2) #f]
+          [else (< vecR-e1 vecR-e2)]))))
     (hash-set! ranked-sorted-pruned-candidates cost sorted-candidates))
 
   ;(pretty-print ranked-sorted-pruned-candidates)
-  
+
   ranked-sorted-pruned-candidates)
   
-;  (make-hash (list (cons 8 (set
-;
-;                            (specialize-gather*-nodes
-;                             (vmpa-acc
-;                              (vtmpy-acc
-;                               (vtmpy-acc
-;                                (vzxt hvx-sub-expr #t)
-;                                hvx-sub-expr 
-;                                (cons (int8_t (bv #x02 8)) (int8_t (bv #x04 8))) #t)
-;                               hvx-sub-expr 
-;                               (cons (int8_t (bv #x02 8)) (int8_t (bv #x01 8))) #t)
-;                              hvx-sub-expr 
-;                              (cons (int8_t (bv #x02 8)) (int8_t (bv #x02 8))) #t))
-;                             
-;;                            (specialize-gather*-nodes
-;;                             (vmpa-acc
-;;                              (vmpa-acc
-;;                               (vmpa-acc
-;;                                (vmpa-acc
-;;                                 (vmpy
-;;                                  hvx-sub-expr
-;;                                  (int8-const))
-;;                                 hvx-sub-expr
-;;                                 (cons (int8-const) (int8-const)) #t)
-;;                                hvx-sub-expr
-;;                                (cons (int8-const) (int8-const)) #t)
-;;                               hvx-sub-expr
-;;                               (cons (int8-const) (int8-const)) #t)
-;;                              hvx-sub-expr
-;;                              (cons (int8-const) (int8-const)) #t))
-;;                            
-;;                            (vmpyi-acc
-;;                             (vmpyi-acc
-;;                              (vadd hvx-sub-expr hvx-sub-expr #f)
-;;                              (vadd hvx-sub-expr hvx-sub-expr #f)
-;;                              (int8_t (bv #x04 8)))
-;;                             hvx-sub-expr
-;;                             (int8_t (bv #x06 8)))
+;  (if (convolve? ir-expr)
+;      (make-hash (list (cons 8 (set
+;                                (specialize-gather*-nodes
+;                                 (vmpyi-acc
+;                                  (vmpyi-acc
+;                                   (vmpyi-acc hvx-sub-expr hvx-sub-expr (int16_t (bv #x0014 16)))
+;                                   hvx-sub-expr
+;                                   (int16_t (bv #x0006 16)))
+;                                  (vmpyi-acc hvx-sub-expr hvx-sub-expr (int16_t (bv #x0001 16)))
+;                                  (int16_t (bv #x000f 16))))
 ;                            
-;                            )))))
+;                                ))))
+;
+;      (make-hash (list (cons 8 (set
+;                                (specialize-gather*-nodes
+;                                 (vadd
+;                                  (first hvx-sub-expr)
+;                                  (vmpyi-acc (second hvx-sub-expr) (second hvx-sub-expr) (int16_t (bv #x0006 16)))
+;                                  #f))
+;
+;                                ))))
+;
+;      ))
 
 (define database (make-hash))
 
@@ -334,13 +409,17 @@
     ;; Recursive base case
     [(<= depth 0)
      (cond
+       [(list? base-expr)
+        (define res (set))
+        (for ([be base-expr])
+          (define base-expr-types (base-types be))
+          (set! res (set-union res (if (set-empty? (set-intersect types base-expr-types)) (set) (set be)))))
+        res]
        [(cons? base-expr)
         (define base-expr-types (base-types (car base-expr)))
         (define res (if (set-empty? (set-intersect types base-expr-types)) (set) (set (car base-expr))))
-
         (set! base-expr-types (base-types (cdr base-expr)))
         (set! res (set-union res (if (set-empty? (set-intersect types base-expr-types)) (set) (set (cdr base-expr)))))
-
         res]
        [else
         (define base-expr-types (base-types base-expr))
@@ -391,8 +470,50 @@
         ;(hash-set! database key candidates)
         ;candidates
 
-        (define filtered-res (list->set (filter (lambda (e) (<= (basic-expr-cost e) max-cost)) (set->list candidates))))
+        ;; Filter any candidate that already exceeds the maximum allowed cost
+        ;(define filtered-res (list->set (filter (lambda (e) (<= (basic-expr-cost e) max-cost)) (set->list candidates))))
+        ;(hash-set! database key filtered-res)
+
+        (define filtered-res
+          (list->set
+           (filter
+            (lambda (e)
+              (cond
+                [(<= (basic-expr-cost e) max-cost)
+                 (define prune? #f)
+
+                 ;; Pruning -- based on conv radius
+                 (define conv-radius-spec the-rad-spec)
+                 (define conv-radius-sk (max-unique-inputs e))
+                 (set! prune? (> conv-radius-sk conv-radius-spec))
+
+                 (define (check-instr-ordering node [pos -1])
+                   (define r-instr (root-instr node))
+                   (define c-instr (child-instr node))
+                   (define parent-order (instr-order r-instr))
+                   (cond
+                     [(void? c-instr) (void)]
+                     [(or (eq? vzxt r-instr) (eq? vsxt r-instr) (eq? vzxt c-instr) (eq? vsxt c-instr)) (void)]
+                     [(list? c-instr)
+                      (for ([ci c-instr])
+                        (when (not (void? ci))
+                          (define child-order (instr-order ci))
+                          (when (or (> child-order parent-order) (eq? parent-order 0))
+                            (set! prune? #t))))]
+                     [else
+                      (define child-order (instr-order c-instr))
+                      (when (or (> child-order parent-order) (eq? parent-order 0))
+                        (set! prune? #t))])
+                   node)
+                 
+                 (visit-hvx e check-instr-ordering)
+                
+                 (not prune?)]
+                [else #f])
+              )
+            (set->list candidates))))
         (hash-set! database key filtered-res)
+        
         filtered-res
         
         ])]))
@@ -490,6 +611,21 @@
                         [_ (begin (println "NYI") (exit))]))
 
   (cond
+    [(list? hvx-sub-expr)
+     (define (??ir-expr)
+       (define r0 (first hvx-sub-expr))
+       (define r1 (second hvx-sub-expr))
+       (define r2 (third hvx-sub-expr))
+       (define r3 (fourth hvx-sub-expr))
+       (define r4 (??hvx-instr (list r0 r1 r2 r3)))
+       (define r5 (??hvx-instr (list r0 r1 r2 r3 r4)))
+       (define r6 (??hvx-instr (list r0 r1 r2 r3 r4 r5)))
+       (cond
+         [(eq? curr-instr-bnd 1) (??hvx-instr (list r0 r1 r2 r3))]
+         [(eq? curr-instr-bnd 2) r5]
+         [(eq? curr-instr-bnd 3) r6]
+         [else r6]))
+     ??ir-expr]
     [(pair? hvx-sub-expr)
      (define (??ir-expr)
        (define r0 (car hvx-sub-expr))
@@ -589,9 +725,10 @@
     (define t2 (lo t0))
     (define t3 (hi t0))
     (choose*
-     (vasr-n t0 t1 i8-n round? (bool-const) signed?)
-     (vdeal (vasr-n t0 t1 i8-n round? (bool-const) signed?))
-     (let-expr 't0 t0 (vasr-n (hi 't0) (lo 't0) i8-n round? (bool-const) signed?))
+     (vasr-n t0 t1 i8-n round? (bool-const) (bool-const))
+     (vdeal (vasr-n t0 t1 i8-n round? (bool-const) (bool-const)))
+     (vdeal (vpack t0 t1 (bool-const)))
+     (let-expr 't0 t0 (vasr-n (hi 't0) (lo 't0) i8-n round? (bool-const) (bool-const)))
      ))
   ??hvx-asr-instr)
 
