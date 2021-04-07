@@ -100,7 +100,7 @@
 
       [(??vread buf-opts idxs) (transform (??vread (visit buf-opts transform) (visit idxs transform)))]
       [(??vreadp buf-opts idxs) (transform (??vreadp (visit buf-opts transform) (visit idxs transform)))]
-    
+      
       [_ (transform p)]))
 
   (pop-trace)

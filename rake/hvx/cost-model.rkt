@@ -97,6 +97,8 @@
     [(swizzle vec) 1]
     [(??vread buf-opts idxs) 1]
     [(??vreadp buf-opts idxs) 1]
+
+    [(abstr-sub-expr _ _) 1]
     
     [_ 0]))
 

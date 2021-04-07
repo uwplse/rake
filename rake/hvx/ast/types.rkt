@@ -295,9 +295,10 @@
     
     [(eq? vmpyi instr) (list
                         (instr-sig 'i16x64 (list 'i16x64 'int8))
-                        (instr-sig 'i32x32 (list 'i32x32 'int8))
-                        (instr-sig 'i32x32 (list 'i32x32 'uint8))
-                        (instr-sig 'i32x32 (list 'i32x32 'int16)))]
+                        ;(instr-sig 'i32x32 (list 'i32x32 'int8))
+                        ;(instr-sig 'i32x32 (list 'i32x32 'uint8))
+                        (instr-sig 'i32x32 (list 'i32x32 'int16))
+                        )]
                         
     [(eq? vmpye instr) (list
                         (instr-sig 'u32x32 (list 'i32x32 'uint16))
@@ -311,8 +312,8 @@
     
     [(eq? vmpyi-acc instr) (list
                             (instr-sig 'i16x64 (list 'i16x64 'i16x64 'int8))
-                            (instr-sig 'i32x32 (list 'i32x32 'i32x32 'int8))
-                            (instr-sig 'i32x32 (list 'i32x32 'i32x32 'uint8))
+                            ;(instr-sig 'i32x32 (list 'i32x32 'i32x32 'int8))
+                            ;(instr-sig 'i32x32 (list 'i32x32 'i32x32 'uint8))
                             (instr-sig 'i32x32 (list 'i32x32 'i32x32 'int16)))]
      
     [(eq? vmpye-acc instr) (list
@@ -369,10 +370,22 @@
                             (instr-sig 'u16x64x2 (list 'u16x64x2 'u8x128x2 'uint8x2 #f))
                             (instr-sig 'i32x32x2 (list 'i32x32x2 'i16x64x2 'int8x2 #t)))]
     
-    ;[vrmpy
-    ;[vrmpy-acc
-    ;[vrmpy-p
-    ;[vrmpy-p-acc
+    [(eq? vrmpy instr) (list
+                        (instr-sig 'u32x32 (list 'u8x128 'uint8x4))
+                        (instr-sig 'i32x32 (list 'u8x128 'int8x4)))]
+
+    [(eq? vrmpy-acc instr) (list
+                            (instr-sig 'u32x32 (list 'u32x32 'u8x128 'uint8x4))
+                            (instr-sig 'i32x32 (list 'i32x32 'u8x128 'int8x4)))]
+                        
+    [(eq? vrmpy-p instr) (list
+                          (instr-sig 'u32x32x2 (list 'u8x128x2 'uint8x4))
+                          (instr-sig 'i32x32x2 (list 'u8x128x2 'int8x4)))]
+    
+    [(eq? vrmpy-p-acc instr) (list
+                              (instr-sig 'u32x32x2 (list 'u32x32x2 'u8x128x2 'uint8x4))
+                              (instr-sig 'i32x32x2 (list 'i32x32x2 'u8x128x2 'int8x4)))]
+    
     ;[vavg
     ;[vnavg
     [(eq? vasl instr) (list

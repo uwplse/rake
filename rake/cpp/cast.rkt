@@ -8,6 +8,11 @@
 ;; Model C++ casting
 (define (cpp-cast v type)
   (match v
+    ;[integer
+     ;(println "whoops")
+     ;(match type
+       ;['int8 (min (max v -128) 127)]
+       ;['uint8 (min (max v 0) 255)])]
     [(int8_t val)
      (match type
        ['int8 v]
