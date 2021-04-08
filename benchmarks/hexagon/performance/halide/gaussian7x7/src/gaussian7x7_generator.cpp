@@ -53,8 +53,9 @@ public:
             rows.compute_at(Func(output), y)
                 .tile(x, y, x, y, xi, yi, vector_size, 4, TailStrategy::RoundUp)
                 .vectorize(xi)
+                .align_storage(x, vector_size)
                 .unroll(yi);
-            
+
             output.prefetch(input, y, 2, PrefetchBoundStrategy::NonFaulting);
         } else {
             const int vector_size = natural_vector_size<uint8_t>();
