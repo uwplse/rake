@@ -314,9 +314,9 @@
   (set! total-synth-time (+ total-synth-time runtime0))
 
   (cond
-    [(unsat? sol0)
+    [(or (unsat? sol0) (unknown? sol0))
      (display (format "Synthesis time: ~ams\n" runtime0))
-     sol0]
+     (unsat)]
     [else
      (display (format "Trying 2 lanes\n"))
      (define synthesized-expr (interpret-hvx candidate-expr))
@@ -351,9 +351,9 @@
      (set! total-synth-time (+ total-synth-time runtime))
      
      (cond
-       [(unsat? sol)
+       [(or (unsat? sol) (unknown? sol))
         (display (format "Synthesis time: ~ams\n" runtime))
-        sol]
+        (unsat)]
        [else
         ;(pretty-print (evaluate candidate-expr sol))
      
@@ -404,7 +404,7 @@
         (set! total-synth-time (+ total-synth-time runtime1))
 
         (cond
-          [(unsat? sol1) (test-synth hal-expr-ctx original-expr candidate-expr (set-add discarded-sols (evaluate candidate-expr sol)))]
+          [(or (unsat? sol1) (unknown? sol1)) (test-synth hal-expr-ctx original-expr candidate-expr (set-add discarded-sols (evaluate candidate-expr sol)))]
           [else sol])])]))
 
 ;; Define enumerative synthesis loop for HVX exppression generation
@@ -560,13 +560,14 @@
   (define runtime (- (current-seconds) st))
 
   (cond
-    [(unsat? sol) (cond
-                    [(void? curr-best-sol) (display "Failed to find an equivalent HVX expression.\n\n")
-                                           (debug (format "Synthesis time: ~a seconds\n" runtime))
-                                           sol]
-                    [else (display (format "Failed to find an equivalent HVX expression with cost lower than ~a.\n\n" curr-best-cost))
-                          (debug (format "Synthesis time: ~a seconds\n" runtime))
-                          (visit-hvx curr-best-sol repl-abstr-exprs)])]
+    [(or (unsat? sol) (unknown? sol))
+     (cond
+       [(void? curr-best-sol) (display "Failed to find an equivalent HVX expression.\n\n")
+                              (debug (format "Synthesis time: ~a seconds\n" runtime))
+                              sol]
+       [else (display (format "Failed to find an equivalent HVX expression with cost lower than ~a.\n\n" curr-best-cost))
+             (debug (format "Synthesis time: ~a seconds\n" runtime))
+             (visit-hvx curr-best-sol repl-abstr-exprs)])]
     [else (display "Successfully found an equivalent HVX expression.\n\n")
           (debug (format "~a\n" (pretty-format (visit-hvx (evaluate synthesized-hvx-expr sol) repl-abstr-exprs))))
           (debug (format "Expression cost: ~a\n" (cost-model (evaluate synthesized-hvx-expr sol))))

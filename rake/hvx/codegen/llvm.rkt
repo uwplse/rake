@@ -589,7 +589,7 @@
        [(list (i32x32 v0) (i32x32 v1) (int8_t n) #f _ #t) (generate `vasrwubsat (p-type p) `(list ,(input-arg Vu) ,(input-arg Vv) (,t_i32 ,(codegen-scalar Rt))))]
        [(list (i32x32 v0) (i32x32 v1) (int8_t n) #t _ #t) (generate `vasrwubrndsat (p-type p) `(list ,(input-arg Vu) ,(input-arg Vv) (,t_i32 ,(codegen-scalar Rt))))]
 
-       [(list (i32x32 v0) (i32x32 v1) (int8_t n) #f #t #f) (generate `vasrwsat (p-type p) `(list ,(input-arg Vu) ,(input-arg Vv) (,t_i32 ,(codegen-scalar Rt))))]
+       [(list (i32x32 v0) (i32x32 v1) (int8_t n) #f #t #f) (generate `vasrwhsat (p-type p) `(list ,(input-arg Vu) ,(input-arg Vv) (,t_i32 ,(codegen-scalar Rt))))]
        [(list (i32x32 v0) (i32x32 v1) (int8_t n) #f #f #f) (generate `vasrw (p-type p) `(list ,(input-arg Vu) ,(input-arg Vv) (,t_i32 ,(codegen-scalar Rt))))]
        [(list (i32x32 v0) (i32x32 v1) (int8_t n) #t _ #f) (generate `vasrwrndsat (p-type p) `(list ,(input-arg Vu) ,(input-arg Vv) (,t_i32 ,(codegen-scalar Rt))))]
        

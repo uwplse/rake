@@ -122,7 +122,7 @@
        [(eq? op bvashr) (flatten (for/list ([operand operands]) (extract-lane-buf-reads operand)))]
        [(eq? op bvshl) (flatten (for/list ([operand operands]) (extract-lane-buf-reads operand)))]
        [(eq? op ite) (flatten (for/list ([operand operands]) (extract-lane-buf-reads operand)))]
-       [(eq? op app) (if (empty? (symbolics (cdr operands))) (list) (list (mk-typed-expr expr (var-type (list-ref operands 0)))))]
+       [(eq? op app) (if (hash-has-key? type-dict (car operands)) (list (mk-typed-expr expr (var-type (list-ref operands 0)))) (list))]
        [else (error "NYI: extract buffer reads from" expr)])]
      
     [_ (list)]))

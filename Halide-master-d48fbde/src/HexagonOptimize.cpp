@@ -3315,6 +3315,8 @@ Stmt optimize_hexagon_instructions_synthesis(Stmt s, const Target &t, FuncValueB
     s = IROptimizer(fvb).mutate(s);
     s = common_subexpression_elimination(s);
     debug(0) << s << "\n\n";
+    s = simplify(s);
+    debug(0) << s << "\n\n";
     //exit(0);
     return s;
 }

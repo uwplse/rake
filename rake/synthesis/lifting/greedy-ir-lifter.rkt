@@ -201,7 +201,7 @@
        ;; If that didn't work, try to replace the ir sub-expr with a new fused expr
        (define sub-expr (get-subexpr-ir lifted-vec))
        (when (and (unsat? ir-expr) (not (void? sub-expr)))
-         (define synthesized-expr (choose* (downcast sub-expr) (upcast sub-expr) (cast (get-node-id) sub-expr 'int16)))
+         (define synthesized-expr (cast (get-node-id) sub-expr 'int16))
          (define sol (run-synthesizer halide-expr synthesized-expr axioms))
          (when (not (unsat? sol))
            (set! ir-expr (evaluate synthesized-expr sol))))
@@ -824,6 +824,7 @@
 
   (cond
     [(unsat? sol) sol]
+    [(unknown? sol) (unsat)]
     [else
      (define res-sol (merge-sols sol sub-sol))
      (set! learned-axioms (set-add learned-axioms (eq? ((interpret-halide original-expr) 0) (evaluate (elem-ir (interpret-ir synthesized-expr) 0) res-sol))))

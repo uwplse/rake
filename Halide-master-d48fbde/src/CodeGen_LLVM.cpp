@@ -2590,6 +2590,8 @@ void CodeGen_LLVM::visit(const Call *op) {
             fn = llvm::Intrinsic::getDeclaration(module.get(), llvm::Intrinsic::hexagon_V6_vaddh_128B);
         else if (op->name == std::string("llvm.hexagon.V6.vdealb.128B"))
             fn = llvm::Intrinsic::getDeclaration(module.get(), llvm::Intrinsic::hexagon_V6_vdealb_128B);
+        else if (op->name == std::string("llvm.hexagon.V6.vaddw.128B"))
+            fn = llvm::Intrinsic::getDeclaration(module.get(), llvm::Intrinsic::hexagon_V6_vaddw_128B);
         else
             fn = module->getFunction(op->name);
         
