@@ -3069,12 +3069,23 @@ private:
     Stmt visit(const Store *stmt) override {
         bounds.push(stmt->name, bounds_of_expr_in_scope(stmt->value, bounds, func_value_bounds));
 
+        // If the RHS is a scalar expression, ignore it
+        if (!stmt->value.type().is_vector())
+            return IRMutator::visit(stmt);
+
+        // If the RHS is a float type
+        if (stmt->value.type().element_of().is_float())
+            return IRMutator::visit(stmt);
+
+        // If the RHS is just a single load instruction, there is nothing to do
         if (stmt->value.node_type() == IRNodeType::Load)
             return IRMutator::visit(stmt);
 
+        // If the RHS is a dynamic shuffle, we currently do not support it
         const Call *c = stmt->value.as<Call>();
         if (c && c->is_intrinsic(Call::dynamic_shuffle))
             return IRMutator::visit(stmt);
+
 
         debug(0) << "\nOptimizing expression: " << expr_id << "\n"
                  << stmt->value << "\n\n";
