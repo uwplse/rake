@@ -3090,13 +3090,13 @@ private:
         debug(0) << "\nOptimizing expression: " << expr_id << "\n"
                  << stmt->value << "\n\n";
 
-        int x;
-        std::cin >> x;
+        //int x;
+        //std::cin >> x;
 
-        if (x == 0) {
-            expr_id++;
-            return IRMutator::visit(stmt);
-        }
+        //if (x == 0) {
+          //  expr_id++;
+            //return IRMutator::visit(stmt);
+        //}
 
         RacketPrinter specPrinter(std::cout, let_vars);
         std::string expr = specPrinter.dispatch(lower_intrinsics(stmt->value));
@@ -3242,10 +3242,10 @@ private:
             << "(close-output-port out)";
         rakeInputF.close();
 
-        //expr_id++;
-        //return IRMutator::visit(stmt);
+        expr_id++;
+        return IRMutator::visit(stmt);
 
-        std::ifstream cache("sexp_" + std::to_string(expr_id) + ".out");
+        /*std::ifstream cache("sexp_" + std::to_string(expr_id) + ".out");
         if (!cache.good()) {
             char buf[1000];
             FILE *fp;
@@ -3273,7 +3273,7 @@ private:
 
         expr_id++;
 
-        return Store::make(stmt->name, optimized, stmt->index, stmt->param, stmt->predicate, stmt->alignment);/**/
+        return Store::make(stmt->name, optimized, stmt->index, stmt->param, stmt->predicate, stmt->alignment);*/
     }
 };
 
