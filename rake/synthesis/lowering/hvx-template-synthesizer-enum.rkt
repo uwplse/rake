@@ -510,11 +510,21 @@
   (define original-expr (hash-ref ir-expr-annot (ir-node-id ir-expr)))
   (define synthesized-hvx-expr (??hvx-expr-grm))
 
-  ;(pretty-print synthesized-hvx-expr)
+  ;(pretty-print hvx-sub-expr)
 
   ;(set-curr-cn-hvx 0)
   ;(println ((interpret-halide original-expr) 0))
+  ;(println ((interpret-halide original-expr) 32))
+  ;(println ((interpret-halide original-expr) 64))
+  ;(println ((interpret-halide original-expr) 96))
   ;(println (elem-hvx (interpret-hvx synthesized-hvx-expr) 0))
+  ;(println (elem-hvx (interpret-hvx synthesized-hvx-expr) 32))
+  ;(println (elem-hvx (interpret-hvx synthesized-hvx-expr) 64))
+  ;(println (elem-hvx (interpret-hvx synthesized-hvx-expr) 96))
+
+  ;(exit)
+  ;(println (list? hvx-sub-expr))
+  ;(println (length hvx-sub-expr))
   
   (define (bounded-eq? oe se lanes)
     (for ([i lanes])
@@ -527,10 +537,14 @@
         [else
          (set-curr-cn-hvx i)
          (assert (eq? (oe i) (elem-hvx se i)))
-         ;(set-curr-cn-hvx (+ i 1))
-         ;(assert (eq? (oe (+ i 1)) (elem-hvx se (+ i 1))))
          (set-curr-cn-hvx (+ i 64))
-         (assert (eq? (oe (+ i 64)) (elem-hvx se (+ i 64))))])))
+         (assert (eq? (oe (+ i 64)) (elem-hvx se (+ i 64))))
+         (when (and (list? hvx-sub-expr) (> (length hvx-sub-expr) 2))
+           (set-curr-cn-hvx (+ i 32))
+           (assert (eq? (oe (+ i 32)) (elem-hvx se (+ i 32))))
+           (set-curr-cn-hvx (+ i 96))
+           (assert (eq? (oe (+ i 96)) (elem-hvx se (+ i 96)))))
+         ])))
   
   (define curr-best-cost (if (void? curr-best-sol) +inf.0 (cost-model curr-best-sol)))
   

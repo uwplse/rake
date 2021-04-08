@@ -724,10 +724,12 @@
     (define t1 (apply choose* registers))
     (define t2 (lo t0))
     (define t3 (hi t0))
+    (define t4 (apply choose* registers))
+    (define t5 (apply choose* registers))
     (choose*
      (vasr-n t0 t1 i8-n round? (bool-const) (bool-const))
      (vdeal (vasr-n t0 t1 i8-n round? (bool-const) (bool-const)))
-     (vdeal (vpack t0 t1 (bool-const)))
+     (vdeal (vpack (vasr-n t0 t1 i8-n round? (bool-const) (bool-const)) (vasr-n t4 t5 i8-n round? (bool-const) (bool-const)) (bool-const)))
      (let-expr 't0 t0 (vasr-n (hi 't0) (lo 't0) i8-n round? (bool-const) (bool-const)))
      ))
   ??hvx-asr-instr)
