@@ -195,6 +195,9 @@ Expr SExpParser::parse_intrinsic(Token &tok, string &sexp) {
           ModulusRemainder())
         );
     }
+    else if(func_name.find("concat_vectors") != std::string::npos){
+      return Shuffle::make_concat(params);
+    }
 
     // Not sure about the call type here
     return Call::make(return_type, func_name, params, Call::CallType::PureExtern);
