@@ -156,6 +156,23 @@
              ['enumerative (backtracking-search-enum halide-sub-expr halide-expr-axioms ir-expr ir-expr-sol ir-annotations (list) swizzling-algo ir-to-hvx)]
              [_ (error (format "Unrecognized lowering algorithm specified: '~a. Supported algorithms: ['incremental, 'enumerative]" lowering-algo))])]
          [else (values #f (void))])]
+
+      [(maximum sub-expr1 sub-expr2)
+       (define-values (successful1? hvx-sub-expr1)
+         (synthesize-hvx-expr halide-expr halide-expr-axioms sub-expr1 ir-expr-sol ir-annotations lowering-algo swizzling-algo #f))
+       (define-values (successful2? hvx-sub-expr2)
+         (synthesize-hvx-expr halide-expr halide-expr-axioms sub-expr2 ir-expr-sol ir-annotations lowering-algo swizzling-algo #f))
+
+       (cond
+         [(and successful1? successful2?)
+           (define halide-sub-expr (hash-ref ir-annotations (ir-node-id ir-expr)))
+           (hash-set! ir-to-hvx (ir-node-id sub-expr1) (if (vinterleave? hvx-sub-expr1) (vinterleave-Vuu hvx-sub-expr1) hvx-sub-expr1))
+           (hash-set! ir-to-hvx (ir-node-id sub-expr2) (if (vinterleave? hvx-sub-expr2) (vinterleave-Vuu hvx-sub-expr2) hvx-sub-expr2))
+           (match lowering-algo
+             ['incremental (backtracking-search-incr halide-sub-expr halide-expr-axioms ir-expr ir-expr-sol ir-annotations (list) swizzling-algo ir-to-hvx)]
+             ['enumerative (backtracking-search-enum halide-sub-expr halide-expr-axioms ir-expr ir-expr-sol ir-annotations (list) swizzling-algo ir-to-hvx)]
+             [_ (error (format "Unrecognized lowering algorithm specified: '~a. Supported algorithms: ['incremental, 'enumerative]" lowering-algo))])]
+         [else (values #f (void))])]
       
       [(zip-data sub-expr1 sub-expr2)
        (define-values (successful1? hvx-sub-expr1)

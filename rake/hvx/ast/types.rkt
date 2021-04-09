@@ -96,6 +96,9 @@
 (struct vabs (Vu sat?) #:transparent)
 (struct vabsdiff (Vu Vv) #:transparent)
 
+(struct vmax (Vu Vv) #:transparent)
+(struct vmin (Vu Vv) #:transparent)
+
 ;; New instructions types we introduce to abstract away data-movement.
 ;; These instr types should never exist in output code.
 (struct gather* (buff-reads))

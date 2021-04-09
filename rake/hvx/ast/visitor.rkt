@@ -89,6 +89,9 @@
       [(vround Vu Vv signed?) (transform (vround (visit Vu transform) (visit Vv transform) (visit signed? transform)))]
       [(vabs Vu sat?) (transform (vabs (visit Vu transform) (visit sat? transform)))]
       [(vabsdiff Vu Vv) (transform (vabsdiff (visit Vu transform) (visit Vv transform)))]
+
+      [(vmax Vu Vv) (transform (vmax (visit Vu transform) (visit Vv transform)))]
+      [(vmin Vu Vv) (transform (vmin (visit Vu transform) (visit Vv transform)))]
     
       ;; New instructions types we introduce to abstract away data-movement.
       ;; These instr types should never exist in output code.

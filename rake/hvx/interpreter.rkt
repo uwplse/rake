@@ -782,6 +782,14 @@
          [(list (i8x128 v0) #f) (u16x64x2 (lambda (i) (uint16_t (zxt16 (v0 (* i 2))))) (lambda (i) (uint16_t (zxt16 (v0 (+ (* i 2) 1))))))]
          [(list (u16x64 v0) #f) (u32x32x2 (lambda (i) (uint32_t (zxt32 (v0 (* i 2))))) (lambda (i) (uint32_t (zxt32 (v0 (+ (* i 2) 1))))))]
          [(list (i16x64 v0) #f) (u32x32x2 (lambda (i) (uint32_t (zxt32 (v0 (* i 2))))) (lambda (i) (uint32_t (zxt32 (v0 (+ (* i 2) 1))))))]))]
+
+    [(vmax Vu Vv)
+     (match (list (interpret Vu) (interpret Vv))
+       [(list (i8x128 v0) (i8x128 v1)) (i8x128 (lambda (i) (int8_t (max8 (eval (v0 i)) (eval (v1 i))))))]
+       [(list (u8x128 v0) (u8x128 v1)) (u8x128 (lambda (i) (uint8_t (maxu8 (eval (v0 i)) (eval (v1 i))))))]
+       [(list (i16x64 v0) (i16x64 v1)) (i16x64 (lambda (i) (int16_t (max16 (eval (v0 i)) (eval (v1 i))))))]
+       [(list (u16x64 v0) (u16x64 v1)) (u16x64 (lambda (i) (uint16_t (maxu16 (eval (v0 i)) (eval (v1 i))))))]
+       [(list (i32x32 v0) (i32x32 v1)) (i32x32 (lambda (i) (int32_t (max32 (eval (v0 i)) (eval (v1 i))))))])]
     
     ;; ---- Everything below this line in the interpreter is tentative ----
     

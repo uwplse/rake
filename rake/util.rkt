@@ -16,6 +16,9 @@
 (define (init-var-types td) (set! type-dict td))
 (define (var-type var) (hash-ref type-dict var))
 
+(define (is_unsat? sol)
+  (or (unsat? sol) (unknown? sol)))
+
 ;; Creating typed expressions
 (define (get-type bw signed?)
   (if signed?
@@ -87,12 +90,12 @@
   vecs)
 
 (define (merge-sols sol1 sol2)
-  (define merged-sol (list))
-  (for ([k (in-dict-keys (model sol1))])
-    (set! merged-sol (append merged-sol (list (cons k (hash-ref (model sol1) k))))))
+  (define merged-sol (make-hash))
   (for ([k (in-dict-keys (model sol2))])
-    (set! merged-sol (append merged-sol (list (cons k (hash-ref (model sol2) k))))))
-  (sat (make-immutable-hash merged-sol)))
+    (hash-set! merged-sol k (hash-ref (model sol2) k)))
+  (for ([k (in-dict-keys (model sol1))])
+    (hash-set! merged-sol k (hash-ref (model sol1) k)))
+  (sat (make-immutable-hash (hash->list merged-sol))))
 
 ;; Utility functions
 (define (nop v) v)
@@ -159,7 +162,8 @@
 (define (max8 a b)
   (define diff (bvsub a b))
   (define dsgn (bvashr diff (bv 7 8)))
-  (bvsub a (bvand diff dsgn)))
+  (bvsub a (bvand diff dsgn))
+  (bvsmax a b))
 
 (define (max16 a b)
   (define diff (bvsub a b))

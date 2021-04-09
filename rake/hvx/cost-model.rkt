@@ -88,6 +88,9 @@
     [(vasr-n Vu Vv Rt round? sat? unsigned?) 1]
     [(vround Vu Vv signed?) 1]
 
+    [(vmax Vu Vv) 1]
+    [(vmin Vu Vv) 1]
+
     ;; New instructions types we introduce to abstract away data-movement.
     ;; These instr types should never exist in output code.
     [(gather* buff-reads) 1]

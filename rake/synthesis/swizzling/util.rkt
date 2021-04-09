@@ -120,7 +120,9 @@
          [(vasr Vu Rt) (gather-vec next-id opts)]
          [(vasr-acc Vd Vu Rt) (gather-vec next-id opts)]
          [(vasr-n Vu Vv Rt round? sat? unsigned?) (gather-vec next-id opts)]
-         [(vround Vu Vv signed?) (gather-vec next-id opts)])]
+         [(vround Vu Vv signed?) (gather-vec next-id opts)]
+         [(vmax Vu Vv) (gather-vec next-id opts)]
+         [(vmin Vu Vv) (gather-vec next-id opts)])]
       [_ node]))
   (visit-hvx hvx-expr-sketch iden))
 

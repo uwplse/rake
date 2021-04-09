@@ -93,14 +93,14 @@
          (set! ir-expr (cons lifted-vec (sat))))
        
        ;; Try folding into sub-expr
-       (when (unsat? ir-expr)
+       (when (is_unsat? ir-expr)
          (set! ir-expr (fold-into-subexpr lifted-vec halide-expr axioms add-consts sub-consts mul-consts div-consts)))
        
-       (when (unsat? ir-expr)
+       (when (is_unsat? ir-expr)
          (error "NYI: extend ir-expr when encountering slice_vectors" ir-expr))
 
        ;; Return synthesized expr
-       (if (not (unsat? ir-expr))
+       (if (not (is_unsat? ir-expr))
            ir-expr
            (error "Could not lift" halide-expr))]
 
@@ -114,20 +114,20 @@
          (set! ir-expr (cons (load-data (get-load-id) buff-reads) (sat))))
        
        ;; Try folding into lhs sub-expr
-       (when (unsat? ir-expr)
+       (when (is_unsat? ir-expr)
          (set! ir-expr (fold-into-subexpr lifted-v1 halide-expr axioms add-consts sub-consts mul-consts div-consts)))
        
        ;; If that didn't work, try folding into rhs sub-expr
-       (when (unsat? ir-expr)
+       (when (is_unsat? ir-expr)
          (set! ir-expr (fold-into-subexpr lifted-v2 halide-expr axioms add-consts sub-consts mul-consts div-consts)))
        
        ;; If that didn't work, extend the ir-expr with a new instruction
        (define sub-expr (choose* lifted-v1 lifted-v2))
-       (when (unsat? ir-expr)
+       (when (is_unsat? ir-expr)
          (error "NYI: extend ir-expr when encountering concat_vec" ir-expr))
 
        ;; Return synthesized expr
-       (if (not (unsat? ir-expr))
+       (if (not (is_unsat? ir-expr))
            ir-expr
            (error "Could not lift" halide-expr))]
       
@@ -146,17 +146,17 @@
 
        ;; If that didn't work, try to replace the ir sub-expr with a new fused expr
        (define sub-expr (get-subexpr-ir lifted-vec))
-       (when (and (unsat? ir-expr) (not (void? sub-expr)))
+       (when (and (is_unsat? ir-expr) (not (void? sub-expr)))
          (define synthesized-expr (choose* (cast (get-node-id) sub-expr 'uint8)))
          (define sol (run-synthesizer halide-expr synthesized-expr axioms sub-sol))
-         (when (not (unsat? sol))
+         (when (sat? sol)
            (set! ir-expr (evaluate synthesized-expr sol))))
 
        ;; If that didn't work, extend the expression with a new instruction
-       (when (unsat? ir-expr)
+       (when (is_unsat? ir-expr)
          (set! ir-expr (run-synthesizer halide-expr (cast (get-node-id) lifted-vec 'uint8) axioms sub-sol)))
        
-       (if (not (unsat? ir-expr))
+       (if (not (is_unsat? ir-expr))
            ir-expr
            (error "Could not lift" halide-expr))]
       
@@ -172,17 +172,17 @@
 
        ;; If that didn't work, try to replace the ir sub-expr with a new fused expr
        (define sub-expr (get-subexpr-ir lifted-vec))
-       (when (and (unsat? ir-expr) (not (void? sub-expr)))
+       (when (and (is_unsat? ir-expr) (not (void? sub-expr)))
          (define synthesized-expr (choose* (downcast sub-expr) (upcast sub-expr) (cast (get-node-id) sub-expr 'uint8)))
          (define sol (run-synthesizer halide-expr synthesized-expr axioms sub-sol))
-         (when (not (unsat? sol))
+         (when (sat? sol)
            (set! ir-expr (evaluate synthesized-expr sol))))
 
        ;; If that didn't work, extend the expression with a new instruction
-       (when (unsat? ir-expr)
+       (when (is_unsat? ir-expr)
          (set! ir-expr (run-synthesizer halide-expr (cast (get-node-id) lifted-vec 'uint8) axioms sub-sol)))
        
-       (if (not (unsat? ir-expr))
+       (if (not (is_unsat? ir-expr))
            ir-expr
            (error "Could not lift" halide-expr))]
 
@@ -200,17 +200,17 @@
 
        ;; If that didn't work, try to replace the ir sub-expr with a new fused expr
        (define sub-expr (get-subexpr-ir lifted-vec))
-       (when (and (unsat? ir-expr) (not (void? sub-expr)))
+       (when (and (is_unsat? ir-expr) (not (void? sub-expr)))
          (define synthesized-expr (cast (get-node-id) sub-expr 'int16))
          (define sol (run-synthesizer halide-expr synthesized-expr axioms))
-         (when (not (unsat? sol))
+         (when (sat? sol)
            (set! ir-expr (evaluate synthesized-expr sol))))
 
        ;; If that didn't work, extend the expression with a new instruction
-       (when (unsat? ir-expr)
+       (when (is_unsat? ir-expr)
          (set! ir-expr (run-synthesizer halide-expr (cast (get-node-id) lifted-vec 'uint16) axioms)))
        
-       (if (not (unsat? ir-expr))
+       (if (not (is_unsat? ir-expr))
            ir-expr
            (error "Could not lift" halide-expr))]
 
@@ -224,17 +224,17 @@
 
        ;; If that didn't work, try to replace the ir sub-expr with a new fused expr
        (define sub-expr (get-subexpr-ir lifted-vec))
-       (when (and (unsat? ir-expr) (not (void? sub-expr)))
+       (when (and (is_unsat? ir-expr) (not (void? sub-expr)))
          (define synthesized-expr (choose* (downcast sub-expr) (upcast sub-expr) (cast (get-node-id) sub-expr 'int16)))
          (define sol (run-synthesizer halide-expr synthesized-expr axioms))
-         (when (not (unsat? sol))
+         (when (sat? sol)
            (set! ir-expr (evaluate synthesized-expr sol))))
 
        ;; If that didn't work, extend the expression with a new instruction
-       (when (unsat? ir-expr)
+       (when (is_unsat? ir-expr)
          (set! ir-expr (run-synthesizer halide-expr (cast (get-node-id) lifted-vec 'int16) axioms)))
        
-       (if (not (unsat? ir-expr))
+       (if (not (is_unsat? ir-expr))
            ir-expr
            (error "Could not lift" halide-expr))]
 
@@ -255,17 +255,17 @@
 
        ;; If that didn't work, try to replace the ir sub-expr with a new fused expr
        (define sub-expr (get-subexpr-ir lifted-vec))
-       (when (and (unsat? ir-expr) (not (void? sub-expr)))
+       (when (and (is_unsat? ir-expr) (not (void? sub-expr)))
          (define synthesized-expr (choose* (downcast sub-expr) (upcast sub-expr) (cast (get-node-id) sub-expr 'int32)))
          (define sol (run-synthesizer halide-expr synthesized-expr axioms))
-         (when (not (unsat? sol))
+         (when (sat? sol)
            (set! ir-expr (evaluate synthesized-expr sol))))
 
        ;; If that didn't work, extend the expression with a new instruction
-       (when (unsat? ir-expr)
+       (when (is_unsat? ir-expr)
          (set! ir-expr (run-synthesizer halide-expr (cast (get-node-id) lifted-vec 'int32) axioms)))
        
-       (if (not (unsat? ir-expr))
+       (if (not (is_unsat? ir-expr))
            ir-expr
            (error "Could not lift" halide-expr))]
       
@@ -281,12 +281,12 @@
        (define ir-expr (fold-into-subexpr lifted-v1 halide-expr axioms add-consts sub-consts mul-consts div-consts))
 
        ;; If that didn't work, try folding into rhs sub-expr
-       (when (unsat? ir-expr)
+       (when (is_unsat? ir-expr)
          (set! ir-expr (fold-into-subexpr lifted-v2 halide-expr axioms add-consts sub-consts mul-consts div-consts)))
 
        ;; If that didn't work, try to replace the ir sub-expr with a new fused expr
        (define sub-expr (choose* (get-subexpr-ir lifted-v1) (get-subexpr-ir lifted-v2)))
-       (when (unsat? ir-expr)
+       (when (is_unsat? ir-expr)
          (define weights (list (apply choose* (append (list (int8_t (bv 1 8))) mul-consts)) (apply choose* (append (list (int8_t (bv 1 8))) mul-consts))))
          (define saturation-func nop);(choose* nop sat8 sat16 satu8 satu16))
          (define output-type (choose* 'uint8 'uint16 'uint32 'int8 'int16 'int32))
@@ -298,13 +298,13 @@
 
        ;; If even that did not work, extend the ir-expr with a new instruction
        (set! sub-expr (choose* lifted-v1 lifted-v2))
-       (when (and (unsat? ir-expr) (not (empty? add-consts)))
+       (when (and (is_unsat? ir-expr) (not (empty? add-consts)))
          ;; Const add
          (define output-type (type ((interpret-halide halide-expr) 0)))
          (define const-add-op (const-add (get-node-id) sub-expr (apply choose* add-consts) nop output-type))
          (set! ir-expr (run-synthesizer halide-expr const-add-op axioms)))
        (set! sub-expr (choose* lifted-v1 lifted-v2))
-       (when (unsat? ir-expr)
+       (when (is_unsat? ir-expr)
          ;; Conv
          (define output-type (type ((interpret-halide halide-expr) 0)))
          (define weights (list (int8_t (bv 1 8)) (int8_t (bv 1 8))))
@@ -317,7 +317,7 @@
          (define merged-sol (merge-sols (cdr res-v1) (cdr res-v2)))
          (set! ir-expr (run-synthesizer halide-expr conv-op axioms merged-sol)))
        (set! sub-expr (zip-data (get-node-id) lifted-v1 lifted-v2))
-       (when (unsat? ir-expr)
+       (when (is_unsat? ir-expr)
          ;; Conv
          (define output-type (type ((interpret-halide halide-expr) 0)))
          (define weights (list (int8_t (bv 1 8)) (int8_t (bv 1 8))))
@@ -330,7 +330,7 @@
          (set! ir-expr (run-synthesizer halide-expr conv-op axioms merged-sol)))
 
        ;; Return synthesized expr
-       (if (not (unsat? ir-expr))
+       (if (not (is_unsat? ir-expr))
            ir-expr
            (error "Could not lift" halide-expr))]
     
@@ -347,12 +347,12 @@
        (define ir-expr (fold-into-subexpr lifted-v1 halide-expr axioms add-consts sub-consts mul-consts div-consts))
        
        ;; If that didn't work, try folding into rhs sub-expr
-       (when (unsat? ir-expr)
+       (when (is_unsat? ir-expr)
          (set! ir-expr (fold-into-subexpr lifted-v2 halide-expr axioms add-consts sub-consts mul-consts div-consts)))
 
        ;; If that didn't work, try to replace the ir sub-expr with a new fused expr
        (define sub-expr (choose* (get-subexpr-ir lifted-v1) (get-subexpr-ir lifted-v2)))
-       (when (unsat? ir-expr)
+       (when (is_unsat? ir-expr)
          (define weights (if (empty? mul-consts) (list (void)) (list (apply choose* mul-consts))))
          (define saturation-func nop)
          (define output-type (type ((interpret-halide halide-expr) 0)))
@@ -364,7 +364,7 @@
 
        ;; If even that did not work, extend the ir-expr with a new instruction
        (set! sub-expr (choose* lifted-v1 lifted-v2))
-       (when (unsat? ir-expr)
+       (when (is_unsat? ir-expr)
          (define weights (if (empty? mul-consts) (list (void)) (list (apply choose* mul-consts))))
          (define saturation-func nop)
          (define output-type (type ((interpret-halide halide-expr) 0)))
@@ -374,7 +374,7 @@
          (define conv-op (convolve (get-node-id) sub-expr kernel saturation-func output-type))
          (set! ir-expr (run-synthesizer halide-expr conv-op axioms)))
        
-       (if (not (unsat? ir-expr))
+       (if (not (is_unsat? ir-expr))
            ir-expr
            (error "Could not lift" halide-expr))]
     
@@ -386,43 +386,43 @@
        (define ir-expr (fold-into-subexpr lifted-v1 halide-expr axioms add-consts sub-consts mul-consts div-consts))
        
        ;; If that didn't work, try folding into rhs sub-expr
-       (when (unsat? ir-expr)
+       (when (is_unsat? ir-expr)
          (set! ir-expr (fold-into-subexpr lifted-v2 halide-expr axioms add-consts sub-consts mul-consts div-consts)))
 
        ;; If that didn't work, try to replace the ir sub-expr with a new fused expr
        (define sub-expr (choose* (get-subexpr-ir lifted-v1) (get-subexpr-ir lifted-v2)))
-       (when (and (unsat? ir-expr) (not (void? int-divisor-gen)))
+       (when (and (is_unsat? ir-expr) (not (void? int-divisor-gen)))
          (define div-op (const-divide sub-expr (int-divisor-gen)))
          (set! ir-expr (run-synthesizer halide-expr div-op axioms)))
-       (when (unsat? ir-expr)
+       (when (is_unsat? ir-expr)
          (define div-op (packhi (get-node-id) sub-expr (bool-const)))
          (set! ir-expr (run-synthesizer halide-expr div-op axioms)))
-       (when (and (unsat? ir-expr) (not (void? int-shiftr-gen)))
+       (when (and (is_unsat? ir-expr) (not (void? int-shiftr-gen)))
          (define div-op (logic-shift-right (get-node-id) sub-expr (int-shiftr-gen)))
          (set! ir-expr (run-synthesizer halide-expr div-op axioms)))
-       (when (and (unsat? ir-expr) (not (void? int-shiftr-gen)))
+       (when (and (is_unsat? ir-expr) (not (void? int-shiftr-gen)))
          (define output-type (type ((interpret-halide halide-expr) 0)))
          (define div-op (arith-shift-right (get-node-id) sub-expr (int-shiftr-gen) (bool-const) output-type))
          (set! ir-expr (run-synthesizer halide-expr div-op axioms)))
 
        ;; If even that did not work, extend the ir-expr with a new instruction
        (set! sub-expr (choose* lifted-v1 lifted-v2))
-       (when (and (unsat? ir-expr) (not (void? int-divisor-gen)))
+       (when (and (is_unsat? ir-expr) (not (void? int-divisor-gen)))
          (define div-op (const-divide sub-expr (int-divisor-gen)))
          (set! ir-expr (run-synthesizer halide-expr div-op axioms)))
-       (when (unsat? ir-expr)
+       (when (is_unsat? ir-expr)
          (define div-op (packhi (get-node-id) sub-expr (bool-const)))
          (set! ir-expr (run-synthesizer halide-expr div-op axioms)))
-       (when (and (unsat? ir-expr) (not (void? int-shiftr-gen)))
+       (when (and (is_unsat? ir-expr) (not (void? int-shiftr-gen)))
          (define div-op (logic-shift-right (get-node-id) sub-expr (int-shiftr-gen)))
          (set! ir-expr (run-synthesizer halide-expr div-op axioms)))
-       (when (and (unsat? ir-expr) (not (void? int-shiftr-gen)))
+       (when (and (is_unsat? ir-expr) (not (void? int-shiftr-gen)))
          (define output-type (type ((interpret-halide halide-expr) 0)))
          (define div-op (arith-shift-right (get-node-id) sub-expr (int-shiftr-gen) (bool-const) output-type))
          (set! ir-expr (run-synthesizer halide-expr div-op axioms)))
        
        ;; Return synthesized expr
-       (if (not (unsat? ir-expr))
+       (if (not (is_unsat? ir-expr))
            ir-expr
            (error "Could not lift" halide-expr))]
     
@@ -439,15 +439,15 @@
        (define ir-expr (fold-into-subexpr lifted-v1 halide-expr axioms add-consts sub-consts mul-consts div-consts merged-sol))
 
        ;; If that didn't work, try folding into rhs sub-expr
-       (when (unsat? ir-expr)
+       (when (is_unsat? ir-expr)
          (set! ir-expr (fold-into-subexpr lifted-v2 halide-expr axioms add-consts sub-consts mul-consts div-consts merged-sol)))
        
        ;; If even that did not work, extend the ir-expr with a new instruction
-       (when (unsat? ir-expr)
+       (when (is_unsat? ir-expr)
          (set! ir-expr (run-synthesizer halide-expr (minimum (get-node-id) lifted-v1 lifted-v2) axioms merged-sol)))
 
        ;; Return synthesized expr
-       (if (not (unsat? ir-expr))
+       (if (not (is_unsat? ir-expr))
            ir-expr
            (error "Could not lift" halide-expr))]
       
@@ -459,20 +459,20 @@
        (define lifted-v2 (car res-v2))
 
        (define merged-sol (merge-sols (cdr res-v1) (cdr res-v2)))
-       
+
        ;; Try folding into lhs sub-expr
        (define ir-expr (fold-into-subexpr lifted-v1 halide-expr axioms add-consts sub-consts mul-consts div-consts merged-sol))
 
        ;; If that didn't work, try folding into rhs sub-expr
-       (when (unsat? ir-expr)
+       (when (is_unsat? ir-expr)
          (set! ir-expr (fold-into-subexpr lifted-v2 halide-expr axioms add-consts sub-consts mul-consts div-consts merged-sol)))
-       
+
        ;; If even that did not work, extend the ir-expr with a new instruction
-       (when (unsat? ir-expr)
+       (when (is_unsat? ir-expr)
          (set! ir-expr (run-synthesizer halide-expr (maximum (get-node-id) lifted-v1 lifted-v2) axioms merged-sol)))
 
        ;; Return synthesized expr
-       (if (not (unsat? ir-expr))
+       (if (not (is_unsat? ir-expr))
            ir-expr
            (error "Could not lift" halide-expr))]
 
@@ -484,12 +484,12 @@
        (define ir-expr (fold-into-subexpr lifted-v1 halide-expr axioms add-consts sub-consts mul-consts div-consts))
        
        ;; If that didn't work, try folding into rhs sub-expr
-       (when (unsat? ir-expr)
+       (when (is_unsat? ir-expr)
          (set! ir-expr (fold-into-subexpr lifted-v2 halide-expr axioms add-consts sub-consts mul-consts div-consts)))
 
        ;; If that didn't work, try to replace the ir sub-expr with a new fused expr
        (define sub-expr (choose* (get-subexpr-ir lifted-v1) (get-subexpr-ir lifted-v2)))
-       (when (unsat? ir-expr)
+       (when (is_unsat? ir-expr)
          (define weights (if (empty? mul-consts) (list (void)) (list (apply choose* mul-consts))))
          (define saturation-func nop)
          (define output-type (type ((interpret-halide halide-expr) 0)))
@@ -501,7 +501,7 @@
 
        ;; If even that did not work, extend the ir-expr with a new instruction
        (set! sub-expr (choose* lifted-v1 lifted-v2))
-       (when (unsat? ir-expr)
+       (when (is_unsat? ir-expr)
          (define weights (if (empty? mul-consts) (list (void)) (list (apply choose* mul-consts))))
          (define saturation-func nop)
          (define output-type (type ((interpret-halide halide-expr) 0)))
@@ -512,7 +512,7 @@
          (set! ir-expr (run-synthesizer halide-expr conv-op axioms)))
        
        ;; Return synthesized expr
-       (if (not (unsat? ir-expr))
+       (if (not (is_unsat? ir-expr))
            ir-expr
            (error "Could not lift" halide-expr))]
 
@@ -524,37 +524,37 @@
        (define ir-expr (fold-into-subexpr lifted-v1 halide-expr axioms add-consts sub-consts mul-consts div-consts))
        
        ;; If that didn't work, try folding into rhs sub-expr
-       (when (unsat? ir-expr)
+       (when (is_unsat? ir-expr)
          (set! ir-expr (fold-into-subexpr lifted-v2 halide-expr axioms add-consts sub-consts mul-consts div-consts)))
 
        ;; If that didn't work, try to replace the ir sub-expr with a new fused expr
        (define sub-expr (choose* (get-subexpr-ir lifted-v1) (get-subexpr-ir lifted-v2)))
-       (when (unsat? ir-expr)
+       (when (is_unsat? ir-expr)
          (define div-op (packhi (get-node-id) sub-expr (bool-const)))
          (set! ir-expr (run-synthesizer halide-expr div-op axioms)))
-       (when (and (unsat? ir-expr) (not (void? int-shiftr-gen)))
+       (when (and (is_unsat? ir-expr) (not (void? int-shiftr-gen)))
          (define div-op (logic-shift-right (get-node-id) sub-expr (int-shiftr-gen)))
          (set! ir-expr (run-synthesizer halide-expr div-op axioms)))
-       (when (and (unsat? ir-expr) (not (void? int-shiftr-gen)))
+       (when (and (is_unsat? ir-expr) (not (void? int-shiftr-gen)))
          (define output-type (type ((interpret-halide halide-expr) 0)))
          (define div-op (arith-shift-right (get-node-id) sub-expr (int-shiftr-gen) (bool-const) output-type))
          (set! ir-expr (run-synthesizer halide-expr div-op axioms)))
 
        ;; If even that did not work, extend the ir-expr with a new instruction
        (set! sub-expr (choose* lifted-v1 lifted-v2))
-       (when (unsat? ir-expr)
+       (when (is_unsat? ir-expr)
          (define div-op (packhi (get-node-id) sub-expr (bool-const)))
          (set! ir-expr (run-synthesizer halide-expr div-op axioms)))
-       (when (and (unsat? ir-expr) (not (void? int-shiftr-gen)))
+       (when (and (is_unsat? ir-expr) (not (void? int-shiftr-gen)))
          (define div-op (logic-shift-right (get-node-id) sub-expr (int-shiftr-gen)))
          (set! ir-expr (run-synthesizer halide-expr div-op axioms)))
-       (when (and (unsat? ir-expr) (not (void? int-shiftr-gen)))
+       (when (and (is_unsat? ir-expr) (not (void? int-shiftr-gen)))
          (define output-type (type ((interpret-halide halide-expr) 0)))
          (define div-op (arith-shift-right (get-node-id) sub-expr (int-shiftr-gen) (bool-const) output-type))
          (set! ir-expr (run-synthesizer halide-expr div-op axioms)))
        
        ;; Return synthesized expr
-       (if (not (unsat? ir-expr))
+       (if (not (is_unsat? ir-expr))
            ir-expr
            (error "Could not lift" halide-expr))]
 
@@ -566,20 +566,20 @@
        (define ir-expr (fold-into-subexpr lifted-v1 halide-expr axioms add-consts sub-consts mul-consts div-consts))
        
        ;; If that didn't work, try folding into rhs sub-expr
-       (when (unsat? ir-expr)
+       (when (is_unsat? ir-expr)
          (set! ir-expr (fold-into-subexpr lifted-v2 halide-expr axioms add-consts sub-consts mul-consts div-consts)))
 
        ;; If that didn't work, try to replace the ir sub-expr with a new fused expr
        (define sub-expr (choose* (get-subexpr-ir lifted-v1) (get-subexpr-ir lifted-v2)))
-       (when (unsat? ir-expr)
+       (when (is_unsat? ir-expr)
          (set! ir-expr (run-synthesizer halide-expr (abs-diff (get-node-id) sub-expr sub-expr) axioms)))
 
        ;; If even that did not work, extend the ir-expr with a new instruction
-       (when (unsat? ir-expr)
+       (when (is_unsat? ir-expr)
          (set! ir-expr (run-synthesizer halide-expr (abs-diff (get-node-id) lifted-v1 lifted-v2) axioms)))
        
        ;; Return synthesized expr
-       (if (not (unsat? ir-expr))
+       (if (not (is_unsat? ir-expr))
            ir-expr
            (error "Could not lift" halide-expr))]
       
@@ -641,6 +641,10 @@
                                (arith-shift-right (get-node-id) sub-expr (int-shiftr-gen) (choose* #t #f) outT)
                                (packhi (get-node-id) sub-expr (signedT? outT)))]
                              [(minimum sub-expr1 sub-expr2)
+                              (choose*
+                               (saturate (get-node-id) sub-expr1 (choose* #t #f) (signedT? outT))
+                               (saturate (get-node-id) sub-expr2 (choose* #t #f) (signedT? outT)))]
+                             [(maximum sub-expr1 sub-expr2)
                               (choose*
                                (saturate (get-node-id) sub-expr1 (choose* #t #f) (signedT? outT))
                                (saturate (get-node-id) sub-expr2 (choose* #t #f) (signedT? outT)))]
@@ -804,6 +808,7 @@
   ;(println sub-sol)
   ;(pretty-print original-expr)
   ;(pretty-print synthesized-expr)
+  ;(evaluate (elem-ir (interpret-ir synthesized-expr) 0) sub-sol)
   ;(set-curr-cn-ir 0)
   ;(println ((interpret-halide original-expr) 0))
   ;(println (elem-ir (interpret-ir synthesized-expr) 0))
@@ -815,17 +820,15 @@
   (define sol (synthesize #:forall (symbolics original-expr)
                           #:guarantee (bounded-eq? (interpret-halide original-expr) (interpret-ir synthesized-expr) MC_BND)))
   (define runtime (- (current-seconds) st))
-
   ;(when (convolve-acc? synthesized-expr)
     ;(println sol)
     ;(exit))
   
   (display (format "Ran synthesizer for ~a seconds.\n" runtime))
-
+  
   (cond
-    [(unsat? sol) sol]
-    [(unknown? sol) (unsat)]
-    [else
+    [(is_unsat? sol) sol]
+    [(sat? sol)
      (define res-sol (merge-sols sol sub-sol))
      (set! learned-axioms (set-add learned-axioms (eq? ((interpret-halide original-expr) 0) (evaluate (elem-ir (interpret-ir synthesized-expr) 0) res-sol))))
      (define res-expr (evaluate synthesized-expr res-sol))
@@ -870,7 +873,7 @@
     (begin
       (define sub-expr (first sub-exprs))
       (define ir-expr (fold-into-subexpr sub-expr halide-expr axioms add-consts sub-consts mul-consts div-consts sub-sol))
-      (if (unsat? ir-expr)
+      (if (is_unsat? ir-expr)
           (rec-fold (rest sub-exprs) halide-expr axioms add-consts sub-consts mul-consts div-consts sub-sol)
           ir-expr))))
 

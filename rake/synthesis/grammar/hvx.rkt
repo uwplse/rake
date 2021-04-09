@@ -608,6 +608,7 @@
                              (get-hvx-sat-isa signedOut?))]
                         [(packhi data signed?) (get-hvx-hi-isa signed?)]
                         [(abs-diff data1 data2) (get-hvx-absdiff-isa)]
+                        [(maximum data1 data2) (get-hvx-max-isa)]
                         [_ (begin (println "NYI") (exit))]))
 
   (cond
@@ -787,6 +788,20 @@
          (vcombine
           (vabsdiff (lo 't0) (lo 't1))
           (vabsdiff (hi 't0) (hi 't1)))))
+     ))
+  ??hvx-hi-instr)
+
+(define (get-hvx-max-isa)
+  (define (??hvx-hi-instr registers)
+    (define t0 (apply choose* registers))
+    (define t1 (apply choose* registers))
+    (choose*
+     (vmax t0 t1)
+     ;(let-expr 't0 t0
+       ;(let-expr 't1 t1
+         ;(vcombine
+          ;(vmax (lo 't0) (lo 't1))
+          ;(vmax (hi 't0) (hi 't1)))))
      ))
   ??hvx-hi-instr)
 
