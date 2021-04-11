@@ -71,10 +71,10 @@
   (define lifted-expr
     (match halide-expr
       ;; Constructors
-      [(x32 sca) (cons (broadcast (get-node-id) sca) (sat))]
-      [(x64 sca) (cons (broadcast (get-node-id) sca) (sat))]
-      [(x128 sca) (cons (broadcast (get-node-id) sca) (sat))]
-      [(x256 sca) (cons (broadcast (get-node-id) sca) (sat))]
+      [(x32 sca) (cons (broadcast (get-node-id) sca 32) (sat))]
+      [(x64 sca) (cons (broadcast (get-node-id) sca 64) (sat))]
+      [(x128 sca) (cons (broadcast (get-node-id) sca 128) (sat))]
+      [(x256 sca) (cons (broadcast (get-node-id) sca 256) (sat))]
 
       [(load buf idxs align)
        (cons (load-data (get-load-id) buff-reads) (sat))]
@@ -173,7 +173,7 @@
        ;; If that didn't work, try to replace the ir sub-expr with a new fused expr
        (define sub-expr (get-subexpr-ir lifted-vec))
        (when (and (is_unsat? ir-expr) (not (void? sub-expr)))
-         (define synthesized-expr (choose* (downcast sub-expr) (upcast sub-expr) (cast (get-node-id) sub-expr 'uint8)))
+         (define synthesized-expr (choose* (cast (get-node-id) sub-expr 'uint8)))
          (define sol (run-synthesizer halide-expr synthesized-expr axioms sub-sol))
          (when (sat? sol)
            (set! ir-expr (evaluate synthesized-expr sol))))
@@ -225,7 +225,7 @@
        ;; If that didn't work, try to replace the ir sub-expr with a new fused expr
        (define sub-expr (get-subexpr-ir lifted-vec))
        (when (and (is_unsat? ir-expr) (not (void? sub-expr)))
-         (define synthesized-expr (choose* (downcast sub-expr) (upcast sub-expr) (cast (get-node-id) sub-expr 'int16)))
+         (define synthesized-expr (choose* (cast (get-node-id) sub-expr 'int16)))
          (define sol (run-synthesizer halide-expr synthesized-expr axioms))
          (when (sat? sol)
            (set! ir-expr (evaluate synthesized-expr sol))))
@@ -256,15 +256,15 @@
        ;; If that didn't work, try to replace the ir sub-expr with a new fused expr
        (define sub-expr (get-subexpr-ir lifted-vec))
        (when (and (is_unsat? ir-expr) (not (void? sub-expr)))
-         (define synthesized-expr (choose* (downcast sub-expr) (upcast sub-expr) (cast (get-node-id) sub-expr 'int32)))
+         (define synthesized-expr (choose* (cast (get-node-id) sub-expr 'int32)))
          (define sol (run-synthesizer halide-expr synthesized-expr axioms))
          (when (sat? sol)
            (set! ir-expr (evaluate synthesized-expr sol))))
-
+       
        ;; If that didn't work, extend the expression with a new instruction
        (when (is_unsat? ir-expr)
          (set! ir-expr (run-synthesizer halide-expr (cast (get-node-id) lifted-vec 'int32) axioms)))
-       
+
        (if (not (is_unsat? ir-expr))
            ir-expr
            (error "Could not lift" halide-expr))]
@@ -337,7 +337,26 @@
       [(vec-sub v1 v2)
        (define lifted-v1 (car (synthesize-ir-expr v1 buff-reads axioms)))
        (define lifted-v2 (car (synthesize-ir-expr v2 buff-reads axioms)))
-       (error "fuck" halide-expr)]
+
+       ;; Try folding into lhs sub-expr
+       (define ir-expr (fold-into-subexpr lifted-v1 halide-expr axioms add-consts sub-consts mul-consts div-consts))
+       
+       ;; If that didn't work, try folding into rhs sub-expr
+       (when (is_unsat? ir-expr)
+         (set! ir-expr (fold-into-subexpr lifted-v2 halide-expr axioms add-consts sub-consts mul-consts div-consts)))
+
+       ;; If that didn't work, try to replace the ir sub-expr with a new fused expr
+       (define sub-expr1 (choose* (get-subexpr-ir lifted-v1) lifted-v1))
+       (define sub-expr2 (choose* (get-subexpr-ir lifted-v2) lifted-v2))
+       (when (is_unsat? ir-expr)
+         (define output-type (type ((interpret-halide halide-expr) 0)))
+         (set! ir-expr (run-synthesizer halide-expr (subtract (get-node-id) sub-expr1 sub-expr2 (choose* #t #f) output-type) axioms)))
+
+       ;; Return synthesized expr
+       (if (not (is_unsat? ir-expr))
+           ir-expr
+           (error "Could not lift" halide-expr))
+       ]
 
       [(vec-mul v1 v2)
        (define lifted-v1 (car (synthesize-ir-expr v1 buff-reads axioms)))
@@ -632,10 +651,11 @@
   
   (define synthesized-expr (match lifted-sub-expr
                              [(load-data opts) lifted-sub-expr]
-                             [(broadcast sca) (broadcast (get-node-id) sca)]
+                             [(broadcast sca N) (broadcast (get-node-id) sca N)]
                              [(cast sub-expr type) (cast (get-node-id) sub-expr outT)]
                              [(abs-diff sub-expr1 sub-expr2) (void)]
                              [(zip-data sub-expr1 sub-expr2) (void)]
+                             [(subtract sub-expr1 sub-expr2 sat? outputT) (subtract (get-node-id) sub-expr1 sub-expr2 (choose* #t #f) outT)]
                              [(arith-shift-right sub-expr n round? output-type)
                               (choose*
                                (arith-shift-right (get-node-id) sub-expr (int-shiftr-gen) (choose* #t #f) outT)
@@ -785,7 +805,7 @@
                                  (define ktype WMT_GENERAL)
                                  (define k (weight-matrix radius (take weights radius) ktype))
                                  (convolve-acc (get-node-id) acc sub-expr k saturation-func output-type)])]
-                             [_ (error "Oops 0" lifted-sub-expr)]))
+                             [_ (error "Grammar not defined for folding into: " lifted-sub-expr)]))
 
   (run-synthesizer halide-expr synthesized-expr axioms sub-sol))
 
@@ -839,7 +859,7 @@
 (define (get-subexpr-ir ir-expr)
   (match ir-expr
     [(load-data opts) (void)]
-    [(broadcast sca) (void)]
+    [(broadcast sca N) (void)]
     [(cast sub-expr type) sub-expr]
     [(arith-shift-right sub-expr n round? output-type) sub-expr]
     [(const-add sub-expr const-val saturation-func output-type) sub-expr]
@@ -848,14 +868,15 @@
     [(abs-diff sub-expr1 sub-expr2) (list sub-expr1 sub-expr2)]
     [(minimum sub-expr1 sub-expr2) (list sub-expr1 sub-expr2)]
     [(maximum sub-expr1 sub-expr2) (list sub-expr1 sub-expr2)]
+    [(subtract sub-expr1 sub-expr2 sat? outT) (list sub-expr1 sub-expr2)]
     [(zip-data sub-expr1 sub-expr2) (list sub-expr1 sub-expr2)]
-    [_ (error "oops 1" ir-expr)]))
+    [_ (error "NYI: get subexpression from:" ir-expr)]))
 
 (define (get-subexpr-list ir-expr)
   (define sub-exprs (flatten (list ir-expr)))
   (match ir-expr
     [(load-data opts) sub-exprs]
-    [(broadcast sca) sub-exprs]
+    [(broadcast sca N) sub-exprs]
     [(cast sub-expr type) (append sub-exprs (get-subexpr-list sub-expr))]
     [(arith-shift-right sub-expr n round? output-type) (append sub-exprs (get-subexpr-list sub-expr))]
     [(const-add sub-expr const-val saturation-func output-type) (append sub-exprs (get-subexpr-list sub-expr))]
@@ -864,6 +885,7 @@
     [(abs-diff sub-expr1 sub-expr2) (append sub-exprs (get-subexpr-list sub-expr1) (get-subexpr-list sub-expr2))]
     [(minimum sub-expr1 sub-expr2) (append sub-exprs (get-subexpr-list sub-expr1) (get-subexpr-list sub-expr2))]
     [(maximum sub-expr1 sub-expr2) (append sub-exprs (get-subexpr-list sub-expr1) (get-subexpr-list sub-expr2))]
+    [(subtract sub-expr1 sub-expr2 sat? outT) (append sub-exprs (get-subexpr-list sub-expr1) (get-subexpr-list sub-expr2))]
     [(zip-data sub-expr1 sub-expr2) (append sub-exprs (get-subexpr-list sub-expr1) (get-subexpr-list sub-expr2))]
     [_ (error "oops 2" ir-expr)]))
 

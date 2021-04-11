@@ -37,9 +37,10 @@
 (struct upcast (data) #:super struct:ir-node #:transparent)
 (struct downcast (data) #:super struct:ir-node #:transparent)
 (struct packhi (data signed?) #:super struct:ir-node #:transparent)
-(struct broadcast (val) #:super struct:ir-node #:transparent)
+(struct broadcast (val N) #:super struct:ir-node #:transparent)
 (struct load-data (opts) #:super struct:ir-node)
 (struct zip-data (data0 data1) #:super struct:ir-node #:transparent)
+(struct subtract (data0 data1 sat? widen?) #:super struct:ir-node #:transparent)
 
 (define idx-tables (make-hash))
 (for ([i 100])
@@ -66,7 +67,7 @@
       (lambda (i)
         (if (even? i) (elem data0i (quotient i 2)) (elem data1i (quotient i 2)))))]
 
-    [(broadcast val) (vector (lambda (i) val))]
+    [(broadcast val N) (vector (lambda (i) val))]
 
     ;; 1150s
     ;; 1455s
@@ -432,7 +433,7 @@
              [(eq? outputType 'int16) (sat16 out)]
              [(eq? outputType 'uint8) (cpp-cast (satu16 out) 'uint8)]
              [(eq? outputType 'int8) (cpp-cast (sat16 out) 'int8)]
-             [(eq? outputType 'int32) (mk-typed-expr (bvashr (eval v) (eval c)) outputType)])])))]
+             [(eq? outputType 'int32) out])])))]
 
     [(logic-shift-right data n)
      (define datai (interpret data))
@@ -566,7 +567,30 @@
           [(list (int16_t v0) (int16_t v1)) (int16_t (max16 v0 v1))]
           [(list (uint16_t v0) (uint16_t v1)) (uint16_t (maxu16 v0 v1))]
           [(list (int32_t v0) (int32_t v1)) (int32_t (max32 v0 v1))])))]
-    
+
+    [(subtract data0 data1 sat? outT)
+     (define data0i (interpret data0))
+     (define data1i (interpret data1))
+     (vector
+      (lambda (i)
+        (define lhs (cpp-cast (elem data0i i) outT))
+        (define rhs (cpp-cast (elem data1i i) outT))
+        (match (list lhs rhs)
+          [(list (int8_t _) (int8_t _))
+           (if sat? (sat8 (int8_t (bvsub (eval lhs) (eval rhs)))) (int8_t (bvsub (eval lhs) (eval rhs))))]
+          [(list (int16_t _) (int16_t _))
+           (if sat? (sat16 (int16_t (bvsub (eval lhs) (eval rhs)))) (int16_t (bvsub (eval lhs) (eval rhs))))]
+          [(list (int32_t _) (int32_t _))
+           (if sat? (sat32 (int32_t (bvsub (eval lhs) (eval rhs)))) (int32_t (bvsub (eval lhs) (eval rhs))))]
+          [(list (uint8_t _) (int8_t _))
+           (satu8 (int8_t (bvsub (eval lhs) (eval rhs))))]
+          [(list (uint8_t _) (uint8_t _))
+           (satu8 (uint8_t (bvsub (eval lhs) (eval rhs))))]
+          [(list (uint16_t _) (uint16_t _))
+           (satu16 (uint16_t (bvsub (eval lhs) (eval rhs))))]
+          [(list (uint32_t _) (uint32_t _))
+           (satu32 (uint32_t (bvsub (eval lhs) (eval rhs))))])))]
+
     [_ p]))
 
 (define (asList kernel)
