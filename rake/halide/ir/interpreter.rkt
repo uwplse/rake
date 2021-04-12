@@ -18,6 +18,16 @@
     [(load buf idxs alignment) (lambda (i) (get (interpret buf) ((interpret idxs) i)))]
 
     ;; Type Casts
+    [(uint8x1 sca) (lambda (i) (cpp-cast ((interpret sca) i) 'uint8))]
+    [(uint16x1 sca) (lambda (i) (cpp-cast ((interpret sca) i) 'uint16))]    
+    [(uint32x1 sca) (lambda (i) (cpp-cast ((interpret sca) i) 'uint32))]
+    [(uint64x1 sca) (lambda (i) (cpp-cast ((interpret sca) i) 'uint64))]
+
+    [(int8x1 sca) (lambda (i) (cpp-cast ((interpret sca) i) 'int8))]
+    [(int16x1 sca) (lambda (i) (cpp-cast ((interpret sca) i) 'int16))]    
+    [(int32x1 sca) (lambda (i) (cpp-cast ((interpret sca) i) 'int32))]
+    [(int64x1 sca) (lambda (i) (cpp-cast ((interpret sca) i) 'int64))]
+
     [(uint8x32 vec) (lambda (i) (cpp-cast ((interpret vec) i) 'uint8))]
     [(uint8x64 vec) (lambda (i) (cpp-cast ((interpret vec) i) 'uint8))]
     [(uint8x128 vec) (lambda (i) (cpp-cast ((interpret vec) i) 'uint8))]
@@ -42,6 +52,14 @@
     [(int32x32 vec) (lambda (i) (cpp-cast ((interpret vec) i) 'int32))]
     [(int32x64 vec) (lambda (i) (cpp-cast ((interpret vec) i) 'int32))]
     [(int32x128 vec) (lambda (i) (cpp-cast ((interpret vec) i) 'int32))]
+    
+    [(uint64x32 vec) (lambda (i) (cpp-cast ((interpret vec) i) 'uint64))]
+    [(uint64x64 vec) (lambda (i) (cpp-cast ((interpret vec) i) 'uint64))]
+    [(uint64x128 vec) (lambda (i) (cpp-cast ((interpret vec) i) 'uint64))]
+
+    [(int64x32 vec) (lambda (i) (cpp-cast ((interpret vec) i) 'int64))]
+    [(int64x64 vec) (lambda (i) (cpp-cast ((interpret vec) i) 'int64))]
+    [(int64x128 vec) (lambda (i) (cpp-cast ((interpret vec) i) 'int64))]
 
     ;; Operations
     [(sca-add v1 v2) (do-add v1 v2)]

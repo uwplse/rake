@@ -7,19 +7,19 @@
 #include "FindIntrinsics.h"
 #include "HexagonAlignment.h"
 #include "IREquality.h"
-#include "IRPrinter.h"
 #include "IRMatch.h"
 #include "IRMutator.h"
 #include "IROperator.h"
+#include "IRPrinter.h"
 #include "Lerp.h"
 #include "SExpParser.h"
 #include "Scope.h"
 #include "Simplify.h"
 #include "Substitute.h"
-#include <unordered_map>
-#include <utility>
 #include <fstream>
+#include <unordered_map>
 #include <unordered_set>
+#include <utility>
 
 namespace Halide {
 namespace Internal {
@@ -27,8 +27,8 @@ namespace Internal {
 using std::pair;
 using std::set;
 using std::string;
-using std::vector;
 using std::unordered_set;
+using std::vector;
 
 using namespace Halide::ConciseCasts;
 
@@ -2599,7 +2599,11 @@ private:
             stream << op->type;
 
             indent.push(indent.top() + 1);
+
             std::string rkt_type = stream.str();
+            if (op->type.is_scalar()) {
+                rkt_type += "x1";
+            }
             std::string rkt_val = dispatch(op->value);
             indent.pop();
 
@@ -2659,9 +2663,9 @@ private:
             indent.push(0);
             bv_enc.push(false);
             std::string rkt_idx = dispatch(op->index);
-            std::string alignment = std::string("(aligned ") + 
-                std::to_string(op->alignment.modulus) + std::string(" ") + 
-                std::to_string(op->alignment.remainder) + ")";
+            std::string alignment = std::string("(aligned ") +
+                                    std::to_string(op->alignment.modulus) + std::string(" ") +
+                                    std::to_string(op->alignment.remainder) + ")";
             bv_enc.pop();
             indent.pop();
 
@@ -2694,6 +2698,13 @@ private:
                 indent.pop();
 
                 return tabs() + "(vec-add\n" + rkt_lhs + "\n" + rkt_rhs + ")";
+            } else if (op->type != Int(32)) {
+                indent.push(indent.top() + 1);
+                std::string rkt_lhs = dispatch(op->a);
+                std::string rkt_rhs = dispatch(op->b);
+                indent.pop();
+
+                return tabs() + "(sca-add\n" + rkt_lhs + "\n" + rkt_rhs + ")";
             } else {
                 indent.push(0);
                 std::string rkt_lhs = dispatch(op->a);
@@ -2712,6 +2723,13 @@ private:
                 indent.pop();
 
                 return tabs() + "(vec-sub\n" + rkt_lhs + "\n" + rkt_rhs + ")";
+            } else if (op->type != Int(32)) {
+                indent.push(indent.top() + 1);
+                std::string rkt_lhs = dispatch(op->a);
+                std::string rkt_rhs = dispatch(op->b);
+                indent.pop();
+
+                return tabs() + "(sca-sub\n" + rkt_lhs + "\n" + rkt_rhs + ")";
             } else {
                 indent.push(0);
                 std::string rkt_lhs = dispatch(op->a);
@@ -2730,6 +2748,13 @@ private:
                 indent.pop();
 
                 return tabs() + "(vec-mul\n" + rkt_lhs + "\n" + rkt_rhs + ")";
+            } else if (op->type != Int(32)) {
+                indent.push(indent.top() + 1);
+                std::string rkt_lhs = dispatch(op->a);
+                std::string rkt_rhs = dispatch(op->b);
+                indent.pop();
+
+                return tabs() + "(sca-mul\n" + rkt_lhs + "\n" + rkt_rhs + ")";
             } else {
                 indent.push(0);
                 std::string rkt_lhs = dispatch(op->a);
@@ -2748,6 +2773,13 @@ private:
                 indent.pop();
 
                 return tabs() + "(vec-div\n" + rkt_lhs + "\n" + rkt_rhs + ")";
+            } else if (op->type != Int(32)) {
+                indent.push(indent.top() + 1);
+                std::string rkt_lhs = dispatch(op->a);
+                std::string rkt_rhs = dispatch(op->b);
+                indent.pop();
+
+                return tabs() + "(sca-div\n" + rkt_lhs + "\n" + rkt_rhs + ")";
             } else {
                 indent.push(0);
                 std::string rkt_lhs = dispatch(op->a);
@@ -2771,6 +2803,13 @@ private:
                 indent.pop();
 
                 return tabs() + "(vec-min\n" + rkt_lhs + "\n" + rkt_rhs + ")";
+            } else if (op->type != Int(32)) {
+                indent.push(indent.top() + 1);
+                std::string rkt_lhs = dispatch(op->a);
+                std::string rkt_rhs = dispatch(op->b);
+                indent.pop();
+
+                return tabs() + "(sca-min\n" + rkt_lhs + "\n" + rkt_rhs + ")";
             } else {
                 indent.push(0);
                 std::string rkt_lhs = dispatch(op->a);
@@ -2789,6 +2828,13 @@ private:
                 indent.pop();
 
                 return tabs() + "(vec-max\n" + rkt_lhs + "\n" + rkt_rhs + ")";
+            } else if (op->type != Int(32)) {
+                indent.push(indent.top() + 1);
+                std::string rkt_lhs = dispatch(op->a);
+                std::string rkt_rhs = dispatch(op->b);
+                indent.pop();
+
+                return tabs() + "(sca-max\n" + rkt_lhs + "\n" + rkt_rhs + ")";
             } else {
                 indent.push(0);
                 std::string rkt_lhs = dispatch(op->a);
@@ -2968,9 +3014,9 @@ private:
 
         void visit(const Variable *op) override {
             if (op->type.is_vector()) {
-                debug(0) << "Var Found: " << op->name << "\n";
-                debug(0) << "Bound: " << bounds_of_expr_in_scope(op, bounds, func_value_bounds).min << "\n";
-                debug(0) << "Bound: " << bounds_of_expr_in_scope(op, bounds, func_value_bounds).max << "\n";
+                auto b = bounds_of_expr_in_scope(op, bounds, func_value_bounds);
+                debug(0) << "Var Found: " << op->name << "\n"
+                         << "Bounds: " << b.min << " ... " << b.max << "\n";
             }
 
             if (external_let_vars.count(op->name)) {
@@ -2987,11 +3033,10 @@ private:
         }
 
         void visit(const Load *op) override {
-            debug(0) << "Load Found: " << op->name << "\n";
-            debug(0) << "Bound: " << bounds_of_expr_in_scope(op, bounds, func_value_bounds).min << "\n";
-            debug(0) << "Bound: " << bounds_of_expr_in_scope(op, bounds, func_value_bounds).max << "\n";
-            buffers.insert(std::pair<std::string, Type>(op->name,
-                                                        (op->type.is_vector() ? op->type.element_of() : op->type)));
+            auto b = bounds_of_expr_in_scope(op, bounds, func_value_bounds);
+            debug(0) << "Load Found: " << op->name << "\n"
+                     << "Bound: " << b.min << " ... " << b.max << "\n";
+            buffers.insert(std::pair<std::string, Type>(op->name, (op->type.is_vector() ? op->type.element_of() : op->type)));
 
             IRVisitor::visit(op);
         }
@@ -3035,33 +3080,48 @@ private:
     std::map<std::string, Expr> let_vars;
     std::vector<std::string> let_decl_order;
 
+    Expr linearize(const Expr &e) {
+        if (is_const(e)) {
+            return e;
+        } else if (e.as<Variable>()) {
+            return e;
+        } else if (const Add *add = e.as<Add>()) {
+            return linearize(add->a) + linearize(add->b);
+        } else if (const Sub *sub = e.as<Sub>()) {
+            return linearize(sub->a) - linearize(sub->b);
+        } else if (const Mul *mul = e.as<Mul>()) {
+            // Assume the simplifier has run, so constants are to the right
+            if (is_const(mul->b)) {
+                return linearize(mul->a) * mul->b;
+            }
+        } else if (const Min *m = e.as<Min>()) {
+            return min(linearize(m->a), linearize(m->b));
+        } else if (const Max *m = e.as<Max>()) {
+            return max(linearize(m->a), linearize(m->b));
+        }
+        // TODO: Select nodes? Need to decide which kinds of
+        // conditions are OK if so. Or we could abstract the condition
+        // as a new variable.
+
+        // Just treat it as a symbolic unknown
+        return Variable::make(e.type(), unique_name('t'));
+    }
+
     Stmt visit(const LetStmt *stmt) override {
         debug(0) << "Let Found: " << stmt->name << " = " << stmt->value << "\n";
 
-        // We don't want/need to model some stuff
-        if (stmt->value.node_type() == IRNodeType::Call) {
-            const Call* c = stmt->value.as<Call>();
-            std::unordered_set<std::string> s = {
-                "_halide_buffer_get_host",
-                "_halide_buffer_get_min",
-                "_halide_buffer_get_stride",
-                "_halide_buffer_get_min",
-                "_halide_buffer_get_stride",
-                "_halide_buffer_get_host",
-                "_halide_buffer_get_min",
-                "_halide_buffer_get_extent",
-                "_halide_buffer_get_stride",
-                "_halide_buffer_get_min",
-                "_halide_buffer_get_extent",
-                "_halide_buffer_get_stride"
-            };
-            
-            if (s.find(c->name) != s.end())
-                return IRMutator::visit(stmt);    
+        Expr value = stmt->value;
+        value = lower_intrinsics(value);
+        if (value.type() == Int(32)) {
+            // For index expressions, we don't want/need to model some
+            // stuff. Just abstract things as unknowns if we hit any
+            // non-linearities. We're assuming that any scalar Int(32)
+            // lets are from index expressions.
+            value = linearize(stmt->value);
         }
 
-        bounds.push(stmt->name, bounds_of_expr_in_scope(stmt->value, bounds, func_value_bounds));
-        let_vars[stmt->name] = stmt->value;
+        bounds.push(stmt->name, bounds_of_expr_in_scope(value, bounds, func_value_bounds));
+        let_vars[stmt->name] = value;
         let_decl_order.push_back(stmt->name);
         return IRMutator::visit(stmt);
     }
@@ -3086,16 +3146,15 @@ private:
         if (c && c->is_intrinsic(Call::dynamic_shuffle))
             return IRMutator::visit(stmt);
 
-
         debug(0) << "\nOptimizing expression: " << expr_id << "\n"
                  << stmt->value << "\n\n";
 
-        //int x;
-        //std::cin >> x;
+        // int x;
+        // std::cin >> x;
 
-        //if (x == 0) {
-          //  expr_id++;
-            //return IRMutator::visit(stmt);
+        // if (x == 0) {
+        //   expr_id++;
+        // return IRMutator::visit(stmt);
         //}
 
         RacketPrinter specPrinter(std::cout, let_vars);
@@ -3104,11 +3163,11 @@ private:
         InferSymbolics symFinder(let_vars, bounds, func_value_bounds);
         stmt->value.accept(&symFinder);
 
-        //IRPrinter printer = IRPrinter(std::cout);
-        //for (auto var : symFinder.getSymVars())
-        //debug(0) << var->name << "\n";
-        //for (auto buf : symFinder.getSymBufs())
-        //  debug(0) << buf.first << "\n";
+        // IRPrinter printer = IRPrinter(std::cout);
+        // for (auto var : symFinder.getSymVars())
+        // debug(0) << var->name << "\n";
+        // for (auto buf : symFinder.getSymBufs())
+        //   debug(0) << buf.first << "\n";
 
         debug(0) << "Generating synthesis specification...\n";
 
@@ -3133,10 +3192,19 @@ private:
 
                 std::pair<std::string, int> key(buf.first, 0);
                 if (func_value_bounds.count(key)) {
-                    axioms << "\n   (values-range-from "
-                           << buf.first
-                           << specPrinter.dispatch(func_value_bounds[key].min)
-                           << specPrinter.dispatch(func_value_bounds[key].max) << ")";
+                    auto in = func_value_bounds[key];
+                    if (!in.is_everything()) {
+                        if (!in.has_lower_bound()) {
+                            in.min = in.max.type().min();
+                        }
+                        if (!in.has_upper_bound()) {
+                            in.max = in.min.type().max();
+                        }
+                        axioms << "\n   (values-range-from "
+                               << buf.first
+                               << specPrinter.dispatch(in.min)
+                               << specPrinter.dispatch(in.max) << ")";
+                    }
                 }
             }
         }
@@ -3151,12 +3219,25 @@ private:
                 sym_vars << "(define " << var->name << " (load " << var->name
                          << "-buf (ramp 0 1 " << var->type.lanes() << ")))\n";
 
-                axioms << "\n   (values-range-from "
-                       << var->name << "-buf"
-                       << specPrinter.dispatch(bounds_of_expr_in_scope(var, bounds, func_value_bounds).min)
-                       << specPrinter.dispatch(bounds_of_expr_in_scope(var, bounds, func_value_bounds).max) << ")";
-            } else {
+                auto in = bounds_of_expr_in_scope(var, bounds, func_value_bounds);
+                if (!in.is_everything()) {
+                    if (!in.has_lower_bound()) {
+                        in.min = var->type.min();
+                    }
+                    if (!in.has_upper_bound()) {
+                        in.max = var->type.max();
+                    }
+
+                    axioms << "\n   (values-range-from "
+                           << var->name << "-buf"
+                           << specPrinter.dispatch(in.min)
+                           << specPrinter.dispatch(in.max) << ")";
+                }
+            } else if (var->type == Int(32)) {
                 sym_vars << "(define-symbolic " << var->name << " integer?)\n";
+            } else {
+                // Assume it's a fixed point scalar var
+                sym_vars << "(define-symbolic " << var->name << " (bitvector " << var->type.bits() << "))\n";
             }
         }
         sym_buf_types << ")))\n";

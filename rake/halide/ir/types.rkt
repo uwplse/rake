@@ -15,6 +15,16 @@
 (struct load (buf idxs alignment) #:transparent)
 
 ;; Type Casts
+(struct uint8x1 (sca) #:transparent)
+(struct uint16x1 (sca) #:transparent)
+(struct uint32x1 (sca) #:transparent)
+(struct uint64x1 (sca) #:transparent)
+
+(struct int8x1 (sca) #:transparent)
+(struct int16x1 (sca) #:transparent)
+(struct int32x1 (sca) #:transparent)
+(struct int64x1 (sca) #:transparent)
+
 (struct uint8x32 (vec) #:transparent)
 (struct uint8x64 (vec) #:transparent)
 (struct uint8x128 (vec) #:transparent)
@@ -28,6 +38,10 @@
 (struct uint32x64 (vec) #:transparent)
 (struct uint32x128 (vec) #:transparent)
 
+(struct uint64x32 (vec) #:transparent)
+(struct uint64x64 (vec) #:transparent)
+(struct uint64x128 (vec) #:transparent)
+
 (struct int8x32 (vec) #:transparent)
 (struct int8x64 (vec) #:transparent)
 (struct int8x128 (vec) #:transparent)
@@ -39,6 +53,10 @@
 (struct int32x32 (vec) #:transparent)
 (struct int32x64 (vec) #:transparent)
 (struct int32x128 (vec) #:transparent)
+
+(struct int64x32 (vec) #:transparent)
+(struct int64x64 (vec) #:transparent)
+(struct int64x128 (vec) #:transparent)
 
 ;; Operations
 (struct sca-add (v1 v2) #:transparent)
@@ -77,24 +95,39 @@
     [(load buf idxs alignment) (vec-len idxs)]
 
     ;; Type Casts
+    [(uint8x1 sca) 1]
+    [(uint16x1 sca) 1]
+    [(uint32x1 sca) 1]
+    [(uint64x1 sca) 1]
+    [(int8x1 sca) 1]
+    [(int16x1 sca) 1]
+    [(int32x1 sca) 1]
+    [(int64x1 sca) 1]    
+   
     [(uint8x32 vec) 32]
     [(uint16x32 vec) 32]
     [(uint32x32 vec) 32]
+    [(uint64x32 vec) 32]    
     [(int8x32 vec) 32]
     [(int16x32 vec) 32]
     [(int32x32 vec) 32]
+    [(int64x32 vec) 32]    
     [(uint8x64 vec) 64]
     [(uint16x64 vec) 64]
     [(uint32x64 vec) 64]
+    [(uint64x64 vec) 64]    
     [(int8x64 vec) 64]
     [(int16x64 vec) 64]
     [(int32x64 vec) 64]
+    [(int64x64 vec) 64]    
     [(uint8x128 vec) 128]
     [(uint16x128 vec) 128]
     [(uint32x128 vec) 128]
+    [(uint64x128 vec) 128]
     [(int8x128 vec) 128]
     [(int16x128 vec) 128]
     [(int32x128 vec) 128]
+    [(int64x128 vec) 128]    
     [(uint8x256 vec) 256]
 
     ;; Operations
