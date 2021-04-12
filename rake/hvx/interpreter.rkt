@@ -1069,7 +1069,7 @@
 
   (define-symbolic* idx-tbl1 (~> integer? integer?))
   (define-symbolic* idx-tbl2 (~> integer? integer?))
-  
+
   (choose*
    (vecType
     (lambda (i) (list-ref (filter (lambda(v) (eq? (type v) elemType)) (list-ref buff-reads curr-cn)) (idx-tbl1 i))))

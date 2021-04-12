@@ -2854,6 +2854,11 @@ private:
             return NYI();
         }
         std::string visit(const LT *op) {
+            if (op->type.is_scalar()) {
+                std::string rkt_lhs = dispatch(op->a);
+                std::string rkt_rhs = dispatch(op->b);
+                return tabs() + "(< " + rkt_lhs + " " + rkt_rhs + ")";
+            }
             printer.print(op);
             return NYI();
         }
@@ -2882,6 +2887,12 @@ private:
             return NYI();
         }
         std::string visit(const Select *op) {
+            if (op->type.is_scalar()) {
+                std::string rkt_cond = dispatch(op->condition);
+                std::string rkt_true = dispatch(op->true_value);
+                std::string rkt_false = dispatch(op->false_value);
+                return tabs() + "(if " + rkt_cond + " " + rkt_true + " " + rkt_false + ")";
+            }
             printer.print(op);
             return NYI();
         }

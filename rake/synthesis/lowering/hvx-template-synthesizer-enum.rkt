@@ -245,6 +245,38 @@
          
              (reset-hvx-instr-bnd)
              (synthesize-equiv-hvx spec (cons sub-expr1 sub-expr2) (cons abstract-sub-expr1 abstract-sub-expr2) discarded-sols))]
+
+          [(subtract sub-expr1 sub-expr2 sat? outT)
+           (begin
+             (define hvx-sub-spec1 (hvx-expr-spec sub-expr1 ir-expr-sol ir-expr-annotations ir-expr-ctx ir-expr-axioms ir-expr-invalid-sketches))
+             (define hvx-sub-expr1 (synthesize-hvx-template hvx-sub-spec1 ir-to-hvx offset))
+         
+             (define hvx-sub-spec2 (hvx-expr-spec sub-expr2 ir-expr-sol ir-expr-annotations ir-expr-ctx ir-expr-axioms ir-expr-invalid-sketches))
+             (define hvx-sub-expr2 (synthesize-hvx-template hvx-sub-spec2 ir-to-hvx offset))
+
+             (define abstract-sub-expr1
+               (cond
+                 [(load-data? sub-expr1) hvx-sub-expr1]
+                 [(broadcast? sub-expr1) hvx-sub-expr1]
+                 [else
+                  (define ret (eval-hvx-expr hvx-sub-expr1 (hash-ref ir-expr-annotations (ir-node-id sub-expr1))))
+                  (hash-set! abstract-expr-mapping (abstr-sub-expr-id ret) hvx-sub-expr1)
+                  ret]))
+             (define abstract-sub-expr2
+               (cond
+                 [(load-data? sub-expr2) hvx-sub-expr2]
+                 [(broadcast? sub-expr2) hvx-sub-expr2]
+                 [else
+                  (define ret (eval-hvx-expr hvx-sub-expr2 (hash-ref ir-expr-annotations (ir-node-id sub-expr2))))
+                  (hash-set! abstract-expr-mapping (abstr-sub-expr-id ret) hvx-sub-expr2)
+                  ret]))
+
+             (display "Lifting IR to HVX...\n")
+             (display "====================\n\n")
+             (display (format "IR Operation: \n\n~a\n\n" (pretty-format ir-expr)))
+         
+             (reset-hvx-instr-bnd)
+             (synthesize-equiv-hvx spec (cons sub-expr1 sub-expr2) (cons abstract-sub-expr1 abstract-sub-expr2) discarded-sols))]
       
           [(zip-data sub-expr1 sub-expr2)
            (begin
@@ -267,7 +299,7 @@
              (debug (format "Synthesis time: 0 seconds\n"))
              hvx-expr)]
 
-          [_ (error "NYI asd")]))
+          [_ (error "NYI:" ir-expr)]))
 
       (hash-set! ir-to-hvx ir-expr hvx-expr)
       hvx-expr]))
@@ -543,11 +575,13 @@
   ;(pretty-print hvx-sub-expr)
 
   (set-curr-cn-hvx 0)
-  ;(println ((interpret-halide original-expr) 0))
+  (println "--------")
+  ;(println (??hvx-expr-grm))
+  (println ((interpret-halide original-expr) 0))
   ;(println ((interpret-halide original-expr) 32))
   ;(println ((interpret-halide original-expr) 64))
   ;(println ((interpret-halide original-expr) 96))
-  ;(println (elem-hvx (interpret-hvx synthesized-hvx-expr) 0))
+  (println (elem-hvx (interpret-hvx synthesized-hvx-expr) 0))
   ;(println (symbolics (elem-hvx (interpret-hvx synthesized-hvx-expr) 0)))
   ;(println (elem-hvx (interpret-hvx synthesized-hvx-expr) 32))
   ;(println (elem-hvx (interpret-hvx synthesized-hvx-expr) 64))
