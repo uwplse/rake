@@ -25,6 +25,11 @@
 (struct int32x1 (sca) #:transparent)
 (struct int64x1 (sca) #:transparent)
 
+(struct uint1x32 (vec) #:transparent)
+(struct uint1x64 (vec) #:transparent)
+(struct uint1x128 (vec) #:transparent)
+(struct uint1x256 (vec) #:transparent)
+
 (struct uint8x32 (vec) #:transparent)
 (struct uint8x64 (vec) #:transparent)
 (struct uint8x128 (vec) #:transparent)
@@ -73,6 +78,10 @@
 (struct vec-max (v1 v2) #:transparent)
 (struct vec-min (v1 v2) #:transparent)
 
+(struct vec-if (v1 v2 v3) #:transparent)
+(struct vec-lt (v1 v2) #:transparent)
+(struct vec-le (v1 v2) #:transparent)
+
 (struct absd (v1 v2) #:transparent)
 (struct shift_left (vec shift) #:transparent)
 (struct shift_right (vec shift) #:transparent)
@@ -102,7 +111,12 @@
     [(int8x1 sca) 1]
     [(int16x1 sca) 1]
     [(int32x1 sca) 1]
-    [(int64x1 sca) 1]    
+    [(int64x1 sca) 1]
+
+    [(uint1x32 vec) 32]
+    [(uint1x64 vec) 64]
+    [(uint1x128 vec) 128]
+    [(uint1x256 vec) 256]    
    
     [(uint8x32 vec) 32]
     [(uint16x32 vec) 32]
@@ -137,7 +151,10 @@
     [(vec-div v1 v2) (vec-len v1)]
     [(vec-min v1 v2) (vec-len v1)]
     [(vec-max v1 v2) (vec-len v1)]
-
+    [(vec-if v1 v2 v3) (vec-len v2)]
+    [(vec-lt v1 v2) (vec-len v1)]
+    [(vec-le v1 v2) (vec-len v1)]
+    
     [(absd v1 v2) (vec-len v1)]
     [(shift_left vec shift) (vec-len vec)]
     [(shift_right vec shift) (vec-len vec)]

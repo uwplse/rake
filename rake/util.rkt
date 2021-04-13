@@ -29,6 +29,7 @@
         [(eq? bw 64) 'int64]
         [else (error "Cannot handle signed ints of bw: ~a" bw)])
       (cond
+        [(eq? bw 1) 'uint1]
         [(eq? bw 8) 'uint8]
         [(eq? bw 16) 'uint16]
         [(eq? bw 32) 'uint32]
@@ -41,6 +42,7 @@
     ['int16 (int16_t expr)]
     ['int32 (int32_t expr)]
     ['int64 (int64_t expr)]
+    ['uint1 (uint1_t expr)]
     ['uint8 (uint8_t expr)]
     ['uint16 (uint16_t expr)]
     ['uint32 (uint32_t expr)]

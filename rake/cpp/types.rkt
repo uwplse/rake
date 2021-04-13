@@ -8,6 +8,7 @@
 (struct int32_t (v) #:transparent)
 (struct int64_t (v) #:transparent)
 
+(struct uint1_t (v) #:transparent)
 (struct uint8_t (v) #:transparent)
 (struct uint16_t (v) #:transparent)
 (struct uint32_t (v) #:transparent)
@@ -20,6 +21,7 @@
     [(int16_t v) v]
     [(int32_t v) v]
     [(int64_t v) v]
+    [(uint1_t v) v]
     [(uint8_t v) v]
     [(uint16_t v) v]
     [(uint32_t v) v]
@@ -33,6 +35,7 @@
     [(int16_t v) (bitvector->integer v)]
     [(int32_t v) (bitvector->integer v)]
     [(int64_t v) (bitvector->integer v)]
+    [(uint1_t v) (bitvector->natural v)]
     [(uint8_t v) (bitvector->natural v)]
     [(uint16_t v) (bitvector->natural v)]
     [(uint32_t v) (bitvector->natural v)]
@@ -46,6 +49,7 @@
     [(int16_t v) 'int16]
     [(int32_t v) 'int32]
     [(int64_t v) 'int64]
+    [(uint1_t v) 'uint1]
     [(uint8_t v) 'uint8]
     [(uint16_t v) 'uint16]
     [(uint32_t v) 'uint32]
@@ -58,6 +62,7 @@
     [(int16_t v) #t]
     [(int32_t v) #t]
     [(int64_t v) #t]
+    [(uint1_t v) #f]
     [(uint8_t v) #f]
     [(uint16_t v) #f]
     [(uint32_t v) #f]
@@ -73,6 +78,7 @@
     ['int16 #t]
     ['int32 #t]
     ['int64  #t]
+    ['uint1 #f]
     ['uint8 #f]
     ['uint16 #f]
     ['uint32 #f]
@@ -88,6 +94,7 @@
     [(int16_t v) 16]
     [(int32_t v) 32]
     [(int64_t v) 64]
+    [(uint1_t v) 1]
     [(uint8_t v) 8]
     [(uint16_t v) 16]
     [(uint32_t v) 32]
@@ -97,6 +104,7 @@
     ['int16 16]
     ['int32 32]
     ['int64 64]
+    ['uint1 1]
     ['uint8 8]
     ['uint16 16]
     ['uint32 32]
