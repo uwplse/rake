@@ -131,9 +131,10 @@
   (bvadd b (bvand diff dsgn)))
 
 (define (min16 a b)
-  (define diff (bvsub a b))
-  (define dsgn (bvashr diff (bv 15 16)))
-  (bvadd b (bvand diff dsgn)))
+  ;(define diff (bvsub a b))
+  ;(define dsgn (bvashr diff (bv 15 16)))
+  ;(bvadd b (bvand diff dsgn))
+  (bvsmin a b))
 
 (define (min32 a b)
   (define diff (bvsub a b))
@@ -164,13 +165,13 @@
 (define (max8 a b)
   (define diff (bvsub a b))
   (define dsgn (bvashr diff (bv 7 8)))
-  (bvsub a (bvand diff dsgn))
-  (bvsmax a b))
+  (bvsub a (bvand diff dsgn)))
 
 (define (max16 a b)
-  (define diff (bvsub a b))
-  (define dsgn (bvashr diff (bv 15 16)))
-  (bvsub a (bvand diff dsgn)))
+  ;(define diff (bvsub a b))
+  ;(define dsgn (bvashr diff (bv 15 16)))
+  ;(bvsub a (bvand diff dsgn))
+  (bvsmax a b))
 
 (define (max32 a b)
   (define diff (bvsub a b))
