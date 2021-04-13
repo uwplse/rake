@@ -411,7 +411,7 @@
        ;; If that didn't work, try to replace the ir sub-expr with a new fused expr
        (define sub-expr (choose* (get-subexpr-ir lifted-v1) (get-subexpr-ir lifted-v2)))
        (when (and (is_unsat? ir-expr) (not (void? int-divisor-gen)))
-         (define div-op (const-divide sub-expr (int-divisor-gen)))
+         (define div-op (const-divide (get-node-id) sub-expr (int-divisor-gen)))
          (set! ir-expr (run-synthesizer halide-expr div-op axioms)))
        (when (is_unsat? ir-expr)
          (define div-op (packhi (get-node-id) sub-expr (bool-const)))
@@ -427,7 +427,7 @@
        ;; If even that did not work, extend the ir-expr with a new instruction
        (set! sub-expr (choose* lifted-v1 lifted-v2))
        (when (and (is_unsat? ir-expr) (not (void? int-divisor-gen)))
-         (define div-op (const-divide sub-expr (int-divisor-gen)))
+         (define div-op (const-divide (get-node-id) sub-expr (int-divisor-gen)))
          (set! ir-expr (run-synthesizer halide-expr div-op axioms)))
        (when (is_unsat? ir-expr)
          (define div-op (packhi (get-node-id) sub-expr (bool-const)))
