@@ -595,6 +595,7 @@
                              (get-hvx-conv-isa kernel)
                              (get-hvx-conv-w-isa kernel))]
                         [(arith-shift-right data n round? outputType) (get-hvx-asr-isa n round? outputType)]
+                        [(const-divide data den) (get-hvx-div-isa den)]
                         [(cast data outType)
                          ;; Todo specialize based on type
                          ;(println (bw (elem-ir (interpret-ir sub-expr) 0)))
@@ -609,7 +610,8 @@
                         [(packhi data signed?) (get-hvx-hi-isa signed?)]
                         [(abs-diff data1 data2) (get-hvx-absdiff-isa)]
                         [(maximum data1 data2) (get-hvx-max-isa)]
-                        [_ (begin (println "NYI") (exit))]))
+                        [(subtract data1 data2 sat? outT) (get-hvx-sub-isa sat? outT)]
+                        [_ (begin (error "NYI: HVX grammar not defined for" ir-expr))]))
 
   (cond
     [(list? hvx-sub-expr)
@@ -802,6 +804,36 @@
          ;(vcombine
           ;(vmax (lo 't0) (lo 't1))
           ;(vmax (hi 't0) (hi 't1)))))
+     ))
+  ??hvx-hi-instr)
+
+(define (get-hvx-div-isa den)
+  (define (??hvx-div-instr registers)
+    (define t0 (apply choose* registers))
+    (define shift (int8_t (zero-extend (?? (bitvector 4)) (bitvector 8))))
+    (define-symbolic bvc8 (bitvector 8))
+    (define-symbolic bvc16 (bitvector 16))
+    (define multiplier (choose (int8_t bvc8) (int16_t bvc16) (uint8_t bvc8) (uint16_t bvc16)))
+    (choose*
+     (vmpy t0 multiplier)
+     (vasr t0 shift)
+     (vlsr t0 shift)
+     (let-expr 'x0 t0 (vshuffo-n (hi 'x0) (lo 'x0) (bool-const)))
+     (let-expr 'x0 t0 (vasr-n (hi 'x0) (lo 'x0) shift (bool-const) (bool-const) (bool-const)))
+     ))
+  ??hvx-div-instr)
+
+(define (get-hvx-sub-isa sat? outT)
+  (define (??hvx-hi-instr registers)
+    (define t0 (apply choose* registers))
+    (define t1 (apply choose* registers))
+    (choose*
+     ;(vsxt t0 (choose* #t #f))
+     (vzxt t0 (choose* #t #f))
+     ;(vsub t0 t1 sat?)
+     (let-expr 'v0 t0
+      (let-expr 'v1 t1
+       (vcombine (vsub (lo 'v0) (lo 'v0) (choose* #t #f)) (vsub (hi 'v1) (hi 'v1) (choose* #t #f)))))
      ))
   ??hvx-hi-instr)
 

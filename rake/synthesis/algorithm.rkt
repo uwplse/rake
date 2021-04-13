@@ -77,6 +77,13 @@
     [else (error (format "Input specification is provided in a language Rake currently does not support: '~a. Supported IRs: ['halide-ir]" spec-lang))]))
 
 (define (unpack-if-needed hvx-expr halide-expr)
+  (cond
+    [(cons? hvx-expr)
+     (cons (unpack-e (car hvx-expr) halide-expr) (unpack-e (cdr hvx-expr) halide-expr))]
+    [else
+     (unpack-e hvx-expr halide-expr)]))
+
+(define (unpack-e hvx-expr halide-expr)
   (define bw-o-type (bw (type ((interpret-halide halide-expr) 0))))
   (define bw-s-type (bw (elem-type (hvx-type (interpret-hvx hvx-expr)))))
   (cond

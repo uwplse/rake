@@ -175,6 +175,20 @@
              [_ (error (format "Unrecognized lowering algorithm specified: '~a. Supported algorithms: ['incremental, 'enumerative]" lowering-algo))])]
          [else (values #f (void))])]
 
+      [(const-divide sub-expr const-divisor)
+       (define-values (successful? hvx-sub-expr)
+         (synthesize-hvx-expr halide-expr halide-expr-axioms sub-expr ir-expr-sol ir-annotations lowering-algo swizzling-algo #f))
+       
+       (cond
+         [successful?
+           (define halide-sub-expr (hash-ref ir-annotations (ir-node-id ir-expr)))
+           (hash-set! ir-to-hvx (ir-node-id sub-expr) (if (vinterleave? hvx-sub-expr) (vinterleave-Vuu hvx-sub-expr) hvx-sub-expr))
+           (match lowering-algo
+             ['incremental (backtracking-search-incr halide-sub-expr halide-expr-axioms ir-expr ir-expr-sol ir-annotations (list) swizzling-algo ir-to-hvx)]
+             ['enumerative (backtracking-search-enum halide-sub-expr halide-expr-axioms ir-expr ir-expr-sol ir-annotations (list) swizzling-algo ir-to-hvx)]
+             [_ (error (format "Unrecognized lowering algorithm specified: '~a. Supported algorithms: ['incremental, 'enumerative]" lowering-algo))])]
+         [else (values #f (void))])]
+
       [(maximum sub-expr1 sub-expr2)
        (define-values (successful1? hvx-sub-expr1)
          (synthesize-hvx-expr halide-expr halide-expr-axioms sub-expr1 ir-expr-sol ir-annotations lowering-algo swizzling-algo #f))
@@ -250,7 +264,7 @@
        (cond
          [(eq? tile-width hvx-vec-len) (values #t (vsplat val))]
          [(eq? tile-width (* 2 hvx-vec-len)) (values #t (vcombine (vsplat val) (vsplat val)))]
-         [else (error "NYI: broadcasting for tiles greater than 2048bits")])]
+         [else (error "NYI: broadcasting for tiles greater than 2048 bits")])]
       
       [(load-data opts)
        (cond
@@ -263,7 +277,7 @@
          [else
           (values #t (gather* opts))])]
 
-      [_ (error "NYI" ir-expr)]
+      [_ (error "NYI: Handler inside ir-expr-synthesizer for" ir-expr)]
       ))
   
   (values successful? hvx-expr))

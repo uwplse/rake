@@ -268,18 +268,18 @@
                        (instr-sig 'i16x64 (list 'i16x64 'i16x64 'bool))
                        (instr-sig 'i32x32 (list 'i32x32 'i32x32 'bool))
 
-                       (instr-sig 'u8x128 (list 'u8x128 'i8x128 #t))
-                       (instr-sig 'u8x128 (list 'u8x128 'u8x128 #t))
-                       (instr-sig 'u16x64 (list 'u16x64 'u16x64 #t))
-                       (instr-sig 'u32x32 (list 'u32x32 'u32x32 #t))
+                       (instr-sig 'u8x128 (list 'u8x128 'i8x128 'bool))
+                       (instr-sig 'u8x128 (list 'u8x128 'u8x128 'bool))
+                       (instr-sig 'u16x64 (list 'u16x64 'u16x64 'bool))
+                       (instr-sig 'u32x32 (list 'u32x32 'u32x32 'bool))
 
                        (instr-sig 'i8x128x2 (list 'i8x128x2 'i8x128x2 'bool))
                        (instr-sig 'i16x64x2 (list 'i16x64x2 'i16x64x2 'bool))
                        (instr-sig 'i32x32x2 (list 'i32x32x2 'i32x32x2 'bool))
 
-                       (instr-sig 'u8x128x2 (list 'u8x128x2 'u8x128x2 #t))
-                       (instr-sig 'u16x64x2 (list 'u16x64x2 'u16x64x2 #t))
-                       (instr-sig 'u32x32x2 (list 'u32x32x2 'u32x32x2 #t)))]
+                       (instr-sig 'u8x128x2 (list 'u8x128x2 'u8x128x2 'bool))
+                       (instr-sig 'u16x64x2 (list 'u16x64x2 'u16x64x2 'bool))
+                       (instr-sig 'u32x32x2 (list 'u32x32x2 'u32x32x2 'bool)))]
     
     [(eq? vadd-w instr) (list
                          (instr-sig 'i16x64x2 (list 'u8x128 'u8x128))
