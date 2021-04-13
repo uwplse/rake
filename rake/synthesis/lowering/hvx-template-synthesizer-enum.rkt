@@ -159,6 +159,19 @@
 
           [(cast sub-expr type)
            (begin
+             (println 1)
+             (define hvx-sub-spec (hvx-expr-spec sub-expr ir-expr-sol ir-expr-annotations ir-expr-ctx ir-expr-axioms ir-expr-invalid-sketches))
+             (define hvx-sub-expr (synthesize-hvx-template hvx-sub-spec ir-to-hvx offset))
+         
+             (display "Lifting IR to HVX...\n")
+             (display "====================\n\n")
+             (display (format "IR Operation: \n\n~a\n\n" (pretty-format ir-expr)))
+         
+             (reset-hvx-instr-bnd)
+             (synthesize-equiv-hvx spec sub-expr hvx-sub-expr discarded-sols))]
+
+          [(const-divide sub-expr const-divisor)
+           (begin
              (define hvx-sub-spec (hvx-expr-spec sub-expr ir-expr-sol ir-expr-annotations ir-expr-ctx ir-expr-axioms ir-expr-invalid-sketches))
              (define hvx-sub-expr (synthesize-hvx-template hvx-sub-spec ir-to-hvx offset))
          
@@ -299,7 +312,7 @@
              (debug (format "Synthesis time: 0 seconds\n"))
              hvx-expr)]
 
-          [_ (error "NYI:" ir-expr)]))
+          [_ (error "NYI: Handler inside hvx-template-synthesizer-enum for" ir-expr)]))
 
       (hash-set! ir-to-hvx ir-expr hvx-expr)
       hvx-expr]))
@@ -548,7 +561,7 @@
         (display "Generating HVX Grammar...\n")
         (debug (format "Number of instructions: ~a" (hvx-instr-bnd)))
         (debug (format "Set of instructions: Specialized\n"))
-        
+
         (define ??hvx-expr-grm (generate-hvx-grammar (hvx-expr-spec-expr spec) sub-expr hvx-sub-expr))
         (define res (synthesize-optimal spec ??hvx-expr-grm basic-expr-cost hvx-sub-expr discarded-sols))
         
@@ -574,10 +587,10 @@
 
   ;(pretty-print hvx-sub-expr)
 
-  (set-curr-cn-hvx 0)
-  (println "--------")
-  ;(println (??hvx-expr-grm))
-  (println ((interpret-halide original-expr) 0))
+  ;(set-curr-cn-hvx 0)
+  ;(println "--------")
+  ;(println synthesized-hvx-expr)
+  ;(println ((interpret-halide original-expr) 0))
   ;(println ((interpret-halide original-expr) 32))
   ;(println ((interpret-halide original-expr) 64))
   ;(println ((interpret-halide original-expr) 96))
@@ -623,7 +636,7 @@
                                        (for ([discarded-sol discarded-sols])
                                          (assert (not (equal-expr-hvx? discarded-sol synthesized-hvx-expr)))))))
   (define runtime (- (current-seconds) st))
-
+  
   (cond
     [(or (unsat? sol) (unknown? sol))
      (cond

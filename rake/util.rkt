@@ -91,13 +91,19 @@
 
   vecs)
 
-(define (merge-sols sol1 sol2)
-  (define merged-sol (make-hash))
-  (for ([k (in-dict-keys (model sol2))])
-    (hash-set! merged-sol k (hash-ref (model sol2) k)))
-  (for ([k (in-dict-keys (model sol1))])
-    (hash-set! merged-sol k (hash-ref (model sol1) k)))
-  (sat (make-immutable-hash (hash->list merged-sol))))
+;(define (merge-sols sol1 sol2)
+  ;(define merged-sol (make-hash))
+  ;(for ([k (in-dict-keys (model sol2))])
+    ;(hash-set! merged-sol k (hash-ref (model sol2) k)))
+  ;(for ([k (in-dict-keys (model sol1))])
+    ;(hash-set! merged-sol k (hash-ref (model sol1) k)))
+  ;(sat (make-immutable-hash (hash->list merged-sol))))
+
+(define (append-sol sol-list new-sol)
+  (flatten (append (list sol-list) (list new-sol))))
+
+(define (evaluate-sols expr sol-list)
+  (for/fold ([eval-expr expr]) ([sol sol-list]) (evaluate expr sol)))
 
 ;; Utility functions
 (define (nop v) v)
