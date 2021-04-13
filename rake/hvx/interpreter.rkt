@@ -38,7 +38,14 @@
     [(vread buf loc align) ((get-vec-type buf) (lambda (i) (get buf (+ loc i))))]
     [(vreadp buf loc align) ((get-vecp-type buf) (lambda (i) (get buf (+ loc i))) (lambda (i) (get buf (+ loc i (get-offset buf)))))]
 
-    [(vsplat Rt) (i8x128 (lambda (i) Rt))]
+    [(vsplat Rt)
+     (cond
+       [(int8_t? Rt)   (i8x128 (lambda (i) Rt))]
+       [(int16_t? Rt)  (i16x64 (lambda (i) Rt))]
+       [(int32_t? Rt)  (i32x32 (lambda (i) Rt))]
+       [(uint8_t? Rt)  (i8x128 (lambda (i) Rt))]
+       [(uint16_t? Rt) (i16x64 (lambda (i) Rt))]
+       [(uint32_t? Rt) (i32x32 (lambda (i) Rt))])]
 
     ;;;;;;;;;;;;;;;; Instructions for data movement ;;;;;;;;;;;;;;;;
     
@@ -324,7 +331,20 @@
 
     ;; Subtraction (non-widening) -- carry variants currently not supported
     [(vsub Vu Vv sat?)
-     (match (list (interpret Vu) (interpret Vv))
+     (define iVu (interpret Vu))
+     (define iVv (interpret Vv))
+     
+     (cond
+       [(and (i16x64x2? iVu) (i16x64x2? iVv))
+        (define lhs-v0 (i16x64x2-Vu iVu))
+        (define lhs-v1 (i16x64x2-Vv iVu))
+        (define rhs-v0 (i16x64x2-Vu iVv))
+        (define rhs-v1 (i16x64x2-Vv iVv))
+        (i16x64x2
+         (lambda (i) (if sat? (sub-sat (lhs-v0 i) (rhs-v0 i) 'int16) (sub (lhs-v0 i) (rhs-v0 i) 'int16)))
+         (lambda (i) (if sat? (sub-sat (lhs-v1 i) (rhs-v1 i) 'int16) (sub (lhs-v1 i) (rhs-v1 i) 'int16))))]
+       [else
+     (match (list iVu iVv)
        ;; Saturating for signed types is optional
        [(list (i8x128 lhs) (i8x128 rhs)) (i8x128 (lambda (i) (if sat? (sub-sat (lhs i) (rhs i) 'int8) (sub (lhs i) (rhs i) 'int8))))]
        [(list (i16x64 lhs) (i16x64 rhs)) (i16x64 (lambda (i) (if sat? (sub-sat (lhs i) (rhs i) 'int16) (sub (lhs i) (rhs i) 'int16))))]
@@ -362,7 +382,7 @@
        [(list (u32x32x2 lhs-v0 lhs-v1) (u32x32x2 rhs-v0 rhs-v1))
         (u32x32x2
          (lambda (i) (sub-sat (lhs-v0 i) (rhs-v0 i) 'uint32))
-         (lambda (i) (sub-sat (lhs-v1 i) (rhs-v1 i) 'uint32)))])]
+         (lambda (i) (sub-sat (lhs-v1 i) (rhs-v1 i) 'uint32)))])])]
 
     ;; Subtraction (widening)
     [(vsub-w Vu Vv)

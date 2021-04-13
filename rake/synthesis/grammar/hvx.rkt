@@ -805,4 +805,43 @@
      ))
   ??hvx-hi-instr)
 
+(define (get-hvx-div-isa den)
+  (define (??hvx-div-instr registers)
+    (define t0 (apply choose* registers))
+    (define shift (int8_t (zero-extend (?? (bitvector 4)) (bitvector 8))))
+    (define-symbolic bvc8 (bitvector 8))
+    (define-symbolic bvc16 (bitvector 16))
+    (define multiplier (choose (int8_t bvc8) (int16_t bvc16) (uint8_t bvc8) (uint16_t bvc16)))
+    (choose*
+     (vmpy t0 multiplier)
+     (vasr t0 shift)
+     (vlsr t0 shift)
+     (let-expr 'x0 t0 (vshuffo-n (hi 'x0) (lo 'x0) (bool-const)))
+     (let-expr 'x0 t0 (vasr-n (hi 'x0) (lo 'x0) shift (bool-const) (bool-const) (bool-const)))
+     ))
+  ??hvx-div-instr)
+
+(define-grammar (sub-isa-grm y)
+  [expr                            ; <expr> :=
+   (choose y (?? (bitvector 8))    ;  y | <8-bit constant> |
+           ((bop) (expr) (expr)))] ;  ((bop) <expr> <expr>)
+  [bop                             ; <bop>  :=
+   (choose bvshl bvashr bvlshr     ;  bvshl | bvashr | bvlshr |
+           bvand bvor bvxor        ;  bvand | bvor | bvxor | 
+           bvadd bvsub)])
+
+(define (get-hvx-sub-isa sat? outT)
+  (define (??hvx-hi-instr registers)
+    (define t0 (apply choose* registers))
+    (define t1 (apply choose* registers))
+    (choose*
+     ;(vsxt t0 (choose* #t #f))
+     (vzxt t0 #t)
+     (vsub t0 t1 (bool-const))
+     ;(let-expr 'v0 t0
+      ;(let-expr 'v1 t1
+       ;(vcombine (vsub (lo 'v0) (lo 'v0) (choose* #t #f)) (vsub (hi 'v1) (hi 'v1) (choose* #t #f)))))
+     ))
+  ??hvx-hi-instr)
+
 (provide hvx-instr-limit-exceeded? hvx-instr-bnd generate-hvx-grammar increment-hvx-instr-bnd reset-hvx-instr-bnd enumerate-hvx-exprs)

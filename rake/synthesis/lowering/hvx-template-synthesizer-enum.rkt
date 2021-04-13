@@ -581,7 +581,7 @@
   ;(println ((interpret-halide original-expr) 32))
   ;(println ((interpret-halide original-expr) 64))
   ;(println ((interpret-halide original-expr) 96))
-  (println (elem-hvx (interpret-hvx synthesized-hvx-expr) 0))
+  ;(println (v0-elem-hvx (interpret-hvx synthesized-hvx-expr) 0))
   ;(println (symbolics (elem-hvx (interpret-hvx synthesized-hvx-expr) 0)))
   ;(println (elem-hvx (interpret-hvx synthesized-hvx-expr) 32))
   ;(println (elem-hvx (interpret-hvx synthesized-hvx-expr) 64))

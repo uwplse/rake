@@ -12,6 +12,7 @@
 
 (define (visit p transform [arg-pos -1])
   (push-trace p)
+  ;(println p)
   (define outp
     (match p
       ;; Let Exprs
@@ -20,7 +21,7 @@
       ;; HVX instructions for vector creation
       [(vread buf loc align) (transform (vread buf loc align))]
       [(vreadp buf loc align) (transform (vreadp buf loc align))]
-      [(vsplat Rt) (transform (vsplat (visit Rt)))]
+      [(vsplat Rt) (transform (vsplat (visit Rt transform)))]
 
       ;; HVX instructions for data swizzling
       [(lo Vuu) (transform (lo (visit Vuu transform)))]
