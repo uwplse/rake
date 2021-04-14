@@ -836,6 +836,8 @@
     [(sat? sol)
      (define res-sol (append-sol sub-sols sol))
 
+     (println res-sol)
+     
      ;; For debugging
      ;(evaluate (elem-ir (interpret-ir synthesized-expr) 0) res-sol)
      ;(println "-------------------------------")
@@ -847,6 +849,7 @@
      ;(set-curr-cn-ir 0)
      ;(println ((interpret-halide original-expr) 0))
      ;(println (evaluate-sols (elem-ir (interpret-ir synthesized-expr) 0) sub-sols))
+     ;(println sol)
      ;(println (evaluate (evaluate-sols (elem-ir (interpret-ir synthesized-expr) 0) sub-sols) sol))
      ;(println (evaluate-sols (elem-ir (interpret-ir synthesized-expr) 0) res-sol))
      ;(when (convolve-acc? synthesized-expr)
