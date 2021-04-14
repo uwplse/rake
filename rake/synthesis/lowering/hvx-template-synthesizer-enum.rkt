@@ -159,7 +159,6 @@
 
           [(cast sub-expr type)
            (begin
-             (println 1)
              (define hvx-sub-spec (hvx-expr-spec sub-expr ir-expr-sol ir-expr-annotations ir-expr-ctx ir-expr-axioms ir-expr-invalid-sketches))
              (define hvx-sub-expr (synthesize-hvx-template hvx-sub-spec ir-to-hvx offset))
          
@@ -240,17 +239,81 @@
              (define abstract-sub-expr1
                (cond
                  [(load-data? sub-expr1) hvx-sub-expr1]
+                 [(broadcast? sub-expr1) hvx-sub-expr1]
                  [else
-                  (define ret (eval-hvx-expr hvx-sub-expr1 (hash-ref ir-expr-annotations (ir-node-id sub-expr1))))
-                  (hash-set! abstract-expr-mapping (abstr-sub-expr-id ret) hvx-sub-expr1)
-                  ret]))
+                  (cond
+                    [(cons? hvx-sub-expr1)
+                     (define ret1 (eval-hvx-expr (car hvx-sub-expr1) (hash-ref ir-expr-annotations (ir-node-id sub-expr1))))
+                     (define ret2 (eval-hvx-expr (cdr hvx-sub-expr1) (hash-ref ir-expr-annotations (ir-node-id sub-expr1))))
+                     (hash-set! abstract-expr-mapping (abstr-sub-expr-id ret1) (car hvx-sub-expr1))
+                     (hash-set! abstract-expr-mapping (abstr-sub-expr-id ret2) (cdr hvx-sub-expr1))
+                     (cons ret1 ret2)]
+                    [else
+                     (define ret (eval-hvx-expr hvx-sub-expr1 (hash-ref ir-expr-annotations (ir-node-id sub-expr1))))
+                     (hash-set! abstract-expr-mapping (abstr-sub-expr-id ret) hvx-sub-expr1)
+                     ret])]))
+             (define abstract-sub-expr2
+               (cond
+                 [(load-data? sub-expr2) hvx-sub-expr2]
+                 [(broadcast? sub-expr2) hvx-sub-expr2]
+                 [else
+                  (cond
+                    [(cons? hvx-sub-expr2)
+                     (define ret1 (eval-hvx-expr (car hvx-sub-expr2) (hash-ref ir-expr-annotations (ir-node-id sub-expr1))))
+                     (define ret2 (eval-hvx-expr (cdr hvx-sub-expr2) (hash-ref ir-expr-annotations (ir-node-id sub-expr1))))
+                     (hash-set! abstract-expr-mapping (abstr-sub-expr-id ret1) (car hvx-sub-expr2))
+                     (hash-set! abstract-expr-mapping (abstr-sub-expr-id ret2) (cdr hvx-sub-expr2))
+                     (cons ret1 ret2)]
+                    [else
+                     (define ret (eval-hvx-expr hvx-sub-expr2 (hash-ref ir-expr-annotations (ir-node-id sub-expr2))))
+                     (hash-set! abstract-expr-mapping (abstr-sub-expr-id ret) hvx-sub-expr2)
+                     ret])]))
+
+             (display "Lifting IR to HVX...\n")
+             (display "====================\n\n")
+             (display (format "IR Operation: \n\n~a\n\n" (pretty-format ir-expr)))
+         
+             (reset-hvx-instr-bnd)
+             (synthesize-equiv-hvx spec (cons sub-expr1 sub-expr2) (cons abstract-sub-expr1 abstract-sub-expr2) discarded-sols))]
+
+          [(minimum sub-expr1 sub-expr2)
+           (begin
+             (define hvx-sub-spec1 (hvx-expr-spec sub-expr1 ir-expr-sol ir-expr-annotations ir-expr-ctx ir-expr-axioms ir-expr-invalid-sketches))
+             (define hvx-sub-expr1 (synthesize-hvx-template hvx-sub-spec1 ir-to-hvx offset))
+         
+             (define hvx-sub-spec2 (hvx-expr-spec sub-expr2 ir-expr-sol ir-expr-annotations ir-expr-ctx ir-expr-axioms ir-expr-invalid-sketches))
+             (define hvx-sub-expr2 (synthesize-hvx-template hvx-sub-spec2 ir-to-hvx offset))
+
+             (define abstract-sub-expr1
+               (cond
+                 [(load-data? sub-expr1) hvx-sub-expr1]
+                 [else
+                  (cond
+                    [(cons? hvx-sub-expr1)
+                     (define ret1 (eval-hvx-expr (car hvx-sub-expr1) (hash-ref ir-expr-annotations (ir-node-id sub-expr1))))
+                     (define ret2 (eval-hvx-expr (cdr hvx-sub-expr1) (hash-ref ir-expr-annotations (ir-node-id sub-expr1))))
+                     (hash-set! abstract-expr-mapping (abstr-sub-expr-id ret1) (car hvx-sub-expr1))
+                     (hash-set! abstract-expr-mapping (abstr-sub-expr-id ret2) (cdr hvx-sub-expr1))
+                     (cons ret1 ret2)]
+                    [else
+                     (define ret (eval-hvx-expr hvx-sub-expr1 (hash-ref ir-expr-annotations (ir-node-id sub-expr1))))
+                     (hash-set! abstract-expr-mapping (abstr-sub-expr-id ret) hvx-sub-expr1)
+                     ret])]))
              (define abstract-sub-expr2
                (cond
                  [(load-data? sub-expr2) hvx-sub-expr2]
                  [else
-                  (define ret (eval-hvx-expr hvx-sub-expr2 (hash-ref ir-expr-annotations (ir-node-id sub-expr2))))
-                  (hash-set! abstract-expr-mapping (abstr-sub-expr-id ret) hvx-sub-expr2)
-                  ret]))
+                  (cond
+                    [(cons? hvx-sub-expr2)
+                     (define ret1 (eval-hvx-expr (car hvx-sub-expr2) (hash-ref ir-expr-annotations (ir-node-id sub-expr1))))
+                     (define ret2 (eval-hvx-expr (cdr hvx-sub-expr2) (hash-ref ir-expr-annotations (ir-node-id sub-expr1))))
+                     (hash-set! abstract-expr-mapping (abstr-sub-expr-id ret1) (car hvx-sub-expr2))
+                     (hash-set! abstract-expr-mapping (abstr-sub-expr-id ret2) (cdr hvx-sub-expr2))
+                     (cons ret1 ret2)]
+                    [else
+                     (define ret (eval-hvx-expr hvx-sub-expr2 (hash-ref ir-expr-annotations (ir-node-id sub-expr2))))
+                     (hash-set! abstract-expr-mapping (abstr-sub-expr-id ret) hvx-sub-expr2)
+                     ret])]))
 
              (display "Lifting IR to HVX...\n")
              (display "====================\n\n")

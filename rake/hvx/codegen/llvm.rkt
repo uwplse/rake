@@ -114,6 +114,7 @@
 
 (define (double-len t)
   (match t
+    ['int16x64 'int16x128]
     ['int32x64 'int32x128]))
 
 (define (codegen-idx idx)

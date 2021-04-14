@@ -78,16 +78,20 @@
 
 (define (unpack-if-needed hvx-expr halide-expr)
   (define bw-o-type (bw (type ((interpret-halide halide-expr) 0))))
-  (define bw-s-type (bw (elem-type (hvx-type (interpret-hvx hvx-expr)))))
-  (cond
-    [(eq? bw-o-type bw-s-type) hvx-expr]
-    [(eq? bw-o-type (* 2 bw-s-type))
-     (define unpacked-hvx-expr
-       (cond
-         [(hvx-pair? (interpret-hvx hvx-expr)) (let-expr 'v0 hvx-expr (list (vunpack (lo 'v0)) (vunpack (hi 'v0))))]
-         [else (vunpack 'v0)]))
-     unpacked-hvx-expr]
-    [else
-     (error "NYI: Expression unpacking when the required type is more than twice as wide.")]))
+  (define unpacked-exprs
+    (for/list ([e (flatten hvx-expr)])
+      (define bw-s-type (bw (elem-type (hvx-type (interpret-hvx e)))))
+      (cond
+        [(eq? bw-o-type bw-s-type) e]
+        [(eq? bw-o-type (* 2 bw-s-type))
+         (define unpacked-hvx-expr
+           (cond
+             [(hvx-pair? (interpret-hvx e)) (let-expr 'v0 e (list (vunpack (lo 'v0)) (vunpack (hi 'v0))))]
+             [else (vunpack 'v0)]))
+         unpacked-hvx-expr]
+        [else
+         (error "NYI: Expression unpacking when the required type is more than twice as wide.")])))
+
+  (if (eq? 1 (length unpacked-exprs)) (first unpacked-exprs) unpacked-exprs))
 
 (provide synthesize-hvx synthesize-arm)

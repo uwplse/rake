@@ -84,15 +84,23 @@
 
     ;; Extract n/2 bits
     [(vshuffo-n Vd Vu signed?)
-     (match (list (interpret Vd) (interpret Vu) (interpret signed?))
-       [(list (i16x64 v0) (i16x64 v1) #t) (i8x128 (lambda (i) (if (even? i) (i8hi (v1 (quotient i 2))) (i8hi (v0 (quotient i 2))))))]
-       [(list (i16x64 v0) (i16x64 v1) #f) (u8x128 (lambda (i) (if (even? i) (u8hi (v1 (quotient i 2))) (u8hi (v0 (quotient i 2))))))]
-       [(list (u16x64 v0) (u16x64 v1) #t) (i8x128 (lambda (i) (if (even? i) (i8hi (v1 (quotient i 2))) (i8hi (v0 (quotient i 2))))))]
-       [(list (u16x64 v0) (u16x64 v1) #f) (u8x128 (lambda (i) (if (even? i) (u8hi (v1 (quotient i 2))) (u8hi (v0 (quotient i 2))))))]
-       [(list (i32x32 v0) (i32x32 v1) #t) (i16x64 (lambda (i) (if (even? i) (i16hi (v1 (quotient i 2))) (i16hi (v0 (quotient i 2))))))]
-       [(list (i32x32 v0) (i32x32 v1) #f) (u16x64 (lambda (i) (if (even? i) (u16hi (v1 (quotient i 2))) (u16hi (v0 (quotient i 2))))))]
-       [(list (u32x32 v0) (u32x32 v1) #t) (i16x64 (lambda (i) (if (even? i) (i16hi (v1 (quotient i 2))) (i16hi (v0 (quotient i 2))))))]
-       [(list (u32x32 v0) (u32x32 v1) #f) (u16x64 (lambda (i) (if (even? i) (u16hi (v1 (quotient i 2))) (u16hi (v0 (quotient i 2))))))])]
+     (match (list (interpret Vd) (interpret Vu))
+       [(list (i16x64 v0) (i16x64 v1))
+        (if signed?
+            (i8x128 (lambda (i) (if (even? i) (i8hi (v1 (quotient i 2))) (i8hi (v0 (quotient i 2))))))
+            (u8x128 (lambda (i) (if (even? i) (u8hi (v1 (quotient i 2))) (u8hi (v0 (quotient i 2)))))))]
+       [(list (u16x64 v0) (u16x64 v1))
+        (if signed?
+            (i8x128 (lambda (i) (if (even? i) (i8hi (v1 (quotient i 2))) (i8hi (v0 (quotient i 2))))))
+            (u8x128 (lambda (i) (if (even? i) (u8hi (v1 (quotient i 2))) (u8hi (v0 (quotient i 2)))))))]
+       [(list (i32x32 v0) (i32x32 v1))
+        (if signed?
+            (i16x64 (lambda (i) (if (even? i) (i16hi (v1 (quotient i 2))) (i16hi (v0 (quotient i 2))))))
+            (u16x64 (lambda (i) (if (even? i) (u16hi (v1 (quotient i 2))) (u16hi (v0 (quotient i 2)))))))]
+       [(list (u32x32 v0) (u32x32 v1))
+        (if signed?
+            (i16x64 (lambda (i) (if (even? i) (i16hi (v1 (quotient i 2))) (i16hi (v0 (quotient i 2))))))
+            (u16x64 (lambda (i) (if (even? i) (u16hi (v1 (quotient i 2))) (u16hi (v0 (quotient i 2)))))))])]
 
     [(vshuffoe Vu Vv)
      (match (list (interpret Vu) (interpret Vv))
@@ -258,16 +266,14 @@
     ;; Addition (non-widening) -- carry variants currently not supported
     [(vadd Vu Vv sat?)
      (match (list (interpret Vu) (interpret Vv))
-       ;; Saturating for signed types is optional
        [(list (i8x128 lhs) (i8x128 rhs)) (i8x128 (lambda (i) (if sat? (add-sat (lhs i) (rhs i) 'int8) (add (lhs i) (rhs i) 'int8))))]
        [(list (i16x64 lhs) (i16x64 rhs)) (i16x64 (lambda (i) (if sat? (add-sat (lhs i) (rhs i) 'int16) (add (lhs i) (rhs i) 'int16))))]
        [(list (i32x32 lhs) (i32x32 rhs)) (i32x32 (lambda (i) (if sat? (add-sat (lhs i) (rhs i) 'int32) (add (lhs i) (rhs i) 'int32))))]
 
-       ;; Always saturate for unsigned types
-       [(list (u8x128 lhs) (i8x128 rhs)) (u8x128 (lambda (i) (add-sat (lhs i) (rhs i) 'uint8)))]
-       [(list (u8x128 lhs) (u8x128 rhs)) (u8x128 (lambda (i) (add-sat (lhs i) (rhs i) 'uint8)))]
-       [(list (u16x64 lhs) (u16x64 rhs)) (u16x64 (lambda (i) (add-sat (lhs i) (rhs i) 'uint16)))]
-       [(list (u32x32 lhs) (u32x32 rhs)) (u32x32 (lambda (i) (add-sat (lhs i) (rhs i) 'uint32)))]
+       [(list (u8x128 lhs) (i8x128 rhs)) (u8x128 (lambda (i) (if sat? (add-sat (lhs i) (rhs i) 'uint8) (add (lhs i) (rhs i) 'uint8))))]
+       [(list (u8x128 lhs) (u8x128 rhs)) (u8x128 (lambda (i) (if sat? (add-sat (lhs i) (rhs i) 'uint8) (add (lhs i) (rhs i) 'uint8))))]
+       [(list (u16x64 lhs) (u16x64 rhs)) (u16x64 (lambda (i) (if sat? (add-sat (lhs i) (rhs i) 'uint16) (add (lhs i) (rhs i) 'uint16))))]
+       [(list (u32x32 lhs) (u32x32 rhs)) (u32x32 (lambda (i) (if sat? (add-sat (lhs i) (rhs i) 'uint32) (add (lhs i) (rhs i) 'uint32))))]
        
        ;; Saturating for signed types is optional
        [(list (i8x128x2 lhs-v0 lhs-v1) (i8x128x2 rhs-v0 rhs-v1))
@@ -803,6 +809,15 @@
          [(list (u16x64 v0) #f) (u32x32x2 (lambda (i) (uint32_t (zxt32 (v0 (* i 2))))) (lambda (i) (uint32_t (zxt32 (v0 (+ (* i 2) 1))))))]
          [(list (i16x64 v0) #f) (u32x32x2 (lambda (i) (uint32_t (zxt32 (v0 (* i 2))))) (lambda (i) (uint32_t (zxt32 (v0 (+ (* i 2) 1))))))]))]
 
+    [(reinterpret Vu)
+     (match (list (interpret Vu))
+       [(list (i8x128 v0)) (u8x128 (lambda (i) (uint8_t (eval (v0 i)))))]
+       [(list (i16x64 v0)) (u16x64 (lambda (i) (uint16_t (eval (v0 i)))))]
+       [(list (i32x32 v0)) (u32x32 (lambda (i) (uint32_t (eval (v0 i)))))]
+       [(list (u8x128 v0)) (i8x128 (lambda (i) (int8_t (eval (v0 i)))))]
+       [(list (u16x64 v0)) (i16x64 (lambda (i) (int16_t (eval (v0 i)))))]
+       [(list (u32x32 v0)) (i32x32 (lambda (i) (int32_t (eval (v0 i)))))])]
+
     [(vmax Vu Vv)
      (match (list (interpret Vu) (interpret Vv))
        [(list (i8x128 v0) (i8x128 v1)) (i8x128 (lambda (i) (int8_t (max8 (eval (v0 i)) (eval (v1 i))))))]
@@ -810,6 +825,21 @@
        [(list (i16x64 v0) (i16x64 v1)) (i16x64 (lambda (i) (int16_t (max16 (eval (v0 i)) (eval (v1 i))))))]
        [(list (u16x64 v0) (u16x64 v1)) (u16x64 (lambda (i) (uint16_t (maxu16 (eval (v0 i)) (eval (v1 i))))))]
        [(list (i32x32 v0) (i32x32 v1)) (i32x32 (lambda (i) (int32_t (max32 (eval (v0 i)) (eval (v1 i))))))])]
+
+    [(vmin Vu Vv)
+     (match (list (interpret Vu) (interpret Vv))
+       [(list (i8x128 v0) (i8x128 v1)) (i8x128 (lambda (i) (int8_t (min8 (eval (v0 i)) (eval (v1 i))))))]
+       [(list (u8x128 v0) (u8x128 v1)) (u8x128 (lambda (i) (uint8_t (minu8 (eval (v0 i)) (eval (v1 i))))))]
+       [(list (i16x64 v0) (i16x64 v1)) (i16x64 (lambda (i) (int16_t (min16 (eval (v0 i)) (eval (v1 i))))))]
+       [(list (u16x64 v0) (u16x64 v1)) (u16x64 (lambda (i) (uint16_t (minu16 (eval (v0 i)) (eval (v1 i))))))]
+       [(list (i32x32 v0) (i32x32 v1)) (i32x32 (lambda (i) (int32_t (min32 (eval (v0 i)) (eval (v1 i))))))])]
+
+    ;; Logical shift right
+    [(vlsr Vu Rt)
+     (match (list (interpret Vu) (interpret Rt))
+       [(list (u16x64 v0) (int8_t n)) (u16x64 (lambda (i) (uint16_t (bvlshr (eval (v0 i)) (eval (cpp-cast Rt 'uint16))))))]
+       ;; Todo rest
+       )]
     
     ;; ---- Everything below this line in the interpreter is tentative ----
     
@@ -836,26 +866,6 @@
          [(and (int8_t? lhs) (int8_t? rhs)) (naverage lhs rhs 'int8)]
          [(and (int16_t? lhs) (int16_t? rhs)) (naverage lhs rhs 'int16)]
          [(and (int32_t? lhs) (int32_t? rhs)) (naverage lhs rhs 'int32)]))]
-
-    ;; Logical shift right
-    [(vlsr Vu Rt)
-     (lambda (i)
-       (define val ((interpret Vu) i))
-       (define c (interpret Rt))
-       (cond
-         [(uint8_t? val) (uint8_t (bvlshr (eval val) (eval c)))]
-         [(uint16_t? val) (uint16_t (bvlshr (eval val) (eval c)))]
-         [(uint32_t? val) (uint32_t (bvlshr (eval val) (eval c)))]))]
-
-    ;; Logical shift right
-    [(vlsr Vu Rt)
-     (lambda (i)
-       (define val ((interpret Vu) i))
-       (define c (interpret Rt))
-       (cond
-         [(uint8_t? val) (uint8_t (bvlshr (eval val) (eval c)))]
-         [(uint16_t? val) (uint16_t (bvlshr (eval val) (eval c)))]
-         [(uint32_t? val) (uint32_t (bvlshr (eval val) (eval c)))]))]
 
     [(vabs Vu sat?)
      (match (interpret Vu)

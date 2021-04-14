@@ -55,6 +55,7 @@
       ;; HVX instructions for type-casting
       [(vzxt Vu signed?) (transform (vzxt (visit Vu transform) (visit signed? transform)))]
       [(vsxt Vu signed?) (transform (vsxt (visit Vu transform) (visit signed? transform)))]
+      [(reinterpret Vu) (transform (reinterpret (visit Vu transform)))]
 
       ;; HVX instructions for data processing
       [(vadd Vu Vv sat?) (transform (vadd (visit Vu transform) (visit Vv transform) (visit sat? transform)))]

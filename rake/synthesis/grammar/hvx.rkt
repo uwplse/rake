@@ -595,6 +595,7 @@
                              (get-hvx-conv-isa kernel)
                              (get-hvx-conv-w-isa kernel))]
                         [(arith-shift-right data n round? outputType) (get-hvx-asr-isa n round? outputType)]
+                        [(const-divide data den) (get-hvx-div-isa den)]
                         [(cast data outType)
                          ;; Todo specialize based on type
                          ;(println (bw (elem-ir (interpret-ir sub-expr) 0)))
@@ -609,10 +610,53 @@
                         [(packhi data signed?) (get-hvx-hi-isa signed?)]
                         [(abs-diff data1 data2) (get-hvx-absdiff-isa)]
                         [(maximum data1 data2) (get-hvx-max-isa)]
-                        [_ (begin (println "NYI") (exit))]))
+                        [(minimum data1 data2) (get-hvx-min-isa)]
+                        [(subtract data1 data2 sat? outT) (get-hvx-sub-isa sat? outT)]
+                        [_ (begin (error "NYI: HVX grammar not defined for" ir-expr))]))
 
+  (set! hvx-sub-expr (flatten (list hvx-sub-expr)))
+  
   (cond
-    [(list? hvx-sub-expr)
+    [(eq? (length hvx-sub-expr) 1)
+     (define (??ir-expr)
+       (define r0 (first hvx-sub-expr))
+       (define r1 (??hvx-instr (list r0)))
+       (define r2 (??hvx-instr (list r0 r1)))
+       (define r3 (??hvx-instr (list r0 r1 r2)))
+       (cond
+         [(eq? curr-instr-bnd 1) (??hvx-instr (list r0))]
+         [(eq? curr-instr-bnd 2) r2]
+         [(eq? curr-instr-bnd 3) r3]
+         [else r3]))
+     ??ir-expr]
+    [(eq? (length hvx-sub-expr) 2)
+     (define (??ir-expr)
+       (define r0 (first hvx-sub-expr))
+       (define r1 (second hvx-sub-expr))
+       (define r2 (??hvx-instr (list r0 r1)))
+       (define r3 (??hvx-instr (list r0 r1 r2)))
+       (define r4 (??hvx-instr (list r0 r1 r2 r3)))
+       (cond
+         [(eq? curr-instr-bnd 1) (??hvx-instr (list r0 r1))]
+         [(eq? curr-instr-bnd 2) r3]
+         [(eq? curr-instr-bnd 3) r4]
+         [else r4]))
+     ??ir-expr]
+    [(eq? (length hvx-sub-expr) 3)
+     (define (??ir-expr)
+       (define r0 (first hvx-sub-expr))
+       (define r1 (second hvx-sub-expr))
+       (define r2 (third hvx-sub-expr))
+       (define r3 (??hvx-instr (list r0 r1 r2)))
+       (define r4 (??hvx-instr (list r0 r1 r2 r3)))
+       (define r5 (??hvx-instr (list r0 r1 r2 r3 r4)))
+       (cond
+         [(eq? curr-instr-bnd 1) (??hvx-instr (list r0 r1 r2))]
+         [(eq? curr-instr-bnd 2) r4]
+         [(eq? curr-instr-bnd 3) r5]
+         [else r5]))
+     ??ir-expr]
+    [(eq? (length hvx-sub-expr) 4)
      (define (??ir-expr)
        (define r0 (first hvx-sub-expr))
        (define r1 (second hvx-sub-expr))
@@ -627,31 +671,8 @@
          [(eq? curr-instr-bnd 3) r6]
          [else r6]))
      ??ir-expr]
-    [(pair? hvx-sub-expr)
-     (define (??ir-expr)
-       (define r0 (car hvx-sub-expr))
-       (define r1 (cdr hvx-sub-expr))
-       (define r2 (??hvx-instr (list r0 r1)))
-       (define r3 (??hvx-instr (list r0 r1 r2)))
-       (define r4 (??hvx-instr (list r0 r1 r2 r3)))
-       (cond
-         [(eq? curr-instr-bnd 1) (??hvx-instr (list r0 r1))]
-         [(eq? curr-instr-bnd 2) r3]
-         [(eq? curr-instr-bnd 3) r4]
-         [else r4]))
-     ??ir-expr]
     [else
-     (define (??ir-expr)
-       (define r0 hvx-sub-expr)
-       (define r1 (??hvx-instr (list r0)))
-       (define r2 (??hvx-instr (list r0 r1)))
-       (define r3 (??hvx-instr (list r0 r1 r2)))
-       (cond
-         [(eq? curr-instr-bnd 1) (??hvx-instr (list r0))]
-         [(eq? curr-instr-bnd 2) r2]
-         [(eq? curr-instr-bnd 3) r3]
-         [else r3]))
-     ??ir-expr]))
+     (error "NYI: Generating grammar for more than 4 sub-expressions. See synthesis/grammar/hvx.rkt")]))
 
 ;; HVX instructions for synthesizing convolutions
 (define (get-hvx-conv-isa weights)
@@ -740,6 +761,7 @@
   (define (??hvx-hi-instr registers)
     (define t0 (apply choose* registers))
     (choose*
+     (reinterpret t0)
      (vsxt t0 #t)
      (vzxt t0 #t)))
   ??hvx-hi-instr)
@@ -796,13 +818,15 @@
     (define t0 (apply choose* registers))
     (define t1 (apply choose* registers))
     (choose*
-     (vmax t0 t1)
-     ;(let-expr 't0 t0
-       ;(let-expr 't1 t1
-         ;(vcombine
-          ;(vmax (lo 't0) (lo 't1))
-          ;(vmax (hi 't0) (hi 't1)))))
-     ))
+     (vmax t0 t1)))
+  ??hvx-hi-instr)
+
+(define (get-hvx-min-isa)
+  (define (??hvx-hi-instr registers)
+    (define t0 (apply choose* registers))
+    (define t1 (apply choose* registers))
+    (choose*
+     (vmin t0 t1)))
   ??hvx-hi-instr)
 
 (define (get-hvx-div-isa den)

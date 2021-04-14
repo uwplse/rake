@@ -56,6 +56,7 @@
     ;; HVX instructions for type-casting
     [(vzxt Vu signed?) 1]
     [(vsxt Vu signed?) 1]
+    [(reinterpret Vu) 0]
 
     ;; HVX instructions for data processing
     [(vadd Vu Vv sat?) 1]
