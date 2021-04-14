@@ -44,7 +44,13 @@
 
 (define idx-tables (make-hash))
 (for ([i 100])
-  (define-symbolic* get-idx (~> integer? integer?))
+  ;(define-symbolic* get-idx (~> integer? integer?))
+  (define idx-tbl (make-hash))
+  (define (get-idx i)
+    (when (not (hash-has-key? idx-tbl i))
+      (define-symbolic* idx integer?)
+      (hash-set! idx-tbl i idx))
+    (hash-ref idx-tbl i))
   (hash-set! idx-tables i get-idx))
  
 ;; Model IR Instructions

@@ -847,6 +847,7 @@
      ;(set-curr-cn-ir 0)
      ;(println ((interpret-halide original-expr) 0))
      ;(println (evaluate-sols (elem-ir (interpret-ir synthesized-expr) 0) sub-sols))
+     ;(println (evaluate (evaluate-sols (elem-ir (interpret-ir synthesized-expr) 0) sub-sols) sol))
      ;(println (evaluate-sols (elem-ir (interpret-ir synthesized-expr) 0) res-sol))
      ;(when (convolve-acc? synthesized-expr)
      ;(assume (list-ref learned-axioms 1))
