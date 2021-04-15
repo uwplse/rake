@@ -74,6 +74,9 @@
     [(vec-div v1 v2) (lambda (i) (do-div ((interpret v1) i) ((interpret v2) i)))]
     [(vec-min v1 v2) (lambda (i) (do-min ((interpret v1) i) ((interpret v2) i)))]
     [(vec-max v1 v2) (lambda (i) (do-max ((interpret v1) i) ((interpret v2) i)))]
+    [(vec-if v1 v2 v3) (lambda (i) (do-if ((interpret v1) i) ((interpret v2) i) ((interpret v3) i)))]
+    [(vec-lt v1 v2) (lambda (i) (do-lt ((interpret v1) i) ((interpret v2) i)))]
+    [(vec-le v1 v2) (lambda (i) (do-le ((interpret v1) i) ((interpret v2) i)))]        
 
     [(shift_left v1 v2) (lambda (i) (do-shl ((interpret v1) i) ((interpret v2) i)))]
     [(shift_right v1 v2) (lambda (i) (do-shr ((interpret v1) i) ((interpret v2) i)))]
@@ -179,6 +182,27 @@
 (define (do-shl lhs rhs)
   (define outT (infer-out-type lhs rhs))
   (mk-typed-expr (bvshl (eval lhs) (eval rhs)) outT))
+
+(define (do-if cond lhs rhs)
+  (if (and (and (integer? lhs) (integer? rhs) (boolean? cond)))
+      (if cond lhs rhs)
+      (begin
+        (define outT (infer-out-type lhs rhs))
+        (mk-typed-expr (if (eval cond) (eval lhs) (eval rhs)) outT))))
+
+(define (do-lt lhs rhs)
+  (if (and (integer? lhs) (integer? rhs))
+      (< lhs rhs)
+      (if (signed? lhs)
+          (mk-typed-expr (bvslt (eval lhs) (eval rhs)) 'uint1)
+          (mk-typed-expr (bvult (eval lhs) (eval rhs)) 'uint1))))
+
+(define (do-le lhs rhs)
+  (if (and (integer? lhs) (integer? rhs))
+      (<= lhs rhs)
+      (if (signed? lhs)
+          (mk-typed-expr (bvsle (eval lhs) (eval rhs)) 'uint1)
+          (mk-typed-expr (bvule (eval lhs) (eval rhs)) 'uint1))))
 
 (define (do-absd lhs rhs)
   (define outT (infer-out-type lhs rhs))

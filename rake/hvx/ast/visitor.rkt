@@ -12,6 +12,7 @@
 
 (define (visit p transform [arg-pos -1])
   (push-trace p)
+  ;(println p)
   (define outp
     (match p
       ;; Let Exprs
@@ -20,7 +21,7 @@
       ;; HVX instructions for vector creation
       [(vread buf loc align) (transform (vread buf loc align))]
       [(vreadp buf loc align) (transform (vreadp buf loc align))]
-      [(vsplat Rt) (transform (vsplat (visit Rt)))]
+      [(vsplat Rt) (transform (vsplat (visit Rt transform)))]
 
       ;; HVX instructions for data swizzling
       [(lo Vuu) (transform (lo (visit Vuu transform)))]
@@ -43,8 +44,9 @@
       [(vtranspose Vu Vv Rt) (transform (vtranspose (visit Vu transform) (visit Vv transform) (visit Rt transform)))]
       [(vinterleave Vuu) (transform (vinterleave (visit Vuu transform)))]
       [(vpack Vu Vv signed?) (transform (vpack (visit Vu transform) (visit Vv transform) (visit signed? transform)))]
-      [(vpacke Vu Vv signed?) (transform (vpacke (visit Vu transform) (visit Vv transform) (visit signed? transform)))]
-      [(vpacko Vu Vv signed?) (transform (vpacko (visit Vu transform) (visit Vv transform) (visit signed? transform)))]
+      [(vpacke Vu Vv) (transform (vpacke (visit Vu transform) (visit Vv transform)))]
+      [(vpacko Vu Vv) (transform (vpacko (visit Vu transform) (visit Vv transform)))]
+      [(vpacke-n Vu Vv signed?) (transform (vpacke-n (visit Vu transform) (visit Vv transform) (visit signed? transform)))]
       [(vpacko-n Vu Vv signed?) (transform (vpacko-n (visit Vu transform) (visit Vv transform) (visit signed? transform)))]
       [(vunpack Vu) (transform (vunpack (visit Vu transform)))]
       ;[(vunpacko Vu)
@@ -54,6 +56,7 @@
       ;; HVX instructions for type-casting
       [(vzxt Vu signed?) (transform (vzxt (visit Vu transform) (visit signed? transform)))]
       [(vsxt Vu signed?) (transform (vsxt (visit Vu transform) (visit signed? transform)))]
+      [(reinterpret Vu) (transform (reinterpret (visit Vu transform)))]
 
       ;; HVX instructions for data processing
       [(vadd Vu Vv sat?) (transform (vadd (visit Vu transform) (visit Vv transform) (visit sat? transform)))]

@@ -41,6 +41,9 @@
 (struct div-op (v1 v2) #:transparent)
 (struct min-op (v1 v2) #:transparent)
 (struct max-op (v1 v2) #:transparent)
+(struct if-op (v1 v2) #:transparent)
+(struct lt-op (v1 v2) #:transparent)
+(struct le-op (v1 v2) #:transparent)
 
 (struct ??swizzle-gen-vecpair ())
 (struct ??swizzle-gen-vec ())
@@ -90,7 +93,10 @@
     [(vec-div v1 v2) (lambda (i) (div-op ((encode v1) i) ((encode v2) i)))]
     [(vec-min v1 v2) (lambda (i) (min-op ((encode v1) i) ((encode v2) i)))]
     [(vec-max v1 v2) (lambda (i) (max-op ((encode v1) i) ((encode v2) i)))]
-    
+    [(vec-if v1 v2 v3) (lambda (i) (if-op ((encode v1) i) ((encode v2) i) ((encode v3) i)))]
+    [(vec-lt v1 v2) (lambda (i) (lt-op ((encode v1) i) ((encode v2) i)))]
+    [(vec-le v1 v2) (lambda (i) (le-op ((encode v1) i) ((encode v2) i)))]    
+
     ;; Base case
     [_ p]))
     

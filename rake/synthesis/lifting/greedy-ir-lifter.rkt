@@ -314,7 +314,7 @@
          (define conv-op (convolve (get-node-id) sub-expr kernel nop output-type))
          
          ;; Merge sols
-         (define merged-sol (merge-sols (cdr res-v1) (cdr res-v2)))
+         (define merged-sol (append-sol (cdr res-v1) (cdr res-v2)))
          (set! ir-expr (run-synthesizer halide-expr conv-op axioms merged-sol)))
        (set! sub-expr (zip-data (get-node-id) lifted-v1 lifted-v2))
        (when (is_unsat? ir-expr)
@@ -326,7 +326,7 @@
          (define kernel (weight-matrix radius (take weights radius) ktype))
          (define conv-op (convolve (get-node-id) sub-expr kernel nop output-type))
          ;; Merge sols
-         (define merged-sol (merge-sols (cdr res-v1) (cdr res-v2)))
+         (define merged-sol (append-sol (cdr res-v1) (cdr res-v2)))
          (set! ir-expr (run-synthesizer halide-expr conv-op axioms merged-sol)))
 
        ;; Return synthesized expr
@@ -452,7 +452,7 @@
        (define lifted-v1 (car res-v1))
        (define lifted-v2 (car res-v2))
 
-       (define merged-sol (merge-sols (cdr res-v1) (cdr res-v2)))
+       (define merged-sol (append-sol (cdr res-v1) (cdr res-v2)))
        
        ;; Try folding into lhs sub-expr
        (define ir-expr (fold-into-subexpr lifted-v1 halide-expr axioms add-consts sub-consts mul-consts div-consts merged-sol))
@@ -477,7 +477,7 @@
        (define lifted-v1 (car res-v1))
        (define lifted-v2 (car res-v2))
 
-       (define merged-sol (merge-sols (cdr res-v1) (cdr res-v2)))
+       (define merged-sol (append-sol (cdr res-v1) (cdr res-v2)))
 
        ;; Try folding into lhs sub-expr
        (define ir-expr (fold-into-subexpr lifted-v1 halide-expr axioms add-consts sub-consts mul-consts div-consts merged-sol))
@@ -809,13 +809,13 @@
 
   (run-synthesizer halide-expr synthesized-expr axioms sub-sol))
 
-(define (run-synthesizer original-expr synthesized-expr axioms [sub-sol (sat)])
+(define (run-synthesizer original-expr synthesized-expr axioms [sub-sols (list)])
   (define VEC_LANES (num-elems-hal original-expr))
-
+  
   (define (bounded-eq? oe se lanes)
     (for ([i lanes])
       (set-curr-cn-ir i)
-      (assert (eq? (oe i) (evaluate (elem-ir se i) sub-sol)))
+      (assert (eq? (oe i) (evaluate-sols (elem-ir se i) sub-sols)))
       ;(set-curr-cn-ir (+ i (/ VEC_LANES 2) 1))
       ;(assert (eq? (oe (+ i (/ VEC_LANES 2) 1)) (elem-ir se (+ i (/ VEC_LANES 2) 1))))
       ))
@@ -824,34 +824,42 @@
   (clear-vc!)
   (for ([axiom axioms]) (assume axiom))
   (define st (current-seconds))
-  ;(println "-------------------------------")
-  ;(println sub-sol)
-  ;(pretty-print original-expr)
-  ;(pretty-print synthesized-expr)
-  ;(evaluate (elem-ir (interpret-ir synthesized-expr) 0) sub-sol)
-  ;(set-curr-cn-ir 0)
-  ;(println ((interpret-halide original-expr) 0))
-  ;(println (elem-ir (interpret-ir synthesized-expr) 0))
-  ;(when (convolve-acc? synthesized-expr)
-    ;(assume (list-ref learned-axioms 1))
-    ;(println (evaluate (elem-ir (interpret-ir synthesized-expr) 0) sub-sol))
-    ;)
   (for ([axiom learned-axioms]) (assume axiom))
   (define sol (synthesize #:forall (symbolics original-expr)
                           #:guarantee (bounded-eq? (interpret-halide original-expr) (interpret-ir synthesized-expr) MC_BND)))
   (define runtime (- (current-seconds) st))
-  ;(when (convolve-acc? synthesized-expr)
-    ;(println sol)
-    ;(exit))
   
   (display (format "Ran synthesizer for ~a seconds.\n" runtime))
   
   (cond
     [(is_unsat? sol) sol]
     [(sat? sol)
-     (define res-sol (merge-sols sol sub-sol))
-     (set! learned-axioms (set-add learned-axioms (eq? ((interpret-halide original-expr) 0) (evaluate (elem-ir (interpret-ir synthesized-expr) 0) res-sol))))
-     (define res-expr (evaluate synthesized-expr res-sol))
+     (define res-sol (append-sol sub-sols sol))
+
+     (println res-sol)
+     
+     ;; For debugging
+     ;(evaluate (elem-ir (interpret-ir synthesized-expr) 0) res-sol)
+     ;(println "-------------------------------")
+     ;(pretty-print learned-axioms)
+     ;(println sub-sol)
+     ;(pretty-print original-expr)
+     ;(pretty-print synthesized-expr)
+     ;(evaluate (elem-ir (interpret-ir synthesized-expr) 0) sub-sol)
+     ;(set-curr-cn-ir 0)
+     ;(println ((interpret-halide original-expr) 0))
+     ;(println (evaluate-sols (elem-ir (interpret-ir synthesized-expr) 0) sub-sols))
+     ;(println sol)
+     ;(println (evaluate (evaluate-sols (elem-ir (interpret-ir synthesized-expr) 0) sub-sols) sol))
+     ;(println (evaluate-sols (elem-ir (interpret-ir synthesized-expr) 0) res-sol))
+     ;(when (convolve-acc? synthesized-expr)
+     ;(assume (list-ref learned-axioms 1))
+     ;(println (evaluate (elem-ir (interpret-ir synthesized-expr) 0) sub-sol))
+     ;)
+     ;(exit)
+     
+     (set! learned-axioms (set-add learned-axioms (eq? ((interpret-halide original-expr) 0) (evaluate-sols (elem-ir (interpret-ir synthesized-expr) 0) res-sol))))
+     (define res-expr (evaluate-sols synthesized-expr res-sol))
      (hash-set! annotations (ir-node-id res-expr) original-expr)
      (cons res-expr res-sol)]))
 

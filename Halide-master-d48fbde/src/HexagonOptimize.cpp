@@ -2484,6 +2484,36 @@ public:
     }
 
 private:
+    // A custom version of lower intrinsics that skips a TODO in the existing lower_intrinsics
+    class LowerIntrinsics : public IRMutator {
+        using IRMutator::visit;
+
+        Expr widen(Expr a) {
+            Type result_type = a.type().widen();
+            return Cast::make(result_type, std::move(a));
+        }
+
+        Expr narrow(Expr a) {
+            Type result_type = a.type().narrow();
+            return Cast::make(result_type, std::move(a));
+        }
+
+        Expr visit(const Call *op) override {
+            Expr lowered;
+            if (op->is_intrinsic(Call::rounding_halving_add)) {
+                lowered = narrow((widen(op->args[0]) + widen(op->args[1]) + 1) / 2);
+            } else if (op->is_intrinsic(Call::rounding_halving_sub)) {
+                lowered = narrow((widen(op->args[0]) - widen(op->args[1]) + 1) / 2);
+            } else {
+                lowered = lower_intrinsic(op);
+            }
+            if (lowered.defined()) {
+                return mutate(lowered);
+            }
+            return IRMutator::visit(op);
+        }
+    };
+
     class InferVarEncoding : public IRVisitor {
     public:
         using IRVisitor::visit;
@@ -2691,101 +2721,61 @@ private:
         }
 
         std::string visit(const Add *op) {
-            if (op->type.is_vector()) {
-                indent.push(indent.top() + 1);
-                std::string rkt_lhs = dispatch(op->a);
-                std::string rkt_rhs = dispatch(op->b);
-                indent.pop();
+            indent.push(indent.top() + 1);
+            std::string rkt_lhs = dispatch(op->a);
+            std::string rkt_rhs = dispatch(op->b);
+            indent.pop();
 
+            if (op->type.is_vector()) {
                 return tabs() + "(vec-add\n" + rkt_lhs + "\n" + rkt_rhs + ")";
             } else if (op->type != Int(32)) {
-                indent.push(indent.top() + 1);
-                std::string rkt_lhs = dispatch(op->a);
-                std::string rkt_rhs = dispatch(op->b);
-                indent.pop();
-
                 return tabs() + "(sca-add\n" + rkt_lhs + "\n" + rkt_rhs + ")";
             } else {
-                indent.push(0);
-                std::string rkt_lhs = dispatch(op->a);
-                std::string rkt_rhs = dispatch(op->b);
-                indent.pop();
-
                 return tabs() + "(+ " + rkt_lhs + " " + rkt_rhs + ")";
             }
         }
 
         std::string visit(const Sub *op) {
-            if (op->type.is_vector()) {
-                indent.push(indent.top() + 1);
-                std::string rkt_lhs = dispatch(op->a);
-                std::string rkt_rhs = dispatch(op->b);
-                indent.pop();
+            indent.push(indent.top() + 1);
+            std::string rkt_lhs = dispatch(op->a);
+            std::string rkt_rhs = dispatch(op->b);
+            indent.pop();
 
+            if (op->type.is_vector()) {
                 return tabs() + "(vec-sub\n" + rkt_lhs + "\n" + rkt_rhs + ")";
             } else if (op->type != Int(32)) {
-                indent.push(indent.top() + 1);
-                std::string rkt_lhs = dispatch(op->a);
-                std::string rkt_rhs = dispatch(op->b);
-                indent.pop();
-
                 return tabs() + "(sca-sub\n" + rkt_lhs + "\n" + rkt_rhs + ")";
             } else {
-                indent.push(0);
-                std::string rkt_lhs = dispatch(op->a);
-                std::string rkt_rhs = dispatch(op->b);
-                indent.pop();
-
                 return tabs() + "(- " + rkt_lhs + " " + rkt_rhs + ")";
             }
         }
 
         std::string visit(const Mul *op) {
-            if (op->type.is_vector()) {
-                indent.push(indent.top() + 1);
-                std::string rkt_lhs = dispatch(op->a);
-                std::string rkt_rhs = dispatch(op->b);
-                indent.pop();
+            indent.push(indent.top() + 1);
+            std::string rkt_lhs = dispatch(op->a);
+            std::string rkt_rhs = dispatch(op->b);
+            indent.pop();
 
+            if (op->type.is_vector()) {
                 return tabs() + "(vec-mul\n" + rkt_lhs + "\n" + rkt_rhs + ")";
             } else if (op->type != Int(32)) {
-                indent.push(indent.top() + 1);
-                std::string rkt_lhs = dispatch(op->a);
-                std::string rkt_rhs = dispatch(op->b);
-                indent.pop();
-
                 return tabs() + "(sca-mul\n" + rkt_lhs + "\n" + rkt_rhs + ")";
             } else {
-                indent.push(0);
-                std::string rkt_lhs = dispatch(op->a);
-                std::string rkt_rhs = dispatch(op->b);
-                indent.pop();
-
-                return "(* " + rkt_lhs + " " + rkt_rhs + ")";
+                return tabs() + "(* " + rkt_lhs + " " + rkt_rhs + ")";
             }
         }
 
         std::string visit(const Div *op) {
-            if (op->type.is_vector()) {
-                indent.push(indent.top() + 1);
-                std::string rkt_lhs = dispatch(op->a);
-                std::string rkt_rhs = dispatch(op->b);
-                indent.pop();
+            indent.push(indent.top() + 1);
+            std::string rkt_lhs = dispatch(op->a);
+            std::string rkt_rhs = dispatch(op->b);
+            indent.pop();
 
+            if (op->type.is_vector()) {
                 return tabs() + "(vec-div\n" + rkt_lhs + "\n" + rkt_rhs + ")";
             } else if (op->type != Int(32)) {
-                indent.push(indent.top() + 1);
-                std::string rkt_lhs = dispatch(op->a);
-                std::string rkt_rhs = dispatch(op->b);
-                indent.pop();
-
                 return tabs() + "(sca-div\n" + rkt_lhs + "\n" + rkt_rhs + ")";
             } else {
-                indent.push(0);
-                std::string rkt_lhs = dispatch(op->a);
-                std::string rkt_rhs = dispatch(op->b);
-                indent.pop();
-
                 return tabs() + "(quotient " + rkt_lhs + " " + rkt_rhs + ")";
             }
         }
@@ -2796,51 +2786,31 @@ private:
         }
 
         std::string visit(const Min *op) {
-            if (op->type.is_vector()) {
-                indent.push(indent.top() + 1);
-                std::string rkt_lhs = dispatch(op->a);
-                std::string rkt_rhs = dispatch(op->b);
-                indent.pop();
+            indent.push(indent.top() + 1);
+            std::string rkt_lhs = dispatch(op->a);
+            std::string rkt_rhs = dispatch(op->b);
+            indent.pop();
 
+            if (op->type.is_vector()) {
                 return tabs() + "(vec-min\n" + rkt_lhs + "\n" + rkt_rhs + ")";
             } else if (op->type != Int(32)) {
-                indent.push(indent.top() + 1);
-                std::string rkt_lhs = dispatch(op->a);
-                std::string rkt_rhs = dispatch(op->b);
-                indent.pop();
-
                 return tabs() + "(sca-min\n" + rkt_lhs + "\n" + rkt_rhs + ")";
             } else {
-                indent.push(0);
-                std::string rkt_lhs = dispatch(op->a);
-                std::string rkt_rhs = dispatch(op->b);
-                indent.pop();
-
                 return tabs() + "(min " + rkt_lhs + " " + rkt_rhs + ")";
             }
         }
 
         std::string visit(const Max *op) {
-            if (op->type.is_vector()) {
-                indent.push(indent.top() + 1);
-                std::string rkt_lhs = dispatch(op->a);
-                std::string rkt_rhs = dispatch(op->b);
-                indent.pop();
+            indent.push(indent.top() + 1);
+            std::string rkt_lhs = dispatch(op->a);
+            std::string rkt_rhs = dispatch(op->b);
+            indent.pop();
 
+            if (op->type.is_vector()) {
                 return tabs() + "(vec-max\n" + rkt_lhs + "\n" + rkt_rhs + ")";
             } else if (op->type != Int(32)) {
-                indent.push(indent.top() + 1);
-                std::string rkt_lhs = dispatch(op->a);
-                std::string rkt_rhs = dispatch(op->b);
-                indent.pop();
-
                 return tabs() + "(sca-max\n" + rkt_lhs + "\n" + rkt_rhs + ")";
             } else {
-                indent.push(0);
-                std::string rkt_lhs = dispatch(op->a);
-                std::string rkt_rhs = dispatch(op->b);
-                indent.pop();
-
                 return tabs() + "(max " + rkt_lhs + " " + rkt_rhs + ")";
             }
         }
@@ -2854,13 +2824,15 @@ private:
             return NYI();
         }
         std::string visit(const LT *op) {
-            if (op->type.is_scalar()) {
-                std::string rkt_lhs = dispatch(op->a);
-                std::string rkt_rhs = dispatch(op->b);
+            std::string rkt_lhs = dispatch(op->a);
+            std::string rkt_rhs = dispatch(op->b);
+            if (op->type.is_vector()) {
+                return tabs() + "(vec-lt " + rkt_lhs + " " + rkt_rhs + ")";
+            } else if (op->type != Int(32)) {
+                return tabs() + "(sca-lt " + rkt_lhs + " " + rkt_rhs + ")";
+            } else {
                 return tabs() + "(< " + rkt_lhs + " " + rkt_rhs + ")";
             }
-            printer.print(op);
-            return NYI();
         }
         std::string visit(const LE *op) {
             printer.print(op);
@@ -2887,14 +2859,16 @@ private:
             return NYI();
         }
         std::string visit(const Select *op) {
-            if (op->type.is_scalar()) {
-                std::string rkt_cond = dispatch(op->condition);
-                std::string rkt_true = dispatch(op->true_value);
-                std::string rkt_false = dispatch(op->false_value);
+            std::string rkt_cond = dispatch(op->condition);
+            std::string rkt_true = dispatch(op->true_value);
+            std::string rkt_false = dispatch(op->false_value);
+            if (op->type.is_vector()) {
+                return tabs() + "(vec-if " + rkt_cond + " " + rkt_true + " " + rkt_false + ")";
+            } else if (op->type != Int(32)) {
+                return tabs() + "(sca-if " + rkt_cond + " " + rkt_true + " " + rkt_false + ")";
+            } else {
                 return tabs() + "(if " + rkt_cond + " " + rkt_true + " " + rkt_false + ")";
             }
-            printer.print(op);
-            return NYI();
         }
         std::string visit(const IfThenElse *op) {
             printer.print(op);
@@ -3122,7 +3096,7 @@ private:
         debug(0) << "Let Found: " << stmt->name << " = " << stmt->value << "\n";
 
         Expr value = stmt->value;
-        value = lower_intrinsics(value);
+        value = LowerIntrinsics().mutate(value);
         if (value.type() == Int(32)) {
             // For index expressions, we don't want/need to model some
             // stuff. Just abstract things as unknowns if we hit any
@@ -3169,7 +3143,7 @@ private:
         }
 
         RacketPrinter specPrinter(std::cout, let_vars);
-        std::string expr = specPrinter.dispatch(lower_intrinsics(stmt->value));
+        std::string expr = specPrinter.dispatch(LowerIntrinsics().mutate(stmt->value));
 
         InferSymbolics symFinder(let_vars, bounds, func_value_bounds);
         stmt->value.accept(&symFinder);
@@ -3311,6 +3285,7 @@ private:
         rakeInputF.open(filename.c_str());
         rakeInputF
             << "#lang rosette\n"
+            << "; " << stmt->value << "\n"
             << "\n"
             << "(require rake)\n"
             << "(require rake/halide)\n"
@@ -3420,7 +3395,7 @@ Stmt optimize_hexagon_instructions_synthesis(Stmt s, const Target &t, FuncValueB
     debug(0) << s << "\n\n";
     s = simplify(s);
     debug(0) << s << "\n\n";
-    //exit(0);
+    // exit(0);
     return s;
 }
 

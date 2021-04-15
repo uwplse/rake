@@ -38,7 +38,14 @@
     [(vread buf loc align) ((get-vec-type buf) (lambda (i) (get buf (+ loc i))))]
     [(vreadp buf loc align) ((get-vecp-type buf) (lambda (i) (get buf (+ loc i))) (lambda (i) (get buf (+ loc i (get-offset buf)))))]
 
-    [(vsplat Rt) (i8x128 (lambda (i) Rt))]
+    [(vsplat Rt)
+     (cond
+       [(int8_t? Rt)   (i8x128 (lambda (i) Rt))]
+       [(int16_t? Rt)  (i16x64 (lambda (i) Rt))]
+       [(int32_t? Rt)  (i32x32 (lambda (i) Rt))]
+       [(uint8_t? Rt)  (i8x128 (lambda (i) Rt))]
+       [(uint16_t? Rt) (i16x64 (lambda (i) Rt))]
+       [(uint32_t? Rt) (i32x32 (lambda (i) Rt))])]
 
     ;;;;;;;;;;;;;;;; Instructions for data movement ;;;;;;;;;;;;;;;;
     
@@ -330,7 +337,20 @@
 
     ;; Subtraction (non-widening) -- carry variants currently not supported
     [(vsub Vu Vv sat?)
-     (match (list (interpret Vu) (interpret Vv))
+     (define iVu (interpret Vu))
+     (define iVv (interpret Vv))
+     
+     (cond
+       [(and (i16x64x2? iVu) (i16x64x2? iVv))
+        (define lhs-v0 (i16x64x2-Vu iVu))
+        (define lhs-v1 (i16x64x2-Vv iVu))
+        (define rhs-v0 (i16x64x2-Vu iVv))
+        (define rhs-v1 (i16x64x2-Vv iVv))
+        (i16x64x2
+         (lambda (i) (if sat? (sub-sat (lhs-v0 i) (rhs-v0 i) 'int16) (sub (lhs-v0 i) (rhs-v0 i) 'int16)))
+         (lambda (i) (if sat? (sub-sat (lhs-v1 i) (rhs-v1 i) 'int16) (sub (lhs-v1 i) (rhs-v1 i) 'int16))))]
+       [else
+     (match (list iVu iVv)
        ;; Saturating for signed types is optional
        [(list (i8x128 lhs) (i8x128 rhs)) (i8x128 (lambda (i) (if sat? (sub-sat (lhs i) (rhs i) 'int8) (sub (lhs i) (rhs i) 'int8))))]
        [(list (i16x64 lhs) (i16x64 rhs)) (i16x64 (lambda (i) (if sat? (sub-sat (lhs i) (rhs i) 'int16) (sub (lhs i) (rhs i) 'int16))))]
@@ -368,7 +388,7 @@
        [(list (u32x32x2 lhs-v0 lhs-v1) (u32x32x2 rhs-v0 rhs-v1))
         (u32x32x2
          (lambda (i) (sub-sat (lhs-v0 i) (rhs-v0 i) 'uint32))
-         (lambda (i) (sub-sat (lhs-v1 i) (rhs-v1 i) 'uint32)))])]
+         (lambda (i) (sub-sat (lhs-v1 i) (rhs-v1 i) 'uint32)))])])]
 
     ;; Subtraction (widening)
     [(vsub-w Vu Vv)
@@ -751,6 +771,20 @@
        ;[(list (u32x32 v0) (u32x32 v1) #t) (i16x64 (lambda (i) (if (< i 32) (i16hi (v1 i)) (i16hi (v0 (- i 32))))))]
        ;[(list (u32x32 v0) (u32x32 v1) #f) (u16x64 (lambda (i) (if (< i 32) (u16hi (v1 i)) (u16hi (v0 (- i 32))))))]
        )]
+
+    [(vpacke Vu Vv)
+     (match (list (interpret Vu) (interpret Vv))
+       [(list (i8x128 v0) (i8x128 v1)) (i8x128 (lambda (i) (if (< i 64) (v1 (* i 2)) (v0 (* 2 (- i 64))))))]
+       [(list (u8x128 v0) (u8x128 v1)) (u8x128 (lambda (i) (if (< i 64) (v1 (* i 2)) (v0 (* 2 (- i 64))))))]
+       [(list (i16x64 v0) (i16x64 v1)) (i16x64 (lambda (i) (if (< i 32) (v1 (* i 2)) (v0 (* 2 (- i 32))))))]
+       [(list (u16x64 v0) (u16x64 v1)) (u16x64 (lambda (i) (if (< i 32) (v1 (* i 2)) (v0 (* 2 (- i 32))))))])]
+
+    [(vpacko Vu Vv)
+     (match (list (interpret Vu) (interpret Vv))
+       [(list (i8x128 v0) (i8x128 v1)) (i8x128 (lambda (i) (if (< i 64) (v1 (+ (* i 2) 1)) (v0 (+ (* 2 (- i 64)) 1)))))]
+       [(list (u8x128 v0) (u8x128 v1)) (u8x128 (lambda (i) (if (< i 64) (v1 (+ (* i 2) 1)) (v0 (+ (* 2 (- i 64)) 1)))))]
+       [(list (i16x64 v0) (i16x64 v1)) (i16x64 (lambda (i) (if (< i 32) (v1 (+ (* i 2) 1)) (v0 (+ (* 2 (- i 32)) 1)))))]
+       [(list (u16x64 v0) (u16x64 v1)) (u16x64 (lambda (i) (if (< i 32) (v1 (+ (* i 2) 1)) (v0 (+ (* 2 (- i 32)) 1)))))])]
     
     [(vpacko-n Vu Vv signed?)
      (match (list (interpret Vu) (interpret Vv) (interpret signed?))
@@ -789,6 +823,15 @@
          [(list (u16x64 v0) #f) (u32x32x2 (lambda (i) (uint32_t (zxt32 (v0 (* i 2))))) (lambda (i) (uint32_t (zxt32 (v0 (+ (* i 2) 1))))))]
          [(list (i16x64 v0) #f) (u32x32x2 (lambda (i) (uint32_t (zxt32 (v0 (* i 2))))) (lambda (i) (uint32_t (zxt32 (v0 (+ (* i 2) 1))))))]))]
 
+    [(reinterpret Vu)
+     (match (list (interpret Vu))
+       [(list (i8x128 v0)) (u8x128 (lambda (i) (uint8_t (eval (v0 i)))))]
+       [(list (i16x64 v0)) (u16x64 (lambda (i) (uint16_t (eval (v0 i)))))]
+       [(list (i32x32 v0)) (u32x32 (lambda (i) (uint32_t (eval (v0 i)))))]
+       [(list (u8x128 v0)) (i8x128 (lambda (i) (int8_t (eval (v0 i)))))]
+       [(list (u16x64 v0)) (i16x64 (lambda (i) (int16_t (eval (v0 i)))))]
+       [(list (u32x32 v0)) (i32x32 (lambda (i) (int32_t (eval (v0 i)))))])]
+
     [(vmax Vu Vv)
      (match (list (interpret Vu) (interpret Vv))
        [(list (i8x128 v0) (i8x128 v1)) (i8x128 (lambda (i) (int8_t (max8 (eval (v0 i)) (eval (v1 i))))))]
@@ -796,6 +839,14 @@
        [(list (i16x64 v0) (i16x64 v1)) (i16x64 (lambda (i) (int16_t (max16 (eval (v0 i)) (eval (v1 i))))))]
        [(list (u16x64 v0) (u16x64 v1)) (u16x64 (lambda (i) (uint16_t (maxu16 (eval (v0 i)) (eval (v1 i))))))]
        [(list (i32x32 v0) (i32x32 v1)) (i32x32 (lambda (i) (int32_t (max32 (eval (v0 i)) (eval (v1 i))))))])]
+
+    [(vmin Vu Vv)
+     (match (list (interpret Vu) (interpret Vv))
+       [(list (i8x128 v0) (i8x128 v1)) (i8x128 (lambda (i) (int8_t (min8 (eval (v0 i)) (eval (v1 i))))))]
+       [(list (u8x128 v0) (u8x128 v1)) (u8x128 (lambda (i) (uint8_t (minu8 (eval (v0 i)) (eval (v1 i))))))]
+       [(list (i16x64 v0) (i16x64 v1)) (i16x64 (lambda (i) (int16_t (min16 (eval (v0 i)) (eval (v1 i))))))]
+       [(list (u16x64 v0) (u16x64 v1)) (u16x64 (lambda (i) (uint16_t (minu16 (eval (v0 i)) (eval (v1 i))))))]
+       [(list (i32x32 v0) (i32x32 v1)) (i32x32 (lambda (i) (int32_t (min32 (eval (v0 i)) (eval (v1 i))))))])]
 
     ;; Logical shift right
     [(vlsr Vu Rt)

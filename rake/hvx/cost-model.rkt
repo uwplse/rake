@@ -45,8 +45,9 @@
     [(vtranspose Vu Vv Rt) 1]
     [(vinterleave Vuu) 1]
     [(vpack Vu Vv signed?) 1]
-    [(vpacke Vu Vv signed?) 1]
-    [(vpacko Vu Vv signed?) 1]
+    [(vpacke Vu Vv) 1]
+    [(vpacko Vu Vv) 1]
+    [(vpacke-n Vu Vv signed?) 1]
     [(vpacko-n Vu Vv signed?) 1]
     [(vunpack Vu) 1]
     [(vunpacko Vu) 1]
@@ -56,6 +57,7 @@
     ;; HVX instructions for type-casting
     [(vzxt Vu signed?) 1]
     [(vsxt Vu signed?) 1]
+    [(reinterpret Vu) 0]
 
     ;; HVX instructions for data processing
     [(vadd Vu Vv sat?) 1]

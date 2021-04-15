@@ -92,6 +92,7 @@
        (match (visitor-trace-peek-parent)
          [(vzxt Vu signed?) (gather-vec next-id opts)]
          [(vsxt Vu signed?) (gather-vec next-id opts)]
+         [(reinterpret Vu) (gather-vec next-id opts)]
          [(vadd Vu Vv sat?) (gather-vec next-id opts)]
          [(vadd-w Vu Vv) (gather-vec next-id opts)]
          [(vadd-w-acc Vdd Vu Vv) (if (eq? arg-pos 0) (gather-vecp next-id opts) (gather-vec next-id opts))]

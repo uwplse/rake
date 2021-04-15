@@ -80,14 +80,13 @@
   (define (find-next-swizzle candidate-swizzle-exprs)
     (cond
       [(empty? candidate-swizzle-exprs) (unsat)]
-      [else 
+      [else
        (define candidate-swizzle (first candidate-swizzle-exprs))
        (cond
          [(and (hash-has-key? enum-history candidate-swizzle) (eq? (hash-ref enum-history candidate-swizzle) #f))
           (find-next-swizzle (rest candidate-swizzle-exprs))]
          [else
           ;(println candidate-swizzle)
-          
           ;; Replace swizzle node with swizzle grammar
           (define (repl-gather-with-swizzle-grm node)
             (match node
@@ -103,7 +102,6 @@
           (define VEC_LANES (num-elems-hvx (interpret-hvx hvx-expr-grm)))
 
           (define runtime 0)
-          
           (define synthesizer
             (engine
              (λ (_)
@@ -182,7 +180,7 @@
          [else
           (enumerate-hvx-gather-exprs
            (hvx-type (interpret-hvx swizzle-node))
-           (list lo hi vinterleave vshuff vshuffe vshuffo vshuffoe vcombine vdeal vdeale valign vror vtranspose vpacke vpacko vunpack)
+           (list vinterleave vshuff vshuffe vshuffo vshuffoe vcombine vdeal vdeale valign vror vpacke vpacko)
            load-idxs
            3)])))
   
@@ -206,11 +204,11 @@
 
      (define interpreted-f-expr (interpret-hvx hvx-expr-grm))
 
-;     (println lanes-used-in-synth)
-;     (println interpreted-f-expr)
-;     (println (interpreted-o-expr (+ offset 0)))
-;     (set-curr-cn-hvx 0)
-;     (println (cpp-cast (v0-elem-hvx interpreted-f-expr 0) (type (interpreted-o-expr (+ offset 0)))))
+     ;(println lanes-used-in-synth)
+     ;(println interpreted-f-expr)
+     ;(println (interpreted-o-expr (+ offset 0)))
+     ;(set-curr-cn-hvx 0)
+     ;(println (cpp-cast (v0-elem-hvx interpreted-f-expr 0) (type (interpreted-o-expr (+ offset 0)))))
      
      (define sol (synthesize #:forall ctx
                              #:guarantee (begin

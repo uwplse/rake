@@ -115,17 +115,19 @@
              ])]
          [else (values #f (void))])]
 
-;      [(cast sub-expr type)
-;       (begin
-;         (define hvx-sub-spec (hvx-expr-spec sub-expr ir-expr-sol ir-annotations ir-expr-ctx ir-expr-axioms ir-expr-invalid-sketches))
-;         (define hvx-sub-expr (synthesize-hvx-template hvx-sub-spec ir-to-hvx))
-;         
-;         (display "Lifting IR to HVX...\n")
-;         (display "====================\n\n")
-;         (display (format "IR Operation: \n\n~a\n\n" (pretty-format ir-expr)))
-;         
-;         (reset-hvx-instr-bnd)
-;         (synthesize-equiv-hvx spec sub-expr hvx-sub-expr discarded-sols))]
+      [(cast sub-expr type)
+       (define-values (successful? hvx-sub-expr)
+         (synthesize-hvx-expr halide-expr halide-expr-axioms sub-expr ir-expr-sol ir-annotations lowering-algo swizzling-algo #f))
+       
+       (cond
+         [successful?
+          (define halide-sub-expr (hash-ref ir-annotations (ir-node-id ir-expr)))
+          (hash-set! ir-to-hvx (ir-node-id sub-expr) (if (vinterleave? hvx-sub-expr) (vinterleave-Vuu hvx-sub-expr) hvx-sub-expr))
+          (match lowering-algo
+            ['incremental (backtracking-search-incr halide-sub-expr halide-expr-axioms ir-expr ir-expr-sol ir-annotations (list) swizzling-algo ir-to-hvx)]
+            ['enumerative (backtracking-search-enum halide-sub-expr halide-expr-axioms ir-expr ir-expr-sol ir-annotations (list) swizzling-algo ir-to-hvx)]
+            [_ (error (format "Unrecognized lowering algorithm specified: '~a. Supported algorithms: ['incremental, 'enumerative]" lowering-algo))])]
+         [else (values #f (void))])]
 
       [(saturate sub-expr round? signedOut?)
        (define-values (successful? hvx-sub-expr)
@@ -261,10 +263,11 @@
       [(broadcast val N)
        (define tile-width (* N (bw (elem-ir (interpret-ir ir-expr) 0))))
        (define hvx-vec-len 1024)
-       (cond
-         [(eq? tile-width hvx-vec-len) (values #t (vsplat val))]
-         [(eq? tile-width (* 2 hvx-vec-len)) (values #t (vcombine (vsplat val) (vsplat val)))]
-         [else (error "NYI: broadcasting for tiles greater than 2048 bits")])]
+       (values #t (vsplat val))]
+       ;(cond
+         ;[(eq? tile-width hvx-vec-len) (values #t (vsplat val))]
+         ;[(eq? tile-width (* 2 hvx-vec-len)) (values #t (vcombine (vsplat val) (vsplat val)))]
+         ;[else (error "NYI: broadcasting for tiles greater than 2048 bits")])]
       
       [(load-data opts)
        (cond
@@ -305,6 +308,18 @@
   ;; Synthesize equivalent HVX template (compute instructions)
   ;(define ir-to-hvx (make-hash))
   (define hvx-expr-sketch (synthesize-hvx-template-enum hvx-spec ir-to-hvx offset))
+
+  (define hal-elem-cnt (vec-len halide-expr))
+  
+  (when (gather*? hvx-expr-sketch)
+    ;(define elem-bw (bw ((interpret-halide halide-expr) 0)))
+    ;(define tile-size (* hal-elem-cnt elem-bw))
+    ;(define hvx-vec-len 1024)
+    ;(set! hvx-expr-sketch (cond
+                            ;[(eq? tile-size hvx-vec-len) (gather-vec 1 (gather*-buff-reads hvx-expr-sketch))]
+                            ;[(eq? tile-size (* 2 hvx-vec-len)) (gather-vecp 1 (gather*-buff-reads hvx-expr-sketch))]
+                            ;[else (error "NYI: Support for swizzling a tile size greater than HVX vector-pair")]))
+    (set! hvx-expr-sketch (gather-vec 1 (gather*-buff-reads hvx-expr-sketch))))
   
   ;; Synthesize data-movement
   (define-values (successful? hvx-expr)
@@ -313,7 +328,6 @@
   (cond
     [successful?
       ;; Repeat sketch if necessary to produce the right number of values
-     (define hal-elem-cnt (vec-len halide-expr))
      (define hvx-elem-cnt (num-elems-hvx (interpret-hvx hvx-expr-sketch)))
      (cond
        [(eq? hal-elem-cnt (* 2 hvx-elem-cnt))

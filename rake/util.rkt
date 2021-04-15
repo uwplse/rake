@@ -29,6 +29,7 @@
         [(eq? bw 64) 'int64]
         [else (error "Cannot handle signed ints of bw: ~a" bw)])
       (cond
+        [(eq? bw 1) 'uint1]
         [(eq? bw 8) 'uint8]
         [(eq? bw 16) 'uint16]
         [(eq? bw 32) 'uint32]
@@ -41,6 +42,7 @@
     ['int16 (int16_t expr)]
     ['int32 (int32_t expr)]
     ['int64 (int64_t expr)]
+    ['uint1 (uint1_t expr)]
     ['uint8 (uint8_t expr)]
     ['uint16 (uint16_t expr)]
     ['uint32 (uint32_t expr)]
@@ -89,13 +91,19 @@
 
   vecs)
 
-(define (merge-sols sol1 sol2)
-  (define merged-sol (make-hash))
-  (for ([k (in-dict-keys (model sol2))])
-    (hash-set! merged-sol k (hash-ref (model sol2) k)))
-  (for ([k (in-dict-keys (model sol1))])
-    (hash-set! merged-sol k (hash-ref (model sol1) k)))
-  (sat (make-immutable-hash (hash->list merged-sol))))
+;(define (merge-sols sol1 sol2)
+  ;(define merged-sol (make-hash))
+  ;(for ([k (in-dict-keys (model sol2))])
+    ;(hash-set! merged-sol k (hash-ref (model sol2) k)))
+  ;(for ([k (in-dict-keys (model sol1))])
+    ;(hash-set! merged-sol k (hash-ref (model sol1) k)))
+  ;(sat (make-immutable-hash (hash->list merged-sol))))
+
+(define (append-sol sol-list new-sol)
+  (flatten (append (list sol-list) (list new-sol))))
+
+(define (evaluate-sols expr sol-list)
+  (for/fold ([eval-expr expr]) ([sol sol-list]) (evaluate expr sol)))
 
 ;; Utility functions
 (define (nop v) v)
@@ -129,9 +137,10 @@
   (bvadd b (bvand diff dsgn)))
 
 (define (min16 a b)
-  (define diff (bvsub a b))
-  (define dsgn (bvashr diff (bv 15 16)))
-  (bvadd b (bvand diff dsgn)))
+  ;(define diff (bvsub a b))
+  ;(define dsgn (bvashr diff (bv 15 16)))
+  ;(bvadd b (bvand diff dsgn))
+  (bvsmin a b))
 
 (define (min32 a b)
   (define diff (bvsub a b))
@@ -162,13 +171,13 @@
 (define (max8 a b)
   (define diff (bvsub a b))
   (define dsgn (bvashr diff (bv 7 8)))
-  (bvsub a (bvand diff dsgn))
-  (bvsmax a b))
+  (bvsub a (bvand diff dsgn)))
 
 (define (max16 a b)
-  (define diff (bvsub a b))
-  (define dsgn (bvashr diff (bv 15 16)))
-  (bvsub a (bvand diff dsgn)))
+  ;(define diff (bvsub a b))
+  ;(define dsgn (bvashr diff (bv 15 16)))
+  ;(bvsub a (bvand diff dsgn))
+  (bvsmax a b))
 
 (define (max32 a b)
   (define diff (bvsub a b))
