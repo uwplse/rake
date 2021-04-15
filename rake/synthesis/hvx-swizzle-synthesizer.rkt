@@ -23,15 +23,7 @@
 
   ;; Pre-processing. Replace gather* with gather-vec and gather-vecp
   (set! hvx-expr-sketch
-    (cond
-      [(gather*? hvx-expr-sketch)
-       (println halide-spec)
-       (println (vec-len halide-spec))
-       (println (interpret-halide halide-spec))
-       (exit)
-       1]
-      [else
-       (specialize-gather*-nodes hvx-expr-sketch)]))
+    (specialize-gather*-nodes hvx-expr-sketch))
 
   ;; Synthesize a hash-table spec
   (define-values (sketch-is-correct? hvx-expr-spec)
@@ -39,7 +31,7 @@
 
   ;; Add a swizzle at the end to allow the synthesizer to distribute data movement before
   ;; and after the computation
-  (when (hvx-pair? (interpret-hvx hvx-expr-sketch))
+  (when (and (hvx-pair? (interpret-hvx hvx-expr-sketch)) (not (or (gather-vec? hvx-expr-sketch) (gather-vecp? hvx-expr-sketch))))
     (set! hvx-expr-sketch (swizzle 0 hvx-expr-sketch)))
   
   ;; Synthesize instructions

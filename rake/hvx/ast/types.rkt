@@ -48,8 +48,9 @@
 (struct vshuff (Vu) #:transparent)
 (struct vtranspose (Vu Vv Rt) #:transparent)
 (struct vpack (Vu Vv signed?) #:transparent)
-(struct vpacke (Vu Vv signed?) #:transparent)
-(struct vpacko (Vu Vv signed?) #:transparent)
+(struct vpacke (Vu Vv) #:transparent)
+(struct vpacko (Vu Vv) #:transparent)
+(struct vpacke-n (Vu Vv signed?) #:transparent)
 (struct vpacko-n (Vu Vv signed?) #:transparent)
 (struct vunpack (Vu) #:transparent)
 (struct vunpacko (Vu) #:transparent)
@@ -204,24 +205,16 @@
                          (instr-sig 'u8x128 (list 'u8x128 'u8x128)))]
 
     [(eq? vpacke instr) (list
-                         (instr-sig 'i8x128 (list 'i16x64 'i16x64 #t))
-                         (instr-sig 'u8x128 (list 'i16x64 'i16x64 #f))
-                         (instr-sig 'i8x128 (list 'u16x64 'u16x64 #t))
-                         (instr-sig 'u8x128 (list 'u16x64 'u16x64 #f))
-                         (instr-sig 'i16x64 (list 'i32x32 'i32x32 #t))
-                         (instr-sig 'u16x64 (list 'i32x32 'i32x32 #f))
-                         (instr-sig 'i16x64 (list 'u32x32 'u32x32 #t))
-                         (instr-sig 'u16x64 (list 'u32x32 'u32x32 #f)))]
+                         (instr-sig 'i8x128 (list 'i8x128 'i8x128))
+                         (instr-sig 'u8x128 (list 'u8x128 'u8x128))
+                         (instr-sig 'i16x64 (list 'i16x64 'i16x64))
+                         (instr-sig 'u16x64 (list 'u16x64 'u16x64)))]
 
     [(eq? vpacko instr) (list
-                         (instr-sig 'i8x128 (list 'i16x64 'i16x64 #t))
-                         (instr-sig 'u8x128 (list 'i16x64 'i16x64 #f))
-                         (instr-sig 'i8x128 (list 'u16x64 'u16x64 #t))
-                         (instr-sig 'u8x128 (list 'u16x64 'u16x64 #f))
-                         (instr-sig 'i16x64 (list 'i32x32 'i32x32 #t))
-                         (instr-sig 'u16x64 (list 'i32x32 'i32x32 #f))
-                         (instr-sig 'i16x64 (list 'u32x32 'u32x32 #t))
-                         (instr-sig 'u16x64 (list 'u32x32 'u32x32 #f)))]
+                         (instr-sig 'i8x128 (list 'i8x128 'i8x128))
+                         (instr-sig 'u8x128 (list 'u8x128 'u8x128))
+                         (instr-sig 'i16x64 (list 'i16x64 'i16x64))
+                         (instr-sig 'u16x64 (list 'u16x64 'u16x64)))]
 
     [(eq? vunpack instr) (list
                           (instr-sig 'i16x64x2 (list 'i8x128))

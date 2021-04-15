@@ -100,7 +100,7 @@
     [(x128 sca) 128]
     [(x256 sca) 256]
 
-    [(ramp base stride len) len]
+    [(ramp base stride len) (quotient len stride)]
     [(load buf idxs alignment) (vec-len idxs)]
 
     ;; Type Casts

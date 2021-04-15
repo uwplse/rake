@@ -303,7 +303,7 @@
        [(list (u32x32 _)(u32x32 _)) (generate `vpackwuh.sat (p-type p) `(list ,(input-arg Vu) ,(input-arg Vv)))])]
     
     ;;vpacke
-    [(vpacke Vu Vv signed?)
+    [(vpacke Vu Vv)
      (match (list (interpret-hvx Vu) (interpret-hvx Vv))
        [(list (i32x32 _)(i32x32 _)) (generate `vpackeh (p-type p) `(list ,(input-arg Vu) ,(input-arg Vv)))]
        [(list (i16x64 _)(i16x64 _)) (generate `vpackeb (p-type p) `(list ,(input-arg Vu) ,(input-arg Vv)))])]

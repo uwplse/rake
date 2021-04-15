@@ -308,6 +308,18 @@
   ;; Synthesize equivalent HVX template (compute instructions)
   ;(define ir-to-hvx (make-hash))
   (define hvx-expr-sketch (synthesize-hvx-template-enum hvx-spec ir-to-hvx offset))
+
+  (define hal-elem-cnt (vec-len halide-expr))
+  
+  (when (gather*? hvx-expr-sketch)
+    ;(define elem-bw (bw ((interpret-halide halide-expr) 0)))
+    ;(define tile-size (* hal-elem-cnt elem-bw))
+    ;(define hvx-vec-len 1024)
+    ;(set! hvx-expr-sketch (cond
+                            ;[(eq? tile-size hvx-vec-len) (gather-vec 1 (gather*-buff-reads hvx-expr-sketch))]
+                            ;[(eq? tile-size (* 2 hvx-vec-len)) (gather-vecp 1 (gather*-buff-reads hvx-expr-sketch))]
+                            ;[else (error "NYI: Support for swizzling a tile size greater than HVX vector-pair")]))
+    (set! hvx-expr-sketch (gather-vec 1 (gather*-buff-reads hvx-expr-sketch))))
   
   ;; Synthesize data-movement
   (define-values (successful? hvx-expr)
@@ -316,7 +328,6 @@
   (cond
     [successful?
       ;; Repeat sketch if necessary to produce the right number of values
-     (define hal-elem-cnt (vec-len halide-expr))
      (define hvx-elem-cnt (num-elems-hvx (interpret-hvx hvx-expr-sketch)))
      (cond
        [(eq? hal-elem-cnt (* 2 hvx-elem-cnt))

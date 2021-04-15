@@ -44,8 +44,9 @@
       [(vtranspose Vu Vv Rt) (transform (vtranspose (visit Vu transform) (visit Vv transform) (visit Rt transform)))]
       [(vinterleave Vuu) (transform (vinterleave (visit Vuu transform)))]
       [(vpack Vu Vv signed?) (transform (vpack (visit Vu transform) (visit Vv transform) (visit signed? transform)))]
-      [(vpacke Vu Vv signed?) (transform (vpacke (visit Vu transform) (visit Vv transform) (visit signed? transform)))]
-      [(vpacko Vu Vv signed?) (transform (vpacko (visit Vu transform) (visit Vv transform) (visit signed? transform)))]
+      [(vpacke Vu Vv) (transform (vpacke (visit Vu transform) (visit Vv transform)))]
+      [(vpacko Vu Vv) (transform (vpacko (visit Vu transform) (visit Vv transform)))]
+      [(vpacke-n Vu Vv signed?) (transform (vpacke-n (visit Vu transform) (visit Vv transform) (visit signed? transform)))]
       [(vpacko-n Vu Vv signed?) (transform (vpacko-n (visit Vu transform) (visit Vv transform) (visit signed? transform)))]
       [(vunpack Vu) (transform (vunpack (visit Vu transform)))]
       ;[(vunpacko Vu)

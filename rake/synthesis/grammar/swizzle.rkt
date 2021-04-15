@@ -12,6 +12,8 @@
 
 (require rake/synthesis/ir)
 
+(require profile)
+
 (define (enumerate-hvx-swizzle-exprs type instr-set vecs)
   ;; Enumerate all expressions
   (define candidates (set->list (enumerate-sw type instr-set vecs 2)))
@@ -19,7 +21,7 @@
   ;; Group into equivalance classes by their cost
   (define ranked-candidates (make-hash))
   (for ([candidate-expr candidates])
-    (define candidate-expr-cost (basic-expr-cost candidate-expr))
+    (define candidate-expr-cost candidate-expr)
     (when (not (hash-has-key? ranked-candidates candidate-expr-cost))
       (hash-set! ranked-candidates candidate-expr-cost (set)))
     (hash-set! ranked-candidates candidate-expr-cost (set-add (hash-ref ranked-candidates candidate-expr-cost) candidate-expr)))
@@ -48,16 +50,16 @@
                (set! reads (set-add reads (vreadp buf (car idx) (second idx))))))
            (apply choose* reads)]
           [_ instr]))
-      (visit-hvx candidate-expr fix-reads)))
+      (cons (visit-hvx (car candidate-expr) fix-reads) (cdr candidate-expr))))
   (set! candidates fixed-candidates)
   
   ;; Group into equivalance classes by their cost
   (define ranked-candidates (make-hash))
   (for ([candidate-expr candidates])
-    (define candidate-expr-cost (basic-expr-cost candidate-expr))
+    (define candidate-expr-cost (cdr candidate-expr))
     (when (not (hash-has-key? ranked-candidates candidate-expr-cost))
       (hash-set! ranked-candidates candidate-expr-cost (set)))
-    (hash-set! ranked-candidates candidate-expr-cost (set-add (hash-ref ranked-candidates candidate-expr-cost) candidate-expr)))
+    (hash-set! ranked-candidates candidate-expr-cost (set-add (hash-ref ranked-candidates candidate-expr-cost) (car candidate-expr))))
   
   ranked-candidates)
   
@@ -84,6 +86,16 @@
 ;  (println (set-count unique-expr-set))
 ;  
 ;  pruned-ranked-candidates)
+
+(define (skip? parent-instr child-instr)
+  (or
+   (and (eq? vshuff parent-instr) (eq? vdeal child-instr))
+   (and (eq? vdeal parent-instr) (eq? vshuff child-instr))
+   (and (eq? vror parent-instr) (eq? vror child-instr))
+   (and (eq? valign parent-instr) (eq? valign child-instr))
+   (and (eq? vinterleave parent-instr) (eq? vinterleave child-instr))
+   (and (eq? vtranspose parent-instr) (eq? vtranspose child-instr))
+   (and (eq? vshuffoe parent-instr) (eq? vshuffoe child-instr))))
 
 (define database-sw (make-hash))
 
@@ -132,7 +144,7 @@
 
 (define database (make-hash))
 
-(define (enumerate type instr-set load-idxs max-cost depth)
+(define (enumerate type instr-set load-idxs max-cost depth [parent-instr (void)])
   (define key (list type instr-set load-idxs depth))
   (cond
     [(hash-has-key? database key) (hash-ref database key)]
@@ -146,36 +158,42 @@
           (define buf-opts (filter (lambda (v) (eq? elem-t (var-type v))) (hash-keys load-idxs)))
           (cond
             [(empty? buf-opts) (set)]
-            [else (if gen-pair? (set (??vreadp buf-opts load-idxs)) (set (??vread buf-opts load-idxs)))])]
+            [else (if gen-pair? (set (cons (??vreadp buf-opts load-idxs) 1)) (set (cons (??vread buf-opts load-idxs) 1)))])]
          [else
           (define candidates (set))
-          (set! candidates (set-union candidates (enumerate type instr-set load-idxs max-cost (sub1 depth))))
+          (set! candidates (set-union candidates (enumerate type instr-set load-idxs max-cost (sub1 depth) parent-instr)))
           (for ([instr instr-set])
-            (for ([sig (instr-forms instr)])
-              (when (eq? type (instr-sig-ret-val sig))
-                (define arg-opts (list))
-                (for ([arg (instr-sig-args sig)])
-                  (define opts (match arg
-                                 [#t (list #t)]
-                                 [#f (list #f)]
-                                 ['const (list (??))]
-                                 [_ (set->list (enumerate arg instr-set load-idxs max-cost (sub1 depth)))]))
-                  (set! arg-opts (append arg-opts (list opts))))
-                (define sig-exprs
-                  (list->set
-                   (match (length arg-opts)
-                     [1 (cartesian-product (list instr) (first arg-opts))]
-                     [2 (cartesian-product (list instr) (first arg-opts) (second arg-opts))]
-                     [3 (cartesian-product (list instr) (first arg-opts) (second arg-opts) (third arg-opts))]
-                     [_ (error "NYI: enumeration instrs with the following number of args:" (length arg-opts))])))
-                (set! sig-exprs (for/set ([sig-expr sig-exprs]) (match (length sig-expr)
-                                                                  [2 ((list-ref sig-expr 0) (list-ref sig-expr 1))]
-                                                                  [3 ((list-ref sig-expr 0) (list-ref sig-expr 1) (list-ref sig-expr 2))]
-                                                                  [4 ((list-ref sig-expr 0) (list-ref sig-expr 1) (list-ref sig-expr 2) (list-ref sig-expr 3))]
-                                                                  [_ (error "NYI. Sig-expr of size" (length sig-expr))])))
-                (set! candidates (set-union candidates sig-exprs)))))
+            (when (not (skip? parent-instr instr))
+              (for ([sig (instr-forms instr)])
+                (when (eq? type (instr-sig-ret-val sig))
+                  (define arg-opts (list))
+                  (for ([arg (instr-sig-args sig)])
+                    (define opts (match arg
+                                   [#t (list (cons #t 0))]
+                                   [#f (list (cons #f 0))]
+                                   ['const (list (cons (??) 0))]
+                                   [_ (set->list (enumerate arg instr-set load-idxs max-cost (sub1 depth) instr))]))
+                    (set! arg-opts (append arg-opts (list opts))))
+                  (define sig-exprs
+                    (list->set
+                     (match (length arg-opts)
+                       [1 (cartesian-product (list (cons instr 1)) (first arg-opts))]
+                       [2 (cartesian-product (list (cons instr 1)) (first arg-opts) (second arg-opts))]
+                       [3 (cartesian-product (list (cons instr 1)) (first arg-opts) (second arg-opts) (third arg-opts))]
+                       [_ (error "NYI: enumeration instrs with the following number of args:" (length arg-opts))])))
+
+                  (set! sig-exprs (for/set ([sig-expr sig-exprs])
+                                    ;(filter (lambda (e) (<= (for/fold ([sum 0]) ([sub-expr e]) (+ sum (cdr sub-expr))) max-cost)) (set->list sig-exprs))
+                                    (define cost (for/fold ([sum 0]) ([sub-expr sig-expr]) (+ sum (cdr sub-expr))))
+                                    (match (length sig-expr)
+                                      [2 (cons ((car (list-ref sig-expr 0)) (car (list-ref sig-expr 1))) cost)]
+                                      [3 (cons ((car (list-ref sig-expr 0)) (car (list-ref sig-expr 1)) (car (list-ref sig-expr 2))) cost)]
+                                      [4 (cons ((car (list-ref sig-expr 0)) (car (list-ref sig-expr 1)) (car (list-ref sig-expr 2)) (car (list-ref sig-expr 3))) cost)]
+                                      [_ (error "NYI. Sig-expr of size" (length sig-expr))])))
+                  (set! candidates (set-union candidates sig-exprs))))))
           candidates]))
-     (define filtered-res (list->set (filter (lambda (e) (<= (basic-expr-cost e) max-cost)) (set->list res))))
+     ;(define filtered-res (list->set (filter (lambda (e) (<= (basic-expr-cost e) max-cost)) (set->list res))))
+     (define filtered-res (list->set (filter (lambda (e) (<= (cdr e) max-cost)) (set->list res))))
      (hash-set! database key filtered-res)
      filtered-res]))
 
