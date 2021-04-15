@@ -49,8 +49,8 @@ public:
                 output.prefetch(input, y, 2);
             }
             if (use_parallel_sched) {
-                Var yo;
-                output.split(y, yo, y, 128).parallel(yo);
+                //Var yo;
+                //output.split(y, yo, y, 128).parallel(yo);
             }
         }
         else {

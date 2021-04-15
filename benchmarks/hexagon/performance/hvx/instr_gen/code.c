@@ -18,11 +18,11 @@ HVX_VectorPair getllvm2(unsigned char *restrict src){
     return Q6_Wuh_vadd_WuhWuh_sat(x, y);
 }
 
-HVX_VectorPair getllvm3(unsigned short *restrict src){
-    HVX_VectorPair *p1 = (HVX_VectorPair *)(src);
+HVX_Vector getllvm3(unsigned short *restrict src){
+    HVX_Vector *p1 = (HVX_Vector *)(src);
     HVX_Vector *p2 = (HVX_Vector *)(src+1);
-    HVX_VectorPair x = *p1;
+    HVX_Vector x = *p1;
     HVX_Vector y = *p2;
     HEXAGON_Vect32 c = 0x02040204;
-    return Q6_Wuh_vmpyacc_WuhVubRub(x, y, c);
+    return Q6_Vh_vasr_VwVwR_sat(x, y, c);
 }

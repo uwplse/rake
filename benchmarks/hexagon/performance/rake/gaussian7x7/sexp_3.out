@@ -1,0 +1,601 @@
+(llvm.hexagon.V6.concat_vectors.128B
+ int32x128
+ (list
+  (int32x64
+   (llvm.hexagon.V6.vunpackh.128B
+    int32x64
+    (list
+     (int16x64
+      (llvm.hexagon.V6.lo.128B
+       int16x64
+       (list
+        (int16x128
+         (llvm.hexagon.V6.vshuffvdd.128B
+          int16x128
+          (list
+           (int16x64
+            (llvm.hexagon.V6.hi.128B
+             int16x64
+             (list
+              (int16x128
+               (llvm.hexagon.V6.vmpabus.acc.128B
+                int16x128
+                (list
+                 (int16x128
+                  (llvm.hexagon.V6.vmpybus.acc.128B
+                   int16x128
+                   (list
+                    (int16x128
+                     (llvm.hexagon.V6.vmpabus.acc.128B
+                      int16x128
+                      (list
+                       (int16x128
+                        (llvm.hexagon.V6.vmpabus.128B
+                         int16x128
+                         (list
+                          (uint8x256
+                           (llvm.hexagon.V6.vcombine.128B
+                            uint8x256
+                            (list
+                             (uint8x128
+                              (llvm.hexagon.V6.vread.128B
+                               uint8x128
+                               (list
+                                (int32 input)
+                                (int32
+                                 (+
+                                  -3
+                                  (+
+                                   (+
+                                    (* 128 rows.s0.x.x)
+                                    (*
+                                     input.stride.1
+                                     (+ 3 (* 4 output.s0.y.y))))
+                                   (* -2 input.stride.1))))
+                                (int32 128)
+                                (int32 125))))
+                             (uint8x128
+                              (llvm.hexagon.V6.vread.128B
+                               uint8x128
+                               (list
+                                (int32 input)
+                                (int32
+                                 (+
+                                  -3
+                                  (+
+                                   (+
+                                    (* 128 rows.s0.x.x)
+                                    (*
+                                     input.stride.1
+                                     (+ 3 (* 4 output.s0.y.y))))
+                                   (* 2 input.stride.1))))
+                                (int32 128)
+                                (int32 125)))))))
+                          (int32 0x06060606))))
+                       (uint8x256
+                        (llvm.hexagon.V6.vcombine.128B
+                         uint8x256
+                         (list
+                          (uint8x128
+                           (llvm.hexagon.V6.vread.128B
+                            uint8x128
+                            (list
+                             (int32 input)
+                             (int32
+                              (+
+                               -3
+                               (+
+                                (+
+                                 (* 128 rows.s0.x.x)
+                                 (* input.stride.1 (+ 3 (* 4 output.s0.y.y))))
+                                (- 0 input.stride.1))))
+                             (int32 1)
+                             (int32 0))))
+                          (uint8x128
+                           (llvm.hexagon.V6.vread.128B
+                            uint8x128
+                            (list
+                             (int32 input)
+                             (int32
+                              (+
+                               -3
+                               (+
+                                (* 128 rows.s0.x.x)
+                                (* input.stride.1 (+ 3 (* 4 output.s0.y.y))))))
+                             (int32 128)
+                             (int32 125)))))))
+                       (int32 0x0f140f14))))
+                    (uint8x128
+                     (llvm.hexagon.V6.vread.128B
+                      uint8x128
+                      (list
+                       (int32 input)
+                       (int32
+                        (+
+                         -3
+                         (+
+                          input.stride.1
+                          (+
+                           (* 128 rows.s0.x.x)
+                           (* input.stride.1 (+ 3 (* 4 output.s0.y.y)))))))
+                       (int32 128)
+                       (int32 125))))
+                    (int32 0x0f0f0f0f))))
+                 (uint8x256
+                  (llvm.hexagon.V6.vcombine.128B
+                   uint8x256
+                   (list
+                    (uint8x128
+                     (llvm.hexagon.V6.vread.128B
+                      uint8x128
+                      (list
+                       (int32 input)
+                       (int32
+                        (+
+                         -3
+                         (+
+                          (+
+                           (* 128 rows.s0.x.x)
+                           (* input.stride.1 (+ 3 (* 4 output.s0.y.y))))
+                          (* 3 input.stride.1))))
+                       (int32 128)
+                       (int32 125))))
+                    (uint8x128
+                     (llvm.hexagon.V6.vread.128B
+                      uint8x128
+                      (list
+                       (int32 input)
+                       (int32
+                        (+
+                         -3
+                         (+
+                          (+
+                           (* 128 rows.s0.x.x)
+                           (* input.stride.1 (+ 3 (* 4 output.s0.y.y))))
+                          (* -3 input.stride.1))))
+                       (int32 128)
+                       (int32 125)))))))
+                 (int32 0x01010101)))))))
+           (int16x64
+            (llvm.hexagon.V6.lo.128B
+             int16x64
+             (list
+              (int16x128
+               (llvm.hexagon.V6.vmpabus.acc.128B
+                int16x128
+                (list
+                 (int16x128
+                  (llvm.hexagon.V6.vmpybus.acc.128B
+                   int16x128
+                   (list
+                    (int16x128
+                     (llvm.hexagon.V6.vmpabus.acc.128B
+                      int16x128
+                      (list
+                       (int16x128
+                        (llvm.hexagon.V6.vmpabus.128B
+                         int16x128
+                         (list
+                          (uint8x256
+                           (llvm.hexagon.V6.vcombine.128B
+                            uint8x256
+                            (list
+                             (uint8x128
+                              (llvm.hexagon.V6.vread.128B
+                               uint8x128
+                               (list
+                                (int32 input)
+                                (int32
+                                 (+
+                                  -3
+                                  (+
+                                   (+
+                                    (* 128 rows.s0.x.x)
+                                    (*
+                                     input.stride.1
+                                     (+ 3 (* 4 output.s0.y.y))))
+                                   (* -2 input.stride.1))))
+                                (int32 128)
+                                (int32 125))))
+                             (uint8x128
+                              (llvm.hexagon.V6.vread.128B
+                               uint8x128
+                               (list
+                                (int32 input)
+                                (int32
+                                 (+
+                                  -3
+                                  (+
+                                   (+
+                                    (* 128 rows.s0.x.x)
+                                    (*
+                                     input.stride.1
+                                     (+ 3 (* 4 output.s0.y.y))))
+                                   (* 2 input.stride.1))))
+                                (int32 128)
+                                (int32 125)))))))
+                          (int32 0x06060606))))
+                       (uint8x256
+                        (llvm.hexagon.V6.vcombine.128B
+                         uint8x256
+                         (list
+                          (uint8x128
+                           (llvm.hexagon.V6.vread.128B
+                            uint8x128
+                            (list
+                             (int32 input)
+                             (int32
+                              (+
+                               -3
+                               (+
+                                (+
+                                 (* 128 rows.s0.x.x)
+                                 (* input.stride.1 (+ 3 (* 4 output.s0.y.y))))
+                                (- 0 input.stride.1))))
+                             (int32 1)
+                             (int32 0))))
+                          (uint8x128
+                           (llvm.hexagon.V6.vread.128B
+                            uint8x128
+                            (list
+                             (int32 input)
+                             (int32
+                              (+
+                               -3
+                               (+
+                                (* 128 rows.s0.x.x)
+                                (* input.stride.1 (+ 3 (* 4 output.s0.y.y))))))
+                             (int32 128)
+                             (int32 125)))))))
+                       (int32 0x0f140f14))))
+                    (uint8x128
+                     (llvm.hexagon.V6.vread.128B
+                      uint8x128
+                      (list
+                       (int32 input)
+                       (int32
+                        (+
+                         -3
+                         (+
+                          input.stride.1
+                          (+
+                           (* 128 rows.s0.x.x)
+                           (* input.stride.1 (+ 3 (* 4 output.s0.y.y)))))))
+                       (int32 128)
+                       (int32 125))))
+                    (int32 0x0f0f0f0f))))
+                 (uint8x256
+                  (llvm.hexagon.V6.vcombine.128B
+                   uint8x256
+                   (list
+                    (uint8x128
+                     (llvm.hexagon.V6.vread.128B
+                      uint8x128
+                      (list
+                       (int32 input)
+                       (int32
+                        (+
+                         -3
+                         (+
+                          (+
+                           (* 128 rows.s0.x.x)
+                           (* input.stride.1 (+ 3 (* 4 output.s0.y.y))))
+                          (* 3 input.stride.1))))
+                       (int32 128)
+                       (int32 125))))
+                    (uint8x128
+                     (llvm.hexagon.V6.vread.128B
+                      uint8x128
+                      (list
+                       (int32 input)
+                       (int32
+                        (+
+                         -3
+                         (+
+                          (+
+                           (* 128 rows.s0.x.x)
+                           (* input.stride.1 (+ 3 (* 4 output.s0.y.y))))
+                          (* -3 input.stride.1))))
+                       (int32 128)
+                       (int32 125)))))))
+                 (int32 0x01010101)))))))
+           (int32 -2))))))))))
+  (int32x64
+   (llvm.hexagon.V6.vunpackh.128B
+    int32x64
+    (list
+     (int16x64
+      (llvm.hexagon.V6.hi.128B
+       int16x64
+       (list
+        (int16x128
+         (llvm.hexagon.V6.vshuffvdd.128B
+          int16x128
+          (list
+           (int16x64
+            (llvm.hexagon.V6.hi.128B
+             int16x64
+             (list
+              (int16x128
+               (llvm.hexagon.V6.vmpabus.acc.128B
+                int16x128
+                (list
+                 (int16x128
+                  (llvm.hexagon.V6.vmpybus.acc.128B
+                   int16x128
+                   (list
+                    (int16x128
+                     (llvm.hexagon.V6.vmpabus.acc.128B
+                      int16x128
+                      (list
+                       (int16x128
+                        (llvm.hexagon.V6.vmpabus.128B
+                         int16x128
+                         (list
+                          (uint8x256
+                           (llvm.hexagon.V6.vcombine.128B
+                            uint8x256
+                            (list
+                             (uint8x128
+                              (llvm.hexagon.V6.vread.128B
+                               uint8x128
+                               (list
+                                (int32 input)
+                                (int32
+                                 (+
+                                  -3
+                                  (+
+                                   (+
+                                    (* 128 rows.s0.x.x)
+                                    (*
+                                     input.stride.1
+                                     (+ 3 (* 4 output.s0.y.y))))
+                                   (* -2 input.stride.1))))
+                                (int32 128)
+                                (int32 125))))
+                             (uint8x128
+                              (llvm.hexagon.V6.vread.128B
+                               uint8x128
+                               (list
+                                (int32 input)
+                                (int32
+                                 (+
+                                  -3
+                                  (+
+                                   (+
+                                    (* 128 rows.s0.x.x)
+                                    (*
+                                     input.stride.1
+                                     (+ 3 (* 4 output.s0.y.y))))
+                                   (* 2 input.stride.1))))
+                                (int32 128)
+                                (int32 125)))))))
+                          (int32 0x06060606))))
+                       (uint8x256
+                        (llvm.hexagon.V6.vcombine.128B
+                         uint8x256
+                         (list
+                          (uint8x128
+                           (llvm.hexagon.V6.vread.128B
+                            uint8x128
+                            (list
+                             (int32 input)
+                             (int32
+                              (+
+                               -3
+                               (+
+                                (+
+                                 (* 128 rows.s0.x.x)
+                                 (* input.stride.1 (+ 3 (* 4 output.s0.y.y))))
+                                (- 0 input.stride.1))))
+                             (int32 1)
+                             (int32 0))))
+                          (uint8x128
+                           (llvm.hexagon.V6.vread.128B
+                            uint8x128
+                            (list
+                             (int32 input)
+                             (int32
+                              (+
+                               -3
+                               (+
+                                (* 128 rows.s0.x.x)
+                                (* input.stride.1 (+ 3 (* 4 output.s0.y.y))))))
+                             (int32 128)
+                             (int32 125)))))))
+                       (int32 0x0f140f14))))
+                    (uint8x128
+                     (llvm.hexagon.V6.vread.128B
+                      uint8x128
+                      (list
+                       (int32 input)
+                       (int32
+                        (+
+                         -3
+                         (+
+                          input.stride.1
+                          (+
+                           (* 128 rows.s0.x.x)
+                           (* input.stride.1 (+ 3 (* 4 output.s0.y.y)))))))
+                       (int32 128)
+                       (int32 125))))
+                    (int32 0x0f0f0f0f))))
+                 (uint8x256
+                  (llvm.hexagon.V6.vcombine.128B
+                   uint8x256
+                   (list
+                    (uint8x128
+                     (llvm.hexagon.V6.vread.128B
+                      uint8x128
+                      (list
+                       (int32 input)
+                       (int32
+                        (+
+                         -3
+                         (+
+                          (+
+                           (* 128 rows.s0.x.x)
+                           (* input.stride.1 (+ 3 (* 4 output.s0.y.y))))
+                          (* 3 input.stride.1))))
+                       (int32 128)
+                       (int32 125))))
+                    (uint8x128
+                     (llvm.hexagon.V6.vread.128B
+                      uint8x128
+                      (list
+                       (int32 input)
+                       (int32
+                        (+
+                         -3
+                         (+
+                          (+
+                           (* 128 rows.s0.x.x)
+                           (* input.stride.1 (+ 3 (* 4 output.s0.y.y))))
+                          (* -3 input.stride.1))))
+                       (int32 128)
+                       (int32 125)))))))
+                 (int32 0x01010101)))))))
+           (int16x64
+            (llvm.hexagon.V6.lo.128B
+             int16x64
+             (list
+              (int16x128
+               (llvm.hexagon.V6.vmpabus.acc.128B
+                int16x128
+                (list
+                 (int16x128
+                  (llvm.hexagon.V6.vmpybus.acc.128B
+                   int16x128
+                   (list
+                    (int16x128
+                     (llvm.hexagon.V6.vmpabus.acc.128B
+                      int16x128
+                      (list
+                       (int16x128
+                        (llvm.hexagon.V6.vmpabus.128B
+                         int16x128
+                         (list
+                          (uint8x256
+                           (llvm.hexagon.V6.vcombine.128B
+                            uint8x256
+                            (list
+                             (uint8x128
+                              (llvm.hexagon.V6.vread.128B
+                               uint8x128
+                               (list
+                                (int32 input)
+                                (int32
+                                 (+
+                                  -3
+                                  (+
+                                   (+
+                                    (* 128 rows.s0.x.x)
+                                    (*
+                                     input.stride.1
+                                     (+ 3 (* 4 output.s0.y.y))))
+                                   (* -2 input.stride.1))))
+                                (int32 128)
+                                (int32 125))))
+                             (uint8x128
+                              (llvm.hexagon.V6.vread.128B
+                               uint8x128
+                               (list
+                                (int32 input)
+                                (int32
+                                 (+
+                                  -3
+                                  (+
+                                   (+
+                                    (* 128 rows.s0.x.x)
+                                    (*
+                                     input.stride.1
+                                     (+ 3 (* 4 output.s0.y.y))))
+                                   (* 2 input.stride.1))))
+                                (int32 128)
+                                (int32 125)))))))
+                          (int32 0x06060606))))
+                       (uint8x256
+                        (llvm.hexagon.V6.vcombine.128B
+                         uint8x256
+                         (list
+                          (uint8x128
+                           (llvm.hexagon.V6.vread.128B
+                            uint8x128
+                            (list
+                             (int32 input)
+                             (int32
+                              (+
+                               -3
+                               (+
+                                (+
+                                 (* 128 rows.s0.x.x)
+                                 (* input.stride.1 (+ 3 (* 4 output.s0.y.y))))
+                                (- 0 input.stride.1))))
+                             (int32 1)
+                             (int32 0))))
+                          (uint8x128
+                           (llvm.hexagon.V6.vread.128B
+                            uint8x128
+                            (list
+                             (int32 input)
+                             (int32
+                              (+
+                               -3
+                               (+
+                                (* 128 rows.s0.x.x)
+                                (* input.stride.1 (+ 3 (* 4 output.s0.y.y))))))
+                             (int32 128)
+                             (int32 125)))))))
+                       (int32 0x0f140f14))))
+                    (uint8x128
+                     (llvm.hexagon.V6.vread.128B
+                      uint8x128
+                      (list
+                       (int32 input)
+                       (int32
+                        (+
+                         -3
+                         (+
+                          input.stride.1
+                          (+
+                           (* 128 rows.s0.x.x)
+                           (* input.stride.1 (+ 3 (* 4 output.s0.y.y)))))))
+                       (int32 128)
+                       (int32 125))))
+                    (int32 0x0f0f0f0f))))
+                 (uint8x256
+                  (llvm.hexagon.V6.vcombine.128B
+                   uint8x256
+                   (list
+                    (uint8x128
+                     (llvm.hexagon.V6.vread.128B
+                      uint8x128
+                      (list
+                       (int32 input)
+                       (int32
+                        (+
+                         -3
+                         (+
+                          (+
+                           (* 128 rows.s0.x.x)
+                           (* input.stride.1 (+ 3 (* 4 output.s0.y.y))))
+                          (* 3 input.stride.1))))
+                       (int32 128)
+                       (int32 125))))
+                    (uint8x128
+                     (llvm.hexagon.V6.vread.128B
+                      uint8x128
+                      (list
+                       (int32 input)
+                       (int32
+                        (+
+                         -3
+                         (+
+                          (+
+                           (* 128 rows.s0.x.x)
+                           (* input.stride.1 (+ 3 (* 4 output.s0.y.y))))
+                          (* -3 input.stride.1))))
+                       (int32 128)
+                       (int32 125)))))))
+                 (int32 0x01010101)))))))
+           (int32 -2))))))))))))

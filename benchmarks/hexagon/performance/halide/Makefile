@@ -3,7 +3,7 @@ HALIDE_DIR ?= ../../../../../../Software/Halide-d48fbde/distrib
 HEXAGON_SIM ?= /home/maaz/Qualcomm/Hexagon_SDK/3.5.2/tools/HEXAGON_Tools/8.3.07/Tools/bin/hexagon-sim
 HEXAGON_CLANG ?= /home/maaz/Qualcomm/Hexagon_SDK/3.5.2/tools/HEXAGON_Tools/8.3.07/Tools/bin/hexagon-clang++
 
-benchmarks = vmpabuu simple gaussian3x3 gaussian5x5 gaussian5x5_bc gaussian7x7 conv3x3a16 conv3x3a32 sobel3x3 blur3x3 dilate3x3 median3x3
+benchmarks = vmpabuu simple gaussian3x3 gaussian5x5 gaussian5x5_bc gaussian7x7 conv3x3a16 conv3x3a32 sobel3x3 blur3x3 dilate3x3 median3x3 conv_nn im2col camera_pipe matmul maxpool
 
 bin_dirs = $(addsuffix /bin,$(benchmarks))
 out_dirs = $(addsuffix /out,$(benchmarks))
@@ -22,7 +22,7 @@ $(benchmarks): %: %/bin %/out %/profile
 
 	export LD_LIBRARY_PATH=$(HALIDE_DIR)/lib; ./$@/bin/$@_generator \
 		-o $@/bin \
-		-g $@ -e static_library,stmt,h,llvm_assembly,assembly \
+		-g $@ -e static_library,stmt,h,llvm_assembly,assembly,schedule \
 		-f $@_hvx128 target=hexagon-32-noos-no_bounds_query-no_asserts-hvx_128
 
 	$(HEXAGON_CLANG) \

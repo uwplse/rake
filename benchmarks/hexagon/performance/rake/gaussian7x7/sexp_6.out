@@ -1,0 +1,555 @@
+(llvm.hexagon.V6.vdealb.128B
+ uint8x128
+ (list
+  (uint8x128
+   (llvm.hexagon.V6.vpackhub.sat.128B
+    uint8x128
+    (list
+     (int16x64
+      (llvm.hexagon.V6.vasrwhsat.128B
+       int16x64
+       (list
+        (int32x32
+         (llvm.hexagon.V6.vmpyiwb.acc.128B
+          int32x32
+          (list
+           (int32x32
+            (llvm.hexagon.V6.vmpyiwb.acc.128B
+             int32x32
+             (list
+              (int32x32
+               (llvm.hexagon.V6.vmpyiwb.acc.128B
+                int32x32
+                (list
+                 (int32x32
+                  (llvm.hexagon.V6.vmpyiwb.acc.128B
+                   int32x32
+                   (list
+                    (int32x32
+                     (llvm.hexagon.V6.vmpyiwb.acc.128B
+                      int32x32
+                      (list
+                       (int32x32
+                        (llvm.hexagon.V6.vread.128B
+                         int32x32
+                         (list
+                          (int32 rows)
+                          (int32
+                           (+
+                            358
+                            (*
+                             2
+                             (+
+                              t15
+                              (* 64 output.s0.x.x)))))
+                          (int32 4)
+                          (int32 2))))
+                       (int32x32
+                        (llvm.hexagon.V6.vread.128B
+                         int32x32
+                         (list
+                          (int32 rows)
+                          (int32
+                           (+
+                            355
+                            (*
+                             2
+                             (+
+                              t15
+                              (* 64 output.s0.x.x)))))
+                          (int32 4)
+                          (int32 3))))
+                       (int32 0x14141414))))
+                    (int32x32
+                     (llvm.hexagon.V6.vmpyiwb.acc.128B
+                      int32x32
+                      (list
+                       (int32x32
+                        (llvm.hexagon.V6.vread.128B
+                         int32x32
+                         (list
+                          (int32 rows)
+                          (int32
+                           (+
+                            356
+                            (*
+                             2
+                             (+
+                              t15
+                              (* 64 output.s0.x.x)))))
+                          (int32 4)
+                          (int32 0))))
+                       (int32x32
+                        (llvm.hexagon.V6.vread.128B
+                         int32x32
+                         (list
+                          (int32 rows)
+                          (int32
+                           (+
+                            354
+                            (*
+                             2
+                             (+
+                              t15
+                              (* 64 output.s0.x.x)))))
+                          (int32 4)
+                          (int32 2))))
+                       (int32 0x01010101))))
+                    (int32 0x0f0f0f0f))))
+                 (int32x32
+                  (llvm.hexagon.V6.vread.128B
+                   int32x32
+                   (list
+                    (int32 rows)
+                    (int32
+                     (+
+                      357
+                      (*
+                       2
+                       (+
+                        t15
+                        (* 64 output.s0.x.x)))))
+                    (int32 4)
+                    (int32 1))))
+                 (int32 0x06060606))))
+              (int32x32
+               (llvm.hexagon.V6.vread.128B
+                int32x32
+                (list
+                 (int32 rows)
+                 (int32
+                  (+
+                   352
+                   (*
+                    2
+                    (+
+                     t15
+                     (* 64 output.s0.x.x)))))
+                 (int32 4)
+                 (int32 0))))
+              (int32 0x01010101))))
+           (int32x32
+            (llvm.hexagon.V6.vread.128B
+             int32x32
+             (list
+              (int32 rows)
+              (int32
+               (+
+                353
+                (*
+                 2
+                 (+
+                  t15
+                  (* 64 output.s0.x.x)))))
+              (int32 4)
+              (int32 1))))
+           (int32 0x06060606))))
+        (int32x32
+         (llvm.hexagon.V6.vaddw.128B
+          int32x32
+          (list
+           (int32x32
+            (llvm.hexagon.V6.vmpyiwb.acc.128B
+             int32x32
+             (list
+              (int32x32
+               (llvm.hexagon.V6.vmpyiwb.acc.128B
+                int32x32
+                (list
+                 (int32x32
+                  (llvm.hexagon.V6.vmpyiwb.acc.128B
+                   int32x32
+                   (list
+                    (int32x32
+                     (llvm.hexagon.V6.vread.128B
+                      int32x32
+                      (list
+                       (int32 rows)
+                       (int32
+                        (+
+                         294
+                         (*
+                          2
+                          (+
+                           t15
+                           (* 64 output.s0.x.x)))))
+                       (int32 4)
+                       (int32 2))))
+                    (int32x32
+                     (llvm.hexagon.V6.vread.128B
+                      int32x32
+                      (list
+                       (int32 rows)
+                       (int32
+                        (+
+                         291
+                         (*
+                          2
+                          (+
+                           t15
+                           (* 64 output.s0.x.x)))))
+                       (int32 4)
+                       (int32 3))))
+                    (int32 0x14141414))))
+                 (int32x32
+                  (llvm.hexagon.V6.vmpyiwb.acc.128B
+                   int32x32
+                   (list
+                    (int32x32
+                     (llvm.hexagon.V6.vread.128B
+                      int32x32
+                      (list
+                       (int32 rows)
+                       (int32
+                        (+
+                         292
+                         (*
+                          2
+                          (+
+                           t15
+                           (* 64 output.s0.x.x)))))
+                       (int32 4)
+                       (int32 0))))
+                    (int32x32
+                     (llvm.hexagon.V6.vread.128B
+                      int32x32
+                      (list
+                       (int32 rows)
+                       (int32
+                        (+
+                         290
+                         (*
+                          2
+                          (+
+                           t15
+                           (* 64 output.s0.x.x)))))
+                       (int32 4)
+                       (int32 2))))
+                    (int32 0x01010101))))
+                 (int32 0x0f0f0f0f))))
+              (int32x32
+               (llvm.hexagon.V6.vread.128B
+                int32x32
+                (list
+                 (int32 rows)
+                 (int32
+                  (+
+                   293
+                   (*
+                    2
+                    (+
+                     t15
+                     (* 64 output.s0.x.x)))))
+                 (int32 4)
+                 (int32 1))))
+              (int32 0x06060606))))
+           (int32x32
+            (llvm.hexagon.V6.vmpyiwb.acc.128B
+             int32x32
+             (list
+              (int32x32
+               (llvm.hexagon.V6.vread.128B
+                int32x32
+                (list
+                 (int32 rows)
+                 (int32
+                  (+
+                   288
+                   (*
+                    2
+                    (+
+                     t15
+                     (* 64 output.s0.x.x)))))
+                 (int32 4)
+                 (int32 0))))
+              (int32x32
+               (llvm.hexagon.V6.vread.128B
+                int32x32
+                (list
+                 (int32 rows)
+                 (int32
+                  (+
+                   289
+                   (*
+                    2
+                    (+
+                     t15
+                     (* 64 output.s0.x.x)))))
+                 (int32 4)
+                 (int32 1))))
+              (int32 0x06060606)))))))
+        (int32 12))))
+     (int16x64
+      (llvm.hexagon.V6.vasrwhsat.128B
+       int16x64
+       (list
+        (int32x32
+         (llvm.hexagon.V6.vmpyiwb.acc.128B
+          int32x32
+          (list
+           (int32x32
+            (llvm.hexagon.V6.vmpyiwb.acc.128B
+             int32x32
+             (list
+              (int32x32
+               (llvm.hexagon.V6.vread.128B
+                int32x32
+                (list
+                 (int32 rows)
+                 (int32
+                  (+
+                   320
+                   (*
+                    2
+                    (+
+                     t15
+                     (* 64 output.s0.x.x)))))
+                 (int32 4)
+                 (int32 0))))
+              (int32x32
+               (llvm.hexagon.V6.vread.128B
+                int32x32
+                (list
+                 (int32 rows)
+                 (int32
+                  (+
+                   321
+                   (*
+                    2
+                    (+
+                     t15
+                     (* 64 output.s0.x.x)))))
+                 (int32 4)
+                 (int32 1))))
+              (int32 0x06060606))))
+           (int32x32
+            (llvm.hexagon.V6.vmpyiwb.acc.128B
+             int32x32
+             (list
+              (int32x32
+               (llvm.hexagon.V6.vmpyiwb.acc.128B
+                int32x32
+                (list
+                 (int32x32
+                  (llvm.hexagon.V6.vmpyiwb.acc.128B
+                   int32x32
+                   (list
+                    (int32x32
+                     (llvm.hexagon.V6.vread.128B
+                      int32x32
+                      (list
+                       (int32 rows)
+                       (int32
+                        (+
+                         326
+                         (*
+                          2
+                          (+
+                           t15
+                           (* 64 output.s0.x.x)))))
+                       (int32 4)
+                       (int32 2))))
+                    (int32x32
+                     (llvm.hexagon.V6.vread.128B
+                      int32x32
+                      (list
+                       (int32 rows)
+                       (int32
+                        (+
+                         323
+                         (*
+                          2
+                          (+
+                           t15
+                           (* 64 output.s0.x.x)))))
+                       (int32 4)
+                       (int32 3))))
+                    (int32 0x14141414))))
+                 (int32x32
+                  (llvm.hexagon.V6.vmpyiwb.acc.128B
+                   int32x32
+                   (list
+                    (int32x32
+                     (llvm.hexagon.V6.vread.128B
+                      int32x32
+                      (list
+                       (int32 rows)
+                       (int32
+                        (+
+                         324
+                         (*
+                          2
+                          (+
+                           t15
+                           (* 64 output.s0.x.x)))))
+                       (int32 4)
+                       (int32 0))))
+                    (int32x32
+                     (llvm.hexagon.V6.vread.128B
+                      int32x32
+                      (list
+                       (int32 rows)
+                       (int32
+                        (+
+                         322
+                         (*
+                          2
+                          (+
+                           t15
+                           (* 64 output.s0.x.x)))))
+                       (int32 4)
+                       (int32 2))))
+                    (int32 0x01010101))))
+                 (int32 0x0f0f0f0f))))
+              (int32x32
+               (llvm.hexagon.V6.vread.128B
+                int32x32
+                (list
+                 (int32 rows)
+                 (int32
+                  (+
+                   325
+                   (*
+                    2
+                    (+
+                     t15
+                     (* 64 output.s0.x.x)))))
+                 (int32 4)
+                 (int32 1))))
+              (int32 0x06060606))))
+           (int32 0x01010101))))
+        (int32x32
+         (llvm.hexagon.V6.vmpyiwb.acc.128B
+          int32x32
+          (list
+           (int32x32
+            (llvm.hexagon.V6.vaddw.128B
+             int32x32
+             (list
+              (int32x32
+               (llvm.hexagon.V6.vread.128B
+                int32x32
+                (list
+                 (int32 rows)
+                 (int32
+                  (+
+                   256
+                   (*
+                    2
+                    (+
+                     t15
+                     (* 64 output.s0.x.x)))))
+                 (int32 4)
+                 (int32 0))))
+              (int32x32
+               (llvm.hexagon.V6.vmpyiwb.acc.128B
+                int32x32
+                (list
+                 (int32x32
+                  (llvm.hexagon.V6.vmpyiwb.acc.128B
+                   int32x32
+                   (list
+                    (int32x32
+                     (llvm.hexagon.V6.vmpyiwb.acc.128B
+                      int32x32
+                      (list
+                       (int32x32
+                        (llvm.hexagon.V6.vread.128B
+                         int32x32
+                         (list
+                          (int32 rows)
+                          (int32
+                           (+
+                            262
+                            (*
+                             2
+                             (+
+                              t15
+                              (* 64 output.s0.x.x)))))
+                          (int32 4)
+                          (int32 2))))
+                       (int32x32
+                        (llvm.hexagon.V6.vread.128B
+                         int32x32
+                         (list
+                          (int32 rows)
+                          (int32
+                           (+
+                            259
+                            (*
+                             2
+                             (+
+                              t15
+                              (* 64 output.s0.x.x)))))
+                          (int32 4)
+                          (int32 3))))
+                       (int32 0x14141414))))
+                    (int32x32
+                     (llvm.hexagon.V6.vmpyiwb.acc.128B
+                      int32x32
+                      (list
+                       (int32x32
+                        (llvm.hexagon.V6.vread.128B
+                         int32x32
+                         (list
+                          (int32 rows)
+                          (int32
+                           (+
+                            260
+                            (*
+                             2
+                             (+
+                              t15
+                              (* 64 output.s0.x.x)))))
+                          (int32 4)
+                          (int32 0))))
+                       (int32x32
+                        (llvm.hexagon.V6.vread.128B
+                         int32x32
+                         (list
+                          (int32 rows)
+                          (int32
+                           (+
+                            258
+                            (*
+                             2
+                             (+
+                              t15
+                              (* 64 output.s0.x.x)))))
+                          (int32 4)
+                          (int32 2))))
+                       (int32 0x01010101))))
+                    (int32 0x0f0f0f0f))))
+                 (int32x32
+                  (llvm.hexagon.V6.vread.128B
+                   int32x32
+                   (list
+                    (int32 rows)
+                    (int32
+                     (+
+                      261
+                      (*
+                       2
+                       (+
+                        t15
+                        (* 64 output.s0.x.x)))))
+                    (int32 4)
+                    (int32 1))))
+                 (int32 0x06060606)))))))
+           (int32x32
+            (llvm.hexagon.V6.vread.128B
+             int32x32
+             (list
+              (int32 rows)
+              (int32
+               (+
+                257
+                (*
+                 2
+                 (+
+                  t15
+                  (* 64 output.s0.x.x)))))
+              (int32 4)
+              (int32 1))))
+           (int32 0x06060606))))
+        (int32 12)))))))))

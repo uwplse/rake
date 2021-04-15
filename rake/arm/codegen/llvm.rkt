@@ -88,6 +88,10 @@
     [(i32x32x2 data-v0 data-v1) (string->sexp "int32x64")]
     [(u32x32x2 data-v0 data-v1) (string->sexp "uint32x64")]))
 
+(define (double-len t)
+  (match t
+    ["int32x64" "int32x128"]))
+
 (define (codegen-idx idx)
   (match idx
     [(expression op child ...)
@@ -115,9 +119,12 @@
     [_ idx]))
 
 (define (codegen p)
-  ;;(printf (format "~a\n" p))
+  (printf (format "~a\n" p))
   (match p
 
+    [(list v0 v1)
+     (generate `concat_vectors (double-len (p-type (first p))) `(list ,(input-arg Vu) ,(input-arg Vv)))]
+    
     ;;vread
     [(vread buf loc align)
      (generate

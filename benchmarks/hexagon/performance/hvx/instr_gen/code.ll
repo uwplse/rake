@@ -34,19 +34,19 @@ entry:
 declare <64 x i32> @llvm.hexagon.V6.vadduhsat.dv.128B(<64 x i32>, <64 x i32>) #1
 
 ; Function Attrs: nounwind readonly
-define dso_local inreg <64 x i32> @getllvm3(i16* noalias nocapture readonly %src) local_unnamed_addr #0 {
+define dso_local inreg <32 x i32> @getllvm3(i16* noalias nocapture readonly %src) local_unnamed_addr #0 {
 entry:
-  %0 = bitcast i16* %src to <64 x i32>*
+  %0 = bitcast i16* %src to <32 x i32>*
   %add.ptr = getelementptr inbounds i16, i16* %src, i32 1
   %1 = bitcast i16* %add.ptr to <32 x i32>*
-  %2 = load <64 x i32>, <64 x i32>* %0, align 256, !tbaa !2
+  %2 = load <32 x i32>, <32 x i32>* %0, align 128, !tbaa !2
   %3 = load <32 x i32>, <32 x i32>* %1, align 128, !tbaa !2
-  %4 = tail call <64 x i32> @llvm.hexagon.V6.vmpyub.acc.128B(<64 x i32> %2, <32 x i32> %3, i32 33817092)
-  ret <64 x i32> %4
+  %4 = tail call <32 x i32> @llvm.hexagon.V6.vasrwhsat.128B(<32 x i32> %2, <32 x i32> %3, i32 33817092)
+  ret <32 x i32> %4
 }
 
 ; Function Attrs: nounwind readnone
-declare <64 x i32> @llvm.hexagon.V6.vmpyub.acc.128B(<64 x i32>, <32 x i32>, i32) #1
+declare <32 x i32> @llvm.hexagon.V6.vasrwhsat.128B(<32 x i32>, <32 x i32>, i32) #1
 
 attributes #0 = { nounwind readonly "correctly-rounded-divide-sqrt-fp-math"="false" "disable-tail-calls"="false" "less-precise-fpmad"="false" "no-frame-pointer-elim"="true" "no-frame-pointer-elim-non-leaf" "no-infs-fp-math"="false" "no-jump-tables"="false" "no-nans-fp-math"="false" "no-signed-zeros-fp-math"="false" "no-trapping-math"="false" "stack-protector-buffer-size"="8" "target-cpu"="hexagonv66" "target-features"="+hvx-length128b,+hvxv66,-long-calls" "unsafe-fp-math"="false" "use-soft-float"="false" }
 attributes #1 = { nounwind readnone }
