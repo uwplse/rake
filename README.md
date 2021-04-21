@@ -63,5 +63,6 @@ constructors  :=   load (buffer indexes align) | ramp (base stride len)
               |   extract-div-consts-halide : (halide-expr) -> set<int>
               |   extract-shr-consts-halide : (halide-expr) -> set<int>
   
-** For each lane of the vector computed by the Halide expression, the hash-table maps to the set of live buffer-reads involved in its computation
+** For each lane of the vector computed by the Halide expression, the hash-table maps to the set of live buffer-reads 
+involved in its computation
 ```
