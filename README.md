@@ -49,4 +49,19 @@ constructors  :=   load (buffer indexes align) | ramp (base stride len)
 
  shuffle-ops  :=  slice_vectors (vec base stride len) | concat_vectors (vec1 vec2)
               |   dynamic_shuffle (vec idxs st end)
+
+     lib-fns  :=  halide-elem-type : (halide-expr) -> cpp-type
+              |   halide-vec-len : (halide-expr) -> int
+              |   halide-sub-exprs : (halide-expr) -> list<halide-expr>
+              |   halide-cast-op? : (halide-expr) -> bool
+
+    analysis  :=  extract-live-buffers-halide : (halide-expr) -> set<halide-buffer>
+              |   extract-buffer-reads-halide : (halide-expr) -> hash-table<int,set<buffer-ref>>**
+              |   extract-add-consts-halide : (halide-expr) -> set<int>
+              |   extract-sub-consts-halide : (halide-expr) -> set<int>
+              |   extract-mul-consts-halide : (halide-expr) -> set<int>
+              |   extract-div-consts-halide : (halide-expr) -> set<int>
+              |   extract-shr-consts-halide : (halide-expr) -> set<int>
+  
+** For each lane of the vector computed by the Halide expression, the hash-table maps to the set of live buffer-reads involved in its computation
 ```
