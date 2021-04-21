@@ -1,440 +1,284 @@
 #lang rosette
 
-(require rake/util)
-(require rake/cpp/types)
-(require rake/halide/ir/types)
-(require rake/halide/ir/interpreter)
+;; WARNING:
+;; Most, if not all, of the following functions are meant as a pre-processing step to the actual synthesis. They help
+;; generate and specialize a grammar. The functions contain rosette unsafe constructs and therefore should never be
+;; used as part of a query to the solver.
 
-(require rake/hvx/ast/types)
+(require
+  (only-in racket/base for/fold)
+  (only-in rosette/base/core/term @app)
+  rosette/lib/destruct
+  rake/cpp
+  rake/halide/ir/types
+  rake/halide/ir/visitor
+  rake/halide/ir/interpreter)
 
-(require rosette/lib/match)
+(provide
+ (rename-out
+  [extract-live-buffers extract-live-buffers-halide]
+  [extract-buffer-reads extract-buffer-reads-halide]
+  [extract-add-consts extract-add-consts-halide]
+  [extract-sub-consts extract-sub-consts-halide]
+  [extract-mul-consts extract-mul-consts-halide]
+  [extract-div-consts extract-div-consts-halide]
+  [extract-shr-consts extract-shr-consts-halide]
+  [cast-op? halide-cast-op?]))
 
-;; Extract vectors
-(define (extract-loads-as-hvx-vecs expr)
-  (list->set
-   (match expr
-     ;; Constructors
-     ;[(x32 sca) (list (vsplat sca))]
-     ;[(x64 sca) (list (vsplat sca))]
-     ;[(x128 sca) (list (vsplat sca))]
-     ;[(x256 sca) (list (vsplat sca))]
-     [(x32 sca) (list)]
-     [(x64 sca) (list)]
-     [(x128 sca) (list)]
-     [(x256 sca) (list)]
+(define (extract-live-buffers expr)
+  (define live-buffers (mutable-set))
+  (define (extract-buffer node)
+    (destruct node
+      [(buffer data elemT) (set-add! live-buffers node)]
+      [_ node]))
+  (visit-halide expr extract-buffer)
+  live-buffers)
 
-     [(ramp base stride len) (list)]
-     [(load buf idxs align)
-      (match idxs
-        [(ramp base stride len)
-         (define elem-bw (bw (hash-ref type-dict buf)))
-         (define tile-w (* len elem-bw))
-         (cond
-           [(eq? tile-w 1024)
-            (list (list buf base align))]
-           [(eq? tile-w 2048)
-            (list
-             (list buf base align)
-             (list buf (+ base (quotient 1024 elem-bw)) align))]
-           [(eq? tile-w 4096)
-            (list
-             (list buf base align)
-             (list buf (+ base (quotient 1024 elem-bw)) align)
-             (list buf (+ base (quotient 2048 elem-bw)) align)
-             (list buf (+ base (quotient 3072 elem-bw)) align))])]
-        [_ (error "NYI: Extracting vec from:" expr)])]
-
-     [(slice_vectors vec base stride len) (extract-loads-as-hvx-vecs vec)]
-     [(concat_vectors v1 v2) (set-union (extract-loads-as-hvx-vecs v1) (extract-loads-as-hvx-vecs v2))]
-
-     ;; Type Casts
-     [(uint8x32 vec) (extract-loads-as-hvx-vecs vec)]
-     [(uint16x32 vec) (extract-loads-as-hvx-vecs vec)]
-     [(uint32x32 vec) (extract-loads-as-hvx-vecs vec)]
-     [(int8x32 vec) (extract-loads-as-hvx-vecs vec)]
-     [(int16x32 vec) (extract-loads-as-hvx-vecs vec)]
-     [(int32x32 vec) (extract-loads-as-hvx-vecs vec)]
-     [(uint8x64 vec) (extract-loads-as-hvx-vecs vec)]
-     [(uint16x64 vec) (extract-loads-as-hvx-vecs vec)]
-     [(uint32x64 vec) (extract-loads-as-hvx-vecs vec)]
-     [(int8x64 vec) (extract-loads-as-hvx-vecs vec)]
-     [(int16x64 vec) (extract-loads-as-hvx-vecs vec)]
-     [(int32x64 vec) (extract-loads-as-hvx-vecs vec)]
-     [(uint8x128 vec) (extract-loads-as-hvx-vecs vec)]
-     [(uint16x128 vec) (extract-loads-as-hvx-vecs vec)]
-     [(uint32x128 vec) (extract-loads-as-hvx-vecs vec)]
-     [(int8x128 vec) (extract-loads-as-hvx-vecs vec)]
-     [(int16x128 vec) (extract-loads-as-hvx-vecs vec)]
-     [(int32x128 vec) (extract-loads-as-hvx-vecs vec)]
-     [(uint8x256 vec) (extract-loads-as-hvx-vecs vec)]
-
-     ;; Operations
-     [(vec-add v1 v2) (set-union (extract-loads-as-hvx-vecs v1) (extract-loads-as-hvx-vecs v2))]
-     [(vec-sub v1 v2) (set-union (extract-loads-as-hvx-vecs v1) (extract-loads-as-hvx-vecs v2))]
-     [(vec-div v1 v2) (set-union (extract-loads-as-hvx-vecs v1) (extract-loads-as-hvx-vecs v2))]
-     [(vec-mul v1 v2) (set-union (extract-loads-as-hvx-vecs v1) (extract-loads-as-hvx-vecs v2))]
-     [(vec-max v1 v2) (set-union (extract-loads-as-hvx-vecs v1) (extract-loads-as-hvx-vecs v2))]
-     [(vec-min v1 v2) (set-union (extract-loads-as-hvx-vecs v1) (extract-loads-as-hvx-vecs v2))]
-     [(vec-if v1 v2 v3) (set-union (set-union (extract-loads-as-hvx-vecs v1) (extract-loads-as-hvx-vecs v2)) (extract-loads-as-hvx-vecs v3))]
-     [(vec-lt v1 v2) (set-union (extract-loads-as-hvx-vecs v1) (extract-loads-as-hvx-vecs v2))]     
-     [(vec-le v1 v2) (set-union (extract-loads-as-hvx-vecs v1) (extract-loads-as-hvx-vecs v2))]     
-
-     [(shift_left v1 v2) (set-union (extract-loads-as-hvx-vecs v1) (extract-loads-as-hvx-vecs v2))]
-     [(shift_right v1 v2) (set-union (extract-loads-as-hvx-vecs v1) (extract-loads-as-hvx-vecs v2))]
-     [(absd v1 v2) (set-union (extract-loads-as-hvx-vecs v1) (extract-loads-as-hvx-vecs v2))]
-    
-     ;; Base case
-     [_ (error "Don't know how to get loads from:" expr)])))
-
-;; Extract buffer reads
-(define (extract-buf-reads expr)
-  (for/fold ([buff-reads '()]) ([i (num-elems-hal expr)]) (append buff-reads (list (set->list (list->set (extract-lane-buf-reads ((interpret-halide expr) i))))))))
+;; Extract buffer reads. Current strategy is to interpret the expression and traverse the symbolic vector generated.
+;; Usage: When synthesizing (swizzling) hash-tables, we restrict the hashtables to only point to the data-elements that appear in
+;; the original expression. 
+(define (extract-buffer-reads expr)
+  (define live-buffers (extract-live-buffers expr))
+  (for/fold
+    ([buff-reads '()])
+    ([i (halide-vec-len expr)])
+      (append buff-reads (list (set->list (list->set (extract-lane-buffer-reads ((interpret-halide expr) i) live-buffers)))))))
   
-(define (extract-lane-buf-reads expr)
+(define (extract-lane-buffer-reads expr live-buffers)
   (match expr
-    [(int8_t v) (extract-lane-buf-reads v)]
-    [(int16_t v) (extract-lane-buf-reads v)]
-    [(int32_t v) (extract-lane-buf-reads v)]
-    [(uint8_t v) (extract-lane-buf-reads v)]
-    [(uint16_t v) (extract-lane-buf-reads v)]
-    [(uint32_t v) (extract-lane-buf-reads v)]
-
-    [(expression op operands ...)
-
-     ;; Silly workaround -- ask rosette folks how to do this properly
-     (define-symbolic hack (~> integer? integer?))
-     (define hack2 (hack 0))
-     (define hack3 (if (< (hack 0) 0) 1 2))
-     (define app (match hack2 [(expression op2 ops2 ...) op2]))
-     (define ite (match hack3 [(expression op2 ops2 ...) op2]))
-     
-     (cond
-       [(eq? op bvadd) (flatten (for/list ([operand operands]) (extract-lane-buf-reads operand)))]
-       [(eq? op bvmul) (flatten (for/list ([operand operands]) (extract-lane-buf-reads operand)))]
-       [(eq? op bvsdiv) (flatten (for/list ([operand operands]) (extract-lane-buf-reads operand)))]
-       [(eq? op bvudiv) (flatten (for/list ([operand operands]) (extract-lane-buf-reads operand)))]
-       [(eq? op bvashr) (flatten (for/list ([operand operands]) (extract-lane-buf-reads operand)))]
-       [(eq? op bvslt) (flatten (for/list ([operand operands]) (extract-lane-buf-reads operand)))]
-       [(eq? op bvult) (flatten (for/list ([operand operands]) (extract-lane-buf-reads operand)))]
-       [(eq? op bvsle) (flatten (for/list ([operand operands]) (extract-lane-buf-reads operand)))]
-       [(eq? op bvule) (flatten (for/list ([operand operands]) (extract-lane-buf-reads operand)))]              
-       [(eq? op bvneg) (flatten (for/list ([operand operands]) (extract-lane-buf-reads operand)))]
-       [(eq? op extract) (flatten (for/list ([operand operands]) (extract-lane-buf-reads operand)))]
-       [(eq? op zero-extend) (flatten (for/list ([operand operands]) (extract-lane-buf-reads operand)))]
-       [(eq? op sign-extend) (flatten (for/list ([operand operands]) (extract-lane-buf-reads operand)))]
-       [(eq? op bvule) (flatten (for/list ([operand operands]) (extract-lane-buf-reads operand)))]
-       [(eq? op bvsle) (flatten (for/list ([operand operands]) (extract-lane-buf-reads operand)))]
-       [(eq? op bvand) (flatten (for/list ([operand operands]) (extract-lane-buf-reads operand)))]
-       [(eq? op bvxor) (flatten (for/list ([operand operands]) (extract-lane-buf-reads operand)))]
-       [(eq? op bvashr) (flatten (for/list ([operand operands]) (extract-lane-buf-reads operand)))]
-       [(eq? op bvshl) (flatten (for/list ([operand operands]) (extract-lane-buf-reads operand)))]
-       [(eq? op ite) (flatten (for/list ([operand operands]) (extract-lane-buf-reads operand)))]
-       [(eq? op app) (if (hash-has-key? type-dict (car operands)) (list (mk-typed-expr expr (var-type (list-ref operands 0)))) (list))]
-       [else (error "NYI: extract buffer reads from" expr)])]
-     
-    [_ (list)]))
-
-(define (cast-type vec toT)
-  (define fromT (type ((interpret-halide vec) 0)))
-  (match (cons fromT toT)
-    [(cons 'int16 'uint8) 'down-cast]
-    [(cons 'uint8 'int16) 'down-cast]
-    [_ (error "NYI: infer cast type" fromT toT)]))
-
-;; Extract the set of operators used in the code
-(define (extract-live-ops expr)
-  (match expr
-    ;; Constructors
-    [(x32 sca) (list)]
-    [(x64 sca) (list)]
-    [(x128 sca) (list)]
-    [(x256 sca) (list)]
-
-    ;[(ramp buf base stride len) (list)]
-    [(ramp base stride len) (list)]
-
-    [(slice_vectors vec base stride len) (append (list 'slice) (extract-live-ops vec))]
-    [(concat_vectors v1 v2) (append (list 'concat) (extract-live-ops v1) (extract-live-ops v2))]
-
-    ;; Type Casts
-    [(uint8x32 vec) (append (list 'cast (cast-type vec 'uint8)) (extract-live-ops vec))]
-    [(uint16x32 vec) (append (list 'cast (cast-type vec 'uint16)) (extract-live-ops vec))]
-    [(uint32x32 vec) (append (list 'cast (cast-type vec 'uint32)) (extract-live-ops vec))]
-    [(int8x32 vec) (append (list 'cast (cast-type vec 'int8)) (extract-live-ops vec))]
-    [(int16x32 vec) (append (list 'cast (cast-type vec 'int16)) (extract-live-ops vec))]
-    [(int32x32 vec) (append (list 'cast (cast-type vec 'int32)) (extract-live-ops vec))]
-    [(uint8x64 vec) (append (list 'cast (cast-type vec 'uint8)) (extract-live-ops vec))]
-    [(uint16x64 vec) (append (list 'cast (cast-type vec 'uint16)) (extract-live-ops vec))]
-    [(uint32x64 vec) (append (list 'cast (cast-type vec 'uint32)) (extract-live-ops vec))]
-    [(int8x64 vec) (append (list 'cast (cast-type vec 'int8)) (extract-live-ops vec))]
-    [(int16x64 vec) (append (list 'cast (cast-type vec 'int16)) (extract-live-ops vec))]
-    [(int32x64 vec) (append (list 'cast (cast-type vec 'int32)) (extract-live-ops vec))]
-    [(uint8x128 vec) (append (list 'cast (cast-type vec 'uint8)) (extract-live-ops vec))]
-    [(uint16x128 vec) (append (list 'cast (cast-type vec 'uint16)) (extract-live-ops vec))]
-    [(uint32x128 vec) (append (list 'cast (cast-type vec 'uint32)) (extract-live-ops vec))]
-    [(int8x128 vec) (append (list 'cast (cast-type vec 'int8)) (extract-live-ops vec))]
-    [(int16x128 vec) (append (list 'cast (cast-type vec 'int16)) (extract-live-ops vec))]
-    [(int32x128 vec) (append (list 'cast (cast-type vec 'int32)) (extract-live-ops vec))]
-    [(uint8x256 vec) (append (list 'cast (cast-type vec 'uint8)) (extract-live-ops vec))]
-
-    ;; Operations
-    [(vec-add v1 v2) (append (list 'add) (extract-live-ops v1) (extract-live-ops v2))]
-    [(vec-sub v1 v2) (append (list 'sub) (extract-live-ops v1) (extract-live-ops v2))]
-    [(vec-div v1 v2) (if (broadcast? v2)
-                         (append (list 'vec-sca-div) (extract-live-ops v1) (extract-live-ops v2))
-                         (append (list 'vec-vec-div) (extract-live-ops v1) (extract-live-ops v2)))]
-    [(vec-mul v1 v2) (if (or (broadcast? v1) (broadcast? v2))
-                         (append (list 'vec-sca-mul) (extract-live-ops v1) (extract-live-ops v2))
-                         (append (list 'vec-vec-mul) (extract-live-ops v1) (extract-live-ops v2)))]
-    [(vec-max v1 v2) (append (list 'max) (extract-live-ops v1) (extract-live-ops v2))]
-    [(vec-min v1 v2) (append (list 'min) (extract-live-ops v1) (extract-live-ops v2))]
-    [(vec-if v1 v2 v3) (append (list 'if) (extract-live-ops v1) (extract-live-ops v2) (extract-live-ops v3))]
-    [(vec-lt v1 v2) (append (list 'lt) (extract-live-ops v1) (extract-live-ops v2))]
-    [(vec-le v1 v2) (append (list 'lt) (extract-live-ops v1) (extract-live-ops v2))]        
-
-    [(shift_left v1 v2) (append (list 'vec-sca-mul) (extract-live-ops v1) (extract-live-ops v2))]
-    [(shift_right v1 v2) (append (list 'vec-sca-div) (extract-live-ops v1) (extract-live-ops v2))]
-    [(absd v1 v2) (append (list 'absd) (extract-live-ops v1) (extract-live-ops v2))]
+    ;; Unwrap the types
+    [(int8_t v) (extract-lane-buffer-reads v live-buffers)]
+    [(int16_t v) (extract-lane-buffer-reads v live-buffers)]
+    [(int32_t v) (extract-lane-buffer-reads v live-buffers)]
+    [(int64_t v) (extract-lane-buffer-reads v live-buffers)]
+    [(uint8_t v) (extract-lane-buffer-reads v live-buffers)]
+    [(uint16_t v) (extract-lane-buffer-reads v live-buffers)]
+    [(uint32_t v) (extract-lane-buffer-reads v live-buffers)]
+    [(uint64_t v) (extract-lane-buffer-reads v live-buffers)]
     
-    ;; Base case
-    [_ (error "Don't know how to get live ops from:" expr)]))
-    
-;; Extract constants used with various operators
+    ;; If it is a read from a symbolic buffer, extract
+    [(expression (== @app) xs ...)
+      (define app-target (list-ref xs 0))
+      (define expr-type (for/or ([lb live-buffers]) (if (eq? (buffer-data lb) app-target) (buffer-elemT lb) #f)))
+      (if expr-type (list (mk-cpp-expr expr expr-type)) (list))]
+
+    ;; For all other expressions, recurse
+    [(expression op xs ...)
+     (flatten (for/list ([x xs]) (extract-lane-buffer-reads x live-buffers)))]
+
+    ;; Ignore constants
+    [(bv _ _) (list)]
+    [(bitvector _) (list)]
+    [(? number? n) (list)]
+
+    [else (error "halide/ir/analysis: NYI how to extract buffer reads from" expr)]))
+
 (define (extract-add-consts expr)
-  (match expr
-    ;; Constructors
-    [(x32 sca) (list)]
-    [(x64 sca) (list)]
-    [(x128 sca) (list)]
-    [(x256 sca) (list)]
-
-    [(ramp base stride len) (list)]
-    [(load buf idxs align) (list)]
-
-    ;; Type Casts
-    [(uint8x32 vec) (extract-add-consts vec)]
-    [(uint16x32 vec) (extract-add-consts vec)]
-    [(uint32x32 vec) (extract-add-consts vec)]
-    [(int8x32 vec) (extract-add-consts vec)]
-    [(int16x32 vec) (extract-add-consts vec)]
-    [(int32x32 vec) (extract-add-consts vec)]
-    [(uint8x64 vec) (extract-add-consts vec)]
-    [(uint16x64 vec) (extract-add-consts vec)]
-    [(uint32x64 vec) (extract-add-consts vec)]
-    [(int8x64 vec) (extract-add-consts vec)]
-    [(int16x64 vec) (extract-add-consts vec)]
-    [(int32x64 vec) (extract-add-consts vec)]
-    [(uint8x128 vec) (extract-add-consts vec)]
-    [(uint16x128 vec) (extract-add-consts vec)]
-    [(uint32x128 vec) (extract-add-consts vec)]
-    [(int8x128 vec) (extract-add-consts vec)]
-    [(int16x128 vec) (extract-add-consts vec)]
-    [(int32x128 vec) (extract-add-consts vec)]
-    [(uint8x256 vec) (extract-add-consts vec)]
-
-    ;; Shuffles
-    [(slice_vectors vec base stride len) (extract-add-consts vec)]
-    [(concat_vectors v1 v2) (append (extract-add-consts v1) (extract-add-consts v2))]
-    [(dynamic_shuffle vec idxs st end) (extract-add-consts vec)]
-    
-    ;; Operations
-    [(vec-add v1 v2) (append
-                      (if (broadcast? v1) (extract-consts v1) (extract-add-consts v1))
-                      (if (broadcast? v2) (extract-consts v2) (extract-add-consts v2)))]
-    [(vec-sub v1 v2) (append (extract-add-consts v1) (extract-add-consts v2))]
-    [(vec-mul v1 v2) (append (extract-add-consts v1) (extract-add-consts v2))]
-    [(vec-div v1 v2) (append (extract-add-consts v1) (extract-add-consts v2))]
-    [(vec-min v1 v2) (append (extract-add-consts v1) (extract-add-consts v2))]
-    [(vec-max v1 v2) (append (extract-add-consts v1) (extract-add-consts v2))]
-    [(vec-if v1 v2 v3) (append (extract-add-consts v1) (extract-add-consts v2) (extract-add-consts v3))]
-    [(vec-lt v1 v2) (append (extract-add-consts v1) (extract-add-consts v2))]
-    [(vec-le v1 v2) (append (extract-add-consts v1) (extract-add-consts v2))]            
-
-    [(shift_left v1 v2) (append (extract-add-consts v1) (extract-add-consts v2))]
-    [(shift_right v1 v2) (append (extract-add-consts v1) (extract-add-consts v2))]
-    [(absd v1 v2) (append (extract-add-consts v1) (extract-add-consts v2))]
-    
-    ;; Base case
-    [_ (error "Don't know how to extract add consts from:" expr)]))
+  (define add-consts (mutable-set))
+  (define (extract-add-const node)
+    (destruct node
+      ;; We only need to examine add nodes
+      [(vec-add v1 v2) (set-union! add-consts (extract-consts v1) (extract-consts v2))]
+      ;; Ignore everything else
+      [_ node]))
+  (visit-halide expr extract-add-const)
+  (set->list add-consts))
 
 (define (extract-sub-consts expr)
-  (match expr
-    ;; Constructors
-    [(x32 sca) (list)]
-    [(x64 sca) (list)]
-    [(x128 sca) (list)]
-    [(x256 sca) (list)]
-
-    [(ramp base stride len) (list)]
-    [(load buf idxs align) (list)]
-
-    ;; Type Casts
-    [(uint8x32 vec) (extract-sub-consts vec)]
-    [(uint16x32 vec) (extract-sub-consts vec)]
-    [(uint32x32 vec) (extract-sub-consts vec)]
-    [(int8x32 vec) (extract-sub-consts vec)]
-    [(int16x32 vec) (extract-sub-consts vec)]
-    [(int32x32 vec) (extract-sub-consts vec)]
-    [(uint8x64 vec) (extract-sub-consts vec)]
-    [(uint16x64 vec) (extract-sub-consts vec)]
-    [(uint32x64 vec) (extract-sub-consts vec)]
-    [(int8x64 vec) (extract-sub-consts vec)]
-    [(int16x64 vec) (extract-sub-consts vec)]
-    [(int32x64 vec) (extract-sub-consts vec)]
-    [(uint8x128 vec) (extract-sub-consts vec)]
-    [(uint16x128 vec) (extract-sub-consts vec)]
-    [(uint32x128 vec) (extract-sub-consts vec)]
-    [(int8x128 vec) (extract-sub-consts vec)]
-    [(int16x128 vec) (extract-sub-consts vec)]
-    [(int32x128 vec) (extract-sub-consts vec)]
-    [(uint8x256 vec) (extract-sub-consts vec)]
-
-    ;; Operations
-    [(vec-add v1 v2) (append (extract-sub-consts v1) (extract-sub-consts v2))]
-    [(vec-sub v1 v2) (append
-                      (if (broadcast? v1) (extract-consts v1) (extract-sub-consts v1))
-                      (if (broadcast? v2) (extract-consts v2) (extract-sub-consts v2)))]
-    [(vec-mul v1 v2) (append (extract-sub-consts v1) (extract-sub-consts v2))]
-    [(vec-div v1 v2) (append (extract-sub-consts v1) (extract-sub-consts v2))]
-    [(vec-min v1 v2) (append (extract-sub-consts v1) (extract-sub-consts v2))]
-    [(vec-max v1 v2) (append (extract-sub-consts v1) (extract-sub-consts v2))]
-
-    [(vec-if v1 v2 v3) (append (extract-sub-consts v1) (extract-sub-consts v2) (extract-sub-consts v3))]
-    [(vec-lt v1 v2) (append (extract-sub-consts v1) (extract-sub-consts v2))]
-    [(vec-le v1 v2) (append (extract-sub-consts v1) (extract-sub-consts v2))]            
-
-    [(shift_left v1 v2) (append (extract-sub-consts v1) (extract-sub-consts v2))]
-    [(shift_right v1 v2) (append (extract-sub-consts v1) (extract-sub-consts v2))]
-    [(absd v1 v2) (append
-                   (if (broadcast? v1) (extract-consts v1) (extract-sub-consts v1))
-                   (if (broadcast? v2) (extract-consts v2) (extract-sub-consts v2)))]
-
-    ;; Shuffles
-    [(slice_vectors vec base stride len) (extract-sub-consts vec)]
-    [(concat_vectors v1 v2) (append (extract-sub-consts v1) (extract-sub-consts v2))]
-    [(dynamic_shuffle vec idxs st end) (extract-sub-consts vec)]
-    
-    ;; Base case
-    [_ (error "Don't know how to extract consts from:" expr)]))
+  (define sub-consts (mutable-set))
+  (define (extract-sub-const node)
+    (destruct node
+      ;; We only need to examine sub nodes
+      [(vec-sub v1 v2) (set-union! sub-consts (extract-consts v1) (extract-consts v2))]
+      ;; Ignore everything else
+      [_ node]))
+  (visit-halide expr extract-sub-const)
+  (set->list sub-consts))
 
 (define (extract-mul-consts expr)
-  (match expr
-    ;; Constructors
-    [(x32 sca) (list)]
-    [(x64 sca) (list)]
-    [(x128 sca) (list)]
-    [(x256 sca) (list)]
+  (define mul-consts (mutable-set))
+  (define (extract-mul-const node)
+    (destruct node
+      ;; We only need to examing shift-left and multiply nodes
+      [(vec-mul v1 v2) (set-union! mul-consts (extract-consts v1) (extract-consts v2))]
+      [(vec-shl v1 v2) (set-union! mul-consts (extract-consts v1) (two^ (extract-consts v2)))]
+      ;; Ignore everything else
+      [_ node]))
+  (visit-halide expr extract-mul-const)
+  (set->list mul-consts))
 
-    [(ramp base stride len) (list)]
-    [(load buf idxs align) (list)]
-
-    ;; Type Casts
-    [(uint8x32 vec) (extract-mul-consts vec)]
-    [(uint16x32 vec) (extract-mul-consts vec)]
-    [(uint32x32 vec) (extract-mul-consts vec)]
-    [(int8x32 vec) (extract-mul-consts vec)]
-    [(int16x32 vec) (extract-mul-consts vec)]
-    [(int32x32 vec) (extract-mul-consts vec)]
-    [(uint8x64 vec) (extract-mul-consts vec)]
-    [(uint16x64 vec) (extract-mul-consts vec)]
-    [(uint32x64 vec) (extract-mul-consts vec)]
-    [(int8x64 vec) (extract-mul-consts vec)]
-    [(int16x64 vec) (extract-mul-consts vec)]
-    [(int32x64 vec) (extract-mul-consts vec)]
-    [(uint8x128 vec) (extract-mul-consts vec)]
-    [(uint16x128 vec) (extract-mul-consts vec)]
-    [(uint32x128 vec) (extract-mul-consts vec)]
-    [(int8x128 vec) (extract-mul-consts vec)]
-    [(int16x128 vec) (extract-mul-consts vec)]
-    [(int32x128 vec) (extract-mul-consts vec)]
-    [(uint8x256 vec) (extract-mul-consts vec)]
-
-    ;; Operations
-    [(vec-add v1 v2) (append (extract-mul-consts v1) (extract-mul-consts v2))]
-    [(vec-sub v1 v2) (append (extract-mul-consts v1) (extract-mul-consts v2))]
-    [(vec-mul v1 v2) (append
-                      (if (broadcast? v1) (extract-consts v1) (extract-mul-consts v1))
-                      (if (broadcast? v2) (extract-consts v2) (extract-mul-consts v2)))]
-    [(vec-div v1 v2) (append (extract-mul-consts v1) (extract-mul-consts v2))]
-    [(vec-min v1 v2) (append (extract-mul-consts v1) (extract-mul-consts v2))]
-    [(vec-max v1 v2) (append (extract-mul-consts v1) (extract-mul-consts v2))]
-
-    [(vec-if v1 v2 v3) (append (extract-mul-consts v1) (extract-mul-consts v2) (extract-mul-consts v3))]
-    [(vec-lt v1 v2) (append (extract-mul-consts v1) (extract-mul-consts v2))]
-    [(vec-le v1 v2) (append (extract-mul-consts v1) (extract-mul-consts v2))]            
-
-    [(shift_left v1 v2) (append
-                         (if (broadcast? v1) (two^ (extract-consts v1)) (extract-mul-consts v1))
-                         (if (broadcast? v2) (two^ (extract-consts v2)) (extract-mul-consts v2)))]
-    [(shift_right v1 v2) (append (extract-mul-consts v1) (extract-mul-consts v2))]
-    [(absd v1 v2) (append (extract-mul-consts v1) (extract-mul-consts v2))]
-
-    ;; Shuffles
-    [(slice_vectors vec base stride len) (extract-mul-consts vec)]
-    [(concat_vectors v1 v2) (append (extract-mul-consts v1) (extract-mul-consts v2))]
-    [(dynamic_shuffle vec idxs st end) (extract-mul-consts vec)]
-    
-    ;; Base case
-    [_ (error "Don't know how to extract consts from:" expr)]))
+(define (extract-shr-consts expr)
+  (define shr-consts (mutable-set))
+  (define (extract-shr-const node)
+    (destruct node
+      ;; We only need to examing shift-right and divide
+      [(vec-div v1 v2)
+       (define div-consts (extract-consts v2))
+       (define pow-of-2-consts (filter (lambda (c) (is-power-of-2? c)) div-consts))
+       (define log-2-consts (map (lambda (c) (log-2 c)) pow-of-2-consts))
+       (set-union! shr-consts log-2-consts)]
+      [(vec-shr v1 v2) (set-union! shr-consts (extract-consts v2))]
+      ;; Ignore everything else
+      [_ node]))
+  (visit-halide expr extract-shr-const)
+  (set->list shr-consts))
 
 (define (extract-div-consts expr)
-  (match expr
-    ;; Constructors
-    [(x32 sca) (list)]
-    [(x64 sca) (list)]
-    [(x128 sca) (list)]
-    [(x256 sca) (list)]
+  (define shr-consts (mutable-set))
+  (define (extract-shr-const node)
+    (destruct node
+      ;; We only need to examing shift-right and divide
+      [(vec-div v1 v2) (set-union! shr-consts (extract-consts v2))]
+      [(vec-shr v1 v2) (set-union! shr-consts (two^ (extract-consts v2)))]
+      ;; Ignore everything else
+      [_ node]))
+  (visit-halide expr extract-shr-const)
+  (set->list shr-consts))
 
-    [(ramp base stride len) (list)]
-    [(load buf idxs align) (list)]
+;;; Extract vectors
+;(define (extract-loads-as-hvx-vecs expr)
+;  (list->set
+;   (match expr
+;     ;; Constructors
+;     ;[(x32 sca) (list (vsplat sca))]
+;     ;[(x64 sca) (list (vsplat sca))]
+;     ;[(x128 sca) (list (vsplat sca))]
+;     ;[(x256 sca) (list (vsplat sca))]
+;     [(x32 sca) (list)]
+;     [(x64 sca) (list)]
+;     [(x128 sca) (list)]
+;     [(x256 sca) (list)]
+;
+;     [(ramp base stride len) (list)]
+;     [(load buf idxs align)
+;      (match idxs
+;        [(ramp base stride len)
+;         (define elem-bw (bw (hash-ref type-dict buf)))
+;         (define tile-w (* len elem-bw))
+;         (cond
+;           [(eq? tile-w 1024)
+;            (list (list buf base align))]
+;           [(eq? tile-w 2048)
+;            (list
+;             (list buf base align)
+;             (list buf (+ base (quotient 1024 elem-bw)) align))]
+;           [(eq? tile-w 4096)
+;            (list
+;             (list buf base align)
+;             (list buf (+ base (quotient 1024 elem-bw)) align)
+;             (list buf (+ base (quotient 2048 elem-bw)) align)
+;             (list buf (+ base (quotient 3072 elem-bw)) align))])]
+;        [_ (error "NYI: Extracting vec from:" expr)])]
+;
+;     [(slice_vectors vec base stride len) (extract-loads-as-hvx-vecs vec)]
+;     [(concat_vectors v1 v2) (set-union (extract-loads-as-hvx-vecs v1) (extract-loads-as-hvx-vecs v2))]
+;
+;     ;; Type Casts
+;     [(uint8x32 vec) (extract-loads-as-hvx-vecs vec)]
+;     [(uint16x32 vec) (extract-loads-as-hvx-vecs vec)]
+;     [(uint32x32 vec) (extract-loads-as-hvx-vecs vec)]
+;     [(int8x32 vec) (extract-loads-as-hvx-vecs vec)]
+;     [(int16x32 vec) (extract-loads-as-hvx-vecs vec)]
+;     [(int32x32 vec) (extract-loads-as-hvx-vecs vec)]
+;     [(uint8x64 vec) (extract-loads-as-hvx-vecs vec)]
+;     [(uint16x64 vec) (extract-loads-as-hvx-vecs vec)]
+;     [(uint32x64 vec) (extract-loads-as-hvx-vecs vec)]
+;     [(int8x64 vec) (extract-loads-as-hvx-vecs vec)]
+;     [(int16x64 vec) (extract-loads-as-hvx-vecs vec)]
+;     [(int32x64 vec) (extract-loads-as-hvx-vecs vec)]
+;     [(uint8x128 vec) (extract-loads-as-hvx-vecs vec)]
+;     [(uint16x128 vec) (extract-loads-as-hvx-vecs vec)]
+;     [(uint32x128 vec) (extract-loads-as-hvx-vecs vec)]
+;     [(int8x128 vec) (extract-loads-as-hvx-vecs vec)]
+;     [(int16x128 vec) (extract-loads-as-hvx-vecs vec)]
+;     [(int32x128 vec) (extract-loads-as-hvx-vecs vec)]
+;     [(uint8x256 vec) (extract-loads-as-hvx-vecs vec)]
+;
+;     ;; Operations
+;     [(vec-add v1 v2) (set-union (extract-loads-as-hvx-vecs v1) (extract-loads-as-hvx-vecs v2))]
+;     [(vec-sub v1 v2) (set-union (extract-loads-as-hvx-vecs v1) (extract-loads-as-hvx-vecs v2))]
+;     [(vec-div v1 v2) (set-union (extract-loads-as-hvx-vecs v1) (extract-loads-as-hvx-vecs v2))]
+;     [(vec-mul v1 v2) (set-union (extract-loads-as-hvx-vecs v1) (extract-loads-as-hvx-vecs v2))]
+;     [(vec-max v1 v2) (set-union (extract-loads-as-hvx-vecs v1) (extract-loads-as-hvx-vecs v2))]
+;     [(vec-min v1 v2) (set-union (extract-loads-as-hvx-vecs v1) (extract-loads-as-hvx-vecs v2))]
+;     [(vec-if v1 v2 v3) (set-union (set-union (extract-loads-as-hvx-vecs v1) (extract-loads-as-hvx-vecs v2)) (extract-loads-as-hvx-vecs v3))]
+;     [(vec-lt v1 v2) (set-union (extract-loads-as-hvx-vecs v1) (extract-loads-as-hvx-vecs v2))]     
+;     [(vec-le v1 v2) (set-union (extract-loads-as-hvx-vecs v1) (extract-loads-as-hvx-vecs v2))]     
+;
+;     [(vec-shl v1 v2) (set-union (extract-loads-as-hvx-vecs v1) (extract-loads-as-hvx-vecs v2))]
+;     [(vec-shr v1 v2) (set-union (extract-loads-as-hvx-vecs v1) (extract-loads-as-hvx-vecs v2))]
+;     [(vec-absd v1 v2) (set-union (extract-loads-as-hvx-vecs v1) (extract-loads-as-hvx-vecs v2))]
+;    
+;     ;; Base case
+;     [_ (error "Don't know how to get loads from:" expr)])))
 
-    ;; Type Casts
-    [(uint8x32 vec) (extract-div-consts vec)]
-    [(uint16x32 vec) (extract-div-consts vec)]
-    [(uint32x32 vec) (extract-div-consts vec)]
-    [(int8x32 vec) (extract-div-consts vec)]
-    [(int16x32 vec) (extract-div-consts vec)]
-    [(int32x32 vec) (extract-div-consts vec)]
-    [(uint8x64 vec) (extract-div-consts vec)]
-    [(uint16x64 vec) (extract-div-consts vec)]
-    [(uint32x64 vec) (extract-div-consts vec)]
-    [(int8x64 vec) (extract-div-consts vec)]
-    [(int16x64 vec) (extract-div-consts vec)]
-    [(int32x64 vec) (extract-div-consts vec)]
-    [(uint8x128 vec) (extract-div-consts vec)]
-    [(uint16x128 vec) (extract-div-consts vec)]
-    [(uint32x128 vec) (extract-div-consts vec)]
-    [(int8x128 vec) (extract-div-consts vec)]
-    [(int16x128 vec) (extract-div-consts vec)]
-    [(int32x128 vec) (extract-div-consts vec)]
-    [(uint8x256 vec) (extract-div-consts vec)]
+;;;;;;;;;;;;;;;;;; Some helper functions ;;;;;;;;;;;;;;;;;;;;;;
 
-    ;; Operations
-    [(vec-add v1 v2) (append (extract-div-consts v1) (extract-div-consts v2))]
-    [(vec-sub v1 v2) (append (extract-div-consts v1) (extract-div-consts v2))]
-    [(vec-mul v1 v2) (append (extract-div-consts v1) (extract-div-consts v2))]
-    [(vec-div v1 v2) (if (broadcast? v2) (extract-consts v2) (extract-div-consts v2))]
-    [(vec-min v1 v2) (append (extract-div-consts v1) (extract-div-consts v2))]
-    [(vec-max v1 v2) (append (extract-div-consts v1) (extract-div-consts v2))]
+(define (is-power-of-2? val)
+  (and
+   ;; It cannot be a symbolic value
+   (empty? (symbolics val))
+   ;; Is a power of 2
+   (let ([x (log (eval-to-int val) 2)]) (eq? x (exact-round x)))))
 
-    [(vec-if v1 v2 v3) (append (extract-div-consts v1) (extract-div-consts v2) (extract-div-consts v3))]
-    [(vec-lt v1 v2) (append (extract-div-consts v1) (extract-div-consts v2))]
-    [(vec-le v1 v2) (append (extract-div-consts v1) (extract-div-consts v2))]            
+(define (log-2 val)
+  (mk-cpp-expr (bv (exact-round (log (eval-to-int val) 2)) (expr-bw val)) (cpp-type val)))
 
-    [(shift_left v1 v2) (extract-div-consts v1) (extract-div-consts v2)]
-    [(shift_right v1 v2) (if (broadcast? v2) (two^ (extract-consts v2)) (extract-div-consts v2))]
-    [(absd v1 v2) (extract-div-consts v1) (extract-div-consts v2)]
+(define (extract-consts vec)
+  (define v (strip-casts vec))
+  (match v
+    [(x32 sca) (set ((interpret-halide vec) 0))]
+    [(x64 sca) (set ((interpret-halide vec) 0))]
+    [(x128 sca) (set ((interpret-halide vec) 0))]
+    [(x256 sca) (set ((interpret-halide vec) 0))]
+    [_ (set)]))
+
+(define (strip-casts expr)
+  (destruct expr
+    [(uint8x32 vec) (strip-casts vec)]
+    [(uint16x32 vec) (strip-casts vec)]
+    [(uint32x32 vec) (strip-casts vec)]
+    [(uint64x32 vec) (strip-casts vec)]
     
-    ;; Shuffles
-    [(slice_vectors vec base stride len) (extract-div-consts vec)]
-    [(concat_vectors v1 v2) (append (extract-div-consts v1) (extract-div-consts v2))]
-    [(dynamic_shuffle vec idxs st end) (extract-div-consts vec)]
+    [(int8x32 vec) (strip-casts vec)]
+    [(int16x32 vec) (strip-casts vec)]
+    [(int32x32 vec) (strip-casts vec)]
+    [(int64x32 vec) (strip-casts vec)]
     
-    ;; Base case
-    [_ (error "Don't know how to extract consts from:" expr)]))
+    [(uint8x64 vec) (strip-casts vec)]
+    [(uint16x64 vec) (strip-casts vec)]
+    [(uint32x64 vec) (strip-casts vec)]
+    [(uint64x64 vec) (strip-casts vec)]
+    
+    [(int8x64 vec) (strip-casts vec)]
+    [(int16x64 vec) (strip-casts vec)]
+    [(int32x64 vec) (strip-casts vec)]
+    [(int64x64 vec) (strip-casts vec)]
+    
+    [(uint8x128 vec) (strip-casts vec)]
+    [(uint16x128 vec) (strip-casts vec)]
+    [(uint32x128 vec) (strip-casts vec)]
+    [(uint64x128 vec) (strip-casts vec)]
+    
+    [(int8x128 vec) (strip-casts vec)]
+    [(int16x128 vec) (strip-casts vec)]
+    [(int32x128 vec) (strip-casts vec)]
+    [(int64x128 vec) (strip-casts vec)]
+    
+    [(uint8x256 vec) (strip-casts vec)]
+    [(uint16x256 vec) (strip-casts vec)]
+    [(uint32x256 vec) (strip-casts vec)]
+    [(uint64x256 vec) (strip-casts vec)]
+
+    [(int8x256 vec) (strip-casts vec)]
+    [(int16x256 vec) (strip-casts vec)]
+    [(int32x256 vec) (strip-casts vec)]
+    [(int64x256 vec) (strip-casts vec)]
+    
+    [_ expr]))
 
 (define (two^ consts)
-  (for/list ([n consts])
+  (for/set ([n consts])
     (match n
       [(int8_t v) (int8_t (bvshl (bv 1 8) v))]
       [(uint8_t v) (uint8_t (bvshl (bv 1 8) v))]
@@ -443,53 +287,46 @@
       [(int32_t v) (int32_t (bvshl (bv 1 32) v))]
       [(uint32_t v) (uint32_t (bvshl (bv 1 32) v))])))
 
-(define (broadcast? vec)
-  (define v (strip-halide-casts vec))
-  (match v
-    [(x32 sca) #t]
-    [(x64 sca) #t]
-    [(x128 sca) #t]
-    [(x256 sca) #t]
+(define (cast-op? expr)
+  (destruct expr
+    [(uint8x32 vec) #t]
+    [(uint16x32 vec) #t]
+    [(uint32x32 vec) #t]
+    [(uint64x32 vec) #t]
+    
+    [(int8x32 vec) #t]
+    [(int16x32 vec) #t]
+    [(int32x32 vec) #t]
+    [(int64x32 vec) #t]
+    
+    [(uint8x64 vec) #t]
+    [(uint16x64 vec) #t]
+    [(uint32x64 vec) #t]
+    [(uint64x64 vec) #t]
+    
+    [(int8x64 vec) #t]
+    [(int16x64 vec) #t]
+    [(int32x64 vec) #t]
+    [(int64x64 vec) #t]
+    
+    [(uint8x128 vec) #t]
+    [(uint16x128 vec) #t]
+    [(uint32x128 vec) #t]
+    [(uint64x128 vec) #t]
+    
+    [(int8x128 vec) #t]
+    [(int16x128 vec) #t]
+    [(int32x128 vec) #t]
+    [(int64x128 vec) #t]
+    
+    [(uint8x256 vec) #t]
+    [(uint16x256 vec) #t]
+    [(uint32x256 vec) #t]
+    [(uint64x256 vec) #t]
+
+    [(int8x256 vec) #t]
+    [(int16x256 vec) #t]
+    [(int32x256 vec) #t]
+    [(int64x256 vec) #t]
+    
     [_ #f]))
-
-(define (extract-consts vec)
-  (define v (strip-halide-casts vec))
-  (match v
-    [(x32 sca) (list ((interpret-halide vec) 0))]
-    [(x64 sca) (list ((interpret-halide vec) 0))]
-    [(x128 sca) (list ((interpret-halide vec) 0))]
-    [(x256 sca) (list ((interpret-halide vec) 0))]
-    [_ (error "Don't know how to extract constant from:" v)]))
-
-(define (strip-halide-casts expr)
-  (match expr
-    [(uint8x32 vec) (strip-halide-casts vec)]
-    [(uint16x32 vec) (strip-halide-casts vec)]
-    [(uint32x32 vec) (strip-halide-casts vec)]
-    [(int8x32 vec) (strip-halide-casts vec)]
-    [(int16x32 vec) (strip-halide-casts vec)]
-    [(int32x32 vec) (strip-halide-casts vec)]
-    [(uint8x64 vec) (strip-halide-casts vec)]
-    [(uint16x64 vec) (strip-halide-casts vec)]
-    [(uint32x64 vec) (strip-halide-casts vec)]
-    [(int8x64 vec) (strip-halide-casts vec)]
-    [(int16x64 vec) (strip-halide-casts vec)]
-    [(int32x64 vec) (strip-halide-casts vec)]
-    [(uint8x128 vec) (strip-halide-casts vec)]
-    [(uint16x128 vec) (strip-halide-casts vec)]
-    [(uint32x128 vec) (strip-halide-casts vec)]
-    [(int8x128 vec) (strip-halide-casts vec)]
-    [(int16x128 vec) (strip-halide-casts vec)]
-    [(int32x128 vec) (strip-halide-casts vec)]
-    [(uint8x256 vec) (strip-halide-casts vec)]
-    [_ expr]))
-
-(provide
- extract-loads-as-hvx-vecs
- (rename-out
-  [extract-buf-reads extract-buf-reads-hal]
-  [extract-live-ops extract-live-ops-hal]
-  [extract-add-consts extract-add-consts-hal]
-  [extract-sub-consts extract-sub-consts-hal]
-  [extract-mul-consts extract-mul-consts-hal]
-  [extract-div-consts extract-div-consts-hal]))

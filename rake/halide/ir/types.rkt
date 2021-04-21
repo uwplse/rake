@@ -1,6 +1,38 @@
-#lang rosette
+#lang rosette/safe
 
-(require rosette/lib/match)
+(require
+  (only-in racket/base error)
+  rosette/lib/destruct)
+
+(provide x32 x64 x128 x256
+
+         uint8x1 uint16x1 uint32x1 uint64x1
+         int8x1 int16x1 int32x1 int64x1
+         
+         uint1x32 uint1x64 uint1x128 uint1x256
+         uint8x32 uint8x64 uint8x128 uint8x256
+         uint16x32 uint16x64 uint16x128 uint16x256
+         uint32x32 uint32x64 uint32x128 uint32x256
+         uint64x32 uint64x64 uint64x128 uint64x256
+         
+         int8x32 int8x64 int8x128 int8x256
+         int16x32 int16x64 int16x128 int16x256
+         int32x32 int32x64 int32x128 int32x256
+         int64x32 int64x64 int64x128 int64x256
+
+         sca-add sca-sub sca-mul sca-div sca-min sca-max
+         vec-add vec-sub vec-mul vec-div vec-min vec-max
+         vec-if vec-lt vec-le vec-absd vec-shl vec-shr
+
+         sca-add? sca-sub? sca-mul? sca-div? sca-min? sca-max?
+         vec-add? vec-sub? vec-mul? vec-div? vec-min? vec-max?
+         vec-if? vec-lt? vec-le? vec-absd? vec-shl? vec-shr?
+
+         slice_vectors concat_vectors dynamic_shuffle
+
+         buffer buffer-elemT buffer-data load ramp aligned)
+         
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; Define Halide's IR
 
@@ -13,6 +45,7 @@
 (struct aligned (mod rem) #:transparent)
 (struct ramp (base stride len) #:transparent)
 (struct load (buf idxs alignment) #:transparent)
+(struct buffer (data elemT) #:transparent)
 
 ;; Type Casts
 (struct uint8x1 (sca) #:transparent)
@@ -38,30 +71,37 @@
 (struct uint16x32 (vec) #:transparent)
 (struct uint16x64 (vec) #:transparent)
 (struct uint16x128 (vec) #:transparent)
+(struct uint16x256 (vec) #:transparent)
 
 (struct uint32x32 (vec) #:transparent)
 (struct uint32x64 (vec) #:transparent)
 (struct uint32x128 (vec) #:transparent)
+(struct uint32x256 (vec) #:transparent)
 
 (struct uint64x32 (vec) #:transparent)
 (struct uint64x64 (vec) #:transparent)
 (struct uint64x128 (vec) #:transparent)
+(struct uint64x256 (vec) #:transparent)
 
 (struct int8x32 (vec) #:transparent)
 (struct int8x64 (vec) #:transparent)
 (struct int8x128 (vec) #:transparent)
+(struct int8x256 (vec) #:transparent)
 
 (struct int16x32 (vec) #:transparent)
 (struct int16x64 (vec) #:transparent)
 (struct int16x128 (vec) #:transparent)
+(struct int16x256 (vec) #:transparent)
 
 (struct int32x32 (vec) #:transparent)
 (struct int32x64 (vec) #:transparent)
 (struct int32x128 (vec) #:transparent)
+(struct int32x256 (vec) #:transparent)
 
 (struct int64x32 (vec) #:transparent)
 (struct int64x64 (vec) #:transparent)
 (struct int64x128 (vec) #:transparent)
+(struct int64x256 (vec) #:transparent)
 
 ;; Operations
 (struct sca-add (v1 v2) #:transparent)
@@ -82,89 +122,11 @@
 (struct vec-lt (v1 v2) #:transparent)
 (struct vec-le (v1 v2) #:transparent)
 
-(struct absd (v1 v2) #:transparent)
-(struct shift_left (vec shift) #:transparent)
-(struct shift_right (vec shift) #:transparent)
+(struct vec-absd (v1 v2) #:transparent)
+(struct vec-shl (v1 v2) #:transparent)
+(struct vec-shr (v1 v2) #:transparent)
 
 ;; Shuffles
 (struct slice_vectors (vec base stride len) #:transparent)
 (struct concat_vectors (v1 v2) #:transparent)
 (struct dynamic_shuffle (vec idx st end) #:transparent)
-
-;; Utility functions
-(define (vec-len expr)
-  (match expr
-    ;; Constructors
-    [(x32 sca) 32]
-    [(x64 sca) 64]
-    [(x128 sca) 128]
-    [(x256 sca) 256]
-
-    [(ramp base stride len) (quotient len stride)]
-    [(load buf idxs alignment) (vec-len idxs)]
-
-    ;; Type Casts
-    [(uint8x1 sca) 1]
-    [(uint16x1 sca) 1]
-    [(uint32x1 sca) 1]
-    [(uint64x1 sca) 1]
-    [(int8x1 sca) 1]
-    [(int16x1 sca) 1]
-    [(int32x1 sca) 1]
-    [(int64x1 sca) 1]
-
-    [(uint1x32 vec) 32]
-    [(uint1x64 vec) 64]
-    [(uint1x128 vec) 128]
-    [(uint1x256 vec) 256]    
-   
-    [(uint8x32 vec) 32]
-    [(uint16x32 vec) 32]
-    [(uint32x32 vec) 32]
-    [(uint64x32 vec) 32]    
-    [(int8x32 vec) 32]
-    [(int16x32 vec) 32]
-    [(int32x32 vec) 32]
-    [(int64x32 vec) 32]    
-    [(uint8x64 vec) 64]
-    [(uint16x64 vec) 64]
-    [(uint32x64 vec) 64]
-    [(uint64x64 vec) 64]    
-    [(int8x64 vec) 64]
-    [(int16x64 vec) 64]
-    [(int32x64 vec) 64]
-    [(int64x64 vec) 64]    
-    [(uint8x128 vec) 128]
-    [(uint16x128 vec) 128]
-    [(uint32x128 vec) 128]
-    [(uint64x128 vec) 128]
-    [(int8x128 vec) 128]
-    [(int16x128 vec) 128]
-    [(int32x128 vec) 128]
-    [(int64x128 vec) 128]    
-    [(uint8x256 vec) 256]
-
-    ;; Operations
-    [(vec-add v1 v2) (vec-len v1)]
-    [(vec-sub v1 v2) (vec-len v1)]
-    [(vec-mul v1 v2) (vec-len v1)]
-    [(vec-div v1 v2) (vec-len v1)]
-    [(vec-min v1 v2) (vec-len v1)]
-    [(vec-max v1 v2) (vec-len v1)]
-    [(vec-if v1 v2 v3) (vec-len v2)]
-    [(vec-lt v1 v2) (vec-len v1)]
-    [(vec-le v1 v2) (vec-len v1)]
-    
-    [(absd v1 v2) (vec-len v1)]
-    [(shift_left vec shift) (vec-len vec)]
-    [(shift_right vec shift) (vec-len vec)]
-
-    ;; Shuffles
-    [(slice_vectors vec base stride len) len]
-    [(concat_vectors v1 v2) (+ (vec-len v1) (vec-len v2))]
-    [(dynamic_shuffle vec idxs st end) (vec-len idxs)]
-    
-    ;; Base case
-    [_ (error "Don't know how to get vector length from:" expr)]))
-
-(provide (except-out (all-defined-out)) (rename-out [vec-len num-elems-hal]))
