@@ -1,8 +1,7 @@
 #lang rosette/safe
 
 (require
-  (only-in racket/base getenv putenv error-print-width string->number exit)
-  (only-in racket/format ~v)
+  (only-in racket/base getenv putenv error-print-width string->number)
   (for-syntax syntax/parse))
 
 (provide debug-print)
