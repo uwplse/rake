@@ -17,6 +17,7 @@ cpp-types  :=  int8_t | int16_t | int32_t | int64_t
            |   signed-expr?   :    (cpp-expr) -> bool
            |   unsigned-expr? :    (cpp-expr) -> bool
            |   expr-bw        :    (cpp-expr) -> int
+           |   cpp-type-str   :    (cpp-type) -> str
            |   signed-type?   :    (cpp-type) -> bool
            |   unsigned-type? :    (cpp-type) -> bool
            |   type-bw        :    (cpp-type) -> int
