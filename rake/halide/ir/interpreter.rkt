@@ -8,6 +8,7 @@
 
 (provide
  (rename-out
+  [buffer-ref halide-buffer-ref]
   [elem-type halide-elem-type]
   [vec-len halide-vec-len]
   [sub-exprs halide-sub-exprs]
@@ -362,7 +363,7 @@
         (define q (bvsdiv ia ib))
         (set! q (bvadd q (bvand a-neg (bvsub (bvnot b-neg) b-neg))))
         (set! q (bvand q (bvnot b-zero)))
-        (cpp-cast (int64_t q) outT)]
+        (cpp-cast (int64_t q) (cpp-type-str outT))]
        [else
         (mk-cpp-expr (bvudiv (eval lhs) (eval rhs)) outT)])]))
 
@@ -375,10 +376,10 @@
      (cond
        [(signed-type? outT)
         (define minF (cond [(eq? (type-bw outT) 8) min8] [(eq? (type-bw outT) 16) min16] [(eq? (type-bw outT) 32) min32]))
-        (mk-cpp-expr (minF (eval lhs) (eval rhs)) outT)]
+        (minF lhs rhs)]
        [else
         (define minF (cond [(eq? (type-bw outT) 8) minu8] [(eq? (type-bw outT) 16) minu16] [(eq? (type-bw outT) 32) minu32]))
-        (mk-cpp-expr (minF (eval lhs) (eval rhs)) outT)])]))
+        (minF lhs rhs)])]))
 
 (define (do-max lhs rhs)
   (cond
@@ -389,10 +390,10 @@
      (cond
        [(signed-type? outT)
         (define maxF (cond [(eq? (type-bw outT) 8) max8] [(eq? (type-bw outT) 16) max16] [(eq? (type-bw outT) 32) max32]))
-        (mk-cpp-expr (maxF (eval lhs) (eval rhs)) outT)]
+        (maxF lhs rhs)]
        [else
         (define maxF (cond [(eq? (type-bw outT) 8) maxu8] [(eq? (type-bw outT) 16) maxu16] [(eq? (type-bw outT) 32) maxu32]))
-        (mk-cpp-expr (maxF (eval lhs) (eval rhs)) outT)])]))
+        (maxF lhs rhs)])]))
 
 (define (do-shr lhs rhs)
   (define outT (infer-out-type lhs rhs))

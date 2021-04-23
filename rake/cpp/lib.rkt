@@ -5,8 +5,7 @@
 
 (provide abs8 abs16 abs32
          min8 min16 min32 minu8 minu16 minu32
-         max8 max16 max32 maxu8 maxu16 maxu32
-         bvadd)
+         max8 max16 max32 maxu8 maxu16 maxu32)
 
 ;;;;; Absolute Functions ;;;;;
 

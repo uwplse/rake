@@ -1,16 +1,14 @@
-#lang rosette
+#lang rosette/safe
 
-(require rake/cpp/types)
-(require rake/util)
+(require rake/cpp)
+(require rake/halide)
 
 (define (values-range-from buffer lb ub)
   (define-symbolic idx integer?)
   (cond
-    [(signed? (get buffer idx))
-     (forall (list idx) (and (bvsle (buffer idx) (eval ub)) (bvsge (buffer idx) (eval lb))))]
+    [(signed-type? (buffer-elemT buffer))
+     (forall (list idx) (and (bvsle ((buffer-data buffer) idx) (eval ub)) (bvsge ((buffer-data buffer) idx) (eval lb))))]
     [else
-     (forall (list idx) (and (bvule (buffer idx) (eval ub)) (bvuge (buffer idx) (eval lb))))]
-    ;[else (error "NYI: range axiom for type ~a" (get buffer idx))]
-    ))
+     (forall (list idx) (and (bvule ((buffer-data buffer) idx) (eval ub)) (bvuge ((buffer-data buffer) idx) (eval lb))))]))
 
 (provide (all-defined-out))

@@ -6,7 +6,7 @@
 
 (provide int8_t int16_t int32_t int64_t uint8_t uint16_t uint32_t uint64_t
          int8_t? int16_t? int32_t? int64_t? uint8_t? uint16_t? uint32_t? uint64_t?
-         eval eval-to-int mk-cpp-type mk-cpp-expr cpp-type
+         eval eval-to-int mk-cpp-type mk-cpp-expr cpp-type cpp-type-str
          signed-expr? unsigned-expr? signed-type? unsigned-type?
          expr-bw type-bw)
 
@@ -106,6 +106,19 @@
     [(uint64_t v) 'uint64]
     [_ (error "Cannot infer type: ~a" e)]))
 
+(define (cpp-type-str type)
+  (cond
+    [(eq? type int8_t) 'int8]
+    [(eq? type int16_t) 'int16]
+    [(eq? type int32_t) 'int32]
+    [(eq? type int64_t) 'int64]
+    [(eq? type uint1_t) 'uint1]
+    [(eq? type uint8_t) 'uint8]
+    [(eq? type uint16_t) 'uint16]
+    [(eq? type uint32_t) 'uint32]
+    [(eq? type uint64_t) 'uint64]
+    [else (error "cpp-type-str: Unexpected type: " type)]))
+
 (define (signed-expr? e)
   (destruct e
     [(int8_t v) #t]
@@ -171,4 +184,13 @@
     [(eq? t 'uint16) 16]
     [(eq? t 'uint32) 32]
     [(eq? t 'uint64) 64]
+    [(eq? t int8_t) 8]
+    [(eq? t int16_t) 16]
+    [(eq? t int32_t) 32]
+    [(eq? t int64_t) 64]
+    [(eq? t uint1_t) 1]
+    [(eq? t uint8_t) 8]
+    [(eq? t uint16_t) 16]
+    [(eq? t uint32_t) 32]
+    [(eq? t uint64_t) 64]
     [else (error "Cannot infer bit-width from type: ~a" t)]))

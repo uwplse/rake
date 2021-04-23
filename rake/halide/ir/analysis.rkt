@@ -43,7 +43,7 @@
     ([buff-reads '()])
     ([i (halide-vec-len expr)])
       (append buff-reads (list (set->list (list->set (extract-lane-buffer-reads ((interpret-halide expr) i) live-buffers)))))))
-  
+
 (define (extract-lane-buffer-reads expr live-buffers)
   (match expr
     ;; Unwrap the types
@@ -114,8 +114,8 @@
       ;; We only need to examing shift-right and divide
       [(vec-div v1 v2)
        (define div-consts (extract-consts v2))
-       (define pow-of-2-consts (filter (lambda (c) (is-power-of-2? c)) div-consts))
-       (define log-2-consts (map (lambda (c) (log-2 c)) pow-of-2-consts))
+       (define pow-of-2-consts (filter (lambda (c) (is-power-of-2? c)) (set->list div-consts)))
+       (define log-2-consts (list->set (map (lambda (c) (log-2 c)) pow-of-2-consts)))
        (set-union! shr-consts log-2-consts)]
       [(vec-shr v1 v2) (set-union! shr-consts (extract-consts v2))]
       ;; Ignore everything else
