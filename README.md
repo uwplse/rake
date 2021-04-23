@@ -67,3 +67,18 @@ constructors  :=   load (buffer indexes align) | ramp (base stride len)
 ** For each lane of the vector computed by the Halide expression, the hash-table maps to the set of live buffer-reads 
 involved in its computation
 ```
+
+### HVX Lifting IR
+Currently truncated, re-introducing uber-instructions as I make progress with refactoring.
+```
+       types  :=   load-data : (live-reads) -> vector
+              |    broadcast : (scalar) -> vector
+              |    cast : (ir-expr type) -> ir-expr
+              |    shift-right : (ir-expr shift saturate? round? arithmetic? output-type) -> ir-expr
+              |    divide-by-const : (ir-expr const) -> ir-expr
+              |    add-const : (ir-expr const) -> ir-expr
+              |    maximum : (ir-expr ir-expr) -> ir-expr
+              |    minimum : (ir-expr ir-expr) -> ir-expr
+              |    vs-mpy-add : (ir-expr weight-matrix output-type saturate?) -> ir-expr
+              |    vs-mpy-add-acc : (ir-expr ir-expr weight-matrix output-type saturate?) -> ir-expr
+```
