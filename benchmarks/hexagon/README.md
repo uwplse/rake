@@ -21,3 +21,31 @@ l2norm          | Machine Learning | Please add
 maxpool         | Machine Learning | Please add
 softmax         | Machine Learning | Please add
 matmul          | Machine Learning | Performs a quantized matrix multiplication
+
+## Runtime Performance Results
+Not yet available
+
+## Synthesis Results
+
+Benchmark Name  | Spec File | Can lift?  | Can sketch? | Can swizzles? | Can verify?
+:-------------- | :-------- | :--------: | :--------------------: | :----------------------: | :---------:
+| gaussian3x3   | expr_0.rkt | :heavy_check_mark: | :x:           | :x:                      | :x:       |
+|               | expr_1.rkt | :heavy_check_mark: | :x:           | :x:                      | :x:       |
+|               | expr_2.rkt | :heavy_check_mark: | :x:           | :x:                      | :x:       |
+|               | expr_3.rkt | :heavy_check_mark: | :x:           | :x:                      | :x:       |
+| gaussian5x5   | expr_0.rkt | :heavy_check_mark: | :x:           | :x:                      | :x:       |
+|               | expr_1.rkt | :heavy_check_mark: | :x:           | :x:                      | :x:       |
+|               | expr_2.rkt | :heavy_check_mark: | :x:           | :x:                      | :x:       |
+|               | expr_3.rkt | :heavy_check_mark: | :x:           | :x:                      | :x:       |
+|               | expr_4.rkt | :heavy_check_mark: | :x:           | :x:                      | :x:       |
+|               | expr_5.rkt | :heavy_check_mark: | :x:           | :x:                      | :x:       |
+|               | expr_6.rkt | :heavy_check_mark: | :x:           | :x:                      | :x:       |
+|               | expr_7.rkt | :heavy_check_mark: | :x:           | :x:                      | :x:       |
+| gaussian7x7   | expr_0.rkt | :heavy_check_mark: | :x:           | :x:                      | :x:       |
+|               | expr_1.rkt | :heavy_check_mark: | :x:           | :x:                      | :x:       |
+|               | expr_2.rkt | :heavy_check_mark: | :x:           | :x:                      | :x:       |
+|               | expr_3.rkt | :heavy_check_mark: | :x:           | :x:                      | :x:       |
+|               | expr_4.rkt | :heavy_check_mark: | :x:           | :x:                      | :x:       |
+|               | expr_5.rkt | :heavy_check_mark: | :x:           | :x:                      | :x:       |
+|               | expr_6.rkt | :heavy_check_mark: | :x:           | :x:                      | :x:       |
+|               | expr_7.rkt | :heavy_check_mark: | :x:           | :x:                      | :x:       |
