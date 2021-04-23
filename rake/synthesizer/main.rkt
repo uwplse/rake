@@ -33,7 +33,7 @@
   ;(println ((interpret-halide halide-expr) 0))
   ;(println ((interpret-hvx-ir template) 0))
 
-  (define-values (halide-expr-s template-s) (simplify-query halide-expr template))
+  ;(define-values (halide-expr-s template-s) (simplify-query halide-expr template))
   
   (clear-vc!)
   (define st (current-milliseconds))
