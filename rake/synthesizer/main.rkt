@@ -47,8 +47,6 @@
   (display (format "Ran synthesizer for ~a ms\n" runtime))
 
   (when (correct? sol)
-    (println halide-expr)
-    (println (evaluate template sol))
     (hash-set! translation-history (ir-node-id template) halide-expr))
   
   sol)
