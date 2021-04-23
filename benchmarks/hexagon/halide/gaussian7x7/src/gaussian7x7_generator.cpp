@@ -10,7 +10,7 @@ public:
     Input<Buffer<uint8_t>> input{"input", 2};
     Output<Buffer<uint8_t>> output{"output", 2};
 
-    GeneratorParam<bool> use_parallel_sched{ "use_parallel_sched", true };
+    GeneratorParam<bool> use_parallel_sched{"use_parallel_sched", true};
     GeneratorParam<bool> use_prefetch_sched{"use_prefetch_sched", true};
 
     void generate() {
@@ -44,16 +44,17 @@ public:
 
             output
                 .hexagon()
-                .tile(x, y, xi, yi, vector_size * 2, 4, TailStrategy::RoundUp)
+                .tile(x, y, xi, yi, vector_size, 4, TailStrategy::RoundUp)
                 .vectorize(xi)
                 .unroll(yi);
             rows.compute_at(Func(output), y)
                 .tile(x, y, x, y, xi, yi, vector_size, 4, TailStrategy::RoundUp)
                 .vectorize(xi)
-                .unroll(yi);
+                .unroll(yi)
+                .align_storage(x, 128);
 
             if (use_prefetch_sched) {
-                output.prefetch(input, y, 2);
+                output.prefetch(input, y, 2, PrefetchBoundStrategy::NonFaulting);
             }
             if (use_parallel_sched) {
                 Var yo;

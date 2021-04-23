@@ -33,7 +33,7 @@ public:
             
             output
                 .hexagon()
-                .prefetch(input, y, 2) // PrefetchBoundStrategy::NonFaulting
+                .prefetch(input, y, 2, PrefetchBoundStrategy::NonFaulting)
                 .tile(x, y, xi, yi, vector_size, 4, TailStrategy::RoundUp)
                 .vectorize(xi)
                 .unroll(yi);

@@ -50,7 +50,8 @@ public:
             rows.compute_at(Func(output), y)
                 .tile(x, y, x, y, xi, yi, vector_size, 4, TailStrategy::RoundUp)
                 .vectorize(xi)
-                .unroll(yi);
+                .unroll(yi)
+                .align_storage(x, 128);
             if (use_prefetch_sched) {
                 output.prefetch(input, y, 2);
             }
