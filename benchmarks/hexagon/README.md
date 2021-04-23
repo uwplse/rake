@@ -49,3 +49,11 @@ Benchmark Name  | Spec File | Can lift?  | Can sketch? | Can swizzles? | Can ver
 |               | expr_5.rkt | :heavy_check_mark: | :x:           | :x:                      | :x:       |
 |               | expr_6.rkt | :heavy_check_mark: | :x:           | :x:                      | :x:       |
 |               | expr_7.rkt | :heavy_check_mark: | :x:           | :x:                      | :x:       |
+| conv3x3a16    | expr_0.rkt | :heavy_check_mark: | :x:           | :x:                      | :x:       |
+|               | expr_1.rkt | :heavy_check_mark: | :x:           | :x:                      | :x:       |
+|               | expr_2.rkt | :heavy_check_mark: | :x:           | :x:                      | :x:       |
+|               | expr_3.rkt | :heavy_check_mark: | :x:           | :x:                      | :x:       |
+| conv3x3a32    | expr_0.rkt | :heavy_check_mark: | :x:           | :x:                      | :x:       |
+|               | expr_1.rkt | :heavy_check_mark: | :x:           | :x:                      | :x:       |
+|               | expr_2.rkt | :heavy_check_mark: | :x:           | :x:                      | :x:       |
+|               | expr_3.rkt | :heavy_check_mark: | :x:           | :x:                      | :x:       |
