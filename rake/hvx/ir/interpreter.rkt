@@ -1,11 +1,13 @@
 #lang rosette/safe
 
 (require
+  (only-in racket/base error)
   rosette/lib/destruct
   rake/cpp
   rake/hvx/ir/instructions)
 
 (provide
+ (rename-out [get-subexprs get-hvx-ir-subexprs])
  (rename-out [set-cn set-cn-hvx-ir])
  (rename-out [elem-type hvx-ir-elem-type])
  (rename-out [interpret interpret-hvx-ir]))
@@ -272,6 +274,19 @@
     [(eq? type 'uint8) satu8]
     [(eq? type 'uint16) satu16]
     [(eq? type 'uint32) satu32]))
+
+(define (get-subexprs ir-expr)
+  (destruct ir-expr
+    [(load-data live-data gather-tbl) '()]
+    [(broadcast value) '()]
+    [(cast sub-expr type) (list sub-expr)]
+    [(vs-mpy-add sub-exprs weight-matrix output-type saturate?) (list sub-exprs)]
+    [(shift-right sub-expr const-val round? saturate? arithmetic? output-type) (list sub-expr)]
+    [(add-const sub-expr const-val output-type saturate?) (list sub-expr)]
+    [(maximum sub-expr0 sub-expr1) (list sub-expr0 sub-expr1)]
+    [(minimum sub-expr0 sub-expr1) (list sub-expr0 sub-expr1)]
+    [(saturate sub-expr round? output-type) (list sub-expr)]
+    [_ (error "NYI: Extracing sub-expression for IR Expr:" ir-expr)]))
 
 ;    [(zip-data data0 data1)
 ;     (define data0i (interpret data0))

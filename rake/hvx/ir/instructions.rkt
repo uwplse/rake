@@ -1,7 +1,8 @@
 #lang rosette/safe
 
 (provide ir-node-id
-         load-data broadcast cast vs-mpy-add vs-mpy-add-acc
+         load-data load-data-gather-tbl load-data-live-data
+         broadcast cast vs-mpy-add vs-mpy-add-acc
          add-const divide-by-const shift-right minimum maximum 
          saturate
 

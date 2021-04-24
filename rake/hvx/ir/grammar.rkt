@@ -3,6 +3,7 @@
 (require
   (only-in racket/list range)
   (only-in racket/base error)
+  (rename-in racket/list [remove-duplicates remove-dups])
   rosette/lib/destruct
   rosette/lib/angelic
   rake/cpp
@@ -48,9 +49,12 @@
           (list (vs-mpy-add (get-node-id) sub-exprs weight-matrix output-type (choose* #t #f)))]
          [(vec-add? halide-expr)
           ;; Try folding the add by expanding the weight-matrix
-          (define live-reads (extract-buffer-reads-halide halide-expr))
-          (define gather-tbl (map (lambda (i) (define-symbolic* idx integer?) idx) (range 25)))
-          (define updated-sub-expr (if (load-data? sub-exprs) (load-data (get-node-id) live-reads gather-tbl) sub-exprs))
+          (define updated-sub-expr
+            (cond
+              [(load-data? sub-exprs)
+               (define live-reads (map (lambda (l1 l2) (remove-dups (append l1 l2))) (load-data-live-data sub-exprs) (extract-buffer-reads-halide halide-expr)))
+               (load-data (get-node-id) live-reads (load-data-gather-tbl sub-exprs))]
+              [else sub-exprs]))
           (list (vs-mpy-add (get-node-id) updated-sub-expr (append weight-matrix (list f)) output-type saturate?))]
          [(or (vec-mul? halide-expr) (vec-shl? halide-expr))
           ;; Try folding the mul by updating the weight-matrix
@@ -74,7 +78,7 @@
 
   (cond
     [(eq? depth 0) candidates]
-    [else (flatten (append (map (lambda (se) (fold-grammar se halide-expr (- depth 1))) (get-subexprs lifted-sub-expr)) candidates))]))
+    [else (flatten (append (map (lambda (se) (fold-grammar se halide-expr (- depth 1))) (get-hvx-ir-subexprs lifted-sub-expr)) candidates))]))
 
 ;; This function returns the list of templates that the
 ;; synthesizer may use to fold the new Halide IR node into
@@ -257,18 +261,6 @@
     [_ (error "NYI: Please define a (extend) grammar for halide node:" halide-expr)]))
 
 (define hvx-uber-instructions (lifting-ir fold-grammar repl-grammar extend-grammar))
-
-(define (get-subexprs ir-expr)
-  (destruct ir-expr
-    [(load-data live-data gather-tbl) '()]
-    [(broadcast value) '()]
-    [(cast sub-expr type) (list sub-expr)]
-    [(vs-mpy-add sub-exprs weight-matrix output-type saturate?) (list sub-exprs)]
-    [(shift-right sub-expr const-val round? saturate? arithmetic? output-type) (list sub-expr)]
-    [(add-const sub-expr const-val output-type saturate?) (list sub-expr)]
-    [(maximum sub-expr0 sub-expr1) (list sub-expr0 sub-expr1)]
-    [(minimum sub-expr0 sub-expr1) (list sub-expr0 sub-expr1)]
-    [_ (error "NYI: Extracing sub-expression for IR Expr:" ir-expr)]))
   
 ;;; Operations
 ;
