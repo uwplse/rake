@@ -5,7 +5,7 @@
 cpp-types  :=  int8_t | int16_t | int32_t | int64_t 
            |   uint8_t | uint16_t | uint32_t | uint64_t
 
-  lib-fns  :=  abs8 | abs16 | abs32
+  lib-fns  :=  abs8 | abs16 | abs32 | absu8 | absu16 | absu32
            |   min8 | min16 | min32 | minu8 | minu16 | minu32
            |   max8 | max16 | max32 | maxu8 | maxu16 | maxu32
 
@@ -81,6 +81,7 @@ Currently truncated, re-introducing uber-instructions as I make progress with re
               |    minimum : (ir-expr ir-expr) -> ir-expr
               |    vs-mpy-add : (ir-expr weight-matrix output-type saturate?) -> ir-expr
               |    vs-mpy-add-acc : (ir-expr ir-expr weight-matrix output-type saturate?) -> ir-expr
+              |    abs-diff : (ir-expr ir-expr) -> ir-expr
 ```
 ### Environment Variables
 To enable `debug-print` statements inside rake, set `RAKE_DEBUG_CODEGEN=1`.
