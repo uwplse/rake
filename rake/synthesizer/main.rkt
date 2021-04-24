@@ -29,13 +29,13 @@
         (synthesize-translation (rest templates) halide-expr axioms context equiv-fn)])]))
 
 (define (run-synthesizer template halide-expr axioms context equiv-fn)
-  ;(pretty-print halide-expr)
-  ;(pretty-print template)
-  
-  ;(set-cn-hvx-ir 0)
-  ;(println ((interpret-halide halide-expr) 0))
-  ;(println ((interpret-hvx-ir template) 0))
-  ;(println (symbolics ((interpret-hvx-ir template) 0)))
+;  (pretty-print halide-expr)
+;  (pretty-print template)
+;  
+;  (set-cn-hvx-ir 0)
+;  (println ((interpret-halide halide-expr) 0))
+;  (println ((interpret-hvx-ir template) 0))
+;  (println (symbolics ((interpret-hvx-ir template) 0)))
 
   (clear-vc!)
   (define st (current-milliseconds))
@@ -50,7 +50,7 @@
 
   (when (correct? sol)
     (define spec ((interpret-halide halide-expr) 0))
-    (define trans ((interpret-hvx-ir template) 0))
+    (define trans ((interpret-hvx-ir (evaluate template sol)) 0))
     (set! learned-axioms (append learned-axioms (list (eq? spec trans))))
     (hash-set! translation-history (ir-node-id template) halide-expr))
   
