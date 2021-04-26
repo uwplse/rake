@@ -435,5 +435,8 @@
 
 (define (do-absd lhs rhs)
   (define outT (infer-out-type lhs rhs))
-  (define absF (cond [(eq? (expr-bw lhs) 8) abs8] [(eq? (expr-bw lhs) 16) abs16] [(eq? (expr-bw lhs) 32) abs32]))
-  (mk-cpp-expr (absF (bvsub (eval lhs) (eval rhs))) outT))
+  (cond
+    [(signed-type? outT)
+     (mk-cpp-expr (if (bvsle (eval lhs) (eval rhs)) (bvsub (eval rhs) (eval lhs)) (bvsub (eval lhs) (eval rhs))) outT)]
+    [else
+     (mk-cpp-expr (if (bvule (eval lhs) (eval rhs)) (bvsub (eval rhs) (eval lhs)) (bvsub (eval lhs) (eval rhs))) outT)]))

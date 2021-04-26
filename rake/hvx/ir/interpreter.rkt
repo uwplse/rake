@@ -3,6 +3,7 @@
 (require
   (only-in racket/base error)
   rosette/lib/destruct
+  rosette/lib/angelic
   rake/cpp
   rake/hvx/ir/instructions)
 
@@ -27,6 +28,17 @@
      (lambda (i)
        (list-ref (list-ref live-data curr-cn) (list-ref gather-tbl i)))]
 
+    [(combine sub-expr0 sub-expr1 read-tbl)
+     (define input0 (interpret sub-expr0))
+     (define input1 (interpret sub-expr1))
+     (lambda (i)
+       (define idx (car (list-ref read-tbl i)))
+       (define c (cdr (list-ref read-tbl i)))
+       (assert (<= 0 idx i))
+       (define lhs (input0 idx))
+       (define rhs (input1 idx))
+       (if c lhs rhs))]
+    
     [(cast sub-expr type)
      (define input (interpret sub-expr))
      (lambda (i) (cpp-cast (input i) type))]
@@ -100,7 +112,21 @@
        (define shift (cond [(eq? (expr-bw v) 16) (bv 8 16)] [(eq? (expr-bw v) 32) (bv 16 32)]))
        (define offset (cond [(eq? (expr-bw v) 16) (bv 128 16)] [(eq? (expr-bw v) 32) (bv 32768 32)]))
        (define rounded (if round? (shiftF (bvadd (eval v) offset) shift) (eval v)))
-       (satF (mk-cpp-type rounded (cpp-type v))))]
+       (satF (mk-cpp-expr rounded (cpp-type v))))]
+
+    [(abs-diff sub-expr0 sub-expr1)
+     (define input0 (interpret sub-expr0))
+     (define input1 (interpret sub-expr1))
+     (lambda (i)
+       (define lhs (input0 i))
+       (define rhs (input1 i))
+       (destruct* (lhs rhs)
+         [((uint8_t v0) (uint8_t v1)) (uint8_t (if (bvule v0 v1) (bvsub v1 v0) (bvsub v0 v1)))]
+         [((uint16_t v0) (uint16_t v1)) (uint16_t (if (bvule v0 v1) (bvsub v1 v0) (bvsub v0 v1)))]
+         [((uint32_t v0) (uint32_t v1)) (uint32_t (if (bvule v0 v1) (bvsub v1 v0) (bvsub v0 v1)))]
+         [((int8_t v0) (int8_t v1)) (int8_t (if (bvsle v0 v1) (bvsub v1 v0) (bvsub v0 v1)))]
+         [((int16_t v0) (int16_t v1)) (int16_t (if (bvsle v0 v1) (bvsub v1 v0) (bvsub v0 v1)))]
+         [((int32_t v0) (int32_t v1)) (int32_t (if (bvsle v0 v1) (bvsub v1 v0) (bvsub v0 v1)))]))]
     
     [(vs-mpy-add sub-expr weights output-type saturate?)
      (define input (interpret sub-expr))
@@ -279,13 +305,15 @@
   (destruct ir-expr
     [(load-data live-data gather-tbl) '()]
     [(broadcast value) '()]
+    [(combine sub-expr0 sub-expr1 read-tbl) (list sub-expr0 sub-expr1)]
     [(cast sub-expr type) (list sub-expr)]
-    [(vs-mpy-add sub-exprs weight-matrix output-type saturate?) (list sub-exprs)]
+    [(vs-mpy-add sub-expr weight-matrix output-type saturate?) (list sub-expr)]
     [(shift-right sub-expr const-val round? saturate? arithmetic? output-type) (list sub-expr)]
     [(add-const sub-expr const-val output-type saturate?) (list sub-expr)]
     [(maximum sub-expr0 sub-expr1) (list sub-expr0 sub-expr1)]
     [(minimum sub-expr0 sub-expr1) (list sub-expr0 sub-expr1)]
     [(saturate sub-expr round? output-type) (list sub-expr)]
+    [(abs-diff sub-expr0 sub-expr1) (list sub-expr0 sub-expr1)]
     [_ (error "NYI: Extracing sub-expression for IR Expr:" ir-expr)]))
 
 ;    [(zip-data data0 data1)
@@ -459,72 +487,6 @@
 ;                             (eval (cpp-cast (vec (+ i 8)) outputType))
 ;                             (eval (cpp-cast (list-ref weights 8) outputType))))]))
 ;        (saturateFunc (mk-typed-expr out outputType))))]
-    
-    
-
-;    [(upcast data)
-;     (define datai (interpret data))
-;     (vector
-;      (lambda (i)
-;        (define v (elem datai i))
-;        (cond
-;          [(int8_t? v) (cpp-cast v 'int16)]
-;          [(int16_t? v) (cpp-cast v 'int32)]
-;          [(uint8_t? v) (cpp-cast v 'uint16)]
-;          [(uint16_t? v) (cpp-cast v 'uint32)])))]
-;
-;    [(downcast data)
-;     (define datai (interpret data))
-;     (vector
-;      (lambda (i)
-;        (define v (elem datai i))
-;        (cond
-;          [(int16_t? v) (cpp-cast v 'int8)]
-;          [(int32_t? v) (cpp-cast v 'int16)]
-;          [(uint16_t? v) (cpp-cast v 'uint8)]
-;          [(uint32_t? v) (cpp-cast v 'uint16)])))]
-;
-;    [(packhi data signed?)
-;     (define datai (interpret data))
-;     (vector
-;      (lambda (i)
-;        (define v (elem datai i))
-;        (match v
-;          [(int16_t val) ((if signed? int8_t uint8_t) (extract 15 8 val))]
-;          [(uint16_t val) ((if signed? int8_t uint8_t) (extract 15 8 val))]
-;          [(int32_t val) ((if signed? int16_t uint16_t) (extract 31 16 val))]
-;          [(uint32_t val) ((if signed? int16_t uint16_t) (extract 31 16 val))])))]
-;
-;    [(abs-diff data0 data1)
-;     (define data0i (interpret data0))
-;     (define data1i (interpret data1))
-;     (vector
-;      (lambda (i)
-;        (define lhs (elem data0i i))
-;        (define rhs (elem data1i i))
-;        (match (list lhs rhs)
-;          [(list (uint8_t _) (uint8_t _))
-;           ;(uint8_t (if (bvsge (eval lhs) (eval rhs)) (bvsub (eval lhs) (eval rhs)) (bvsub (eval rhs) (eval lhs))))
-;           (define n (bvsub (zero-extend (eval lhs) (bitvector 9)) (zero-extend (eval rhs) (bitvector 9))))
-;           (define mask (bvashr n (bv 8 9)))
-;           (uint8_t (extract 7 0 (bvxor mask (bvadd n mask))))]
-;          [(list (uint16_t _) (uint16_t _))
-;           (uint16_t (abs16 (bvsub (eval lhs) (eval rhs))))
-;           ;(uint16_t (if (bvuge (eval lhs) (eval rhs)) (bvsub (eval lhs) (eval rhs)) (bvsub (eval rhs) (eval lhs))))
-;           ;(define n (bvsub (zero-extend (eval lhs) (bitvector 17)) (zero-extend (eval rhs) (bitvector 17))))
-;           ;(define mask (bvashr n (bv 16 17)))
-;           ;(uint16_t (extract 15 0 (bvxor mask (bvadd n mask))))
-;           ]
-;          [(list (int16_t _) (int16_t _))
-;           (int16_t (if (bvsge (eval lhs) (eval rhs)) (bvsub (eval lhs) (eval rhs)) (bvsub (eval rhs) (eval lhs))))
-;           ;(define n (bvsub (eval lhs) (eval rhs)))
-;           ;(define mask (bvashr n (bv 15 16)))
-;           ;(int16_t (bvxor mask (bvadd n mask)))
-;           ]
-;          [(list (int32_t _) (int32_t _))
-;           (define n (bvsub (eval lhs) (eval rhs)))
-;           (define mask (bvashr n (bv 31 32)))
-;           (int32_t (bvxor mask (bvadd n mask)))])))]
 ;
 ;    [(subtract data0 data1 sat? outT)
 ;     (define data0i (interpret data0))
@@ -548,40 +510,3 @@
 ;           (satu16 (uint16_t (bvsub (eval lhs) (eval rhs))))]
 ;          [(list (uint32_t _) (uint32_t _))
 ;           (satu32 (uint32_t (bvsub (eval lhs) (eval rhs))))])))]
-
-;    [_ p]))
-;
-;(define (asList kernel)
-;  (define radius (weight-matrix-rad kernel))
-;  (define ktype (weight-matrix-type kernel))
-;  (define vals (weight-matrix-vals kernel))
-;  (cond
-;    [(eq? radius 1) vals]
-;    [(eq? radius 2) (cond
-;                      [(eq? ktype WMT_GENERAL) vals]
-;                      [(eq? ktype WMT_1DSYM) (append vals (reverse (take vals 1)))])]
-;    [(eq? radius 3) (cond
-;                      [(eq? ktype WMT_GENERAL) vals]
-;                      [(eq? ktype WMT_1DSYM) (append vals (reverse (take vals 2)))])]
-;    [(eq? radius 4) (cond
-;                      [(eq? ktype WMT_GENERAL) vals]
-;                      [(eq? ktype WMT_1DSYM) (append vals (reverse (take vals 3)))]
-;                      [(eq? ktype WMT_2DSYM) (append vals (list (list-ref vals 0) (list-ref vals 1) (list-ref vals 0)  (list-ref vals 2) (list-ref vals 0)))])]
-;    [(eq? radius 5) (cond
-;                      [(eq? ktype WMT_GENERAL) vals]
-;                      [(eq? ktype WMT_1DSYM) (append vals (reverse (take vals 4)))])]
-;    [(eq? radius 6) (cond
-;                      [(eq? ktype WMT_GENERAL) vals]
-;                      [(eq? ktype WMT_1DSYM) (append vals (reverse (take vals 5)))])]
-;    [(eq? radius 7) (cond
-;                      [(eq? ktype WMT_GENERAL) vals]
-;                      [(eq? ktype WMT_1DSYM) (append vals (reverse (take vals 6)))])]
-;    [(eq? radius 8) (cond
-;                      [(eq? ktype WMT_GENERAL) vals]
-;                      [(eq? ktype WMT_1DSYM) (append vals (reverse (take vals 7)))])]
-;    [(eq? radius 9) (cond
-;                      [(eq? ktype WMT_GENERAL) vals]
-;                      [(eq? ktype WMT_1DSYM) (append vals (reverse (take vals 8)))])]))
-;
-;(provide
-; (except-out (all-defined-out) interpret set-curr-cn curr-cn elem) (rename-out [interpret interpret-ir] [set-curr-cn set-curr-cn-ir] [elem elem-ir]))
