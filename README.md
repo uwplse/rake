@@ -73,6 +73,7 @@ Currently truncated, re-introducing uber-instructions as I make progress with re
 ```
        types  :=   load-data : (live-reads) -> vector
               |    broadcast : (scalar) -> vector
+              |    combine : (ir-expr ir-expr) -> ir-expr
               |    cast : (ir-expr type) -> ir-expr
               |    shift-right : (ir-expr shift saturate? round? arithmetic? output-type) -> ir-expr
               |    divide-by-const : (ir-expr const) -> ir-expr
