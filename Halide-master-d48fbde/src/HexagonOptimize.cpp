@@ -2686,7 +2686,26 @@ private:
                 indent.pop();
 
                 return tabs() + "(vec-shr" + rkt_args + ")";
-            } else {
+            } else if (op->name == std::string("shift_left")) {
+                std::string rkt_args = "";
+
+                indent.push(indent.top() + 1);
+                for (unsigned int i = 0; i < op->args.size(); i++)
+                    rkt_args += "\n" + dispatch(op->args[i]);
+                indent.pop();
+
+                return tabs() + "(vec-shl" + rkt_args + ")";
+            } else if (op->name == std::string("absd")) {
+                std::string rkt_args = "";
+
+                indent.push(indent.top() + 1);
+                for (unsigned int i = 0; i < op->args.size(); i++)
+                    rkt_args += "\n" + dispatch(op->args[i]);
+                indent.pop();
+
+                return tabs() + "(vec-absd" + rkt_args + ")";
+            }
+            else {
                 std::string rkt_args = "";
 
                 indent.push(indent.top() + 1);
