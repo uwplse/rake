@@ -3,15 +3,20 @@
 (require
   rake/cpp/types)
 
-(provide abs8 abs16 abs32
+(provide abs8 abs16 abs32 absu8 absu16 absu32
          min8 min16 min32 minu8 minu16 minu32
          max8 max16 max32 maxu8 maxu16 maxu32)
 
 ;;;;; Absolute Functions ;;;;;
 
 (define (abs8 a) (int8_t (let ([v (eval a)]) (int8_t (bvsub (bvxor v (bvashr v (bv 7 8))) (bvashr v (bv 7 8)))))))
-(define (abs16 a) (int16_t (let ([v (eval a)]) (int8_t (bvsub (bvxor v (bvashr v (bv 15 16))) (bvashr v (bv 15 16)))))))
-(define (abs32 a) (int32_t (let ([v (eval a)]) (int8_t (bvsub (bvxor v (bvashr v (bv 31 32))) (bvashr v (bv 31 32)))))))
+(define (abs16 a) (int16_t (let ([v (eval a)]) (int16_t (bvsub (bvxor v (bvashr v (bv 15 16))) (bvashr v (bv 15 16)))))))
+(define (abs32 a) (int32_t (let ([v (eval a)]) (int32_t (bvsub (bvxor v (bvashr v (bv 31 32))) (bvashr v (bv 31 32)))))))
+
+;; Todo: check this is correct
+(define (absu8 a) (uint8_t (let ([v (eval a)]) (uint8_t (bvsub (bvxor v (bvashr v (bv 7 8))) (bvashr v (bv 7 8)))))))
+(define (absu16 a) (uint16_t (let ([v (eval a)]) (uint16_t (bvsub (bvxor v (bvashr v (bv 15 16))) (bvashr v (bv 15 16)))))))
+(define (absu32 a) (uint32_t (let ([v (eval a)]) (uint32_t (bvsub (bvxor v (bvashr v (bv 31 32))) (bvashr v (bv 31 32)))))))
 
 ;;;;; Min/Max functions ;;;;;
 
