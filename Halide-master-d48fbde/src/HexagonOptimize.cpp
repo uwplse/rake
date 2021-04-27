@@ -2484,6 +2484,8 @@ public:
     }
 
 private:
+    enum RosetteEncoding { Integer, Bitvector };
+
     // A custom version of lower intrinsics that skips a TODO in the existing lower_intrinsics
     class LowerIntrinsics : public IRMutator {
         using IRMutator::visit;
@@ -2514,20 +2516,27 @@ private:
         }
     };
 
-    class InferVarEncoding : public IRVisitor {
+    // Any variable that appears inside an indexing expression is encoded as an infinite integer.
+    // Everything else is encoded as bitvectors. 
+    class InferVarEncodings : public IRVisitor {
     public:
         using IRVisitor::visit;
 
-        InferVarEncoding(std::string n, std::map<std::string, Expr> lvs)
-            : var_name(n), indexing(false), computation(false) {
+        InferVarEncodings(std::map<std::string, Expr> lvs) {
             inside_indexing_expr.push(false);
             let_vars = lvs;
         }
 
         void visit(const Variable *op) override {
-            if (op->name == var_name && inside_indexing_expr.top())
-                indexing = true;
-            else if (let_vars.count(op->name))
+            debug(0) << "inside idx expr: " << inside_indexing_expr.top() << "\n";
+            debug(0) << "name: " << op->name << "\n";
+            if (inside_indexing_expr.top())
+                encoding[op->name] = Integer;
+            else
+                encoding[op->name] = Bitvector;
+            
+            // Recurse through let-expressions
+            if (let_vars.count(op->name))
                 let_vars[op->name].accept(this);
         }
 
@@ -2542,38 +2551,39 @@ private:
                 IRVisitor::visit(op);
         }
 
+        void visit(const Let *op) override {
+            op->body.accept(this);
+            if (encoding[op->name] == Integer)
+                inside_indexing_expr.push(true);
+            op->value.accept(this);
+            if (encoding[op->name] == Integer)
+                inside_indexing_expr.pop();
+        }
+
         void visit(const Load *op) override {
             inside_indexing_expr.push(true);
             op->index.accept(this);
             inside_indexing_expr.pop();
-
-            IRVisitor::visit(op);
         }
 
-        bool for_indexing() {
-            return indexing;
-        }
-        bool for_computation() {
-            return computation;
+        std::map<std::string,RosetteEncoding> getEncodings() {
+            return encoding;
         }
 
     private:
-        std::string var_name;
-
-        bool indexing;
-        bool computation;
-
         std::stack<bool> inside_indexing_expr;
+        std::map<std::string, RosetteEncoding> encoding;
         std::map<std::string, Expr> let_vars;
     };
 
     class RacketPrinter : public VariadicVisitor<RacketPrinter, std::string, std::string> {
     public:
-        RacketPrinter(std::ostream &s, std::map<std::string, Expr> lvs)
+        RacketPrinter(std::ostream &s, std::map<std::string, RosetteEncoding> enc, std::map<std::string, Expr> lvs)
             : printer(s) {
             indent.push(1);
             bv_enc.push(true);
             let_vars = lvs;
+            encoding = enc;
         }
 
         void bvEncPush(bool v) {
@@ -2641,18 +2651,20 @@ private:
         }
 
         std::string visit(const Let *op) {
-            InferVarEncoding ive(op->name, let_vars);
-            op->body.accept(&ive);
-
-            if (ive.for_indexing() && !ive.for_computation())
+            if (encoding[op->name] == Integer)
                 bv_enc.push(false);
+            else
+                bv_enc.push(true);
             std::string rkt_val = dispatch(op->value);
-            if (ive.for_indexing() && !ive.for_computation())
-                bv_enc.pop();
+            bv_enc.pop();
 
             indent.push(indent.top() + 1);
             std::string rkt_bdy = dispatch(op->body);
             indent.pop();
+
+            debug(0) << (encoding[op->name] == Integer) << "\n"
+                     << dispatch(op->value) << "\n"
+                     << "--------------------------------------------------------\n";
 
             return tabs() + "(let ([" + op->name + " " + rkt_val + "])\n" + rkt_bdy + ")";
         }
@@ -2809,8 +2821,18 @@ private:
         }
 
         std::string visit(const Mod *op) {
-            printer.print(op);
-            return NYI();
+            indent.push(indent.top() + 1);
+            std::string rkt_lhs = dispatch(op->a);
+            std::string rkt_rhs = dispatch(op->b);
+            indent.pop();
+
+            if (op->type.is_vector()) {
+                return tabs() + "(vec-mod\n" + rkt_lhs + "\n" + rkt_rhs + ")";
+            } else if (op->type != Int(32)) {
+                return tabs() + "(sca-mod\n" + rkt_lhs + "\n" + rkt_rhs + ")";
+            } else {
+                return tabs() + "(modulo " + rkt_lhs + " " + rkt_rhs + ")";
+            }
         }
 
         std::string visit(const Min *op) {
@@ -2917,6 +2939,15 @@ private:
                 indent.pop();
 
                 return tabs() + "(slice_vectors\n" + rkt_vec + " " + rkt_base + " " + rkt_stride + " " + rkt_len + ")";
+            } else if (op->is_interleave()) {
+                indent.push(indent.top() + 1);
+                std::string rkt_vecs = "";
+                for (auto vec : op->vectors)
+                    rkt_vecs += dispatch(op->vectors[0]) + "\n";
+                indent.pop();
+                rkt_vecs.pop_back();
+
+                return tabs() + "(interleave\n" + rkt_vecs + ")";
             } else if (op->is_concat()) {
                 switch (op->vectors.size()) {
                 case 2: {
@@ -3038,6 +3069,7 @@ private:
         std::stack<int> indent;
         std::stack<bool> bv_enc;
         std::map<std::string, Expr> let_vars;
+        std::map<std::string, RosetteEncoding> encoding;
 
         std::string tabs() {
             std::string ret = "";
@@ -3118,6 +3150,7 @@ private:
         std::set<std::string> local_vars;
         std::set<std::pair<std::string, Type>> buffers;
     };
+
 
 private:
     using IRMutator::visit;
@@ -3206,10 +3239,18 @@ private:
             if (x == 0) {
                 expr_id++;
                 return IRMutator::visit(stmt);
-            }   
+            }
         }
 
-        RacketPrinter specPrinter(std::cout, let_vars);
+        InferVarEncodings ive(let_vars);
+        stmt->value.accept(&ive);
+        std::map<std::string, RosetteEncoding> encoding = ive.getEncodings();
+
+        for (auto elem : encoding) {
+            debug(0) << elem.first << " " << (elem.second == Bitvector ? "Bv" : "Int") << "\n";
+        }
+
+        RacketPrinter specPrinter(std::cout, encoding, let_vars);
         std::string expr = specPrinter.dispatch(LowerIntrinsics().mutate(stmt->value));
 
         InferSymbolics symFinder(let_vars, bounds, func_value_bounds);
@@ -3224,6 +3265,7 @@ private:
                << "  (list ";
 
         for (auto buf : symFinder.getSymBufs()) {
+            debug(0) << "Symbolic buffer: " << buf.first << "\n";
             sym_bufs << "(define-symbolic-buffer " << buf.first << " " << type_to_c_type(buf.second, false, true) << ")\n";
             
             std::pair<std::string, int> key(buf.first, 0);
@@ -3246,6 +3288,7 @@ private:
 
         std::stringstream sym_vars;
         for (auto var : symFinder.getSymVars()) {
+            debug(0) << "Symbolic var: " << var->name << "\n";
             if (var->type.is_vector()) {
                 sym_bufs << "(define-symbolic-buffer " << var->name << "-buf " << var->type.element_of() << ")";
                 sym_vars << "(define " << var->name << " (load " << var->name
@@ -3265,11 +3308,11 @@ private:
                            << specPrinter.dispatch(in.min)
                            << specPrinter.dispatch(in.max) << ")";
                 }
-            } else if (var->type == Int(32)) {
-                sym_vars << "(define-symbolic " << var->name << " integer?)\n";
             } else {
-                // Assume it's a fixed point scalar var
-                sym_vars << "(define-symbolic " << var->name << " (bitvector " << var->type.bits() << "))\n";
+                if (encoding[var->name] == Bitvector)
+                    sym_vars << "(define-symbolic " << var->name << " (bitvector " << var->type.bits() << "))\n";
+                else
+                    sym_vars << "(define-symbolic " << var->name << " integer?)\n";
             }
         }
 
@@ -3290,19 +3333,18 @@ private:
         std::stringstream let_stmts;
         for (auto var_name : ordered_live_lets) {
             Expr val = let_vars[var_name];
-            InferVarEncoding ive(var_name, let_vars);
-            stmt->value.accept(&ive);
-
-            if (ive.for_indexing() && !ive.for_computation()) {
+            if (encoding[var_name] == Integer) {
                 specPrinter.bvEncPush(false);
                 let_stmts << "(define " << var_name << specPrinter.dispatch(val) << ")\n";
                 specPrinter.bvEncPop();
             } else {
+                specPrinter.bvEncPush(true);
                 let_stmts << "(define " << var_name << specPrinter.dispatch(val) << ")\n";
+                specPrinter.bvEncPop();
             }
         }
 
-        debug(0)
+        /*debug(0)
             << "#lang rosette/safe\n"
             << "\n"
             << "(require rake)\n"
@@ -3319,7 +3361,7 @@ private:
             << "\n"
             << "(define out (open-output-file \"sexp_" << expr_id << ".out\" #:exists 'replace))\n"
             << "(pretty-write (llvm-codegen hvx-expr) out)\n"
-            << "(close-output-port out)";
+            << "(close-output-port out)";*/
 
         std::ofstream rakeInputF;
         std::string filename = "expr_" + std::to_string(expr_id) + ".rkt";
