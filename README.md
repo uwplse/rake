@@ -83,6 +83,9 @@ Currently truncated, re-introducing uber-instructions as I make progress with re
               |    vs-mpy-add : (ir-expr weight-matrix output-type saturate?) -> ir-expr
               |    vs-mpy-add-acc : (ir-expr ir-expr weight-matrix output-type saturate?) -> ir-expr
               |    abs-diff : (ir-expr ir-expr) -> ir-expr
+              |    less-than : (ir-expr ir-expr) -> ir-expr
+              |    less-than-eq : (ir-expr ir-expr) -> ir-expr
+              |    select : (ir-expr ir-expr ir-expr) -> ir-expr
 ```
 ### Environment Variables
 To enable `debug-print` statements inside rake, set `RAKE_DEBUG_CODEGEN=1`.
