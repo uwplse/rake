@@ -5,9 +5,9 @@
 (define-symbolic-buffer f28 uint8_t)
 (define-symbolic-buffer sharpen_strength_x32 uint8_t)
 (define-symbolic processed.s0.v0.v0 integer?)
-(define-symbolic t4443 integer?)
 (define-symbolic t4448 integer?)
 (define-symbolic t4449 integer?)
+(define-symbolic t4443 integer?)
 
 (define axioms 
   (list 

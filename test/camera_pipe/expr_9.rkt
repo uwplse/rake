@@ -4,18 +4,18 @@
 
 (define-symbolic-buffer deinterleaved int16_t)
 (define-symbolic f7.s0.v0.fused.v0 integer?)
-(define-symbolic t4119 integer?)
-(define-symbolic t4215 integer?)
-(define-symbolic t4118 integer?)
 (define-symbolic t4217 integer?)
 (define-symbolic t4120 integer?)
+(define-symbolic t4119 integer?)
+(define-symbolic t4118 integer?)
+(define-symbolic t4215 integer?)
 (define-symbolic t4121 integer?)
 
 (define axioms 
   (list 
    (values-range-from deinterleaved (int16_t (bv 0 16)) (int16_t (bv 32767 16)))))
 
-(define t3790 (max   (max    (max     (*      t4121      (int32_t (bv 64 32)))     (+      (*       t4120       (int32_t (bv 128 32)))      (int32_t (bv 63 32))))    (+     (*      t4119      (int32_t (bv 64 32)))     (int32_t (bv 1 32))))   (+    (*     t4118     (int32_t (bv 128 32)))    (int32_t (bv 62 32)))))
+(define t3790 (max   (max    (max     (*      t4121      64)     (+      (*       t4120       128)      63))    (+     (*      t4119      64)     1))   (+    (*     t4118     128)    62)))
 (define t3879 t4215)
 (define t3875 t4217)
 (define t3661 (let ([t4054  (+   (*    (quotient     (+      t3790      129)     64)    12)   (+    (*     f7.s0.v0.fused.v0     2)    t3879))])
