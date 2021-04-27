@@ -4,11 +4,7 @@
   (only-in racket/base error)
   rosette/lib/destruct)
 
-(provide int8_t int16_t int32_t int64_t uint8_t uint16_t uint32_t uint64_t
-         int8_t? int16_t? int32_t? int64_t? uint8_t? uint16_t? uint32_t? uint64_t?
-         eval eval-to-int mk-cpp-type mk-cpp-expr cpp-type cpp-type-str
-         signed-expr? unsigned-expr? signed-type? unsigned-type?
-         expr-bw type-bw)
+(provide (all-defined-out))
 
 ;; Types
 (struct int8_t (v) #:transparent)
