@@ -2,15 +2,7 @@
 
 (require (only-in racket/struct make-constructor-style-printer))
 
-(provide ir-node-id
-         load-data load-data-gather-tbl load-data-live-data
-         broadcast combine cast vs-mpy-add vs-mpy-add-acc
-         add-const divide-by-const shift-right minimum maximum 
-         saturate 
-
-         load-data? broadcast? cast? vs-mpy-add? vs-mpy-add-acc?
-         add-const? divide-by-const? shift-right? minimum?
-         maximum? saturate? abs-diff)
+(provide (all-defined-out))
 
 (struct ir-node (id))
 
@@ -35,4 +27,8 @@
 
 (struct abs-diff (sub-expr0 sub-expr1) #:super struct:ir-node #:transparent)
 
-;(struct subtract (data0 data1 sat? widen?) #:super struct:ir-node #:transparent)
+(struct select (sub-expr0 sub-expr1 sub-expr2) #:super struct:ir-node #:transparent)
+(struct less-than (sub-expr0 sub-expr1) #:super struct:ir-node #:transparent)
+(struct less-than-eq (sub-expr0 sub-expr1) #:super struct:ir-node #:transparent)
+
+;(struct subtract (sub-expr0 sub-expr1 output-type saturate?) #:super struct:ir-node #:transparent)

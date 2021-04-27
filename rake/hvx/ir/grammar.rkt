@@ -77,6 +77,9 @@
       [(minimum sub-expr0 sub-expr1) '()]
 
       [(abs-diff sub-expr0 sub-expr1) '()]
+
+      [(less-than sub-expr0 sub-expr1) '()]
+      [(less-than-eq sub-expr0 sub-expr1) '()]
     
       [_ (error "NYI: Please define a (fold) grammar for IR Expr:" lifted-sub-expr halide-expr)]))
 
@@ -118,6 +121,8 @@
       (saturate (get-node-id) sub-expr1 #f (halide-elem-type halide-expr)))]
 
     [(abs-diff sub-expr0 sub-expr1) '()]
+
+    [(less-than sub-expr0 sub-expr1) (list (less-than-eq (get-node-id) sub-expr0 sub-expr1))]
     
     [_ (error "NYI: Please define a (repl) grammar for IR Expr:" lifted-sub-expr)]))
 
@@ -197,7 +202,6 @@
     [(int64x256 vec) (list (cast (get-node-id) (list-ref lifted-sub-exprs 0) 'int64))]
  
     [(vec-add v1 v2)
-     (define mul-consts (extract-mul-consts-halide halide-expr))
      (define add-consts (extract-add-consts-halide halide-expr))
      (define live-reads (extract-buffer-reads-halide halide-expr))
      (define gather-tbl (map (lambda (i) (define-symbolic* idx integer?) idx) (range 25)))
@@ -227,17 +231,52 @@
         (list (int8_t (bv 1 8)) (int8_t (bv 1 8)))
         (halide-elem-type halide-expr)
         #f)
+       (if (eq? (length lifted-sub-exprs) 2)
+           (vs-mpy-add
+            (get-node-id)
+            (combine
+             (get-node-id)
+             (list-ref lifted-sub-exprs 0)
+             (list-ref lifted-sub-exprs 1)
+             read-tbl)
+            (list (int8_t (bv 1 8)) (int8_t (bv 1 8)))
+            (halide-elem-type halide-expr)
+            #f)
+           '())
+           ))]
+
+    [(vec-sub v1 v2)
+     (define live-reads (extract-buffer-reads-halide halide-expr))
+     (define gather-tbl (map (lambda (i) (define-symbolic* idx integer?) idx) (range 25)))
+     (define read-tbl (map (lambda (i) (define-symbolic* idx integer?) (define-symbolic* c boolean?) (cons idx c)) (range 25)))
+     (flatten
+      (list
+       ;; We can extend using vector-scalar multiply-add
        (vs-mpy-add
         (get-node-id)
-        (combine
-         (get-node-id)
-         (list-ref lifted-sub-exprs 0)
-         (list-ref lifted-sub-exprs 1)
-         read-tbl)
-        (list (int8_t (bv 1 8)) (int8_t (bv 1 8)))
+        (apply choose* lifted-sub-exprs)
+        (list (int8_t (bv 1 8)) (int8_t (bv -1 8)))
         (halide-elem-type halide-expr)
         #f)
-       ))]
+       (vs-mpy-add
+        (get-node-id)
+        (load-data (get-load-id) live-reads gather-tbl)
+        (list (int8_t (bv 1 8)) (int8_t (bv -1 8)))
+        (halide-elem-type halide-expr)
+        #f)
+       (if (eq? (length lifted-sub-exprs) 2)
+           (vs-mpy-add
+            (get-node-id)
+            (combine
+             (get-node-id)
+             (list-ref lifted-sub-exprs 0)
+             (list-ref lifted-sub-exprs 1)
+             read-tbl)
+            (list (int8_t (bv 1 8)) (int8_t (bv -1 8)))
+            (halide-elem-type halide-expr)
+            #f)
+           '())
+           ))]
     
     [(vec-mul v1 v2)
      (define mul-consts (extract-mul-consts-halide halide-expr))
@@ -277,8 +316,6 @@
 ;       #f)
       )]
 
-    ;(struct vec-sub (v1 v2) #:transparent)
-
     [(vec-div v1 v2)
      (define shr-consts (extract-shr-consts-halide halide-expr))
      (define div-consts (extract-div-consts-halide halide-expr))
@@ -304,10 +341,14 @@
             (apply choose* lifted-sub-exprs)
             (apply choose* div-consts)))))]
 
-    [(vec-min v1 v2) (list (minimum (get-node-id) (apply choose* lifted-sub-exprs) (apply choose* lifted-sub-exprs)))]
-    [(vec-max v1 v2) (list (maximum (get-node-id) (apply choose* lifted-sub-exprs) (apply choose* lifted-sub-exprs)))]
+    [(vec-min v1 v2) (list (minimum (get-node-id) (list-ref lifted-sub-exprs 0) (list-ref lifted-sub-exprs 1)))]
+    [(vec-max v1 v2) (list (maximum (get-node-id) (list-ref lifted-sub-exprs 0) (list-ref lifted-sub-exprs 1)))]
 
-    [(vec-absd v1 v2) (list (abs-diff (get-node-id) (apply choose* lifted-sub-exprs) (apply choose* lifted-sub-exprs)))]
+    [(vec-if v1 v2 v3) (list (select (get-node-id) (list-ref lifted-sub-exprs 0) (list-ref lifted-sub-exprs 1) (list-ref lifted-sub-exprs 2)))]
+    [(vec-lt v1 v2) (list (less-than (get-node-id) (list-ref lifted-sub-exprs 0) (list-ref lifted-sub-exprs 1)))]
+    [(vec-le v1 v2) (list (less-than-eq (get-node-id) (list-ref lifted-sub-exprs 0) (list-ref lifted-sub-exprs 1)))]
+    
+    [(vec-absd v1 v2) (list (abs-diff (get-node-id) (list-ref lifted-sub-exprs 0) (list-ref lifted-sub-exprs 1)))]
     
     [_ (error "NYI: Please define a (extend) grammar for halide node:" halide-expr)]))
 
@@ -327,11 +368,6 @@
      (define padding (map (lambda (i) '()) (range (- new-len old-len))))
      (map (lambda (l1 l2) (remove-dups (append l1 l2))) (append old-dataset padding) new-dataset)]))
 
-;;; Operations
-;
-;(struct vec-if (v1 v2 v3) #:transparent)
-;(struct vec-lt (v1 v2) #:transparent)
-;(struct vec-le (v1 v2) #:transparent)
 ;
 ;(struct vec-absd (v1 v2) #:transparent)
 ;(struct vec-shl (v1 v2) #:transparent)

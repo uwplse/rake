@@ -127,6 +127,40 @@
          [((int8_t v0) (int8_t v1)) (int8_t (if (bvsle v0 v1) (bvsub v1 v0) (bvsub v0 v1)))]
          [((int16_t v0) (int16_t v1)) (int16_t (if (bvsle v0 v1) (bvsub v1 v0) (bvsub v0 v1)))]
          [((int32_t v0) (int32_t v1)) (int32_t (if (bvsle v0 v1) (bvsub v1 v0) (bvsub v0 v1)))]))]
+
+    [(select sub-expr0 sub-expr1 sub-expr2)
+     (define input0 (interpret sub-expr0))
+     (define input1 (interpret sub-expr1))
+     (define input2 (interpret sub-expr2))
+     (lambda (i) (if (eval (input0 i)) (input1 i) (input2 i)))]
+    
+    [(less-than sub-expr0 sub-expr1)
+     (define input0 (interpret sub-expr0))
+     (define input1 (interpret sub-expr1))
+     (lambda (i)
+       (define lhs (input0 i))
+       (define rhs (input1 i))
+       (destruct* (lhs rhs)
+         [((uint8_t v0) (uint8_t v1)) (uint1_t (bvult v0 v1))]
+         [((uint16_t v0) (uint16_t v1)) (uint1_t (bvult v0 v1))]
+         [((uint32_t v0) (uint32_t v1)) (uint1_t (bvult v0 v1))]
+         [((int8_t v0) (int8_t v1)) (uint1_t (bvslt v0 v1))]
+         [((int16_t v0) (int16_t v1)) (uint1_t (bvslt v0 v1))]
+         [((int32_t v0) (int32_t v1)) (uint1_t (bvslt v0 v1))]))]
+
+    [(less-than-eq sub-expr0 sub-expr1)
+     (define input0 (interpret sub-expr0))
+     (define input1 (interpret sub-expr1))
+     (lambda (i)
+       (define lhs (input0 i))
+       (define rhs (input1 i))
+       (destruct* (lhs rhs)
+         [((uint8_t v0) (uint8_t v1)) (uint1_t (bvule v0 v1))]
+         [((uint16_t v0) (uint16_t v1)) (uint1_t (bvule v0 v1))]
+         [((uint32_t v0) (uint32_t v1)) (uint1_t (bvule v0 v1))]
+         [((int8_t v0) (int8_t v1)) (uint1_t (bvsle v0 v1))]
+         [((int16_t v0) (int16_t v1)) (uint1_t (bvsle v0 v1))]
+         [((int32_t v0) (int32_t v1)) (uint1_t (bvsle v0 v1))]))]
     
     [(vs-mpy-add sub-expr weights output-type saturate?)
      (define input (interpret sub-expr))
@@ -314,6 +348,9 @@
     [(minimum sub-expr0 sub-expr1) (list sub-expr0 sub-expr1)]
     [(saturate sub-expr round? output-type) (list sub-expr)]
     [(abs-diff sub-expr0 sub-expr1) (list sub-expr0 sub-expr1)]
+    [(select sub-expr0 sub-expr1 sub-expr2) (list sub-expr0 sub-expr1 sub-expr2)]
+    [(less-than sub-expr0 sub-expr1) (list sub-expr0 sub-expr1)]
+    [(less-than-eq sub-expr0 sub-expr1) (list sub-expr0 sub-expr1)]
     [_ (error "NYI: Extracing sub-expression for IR Expr:" ir-expr)]))
 
 ;    [(zip-data data0 data1)

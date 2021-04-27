@@ -49,6 +49,7 @@
   (display (format "Ran synthesizer for ~a ms\n" runtime))
 
   (when (correct? sol)
+    ;(pretty-print (evaluate template sol))
     (define spec ((interpret-halide halide-expr) 0))
     (define trans ((interpret-hvx-ir (evaluate template sol)) 0))
     (set! learned-axioms (append learned-axioms (list (eq? spec trans))))
