@@ -93,10 +93,10 @@ Not yet available
 | 62 |                 | expr_9.rkt  | :heavy_check_mark: | :x:           | :x:                      | :x:       |
 | 63 |                 | expr_10.rkt | :heavy_check_mark: | :x:           | :x:                      | :x:       |
 | 64 |                 | expr_11.rkt | :heavy_check_mark: | :x:           | :x:                      | :x:       |
-| 65 |                 | expr_12.rkt | :x: | :x:           | :x:                      | :x:       |
-| 66 |                 | expr_13.rkt | :x: | :x:           | :x:                      | :x:       |
-| 67 |                 | expr_14.rkt | :x: | :x:           | :x:                      | :x:       |
-| 68 |                 | expr_15.rkt | :x: | :x:           | :x:                      | :x:       |
+| 65 |                 | expr_12.rkt | :heavy_check_mark: | :x:           | :x:                      | :x:       |
+| 66 |                 | expr_13.rkt | :heavy_check_mark: | :x:           | :x:                      | :x:       |
+| 67 |                 | expr_14.rkt | :heavy_check_mark: | :x:           | :x:                      | :x:       |
+| 68 |                 | expr_15.rkt | :heavy_check_mark: | :x:           | :x:                      | :x:       |
 | 69 |                 | expr_16.rkt | :x: | :x:           | :x:                      | :x:       |
 | 70 |                 | expr_17.rkt | :x: | :x:           | :x:                      | :x:       |
 | 71 |                 | expr_18.rkt | :x: | :x:           | :x:                      | :x:       |
