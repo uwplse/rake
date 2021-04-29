@@ -4,8 +4,8 @@
 
 (define-symbolic-buffer f1 int16_t)
 (define-symbolic deinterleaved.s0.v0.v0 integer?)
-(define-symbolic t4202 integer?)
 (define-symbolic t4203 integer?)
+(define-symbolic t4202 integer?)
 
 (define axioms 
   (list 

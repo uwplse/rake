@@ -39,7 +39,7 @@
                 (uint16x128
                  t225))
                (int16x128
-                (x128 (halide-buffer-ref mask 0)))))
+                (x128 (load-sca mask 0)))))
              (int32x128
               (vec-mul
                (int16x128
@@ -49,7 +49,7 @@
                    t225
                    t226.s) 1 1 128)))
                (int16x128
-                (x128 (halide-buffer-ref mask 1))))))
+                (x128 (load-sca mask 1))))))
             (int32x128
              (vec-mul
               (int16x128
@@ -59,14 +59,14 @@
                   t225
                   t226.s) 2 1 128)))
               (int16x128
-               (x128 (halide-buffer-ref mask 2))))))
+               (x128 (load-sca mask 2))))))
            (int32x128
             (vec-mul
              (int16x128
               (uint16x128
                t227))
              (int16x128
-              (x128 (halide-buffer-ref mask 3))))))
+              (x128 (load-sca mask 3))))))
           (int32x128
            (vec-mul
             (int16x128
@@ -76,7 +76,7 @@
                 t227
                 t228.s) 1 1 128)))
             (int16x128
-             (x128 (halide-buffer-ref mask 4))))))
+             (x128 (load-sca mask 4))))))
          (int32x128
           (vec-mul
            (int16x128
@@ -86,14 +86,14 @@
                t227
                t228.s) 2 1 128)))
            (int16x128
-            (x128 (halide-buffer-ref mask 5))))))
+            (x128 (load-sca mask 5))))))
         (int32x128
          (vec-mul
           (int16x128
            (uint16x128
             t229))
           (int16x128
-           (x128 (halide-buffer-ref mask 6))))))
+           (x128 (load-sca mask 6))))))
        (int32x128
         (vec-mul
          (int16x128
@@ -103,7 +103,7 @@
              t229
              t230.s) 1 1 128)))
          (int16x128
-          (x128 (halide-buffer-ref mask 7))))))
+          (x128 (load-sca mask 7))))))
       (int32x128
        (vec-mul
         (int16x128
@@ -113,7 +113,7 @@
             t229
             t230.s) 2 1 128)))
         (int16x128
-         (x128 (halide-buffer-ref mask 8))))))
+         (x128 (load-sca mask 8))))))
      (x128 (int32_t (bv 16 32))))
     (x128 (int32_t (bv 255 32))))
    (x128 (int32_t (bv 0 32))))))

@@ -3,10 +3,10 @@
 (require rake)
 
 (define-symbolic-buffer blur_x uint16_t)
-(define-symbolic t195 integer?)
-(define-symbolic t196 integer?)
-(define-symbolic t155 integer?)
 (define-symbolic t194 integer?)
+(define-symbolic t155 integer?)
+(define-symbolic t196 integer?)
+(define-symbolic t195 integer?)
 
 (define axioms 
   (list 

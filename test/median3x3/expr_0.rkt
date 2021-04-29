@@ -4,8 +4,8 @@
 
 (define-symbolic-buffer bounded_input uint8_t)
 (define-symbolic output.s0.x.x integer?)
-(define-symbolic t1411 integer?)
 (define-symbolic t1393 integer?)
+(define-symbolic t1411 integer?)
 (define-symbolic t1413 integer?)
 (define-symbolic t1415 integer?)
 

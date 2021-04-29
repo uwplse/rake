@@ -34,14 +34,14 @@
            t220
            t221.s) 1 1 128)))
        (int16x128
-        (x128 (halide-buffer-ref mask 1))))
+        (x128 (load-sca mask 1))))
       (vec-add
        (vec-mul
         (int16x128
          (uint16x128
           t220))
         (int16x128
-         (x128 (halide-buffer-ref mask 0))))
+         (x128 (load-sca mask 0))))
        (vec-add
         (vec-mul
          (int16x128
@@ -51,14 +51,14 @@
              t220
              t221.s) 2 1 128)))
          (int16x128
-          (x128 (halide-buffer-ref mask 2))))
+          (x128 (load-sca mask 2))))
         (vec-add
          (vec-mul
           (int16x128
            (uint16x128
             t222))
           (int16x128
-           (x128 (halide-buffer-ref mask 3))))
+           (x128 (load-sca mask 3))))
          (vec-add
           (vec-mul
            (int16x128
@@ -68,7 +68,7 @@
                t222
                t223.s) 1 1 128)))
            (int16x128
-            (x128 (halide-buffer-ref mask 4))))
+            (x128 (load-sca mask 4))))
           (vec-add
            (vec-mul
             (int16x128
@@ -78,14 +78,14 @@
                 t222
                 t223.s) 2 1 128)))
             (int16x128
-             (x128 (halide-buffer-ref mask 5))))
+             (x128 (load-sca mask 5))))
            (vec-add
             (vec-mul
              (int16x128
               (uint16x128
                t224))
              (int16x128
-              (x128 (halide-buffer-ref mask 6))))
+              (x128 (load-sca mask 6))))
             (vec-add
              (vec-mul
               (int16x128
@@ -95,7 +95,7 @@
                   t224
                   t225.s) 2 1 128)))
               (int16x128
-               (x128 (halide-buffer-ref mask 8))))
+               (x128 (load-sca mask 8))))
              (vec-mul
               (int16x128
                (uint16x128
@@ -104,7 +104,7 @@
                   t224
                   t225.s) 1 1 128)))
               (int16x128
-               (x128 (halide-buffer-ref mask 7))))))))))))
+               (x128 (load-sca mask 7))))))))))))
      (x128 (int16_t (bv 16 16))))
     (x128 (int16_t (bv 255 16))))
    (x128 (int16_t (bv 0 16))))))

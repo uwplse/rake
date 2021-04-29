@@ -21,7 +21,7 @@
   (slice_vectors
    (load f7 (ramp (*  (+   f28.s0.v0.v0   t3952.s)  64) 1 128) (aligned 64 0)) 1 1 64)
   (slice_vectors
-   (load f7 (ramp (*  (+   f28.s0.v0.v0   t3952.s)  64) 1 128) (aligned 64 0)) 1 1 64)))
+   (load deinterleaved (ramp (*  (+   f28.s0.v0.v0   t3946.s)  64) 1 128) (aligned 64 0)) 2 1 64)))
 
 (define spec (synthesis-spec 'halide-ir halide-expr axioms))
 (define hvx-expr (synthesize-hvx spec 'greedy 'enumerative 'enumerative))

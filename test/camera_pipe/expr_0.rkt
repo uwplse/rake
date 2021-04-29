@@ -4,9 +4,9 @@
 
 (define-symbolic-buffer input uint16_t)
 (define-symbolic f1.s0.v0.v0 integer?)
-(define-symbolic t4154 integer?)
-(define-symbolic t4086 integer?)
 (define-symbolic t4081 integer?)
+(define-symbolic t4086 integer?)
+(define-symbolic t4154 integer?)
 (define-symbolic t4153 integer?)
 
 (define axioms 

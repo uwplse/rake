@@ -24,8 +24,34 @@
  (interleave
   (slice_vectors
    t3703.s 1 1 64)
-  (slice_vectors
-   t3703.s 1 1 64)))
+  (vec-add
+   (int16x64
+    (vec-div
+     (vec-add
+      (vec-add
+       (int32x64
+        (slice_vectors
+         t3703.s 1 1 64))
+       (int32x64
+        (slice_vectors
+         (load deinterleaved (ramp (*  (+   f28.s0.v0.v0   t3911)  64) 1 128) (aligned 64 0)) 2 1 64)))
+      (x64 (int32_t (bv 1 32))))
+     (x64 (int32_t (bv 2 32)))))
+   (vec-sub
+    (slice_vectors
+     (load deinterleaved (ramp (*  (+   f28.s0.v0.v0   t3946.s)  64) 1 128) (aligned 64 0)) 2 1 64)
+    (int16x64
+     (vec-div
+      (vec-add
+       (vec-add
+        (int32x64
+         (slice_vectors
+          t4070 2 1 64))
+        (int32x64
+         (slice_vectors
+          t4070 1 1 64)))
+       (x64 (int32_t (bv 1 32))))
+      (x64 (int32_t (bv 2 32)))))))))
 
 (define spec (synthesis-spec 'halide-ir halide-expr axioms))
 (define hvx-expr (synthesize-hvx spec 'greedy 'enumerative 'enumerative))

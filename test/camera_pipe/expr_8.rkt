@@ -4,12 +4,12 @@
 
 (define-symbolic-buffer deinterleaved int16_t)
 (define-symbolic f7.s0.v0.fused.v0 integer?)
-(define-symbolic t4218 integer?)
-(define-symbolic t4217 integer?)
-(define-symbolic t4120 integer?)
-(define-symbolic t4119 integer?)
 (define-symbolic t4118 integer?)
+(define-symbolic t4120 integer?)
+(define-symbolic t4217 integer?)
+(define-symbolic t4119 integer?)
 (define-symbolic t4121 integer?)
+(define-symbolic t4218 integer?)
 
 (define axioms 
   (list 
@@ -34,29 +34,34 @@
   (load deinterleaved (ramp (*  t4053  64) 1 128) (aligned 64 0))))
 
 (define halide-expr
- (vec-if  (vec-lt  (vec-absd
-  t3654
-  t3655)  (vec-absd
-  t3656
-  t3657))  (int16x128
-  (vec-div
-   (vec-add
+ (vec-if
+  (vec-lt
+   (vec-absd
+    t3654
+    t3655)
+   (vec-absd
+    t3656
+    t3657))
+  (int16x128
+   (vec-div
     (vec-add
-     (int32x128
-      t3654)
-     (int32x128
-      t3655))
-    (x128 (int32_t (bv 1 32))))
-   (x128 (int32_t (bv 2 32)))))  (int16x128
-  (vec-div
-   (vec-add
+     (vec-add
+      (int32x128
+       t3654)
+      (int32x128
+       t3655))
+     (x128 (int32_t (bv 1 32))))
+    (x128 (int32_t (bv 2 32)))))
+  (int16x128
+   (vec-div
     (vec-add
-     (int32x128
-      t3656)
-     (int32x128
-      t3657))
-    (x128 (int32_t (bv 1 32))))
-   (x128 (int32_t (bv 2 32)))))))
+     (vec-add
+      (int32x128
+       t3656)
+      (int32x128
+       t3657))
+     (x128 (int32_t (bv 1 32))))
+    (x128 (int32_t (bv 2 32)))))))
 
 (define spec (synthesis-spec 'halide-ir halide-expr axioms))
 (define hvx-expr (synthesize-hvx spec 'greedy 'enumerative 'enumerative))

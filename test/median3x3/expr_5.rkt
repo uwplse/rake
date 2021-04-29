@@ -4,10 +4,10 @@
 
 (define-symbolic-buffer bounded_input uint8_t)
 (define-symbolic t1393 integer?)
-(define-symbolic t1703 integer?)
 (define-symbolic t1781 integer?)
-(define-symbolic t1777 integer?)
 (define-symbolic t1779 integer?)
+(define-symbolic t1703 integer?)
+(define-symbolic t1777 integer?)
 
 (define axioms 
   (list 

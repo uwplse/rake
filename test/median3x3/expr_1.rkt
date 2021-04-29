@@ -6,8 +6,8 @@
 (define-symbolic output.s0.x.x integer?)
 (define-symbolic t1393 integer?)
 (define-symbolic t1484 integer?)
-(define-symbolic t1488 integer?)
 (define-symbolic t1486 integer?)
+(define-symbolic t1488 integer?)
 
 (define axioms 
   (list 

@@ -6,8 +6,8 @@
 (define-symbolic t1393 integer?)
 (define-symbolic t1923 integer?)
 (define-symbolic t1703 integer?)
-(define-symbolic t1927 integer?)
 (define-symbolic t1925 integer?)
+(define-symbolic t1927 integer?)
 
 (define axioms 
   (list 

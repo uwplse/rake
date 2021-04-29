@@ -3,11 +3,11 @@
 (require rake)
 
 (define-symbolic-buffer input uint16_t)
+(define-symbolic t4081 integer?)
 (define-symbolic t4086 integer?)
+(define-symbolic t4175 integer?)
 (define-symbolic t4127 integer?)
 (define-symbolic t4128 integer?)
-(define-symbolic t4081 integer?)
-(define-symbolic t4175 integer?)
 
 (define axioms 
   (list ))

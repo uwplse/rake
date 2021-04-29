@@ -4,8 +4,8 @@
 
 (define-symbolic-buffer input uint16_t)
 (define-symbolic f1.s0.v0.v0 integer?)
-(define-symbolic t4086 integer?)
 (define-symbolic t4081 integer?)
+(define-symbolic t4086 integer?)
 (define-symbolic t4151 integer?)
 (define-symbolic t4152 integer?)
 

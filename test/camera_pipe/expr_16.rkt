@@ -4,9 +4,9 @@
 
 (define-symbolic-buffer f26 int16_t)
 (define-symbolic-buffer output int16_t)
-(define-symbolic f27.s0.v1 integer?)
-(define-symbolic f28.s0.v1.v1 integer?)
 (define-symbolic processed.s0.v1.v3.v3 integer?)
+(define-symbolic f28.s0.v1.v1 integer?)
+(define-symbolic f27.s0.v1 integer?)
 (define-symbolic t4142 integer?)
 (define-symbolic t4138 integer?)
 (define-symbolic t4103 integer?)
@@ -31,21 +31,20 @@
      (int32x128
       (load output (ramp (*  t3755  128) 1 128) (aligned 128 0)))
      (int32x128
-      (x128 (halide-buffer-ref f26 0))))
+      (x128 (load-sca f26 0))))
     (vec-add
      (vec-mul
       (int32x128
        (load output (ramp (+  (*   t3755   128)  256) 1 128) (aligned 128 0)))
       (int32x128
-       (x128 (halide-buffer-ref f26 1))))
+       (x128 (load-sca f26 1))))
      (vec-add
       (vec-mul
        (int32x128
         (load output (ramp (+  (*   t3755   128)  512) 1 128) (aligned 128 0)))
        (int32x128
-        (x128 (halide-buffer-ref f26 2))))
-      (x128 (int32x1
- (halide-buffer-ref f26 3))))))
+        (x128 (load-sca f26 2))))
+      (x128 (int32x1 (load-sca f26 3))))))
    (x128 (int32_t (bv 256 32))))))
 
 (define spec (synthesis-spec 'halide-ir halide-expr axioms))

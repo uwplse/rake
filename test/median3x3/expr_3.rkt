@@ -5,9 +5,9 @@
 (define-symbolic-buffer bounded_input uint8_t)
 (define-symbolic output.s0.x.x integer?)
 (define-symbolic t1393 integer?)
+(define-symbolic t1630 integer?)
 (define-symbolic t1632 integer?)
 (define-symbolic t1634 integer?)
-(define-symbolic t1630 integer?)
 
 (define axioms 
   (list 
