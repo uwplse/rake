@@ -91,7 +91,8 @@
 
 (define (fold-into-subexpr lifted-sub-expr halide-expr axioms uber-instrs context)
   (define grm-generator (lifting-ir-fold-grammar uber-instrs))
-  (define templates (grm-generator lifted-sub-expr halide-expr 3))
+  (define templates (grm-generator lifted-sub-expr halide-expr 2))
+  (define bounded-eq? (if (interleave? halide-expr) bounded-eq-1? bounded-eq-0?))
   (synthesize-translation templates halide-expr axioms context bounded-eq?))
 
 ;; Updating IR expressions
@@ -106,22 +107,30 @@
 
 (define (repl-subexpr lifted-sub-expr halide-expr axioms uber-instrs context)
   (define grm-generator (lifting-ir-repl-grammar uber-instrs))
-  (define templates (grm-generator lifted-sub-expr halide-expr))
+  (define templates (grm-generator lifted-sub-expr halide-expr 2))
+  (define bounded-eq? (if (interleave? halide-expr) bounded-eq-1? bounded-eq-0?))
   (synthesize-translation templates halide-expr axioms context bounded-eq?))
 
 ;; Extending IR expressions
 (define (extend-subexprs lifted-sub-exprs halide-expr axioms uber-instrs context)
   (define grm-generator (lifting-ir-extend-grammar uber-instrs))
   (define templates (grm-generator lifted-sub-exprs halide-expr))
+  (define bounded-eq? bounded-eq-0?)
   (synthesize-translation templates halide-expr axioms context bounded-eq?))
 
-(define (bounded-eq? oe se)
+(define (bounded-eq-0? oe se)
   (for-each
    (lambda (lane)
      (set-cn-hvx-ir lane)
      (assert (eq? (oe lane) (se lane))))
    (list 0)))
 
+(define (bounded-eq-1? oe se)
+  (for-each
+   (lambda (lane)
+     (set-cn-hvx-ir lane)
+     (assert (eq? (oe lane) (se lane))))
+   (list 0 1)))
 
 ;  (define lifted-sub-exprs
 ;    (match halide-expr
