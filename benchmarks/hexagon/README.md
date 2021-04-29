@@ -97,9 +97,9 @@ Not yet available
 | 66 |                 | expr_13.rkt | :heavy_check_mark: | :x:           | :x:                      | :x:       |
 | 67 |                 | expr_14.rkt | :heavy_check_mark: | :x:           | :x:                      | :x:       |
 | 68 |                 | expr_15.rkt | :heavy_check_mark: | :x:           | :x:                      | :x:       |
-| 69 |                 | expr_16.rkt | :x: | :x:           | :x:                      | :x:       |
-| 70 |                 | expr_17.rkt | :x: | :x:           | :x:                      | :x:       |
-| 71 |                 | expr_18.rkt | :x: | :x:           | :x:                      | :x:       |
+| 69 |                 | expr_16.rkt | :heavy_check_mark: | :x:           | :x:                      | :x:       |
+| 70 |                 | expr_17.rkt | :heavy_check_mark: | :x:           | :x:                      | :x:       |
+| 71 |                 | expr_18.rkt | :heavy_check_mark: | :x:           | :x:                      | :x:       |
 | 72 |                 | expr_19.rkt | :x: | :x:           | :x:                      | :x:       |
 | 73 |                 | expr_20.rkt | :x: | :x:           | :x:                      | :x:       |
 | 74 |                 | expr_21.rkt | :x: | :x:           | :x:                      | :x:       |
