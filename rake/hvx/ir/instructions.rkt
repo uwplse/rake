@@ -9,7 +9,14 @@
 (struct load-data (live-data gather-tbl) #:super struct:ir-node)
 (struct broadcast (value) #:super struct:ir-node #:transparent)
 
-(struct combine (sub-expr0 sub-expr1 read-tbl) #:super struct:ir-node #:transparent)
+(struct combine (sub-expr0 sub-expr1 read-tbl)
+  #:super struct:ir-node
+  #:transparent
+  #:methods gen:custom-write
+  [(define write-proc
+     (make-constructor-style-printer
+      (lambda (obj) `combine)
+      (lambda (obj) (list (combine-sub-expr0 obj) (combine-sub-expr1 obj)))))])
 
 (struct cast (sub-expr type) #:super struct:ir-node #:transparent)
 
@@ -20,6 +27,7 @@
 
 (struct shift-right (sub-expr shift round? saturate? arithmetic? output-type) #:super struct:ir-node #:transparent)
 (struct divide-by-const (sub-expr const-val) #:super struct:ir-node #:transparent)
+(struct average (sub-expr round? output-type) #:super struct:ir-node #:transparent)
 
 (struct minimum (sub-expr0 sub-expr1) #:super struct:ir-node #:transparent)
 (struct maximum (sub-expr0 sub-expr1) #:super struct:ir-node #:transparent)

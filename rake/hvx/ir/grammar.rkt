@@ -32,7 +32,11 @@
 (define (fold-grammar lifted-sub-expr halide-expr [depth 0])
   (define candidates
     (destruct lifted-sub-expr
-      [(load-data live-data gather-tbl) (list lifted-sub-expr)]
+      [(load-data live-data gather-tbl)
+       (define live-reads (extract-buffer-reads-halide halide-expr))
+       (define gather-tbl (map (lambda (i) (define-symbolic* idx integer?) idx) (range 25)))
+       (list (load-data (get-load-id) live-reads gather-tbl))]
+
       [(broadcast value) '()]
 
       [(combine sub-expr0 sub-expr1 read-tbl) '()]
@@ -73,6 +77,9 @@
        (define shr-consts (extract-shr-consts-halide halide-expr))
        (list (shift-right (get-node-id) sub-expr (apply choose* shr-consts) (choose* #t #f) (choose* #t #f) (choose* #t #f) (halide-elem-type halide-expr)))]
 
+      [(average sub-expr round? output-type)
+       (list (average (get-node-id) sub-expr (choose* #t #f) (halide-elem-type halide-expr)))]
+
       [(maximum sub-expr0 sub-expr1) '()]
       [(minimum sub-expr0 sub-expr1) '()]
 
@@ -80,6 +87,7 @@
 
       [(less-than sub-expr0 sub-expr1) '()]
       [(less-than-eq sub-expr0 sub-expr1) '()]
+      [(select sub-expr0 sub-expr1 sub-expr2) '()]
     
       [_ (error "NYI: Please define a (fold) grammar for IR Expr:" lifted-sub-expr halide-expr)]))
 
@@ -92,39 +100,55 @@
 ;; the current IR-expression. In these templates, we consider
 ;; replacing one of the existing uber-instructions with a different
 ;; one.
-(define (repl-grammar lifted-sub-expr halide-expr)
-  (destruct lifted-sub-expr
-    [(load-data live-data gather-tbl) '()]
-    [(broadcast value) '()]
+(define (repl-grammar lifted-sub-expr halide-expr [depth 0])
+  (define candidates
+    (destruct lifted-sub-expr
+      [(load-data live-data gather-tbl) '()]
+      [(broadcast value) '()]
+      [(combine sub-expr0 sub-expr1 read-tbl) '()]
     
-    [(cast sub-expr type) (extend-grammar (list sub-expr) halide-expr)]
+      [(cast sub-expr type) (extend-grammar (list sub-expr) halide-expr)]
 
-    [(vs-mpy-add sub-expr weight-matrix output-type saturate?) '()]
+      [(vs-mpy-add sub-expr weight-matrix output-type saturate?)
+       (define shr-consts (extract-shr-consts-halide halide-expr))
+       (flatten
+        (if (empty? shr-consts)
+            '()
+            (average (get-node-id) sub-expr (choose* #t #f) (halide-elem-type halide-expr))))]
     
-    [(shift-right sub-expr const-val round? saturate? arithmetic? output-type) '()]
+      [(shift-right sub-expr const-val round? saturate? arithmetic? output-type) '()]
 
-    [(add-const sub-expr const-val output-type saturate?)
-     (define shr-consts (extract-shr-consts-halide halide-expr))
-     (flatten
-      (list
-       ;(saturate (get-node-id) sub-expr #t (signedT? output-type))
-       (if (empty? shr-consts) '() (list (shift-right (get-node-id) sub-expr (apply choose* shr-consts) #t #f (signed-type? output-type) output-type)))))]
+      [(add-const sub-expr const-val output-type saturate?)
+       (define shr-consts (extract-shr-consts-halide halide-expr))
+       (flatten
+        (list
+         (saturate (get-node-id) sub-expr #t (halide-elem-type halide-expr))
+         (if (empty? shr-consts)
+             '()
+             (shift-right (get-node-id) sub-expr (apply choose* shr-consts) #t #f (signed-type? output-type) output-type))))]
 
-    [(maximum sub-expr0 sub-expr1)
-     (list
-      (saturate (get-node-id) sub-expr0 #f (halide-elem-type halide-expr))
-      (saturate (get-node-id) sub-expr1 #f (halide-elem-type halide-expr)))]
+      [(average sub-expr round? output-type) '()]
+
+      [(maximum sub-expr0 sub-expr1)
+       (list
+        (saturate (get-node-id) sub-expr0 #f (halide-elem-type halide-expr))
+        (saturate (get-node-id) sub-expr1 #f (halide-elem-type halide-expr)))]
     
-    [(minimum sub-expr0 sub-expr1)
-     (list
-      (saturate (get-node-id) sub-expr0 #f (halide-elem-type halide-expr))
-      (saturate (get-node-id) sub-expr1 #f (halide-elem-type halide-expr)))]
+      [(minimum sub-expr0 sub-expr1)
+       (list
+        (saturate (get-node-id) sub-expr0 #f (halide-elem-type halide-expr))
+        (saturate (get-node-id) sub-expr1 #f (halide-elem-type halide-expr)))]
 
-    [(abs-diff sub-expr0 sub-expr1) '()]
+      [(abs-diff sub-expr0 sub-expr1) '()]
 
-    [(less-than sub-expr0 sub-expr1) (list (less-than-eq (get-node-id) sub-expr0 sub-expr1))]
+      [(less-than sub-expr0 sub-expr1) (list (less-than-eq (get-node-id) sub-expr0 sub-expr1))]
+      [(select sub-expr0 sub-expr1 sub-expr2) '()]
     
-    [_ (error "NYI: Please define a (repl) grammar for IR Expr:" lifted-sub-expr)]))
+      [_ (error "NYI: Please define a (repl) grammar for IR Expr:" lifted-sub-expr)]))
+
+  (cond
+    [(eq? depth 0) candidates]
+    [else (flatten (append (map (lambda (se) (repl-grammar se halide-expr (- depth 1))) (get-hvx-ir-subexprs lifted-sub-expr)) candidates))]))
 
 ;; This function returns the list of uber-instructions that the
 ;; synthesizer may use to extend the IR-expression. We could blindly
@@ -134,10 +158,10 @@
 (define (extend-grammar lifted-sub-exprs halide-expr)
   (destruct halide-expr
     ;; Broadcast nodes
-    [(x32 sca) (list (broadcast (get-node-id) sca))]
-    [(x64 sca) (list (broadcast (get-node-id) sca))]
-    [(x128 sca) (list (broadcast (get-node-id) sca))]
-    [(x256 sca) (list (broadcast (get-node-id) sca))]
+    [(x32 sca) (list (broadcast (get-node-id) (interpret-halide sca)))]
+    [(x64 sca) (list (broadcast (get-node-id) (interpret-halide sca)))]
+    [(x128 sca) (list (broadcast (get-node-id) (interpret-halide sca)))]
+    [(x256 sca) (list (broadcast (get-node-id) (interpret-halide sca)))]
 
     ;; Data loads & shuffles
     [(load buf idxs align)
@@ -154,6 +178,13 @@
      (define live-reads (extract-buffer-reads-halide halide-expr))
      (define gather-tbl (map (lambda (i) (define-symbolic* idx integer?) idx) (range 25)))
      (list (load-data (get-load-id) live-reads gather-tbl))]
+
+    [(interleave v1 v2)
+     (define live-reads (extract-buffer-reads-halide halide-expr))
+     (define gather-tbl (map (lambda (i) (define-symbolic* idx integer?) idx) (range 25)))
+     (define read-tbl (map (lambda (i) (define-symbolic* idx integer?) (define-symbolic* c boolean?) (cons idx c)) (range 25)))
+     (list
+      (combine (get-load-id) (list-ref lifted-sub-exprs 0) (list-ref lifted-sub-exprs 1) read-tbl))]
 
     [(dynamic_shuffle vec idxs st end)
      (define live-reads (extract-buffer-reads-halide halide-expr))
@@ -341,8 +372,8 @@
             (apply choose* lifted-sub-exprs)
             (apply choose* div-consts)))))]
 
-    [(vec-min v1 v2) (list (minimum (get-node-id) (list-ref lifted-sub-exprs 0) (list-ref lifted-sub-exprs 1)))]
-    [(vec-max v1 v2) (list (maximum (get-node-id) (list-ref lifted-sub-exprs 0) (list-ref lifted-sub-exprs 1)))]
+    [(vec-min v1 v2) (if (eq? (length lifted-sub-exprs) 2) (list (minimum (get-node-id) (list-ref lifted-sub-exprs 0) (list-ref lifted-sub-exprs 1))) '())]
+    [(vec-max v1 v2) (if (eq? (length lifted-sub-exprs) 2) (list (maximum (get-node-id) (list-ref lifted-sub-exprs 0) (list-ref lifted-sub-exprs 1))) '())]
 
     [(vec-if v1 v2 v3) (list (select (get-node-id) (list-ref lifted-sub-exprs 0) (list-ref lifted-sub-exprs 1) (list-ref lifted-sub-exprs 2)))]
     [(vec-lt v1 v2) (list (less-than (get-node-id) (list-ref lifted-sub-exprs 0) (list-ref lifted-sub-exprs 1)))]
@@ -368,7 +399,6 @@
      (define padding (map (lambda (i) '()) (range (- new-len old-len))))
      (map (lambda (l1 l2) (remove-dups (append l1 l2))) (append old-dataset padding) new-dataset)]))
 
-;
 ;(struct vec-absd (v1 v2) #:transparent)
 ;(struct vec-shl (v1 v2) #:transparent)
 ;(struct vec-shr (v1 v2) #:transparent)

@@ -29,13 +29,16 @@
         (synthesize-translation (rest templates) halide-expr axioms context equiv-fn)])]))
 
 (define (run-synthesizer template halide-expr axioms context equiv-fn)
-;  (pretty-print halide-expr)
-;  (pretty-print template)
-;  
-;  (set-cn-hvx-ir 0)
-;  (println ((interpret-halide halide-expr) 0))
-;  (println ((interpret-hvx-ir template) 0))
-;  (println (symbolics ((interpret-hvx-ir template) 0)))
+  ;(pretty-print halide-expr)
+  ;(pretty-print template)
+  
+  ;(println ((interpret-halide halide-expr) 0))
+  ;(println ((interpret-halide halide-expr) 1))
+
+  
+  ;(set-cn-hvx-ir 0) (println ((interpret-hvx-ir template) 0))
+  ;(set-cn-hvx-ir 1) (println ((interpret-hvx-ir template) 1))
+  ;(println (symbolics ((interpret-hvx-ir template) 0)))
 
   (clear-vc!)
   (define st (current-milliseconds))
@@ -49,7 +52,18 @@
   (display (format "Ran synthesizer for ~a ms\n" runtime))
 
   (when (correct? sol)
-    ;(pretty-print (evaluate template sol))
+;    (println halide-expr)
+;    (pretty-print (evaluate template sol))
+;
+;    (println sol)
+;    (println equiv-fn)
+;    
+;    (println ((interpret-halide halide-expr) 0))
+;    (println ((interpret-halide halide-expr) 1))
+;  
+;    (set-cn-hvx-ir 0) (println ((interpret-hvx-ir template) 0))
+;    (set-cn-hvx-ir 1) (println ((interpret-hvx-ir template) 1))
+    
     (define spec ((interpret-halide halide-expr) 0))
     (define trans ((interpret-hvx-ir (evaluate template sol)) 0))
     (set! learned-axioms (append learned-axioms (list (eq? spec trans))))

@@ -75,6 +75,35 @@
          [(uint8_t? v) (mk-cpp-expr (bvudiv (eval v) (eval den)) 'uint8)]
          [(uint16_t? v) (mk-cpp-expr (bvudiv (eval v) (eval den)) 'uint16)]))]
 
+    [(average sub-expr round? output-type)
+     (define input (interpret sub-expr))
+     (lambda (i)
+       (cond
+         [(eq? output-type 'int8)
+          (define sum (bvadd (eval (cpp-cast (input (* i 2)) 'int16)) (eval (cpp-cast (input (+ (* i 2) 1)) 'int16))))
+          (define rounded (if round? (bvadd sum (bv 1 16)) sum))
+          (cpp-cast (int16_t (bvashr rounded (bv 1 16))) 'int8)]
+         [(eq? output-type 'int16)
+          (define sum (bvadd (eval (cpp-cast (input (* i 2)) 'int32)) (eval (cpp-cast (input (+ (* i 2) 1)) 'int32))))
+          (define rounded (if round? (bvadd sum (bv 1 32)) sum))
+          (cpp-cast (int32_t (bvashr rounded (bv 1 32))) 'int16)]
+         [(eq? output-type 'int32)
+          (define sum (bvadd (eval (cpp-cast (input (* i 2)) 'int64)) (eval (cpp-cast (input (+ (* i 2) 1)) 'int64))))
+          (define rounded (if round? (bvadd sum (bv 1 64)) sum))
+          (cpp-cast (int64_t (bvashr rounded (bv 1 64))) 'int32)]
+         [(eq? output-type 'uint8)
+          (define sum (bvadd (eval (cpp-cast (input (* i 2)) 'uint16)) (eval (cpp-cast (input (+ (* i 2) 1)) 'uint16))))
+          (define rounded (if round? (bvadd sum (bv 1 16)) sum))
+          (cpp-cast (uint16_t (bvlshr rounded (bv 1 16))) 'uint8)]
+         [(eq? output-type 'uint16)
+          (define sum (bvadd (eval (cpp-cast (input (* i 2)) 'uint32)) (eval (cpp-cast (input (+ (* i 2) 1)) 'uint32))))
+          (define rounded (if round? (bvadd sum (bv 1 32)) sum))
+          (cpp-cast (uint32_t (bvashr rounded (bv 1 32))) 'uint16)]
+         [(eq? output-type 'uint32)
+          (define sum (bvadd (eval (cpp-cast (input (* i 2)) 'uint64)) (eval (cpp-cast (input (+ (* i 2) 1)) 'uint64))))
+          (define rounded (if round? (bvadd sum (bv 1 64)) sum))
+          (cpp-cast (uint64_t (bvashr rounded (bv 1 64))) 'uint32)]))]
+
     [(minimum sub-expr0 sub-expr1)
      (define input0 (interpret sub-expr0))
      (define input1 (interpret sub-expr1))
@@ -174,10 +203,10 @@
                             (eval (cpp-cast (list-ref weights 0) output-type)))]
             [(eq? width 2) (bvadd
                             (bvmul
-                             (eval (cpp-cast (input i) output-type))
+                             (eval (cpp-cast (input (* i 2)) output-type))
                              (eval (cpp-cast (list-ref weights 0) output-type)))
                             (bvmul
-                             (eval (cpp-cast (input (+ i 1)) output-type))
+                             (eval (cpp-cast (input (+ (* i 2) 1)) output-type))
                              (eval (cpp-cast (list-ref weights 1) output-type))))]
             [(eq? width 3) (bvadd
                             (bvmul
@@ -344,22 +373,15 @@
     [(vs-mpy-add sub-expr weight-matrix output-type saturate?) (list sub-expr)]
     [(shift-right sub-expr const-val round? saturate? arithmetic? output-type) (list sub-expr)]
     [(add-const sub-expr const-val output-type saturate?) (list sub-expr)]
+    [(average sub-expr round? output-type) (list sub-expr)]
     [(maximum sub-expr0 sub-expr1) (list sub-expr0 sub-expr1)]
     [(minimum sub-expr0 sub-expr1) (list sub-expr0 sub-expr1)]
     [(saturate sub-expr round? output-type) (list sub-expr)]
     [(abs-diff sub-expr0 sub-expr1) (list sub-expr0 sub-expr1)]
     [(select sub-expr0 sub-expr1 sub-expr2) (list sub-expr0 sub-expr1 sub-expr2)]
     [(less-than sub-expr0 sub-expr1) (list sub-expr0 sub-expr1)]
-    [(less-than-eq sub-expr0 sub-expr1) (list sub-expr0 sub-expr1)]
     [_ (error "NYI: Extracing sub-expression for IR Expr:" ir-expr)]))
-
-;    [(zip-data data0 data1)
-;     (define data0i (interpret data0))
-;     (define data1i (interpret data1))
-;     (vector
-;      (lambda (i)
-;        (if (even? i) (elem data0i (quotient i 2)) (elem data1i (quotient i 2)))))]
-;    
+    
 ;    [(convolve-acc acc data kernel saturateFunc outputType)
 ;     (define acc-vec (vector-data (interpret acc)))
 ;     (define vec (vector-data (interpret data)))
@@ -524,26 +546,3 @@
 ;                             (eval (cpp-cast (vec (+ i 8)) outputType))
 ;                             (eval (cpp-cast (list-ref weights 8) outputType))))]))
 ;        (saturateFunc (mk-typed-expr out outputType))))]
-;
-;    [(subtract data0 data1 sat? outT)
-;     (define data0i (interpret data0))
-;     (define data1i (interpret data1))
-;     (vector
-;      (lambda (i)
-;        (define lhs (cpp-cast (elem data0i i) outT))
-;        (define rhs (cpp-cast (elem data1i i) outT))
-;        (match (list lhs rhs)
-;          [(list (int8_t _) (int8_t _))
-;           (if sat? (sat8 (int8_t (bvsub (eval lhs) (eval rhs)))) (int8_t (bvsub (eval lhs) (eval rhs))))]
-;          [(list (int16_t _) (int16_t _))
-;           (if sat? (sat16 (int16_t (bvsub (eval lhs) (eval rhs)))) (int16_t (bvsub (eval lhs) (eval rhs))))]
-;          [(list (int32_t _) (int32_t _))
-;           (if sat? (sat32 (int32_t (bvsub (eval lhs) (eval rhs)))) (int32_t (bvsub (eval lhs) (eval rhs))))]
-;          [(list (uint8_t _) (int8_t _))
-;           (satu8 (int8_t (bvsub (eval lhs) (eval rhs))))]
-;          [(list (uint8_t _) (uint8_t _))
-;           (satu8 (uint8_t (bvsub (eval lhs) (eval rhs))))]
-;          [(list (uint16_t _) (uint16_t _))
-;           (satu16 (uint16_t (bvsub (eval lhs) (eval rhs))))]
-;          [(list (uint32_t _) (uint32_t _))
-;           (satu32 (uint32_t (bvsub (eval lhs) (eval rhs))))])))]
