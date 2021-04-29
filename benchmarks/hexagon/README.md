@@ -106,6 +106,6 @@ Not yet available
 | 75 |                 | expr_22.rkt | :x: | :x:           | :x:                      | :x:       |
 | 76 |                 | expr_23.rkt | :x: | :x:           | :x:                      | :x:       |
 | 77 |                 | expr_24.rkt | :x: | :x:           | :x:                      | :x:       |
-| 78 |                 | expr_25.rkt | :x: | :x:           | :x:                      | :x:       |
-| 79 |                 | expr_26.rkt | :x: | :x:           | :x:                      | :x:       |
-| 90 |                 | expr_27.rkt | :x: | :x:           | :x:                      | :x:       |
+| 78 |                 | expr_25.rkt | :heavy_check_mark: | :x:           | :x:                      | :x:       |
+| 79 |                 | expr_26.rkt | :heavy_check_mark: | :x:           | :x:                      | :x:       |
+| 90 |                 | expr_27.rkt | :heavy_check_mark: | :x:           | :x:                      | :x:       |
