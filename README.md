@@ -81,6 +81,7 @@ Currently truncated, re-introducing uber-instructions as I make progress with re
               |    shift-right : (ir-expr shift saturate? round? arithmetic? output-type) -> ir-expr
               |    divide-by-const : (ir-expr const) -> ir-expr
               |    average : (ir-expr round? output-type?) -> ir-expr
+              |    modulo-by-const : (ir-expr const) -> ir-expr
               |    maximum : (ir-expr ir-expr) -> ir-expr
               |    minimum : (ir-expr ir-expr) -> ir-expr
               |    saturate : (ir-expr round? output-type) -> ir-expr              
