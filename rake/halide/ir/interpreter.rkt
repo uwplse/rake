@@ -30,6 +30,7 @@
 
     [(ramp base stride len) (quotient len stride)]
     [(load buf idxs alignment) (vec-len idxs)]
+    [(load-sca buf idx) 1]
 
     ;; Type Casts
     [(uint8x1 sca) 1]
@@ -122,6 +123,7 @@
 
     [(ramp base stride len) (list)]
     [(load buf idxs alignment) (list)]
+    [(load-sca buf idx) (list)]
 
     ;; Type Casts
     [(uint8x1 sca) (list)]
@@ -213,17 +215,18 @@
 
     [(ramp base stride len) (lambda (i) (+ (interpret base) (* i (interpret stride))))]
     [(load buf idxs alignment) (lambda (i) (buffer-ref (interpret buf) ((interpret idxs) i)))]
+    [(load-sca buf idx) (buffer-ref (interpret buf) (interpret idx))]
 
     ;; Type Casts
-    [(uint8x1 sca) (lambda (i) (cpp-cast ((interpret sca) i) 'uint8))]
-    [(uint16x1 sca) (lambda (i) (cpp-cast ((interpret sca) i) 'uint16))]    
-    [(uint32x1 sca) (lambda (i) (cpp-cast ((interpret sca) i) 'uint32))]
-    [(uint64x1 sca) (lambda (i) (cpp-cast ((interpret sca) i) 'uint64))]
+    [(uint8x1 sca) (cpp-cast (interpret sca) 'uint8)]
+    [(uint16x1 sca) (cpp-cast (interpret sca) 'uint16)]    
+    [(uint32x1 sca) (cpp-cast (interpret sca) 'uint32)]
+    [(uint64x1 sca) (cpp-cast (interpret sca) 'uint64)]
 
-    [(int8x1 sca) (lambda (i) (cpp-cast ((interpret sca) i) 'int8))]
-    [(int16x1 sca) (lambda (i) (cpp-cast ((interpret sca) i) 'int16))]    
-    [(int32x1 sca) (lambda (i) (cpp-cast ((interpret sca) i) 'int32))]
-    [(int64x1 sca) (lambda (i) (cpp-cast ((interpret sca) i) 'int64))]
+    [(int8x1 sca) (cpp-cast (interpret sca) 'int8)]
+    [(int16x1 sca) (cpp-cast (interpret sca) 'int16)]
+    [(int32x1 sca) (cpp-cast (interpret sca) 'int32)]
+    [(int64x1 sca) (cpp-cast (interpret sca) 'int64)]
 
     ;[(uint1x32 vec) NYI: Not sure what would be casted into uint1?]
     ;[(uint1x64 vec) NYI: Not sure what would be casted into uint1?]

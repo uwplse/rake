@@ -16,10 +16,11 @@
 (struct x128 (sca) #:transparent)
 (struct x256 (sca) #:transparent)
 
-(struct aligned (mod rem) #:transparent)
-(struct ramp (base stride len) #:transparent)
-(struct load (buf idxs alignment) #:transparent)
 (struct buffer (data elemT) #:transparent)
+(struct load (buf idxs alignment) #:transparent)
+(struct ramp (base stride len) #:transparent)
+(struct aligned (mod rem) #:transparent)
+(struct load-sca (buf idx) #:transparent)
 
 ;; Type Casts
 (struct uint8x1 (sca) #:transparent)

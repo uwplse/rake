@@ -51,6 +51,7 @@
     [(int16_t v) (extract-lane-buffer-reads v live-buffers)]
     [(int32_t v) (extract-lane-buffer-reads v live-buffers)]
     [(int64_t v) (extract-lane-buffer-reads v live-buffers)]
+    [(uint1_t v) (extract-lane-buffer-reads v live-buffers)]
     [(uint8_t v) (extract-lane-buffer-reads v live-buffers)]
     [(uint16_t v) (extract-lane-buffer-reads v live-buffers)]
     [(uint32_t v) (extract-lane-buffer-reads v live-buffers)]
