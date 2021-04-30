@@ -3354,8 +3354,14 @@ private:
                            << specPrinter.dispatch(in.max) << ")";
                 }
             } else {
-                if (encoding[var->name] == Bitvector)
-                    sym_vars << "(define-symbolic " << var->name << " (bitvector " << var->type.bits() << "))\n";
+                if (encoding[var->name] == Bitvector) {
+                    sym_vars << "(define-symbolic " << var->name << "-val "
+                             << "(bitvector " << var->type.bits() << "))\n";
+                    sym_vars << "(define " << var->name << " "
+                             << "(" << type_to_c_type(var->type.element_of(), false, true) << " "
+                             << var->name << "-val))\n";
+                    
+                }
                 else
                     sym_vars << "(define-symbolic " << var->name << " integer?)\n";
             }
