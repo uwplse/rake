@@ -4,12 +4,12 @@
 
 (define-symbolic-buffer deinterleaved int16_t)
 (define-symbolic f7.s0.v0.fused.v0 integer?)
-(define-symbolic t4215 integer?)
-(define-symbolic t4118 integer?)
-(define-symbolic t4120 integer?)
 (define-symbolic t4217 integer?)
-(define-symbolic t4119 integer?)
 (define-symbolic t4121 integer?)
+(define-symbolic t4119 integer?)
+(define-symbolic t4118 integer?)
+(define-symbolic t4215 integer?)
+(define-symbolic t4120 integer?)
 
 (define axioms 
   (list 

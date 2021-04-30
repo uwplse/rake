@@ -7,28 +7,15 @@
 (define-symbolic processed.s0.v0.v0 integer?)
 (define-symbolic t4141 integer?)
 (define-symbolic t4096 integer?)
-(define-symbolic t4443 integer?)
+(define-symbolic t4419 integer?)
 
 (define axioms 
   (list 
-   (values-range-from f28 (uint8_t (bv 0 8)) (uint8_t (bv 255 8)))
-   (values-range-from sharpen_strength_x32 (uint8x1  (sca-max
-  (sca-min
-   (sca-mul
-    sharpen_strength
-    32.000000)
-   255.000000)
-  0.000000)) (uint8x1  (sca-max
-  (sca-min
-   (sca-mul
-    sharpen_strength
-    32.000000)
-   255.000000)
-  0.000000)))))
+   (values-range-from f28 (uint8_t (bv 0 8)) (uint8_t (bv 255 8)))))
 
 (define processed.extent.0 t4096)
 (define f28.stride.2 t4141)
-(define t3965 t4443)
+(define t3965 t4419)
 (define t3749 (+   (*    processed.s0.v0.v0    128)   (+    (*     f28.stride.2     2)    t3965)))
 (define t3750.s (load f28 (ramp t3749 1 256) (aligned 128 0)))
 (define t4078 (load f28 (ramp (+  (+   (*    (quotient     processed.extent.0     128)    128)   t3749)  128) 1 128) (aligned 128 0)))

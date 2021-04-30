@@ -4,8 +4,8 @@
 
 (define-symbolic-buffer input uint8_t)
 (define-symbolic output.s0.x.x integer?)
-(define-symbolic t76 integer?)
 (define-symbolic t49 integer?)
+(define-symbolic t76 integer?)
 
 (define axioms 
   (list ))

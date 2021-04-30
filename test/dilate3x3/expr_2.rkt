@@ -4,10 +4,10 @@
 
 (define-symbolic-buffer bounded_input uint8_t)
 (define-symbolic output.s0.x.x integer?)
-(define-symbolic t301 integer?)
 (define-symbolic t312 integer?)
-(define-symbolic t369 integer?)
+(define-symbolic t301 integer?)
 (define-symbolic t370 integer?)
+(define-symbolic t369 integer?)
 
 (define axioms 
   (list 

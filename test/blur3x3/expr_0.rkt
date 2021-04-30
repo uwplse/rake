@@ -5,8 +5,8 @@
 (define-symbolic-buffer input uint16_t)
 (define-symbolic blur_x.s0.y integer?)
 (define-symbolic blur_x.s0.x.x integer?)
-(define-symbolic t165 integer?)
 (define-symbolic t155 integer?)
+(define-symbolic t165 integer?)
 
 (define axioms 
   (list ))

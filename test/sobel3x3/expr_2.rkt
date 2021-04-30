@@ -6,8 +6,8 @@
 (define-symbolic-buffer c6 uint8_t)
 (define-symbolic-buffer c7 uint8_t)
 (define-symbolic output.s0.x.x integer?)
-(define-symbolic t400 integer?)
 (define-symbolic t401 integer?)
+(define-symbolic t400 integer?)
 
 (define axioms 
   (list 

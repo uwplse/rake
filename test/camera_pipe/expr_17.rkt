@@ -7,10 +7,10 @@
 (define-symbolic processed.s0.v1.v3.v3 integer?)
 (define-symbolic f28.s0.v1.v1 integer?)
 (define-symbolic f27.s0.v1 integer?)
+(define-symbolic t4135 integer?)
 (define-symbolic t4142 integer?)
 (define-symbolic t4138 integer?)
 (define-symbolic t4103 integer?)
-(define-symbolic t4135 integer?)
 
 (define axioms 
   (list 

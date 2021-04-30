@@ -5,33 +5,20 @@
 (define-symbolic-buffer f28 uint8_t)
 (define-symbolic-buffer sharpen_strength_x32 uint8_t)
 (define-symbolic processed.s0.v0.v0 integer?)
+(define-symbolic t4448 integer?)
 (define-symbolic t4141 integer?)
-(define-symbolic t4473 integer?)
-(define-symbolic t4443 integer?)
-(define-symbolic t4472 integer?)
+(define-symbolic t4419 integer?)
+(define-symbolic t4449 integer?)
 
 (define axioms 
   (list 
-   (values-range-from f28 (uint8_t (bv 0 8)) (uint8_t (bv 255 8)))
-   (values-range-from sharpen_strength_x32 (uint8x1  (sca-max
-  (sca-min
-   (sca-mul
-    sharpen_strength
-    32.000000)
-   255.000000)
-  0.000000)) (uint8x1  (sca-max
-  (sca-min
-   (sca-mul
-    sharpen_strength
-    32.000000)
-   255.000000)
-  0.000000)))))
+   (values-range-from f28 (uint8_t (bv 0 8)) (uint8_t (bv 255 8)))))
 
 (define f28.stride.2 t4141)
-(define t3965 t4443)
+(define t3965 t4419)
 (define t3744.s (load f28 (ramp (+  (+   (*    processed.s0.v0.v0    128)   t3965)  f28.stride.2) 1 256) (aligned 128 0)))
-(define t3746 (+   (+    (*     t4472     -128)    f28.stride.2)   (+    (*     processed.s0.v0.v0     128)    t3965)))
-(define t3747 (+   (+    (*     t4473     128)    f28.stride.2)   (+    (*     processed.s0.v0.v0     128)    t3965)))
+(define t3746 (+   (+    (*     t4448     -128)    f28.stride.2)   (+    (*     processed.s0.v0.v0     128)    t3965)))
+(define t3747 (+   (+    (*     t4449     128)    f28.stride.2)   (+    (*     processed.s0.v0.v0     128)    t3965)))
 (define t4075 (load f28 (ramp (+  t3747  128) 1 128) (aligned 128 0)))
 (define t4076 (load f28 (ramp (+  (+   (*    processed.s0.v0.v0    128)   t3965)  f28.stride.2) 1 128) (aligned 128 0)))
 (define t4077.s (load f28 (ramp (+  t3747  256) 1 128) (aligned 128 0)))

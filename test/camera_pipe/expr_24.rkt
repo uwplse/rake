@@ -2,27 +2,20 @@
 
 (require rake)
 
-(define-symbolic-buffer curve uint8_t)
 (define-symbolic-buffer f27 int16_t)
+(define-symbolic-buffer t4415-buf uint8_t)
+(define-symbolic-buffer t4417-buf uint8_t)
+(define t4415 (load t4415-buf (ramp 0 1 128) (aligned 0 0)))
+(define t4417 (load t4417-buf (ramp 0 1 128) (aligned 0 0)))
 
 (define axioms 
   (list 
-   (values-range-from curve (uint8_t (bv 0 8)) (uint8_t (bv 255 8)))
-   (values-range-from f27 (int16_t (bv -32768 16)) (int16_t (bv 32767 16)))))
+   (values-range-from f27 (int16_t (bv -32768 16)) (int16_t (bv 32767 16)))
+   (values-range-from t4415-buf (uint8_t (bv 0 8)) (uint8_t (bv 255 8)))
+   (values-range-from t4417-buf (uint8_t (bv 0 8)) (uint8_t (bv 255 8)))))
 
 (define t3734 (load f27 (ramp 640 1 128) (aligned 0 640)))
-(define t3735 (dynamic_shuffle
-  (load curve (ramp 0 1 128) (aligned 0 0))
-  (uint8x128
-   (vec-max
-    (vec-min
-     (vec-div
-      t3734
-      (x128 8))
-     (x128 127))
-    (x128 0)))
-  0
-  127))
+(define t3735 t4415)
 
 (define halide-expr
  (uint8x128
@@ -34,20 +27,7 @@
       (x128 (int16_t (bv 8 16))))
      (int16x128
       (vec-sub
-       (dynamic_shuffle
-        (load curve (ramp 0 1 128) (aligned 0 0))
-        (uint8x128
-         (vec-max
-          (vec-min
-           (vec-add
-            (vec-div
-             t3734
-             (x128 8))
-            (x128 1))
-           (x128 127))
-          (x128 0)))
-        0
-        127)
+       t4417
        t3735)))
     (int16x128
      (vec-shl

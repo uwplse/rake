@@ -6,8 +6,8 @@
 (define-symbolic output.s0.x.x integer?)
 (define-symbolic t311 integer?)
 (define-symbolic t301 integer?)
-(define-symbolic t390 integer?)
 (define-symbolic t389 integer?)
+(define-symbolic t390 integer?)
 
 (define axioms 
   (list 

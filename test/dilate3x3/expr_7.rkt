@@ -4,8 +4,8 @@
 
 (define-symbolic-buffer bounded_input uint8_t)
 (define-symbolic t308 integer?)
-(define-symbolic t301 integer?)
 (define-symbolic t307 integer?)
+(define-symbolic t301 integer?)
 (define-symbolic t314 integer?)
 
 (define axioms 

@@ -5,8 +5,8 @@
 (define-symbolic-buffer deinterleaved int16_t)
 (define-symbolic-buffer f13 int16_t)
 (define-symbolic f28.s0.v0.v0 integer?)
-(define-symbolic t4287 integer?)
 (define-symbolic t4289 integer?)
+(define-symbolic t4287 integer?)
 
 (define axioms 
   (list 

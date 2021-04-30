@@ -4,9 +4,9 @@
 
 (define-symbolic-buffer bounded_input uint8_t)
 (define-symbolic t1393 integer?)
+(define-symbolic t1854 integer?)
 (define-symbolic t1850 integer?)
 (define-symbolic t1852 integer?)
-(define-symbolic t1854 integer?)
 (define-symbolic t1703 integer?)
 
 (define axioms 

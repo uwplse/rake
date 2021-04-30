@@ -6,11 +6,11 @@
 (define-symbolic-buffer f13 int16_t)
 (define-symbolic-buffer f7 int16_t)
 (define-symbolic f28.s0.v0.v0 integer?)
-(define-symbolic t4278 integer?)
 (define-symbolic t4280 integer?)
-(define-symbolic t4287 integer?)
-(define-symbolic t4286 integer?)
 (define-symbolic t4284 integer?)
+(define-symbolic t4286 integer?)
+(define-symbolic t4287 integer?)
+(define-symbolic t4278 integer?)
 
 (define axioms 
   (list 
