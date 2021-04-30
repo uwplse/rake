@@ -72,6 +72,7 @@
     [(bv _ _) (list)]
     [(bitvector _) (list)]
     [(? number? n) (list)]
+    [(constant id type) (list)]
 
     [else (error "halide/ir/analysis: NYI how to extract buffer reads from" expr)]))
 
