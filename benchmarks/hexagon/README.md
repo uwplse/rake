@@ -109,3 +109,27 @@ Not yet available
 | 78 |                 | expr_25.rkt | :heavy_check_mark: | :x:           | :x:                      | :x:       |
 | 79 |                 | expr_26.rkt | :heavy_check_mark: | :x:           | :x:                      | :x:       |
 | 90 |                 | expr_27.rkt | :heavy_check_mark: | :x:           | :x:                      | :x:       |
+| 91 | max_pool        | expr_0.rkt  | :heavy_check_mark: | :x:           | :x:                      | :x:       |
+| 92 |                 | expr_1.rkt  | :heavy_check_mark: | :x:           | :x:                      | :x:       |
+| 93 |                 | expr_2.rkt  | :heavy_check_mark: | :x:           | :x:                      | :x:       |
+| 94 |                 | expr_3.rkt  | :heavy_check_mark: | :x:           | :x:                      | :x:       |
+| 95 |                 | expr_4.rkt  | :heavy_check_mark: | :x:           | :x:                      | :x:       |
+| 96 |                 | expr_5.rkt  | :heavy_check_mark: | :x:           | :x:                      | :x:       |
+| 97 |                 | expr_6.rkt  | :heavy_check_mark: | :x:           | :x:                      | :x:       |
+| 98 |                 | expr_7.rkt  | :heavy_check_mark: | :x:           | :x:                      | :x:       |
+| 99 |                 | expr_8.rkt  | :heavy_check_mark: | :x:           | :x:                      | :x:       |
+| 100 | matmul         | expr_0.rkt  | :x: | :x:           | :x:                      | :x:       |
+| 101 |                | expr_1.rkt  | :x: | :x:           | :x:                      | :x:       |
+| 102 |                | expr_2.rkt  | :x: | :x:           | :x:                      | :x:       |
+| 103 |                | expr_3.rkt  | :x: | :x:           | :x:                      | :x:       |
+| 104 |                | expr_4.rkt  | :x: | :x:           | :x:                      | :x:       |
+| 105 |                | expr_5.rkt  | :x: | :x:           | :x:                      | :x:       |
+| 106 |                | expr_6.rkt  | :x: | :x:           | :x:                      | :x:       |
+| 107 |                | expr_7.rkt  | :x: | :x:           | :x:                      | :x:       |
+| 108 |                | expr_8.rkt  | :x: | :x:           | :x:                      | :x:       |
+| 109 |                | expr_9.rkt  | :x: | :x:           | :x:                      | :x:       |
+| 110 |                | expr_10.rkt | :x: | :x:           | :x:                      | :x:       |
+| 111 |                | expr_11.rkt | :x: | :x:           | :x:                      | :x:       |
+| 112 |                | expr_12.rkt | :x: | :x:           | :x:                      | :x:       |
+| 113 |                | expr_13.rkt | :x: | :x:           | :x:                      | :x:       |
+| 114 |                | expr_14.rkt | :x: | :x:           | :x:                      | :x:       |
