@@ -2528,8 +2528,6 @@ private:
         }
 
         void visit(const Variable *op) override {
-            debug(0) << "inside idx expr: " << inside_indexing_expr.top() << "\n";
-            debug(0) << "name: " << op->name << "\n";
             if (inside_indexing_expr.top())
                 encoding[op->name] = Integer;
             else
@@ -2638,16 +2636,18 @@ private:
             std::ostringstream stream;
             stream << op->type;
 
-            indent.push(indent.top() + 1);
-
-            std::string rkt_type = stream.str();
             if (op->type.is_scalar()) {
+                std::string rkt_type = stream.str();
                 rkt_type += "x1";
+                std::string rkt_val = dispatch(op->value);
+                return tabs() + "(" + rkt_type + " " + rkt_val + ")";
+            } else {
+                indent.push(indent.top() + 1);
+                std::string rkt_type = stream.str();
+                std::string rkt_val = dispatch(op->value);
+                indent.pop();
+                return tabs() + "(" + rkt_type + "\n" + rkt_val + ")";
             }
-            std::string rkt_val = dispatch(op->value);
-            indent.pop();
-
-            return tabs() + "(" + rkt_type + "\n" + rkt_val + ")";
         }
 
         std::string visit(const Let *op) {
@@ -2661,10 +2661,6 @@ private:
             indent.push(indent.top() + 1);
             std::string rkt_bdy = dispatch(op->body);
             indent.pop();
-
-            debug(0) << (encoding[op->name] == Integer) << "\n"
-                     << dispatch(op->value) << "\n"
-                     << "--------------------------------------------------------\n";
 
             return tabs() + "(let ([" + op->name + " " + rkt_val + "])\n" + rkt_bdy + ")";
         }
@@ -2743,7 +2739,7 @@ private:
             if (op->name.compare("scalar_indices") == 0)
                 return tabs() + "(" + op->name + " " + rkt_idx + ")";
             else if (op->type.is_scalar())
-                return tabs() + "(halide-buffer-ref " + op->name + " " + rkt_idx + ")";
+                return tabs() + "(load-sca " + op->name + " " + rkt_idx + ")";
             else
                 return tabs() + "(load " + op->name + " " + rkt_idx + " " + alignment + ")";
         }
@@ -2874,10 +2870,12 @@ private:
             return NYI();
         }
         std::string visit(const LT *op) {
+            indent.push(indent.top() + 1);
             std::string rkt_lhs = dispatch(op->a);
             std::string rkt_rhs = dispatch(op->b);
+            indent.pop();
             if (op->type.is_vector()) {
-                return tabs() + "(vec-lt " + rkt_lhs + " " + rkt_rhs + ")";
+                return tabs() + "(vec-lt\n" + rkt_lhs + "\n" + rkt_rhs + ")";
             } else if (op->type != Int(32)) {
                 return tabs() + "(sca-lt " + rkt_lhs + " " + rkt_rhs + ")";
             } else {
@@ -2909,11 +2907,13 @@ private:
             return NYI();
         }
         std::string visit(const Select *op) {
+            indent.push(indent.top() + 1);
             std::string rkt_cond = dispatch(op->condition);
             std::string rkt_true = dispatch(op->true_value);
             std::string rkt_false = dispatch(op->false_value);
+            indent.pop();
             if (op->type.is_vector()) {
-                return tabs() + "(vec-if " + rkt_cond + " " + rkt_true + " " + rkt_false + ")";
+                return tabs() + "(vec-if\n" + rkt_cond + "\n" + rkt_true + "\n" + rkt_false + ")";
             } else if (op->type != Int(32)) {
                 return tabs() + "(sca-if " + rkt_cond + " " + rkt_true + " " + rkt_false + ")";
             } else {
@@ -2924,7 +2924,6 @@ private:
             printer.print(op);
             return NYI();
         }
-
         std::string visit(const Shuffle *op) {
             if (op->is_slice()) {
                 indent.push(indent.top() + 1);
@@ -2943,7 +2942,7 @@ private:
                 indent.push(indent.top() + 1);
                 std::string rkt_vecs = "";
                 for (auto vec : op->vectors)
-                    rkt_vecs += dispatch(op->vectors[0]) + "\n";
+                    rkt_vecs += dispatch(vec) + "\n";
                 indent.pop();
                 rkt_vecs.pop_back();
 
@@ -3000,7 +2999,6 @@ private:
             printer.print(op);
             return NYI();
         }
-
         std::string visit(const VectorReduce *op) {
             printer.print(op);
             return NYI();
@@ -3151,6 +3149,45 @@ private:
         std::set<std::pair<std::string, Type>> buffers;
     };
 
+    class FloatFinder : public IRVisitor {
+
+    public:
+        using IRVisitor::visit;
+
+        void visit(const Variable *op) override {
+            if (op->type.is_float())
+                f = true;
+        }
+
+        void visit(const FloatImm *op) override {
+            f = true;
+        }
+
+        void visit(const Cast *op) override {
+            if (op->type.is_float())
+                f = true;
+            return IRVisitor::visit(op);
+        }
+
+        bool found() { return f; }
+
+    private:
+        bool f = false;
+
+    };
+
+    class DynShuffleRemover : public IRMutator {
+
+    public:
+        using IRMutator::visit;
+
+        Expr visit(const Call *op) override {
+            if (op->is_intrinsic(Call::dynamic_shuffle))
+                return Variable::make(op->type, unique_name('t'));
+            else
+                return IRMutator::visit(op);
+        }
+    };
 
 private:
     using IRMutator::visit;
@@ -3162,6 +3199,12 @@ private:
 
     std::map<std::string, Expr> let_vars;
     std::vector<std::string> let_decl_order;
+
+    bool containsFloat(const Expr &e) {
+        FloatFinder ff;
+        e.accept(&ff);
+        return ff.found();
+    }
 
     Expr linearize(const Expr &e) {
         if (is_const(e)) {
@@ -3195,6 +3238,7 @@ private:
 
         Expr value = stmt->value;
         value = LowerIntrinsics().mutate(value);
+        value = DynShuffleRemover().mutate(value);
         if (value.type() == Int(32)) {
             // For index expressions, we don't want/need to model some
             // stuff. Just abstract things as unknowns if we hit any
@@ -3232,6 +3276,9 @@ private:
         debug(0) << "\nOptimizing expression: " << expr_id << "\n"
                  << stmt->value << "\n\n";
 
+        // Abstract out dynamic shuffles if they appear as sub-expressions
+        Expr spec_expr = DynShuffleRemover().mutate(stmt->value);
+
         if (getenv("HALIDE_RAKE_DEBUG")) {
             int x;
             std::cin >> x;
@@ -3243,18 +3290,14 @@ private:
         }
 
         InferVarEncodings ive(let_vars);
-        stmt->value.accept(&ive);
+        spec_expr.accept(&ive);
         std::map<std::string, RosetteEncoding> encoding = ive.getEncodings();
 
-        for (auto elem : encoding) {
-            debug(0) << elem.first << " " << (elem.second == Bitvector ? "Bv" : "Int") << "\n";
-        }
-
         RacketPrinter specPrinter(std::cout, encoding, let_vars);
-        std::string expr = specPrinter.dispatch(LowerIntrinsics().mutate(stmt->value));
+        std::string expr = specPrinter.dispatch(LowerIntrinsics().mutate(spec_expr));
 
         InferSymbolics symFinder(let_vars, bounds, func_value_bounds);
-        stmt->value.accept(&symFinder);
+        spec_expr.accept(&symFinder);
 
         debug(0) << "Generating synthesis specification...\n";
 
@@ -3278,10 +3321,12 @@ private:
                     if (!in.has_upper_bound()) {
                         in.max = in.min.type().max();
                     }
-                    axioms << "\n   (values-range-from "
-                            << buf.first
-                            << specPrinter.dispatch(in.min)
-                            << specPrinter.dispatch(in.max) << ")";
+                    if (!(containsFloat(in.min) || containsFloat(in.max))) {
+                        axioms << "\n   (values-range-from "
+                                << buf.first
+                                << specPrinter.dispatch(in.min)
+                                << specPrinter.dispatch(in.max) << ")";
+                    }
                 }
             }
         }
@@ -3290,9 +3335,9 @@ private:
         for (auto var : symFinder.getSymVars()) {
             debug(0) << "Symbolic var: " << var->name << "\n";
             if (var->type.is_vector()) {
-                sym_bufs << "(define-symbolic-buffer " << var->name << "-buf " << var->type.element_of() << ")";
+                sym_bufs << "(define-symbolic-buffer " << var->name << "-buf " << type_to_c_type(var->type.element_of(), false, true) << ")\n";
                 sym_vars << "(define " << var->name << " (load " << var->name
-                         << "-buf (ramp 0 1 " << var->type.lanes() << ")))\n";
+                         << "-buf (ramp 0 1 " << var->type.lanes() << ") (aligned 0 0)))\n";
 
                 auto in = bounds_of_expr_in_scope(var, bounds, func_value_bounds);
                 if (!in.is_everything()) {
@@ -3368,6 +3413,7 @@ private:
         rakeInputF.open(filename.c_str());
         rakeInputF
             << "#lang rosette/safe\n"
+            //<< "; " << stmt->value << "\n"
             << "\n"
             << "(require rake)\n"
             << "\n"
@@ -3471,7 +3517,6 @@ Stmt optimize_hexagon_instructions_synthesis(Stmt s, const Target &t, FuncValueB
     debug(0) << s << "\n\n";
     s = IROptimizer(fvb).mutate(s);
     s = common_subexpression_elimination(s);
-    debug(0) << s << "\n\n";
     s = simplify(s);
     debug(0) << s << "\n\n";
     // exit(0);
