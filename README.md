@@ -75,13 +75,17 @@ Currently truncated, re-introducing uber-instructions as I make progress with re
               |    broadcast : (scalar) -> vector
               |    combine : (ir-expr ir-expr) -> ir-expr
               |    cast : (ir-expr type) -> ir-expr
-              |    shift-right : (ir-expr shift saturate? round? arithmetic? output-type) -> ir-expr
-              |    divide-by-const : (ir-expr const) -> ir-expr
-              |    add-const : (ir-expr const) -> ir-expr
-              |    maximum : (ir-expr ir-expr) -> ir-expr
-              |    minimum : (ir-expr ir-expr) -> ir-expr
               |    vs-mpy-add : (ir-expr weight-matrix output-type saturate?) -> ir-expr
               |    vs-mpy-add-acc : (ir-expr ir-expr weight-matrix output-type saturate?) -> ir-expr
+              |    vv-mpy-add : (ir-expr weight-matrix output-type saturate?) -> ir-expr
+              |    add-const : (ir-expr const) -> ir-expr
+              |    shift-right : (ir-expr shift saturate? round? arithmetic? output-type) -> ir-expr
+              |    divide-by-const : (ir-expr const) -> ir-expr
+              |    average : (ir-expr round? output-type?) -> ir-expr
+              |    modulo-by-const : (ir-expr const) -> ir-expr
+              |    maximum : (ir-expr ir-expr) -> ir-expr
+              |    minimum : (ir-expr ir-expr) -> ir-expr
+              |    saturate : (ir-expr round? output-type) -> ir-expr              
               |    abs-diff : (ir-expr ir-expr) -> ir-expr
               |    less-than : (ir-expr ir-expr) -> ir-expr
               |    less-than-eq : (ir-expr ir-expr) -> ir-expr
