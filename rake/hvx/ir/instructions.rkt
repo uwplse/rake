@@ -22,12 +22,15 @@
 
 (struct vs-mpy-add (sub-expr weight-matrix output-type saturate?) #:super struct:ir-node #:transparent)
 (struct vs-mpy-add-acc (acc-expr sub-expr weight-matrix output-type saturate?) #:super struct:ir-node #:transparent)
+(struct vv-mpy-add (sub-expr width output-type saturate?) #:super struct:ir-node #:transparent)
 
 (struct add-const (sub-expr const-val output-type saturate?) #:super struct:ir-node #:transparent)
 
 (struct shift-right (sub-expr shift round? saturate? arithmetic? output-type) #:super struct:ir-node #:transparent)
 (struct divide-by-const (sub-expr const-val) #:super struct:ir-node #:transparent)
 (struct average (sub-expr round? output-type) #:super struct:ir-node #:transparent)
+
+(struct modulo-by-const (sub-expr const-val) #:super struct:ir-node #:transparent)
 
 (struct minimum (sub-expr0 sub-expr1) #:super struct:ir-node #:transparent)
 (struct maximum (sub-expr0 sub-expr1) #:super struct:ir-node #:transparent)
@@ -38,5 +41,3 @@
 (struct select (sub-expr0 sub-expr1 sub-expr2) #:super struct:ir-node #:transparent)
 (struct less-than (sub-expr0 sub-expr1) #:super struct:ir-node #:transparent)
 (struct less-than-eq (sub-expr0 sub-expr1) #:super struct:ir-node #:transparent)
-
-;(struct subtract (sub-expr0 sub-expr1 output-type saturate?) #:super struct:ir-node #:transparent)
