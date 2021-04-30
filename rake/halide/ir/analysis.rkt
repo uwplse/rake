@@ -23,6 +23,7 @@
   [extract-mul-consts extract-mul-consts-halide]
   [extract-div-consts extract-div-consts-halide]
   [extract-shr-consts extract-shr-consts-halide]
+  [extract-mod-consts extract-mod-consts-halide]
   [cast-op? halide-cast-op?]))
 
 (define (extract-live-buffers expr)
@@ -135,6 +136,22 @@
       [_ node]))
   (visit-halide expr extract-shr-const)
   (set->list shr-consts))
+
+(define (extract-mod-consts expr)
+  (define mod-consts (mutable-set))
+  (define (extract-mod-const node)
+    (destruct node
+      ;; We only need to examing mod and bit-wise and
+      ;[(vec-and v1 v2)
+       ;(define div-consts (extract-consts v2))
+       ;(define pow-of-2-consts (filter (lambda (c) (is-power-of-2? c)) (set->list div-consts)))
+       ;(define log-2-consts (list->set (map (lambda (c) (log-2 c)) pow-of-2-consts)))
+       ;(set-union! mod-consts log-2-consts)]
+      [(vec-mod v1 v2) (set-union! mod-consts (extract-consts v2))]
+      ;; Ignore everything else
+      [_ node]))
+  (visit-halide expr extract-mod-const)
+  (set->list mod-consts))
 
 ;;; Extract vectors
 ;(define (extract-loads-as-hvx-vecs expr)

@@ -14,6 +14,7 @@
     [(x64 sca) (handler (x64 (visit sca handler)))]
     [(x128 sca) (handler (x128 (visit sca handler)))]
     [(x256 sca) (handler (x256 (visit sca handler)))]
+    [(x512 sca) (handler (x512 (visit sca handler)))]
 
     [(ramp base stride len) (handler (ramp (visit base handler) (visit stride handler) (visit len handler)))]
     [(load buf idxs alignment) (handler (load (visit buf handler) (visit idxs handler) (visit alignment handler)))]
@@ -80,6 +81,7 @@
     [(vec-sub v1 v2) (handler (vec-sub (visit v1 handler) (visit v2 handler)))]
     [(vec-mul v1 v2) (handler (vec-mul (visit v1 handler) (visit v2 handler)))]
     [(vec-div v1 v2) (handler (vec-div (visit v1 handler) (visit v2 handler)))]
+    [(vec-mod v1 v2) (handler (vec-mod (visit v1 handler) (visit v2 handler)))]
     [(vec-min v1 v2) (handler (vec-min (visit v1 handler) (visit v2 handler)))]
     [(vec-max v1 v2) (handler (vec-max (visit v1 handler) (visit v2 handler)))]
     [(vec-shl v1 v2) (handler (vec-shl (visit v1 handler) (visit v2 handler)))]

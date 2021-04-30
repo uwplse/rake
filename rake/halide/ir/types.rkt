@@ -15,6 +15,7 @@
 (struct x64 (sca) #:transparent)
 (struct x128 (sca) #:transparent)
 (struct x256 (sca) #:transparent)
+(struct x512 (sca) #:transparent)
 
 (struct buffer (data elemT) #:transparent)
 (struct load (buf idxs alignment) #:transparent)
@@ -90,6 +91,7 @@
 (struct vec-sub (v1 v2) #:transparent)
 (struct vec-mul (v1 v2) #:transparent)
 (struct vec-div (v1 v2) #:transparent)
+(struct vec-mod (v1 v2) #:transparent)
 (struct vec-max (v1 v2) #:transparent)
 (struct vec-min (v1 v2) #:transparent)
 

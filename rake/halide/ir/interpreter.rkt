@@ -27,6 +27,7 @@
     [(x64 sca) 64]
     [(x128 sca) 128]
     [(x256 sca) 256]
+    [(x512 sca) 512]
 
     [(ramp base stride len) (quotient len stride)]
     [(load buf idxs alignment) (vec-len idxs)]
@@ -93,6 +94,7 @@
     [(vec-sub v1 v2) (vec-len v1)]
     [(vec-mul v1 v2) (vec-len v1)]
     [(vec-div v1 v2) (vec-len v1)]
+    [(vec-mod v1 v2) (vec-len v1)]
     [(vec-min v1 v2) (vec-len v1)]
     [(vec-max v1 v2) (vec-len v1)]
     [(vec-if v1 v2 v3) (vec-len v2)]
@@ -120,6 +122,7 @@
     [(x64 sca) (list)]
     [(x128 sca) (list)]
     [(x256 sca) (list)]
+    [(x512 sca) (list)]
 
     [(ramp base stride len) (list)]
     [(load buf idxs alignment) (list)]
@@ -186,6 +189,7 @@
     [(vec-sub v1 v2) (list v1 v2)]
     [(vec-mul v1 v2) (list v1 v2)]
     [(vec-div v1 v2) (list v1 v2)]
+    [(vec-mod v1 v2) (list v1 v2)]
     [(vec-min v1 v2) (list v1 v2)]
     [(vec-max v1 v2) (list v1 v2)]
     [(vec-if v1 v2 v3) (list v1 v2 v3)]
@@ -212,6 +216,7 @@
     [(x64 sca) (lambda (i) (interpret sca))]
     [(x128 sca) (lambda (i) (interpret sca))]
     [(x256 sca) (lambda (i) (interpret sca))]
+    [(x512 sca) (lambda (i) (interpret sca))]
 
     [(ramp base stride len) (lambda (i) (+ (interpret base) (* i (interpret stride))))]
     [(load buf idxs alignment) (lambda (i) (buffer-ref (interpret buf) ((interpret idxs) i)))]
@@ -284,6 +289,7 @@
     [(vec-sub v1 v2) (lambda (i) (do-sub ((interpret v1) i) ((interpret v2) i)))]
     [(vec-mul v1 v2) (lambda (i) (do-mul ((interpret v1) i) ((interpret v2) i)))]
     [(vec-div v1 v2) (lambda (i) (do-div ((interpret v1) i) ((interpret v2) i)))]
+    [(vec-mod v1 v2) (lambda (i) (do-mod ((interpret v1) i) ((interpret v2) i)))]
     [(vec-min v1 v2) (lambda (i) (do-min ((interpret v1) i) ((interpret v2) i)))]
     [(vec-max v1 v2) (lambda (i) (do-max ((interpret v1) i) ((interpret v2) i)))]
     [(vec-if v1 v2 v3) (lambda (i) (do-if ((interpret v1) i) ((interpret v2) i) ((interpret v3) i)))]
@@ -372,6 +378,18 @@
         (cpp-cast (int64_t q) (cpp-type-str outT))]
        [else
         (mk-cpp-expr (bvudiv (eval lhs) (eval rhs)) outT)])]))
+
+(define (do-mod lhs rhs)
+  (cond
+    [(and (integer? lhs) (integer? rhs))
+     (remainder lhs rhs)]
+    [else
+     (define outT (infer-out-type lhs rhs))
+     (cond
+       [(signed-type? outT)
+        (mk-cpp-expr (bvsrem (eval lhs) (eval rhs)) outT)]
+       [else
+        (mk-cpp-expr (bvurem (eval lhs) (eval rhs)) outT)])]))
 
 (define (do-min lhs rhs)
   (cond
