@@ -192,6 +192,7 @@
     [(x64 sca) (list (broadcast (get-node-id) (interpret-halide sca)))]
     [(x128 sca) (list (broadcast (get-node-id) (interpret-halide sca)))]
     [(x256 sca) (list (broadcast (get-node-id) (interpret-halide sca)))]
+    [(x512 sca) (list (broadcast (get-node-id) (interpret-halide sca)))]
 
     ;; Data loads & shuffles
     [(load buf idxs align)
