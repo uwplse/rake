@@ -77,6 +77,7 @@ Currently truncated, re-introducing uber-instructions as I make progress with re
               |    cast : (ir-expr type) -> ir-expr
               |    vs-mpy-add : (ir-expr weight-matrix output-type saturate?) -> ir-expr
               |    vs-mpy-add-acc : (ir-expr ir-expr weight-matrix output-type saturate?) -> ir-expr
+              |    vv-mpy-add : (ir-expr weight-matrix output-type saturate?) -> ir-expr
               |    add-const : (ir-expr const) -> ir-expr
               |    shift-right : (ir-expr shift saturate? round? arithmetic? output-type) -> ir-expr
               |    divide-by-const : (ir-expr const) -> ir-expr
