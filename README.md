@@ -6,8 +6,8 @@ cpp-types  :=  int8_t | int16_t | int32_t | int64_t
            |   uint8_t | uint16_t | uint32_t | uint64_t
 
   lib-fns  :=  abs8 | abs16 | abs32 | absu8 | absu16 | absu32
-           |   min8 | min16 | min32 | minu8 | minu16 | minu32
-           |   max8 | max16 | max32 | maxu8 | maxu16 | maxu32
+           |   min8 | min16 | min32 | min64 | minu8 | minu16 | minu32 | minu64
+           |   max8 | max16 | max32 | max64 | maxu8 | maxu16 | maxu32 | maxu64
 
  misc-fns  :=  eval           :    (cpp-expr) -> bitvector 
            |   eval-to-int    :    (cpp-expr) -> integer 
