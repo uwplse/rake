@@ -84,8 +84,17 @@
 (struct sca-sub (v1 v2) #:transparent)
 (struct sca-mul (v1 v2) #:transparent)
 (struct sca-div (v1 v2) #:transparent)
+(struct sca-mod (v1 v2) #:transparent)
 (struct sca-min (v1 v2) #:transparent)
 (struct sca-max (v1 v2) #:transparent)
+
+(struct sca-if (v1 v2) #:transparent)
+(struct sca-lt (v1 v2) #:transparent)
+(struct sca-le (v1 v2) #:transparent)
+
+(struct sca-absd (v1 v2) #:transparent)
+(struct sca-shl (v1 v2) #:transparent)
+(struct sca-shr (v1 v2) #:transparent)
 
 (struct vec-add (v1 v2) #:transparent)
 (struct vec-sub (v1 v2) #:transparent)

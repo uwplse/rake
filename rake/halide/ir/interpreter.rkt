@@ -279,12 +279,18 @@
     [(int64x256 vec) (lambda (i) (cpp-cast ((interpret vec) i) 'int64))]
     
     ;; Operations
-    [(sca-add v1 v2) (do-add v1 v2)]
-    [(sca-sub v1 v2) (do-sub v1 v2)]
-    [(sca-mul v1 v2) (do-mul v1 v2)]
-    [(sca-div v1 v2) (do-div v1 v2)]
-    [(sca-min v1 v2) (do-min v1 v2)]
-    [(sca-max v1 v2) (do-max v1 v2)]
+    [(sca-add v1 v2) (do-add (interpret v1) (interpret v2))]
+    [(sca-sub v1 v2) (do-sub (interpret v1) (interpret v2))]
+    [(sca-mul v1 v2) (do-mul (interpret v1) (interpret v2))]
+    [(sca-div v1 v2) (do-div (interpret v1) (interpret v2))]
+    [(sca-mod v1 v2) (do-mod (interpret v1) (interpret v2))]
+    [(sca-min v1 v2) (do-min (interpret v1) (interpret v2))]
+    [(sca-max v1 v2) (do-max (interpret v1) (interpret v2))]
+
+    [(sca-absd v1 v2) (do-absd (interpret v1) (interpret v2))]
+    [(sca-shl v1 v2) (do-shl (interpret v1) (interpret v2))]
+    [(sca-shr v1 v2) (do-shr (interpret v1) (interpret v2))]
+    
     [(vec-add v1 v2) (lambda (i) (do-add ((interpret v1) i) ((interpret v2) i)))]
     [(vec-sub v1 v2) (lambda (i) (do-sub ((interpret v1) i) ((interpret v2) i)))]
     [(vec-mul v1 v2) (lambda (i) (do-mul ((interpret v1) i) ((interpret v2) i)))]
@@ -399,10 +405,10 @@
      (define outT (infer-out-type lhs rhs))
      (cond
        [(signed-type? outT)
-        (define minF (cond [(eq? (type-bw outT) 8) min8] [(eq? (type-bw outT) 16) min16] [(eq? (type-bw outT) 32) min32]))
+        (define minF (cond [(eq? (type-bw outT) 8) min8] [(eq? (type-bw outT) 16) min16] [(eq? (type-bw outT) 32) min32] [(eq? (type-bw outT) 64) min64]))
         (minF lhs rhs)]
        [else
-        (define minF (cond [(eq? (type-bw outT) 8) minu8] [(eq? (type-bw outT) 16) minu16] [(eq? (type-bw outT) 32) minu32]))
+        (define minF (cond [(eq? (type-bw outT) 8) minu8] [(eq? (type-bw outT) 16) minu16] [(eq? (type-bw outT) 32) minu32] [(eq? (type-bw outT) 64) minu64]))
         (minF lhs rhs)])]))
 
 (define (do-max lhs rhs)
@@ -413,10 +419,10 @@
      (define outT (infer-out-type lhs rhs))
      (cond
        [(signed-type? outT)
-        (define maxF (cond [(eq? (type-bw outT) 8) max8] [(eq? (type-bw outT) 16) max16] [(eq? (type-bw outT) 32) max32]))
+        (define maxF (cond [(eq? (type-bw outT) 8) max8] [(eq? (type-bw outT) 16) max16] [(eq? (type-bw outT) 32) max32] [(eq? (type-bw outT) 64) max64]))
         (maxF lhs rhs)]
        [else
-        (define maxF (cond [(eq? (type-bw outT) 8) maxu8] [(eq? (type-bw outT) 16) maxu16] [(eq? (type-bw outT) 32) maxu32]))
+        (define maxF (cond [(eq? (type-bw outT) 8) maxu8] [(eq? (type-bw outT) 16) maxu16] [(eq? (type-bw outT) 32) maxu32] [(eq? (type-bw outT) 64) maxu64]))
         (maxF lhs rhs)])]))
 
 (define (do-shr lhs rhs)
