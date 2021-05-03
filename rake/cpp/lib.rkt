@@ -4,8 +4,8 @@
   rake/cpp/types)
 
 (provide abs8 abs16 abs32 absu8 absu16 absu32
-         min8 min16 min32 minu8 minu16 minu32
-         max8 max16 max32 maxu8 maxu16 maxu32)
+         min8 min16 min32 min64 minu8 minu16 minu32 minu64
+         max8 max16 max32 max64 maxu8 maxu16 maxu32 maxu64)
 
 ;;;;; Absolute Functions ;;;;;
 
@@ -24,18 +24,22 @@
 (define (min8 a b) (int8_t (bvsmin (eval a) (eval b))))
 (define (min16 a b) (int16_t (bvsmin (eval a) (eval b))))
 (define (min32 a b) (int32_t (bvsmin (eval a) (eval b))))
+(define (min64 a b) (int64_t (bvsmin (eval a) (eval b))))
 
 (define (minu8 a b) (uint8_t (bvumin (eval a) (eval b))))
 (define (minu16 a b) (uint16_t (bvumin (eval a) (eval b))))
 (define (minu32 a b) (uint32_t (bvumin (eval a) (eval b))))
+(define (minu64 a b) (uint64_t (bvumin (eval a) (eval b))))
 
 (define (max8 a b) (int8_t (bvsmax (eval a) (eval b))))
 (define (max16 a b) (int16_t (bvsmax (eval a) (eval b))))
 (define (max32 a b) (int32_t (bvsmax (eval a) (eval b))))
+(define (max64 a b) (int64_t (bvsmax (eval a) (eval b))))
 
 (define (maxu8 a b) (uint8_t (bvumax (eval a) (eval b))))
 (define (maxu16 a b) (uint16_t (bvumax (eval a) (eval b))))
 (define (maxu32 a b) (uint32_t (bvumax (eval a) (eval b))))
+(define (maxu64 a b) (uint64_t (bvumax (eval a) (eval b))))
 
 ;; Alternate Encoding
 (define (min8_alt a b)
