@@ -5,7 +5,7 @@
   rosette/lib/destruct
   rake/cpp/types)
 
-(provide cpp-cast satu8 satu16 satu32 sat8 sat16 sat32)
+(provide cpp-cast satu8 satu16 satu32 satu64 sat8 sat16 sat32 sat64)
 
 ;; Model C++ casting
 (define (cpp-cast v type)
@@ -100,6 +100,11 @@
 (define MIN_UINT 0)
 (define MAX_UINT 4294967295)
 
+(define MIN_LL #x8000000000000000)
+(define MAX_LL #x7fffffffffffffff)
+(define MIN_ULL 0)
+(define MAX_ULL #xffffffffffffffff)
+
 (define (sat8 e)
   (destruct e
     [(int8_t val) e]
@@ -141,6 +146,17 @@
     [(uint32_t val) (if (bvugt val (bv MAX_INT 32)) (int32_t (bv MAX_INT 32)) (int32_t val))]
     [(uint64_t val) (if (bvugt val (bv MAX_INT 64)) (int32_t (bv MAX_INT 32)) (int32_t (extract 31 0 val)))]))
 
+(define (sat64 e)
+  (destruct e
+    [(int8_t val) (int64_t (sign-extend val (bitvector 64)))]
+    [(int16_t val) (int64_t (sign-extend val (bitvector 64)))]
+    [(int32_t val) (int64_t (sign-extend val (bitvector 64)))]
+    [(int64_t val) e]
+    [(uint8_t val) (int64_t (zero-extend val (bitvector 64)))]
+    [(uint16_t val) (int64_t (zero-extend val (bitvector 64)))]
+    [(uint32_t val) (int64_t (zero-extend val (bitvector 64)))]
+    [(uint64_t val) (if (bvugt val (bv MAX_LL 64)) (int64_t (bv MAX_LL 64)) (int64_t val))]))
+
 (define (satu8 e)
   (destruct e
     [(int8_t val) (if (bvslt val (bv MIN_UCHAR 8)) (uint8_t (bv MIN_UCHAR 8)) (uint8_t val))]
@@ -181,3 +197,14 @@
     [(uint16_t val) (uint32_t (zero-extend val (bitvector 32)))]
     [(uint32_t val) e]
     [(uint64_t val) (if (bvugt val (bv MAX_UINT 64)) (uint32_t (bv MAX_UINT 32)) (uint32_t (extract 31 0 val)))]))
+
+(define (satu64 e)
+  (destruct e
+    [(int8_t val) (if (bvslt val (bv MIN_ULL 8)) (uint64_t (bv MIN_ULL 64)) (uint64_t (zero-extend val (bitvector 64))))]
+    [(int16_t val) (if (bvslt val (bv MIN_ULL 16)) (uint64_t (bv MIN_ULL 64)) (uint64_t (zero-extend val (bitvector 64))))]
+    [(int32_t val) (if (bvslt val (bv MIN_ULL 32)) (uint64_t (bv MIN_ULL 64)) (uint64_t (zero-extend val (bitvector 64))))]
+    [(int64_t val) (if (bvslt val (bv MIN_ULL 64)) (uint64_t (bv MIN_ULL 64)) (uint64_t val))]
+    [(uint8_t val) (uint64_t (zero-extend val (bitvector 64)))]
+    [(uint16_t val) (uint64_t (zero-extend val (bitvector 64)))]
+    [(uint32_t val) (uint64_t (zero-extend val (bitvector 64)))]
+    [(uint64_t val) e]))
