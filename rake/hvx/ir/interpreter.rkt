@@ -49,7 +49,7 @@
      (define c (eval (cpp-cast const-val output-type)))
      (define satF (get-sat-fn output-type))
      (cond
-       [saturate? (lambda (i) (satF (mk-cpp-expr (bvadd (eval (cpp-cast (input i) output-type)) c) output-type)))]
+       [saturate? (lambda (i) (satF (int64_t (bvadd (eval (cpp-cast (input i) 'int64)) (eval (cpp-cast const-val 'int64))))))]
        [else (lambda (i) (mk-cpp-expr (bvadd (eval (cpp-cast (input i) output-type)) c) output-type))])]
 
     [(shift-right sub-expr shift round? saturate? arithmetic? output-type)

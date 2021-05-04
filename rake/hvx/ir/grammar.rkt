@@ -115,6 +115,11 @@
       [(maximum sub-expr0 sub-expr1) '()]
       [(minimum sub-expr0 sub-expr1) '()]
 
+      [(saturate sub-expr round? output-type)
+       (define e-type (halide-elem-type halide-expr))
+       (define narrower-type (if (<= (type-bw e-type) (type-bw output-type)) e-type output-type))
+       (list (saturate (get-node-id) sub-expr round? narrower-type))]
+
       [(abs-diff sub-expr0 sub-expr1) '()]
 
       [(less-than sub-expr0 sub-expr1) '()]
@@ -168,15 +173,36 @@
       [(modulo-by-const sub-expr const-val) '()]
       
       [(maximum sub-expr0 sub-expr1)
-       (list
-        (saturate (get-node-id) sub-expr0 #f (halide-elem-type halide-expr))
-        (saturate (get-node-id) sub-expr1 #f (halide-elem-type halide-expr)))]
+       (define add-consts (extract-add-consts-halide halide-expr))
+       (flatten
+        (list
+         ;; Replace with saturation
+         (saturate (get-node-id) sub-expr0 #f (halide-elem-type halide-expr))
+         (saturate (get-node-id) sub-expr1 #f (halide-elem-type halide-expr))
+         ;; Replace with const-add-saturate
+         (if (empty? add-consts)
+             '()
+             (list
+              (add-const (get-node-id) sub-expr0 (apply choose* add-consts) (halide-elem-type halide-expr) #t)
+              (add-const (get-node-id) sub-expr1 (apply choose* add-consts) (halide-elem-type halide-expr) #t)))))]
     
       [(minimum sub-expr0 sub-expr1)
-       (list
-        (saturate (get-node-id) sub-expr0 #f (halide-elem-type halide-expr))
-        (saturate (get-node-id) sub-expr1 #f (halide-elem-type halide-expr)))]
+       (define add-consts (extract-add-consts-halide halide-expr))
+       (flatten
+        (list
+         ;; Replacy with saturation
+         (saturate (get-node-id) sub-expr0 #f (halide-elem-type halide-expr))
+         (saturate (get-node-id) sub-expr1 #f (halide-elem-type halide-expr))
 
+         ;; Replace by const-add-saturate
+         (if (empty? add-consts)
+             '()
+             (list
+              (add-const (get-node-id) sub-expr0 (apply choose* add-consts) (halide-elem-type halide-expr) #t)
+              (add-const (get-node-id) sub-expr1 (apply choose* add-consts) (halide-elem-type halide-expr) #t)))))]
+
+      [(saturate sub-expr round? output-type) '()]
+      
       [(abs-diff sub-expr0 sub-expr1) '()]
 
       [(less-than sub-expr0 sub-expr1) (list (less-than-eq (get-node-id) sub-expr0 sub-expr1))]
