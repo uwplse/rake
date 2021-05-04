@@ -2,7 +2,8 @@
 
 (require
   (for-syntax syntax/parse)
-  (only-in rake/halide/ir/types buffer buffer-data))
+  (only-in rake/halide/ir/types buffer buffer-data)
+  rake/cpp)
 
 (provide define-symbolic-buffer define-symbolic-var)
 
