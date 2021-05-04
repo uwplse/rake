@@ -57,59 +57,64 @@
     (for/list ([sub-expr sub-exprs])
       (build-ir-expr sub-expr axioms uber-instrs context)))
 
-  ;; Step 1: Folding. Does changing the inputs to any of the sub-expression make it
-  ;; equivalent to the current expression?
+  ;; Step 1: Folding.
+  ;; Can we fold the new node into the **existing** sequence of IR instructions?
+  (define fold-templates (fold-into-subexprs lifted-sub-exprs halide-expr uber-instrs))
+
+  ;; Can we fold the new node into a **modified** version of the existing IR
+  ;; instruction sequence? We restrict modifications such that:
+  ;; - At most 1 IR instruction will  be changed.
+  ;; - 0 or more IR instructions may be removed
+  ;; - We only explore changing or removing the last N instructions in the sequence (N=3 atm)
+  (define repl-templates (repl-subexprs lifted-sub-exprs halide-expr uber-instrs))
+
+  ;; Explore folding templates in increasing cost (cost is defined as the number if IR instructions)
+  (define sorted-templates
+    (sort (append fold-templates repl-templates) (lambda (t1 t2) (< (hvx-ir-instr-count t1) (hvx-ir-instr-count t2)))))
+
+  (define bounded-eq? (if (interleave? halide-expr) bounded-eq-1? bounded-eq-0?))
   (define-values (success? folded-ir-expr)
-    (fold-into-subexprs lifted-sub-exprs halide-expr axioms uber-instrs context))
+    (synthesize-translation sorted-templates halide-expr axioms context bounded-eq?))
 
   (cond
     [success? folded-ir-expr]
     [else
-      ;; Step 2: Replace. Does changing the last instruction in of the sub-expression make it
-      ;; equivalent to the current expression?
-      (define-values (success? updated-ir-expr)
-        (repl-subexprs lifted-sub-exprs halide-expr axioms uber-instrs context))
+      ;; Step 2: We extend the IR instruction sequence with a new instruction. As long as the
+      ;; computation is expressible in HVX, this should not fail.
+      (define-values (success? extended-ir-expr)
+        (extend-subexprs lifted-sub-exprs halide-expr axioms uber-instrs context))
+      
       (cond
-        [success? updated-ir-expr]
-        [else
-          ;; Step 3: Build the IR expression by adding a new instruction on top of the sub-expressions
-          (define-values (success? extended-ir-expr)
-            (extend-subexprs lifted-sub-exprs halide-expr axioms uber-instrs context))
-          (cond
-            [success? extended-ir-expr]
-            [else (error "synthesis\\lifting\\greedy-ir-lifted.rkt: FOLD-REPLACE-EXTEND algorithm failed to lift the halide expression:" halide-expr)])])]))
+        [success? extended-ir-expr]
+        [else (error "synthesis\\lifting\\greedy-ir-lifted.rkt: FOLD-REPLACE-EXTEND algorithm failed to lift the halide expression:" halide-expr)])]))
 
 ;; Folding IR expressions
-(define (fold-into-subexprs lifted-sub-exprs halide-expr axioms uber-instrs context)
+(define (fold-into-subexprs lifted-sub-exprs halide-expr uber-instrs)
   (cond
-    [(empty? lifted-sub-exprs) (values #f (void))]
+    [(empty? lifted-sub-exprs) '()]
     [else
-     (define-values (success? lifted-ir-expr) (fold-into-subexpr (first lifted-sub-exprs) halide-expr axioms uber-instrs context))
-     (cond
-       [success? (values success? lifted-ir-expr)]
-       [else (fold-into-subexprs (rest lifted-sub-exprs) halide-expr axioms uber-instrs context)])]))
+     (append
+      (fold-into-subexpr (first lifted-sub-exprs) halide-expr uber-instrs)
+      (fold-into-subexprs (rest lifted-sub-exprs) halide-expr uber-instrs))]))
 
-(define (fold-into-subexpr lifted-sub-expr halide-expr axioms uber-instrs context)
+(define (fold-into-subexpr lifted-sub-expr halide-expr uber-instrs)
   (define grm-generator (lifting-ir-fold-grammar uber-instrs))
   (define templates (grm-generator lifted-sub-expr halide-expr 2))
-  (define bounded-eq? (if (interleave? halide-expr) bounded-eq-1? bounded-eq-0?))
-  (synthesize-translation templates halide-expr axioms context bounded-eq?))
+  templates)
 
 ;; Updating IR expressions
-(define (repl-subexprs lifted-sub-exprs halide-expr axioms uber-instrs context)
+(define (repl-subexprs lifted-sub-exprs halide-expr uber-instrs)
   (cond
-    [(empty? lifted-sub-exprs) (values #f (void))]
+    [(empty? lifted-sub-exprs) '()]
     [else
-     (define-values (success? lifted-ir-expr) (repl-subexpr (first lifted-sub-exprs) halide-expr axioms uber-instrs context))
-     (cond
-       [success? (values success? lifted-ir-expr)]
-       [else (repl-subexprs (rest lifted-sub-exprs) halide-expr axioms uber-instrs context)])]))
+     (append
+      (repl-subexpr (first lifted-sub-exprs) halide-expr uber-instrs)
+      (repl-subexprs (rest lifted-sub-exprs) halide-expr uber-instrs))]))
 
-(define (repl-subexpr lifted-sub-expr halide-expr axioms uber-instrs context)
+(define (repl-subexpr lifted-sub-expr halide-expr uber-instrs)
   (define grm-generator (lifting-ir-repl-grammar uber-instrs))
-  (define templates (grm-generator lifted-sub-expr halide-expr 2))
-  (define bounded-eq? (if (interleave? halide-expr) bounded-eq-1? bounded-eq-0?))
-  (synthesize-translation templates halide-expr axioms context bounded-eq?))
+  (define templates (grm-generator lifted-sub-expr halide-expr 3))
+  templates)
 
 ;; Extending IR expressions
 (define (extend-subexprs lifted-sub-exprs halide-expr axioms uber-instrs context)
