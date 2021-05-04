@@ -2766,106 +2766,127 @@ private:
         }
 
         std::string visit(const Add *op) {
-            indent.push(indent.top() + 1);
-            std::string rkt_lhs = dispatch(op->a);
-            std::string rkt_rhs = dispatch(op->b);
-            indent.pop();
-
             if (op->type.is_vector()) {
+                indent.push(indent.top() + 1);
+                std::string rkt_lhs = dispatch(op->a);
+                std::string rkt_rhs = dispatch(op->b);
+                indent.pop();
                 return tabs() + "(vec-add\n" + rkt_lhs + "\n" + rkt_rhs + ")";
-            } else if (op->type != Int(32)) {
-                return tabs() + "(sca-add\n" + rkt_lhs + "\n" + rkt_rhs + ")";
+            } else if (bv_enc.top()) {
+                std::string rkt_lhs = dispatch(op->a);
+                std::string rkt_rhs = dispatch(op->b);
+                return tabs() + "(sca-add " + rkt_lhs + " " + rkt_rhs + ")";
             } else {
+                std::string rkt_lhs = dispatch(op->a);
+                std::string rkt_rhs = dispatch(op->b);
                 return tabs() + "(+ " + rkt_lhs + " " + rkt_rhs + ")";
             }
         }
 
         std::string visit(const Sub *op) {
-            indent.push(indent.top() + 1);
-            std::string rkt_lhs = dispatch(op->a);
-            std::string rkt_rhs = dispatch(op->b);
-            indent.pop();
-
             if (op->type.is_vector()) {
+                indent.push(indent.top() + 1);
+                std::string rkt_lhs = dispatch(op->a);
+                std::string rkt_rhs = dispatch(op->b);
+                indent.pop();
                 return tabs() + "(vec-sub\n" + rkt_lhs + "\n" + rkt_rhs + ")";
-            } else if (op->type != Int(32)) {
-                return tabs() + "(sca-sub\n" + rkt_lhs + "\n" + rkt_rhs + ")";
+            } else if (bv_enc.top()) {
+                std::string rkt_lhs = dispatch(op->a);
+                std::string rkt_rhs = dispatch(op->b);
+                return tabs() + "(sca-sub " + rkt_lhs + " " + rkt_rhs + ")";
             } else {
+                std::string rkt_lhs = dispatch(op->a);
+                std::string rkt_rhs = dispatch(op->b);
                 return tabs() + "(- " + rkt_lhs + " " + rkt_rhs + ")";
             }
         }
 
         std::string visit(const Mul *op) {
-            indent.push(indent.top() + 1);
-            std::string rkt_lhs = dispatch(op->a);
-            std::string rkt_rhs = dispatch(op->b);
-            indent.pop();
-
             if (op->type.is_vector()) {
+                indent.push(indent.top() + 1);
+                std::string rkt_lhs = dispatch(op->a);
+                std::string rkt_rhs = dispatch(op->b);
+                indent.pop();
                 return tabs() + "(vec-mul\n" + rkt_lhs + "\n" + rkt_rhs + ")";
-            } else if (op->type != Int(32)) {
-                return tabs() + "(sca-mul\n" + rkt_lhs + "\n" + rkt_rhs + ")";
+            } else if (bv_enc.top()) {
+                std::string rkt_lhs = dispatch(op->a);
+                std::string rkt_rhs = dispatch(op->b);
+                return tabs() + "(sca-mul " + rkt_lhs + " " + rkt_rhs + ")";
             } else {
+                std::string rkt_lhs = dispatch(op->a);
+                std::string rkt_rhs = dispatch(op->b);
                 return tabs() + "(* " + rkt_lhs + " " + rkt_rhs + ")";
             }
         }
 
         std::string visit(const Div *op) {
-            indent.push(indent.top() + 1);
-            std::string rkt_lhs = dispatch(op->a);
-            std::string rkt_rhs = dispatch(op->b);
-            indent.pop();
-
             if (op->type.is_vector()) {
+                indent.push(indent.top() + 1);
+                std::string rkt_lhs = dispatch(op->a);
+                std::string rkt_rhs = dispatch(op->b);
+                indent.pop();
                 return tabs() + "(vec-div\n" + rkt_lhs + "\n" + rkt_rhs + ")";
             } else if (bv_enc.top()) {
+                std::string rkt_lhs = dispatch(op->a);
+                std::string rkt_rhs = dispatch(op->b);
                 return tabs() + "(sca-div" + rkt_lhs + " " + rkt_rhs + ")";
             } else {
+                std::string rkt_lhs = dispatch(op->a);
+                std::string rkt_rhs = dispatch(op->b);
                 return tabs() + "(quotient " + rkt_lhs + " " + rkt_rhs + ")";
             }
         }
 
         std::string visit(const Mod *op) {
-            indent.push(indent.top() + 1);
-            std::string rkt_lhs = dispatch(op->a);
-            std::string rkt_rhs = dispatch(op->b);
-            indent.pop();
-
             if (op->type.is_vector()) {
+                indent.push(indent.top() + 1);
+                std::string rkt_lhs = dispatch(op->a);
+                std::string rkt_rhs = dispatch(op->b);
+                indent.pop();
                 return tabs() + "(vec-mod\n" + rkt_lhs + "\n" + rkt_rhs + ")";
-            } else if (op->type != Int(32)) {
+            } else if (bv_enc.top()) {
+                std::string rkt_lhs = dispatch(op->a);
+                std::string rkt_rhs = dispatch(op->b);
                 return tabs() + "(sca-mod\n" + rkt_lhs + "\n" + rkt_rhs + ")";
             } else {
+                std::string rkt_lhs = dispatch(op->a);
+                std::string rkt_rhs = dispatch(op->b);
                 return tabs() + "(modulo " + rkt_lhs + " " + rkt_rhs + ")";
             }
         }
 
         std::string visit(const Min *op) {
-            indent.push(indent.top() + 1);
-            std::string rkt_lhs = dispatch(op->a);
-            std::string rkt_rhs = dispatch(op->b);
-            indent.pop();
-
             if (op->type.is_vector()) {
+                indent.push(indent.top() + 1);
+                std::string rkt_lhs = dispatch(op->a);
+                std::string rkt_rhs = dispatch(op->b);
+                indent.pop();
                 return tabs() + "(vec-min\n" + rkt_lhs + "\n" + rkt_rhs + ")";
-            } else if (op->type != Int(32)) {
-                return tabs() + "(sca-min\n" + rkt_lhs + "\n" + rkt_rhs + ")";
+            } else if (bv_enc.top()) {
+                std::string rkt_lhs = dispatch(op->a);
+                std::string rkt_rhs = dispatch(op->b);
+                return tabs() + "(sca-min " + rkt_lhs + " " + rkt_rhs + ")";
             } else {
+                std::string rkt_lhs = dispatch(op->a);
+                std::string rkt_rhs = dispatch(op->b);
                 return tabs() + "(min " + rkt_lhs + " " + rkt_rhs + ")";
             }
         }
 
         std::string visit(const Max *op) {
-            indent.push(indent.top() + 1);
-            std::string rkt_lhs = dispatch(op->a);
-            std::string rkt_rhs = dispatch(op->b);
-            indent.pop();
-
             if (op->type.is_vector()) {
+                indent.push(indent.top() + 1);
+                std::string rkt_lhs = dispatch(op->a);
+                std::string rkt_rhs = dispatch(op->b);
+                indent.pop();
                 return tabs() + "(vec-max\n" + rkt_lhs + "\n" + rkt_rhs + ")";
-            } else if (op->type != Int(32)) {
-                return tabs() + "(sca-max\n" + rkt_lhs + "\n" + rkt_rhs + ")";
+            } else if (bv_enc.top()) {
+                std::string rkt_lhs = dispatch(op->a);
+                std::string rkt_rhs = dispatch(op->b);
+                return tabs() + "(sca-max " + rkt_lhs + " " + rkt_rhs + ")";
             } else {
+                std::string rkt_lhs = dispatch(op->a);
+                std::string rkt_rhs = dispatch(op->b);
                 return tabs() + "(max " + rkt_lhs + " " + rkt_rhs + ")";
             }
         }
@@ -2874,65 +2895,99 @@ private:
             printer.print(op);
             return NYI();
         }
+
         std::string visit(const NE *op) {
             printer.print(op);
             return NYI();
         }
+
         std::string visit(const LT *op) {
-            indent.push(indent.top() + 1);
-            std::string rkt_lhs = dispatch(op->a);
-            std::string rkt_rhs = dispatch(op->b);
-            indent.pop();
             if (op->type.is_vector()) {
+                indent.push(indent.top() + 1);
+                std::string rkt_lhs = dispatch(op->a);
+                std::string rkt_rhs = dispatch(op->b);
+                indent.pop();
                 return tabs() + "(vec-lt\n" + rkt_lhs + "\n" + rkt_rhs + ")";
-            } else if (op->type != Int(32)) {
+            } else if (bv_enc.top()) {
+                std::string rkt_lhs = dispatch(op->a);
+                std::string rkt_rhs = dispatch(op->b);
                 return tabs() + "(sca-lt " + rkt_lhs + " " + rkt_rhs + ")";
             } else {
+                std::string rkt_lhs = dispatch(op->a);
+                std::string rkt_rhs = dispatch(op->b);
                 return tabs() + "(< " + rkt_lhs + " " + rkt_rhs + ")";
             }
         }
+
         std::string visit(const LE *op) {
             printer.print(op);
             return NYI();
         }
+
         std::string visit(const GT *op) {
-            printer.print(op);
-            return NYI();
+            if (op->type.is_vector()) {
+                indent.push(indent.top() + 1);
+                std::string rkt_lhs = dispatch(op->a);
+                std::string rkt_rhs = dispatch(op->b);
+                indent.pop();
+                return tabs() + "(vec-gt\n" + rkt_lhs + "\n" + rkt_rhs + ")";
+            } else if (bv_enc.top()) {
+                std::string rkt_lhs = dispatch(op->a);
+                std::string rkt_rhs = dispatch(op->b);
+                return tabs() + "(sca-gt " + rkt_lhs + " " + rkt_rhs + ")";
+            } else {
+                std::string rkt_lhs = dispatch(op->a);
+                std::string rkt_rhs = dispatch(op->b);
+                return tabs() + "(< " + rkt_lhs + " " + rkt_rhs + ")";
+            }
         }
+
         std::string visit(const GE *op) {
             printer.print(op);
             return NYI();
         }
+
         std::string visit(const And *op) {
             printer.print(op);
             return NYI();
         }
+
         std::string visit(const Or *op) {
             printer.print(op);
             return NYI();
         }
+
         std::string visit(const Not *op) {
             printer.print(op);
             return NYI();
         }
+
         std::string visit(const Select *op) {
-            indent.push(indent.top() + 1);
-            std::string rkt_cond = dispatch(op->condition);
-            std::string rkt_true = dispatch(op->true_value);
-            std::string rkt_false = dispatch(op->false_value);
-            indent.pop();
             if (op->type.is_vector()) {
+                indent.push(indent.top() + 1);
+                std::string rkt_cond = dispatch(op->condition);
+                std::string rkt_true = dispatch(op->true_value);
+                std::string rkt_false = dispatch(op->false_value);
+                indent.pop();
                 return tabs() + "(vec-if\n" + rkt_cond + "\n" + rkt_true + "\n" + rkt_false + ")";
-            } else if (op->type != Int(32)) {
+            } else if (bv_enc.top()) {
+                std::string rkt_cond = dispatch(op->condition);
+                std::string rkt_true = dispatch(op->true_value);
+                std::string rkt_false = dispatch(op->false_value);
                 return tabs() + "(sca-if " + rkt_cond + " " + rkt_true + " " + rkt_false + ")";
             } else {
+                std::string rkt_cond = dispatch(op->condition);
+                std::string rkt_true = dispatch(op->true_value);
+                std::string rkt_false = dispatch(op->false_value);
                 return tabs() + "(if " + rkt_cond + " " + rkt_true + " " + rkt_false + ")";
             }
         }
+
         std::string visit(const IfThenElse *op) {
             printer.print(op);
             return NYI();
         }
+
         std::string visit(const Shuffle *op) {
             if (op->is_slice()) {
                 indent.push(indent.top() + 1);
@@ -3008,6 +3063,7 @@ private:
             printer.print(op);
             return NYI();
         }
+
         std::string visit(const VectorReduce *op) {
             printer.print(op);
             return NYI();
