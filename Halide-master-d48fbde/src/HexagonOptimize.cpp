@@ -3003,14 +3003,30 @@ private:
 
                 return tabs() + "(slice_vectors\n" + rkt_vec + " " + rkt_base + " " + rkt_stride + " " + rkt_len + ")";
             } else if (op->is_interleave()) {
-                indent.push(indent.top() + 1);
-                std::string rkt_vecs = "";
-                for (auto vec : op->vectors)
-                    rkt_vecs += dispatch(vec) + "\n";
-                indent.pop();
-                rkt_vecs.pop_back();
-
-                return tabs() + "(interleave\n" + rkt_vecs + ")";
+                switch (op->vectors.size()) {
+                    case 2: {
+                        indent.push(indent.top() + 1);
+                        std::string rkt_lhs = dispatch(op->vectors[0]);
+                        std::string rkt_rhs = dispatch(op->vectors[1]);
+                        indent.pop();
+                        return tabs() + "(interleave\n" + rkt_lhs + "\n" + rkt_rhs + ")";
+                    }
+                    case 4: {
+                        indent.push(indent.top() + 1);
+                        indent.push(indent.top() + 1);
+                        std::string rkt_vec0 = dispatch(op->vectors[0]);
+                        std::string rkt_vec1 = dispatch(op->vectors[1]);
+                        std::string rkt_vec2 = dispatch(op->vectors[2]);
+                        std::string rkt_vec3 = dispatch(op->vectors[3]);
+                        indent.pop();
+                        std::string rkt_lhs = tabs() + "(interleave\n" + rkt_vec0 + "\n" + rkt_vec1 + ")";
+                        std::string rkt_rhs = tabs() + "(interleave\n" + rkt_vec2 + "\n" + rkt_vec3 + ")";
+                        indent.pop();
+                        return tabs() + "(interleave\n" + rkt_lhs + "\n" + rkt_rhs + ")";
+                    }
+                    default:
+                        return NYI();
+                }
             } else if (op->is_concat()) {
                 switch (op->vectors.size()) {
                 case 2: {
