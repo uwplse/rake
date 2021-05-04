@@ -15,12 +15,13 @@ camera_pipe     | Image Processing | The Frankencamera pipeline for processing r
 average_pool    | Machine Learning | Please add
 conv_nn         | Machine Learning | Please add
 depthwise_conv  | Machine Learning | Please add
-add_gen         | Machine Learning | Please add
+add             | Machine Learning | Please add
 fully_connected | Machine Learning | Please add
 l2norm          | Machine Learning | Please add
 maxpool         | Machine Learning | Please add
 softmax         | Machine Learning | Please add
 matmul          | Machine Learning | Performs a quantized matrix multiplication
+10bit8bit       | Image Processing | Performs a quantized matrix multiplication
 
 ## Runtime Performance Results
 Not yet available
@@ -108,11 +109,13 @@ Not yet available
 | 77 |                 | expr_24.rkt | :heavy_check_mark: | :x:           | :x:                      | :x:       |
 | 78 |                 | expr_25.rkt | :heavy_check_mark: | :x:           | :x:                      | :x:       |
 | 79 |                 | expr_26.rkt | :heavy_check_mark: | :x:           | :x:                      | :x:       |
-| 90 |                 | expr_27.rkt | :heavy_check_mark: | :x:           | :x:                      | :x:       |
-| 91 | max_pool        | expr_0.rkt  | :heavy_check_mark: | :x:           | :x:                      | :x:       |
-| 92 |                 | expr_1.rkt  | :heavy_check_mark: | :x:           | :x:                      | :x:       |
-| 93 |                 | expr_2.rkt  | :heavy_check_mark: | :x:           | :x:                      | :x:       |
-| 94 |                 | expr_3.rkt  | :heavy_check_mark: | :x:           | :x:                      | :x:       |
+| 80 |                 | expr_27.rkt | :heavy_check_mark: | :x:           | :x:                      | :x:       |
+| 81 | add             | expr_0.rkt  | :heavy_check_mark: | :x:           | :x:                      | :x:       |
+| 82 |                 | expr_1.rkt  | :heavy_check_mark: | :x:           | :x:                      | :x:       |
+| 83 | max_pool        | expr_0.rkt  | :heavy_check_mark: | :x:           | :x:                      | :x:       |
+| 94 |                 | expr_1.rkt  | :heavy_check_mark: | :x:           | :x:                      | :x:       |
+| 95 |                 | expr_2.rkt  | :heavy_check_mark: | :x:           | :x:                      | :x:       |
+| 96 |                 | expr_3.rkt  | :heavy_check_mark: | :x:           | :x:                      | :x:       |
 | 95 |                 | expr_4.rkt  | :heavy_check_mark: | :x:           | :x:                      | :x:       |
 | 96 |                 | expr_5.rkt  | :heavy_check_mark: | :x:           | :x:                      | :x:       |
 | 97 |                 | expr_6.rkt  | :heavy_check_mark: | :x:           | :x:                      | :x:       |
