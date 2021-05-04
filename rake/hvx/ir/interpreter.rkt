@@ -8,6 +8,7 @@
   rake/hvx/ir/instructions)
 
 (provide
+ (rename-out [instr-count hvx-ir-instr-count])
  (rename-out [get-subexprs get-hvx-ir-subexprs])
  (rename-out [set-cn set-cn-hvx-ir])
  (rename-out [elem-type hvx-ir-elem-type])
@@ -129,7 +130,9 @@
                   [((int16_t v0) (int16_t v1)) (min16 lhs rhs)]
                   [((uint16_t v0) (uint16_t v1)) (minu16 lhs rhs)]
                   [((int32_t v0) (int32_t v1)) (min32 lhs rhs)]
-                  [((uint32_t v0) (uint32_t v1)) (minu32 lhs rhs)]))]
+                  [((uint32_t v0) (uint32_t v1)) (minu32 lhs rhs)]
+                  [((int64_t v0) (int64_t v1)) (min64 lhs rhs)]
+                  [((uint64_t v0) (uint64_t v1)) (minu64 lhs rhs)]))]
 
     [(maximum sub-expr0 sub-expr1)
      (define input0 (interpret sub-expr0))
@@ -143,7 +146,9 @@
                   [((int16_t v0) (int16_t v1)) (max16 lhs rhs)]
                   [((uint16_t v0) (uint16_t v1)) (maxu16 lhs rhs)]
                   [((int32_t v0) (int32_t v1)) (max32 lhs rhs)]
-                  [((uint32_t v0) (uint32_t v1)) (maxu32 lhs rhs)]))]
+                  [((uint32_t v0) (uint32_t v1)) (maxu32 lhs rhs)]
+                  [((int64_t v0) (int64_t v1)) (max64 lhs rhs)]
+                  [((uint64_t v0) (uint64_t v1)) (maxu64 lhs rhs)]))]
 
     [(saturate sub-expr round? output-type)
      (define input (interpret sub-expr))
@@ -151,8 +156,8 @@
        (define v (input i))
        (define satF (get-sat-fn output-type))
        (define shiftF (if (signed-expr? v) bvashr bvlshr))
-       (define shift (cond [(eq? (expr-bw v) 16) (bv 8 16)] [(eq? (expr-bw v) 32) (bv 16 32)]))
-       (define offset (cond [(eq? (expr-bw v) 16) (bv 128 16)] [(eq? (expr-bw v) 32) (bv 32768 32)]))
+       (define shift (cond [(eq? (expr-bw v) 16) (bv 8 16)] [(eq? (expr-bw v) 32) (bv 16 32)] [(eq? (expr-bw v) 64) (bv 32 64)]))
+       (define offset (cond [(eq? (expr-bw v) 16) (bv 128 16)] [(eq? (expr-bw v) 32) (bv 32768 32)] [(eq? (expr-bw v) 64) (bv 2147483648 64)]))
        (define rounded (if round? (shiftF (bvadd (eval v) offset) shift) (eval v)))
        (satF (mk-cpp-expr rounded (cpp-type v))))]
 
@@ -203,6 +208,16 @@
          [((int8_t v0) (int8_t v1)) (uint1_t (bvsle v0 v1))]
          [((int16_t v0) (int16_t v1)) (uint1_t (bvsle v0 v1))]
          [((int32_t v0) (int32_t v1)) (uint1_t (bvsle v0 v1))]))]
+
+    [(vs-frac-mpy sub-expr sca round?)
+     (define input (interpret sub-expr))
+     (lambda (i)
+       (define v1 (cpp-cast (input i) 'int64))
+       (define v2 (cpp-cast sca 'int64))
+       (define mpy (bvmul (eval v1) (eval v2)))
+       (define rnd (if round? (bvadd mpy (bv #x40000000 64)) mpy))
+       (define shift (bvashr rnd (bv 31 64)))
+       (sat32 (int64_t shift)))]
     
     [(vs-mpy-add sub-expr weights output-type saturate?)
      (define input (interpret sub-expr))
@@ -440,9 +455,11 @@
     [(eq? type 'int8) sat8]
     [(eq? type 'int16) sat16]
     [(eq? type 'int32) sat32]
+    [(eq? type 'int64) sat64]
     [(eq? type 'uint8) satu8]
     [(eq? type 'uint16) satu16]
-    [(eq? type 'uint32) satu32]))
+    [(eq? type 'uint32) satu32]
+    [(eq? type 'uint64) satu64]))
 
 (define (get-subexprs ir-expr)
   (destruct ir-expr
@@ -456,6 +473,8 @@
     [(vs-mpy-add sub-expr weight-matrix output-type saturate?) (list sub-expr)]
     [(vs-mpy-add-acc acc-expr sub-expr weight-matrix output-type saturate?) (list acc-expr sub-expr)]
     [(vv-mpy-add sub-expr width output-type saturate?) (list sub-expr)]
+
+    [(vs-frac-mpy sub-expr sca round?) (list sub-expr)]
 
     [(add-const sub-expr const-val output-type saturate?) (list sub-expr)]
     
@@ -475,4 +494,39 @@
     [(less-than sub-expr0 sub-expr1) (list sub-expr0 sub-expr1)]
     [(less-than-eq sub-expr0 sub-expr1) (list sub-expr0 sub-expr1)]
     
-    [_ (error "NYI: Extracing sub-expression for IR Expr:" ir-expr)]))   
+    [_ (error "NYI: Extracing sub-expression for IR Expr:" ir-expr)]))
+
+(define (instr-count ir-expr)
+  (destruct ir-expr
+    [(load-data live-data gather-tbl) 1]
+    [(broadcast value) 1]
+
+    [(combine sub-expr0 sub-expr1 read-tbl) (+ (instr-count sub-expr0) (instr-count sub-expr1) 1)]
+    
+    [(cast sub-expr type) (+ (instr-count sub-expr) 1)]
+
+    [(vs-mpy-add sub-expr weight-matrix output-type saturate?) (+ (instr-count sub-expr) 1)]
+    [(vs-mpy-add-acc acc-expr sub-expr weight-matrix output-type saturate?) (+ (instr-count acc-expr) (instr-count sub-expr) 1)]
+    [(vv-mpy-add sub-expr width output-type saturate?) (+ (instr-count sub-expr) 1)]
+
+    [(vs-frac-mpy sub-expr sca round?) (+ (instr-count sub-expr) 1)]
+
+    [(add-const sub-expr const-val output-type saturate?) (+ (instr-count sub-expr) 1)]
+    
+    [(shift-right sub-expr const-val round? saturate? arithmetic? output-type) (+ (instr-count sub-expr) 1)]
+    [(divide-by-const sub-expr const-val) (+ (instr-count sub-expr) 1)]
+    [(average sub-expr round? output-type) (+ (instr-count sub-expr) 1)]
+    
+    [(modulo-by-const sub-expr const-val) (+ (instr-count sub-expr) 1)]
+    
+    [(maximum sub-expr0 sub-expr1) (+ (instr-count sub-expr0) (instr-count sub-expr1) 1)]
+    [(minimum sub-expr0 sub-expr1) (+ (instr-count sub-expr0) (instr-count sub-expr1) 1)]
+    [(saturate sub-expr round? output-type) (+ (instr-count sub-expr) 1)]
+    
+    [(abs-diff sub-expr0 sub-expr1) (+ (instr-count sub-expr0) (instr-count sub-expr1) 1)]
+    
+    [(select sub-expr0 sub-expr1 sub-expr2) (+ (instr-count sub-expr0) (instr-count sub-expr1) (instr-count sub-expr2) 1)]
+    [(less-than sub-expr0 sub-expr1) (+ (instr-count sub-expr0) (instr-count sub-expr1) 1)]
+    [(less-than-eq sub-expr0 sub-expr1) (+ (instr-count sub-expr0) (instr-count sub-expr1) 1)]
+    
+    [_ (error "NYI: Extracing sub-expression for IR Expr:" ir-expr)]))
