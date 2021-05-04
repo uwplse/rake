@@ -2695,14 +2695,23 @@ private:
 
                 return tabs() + "(vec-shr" + rkt_args + ")";
             } else if (op->name == std::string("shift_left")) {
-                std::string rkt_args = "";
+                if (op->args[0].type().is_scalar()) {
+                    std::string rkt_args = "";
 
-                indent.push(indent.top() + 1);
-                for (unsigned int i = 0; i < op->args.size(); i++)
-                    rkt_args += "\n" + dispatch(op->args[i]);
-                indent.pop();
+                    for (unsigned int i = 0; i < op->args.size(); i++)
+                        rkt_args += " " + dispatch(op->args[i]);
 
-                return tabs() + "(vec-shl" + rkt_args + ")";
+                    return tabs() + "(sca-shl" + rkt_args + ")";
+                } else {
+                    std::string rkt_args = "";
+
+                    indent.push(indent.top() + 1);
+                    for (unsigned int i = 0; i < op->args.size(); i++)
+                        rkt_args += "\n" + dispatch(op->args[i]);
+                    indent.pop();
+
+                    return tabs() + "(vec-shl" + rkt_args + ")";
+                }
             } else if (op->name == std::string("absd")) {
                 std::string rkt_args = "";
 
@@ -2809,8 +2818,8 @@ private:
 
             if (op->type.is_vector()) {
                 return tabs() + "(vec-div\n" + rkt_lhs + "\n" + rkt_rhs + ")";
-            } else if (op->type != Int(32)) {
-                return tabs() + "(sca-div\n" + rkt_lhs + "\n" + rkt_rhs + ")";
+            } else if (bv_enc.top()) {
+                return tabs() + "(sca-div" + rkt_lhs + " " + rkt_rhs + ")";
             } else {
                 return tabs() + "(quotient " + rkt_lhs + " " + rkt_rhs + ")";
             }
@@ -3355,12 +3364,8 @@ private:
                 }
             } else {
                 if (encoding[var->name] == Bitvector) {
-                    sym_vars << "(define-symbolic " << var->name << "-val "
-                             << "(bitvector " << var->type.bits() << "))\n";
-                    sym_vars << "(define " << var->name << " "
-                             << "(" << type_to_c_type(var->type.element_of(), false, true) << " "
-                             << var->name << "-val))\n";
-                    
+                    sym_vars << "(define-symbolic-var " << var->name 
+                             << " " << type_to_c_type(var->type.element_of(), false, true) << ")\n";
                 }
                 else
                     sym_vars << "(define-symbolic " << var->name << " integer?)\n";
