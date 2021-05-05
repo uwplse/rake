@@ -77,7 +77,7 @@ Currently truncated, re-introducing uber-instructions as I make progress with re
 ```
        types  :=   load-data : (live-reads) -> vector
               |    broadcast : (scalar) -> vector
-              |    ramp : (base stride len) -> vector
+              |    build-vec : (base stride len) -> vector
               |    combine : (ir-expr ir-expr) -> ir-expr
               |    cast : (ir-expr type) -> ir-expr
               |    vs-mpy-add : (ir-expr weight-matrix output-type saturate?) -> ir-expr
