@@ -3,23 +3,24 @@
 (require rake)
 
 (define-symbolic-buffer input uint16_t)
-(define-symbolic blur_x.s0.y integer?)
-(define-symbolic t155 integer?)
-(define-symbolic t165 integer?)
+(define-symbolic t136 integer?)
+(define-symbolic t127 integer?)
+(define-symbolic t117 integer?)
 
 (define axioms 
   (list ))
 
-(define blur_y.extent.0 t155)
-(define input.stride.1 t165)
+(define blur_y.extent.0 t117)
+(define input.stride.1 t127)
+(define t104 (+  t136  (+  (*  input.stride.1  2)  blur_y.extent.0)))
 
 (define halide-expr
  (vec-div
   (vec-add
-   (load input (ramp (+  (+   (*    blur_x.s0.y    input.stride.1)   blur_y.extent.0)  -127) 1 128) (aligned 1 0))
+   (load input (ramp (+ t104 -127) 1 128) (aligned 1 0))
    (vec-add
-    (load input (ramp (+  (+   (*    blur_x.s0.y    input.stride.1)   blur_y.extent.0)  -126) 1 128) (aligned 1 0))
-    (load input (ramp (+  (+   (*    blur_x.s0.y    input.stride.1)   blur_y.extent.0)  -128) 1 128) (aligned 1 0))))
+    (load input (ramp (+ t104 -126) 1 128) (aligned 1 0))
+    (load input (ramp (+ t104 -128) 1 128) (aligned 1 0))))
   (x128 (uint16_t (bv 3 16)))))
 
 (define spec (synthesis-spec 'halide-ir halide-expr axioms))

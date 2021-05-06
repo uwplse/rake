@@ -2,121 +2,24 @@
 
 (require rake)
 
-(define-symbolic-buffer input_bounded uint8_t)
-(define-symbolic-buffer mask int8_t)
-(define-symbolic output.s0.x.x integer?)
-(define-symbolic t252 integer?)
-(define-symbolic t251 integer?)
+(define-symbolic-var input_bounded.s0.x.x int32_t)
+(define-symbolic-var t268 int32_t)
 
 (define axioms 
-  (list 
-   (values-range-from input_bounded (uint8_t (bv 0 8)) (uint8_t (bv 255 8)))))
+  (list ))
 
-(define t135 (max   (*    t252    128)   (+    (*     t251     128)    2)))
-(define t207 (load input_bounded (ramp (*  output.s0.x.x  128) 1 128) (aligned 128 0)))
-(define t208.s (load input_bounded (ramp (+  (*   output.s0.x.x   128)  128) 1 128) (aligned 128 0)))
-(define t209 (load input_bounded (ramp (*  (+   (quotient    (+     t135     255)    128)   output.s0.x.x)  128) 1 128) (aligned 128 0)))
-(define t210.s (load input_bounded (ramp (+  (*   (+    (quotient     (+      t135      255)     128)    output.s0.x.x)   128)  128) 1 128) (aligned 128 0)))
-(define t211 (load input_bounded (ramp (*  (+   (*    (quotient     (+      t135      255)     128)    2)   output.s0.x.x)  128) 1 128) (aligned 128 0)))
-(define t212.s (load input_bounded (ramp (+  (*   (+    (*     (quotient      (+       t135       255)      128)     2)    output.s0.x.x)   128)  128) 1 128) (aligned 128 0)))
+(define input.extent.0 t268)
+(define t239.s (sca-min  (sca-mul  input_bounded.s0.x.x  (int32_t (bv 128 32)))  input.extent.0))
 
 (define halide-expr
  (uint8x128
-  (vec-max
-   (vec-min
-    (vec-div
-     (vec-add
-      (vec-add
-       (vec-add
-        (vec-add
-         (vec-add
-          (vec-add
-           (vec-add
-            (vec-add
-             (int32x128
-              (vec-mul
-               (int16x128
-                (uint16x128
-                 t207))
-               (int16x128
-                (x128 (load-sca mask 0)))))
-             (int32x128
-              (vec-mul
-               (int16x128
-                (uint16x128
-                 (slice_vectors
-                  (concat_vectors
-                   t207
-                   t208.s) 1 1 128)))
-               (int16x128
-                (x128 (load-sca mask 1))))))
-            (int32x128
-             (vec-mul
-              (int16x128
-               (uint16x128
-                (slice_vectors
-                 (concat_vectors
-                  t207
-                  t208.s) 2 1 128)))
-              (int16x128
-               (x128 (load-sca mask 2))))))
-           (int32x128
-            (vec-mul
-             (int16x128
-              (uint16x128
-               t209))
-             (int16x128
-              (x128 (load-sca mask 3))))))
-          (int32x128
-           (vec-mul
-            (int16x128
-             (uint16x128
-              (slice_vectors
-               (concat_vectors
-                t209
-                t210.s) 1 1 128)))
-            (int16x128
-             (x128 (load-sca mask 4))))))
-         (int32x128
-          (vec-mul
-           (int16x128
-            (uint16x128
-             (slice_vectors
-              (concat_vectors
-               t209
-               t210.s) 2 1 128)))
-           (int16x128
-            (x128 (load-sca mask 5))))))
-        (int32x128
-         (vec-mul
-          (int16x128
-           (uint16x128
-            t211))
-          (int16x128
-           (x128 (load-sca mask 6))))))
-       (int32x128
-        (vec-mul
-         (int16x128
-          (uint16x128
-           (slice_vectors
-            (concat_vectors
-             t211
-             t212.s) 1 1 128)))
-         (int16x128
-          (x128 (load-sca mask 7))))))
-      (int32x128
-       (vec-mul
-        (int16x128
-         (uint16x128
-          (slice_vectors
-           (concat_vectors
-            t211
-            t212.s) 2 1 128)))
-        (int16x128
-         (x128 (load-sca mask 8))))))
-     (x128 (int32_t (bv 16 32))))
-    (x128 (int32_t (bv 255 32))))
-   (x128 (int32_t (bv 0 32))))))
+  (vec-add
+   (vec-max
+    (vec-min
+     (ramp (sca-add (sca-mul input_bounded.s0.x.x (int32_t (bv 128 32))) (int32_t (bv -1 32))) (int32_t (bv 1 32)) 128)
+     (x128 (sca-add input.extent.0 (int32_t (bv -1 32)))))
+    (x128 (int32_t (bv 0 32))))
+   (x128 (sca-sub (int32_t (bv 1 32)) (sca-max t239.s (int32_t (bv 1 32))))))))
 
 (define spec (synthesis-spec 'halide-ir halide-expr axioms))
 (define hvx-expr (synthesize-hvx spec 'greedy 'enumerative 'enumerative))

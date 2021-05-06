@@ -3,25 +3,29 @@
 (require rake)
 
 (define-symbolic-buffer input uint16_t)
-(define-symbolic blur_x.s0.y integer?)
 (define-symbolic blur_x.s0.x.x integer?)
-(define-symbolic t155 integer?)
-(define-symbolic t165 integer?)
+(define-symbolic blur_y.s0.y.y integer?)
+(define-symbolic blur_y.s0.y.yi.$n.rebased integer?)
+(define-symbolic t127 integer?)
+(define-symbolic t117 integer?)
+(define-symbolic t120 integer?)
 
 (define axioms 
   (list ))
 
-(define blur_y.extent.0 t155)
-(define input.stride.1 t165)
-(define blur_x.s0.x.v1.base.s (+   (min    blur_y.extent.0    256)   (*    blur_x.s0.x.x    128)))
+(define blur_y.extent.0 t117)
+(define blur_y.extent.1 t120)
+(define input.stride.1 t127)
+(define blur_y.s0.y.yi.base (min  (*  blur_y.s0.y.y  128)  (+  blur_y.extent.1  -128)))
+(define blur_x.s0.x.v1.base.s (+  (min  blur_y.extent.0  256)  (*  blur_x.s0.x.x  128)))
 
 (define halide-expr
  (vec-div
   (vec-add
-   (load input (ramp (+  (+   (*    blur_x.s0.y    input.stride.1)   blur_x.s0.x.v1.base.s)  -255) 1 128) (aligned 1 0))
+   (load input (ramp (+ (+ (* (+ blur_y.s0.y.yi.$n.rebased blur_y.s0.y.yi.base) input.stride.1) blur_x.s0.x.v1.base.s) -255) 1 128) (aligned 1 0))
    (vec-add
-    (load input (ramp (+  (+   (*    blur_x.s0.y    input.stride.1)   blur_x.s0.x.v1.base.s)  -254) 1 128) (aligned 1 0))
-    (load input (ramp (+  (+   (*    blur_x.s0.y    input.stride.1)   blur_x.s0.x.v1.base.s)  -256) 1 128) (aligned 1 0))))
+    (load input (ramp (+ (+ (* (+ blur_y.s0.y.yi.$n.rebased blur_y.s0.y.yi.base) input.stride.1) blur_x.s0.x.v1.base.s) -254) 1 128) (aligned 1 0))
+    (load input (ramp (+ (+ (* (+ blur_y.s0.y.yi.$n.rebased blur_y.s0.y.yi.base) input.stride.1) blur_x.s0.x.v1.base.s) -256) 1 128) (aligned 1 0))))
   (x128 (uint16_t (bv 3 16)))))
 
 (define spec (synthesis-spec 'halide-ir halide-expr axioms))

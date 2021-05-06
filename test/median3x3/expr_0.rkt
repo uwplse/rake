@@ -2,110 +2,27 @@
 
 (require rake)
 
-(define-symbolic-buffer bounded_input uint8_t)
-(define-symbolic output.s0.x.x integer?)
-(define-symbolic t1413 integer?)
-(define-symbolic t1393 integer?)
-(define-symbolic t1411 integer?)
-(define-symbolic t1415 integer?)
+(define-symbolic-var bounded_input.s0.x.x int32_t)
+(define-symbolic-var t1480 int32_t)
+(define-symbolic-var t1474 int32_t)
 
 (define axioms 
-  (list 
-   (values-range-from bounded_input (uint8_t (bv 0 8)) (uint8_t (bv 255 8)))))
+  (list ))
 
-(define output.extent.0 t1393)
-(define t1385 (-   (*    output.s0.x.x    128)   (min    output.extent.0    128)))
-(define t1047.s t1411)
-(define t1048 (load bounded_input (ramp (+  (+   (*    t1047.s    128)   t1385)  128) 1 128) (aligned 1 0)))
-(define t1049.s t1413)
-(define t1050 (load bounded_input (ramp (+  (+   (*    t1049.s    128)   t1385)  128) 1 128) (aligned 1 0)))
-(define t1051.s t1415)
-(define t1052 (load bounded_input (ramp (+  (+   (*    t1051.s    128)   t1385)  128) 1 128) (aligned 1 0)))
-(define t1053 (load bounded_input (ramp (+  (+   (*    t1047.s    128)   t1385)  129) 1 128) (aligned 1 0)))
-(define t1054 (load bounded_input (ramp (+  (+   (*    t1049.s    128)   t1385)  129) 1 128) (aligned 1 0)))
-(define t1055 (load bounded_input (ramp (+  (+   (*    t1051.s    128)   t1385)  129) 1 128) (aligned 1 0)))
-(define t1056 (load bounded_input (ramp (+  (+   (*    t1047.s    128)   t1385)  130) 1 128) (aligned 1 0)))
-(define t1057 (load bounded_input (ramp (+  (+   (*    t1049.s    128)   t1385)  130) 1 128) (aligned 1 0)))
-(define t1058 (load bounded_input (ramp (+  (+   (*    t1051.s    128)   t1385)  130) 1 128) (aligned 1 0)))
-(define t1059 (vec-min
-  (vec-max
-   (vec-max
-    t1048
-    t1050)
-   t1052)
-  (vec-min
-   (vec-max
-    (vec-max
-     t1053
-     t1054)
-    t1055)
-   (vec-max
-    (vec-max
-     t1056
-     t1057)
-    t1058))))
-(define t1060 (vec-max
-  (vec-max
-   (vec-min
-    (vec-min
-     t1053
-     t1054)
-    t1055)
-   (vec-min
-    (vec-min
-     t1056
-     t1057)
-    t1058))
-  (vec-min
-   (vec-min
-    t1048
-    t1050)
-   t1052)))
-(define t1061 (vec-max
-  (vec-min
-   (vec-max
-    t1048
-    t1052)
-   t1050)
-  (vec-min
-   t1048
-   t1052)))
-(define t1062 (vec-max
-  (vec-min
-   (vec-max
-    t1053
-    t1055)
-   t1054)
-  (vec-min
-   t1053
-   t1055)))
+(define input.extent.0 t1474)
+(define output.extent.0 t1480)
+(define bounded_input.s0.x.v0.base.s (sca-add  (sca-min  output.extent.0  (int32_t (bv 128 32)))  (sca-mul  bounded_input.s0.x.x  (int32_t (bv 128 32)))))
+(define t1466.s (sca-min  (sca-add  input.extent.0  (int32_t (bv 128 32)))  bounded_input.s0.x.v0.base.s))
 
 (define halide-expr
- (vec-max
-  (vec-min
-   (vec-max
-    t1059
-    t1060)
+ (uint8x128
+  (vec-add
    (vec-max
     (vec-min
-     (vec-max
-      t1061
-      t1062)
-     (vec-max
-      (vec-min
-       (vec-max
-        t1056
-        t1058)
-       t1057)
-      (vec-min
-       t1056
-       t1058)))
-    (vec-min
-     t1061
-     t1062)))
-  (vec-min
-   t1059
-   t1060)))
+     (ramp (sca-add bounded_input.s0.x.v0.base.s (int32_t (bv -129 32))) (int32_t (bv 1 32)) 128)
+     (x128 (sca-add input.extent.0 (int32_t (bv -1 32)))))
+    (x128 (int32_t (bv 0 32))))
+   (x128 (sca-sub (int32_t (bv 129 32)) (sca-max t1466.s (int32_t (bv 129 32))))))))
 
 (define spec (synthesis-spec 'halide-ir halide-expr axioms))
 (define hvx-expr (synthesize-hvx spec 'greedy 'enumerative 'enumerative))

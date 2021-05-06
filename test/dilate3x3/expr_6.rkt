@@ -3,37 +3,38 @@
 (require rake)
 
 (define-symbolic-buffer bounded_input uint8_t)
-(define-symbolic t308 integer?)
-(define-symbolic t307 integer?)
-(define-symbolic t301 integer?)
-(define-symbolic t315 integer?)
+(define-symbolic output.s0.x.x integer?)
+(define-symbolic t357 integer?)
+(define-symbolic t407 integer?)
+(define-symbolic t366 integer?)
+(define-symbolic t406 integer?)
 
 (define axioms 
-  (list 
-   (values-range-from bounded_input (uint8_t (bv 0 8)) (uint8_t (bv 255 8)))))
+  (list ))
 
-(define output.extent.0 t301)
-(define t196 (max   (-    (max     (+      (min       (*        t308        128)       (+        output.extent.0        -128))      127)     output.extent.0)    (min     output.extent.0     128))   (+    (*     t307     128)    -2)))
-(define t224 (+   (max    output.extent.0    128)   (*    t315    384)))
+(define output.extent.0 t357)
+(define t247 (-  (*  t366  384)  (min  output.extent.0  128)))
+(define t211 (+  (*  t406  128)  (+  (*  output.s0.x.x  128)  t247)))
+(define t212 (+  (*  t407  -128)  (+  (*  output.s0.x.x  128)  t247)))
 
 (define halide-expr
  (vec-max
-  (load bounded_input (ramp (+  (+   (*    (quotient     (+      t196      257)     128)    128)   t224)  -127) 1 128) (aligned 1 0))
+  (load bounded_input (ramp (+ t211 129) 1 128) (aligned 1 0))
   (vec-max
-   (load bounded_input (ramp (+  t224  -127) 1 128) (aligned 1 0))
+   (load bounded_input (ramp (+ (+ (* output.s0.x.x 128) t247) 129) 1 128) (aligned 1 0))
    (vec-max
-    (load bounded_input (ramp (+  (+   (*    (quotient     (+      t196      257)     128)    -128)   t224)  -127) 1 128) (aligned 1 0))
+    (load bounded_input (ramp (+ t212 129) 1 128) (aligned 1 0))
     (vec-max
-     (load bounded_input (ramp (+  (+   (*    (quotient     (+      t196      257)     128)    -128)   t224)  -126) 1 128) (aligned 1 0))
+     (load bounded_input (ramp (+ t212 130) 1 128) (aligned 1 0))
      (vec-max
-      (load bounded_input (ramp (+  t224  -126) 1 128) (aligned 1 0))
+      (load bounded_input (ramp (+ (+ (* output.s0.x.x 128) t247) 130) 1 128) (aligned 1 0))
       (vec-max
-       (load bounded_input (ramp (+  (+   (*    (quotient     (+      t196      257)     128)    128)   t224)  -126) 1 128) (aligned 1 0))
+       (load bounded_input (ramp (+ t211 130) 1 128) (aligned 1 0))
        (vec-max
-        (load bounded_input (ramp (+  (+   (*    (quotient     (+      t196      257)     128)    -128)   t224)  -128) 1 128) (aligned 1 0))
+        (load bounded_input (ramp (+ t212 128) 1 128) (aligned 1 0))
         (vec-max
-         (load bounded_input (ramp (+  t224  -128) 1 128) (aligned 1 0))
-         (load bounded_input (ramp (+  (+   (*    (quotient     (+      t196      257)     128)    128)   t224)  -128) 1 128) (aligned 1 0)))))))))))
+         (load bounded_input (ramp (+ (+ (* output.s0.x.x 128) t247) 128) 1 128) (aligned 1 0))
+         (load bounded_input (ramp (+ t211 128) 1 128) (aligned 1 0)))))))))))
 
 (define spec (synthesis-spec 'halide-ir halide-expr axioms))
 (define hvx-expr (synthesize-hvx spec 'greedy 'enumerative 'enumerative))

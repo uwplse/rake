@@ -2,80 +2,31 @@
 
 (require rake)
 
-(define-symbolic-buffer bounded_input uint8_t)
-(define-symbolic-buffer c6 uint8_t)
-(define-symbolic-buffer c7 uint8_t)
-(define-symbolic output.s0.x.x integer?)
-(define-symbolic t401 integer?)
-(define-symbolic t400 integer?)
+(define-symbolic-var bounded_input.s0.x.x.rebased int32_t)
+(define-symbolic-var t425 int32_t)
+(define-symbolic-var t430 int32_t)
+(define-symbolic-var t436 int32_t)
+(define-symbolic-var t437 int32_t)
+(define-symbolic-var t439 int32_t)
 
 (define axioms 
-  (list 
-   (values-range-from bounded_input (uint8_t (bv 0 8)) (uint8_t (bv 255 8)))))
+  (list ))
 
-(define t268 (max   (*    t401    128)   (+    (*     t400     128)    2)))
-(define t221.s (load bounded_input (ramp (*  (+   (*    (quotient     (+      t268      255)     128)    2)   output.s0.x.x)  128) 1 128) (aligned 128 0)))
-(define t222.s.s (load bounded_input (ramp (*  (+   (*    (quotient     (+      t268      255)     128)    2)   output.s0.x.x)  128) 1 256) (aligned 128 0)))
-(define t224.s (load bounded_input (ramp (*  (+   (*    (quotient     (+      t268      255)     128)    4)   output.s0.x.x)  128) 1 128) (aligned 128 0)))
-(define t225.s.s (load bounded_input (ramp (*  (+   (*    (quotient     (+      t268      255)     128)    4)   output.s0.x.x)  128) 1 256) (aligned 128 0)))
-(define t379 (load bounded_input (ramp (*  (+   (*    (quotient     (+      t268      255)     128)    3)   output.s0.x.x)  128) 1 128) (aligned 128 0)))
+(define input.extent.0 t425)
+(define output.min.0 t430)
+(define t309 (sca-min  t437  (sca-add  (sca-max  t436  (int32_t (bv -1 32)))  (int32_t (bv 1 32)))))
+(define t304 (sca-max  t439  t309))
+(define t414.s (sca-min  (sca-add  (sca-mul  (sca-add  bounded_input.s0.x.x.rebased  t304)  (int32_t (bv 128 32)))  output.min.0)  input.extent.0))
 
 (define halide-expr
  (uint8x128
-  (vec-min
-   (vec-add
-    (vec-absd
-     (vec-add
-      (vec-add
-       (vec-shl
-        (uint16x128
-         (slice_vectors
-          (load c6 (ramp 0 1 256) (aligned 0 0)) 1 1 128))
-        (x128 (uint16_t (bv 1 16))))
-       (uint16x128
-        t221.s))
-      (uint16x128
-       (slice_vectors
-        t222.s.s 2 1 128)))
-     (vec-add
-      (vec-add
-       (vec-shl
-        (uint16x128
-         (slice_vectors
-          (load c7 (ramp 0 1 256) (aligned 0 0)) 1 1 128))
-        (x128 (uint16_t (bv 1 16))))
-       (uint16x128
-        t224.s))
-      (uint16x128
-       (slice_vectors
-        t225.s.s 2 1 128))))
-    (vec-absd
-     (vec-add
-      (vec-add
-       (vec-shl
-        (uint16x128
-         t379)
-        (x128 (uint16_t (bv 1 16))))
-       (uint16x128
-        t221.s))
-      (uint16x128
-       t224.s))
-     (vec-add
-      (vec-add
-       (vec-shl
-        (uint16x128
-         (slice_vectors
-          (concat_vectors
-           t379
-           (load bounded_input (ramp (+  (*   (+    (*     (quotient      (+       t268       255)      128)     3)    output.s0.x.x)   128)  128) 1 128) (aligned 128 0))) 2 1 128))
-        (x128 (uint16_t (bv 1 16))))
-       (uint16x128
-        (slice_vectors
-         t222.s.s 2 1 128)))
-      (uint16x128
-       (slice_vectors
-        t225.s.s 2 1 128)))))
-   (x128 (uint16_t (bv 255 16))))))
+  (vec-add
+   (vec-max
+    (vec-min
+     (ramp (sca-add (sca-add (sca-mul (sca-add bounded_input.s0.x.x.rebased t304) (int32_t (bv 128 32))) output.min.0) (int32_t (bv -1 32))) (int32_t (bv 1 32)) 128)
+     (x128 (sca-add input.extent.0 (int32_t (bv -1 32)))))
+    (x128 (int32_t (bv 0 32))))
+   (x128 (sca-sub (int32_t (bv 1 32)) (sca-max t414.s (int32_t (bv 1 32))))))))
 
 (define spec (synthesis-spec 'halide-ir halide-expr axioms))
 (define hvx-expr (synthesize-hvx spec 'greedy 'enumerative 'enumerative))

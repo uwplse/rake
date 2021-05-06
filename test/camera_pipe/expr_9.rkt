@@ -4,71 +4,68 @@
 
 (define-symbolic-buffer deinterleaved int16_t)
 (define-symbolic f7.s0.v0.fused.v0 integer?)
-(define-symbolic t4217 integer?)
-(define-symbolic t4121 integer?)
-(define-symbolic t4119 integer?)
-(define-symbolic t4118 integer?)
-(define-symbolic t4215 integer?)
-(define-symbolic t4120 integer?)
+(define-symbolic t3079 integer?)
+(define-symbolic t3015 integer?)
+(define-symbolic t3016 integer?)
+(define-symbolic t3081 integer?)
 
 (define axioms 
-  (list 
-   (values-range-from deinterleaved (int16_t (bv 0 16)) (int16_t (bv 32767 16)))))
+  (list ))
 
-(define t3790 (max   (max    (max     (*      t4121      64)     (+      (*       t4120       128)      63))    (+     (*      t4119      64)     1))   (+    (*     t4118     128)    62)))
-(define t3879 t4215)
-(define t3875 t4217)
-(define t3661 (let ([t4054  (+   (*    (quotient     (+      t3790      129)     64)    12)   (+    (*     f7.s0.v0.fused.v0     2)    t3879))])
-  (load deinterleaved (ramp (*  t4054  64) 1 128) (aligned 64 0))))
-(define t3662 (let ([t4055  (+   (*    (quotient     (+      t3790      129)     64)    12)   (+    (*     f7.s0.v0.fused.v0     2)    t3879))])
-  (let ([t4056   (load deinterleaved (ramp (+  (*   t4055   64)  64) 1 64) (aligned 64 0))])
+(define t2738 (max  (*  t3016  64)  (+  (*  t3015  128)  62)))
+(define t2813 t3079)
+(define t2817 t3081)
+(define t2630 (let ([t2963  (+  (*  (quotient  (+  t2738  130)  64)  12)  (+  (*  f7.s0.v0.fused.v0  2)  t2817))])
+  (load deinterleaved (ramp (* t2963 64) 1 128) (aligned 64 0))))
+(define t2631 (let ([t2964  (+  (*  (quotient  (+  t2738  130)  64)  12)  (+  (*  f7.s0.v0.fused.v0  2)  t2817))])
+  (let ([t2965   (load deinterleaved (ramp (+ (* t2964 64) 64) 1 64) (aligned 64 0))])
    (concat_vectors
     (slice_vectors
      (concat_vectors
-      (load deinterleaved (ramp (*  t4055  64) 1 64) (aligned 64 0))
-      t4056) 1 1 64)
+      (load deinterleaved (ramp (* t2964 64) 1 64) (aligned 64 0))
+      t2965) 1 1 64)
     (slice_vectors
      (concat_vectors
-      t4056
-      (load deinterleaved (ramp (+  (*   t4055   64)  128) 1 64) (aligned 64 0))) 1 1 64)))))
-(define t3663 (let ([t4058  (load deinterleaved (ramp (+  (*   (+    (*     f7.s0.v0.fused.v0     2)    t3875)   64)  64) 1 64) (aligned 64 0))])
+      t2965
+      (load deinterleaved (ramp (+ (* t2964 64) 128) 1 64) (aligned 64 0))) 1 1 64)))))
+(define t2632 (let ([t2967  (load deinterleaved (ramp (+ (* (+ (* f7.s0.v0.fused.v0 2) t2813) 64) 64) 1 64) (aligned 64 0))])
   (concat_vectors
    (slice_vectors
     (concat_vectors
-     (load deinterleaved (ramp (*  (+   (*    f7.s0.v0.fused.v0    2)   t3875)  64) 1 64) (aligned 64 0))
-     t4058) 1 1 64)
+     (load deinterleaved (ramp (* (+ (* f7.s0.v0.fused.v0 2) t2813) 64) 1 64) (aligned 64 0))
+     t2967) 1 1 64)
    (slice_vectors
     (concat_vectors
-     t4058
-     (load deinterleaved (ramp (+  (*   (+    (*     f7.s0.v0.fused.v0     2)    t3875)   64)  128) 1 64) (aligned 64 0))) 1 1 64))))
-(define t3664 (let ([t4059  (load deinterleaved (ramp (+  (*   (+    (*     f7.s0.v0.fused.v0     2)    t3879)   64)  64) 1 64) (aligned 64 0))])
+     t2967
+     (load deinterleaved (ramp (+ (* (+ (* f7.s0.v0.fused.v0 2) t2813) 64) 128) 1 64) (aligned 64 0))) 1 1 64))))
+(define t2633 (let ([t2968  (load deinterleaved (ramp (+ (* (+ (* f7.s0.v0.fused.v0 2) t2817) 64) 64) 1 64) (aligned 64 0))])
   (concat_vectors
    (slice_vectors
     (concat_vectors
-     (load deinterleaved (ramp (*  (+   (*    f7.s0.v0.fused.v0    2)   t3879)  64) 1 64) (aligned 64 0))
-     t4059) 1 1 64)
+     (load deinterleaved (ramp (* (+ (* f7.s0.v0.fused.v0 2) t2817) 64) 1 64) (aligned 64 0))
+     t2968) 1 1 64)
    (slice_vectors
     (concat_vectors
-     t4059
-     (load deinterleaved (ramp (+  (*   (+    (*     f7.s0.v0.fused.v0     2)    t3879)   64)  128) 1 64) (aligned 64 0))) 1 1 64))))
+     t2968
+     (load deinterleaved (ramp (+ (* (+ (* f7.s0.v0.fused.v0 2) t2817) 64) 128) 1 64) (aligned 64 0))) 1 1 64))))
 
 (define halide-expr
  (vec-if
   (vec-lt
    (vec-absd
-    t3661
-    t3662)
+    t2630
+    t2631)
    (vec-absd
-    t3663
-    t3664))
+    t2632
+    t2633))
   (int16x128
    (vec-div
     (vec-add
      (vec-add
       (int32x128
-       t3661)
+       t2630)
       (int32x128
-       t3662))
+       t2631))
      (x128 (int32_t (bv 1 32))))
     (x128 (int32_t (bv 2 32)))))
   (int16x128
@@ -76,9 +73,9 @@
     (vec-add
      (vec-add
       (int32x128
-       t3663)
+       t2632)
       (int32x128
-       t3664))
+       t2633))
      (x128 (int32_t (bv 1 32))))
     (x128 (int32_t (bv 2 32)))))))
 

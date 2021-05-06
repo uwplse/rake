@@ -4,28 +4,27 @@
 
 (define-symbolic-buffer blur_x uint16_t)
 (define-symbolic blur_y.s0.x.x integer?)
-(define-symbolic t185 integer?)
-(define-symbolic t155 integer?)
-(define-symbolic t186 integer?)
-(define-symbolic t187 integer?)
+(define-symbolic t142 integer?)
+(define-symbolic t141 integer?)
+(define-symbolic t117 integer?)
+(define-symbolic t140 integer?)
 
 (define axioms 
-  (list 
-   (values-range-from blur_x (uint16_t (bv 0 16)) (uint16_t (bv 21845 16)))))
+  (list ))
 
-(define blur_y.extent.0 t155)
-(define t115 (-   (*    blur_y.s0.x.x    256)   (min    blur_y.extent.0    256)))
-(define t148.s t185)
-(define t149.s t186)
-(define t150.s t187)
+(define blur_y.extent.0 t117)
+(define t74 (-  (*  blur_y.s0.x.x  256)  (min  blur_y.extent.0  256)))
+(define t110.s t140)
+(define t111.s t141)
+(define t112.s t142)
 
 (define halide-expr
  (vec-div
   (vec-add
-   (load blur_x (ramp (+  (+   t115   t148.s)  256) 1 256) (aligned 1 0))
+   (load blur_x (ramp (+ (+ t110.s t74) 256) 1 256) (aligned 1 0))
    (vec-add
-    (load blur_x (ramp (+  (+   t115   t149.s)  256) 1 256) (aligned 1 0))
-    (load blur_x (ramp (+  (+   t115   t150.s)  256) 1 256) (aligned 1 0))))
+    (load blur_x (ramp (+ (+ t111.s t74) 256) 1 256) (aligned 1 0))
+    (load blur_x (ramp (+ (+ t112.s t74) 256) 1 256) (aligned 1 0))))
   (x256 (uint16_t (bv 3 16)))))
 
 (define spec (synthesis-spec 'halide-ir halide-expr axioms))

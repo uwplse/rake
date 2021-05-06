@@ -3,109 +3,108 @@
 (require rake)
 
 (define-symbolic-buffer bounded_input uint8_t)
-(define-symbolic t1393 integer?)
-(define-symbolic t1703 integer?)
-(define-symbolic t1704 integer?)
-(define-symbolic t1706 integer?)
-(define-symbolic t1708 integer?)
+(define-symbolic output.s0.x.x integer?)
+(define-symbolic t1643 integer?)
+(define-symbolic t1645 integer?)
+(define-symbolic t1480 integer?)
+(define-symbolic t1647 integer?)
 
 (define axioms 
-  (list 
-   (values-range-from bounded_input (uint8_t (bv 0 8)) (uint8_t (bv 255 8)))))
+  (list ))
 
-(define output.extent.0 t1393)
-(define t1290 (+   (max    output.extent.0    128)   (*    t1703    -128)))
-(define t1127 (+   (max    output.extent.0    128)   (*    t1704    128)))
-(define t1128 (load bounded_input (ramp (+  t1127  -128) 1 128) (aligned 1 0)))
-(define t1129.s t1706)
-(define t1130 (load bounded_input (ramp (+  (+   (*    t1129.s    128)   t1290)  -128) 1 128) (aligned 1 0)))
-(define t1131.s t1708)
-(define t1132 (load bounded_input (ramp (+  (+   (*    t1131.s    128)   t1290)  -128) 1 128) (aligned 1 0)))
-(define t1133 (load bounded_input (ramp (+  t1127  -127) 1 128) (aligned 1 0)))
-(define t1134 (load bounded_input (ramp (+  (+   (*    t1129.s    128)   t1290)  -127) 1 128) (aligned 1 0)))
-(define t1135 (load bounded_input (ramp (+  (+   (*    t1131.s    128)   t1290)  -127) 1 128) (aligned 1 0)))
-(define t1136 (load bounded_input (ramp (+  t1127  -126) 1 128) (aligned 1 0)))
-(define t1137 (load bounded_input (ramp (+  (+   (*    t1129.s    128)   t1290)  -126) 1 128) (aligned 1 0)))
-(define t1138 (load bounded_input (ramp (+  (+   (*    t1131.s    128)   t1290)  -126) 1 128) (aligned 1 0)))
-(define t1139 (vec-min
+(define output.extent.0 t1480)
+(define t1472 (-  (*  output.s0.x.x  128)  (min  output.extent.0  128)))
+(define t1150.s t1643)
+(define t1151 (load bounded_input (ramp (+ (+ (* t1150.s 128) t1472) 128) 1 128) (aligned 1 0)))
+(define t1152.s t1645)
+(define t1153 (load bounded_input (ramp (+ (+ (* t1152.s 128) t1472) 128) 1 128) (aligned 1 0)))
+(define t1154.s t1647)
+(define t1155 (load bounded_input (ramp (+ (+ (* t1154.s 128) t1472) 128) 1 128) (aligned 1 0)))
+(define t1156 (load bounded_input (ramp (+ (+ (* t1150.s 128) t1472) 129) 1 128) (aligned 1 0)))
+(define t1157 (load bounded_input (ramp (+ (+ (* t1152.s 128) t1472) 129) 1 128) (aligned 1 0)))
+(define t1158 (load bounded_input (ramp (+ (+ (* t1154.s 128) t1472) 129) 1 128) (aligned 1 0)))
+(define t1159 (load bounded_input (ramp (+ (+ (* t1150.s 128) t1472) 130) 1 128) (aligned 1 0)))
+(define t1160 (load bounded_input (ramp (+ (+ (* t1152.s 128) t1472) 130) 1 128) (aligned 1 0)))
+(define t1161 (load bounded_input (ramp (+ (+ (* t1154.s 128) t1472) 130) 1 128) (aligned 1 0)))
+(define t1162 (vec-min
   (vec-max
    (vec-max
-    t1128
-    t1130)
-   t1132)
+    t1151
+    t1153)
+   t1155)
   (vec-min
    (vec-max
     (vec-max
-     t1133
-     t1134)
-    t1135)
+     t1156
+     t1157)
+    t1158)
    (vec-max
     (vec-max
-     t1136
-     t1137)
-    t1138))))
-(define t1140 (vec-max
+     t1159
+     t1160)
+    t1161))))
+(define t1163 (vec-max
   (vec-max
    (vec-min
     (vec-min
-     t1133
-     t1134)
-    t1135)
+     t1156
+     t1157)
+    t1158)
    (vec-min
     (vec-min
-     t1136
-     t1137)
-    t1138))
+     t1159
+     t1160)
+    t1161))
   (vec-min
    (vec-min
-    t1128
-    t1130)
-   t1132)))
-(define t1141 (vec-max
+    t1151
+    t1153)
+   t1155)))
+(define t1164 (vec-max
   (vec-min
    (vec-max
-    t1128
-    t1132)
-   t1130)
+    t1151
+    t1155)
+   t1153)
   (vec-min
-   t1128
-   t1132)))
-(define t1142 (vec-max
+   t1151
+   t1155)))
+(define t1165 (vec-max
   (vec-min
    (vec-max
-    t1133
-    t1135)
-   t1134)
+    t1156
+    t1158)
+   t1157)
   (vec-min
-   t1133
-   t1135)))
+   t1156
+   t1158)))
 
 (define halide-expr
  (vec-max
   (vec-min
    (vec-max
-    t1139
-    t1140)
+    t1162
+    t1163)
    (vec-max
     (vec-min
      (vec-max
-      t1141
-      t1142)
+      t1164
+      t1165)
      (vec-max
       (vec-min
        (vec-max
-        t1136
-        t1138)
-       t1137)
+        t1159
+        t1161)
+       t1160)
       (vec-min
-       t1136
-       t1138)))
+       t1159
+       t1161)))
     (vec-min
-     t1141
-     t1142)))
+     t1164
+     t1165)))
   (vec-min
-   t1139
-   t1140)))
+   t1162
+   t1163)))
 
 (define spec (synthesis-spec 'halide-ir halide-expr axioms))
 (define hvx-expr (synthesize-hvx spec 'greedy 'enumerative 'enumerative))

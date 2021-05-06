@@ -6,30 +6,27 @@
 (define-symbolic-buffer f13 int16_t)
 (define-symbolic-buffer f7 int16_t)
 (define-symbolic f28.s0.v0.v0 integer?)
-(define-symbolic t4281 integer?)
-(define-symbolic t4288 integer?)
-(define-symbolic t4279 integer?)
-(define-symbolic t4282 integer?)
-(define-symbolic t4290 integer?)
+(define-symbolic t3139 integer?)
+(define-symbolic t3142 integer?)
+(define-symbolic t3134 integer?)
+(define-symbolic t3140 integer?)
+(define-symbolic t3137 integer?)
 
 (define axioms 
-  (list 
-   (values-range-from deinterleaved (int16_t (bv 0 16)) (int16_t (bv 32767 16)))
-   (values-range-from f13 (int16_t (bv 0 16)) (int16_t (bv 32767 16)))
-   (values-range-from f7 (int16_t (bv 0 16)) (int16_t (bv 32767 16)))))
+  (list ))
 
-(define t3917 t4279)
-(define t3916 t4281)
-(define t3915 t4282)
-(define t3952.s t4288)
-(define t3946.s t4290)
-(define t3708.s (load deinterleaved (ramp (*  (+   f28.s0.v0.v0   t3915)  64) 1 128) (aligned 64 0)))
-(define t3711.s (load deinterleaved (ramp (*  (+   f28.s0.v0.v0   t3916)  64) 1 128) (aligned 64 0)))
-(define t3712.s (load deinterleaved (ramp (*  (+   f28.s0.v0.v0   t3915)  64) 1 128) (aligned 64 0)))
-(define t3713.s (load deinterleaved (ramp (*  (+   f28.s0.v0.v0   t3916)  64) 1 128) (aligned 64 0)))
-(define t3715.s (load f7 (ramp (*  (+   f28.s0.v0.v0   t3952.s)  64) 1 128) (aligned 64 0)))
-(define t3717.s.s (load f13 (ramp (*  (+   f28.s0.v0.v0   t3917)  64) 1 128) (aligned 64 0)))
-(define t3719.s.s (load f13 (ramp (*  (+   f28.s0.v0.v0   t3952.s)  64) 1 128) (aligned 64 0)))
+(define t2831 t3134)
+(define t2828 t3137)
+(define t2858.s t3139)
+(define t2859.s t3140)
+(define t2856.s t3142)
+(define t2663.s (load deinterleaved (ramp (* (+ f28.s0.v0.v0 t2831) 64) 1 128) (aligned 64 0)))
+(define t2666.s (load deinterleaved (ramp (* (+ f28.s0.v0.v0 t2828) 64) 1 128) (aligned 64 0)))
+(define t2667.s (load deinterleaved (ramp (* (+ f28.s0.v0.v0 t2831) 64) 1 128) (aligned 64 0)))
+(define t2668.s (load deinterleaved (ramp (* (+ f28.s0.v0.v0 t2828) 64) 1 128) (aligned 64 0)))
+(define t2670.s (load f7 (ramp (* (+ f28.s0.v0.v0 t2859.s) 64) 1 128) (aligned 64 0)))
+(define t2672.s.s (load f13 (ramp (* (+ f28.s0.v0.v0 t2858.s) 64) 1 128) (aligned 64 0)))
+(define t2674.s.s (load f13 (ramp (* (+ f28.s0.v0.v0 t2859.s) 64) 1 128) (aligned 64 0)))
 
 (define halide-expr
  (interleave
@@ -37,14 +34,14 @@
    (vec-lt
     (vec-absd
      (slice_vectors
-      t3708.s 1 1 64)
+      t2663.s 1 1 64)
      (slice_vectors
-      t3711.s 2 1 64))
+      t2666.s 2 1 64))
     (vec-absd
      (slice_vectors
-      t3712.s 2 1 64)
+      t2667.s 2 1 64)
      (slice_vectors
-      t3713.s 1 1 64)))
+      t2668.s 1 1 64)))
    (vec-add
     (int16x64
      (vec-div
@@ -52,24 +49,24 @@
        (vec-add
         (int32x64
          (slice_vectors
-          t3708.s 1 1 64))
+          t2663.s 1 1 64))
         (int32x64
          (slice_vectors
-          t3711.s 2 1 64)))
+          t2666.s 2 1 64)))
        (x64 (int32_t (bv 1 32))))
       (x64 (int32_t (bv 2 32)))))
     (vec-sub
      (slice_vectors
-      t3715.s 1 1 64)
+      t2670.s 1 1 64)
      (int16x64
       (vec-div
        (vec-add
         (vec-add
          (int32x64
-          (load f13 (ramp (*  (+   f28.s0.v0.v0   t3952.s)  64) 1 64) (aligned 64 0)))
+          (load f13 (ramp (* (+ f28.s0.v0.v0 t2859.s) 64) 1 64) (aligned 64 0)))
          (int32x64
           (slice_vectors
-           t3717.s.s 1 1 64)))
+           t2672.s.s 1 1 64)))
         (x64 (int32_t (bv 1 32))))
        (x64 (int32_t (bv 2 32)))))))
    (vec-add
@@ -79,24 +76,24 @@
        (vec-add
         (int32x64
          (slice_vectors
-          t3712.s 2 1 64))
+          t2667.s 2 1 64))
         (int32x64
          (slice_vectors
-          t3713.s 1 1 64)))
+          t2668.s 1 1 64)))
        (x64 (int32_t (bv 1 32))))
       (x64 (int32_t (bv 2 32)))))
     (vec-sub
      (slice_vectors
-      t3715.s 1 1 64)
+      t2670.s 1 1 64)
      (int16x64
       (vec-div
        (vec-add
         (vec-add
          (int32x64
           (slice_vectors
-           t3719.s.s 1 1 64))
+           t2674.s.s 1 1 64))
          (int32x64
-          (load f13 (ramp (*  (+   f28.s0.v0.v0   t3917)  64) 1 64) (aligned 64 0))))
+          (load f13 (ramp (* (+ f28.s0.v0.v0 t2858.s) 64) 1 64) (aligned 64 0))))
         (x64 (int32_t (bv 1 32))))
        (x64 (int32_t (bv 2 32))))))))
   (vec-add
@@ -106,25 +103,25 @@
       (vec-add
        (int32x64
         (slice_vectors
-         t3712.s 2 1 64))
+         t2667.s 2 1 64))
        (int32x64
         (slice_vectors
-         t3711.s 2 1 64)))
+         t2666.s 2 1 64)))
       (x64 (int32_t (bv 1 32))))
      (x64 (int32_t (bv 2 32)))))
    (vec-sub
     (slice_vectors
-     (load deinterleaved (ramp (*  (+   f28.s0.v0.v0   t3946.s)  64) 1 128) (aligned 64 0)) 2 1 64)
+     (load deinterleaved (ramp (* (+ f28.s0.v0.v0 t2856.s) 64) 1 128) (aligned 64 0)) 2 1 64)
     (int16x64
      (vec-div
       (vec-add
        (vec-add
         (int32x64
          (slice_vectors
-          t3719.s.s 1 1 64))
+          t2674.s.s 1 1 64))
         (int32x64
          (slice_vectors
-          t3717.s.s 1 1 64)))
+          t2672.s.s 1 1 64)))
        (x64 (int32_t (bv 1 32))))
       (x64 (int32_t (bv 2 32)))))))))
 

@@ -5,21 +5,22 @@
 (define-symbolic-buffer f28 uint8_t)
 (define-symbolic-buffer sharpen_strength_x32 uint8_t)
 (define-symbolic processed.s0.v0.v0 integer?)
-(define-symbolic t4419 integer?)
-(define-symbolic t4425 integer?)
-(define-symbolic t4424 integer?)
+(define-symbolic t3250 integer?)
+(define-symbolic t3251 integer?)
+(define-symbolic t3249 integer?)
 
 (define axioms 
-  (list 
-   (values-range-from f28 (uint8_t (bv 0 8)) (uint8_t (bv 255 8)))))
+  (list ))
 
-(define t3965 t4419)
-(define t3738.s (load f28 (ramp (+  (*   processed.s0.v0.v0   128)  t3965) 1 256) (aligned 128 0)))
-(define t3767 (+   (*    t4424    -128)   (+    (*     processed.s0.v0.v0     128)    t3965)))
-(define t3768 (+   (*    t4425    128)   (+    (*     processed.s0.v0.v0     128)    t3965)))
-(define t4071 (load f28 (ramp (+  t3768  128) 1 128) (aligned 128 0)))
-(define t4072 (load f28 (ramp (+  (*   processed.s0.v0.v0   128)  t3965) 1 128) (aligned 128 0)))
-(define t4073.s (load f28 (ramp (+  t3768  256) 1 128) (aligned 128 0)))
+(define t2878 t3249)
+(define t2879 t3250)
+(define t2880 t3251)
+(define t2690.s (load f28 (ramp (+ (* processed.s0.v0.v0 128) t2878) 1 256) (aligned 128 0)))
+(define t2971 (load f28 (ramp (+ (* processed.s0.v0.v0 128) t2880) 1 128) (aligned 128 0)))
+(define t2972 (load f28 (ramp (+ (* processed.s0.v0.v0 128) t2879) 1 128) (aligned 128 0)))
+(define t2973 (load f28 (ramp (+ (* processed.s0.v0.v0 128) t2878) 1 128) (aligned 128 0)))
+(define t2974.s (load f28 (ramp (+ (+ (* processed.s0.v0.v0 128) t2880) 128) 1 128) (aligned 128 0)))
+(define t2975.s (load f28 (ramp (+ (+ (* processed.s0.v0.v0 128) t2879) 128) 1 128) (aligned 128 0)))
 
 (define halide-expr
  (uint8x128
@@ -31,7 +32,7 @@
        (vec-sub
         (int16x128
          (slice_vectors
-          t3738.s 1 1 128))
+          t2690.s 1 1 128))
         (int16x128
          (uint8x128
           (vec-div
@@ -53,13 +54,13 @@
                           (vec-add
                            (vec-add
                             (uint16x128
-                             (load f28 (ramp (+  t3767  -128) 1 128) (aligned 1 0)))
+                             t2971)
                             (uint16x128
-                             t4071))
+                             t2972))
                            (x128 (uint16_t (bv 1 16))))
                           (x128 (uint16_t (bv 2 16))))))
                        (uint16x128
-                        t4072))
+                        t2973))
                       (x128 (uint16_t (bv 1 16))))
                      (x128 (uint16_t (bv 2 16))))))
                   (uint16x128
@@ -73,19 +74,22 @@
                           (vec-add
                            (vec-add
                             (uint16x128
-                             (load f28 (ramp (+  t3767  -126) 1 128) (aligned 1 0)))
+                             (slice_vectors
+                              (concat_vectors
+                               t2971
+                               t2974.s) 2 1 128))
                             (uint16x128
                              (slice_vectors
                               (concat_vectors
-                               t4071
-                               t4073.s) 2 1 128)))
+                               t2972
+                               t2975.s) 2 1 128)))
                            (x128 (uint16_t (bv 1 16))))
                           (x128 (uint16_t (bv 2 16))))))
                        (uint16x128
                         (slice_vectors
                          (concat_vectors
-                          t4072
-                          (load f28 (ramp (+  (+   (*    processed.s0.v0.v0    128)   t3965)  128) 1 128) (aligned 128 0))) 2 1 128)))
+                          t2973
+                          (load f28 (ramp (+ (+ (* processed.s0.v0.v0 128) t2878) 128) 1 128) (aligned 128 0))) 2 1 128)))
                       (x128 (uint16_t (bv 1 16))))
                      (x128 (uint16_t (bv 2 16)))))))
                  (x128 (uint16_t (bv 1 16))))
@@ -101,17 +105,20 @@
                      (vec-add
                       (vec-add
                        (uint16x128
-                        (load f28 (ramp (+  t3767  -127) 1 128) (aligned 1 0)))
+                        (slice_vectors
+                         (concat_vectors
+                          t2971
+                          t2974.s) 1 1 128))
                        (uint16x128
                         (slice_vectors
                          (concat_vectors
-                          t4071
-                          t4073.s) 1 1 128)))
+                          t2972
+                          t2975.s) 1 1 128)))
                       (x128 (uint16_t (bv 1 16))))
                      (x128 (uint16_t (bv 2 16))))))
                   (uint16x128
                    (slice_vectors
-                    t3738.s 1 1 128)))
+                    t2690.s 1 1 128)))
                  (x128 (uint16_t (bv 1 16))))
                 (x128 (uint16_t (bv 2 16)))))))
             (x128 (uint16_t (bv 1 16))))
@@ -120,7 +127,7 @@
       (x128 (int16_t (bv 32 16))))
      (int16x128
       (slice_vectors
-       t3738.s 1 1 128)))
+       t2690.s 1 1 128)))
     (x128 (int16_t (bv 255 16))))
    (x128 (int16_t (bv 0 16))))))
 

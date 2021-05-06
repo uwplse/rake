@@ -3,19 +3,18 @@
 (require rake)
 
 (define-symbolic-buffer f27 int16_t)
-(define-symbolic-buffer t4395-buf uint8_t)
-(define-symbolic-buffer t4397-buf uint8_t)
-(define t4395 (load t4395-buf (ramp 0 1 128) (aligned 0 0)))
-(define t4397 (load t4397-buf (ramp 0 1 128) (aligned 0 0)))
+(define-symbolic-buffer t3231-buf uint8_t)
+(define-symbolic-buffer t3230-buf uint8_t)
+(define t3231 (load t3231-buf (ramp 0 1 128) (aligned 0 0)))
+(define t3230 (load t3230-buf (ramp 0 1 128) (aligned 0 0)))
 
 (define axioms 
   (list 
-   (values-range-from f27 (int16_t (bv -32768 16)) (int16_t (bv 32767 16)))
-   (values-range-from t4395-buf (uint8_t (bv 0 8)) (uint8_t (bv 255 8)))
-   (values-range-from t4397-buf (uint8_t (bv 0 8)) (uint8_t (bv 255 8)))))
+   (values-range-from t3231-buf (uint8_t (bv 0 8)) (uint8_t (bv 255 8)))
+   (values-range-from t3230-buf (uint8_t (bv 0 8)) (uint8_t (bv 255 8)))))
 
-(define t3726 (load f27 (ramp 256 1 128) (aligned 0 256)))
-(define t3727 t4395)
+(define t2678 (load f27 (ramp 256 1 128) (aligned 0 256)))
+(define t2679 t3230)
 
 (define halide-expr
  (uint8x128
@@ -23,16 +22,16 @@
    (vec-add
     (vec-mul
      (vec-mod
-      t3726
+      t2678
       (x128 (int16_t (bv 8 16))))
      (int16x128
       (vec-sub
-       t4397
-       t3727)))
+       t3231
+       t2679)))
     (int16x128
      (vec-shl
       (uint16x128
-       t3727)
+       t2679)
       (x128 (uint16_t (bv 3 16))))))
    (x128 (int16_t (bv 8 16))))))
 

@@ -2,103 +2,38 @@
 
 (require rake)
 
-(define-symbolic-buffer rows int16_t)
-(define-symbolic output.s0.x.x integer?)
-(define-symbolic t482 integer?)
+(define-symbolic-buffer bounded_input uint8_t)
+(define-symbolic rows.s0.x.x integer?)
+(define-symbolic t306 integer?)
 
 (define axioms 
-  (list 
-   (values-range-from rows (int16_t (bv 0 16)) (int16_t (bv 4080 16)))))
+  (list ))
 
-(define t108 (+   (*    t482    384)   (*    output.s0.x.x    256)))
-(define t254 (load rows (ramp t108 1 64) (aligned 128 0)))
-(define t255 (load rows (ramp (+  t108  64) 1 64) (aligned 128 64)))
-(define t256 (concat_vectors
-  t254
-  t255))
-(define t257 (load rows (ramp (+  t108  128) 1 64) (aligned 128 0)))
-(define t258 (concat_vectors
-  t255
-  t257))
-(define t259 (load rows (ramp (+  t108  192) 1 64) (aligned 128 64)))
-(define t260 (concat_vectors
-  t257
-  t259))
-(define t261.s (load rows (ramp (+  t108  256) 1 64) (aligned 128 0)))
+(define output.extent.0 t306)
 
 (define halide-expr
- (uint8x256
-  (vec-div
+ (vec-add
+  (vec-add
    (vec-add
     (vec-mul
-     (concat_vectors
-      (concat_vectors
-       (slice_vectors
-        t256 1 1 64)
-       (slice_vectors
-        t258 1 1 64))
-      (concat_vectors
-       (slice_vectors
-        t260 1 1 64)
-       (slice_vectors
-        (concat_vectors
-         t259
-         t261.s) 1 1 64)))
-     (x256 (int16_t (bv 4 16))))
+     (int16x128
+      (load bounded_input (ramp (+ (* (+ (* (quotient (+ output.extent.0 255) 256) 8) rows.s0.x.x) 128) 512) 1 128) (aligned 128 0)))
+     (x128 (int16_t (bv 4 16))))
     (vec-add
-     (concat_vectors
-      (concat_vectors
-       t254
-       t255)
-      (concat_vectors
-       t257
-       t259))
-     (vec-add
-      (vec-mul
-       (concat_vectors
-        (concat_vectors
-         (slice_vectors
-          t256 2 1 64)
-         (slice_vectors
-          t258 2 1 64))
-        (concat_vectors
-         (slice_vectors
-          t260 2 1 64)
-         (slice_vectors
-          (concat_vectors
-           t259
-           t261.s) 2 1 64)))
-       (x256 (int16_t (bv 6 16))))
-      (vec-add
-       (concat_vectors
-        (concat_vectors
-         (slice_vectors
-          t256 4 1 64)
-         (slice_vectors
-          t258 4 1 64))
-        (concat_vectors
-         (slice_vectors
-          t260 4 1 64)
-         (slice_vectors
-          (concat_vectors
-           t259
-           t261.s) 4 1 64)))
-       (vec-mul
-        (concat_vectors
-         (concat_vectors
-          (slice_vectors
-           t256 3 1 64)
-          (slice_vectors
-           t258 3 1 64))
-         (concat_vectors
-          (slice_vectors
-           t260 3 1 64)
-          (slice_vectors
-           (concat_vectors
-            t259
-            t261.s) 3 1 64)))
-        (x256 (int16_t (bv 4 16))))))))
-   (x256 (int16_t (bv 256 16))))))
+     (vec-mul
+      (int16x128
+       (uint16x128
+        (load bounded_input (ramp (+ (* (+ (* (quotient (+ output.extent.0 255) 256) 10) rows.s0.x.x) 128) 640) 1 128) (aligned 128 0))))
+      (int16x128
+       (x128 (int8_t (bv 6 8)))))
+     (vec-mul
+      (int16x128
+       (load bounded_input (ramp (+ (* (+ (* (quotient (+ output.extent.0 255) 256) 12) rows.s0.x.x) 128) 768) 1 128) (aligned 128 0)))
+      (x128 (int16_t (bv 4 16))))))
+   (int16x128
+    (load bounded_input (ramp (+ (* (+ (* (quotient (+ output.extent.0 255) 256) 6) rows.s0.x.x) 128) 384) 1 128) (aligned 128 0))))
+  (int16x128
+   (load bounded_input (ramp (+ (* (+ (* (quotient (+ output.extent.0 255) 256) 14) rows.s0.x.x) 128) 896) 1 128) (aligned 128 0)))))
 
 (define spec (synthesis-spec 'halide-ir halide-expr axioms))
 (define hvx-expr (synthesize-hvx spec 'greedy 'enumerative 'enumerative))

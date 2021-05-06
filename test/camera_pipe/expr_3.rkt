@@ -3,19 +3,19 @@
 (require rake)
 
 (define-symbolic-buffer input uint16_t)
-(define-symbolic t4186 integer?)
-(define-symbolic t4081 integer?)
-(define-symbolic t4086 integer?)
-(define-symbolic t4127 integer?)
-(define-symbolic t4128 integer?)
+(define-symbolic t3021 integer?)
+(define-symbolic t3020 integer?)
+(define-symbolic t3057 integer?)
+(define-symbolic t2987 integer?)
+(define-symbolic t2992 integer?)
 
 (define axioms 
   (list ))
 
-(define input.min.0 t4081)
-(define input.stride.1 t4086)
-(define t3805.s (-   (*    t4128    128)   t4127))
-(define t3650 (+   t4186   (-    t3805.s    input.min.0)))
+(define input.min.0 t2987)
+(define input.stride.1 t2992)
+(define t2752.s (-  (*  t3021  128)  t3020))
+(define t2805 (+  t3057  (-  t2752.s  input.min.0)))
 
 (define halide-expr
  (vec-max
@@ -24,15 +24,15 @@
     (vec-max
      (vec-max
       (int16x128
-       (load input (ramp (+  (+   (*    input.stride.1    10)   t3650)  -108) 1 128) (aligned 1 0)))
+       (load input (ramp (+ (+ (* input.stride.1 14) t2805) -108) 1 128) (aligned 1 0)))
       (int16x128
-       (load input (ramp (+  (+   (*    input.stride.1    14)   t3650)  -108) 1 128) (aligned 1 0))))
+       (load input (ramp (+ (+ (* input.stride.1 18) t2805) -108) 1 128) (aligned 1 0))))
      (int16x128
-      (load input (ramp (+  (+   (*    input.stride.1    12)   t3650)  -106) 1 128) (aligned 1 0))))
+      (load input (ramp (+ (+ (* input.stride.1 16) t2805) -106) 1 128) (aligned 1 0))))
     (int16x128
-     (load input (ramp (+  (+   (*    input.stride.1    12)   t3650)  -110) 1 128) (aligned 1 0))))
+     (load input (ramp (+ (+ (* input.stride.1 16) t2805) -110) 1 128) (aligned 1 0))))
    (int16x128
-    (load input (ramp (+  (+   (*    input.stride.1    12)   t3650)  -108) 1 128) (aligned 1 0))))
+    (load input (ramp (+ (+ (* input.stride.1 16) t2805) -108) 1 128) (aligned 1 0))))
   (x128 (int16_t (bv 0 16)))))
 
 (define spec (synthesis-spec 'halide-ir halide-expr axioms))

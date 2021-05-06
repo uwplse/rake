@@ -2,112 +2,20 @@
 
 (require rake)
 
-(define-symbolic-buffer input_bounded uint8_t)
-(define-symbolic-buffer mask int8_t)
-(define-symbolic output.s0.x.x integer?)
-(define-symbolic t259 integer?)
-(define-symbolic t258 integer?)
+(define-symbolic-var t283 int32_t)
 
 (define axioms 
-  (list 
-   (values-range-from input_bounded (uint8_t (bv 0 8)) (uint8_t (bv 255 8)))))
+  (list ))
 
-(define t142 (max   (*    t259    128)   (+    (*     t258     128)    2)))
-(define t220 (load input_bounded (ramp (*  (+   (quotient    (+     t142     255)    128)   output.s0.x.x)  128) 1 128) (aligned 128 0)))
-(define t221.s (load input_bounded (ramp (+  (*   (+    (quotient     (+      t142      255)     128)    output.s0.x.x)   128)  128) 1 128) (aligned 128 0)))
-(define t222 (load input_bounded (ramp (*  (+   (*    (quotient     (+      t142      255)     128)    2)   output.s0.x.x)  128) 1 128) (aligned 128 0)))
-(define t223.s (load input_bounded (ramp (+  (*   (+    (*     (quotient      (+       t142       255)      128)     2)    output.s0.x.x)   128)  128) 1 128) (aligned 128 0)))
-(define t224 (load input_bounded (ramp (*  (+   (*    (quotient     (+      t142      255)     128)    3)   output.s0.x.x)  128) 1 128) (aligned 128 0)))
-(define t225.s (load input_bounded (ramp (+  (*   (+    (*     (quotient      (+       t142       255)      128)     3)    output.s0.x.x)   128)  128) 1 128) (aligned 128 0)))
+(define input.extent.0 t283)
 
 (define halide-expr
  (uint8x128
   (vec-max
    (vec-min
-    (vec-div
-     (vec-add
-      (vec-mul
-       (int16x128
-        (uint16x128
-         (slice_vectors
-          (concat_vectors
-           t220
-           t221.s) 1 1 128)))
-       (int16x128
-        (x128 (load-sca mask 1))))
-      (vec-add
-       (vec-mul
-        (int16x128
-         (uint16x128
-          t220))
-        (int16x128
-         (x128 (load-sca mask 0))))
-       (vec-add
-        (vec-mul
-         (int16x128
-          (uint16x128
-           (slice_vectors
-            (concat_vectors
-             t220
-             t221.s) 2 1 128)))
-         (int16x128
-          (x128 (load-sca mask 2))))
-        (vec-add
-         (vec-mul
-          (int16x128
-           (uint16x128
-            t222))
-          (int16x128
-           (x128 (load-sca mask 3))))
-         (vec-add
-          (vec-mul
-           (int16x128
-            (uint16x128
-             (slice_vectors
-              (concat_vectors
-               t222
-               t223.s) 1 1 128)))
-           (int16x128
-            (x128 (load-sca mask 4))))
-          (vec-add
-           (vec-mul
-            (int16x128
-             (uint16x128
-              (slice_vectors
-               (concat_vectors
-                t222
-                t223.s) 2 1 128)))
-            (int16x128
-             (x128 (load-sca mask 5))))
-           (vec-add
-            (vec-mul
-             (int16x128
-              (uint16x128
-               t224))
-             (int16x128
-              (x128 (load-sca mask 6))))
-            (vec-add
-             (vec-mul
-              (int16x128
-               (uint16x128
-                (slice_vectors
-                 (concat_vectors
-                  t224
-                  t225.s) 2 1 128)))
-              (int16x128
-               (x128 (load-sca mask 8))))
-             (vec-mul
-              (int16x128
-               (uint16x128
-                (slice_vectors
-                 (concat_vectors
-                  t224
-                  t225.s) 1 1 128)))
-              (int16x128
-               (x128 (load-sca mask 7))))))))))))
-     (x128 (int16_t (bv 16 16))))
-    (x128 (int16_t (bv 255 16))))
-   (x128 (int16_t (bv 0 16))))))
+    (ramp (int32_t (bv -1 32)) (int32_t (bv 1 32)) 128)
+    (x128 (sca-add input.extent.0 (int32_t (bv -1 32)))))
+   (x128 (int32_t (bv 0 32))))))
 
 (define spec (synthesis-spec 'halide-ir halide-expr axioms))
 (define hvx-expr (synthesize-hvx spec 'greedy 'enumerative 'enumerative))

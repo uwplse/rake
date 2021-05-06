@@ -4,28 +4,27 @@
 
 (define-symbolic-buffer rows int32_t)
 (define-symbolic output.s0.x.x integer?)
-(define-symbolic t111 integer?)
-(define-symbolic t110 integer?)
+(define-symbolic t107 integer?)
+(define-symbolic t106 integer?)
 
 (define axioms 
-  (list 
-   (values-range-from rows (int32_t (bv 0 32)) (int32_t (bv 16320 32)))))
+  (list ))
 
-(define t17 (max   (*    t111    128)   (+    (*     t110     128)    6)))
-(define t84 (load rows (ramp (*  (+   (*    (quotient     (+      t17      255)     128)    2)   output.s0.x.x)  128) 1 32) (aligned 128 0)))
-(define t85 (load rows (ramp (+  (*   (+    (*     (quotient      (+       t17       255)      128)     2)    output.s0.x.x)   128)  32) 1 32) (aligned 128 32)))
+(define t17 (max  (*  t107  128)  (+  (*  t106  128)  6)))
+(define t80 (load rows (ramp (* (+ (* (quotient (+ t17 255) 128) 2) output.s0.x.x) 128) 1 32) (aligned 128 0)))
+(define t81 (load rows (ramp (+ (* (+ (* (quotient (+ t17 255) 128) 2) output.s0.x.x) 128) 32) 1 32) (aligned 128 32)))
+(define t82 (concat_vectors
+  t80
+  t81))
+(define t83 (load rows (ramp (+ (* (+ (* (quotient (+ t17 255) 128) 2) output.s0.x.x) 128) 64) 1 32) (aligned 128 64)))
+(define t84 (concat_vectors
+  t81
+  t83))
+(define t85 (load rows (ramp (+ (* (+ (* (quotient (+ t17 255) 128) 2) output.s0.x.x) 128) 96) 1 32) (aligned 128 96)))
 (define t86 (concat_vectors
-  t84
+  t83
   t85))
-(define t87 (load rows (ramp (+  (*   (+    (*     (quotient      (+       t17       255)      128)     2)    output.s0.x.x)   128)  64) 1 32) (aligned 128 64)))
-(define t88 (concat_vectors
-  t85
-  t87))
-(define t89 (load rows (ramp (+  (*   (+    (*     (quotient      (+       t17       255)      128)     2)    output.s0.x.x)   128)  96) 1 32) (aligned 128 96)))
-(define t90 (concat_vectors
-  t87
-  t89))
-(define t91.s (load rows (ramp (+  (*   (+    (*     (quotient      (+       t17       255)      128)     2)    output.s0.x.x)   128)  128) 1 32) (aligned 128 0)))
+(define t87.s (load rows (ramp (+ (* (+ (* (quotient (+ t17 255) 128) 2) output.s0.x.x) 128) 128) 1 32) (aligned 128 0)))
 
 (define halide-expr
  (uint8x128
@@ -37,101 +36,101 @@
        (concat_vectors
         (concat_vectors
          (slice_vectors
-          t86 1 1 32)
+          t82 1 1 32)
          (slice_vectors
-          t88 1 1 32))
+          t84 1 1 32))
         (concat_vectors
          (slice_vectors
-          t90 1 1 32)
+          t86 1 1 32)
          (slice_vectors
           (concat_vectors
-           t89
-           t91.s) 1 1 32)))
+           t85
+           t87.s) 1 1 32)))
        (x128 (int32_t (bv 6 32))))
       (vec-add
        (concat_vectors
         (concat_vectors
-         t84
-         t85)
+         t80
+         t81)
         (concat_vectors
-         t87
-         t89))
+         t83
+         t85))
        (vec-add
         (vec-mul
          (concat_vectors
           (concat_vectors
            (slice_vectors
-            t86 2 1 32)
+            t82 2 1 32)
            (slice_vectors
-            t88 2 1 32))
+            t84 2 1 32))
           (concat_vectors
            (slice_vectors
-            t90 2 1 32)
+            t86 2 1 32)
            (slice_vectors
             (concat_vectors
-             t89
-             t91.s) 2 1 32)))
+             t85
+             t87.s) 2 1 32)))
          (x128 (int32_t (bv 15 32))))
         (vec-add
          (vec-mul
           (concat_vectors
            (concat_vectors
             (slice_vectors
-             t86 3 1 32)
+             t82 3 1 32)
             (slice_vectors
-             t88 3 1 32))
+             t84 3 1 32))
            (concat_vectors
             (slice_vectors
-             t90 3 1 32)
+             t86 3 1 32)
             (slice_vectors
              (concat_vectors
-              t89
-              t91.s) 3 1 32)))
+              t85
+              t87.s) 3 1 32)))
           (x128 (int32_t (bv 20 32))))
          (vec-add
           (vec-mul
            (concat_vectors
             (concat_vectors
              (slice_vectors
-              t86 4 1 32)
+              t82 4 1 32)
              (slice_vectors
-              t88 4 1 32))
+              t84 4 1 32))
             (concat_vectors
              (slice_vectors
-              t90 4 1 32)
+              t86 4 1 32)
              (slice_vectors
               (concat_vectors
-               t89
-               t91.s) 4 1 32)))
+               t85
+               t87.s) 4 1 32)))
            (x128 (int32_t (bv 15 32))))
           (vec-add
            (concat_vectors
             (concat_vectors
              (slice_vectors
-              t86 6 1 32)
+              t82 6 1 32)
              (slice_vectors
-              t88 6 1 32))
+              t84 6 1 32))
             (concat_vectors
              (slice_vectors
-              t90 6 1 32)
+              t86 6 1 32)
              (slice_vectors
               (concat_vectors
-               t89
-               t91.s) 6 1 32)))
+               t85
+               t87.s) 6 1 32)))
            (vec-mul
             (concat_vectors
              (concat_vectors
               (slice_vectors
-               t86 5 1 32)
+               t82 5 1 32)
               (slice_vectors
-               t88 5 1 32))
+               t84 5 1 32))
              (concat_vectors
               (slice_vectors
-               t90 5 1 32)
+               t86 5 1 32)
               (slice_vectors
                (concat_vectors
-                t89
-                t91.s) 5 1 32)))
+                t85
+                t87.s) 5 1 32)))
             (x128 (int32_t (bv 6 32))))))))))
      (x128 (int32_t (bv 4096 32))))
     (x128 (int32_t (bv 255 32))))

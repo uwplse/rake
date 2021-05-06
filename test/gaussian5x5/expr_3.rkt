@@ -2,39 +2,24 @@
 
 (require rake)
 
-(define-symbolic-buffer bounded_input uint8_t)
-(define-symbolic rows.s0.x.x integer?)
-(define-symbolic t270 integer?)
+(define-symbolic-var bounded_input.s0.x.x int32_t)
+(define-symbolic-var t300 int32_t)
 
 (define axioms 
-  (list 
-   (values-range-from bounded_input (uint8_t (bv 0 8)) (uint8_t (bv 255 8)))))
+  (list ))
 
-(define output.extent.0 t270)
+(define input.extent.0 t300)
+(define t264.s (sca-min  (sca-mul  bounded_input.s0.x.x  (int32_t (bv 128 32)))  (sca-add  input.extent.0  (int32_t (bv 1 32)))))
 
 (define halide-expr
- (vec-add
+ (uint8x128
   (vec-add
-   (vec-add
-    (vec-mul
-     (int16x128
-      (load bounded_input (ramp (+  (*   (+    (*     (quotient      (+       output.extent.0       255)      256)     8)    rows.s0.x.x)   128)  512) 1 128) (aligned 128 0)))
-     (x128 (int16_t (bv 4 16))))
-    (vec-add
-     (vec-mul
-      (int16x128
-       (uint16x128
-        (load bounded_input (ramp (+  (*   (+    (*     (quotient      (+       output.extent.0       255)      256)     10)    rows.s0.x.x)   128)  640) 1 128) (aligned 128 0))))
-      (int16x128
-       (x128 (int8_t (bv 6 8)))))
-     (vec-mul
-      (int16x128
-       (load bounded_input (ramp (+  (*   (+    (*     (quotient      (+       output.extent.0       255)      256)     12)    rows.s0.x.x)   128)  768) 1 128) (aligned 128 0)))
-      (x128 (int16_t (bv 4 16))))))
-   (int16x128
-    (load bounded_input (ramp (+  (*   (+    (*     (quotient      (+       output.extent.0       255)      256)     6)    rows.s0.x.x)   128)  384) 1 128) (aligned 128 0))))
-  (int16x128
-   (load bounded_input (ramp (+  (*   (+    (*     (quotient      (+       output.extent.0       255)      256)     14)    rows.s0.x.x)   128)  896) 1 128) (aligned 128 0)))))
+   (vec-max
+    (vec-min
+     (ramp (sca-add (sca-mul bounded_input.s0.x.x (int32_t (bv 128 32))) (int32_t (bv -2 32))) (int32_t (bv 1 32)) 128)
+     (x128 (sca-add input.extent.0 (int32_t (bv -1 32)))))
+    (x128 (int32_t (bv 0 32))))
+   (x128 (sca-sub (int32_t (bv 2 32)) (sca-max t264.s (int32_t (bv 2 32))))))))
 
 (define spec (synthesis-spec 'halide-ir halide-expr axioms))
 (define hvx-expr (synthesize-hvx spec 'greedy 'enumerative 'enumerative))
