@@ -92,6 +92,8 @@
     [(vec-le v1 v2) (handler (vec-le (visit v1 handler) (visit v2 handler)))]
     [(vec-if v1 v2 v3) (handler (vec-if (visit v1 handler) (visit v2 handler) (visit v3 handler)))]
 
+    [(vec-bwand v1 v2) (handler (vec-bwand (visit v1 handler) (visit v2 handler)))]
+
     ;; Shuffles
     [(slice_vectors vec base stride len) (handler (slice_vectors (visit vec handler) (visit base handler) (visit stride handler) (visit len handler)))]
     [(concat_vectors v1 v2) (handler (concat_vectors (visit v1 handler) (visit v2 handler)))]

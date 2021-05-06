@@ -112,6 +112,8 @@
 (struct vec-shl (v1 v2) #:transparent)
 (struct vec-shr (v1 v2) #:transparent)
 
+(struct vec-bwand (v1 v2) #:transparent)
+
 ;; Shuffles
 (struct slice_vectors (vec base stride len) #:transparent)
 (struct concat_vectors (v1 v2) #:transparent)

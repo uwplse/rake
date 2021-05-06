@@ -24,6 +24,14 @@
   (destruct p
 
     [(broadcast value) (lambda (i) value)]
+
+    [(build-vec base stride len)
+     (lambda (i)
+       (mk-cpp-expr
+        (bvadd
+         (eval base)
+         (bvmul (eval stride) (integer->bitvector i (bitvector (expr-bw stride)))))
+        (cpp-type base)))]
             
     [(load-data live-data gather-tbl)
      (lambda (i)
@@ -209,6 +217,20 @@
          [((int16_t v0) (int16_t v1)) (uint1_t (bvsle v0 v1))]
          [((int32_t v0) (int32_t v1)) (uint1_t (bvsle v0 v1))]))]
 
+    [(bitwise-and sub-expr0 sub-expr1)
+     (define input0 (interpret sub-expr0))
+     (define input1 (interpret sub-expr1))
+     (lambda (i)
+       (define lhs (input0 i))
+       (define rhs (input1 i))
+       (destruct* (lhs rhs)
+         [((uint8_t v0) (uint8_t v1)) (uint8_t (bvand v0 v1))]
+         [((uint16_t v0) (uint16_t v1)) (uint16_t (bvand v0 v1))]
+         [((uint32_t v0) (uint32_t v1)) (uint32_t (bvand v0 v1))]
+         [((int8_t v0) (int8_t v1)) (int8_t (bvand v0 v1))]
+         [((int16_t v0) (int16_t v1)) (int16_t (bvand v0 v1))]
+         [((int32_t v0) (int32_t v1)) (int32_t (bvand v0 v1))]))]
+    
     [(vs-frac-mpy sub-expr sca round?)
      (define input (interpret sub-expr))
      (lambda (i)
@@ -465,6 +487,7 @@
   (destruct ir-expr
     [(load-data live-data gather-tbl) '()]
     [(broadcast value) '()]
+    [(build-vec base stride len) '()]
 
     [(combine sub-expr0 sub-expr1 read-tbl) (list sub-expr0 sub-expr1)]
     
@@ -493,6 +516,8 @@
     [(select sub-expr0 sub-expr1 sub-expr2) (list sub-expr0 sub-expr1 sub-expr2)]
     [(less-than sub-expr0 sub-expr1) (list sub-expr0 sub-expr1)]
     [(less-than-eq sub-expr0 sub-expr1) (list sub-expr0 sub-expr1)]
+
+    [(bitwise-and sub-expr0 sub-expr1) (list sub-expr0 sub-expr1)]
     
     [_ (error "NYI: Extracing sub-expression for IR Expr:" ir-expr)]))
 
@@ -500,6 +525,7 @@
   (destruct ir-expr
     [(load-data live-data gather-tbl) 1]
     [(broadcast value) 1]
+    [(build-vec base stride len) 1]
 
     [(combine sub-expr0 sub-expr1 read-tbl) (+ (instr-count sub-expr0) (instr-count sub-expr1) 1)]
     
@@ -528,5 +554,7 @@
     [(select sub-expr0 sub-expr1 sub-expr2) (+ (instr-count sub-expr0) (instr-count sub-expr1) (instr-count sub-expr2) 1)]
     [(less-than sub-expr0 sub-expr1) (+ (instr-count sub-expr0) (instr-count sub-expr1) 1)]
     [(less-than-eq sub-expr0 sub-expr1) (+ (instr-count sub-expr0) (instr-count sub-expr1) 1)]
+
+    [(bitwise-and sub-expr0 sub-expr1) (+ (instr-count sub-expr0) (instr-count sub-expr1) 1)]
     
     [_ (error "NYI: Extracing sub-expression for IR Expr:" ir-expr)]))

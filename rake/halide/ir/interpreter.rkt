@@ -1,7 +1,7 @@
 #lang rosette/safe
 
 (require
-  (only-in racket/base error)
+  (only-in racket/base error bitwise-and)
   rosette/lib/destruct
   rake/cpp
   rake/halide/ir/types)
@@ -29,7 +29,7 @@
     [(x256 sca) 256]
     [(x512 sca) 512]
 
-    [(ramp base stride len) (quotient len stride)]
+    [(ramp base stride len) len]
     [(load buf idxs alignment) (vec-len idxs)]
     [(load-sca buf idx) 1]
 
@@ -97,6 +97,7 @@
     [(vec-mod v1 v2) (vec-len v1)]
     [(vec-min v1 v2) (vec-len v1)]
     [(vec-max v1 v2) (vec-len v1)]
+
     [(vec-if v1 v2 v3) (vec-len v2)]
     [(vec-lt v1 v2) (vec-len v1)]
     [(vec-le v1 v2) (vec-len v1)]
@@ -104,6 +105,8 @@
     [(vec-absd v1 v2) (vec-len v1)]
     [(vec-shl v1 v2) (vec-len v1)]
     [(vec-shr v1 v2) (vec-len v1)]
+
+    [(vec-bwand v1 v2) (vec-len v1)]
 
     ;; Shuffles
     [(slice_vectors vec base stride len) len]
@@ -200,6 +203,8 @@
     [(vec-shl v1 v2) (list v1 v2)]
     [(vec-shr v1 v2) (list v1 v2)]
 
+    [(vec-bwand v1 v2) (list v1 v2)]
+
     ;; Shuffles
     [(slice_vectors vec base stride len) (list vec)]
     [(concat_vectors v1 v2) (list v1 v2)]
@@ -218,7 +223,22 @@
     [(x256 sca) (lambda (i) (interpret sca))]
     [(x512 sca) (lambda (i) (interpret sca))]
 
-    [(ramp base stride len) (lambda (i) (+ (interpret base) (* i (interpret stride))))]
+    [(ramp base stride len)
+     (define intr-base (interpret base))
+     (define intr-stride (interpret stride))
+     (cond
+       [(integer? base)
+        (lambda (i) (+ (interpret base) (* i (interpret stride))))]
+       [else
+        (lambda (i)
+          (mk-cpp-expr
+           (bvadd
+            (eval intr-base)
+            (bvmul
+             (integer->bitvector i (bitvector (expr-bw intr-stride)))
+             (eval intr-stride)))
+           (cpp-type intr-base)))])]
+
     [(load buf idxs alignment) (lambda (i) (buffer-ref (interpret buf) ((interpret idxs) i)))]
     [(load-sca buf idx) (buffer-ref (interpret buf) (interpret idx))]
 
@@ -305,6 +325,8 @@
     [(vec-shl v1 v2) (lambda (i) (do-shl ((interpret v1) i) ((interpret v2) i)))]
     [(vec-shr v1 v2) (lambda (i) (do-shr ((interpret v1) i) ((interpret v2) i)))]
     [(vec-absd v1 v2) (lambda (i) (do-absd ((interpret v1) i) ((interpret v2) i)))]
+
+    [(vec-bwand v1 v2) (lambda (i) (do-bwand ((interpret v1) i) ((interpret v2) i)))]
 
     ;; Shuffles
     [(slice_vectors vec base stride len) (lambda (i) ((interpret vec) (+ (interpret base) (* i (interpret stride)))))]
@@ -470,3 +492,11 @@
      (mk-cpp-expr (if (bvsle (eval lhs) (eval rhs)) (bvsub (eval rhs) (eval lhs)) (bvsub (eval lhs) (eval rhs))) outT)]
     [else
      (mk-cpp-expr (if (bvule (eval lhs) (eval rhs)) (bvsub (eval rhs) (eval lhs)) (bvsub (eval lhs) (eval rhs))) outT)]))
+
+(define (do-bwand lhs rhs)
+  (cond
+    [(and (integer? lhs) (integer? rhs))
+     (bitwise-and lhs rhs)]
+    [else
+     (define outT (infer-out-type lhs rhs))
+     (mk-cpp-expr (bvand (eval lhs) (eval rhs)) outT)]))

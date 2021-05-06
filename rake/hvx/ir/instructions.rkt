@@ -8,6 +8,7 @@
 
 (struct load-data (live-data gather-tbl) #:super struct:ir-node)
 (struct broadcast (value) #:super struct:ir-node #:transparent)
+(struct build-vec (base stride len) #:super struct:ir-node #:transparent)
 
 (struct combine (sub-expr0 sub-expr1 read-tbl)
   #:super struct:ir-node
@@ -43,3 +44,5 @@
 (struct select (sub-expr0 sub-expr1 sub-expr2) #:super struct:ir-node #:transparent)
 (struct less-than (sub-expr0 sub-expr1) #:super struct:ir-node #:transparent)
 (struct less-than-eq (sub-expr0 sub-expr1) #:super struct:ir-node #:transparent)
+
+(struct bitwise-and (sub-expr0 sub-expr1) #:super struct:ir-node #:transparent)

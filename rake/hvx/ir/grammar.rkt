@@ -38,6 +38,7 @@
        (list (load-data (get-load-id) live-reads gather-tbl))]
 
       [(broadcast value) '()]
+      [(build-vec base stride len) '()]
 
       [(combine sub-expr0 sub-expr1 read-tbl) '()]
     
@@ -125,6 +126,8 @@
       [(less-than sub-expr0 sub-expr1) '()]
       [(less-than-eq sub-expr0 sub-expr1) '()]
       [(select sub-expr0 sub-expr1 sub-expr2) '()]
+
+      [(bitwise-and v1 v2) '()]
     
       [_ (error "NYI: Please define a (fold) grammar for IR Expr:" lifted-sub-expr halide-expr)]))
 
@@ -142,6 +145,7 @@
     (destruct lifted-sub-expr
       [(load-data live-data gather-tbl) '()]
       [(broadcast value) '()]
+      [(build-vec base stride len) '()]
       [(combine sub-expr0 sub-expr1 read-tbl) '()]
     
       [(cast sub-expr type) (extend-grammar (list sub-expr) halide-expr)]
@@ -207,6 +211,8 @@
 
       [(less-than sub-expr0 sub-expr1) (list (less-than-eq (get-node-id) sub-expr0 sub-expr1))]
       [(select sub-expr0 sub-expr1 sub-expr2) '()]
+
+      [(bitwise-and v1 v2) '()]
     
       [_ (error "NYI: Please define a (repl) grammar for IR Expr:" lifted-sub-expr)]))
 
@@ -233,6 +239,9 @@
      (define live-reads (extract-buffer-reads-halide halide-expr))
      (define gather-tbl (map (lambda (i) (define-symbolic* idx integer?) idx) (range 25)))
      (list (load-data (get-load-id) live-reads gather-tbl))]
+
+    [(ramp base stride len)
+     (list (build-vec (get-load-id) (interpret-halide base) (interpret-halide stride) (interpret-halide len)))]
 
     [(slice_vectors vec base stride len)
      (define live-reads (extract-buffer-reads-halide halide-expr))
@@ -581,6 +590,8 @@
     [(vec-le v1 v2) (list (less-than-eq (get-node-id) (list-ref lifted-sub-exprs 0) (list-ref lifted-sub-exprs 1)))]
     
     [(vec-absd v1 v2) (list (abs-diff (get-node-id) (list-ref lifted-sub-exprs 0) (list-ref lifted-sub-exprs 1)))]
+
+    [(vec-bwand v1 v2) (list (bitwise-and (get-node-id) (list-ref lifted-sub-exprs 0) (list-ref lifted-sub-exprs 1)))]
     
     [_ (error "NYI: Please define a (extend) grammar for halide node:" halide-expr)]))
 
