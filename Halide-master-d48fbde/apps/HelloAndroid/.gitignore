@@ -1,8 +1,0 @@
-.gradle/**
-gen/**
-gradle_build/**
-HelloAndroid.iml
-local.properties
-obj/**
-proguard-project.txt
-project.properties
