@@ -2,7 +2,7 @@
 
 (require
   ;; This file uses three rosette unsafe ops, but they should be fine
-  (only-in racket/base values error for/list)
+  (only-in racket/base values error for/list make-hash hash-has-key? hash-ref hash-set!)
   rake/internal/debug
   rake/halide
   rake/synthesis/spec
@@ -34,7 +34,7 @@
       (define st (current-seconds))
       (define res (build-ir-expr halide-expr axioms uber-instrs context))
       (define runtime (- (current-seconds) st))
-  
+      
       (if (eq? res (unsat))
           (begin
             (display "Failed to find an equivalent IR expression.\n\n")
@@ -49,44 +49,50 @@
     [else
       (error (format "Unrecognized lifting target IR: '~a. Supported lifting IRs: ['hvx-uberinstr]" ir-name))]))
 
+(define cache (make-hash))
+
 (define (build-ir-expr halide-expr axioms uber-instrs context)
   (define sub-exprs (halide-sub-exprs halide-expr))
 
-  ;; Lift each sub-expr recursively
-  (define lifted-sub-exprs
-    (for/list ([sub-expr sub-exprs])
-      (build-ir-expr sub-expr axioms uber-instrs context)))
-
-  ;; Step 1: Folding.
-  ;; Can we fold the new node into the **existing** sequence of IR instructions?
-  (define fold-templates (fold-into-subexprs lifted-sub-exprs halide-expr uber-instrs))
-
-  ;; Can we fold the new node into a **modified** version of the existing IR
-  ;; instruction sequence? We restrict modifications such that:
-  ;; - At most 1 IR instruction will  be changed.
-  ;; - 0 or more IR instructions may be removed
-  ;; - We only explore changing or removing the last N instructions in the sequence (N=3 atm)
-  (define repl-templates (repl-subexprs lifted-sub-exprs halide-expr uber-instrs))
-
-  ;; Explore folding templates in increasing cost (cost is defined as the number if IR instructions)
-  (define sorted-templates
-    (sort (append fold-templates repl-templates) (lambda (t1 t2) (< (hvx-ir-instr-count t1) (hvx-ir-instr-count t2)))))
-
-  (define bounded-eq? (if (interleave? halide-expr) bounded-eq-1? bounded-eq-0?))
-  (define-values (success? folded-ir-expr)
-    (synthesize-translation sorted-templates halide-expr axioms context bounded-eq?))
-
   (cond
-    [success? folded-ir-expr]
+    ;; Have we lifted this halide-expr before?
+    [(hash-has-key? cache halide-expr) (hash-ref cache halide-expr)]
     [else
-      ;; Step 2: We extend the IR instruction sequence with a new instruction. As long as the
-      ;; computation is expressible in HVX, this should not fail.
-      (define-values (success? extended-ir-expr)
-        (extend-subexprs lifted-sub-exprs halide-expr axioms uber-instrs context))
+     ;; Lift each sub-expr recursively
+     (define lifted-sub-exprs
+       (for/list ([sub-expr sub-exprs])
+         (build-ir-expr sub-expr axioms uber-instrs context)))
+
+     ;; Step 1: Folding.
+     ;; Can we fold the new node into the **existing** sequence of IR instructions?
+     (define fold-templates (fold-into-subexprs lifted-sub-exprs halide-expr uber-instrs))
+
+     ;; Can we fold the new node into a **modified** version of the existing IR
+     ;; instruction sequence? We restrict modifications such that:
+     ;; - At most 1 IR instruction will  be changed.
+     ;; - 0 or more IR instructions may be removed
+     ;; - We only explore changing or removing the last N instructions in the sequence (N=3 atm)
+     (define repl-templates (repl-subexprs lifted-sub-exprs halide-expr uber-instrs))
+
+     ;; Explore folding templates in increasing cost (cost is defined as the number if IR instructions)
+     (define sorted-templates
+       (sort (append fold-templates repl-templates) (lambda (t1 t2) (< (hvx-ir-instr-count t1) (hvx-ir-instr-count t2)))))
+
+     (define bounded-eq? (if (interleave? halide-expr) bounded-eq-1? bounded-eq-0?))
+     (define-values (success? folded-ir-expr)
+       (synthesize-translation sorted-templates halide-expr axioms context bounded-eq?))
+
+     (cond
+       [success? (hash-set! cache halide-expr folded-ir-expr) folded-ir-expr]
+       [else
+        ;; Step 2: We extend the IR instruction sequence with a new instruction. As long as the
+        ;; computation is expressible in HVX, this should not fail.
+        (define-values (success? extended-ir-expr)
+          (extend-subexprs lifted-sub-exprs halide-expr axioms uber-instrs context))
       
-      (cond
-        [success? extended-ir-expr]
-        [else (error "synthesis\\lifting\\greedy-ir-lifted.rkt: FOLD-REPLACE-EXTEND algorithm failed to lift the halide expression:" halide-expr)])]))
+        (cond
+          [success? (hash-set! cache halide-expr extended-ir-expr) extended-ir-expr]
+          [else (error "synthesis\\lifting\\greedy-ir-lifted.rkt: FOLD-REPLACE-EXTEND algorithm failed to lift the halide expression:" halide-expr)])])]))
 
 ;; Folding IR expressions
 (define (fold-into-subexprs lifted-sub-exprs halide-expr uber-instrs)
