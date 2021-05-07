@@ -65,13 +65,23 @@
      (define n (interpret shift))
      (define satF (get-sat-fn output-type))
      (define shiftF (if arithmetic? bvashr bvlshr))
-     (lambda (i)
-       (define v (input i))
-       (define one (cpp-cast (int8_t (bv 1 8)) (cpp-type v)))
-       (define rounded_v (if round? (bvadd (eval v) (bvshl (eval one) (bvsub (eval n) (eval one)))) (eval v)))
-       (define shifted_v (shiftF rounded_v (eval n)))
-       (define saturated_v (if saturate? (satF (mk-cpp-expr shifted_v (cpp-type v))) (cpp-cast (mk-cpp-expr shifted_v (cpp-type v)) output-type)))
-       saturated_v)]
+     (cond
+       [round?
+        (lambda (i)
+          ;; Promote to avoid overflows
+          (define val (cpp-cast (input i) 'int64))
+          (define shift (cpp-cast n 'int64))
+          (define one (bv 1 64))
+          (define rounded_v (bvadd (eval val) (bvshl (eval one) (bvsub (eval shift) (eval one)))))
+          (define shifted_v (shiftF rounded_v (eval shift)))
+          (define saturated_v (if saturate? (satF (int64_t shifted_v)) (cpp-cast (int64_t shifted_v) output-type)))
+          saturated_v)]
+       [else
+        (lambda(i)
+          (define v (input i))
+          (define shifted_v (shiftF (eval v) (eval (cpp-cast n (cpp-type v)))))
+          (define saturated_v (if saturate? (satF (mk-cpp-expr shifted_v (cpp-type v))) (cpp-cast (mk-cpp-expr shifted_v (cpp-type v)) output-type)))
+          saturated_v)])]
 
     [(divide-by-const sub-expr const-val)
      (define input (interpret sub-expr))
@@ -227,9 +237,11 @@
          [((uint8_t v0) (uint8_t v1)) (uint8_t (bvand v0 v1))]
          [((uint16_t v0) (uint16_t v1)) (uint16_t (bvand v0 v1))]
          [((uint32_t v0) (uint32_t v1)) (uint32_t (bvand v0 v1))]
+         [((uint64_t v0) (uint64_t v1)) (uint64_t (bvand v0 v1))]
          [((int8_t v0) (int8_t v1)) (int8_t (bvand v0 v1))]
          [((int16_t v0) (int16_t v1)) (int16_t (bvand v0 v1))]
-         [((int32_t v0) (int32_t v1)) (int32_t (bvand v0 v1))]))]
+         [((int32_t v0) (int32_t v1)) (int32_t (bvand v0 v1))]
+         [((int64_t v0) (int64_t v1)) (int64_t (bvand v0 v1))]))]
     
     [(vs-frac-mpy sub-expr sca round?)
      (define input (interpret sub-expr))
