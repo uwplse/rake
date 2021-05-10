@@ -1,11 +1,13 @@
 #lang rosette/safe
 
 (require
-  rake/cpp/types)
+  rake/cpp/types
+  rake/cpp/cast)
 
 (provide abs8 abs16 abs32 absu8 absu16 absu32
          min8 min16 min32 min64 minu8 minu16 minu32 minu64
-         max8 max16 max32 max64 maxu8 maxu16 maxu32 maxu64)
+         max8 max16 max32 max64 maxu8 maxu16 maxu32 maxu64
+         euclidean-div)
 
 ;;;;; Absolute Functions ;;;;;
 
@@ -113,6 +115,21 @@
   (define diff (bvsub ae be))
   (define dsgn (bvashr diff (bv 32 33)))
   (uint32_t (extract 31 0 (bvsub ae (bvand diff dsgn)))))
+
+(define (euclidean-div lhs rhs outT)
+  (define lhs64 (cpp-cast lhs 'int64))
+  (define rhs64 (cpp-cast rhs 'int64))
+  (define ia (eval lhs64))
+  (define ib (eval rhs64))
+  (define a-neg (bvashr ia (bv 63 64)))
+  (define b-neg (bvashr ib (bv 63 64)))
+  (define b-zero (if (bveq ib (bv 0 64)) (bv -1 64) (bv 0 64)))
+  (set! ib (bvsub ib b-zero))
+  (set! ia (bvsub ia a-neg))
+  (define q (bvsdiv ia ib))
+  (set! q (bvadd q (bvand a-neg (bvsub (bvnot b-neg) b-neg))))
+  (set! q (bvand q (bvnot b-zero)))
+  (cpp-cast (int64_t q) (cpp-type-str outT)))
 
 ;(define (promote var)
 ;  (match var

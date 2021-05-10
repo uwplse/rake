@@ -113,6 +113,15 @@
     [(eq? type uint16_t) 'uint16]
     [(eq? type uint32_t) 'uint32]
     [(eq? type uint64_t) 'uint64]
+    [(eq? type 'int8) 'int8]
+    [(eq? type 'int16) 'int16]
+    [(eq? type 'int32) 'int32]
+    [(eq? type 'int64) 'int64]
+    [(eq? type 'uint1) 'uint1]
+    [(eq? type 'uint8) 'uint8]
+    [(eq? type 'uint16) 'uint16]
+    [(eq? type 'uint32) 'uint32]
+    [(eq? type 'uint64) 'uint64]
     [else (error "cpp-type-str: Unexpected type: " type)]))
 
 (define (signed-expr? e)

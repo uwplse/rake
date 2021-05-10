@@ -35,7 +35,6 @@
   ;(println ((interpret-halide halide-expr) 0))
   ;(println ((interpret-halide halide-expr) 1))
 
-  
   ;(set-cn-hvx-ir 0) (println ((interpret-hvx-ir template) 0))
   ;(set-cn-hvx-ir 1) (println ((interpret-hvx-ir template) 1))
   ;(println (symbolics ((interpret-hvx-ir template) 0)))

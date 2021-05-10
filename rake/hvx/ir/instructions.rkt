@@ -25,12 +25,19 @@
 (struct vs-mpy-add-acc (acc-expr sub-expr weight-matrix output-type saturate?) #:super struct:ir-node #:transparent)
 (struct vv-mpy-add (sub-expr width output-type saturate?) #:super struct:ir-node #:transparent)
 
+(struct vs-mpy-hh (sub-expr sca round?) #:super struct:ir-node #:transparent)
+(struct vv-mpy-hh-rnd (sub-expr) #:super struct:ir-node #:transparent)
+
 (struct vs-frac-mpy (sub-expr sca round?) #:super struct:ir-node #:transparent)
+
+(struct vs-shift-left (sub-expr sca) #:super struct:ir-node #:transparent)
+(struct vv-shift-left (sub-expr0 sub-expr1) #:super struct:ir-node #:transparent)
 
 (struct add-const (sub-expr const-val output-type saturate?) #:super struct:ir-node #:transparent)
 
 (struct shift-right (sub-expr shift round? saturate? arithmetic? output-type) #:super struct:ir-node #:transparent)
 (struct divide-by-const (sub-expr const-val) #:super struct:ir-node #:transparent)
+(struct vs-divide (sub-expr sca-val output-type) #:super struct:ir-node #:transparent)
 (struct average (sub-expr round? output-type) #:super struct:ir-node #:transparent)
 
 (struct modulo-by-const (sub-expr const-val) #:super struct:ir-node #:transparent)

@@ -6,7 +6,7 @@
 ;; used as part of a query to the solver.
 
 (require
-  (only-in racket/base for/fold)
+  (only-in racket/base for/fold) ; make-hash hash-ref hash-set! hash-has-key?
   (only-in rosette/base/core/term @app)
   rosette/lib/destruct
   rake/cpp
@@ -39,42 +39,53 @@
 ;; Usage: When synthesizing (swizzling) hash-tables, we restrict the hashtables to only point to the data-elements that appear in
 ;; the original expression. 
 (define (extract-buffer-reads expr)
+  (println "starting")
   (define live-buffers (extract-live-buffers expr))
-  (for/fold
+  (define interpreted-expr (interpret-halide expr))
+  (time (for/fold
     ([buff-reads '()])
     ([i (halide-vec-len expr)])
-      (append buff-reads (list (set->list (list->set (extract-lane-buffer-reads ((interpret-halide expr) i) live-buffers)))))))
+      (append buff-reads (list (set->list (list->set (extract-lane-buffer-reads (interpreted-expr i) live-buffers))))))))
+
+(define cache (make-hash))
 
 (define (extract-lane-buffer-reads expr live-buffers)
-  (match expr
-    ;; Unwrap the types
-    [(int8_t v) (extract-lane-buffer-reads v live-buffers)]
-    [(int16_t v) (extract-lane-buffer-reads v live-buffers)]
-    [(int32_t v) (extract-lane-buffer-reads v live-buffers)]
-    [(int64_t v) (extract-lane-buffer-reads v live-buffers)]
-    [(uint1_t v) (extract-lane-buffer-reads v live-buffers)]
-    [(uint8_t v) (extract-lane-buffer-reads v live-buffers)]
-    [(uint16_t v) (extract-lane-buffer-reads v live-buffers)]
-    [(uint32_t v) (extract-lane-buffer-reads v live-buffers)]
-    [(uint64_t v) (extract-lane-buffer-reads v live-buffers)]
+  (cond
+    [(hash-has-key? cache expr)
+     (hash-ref cache expr)]
+    [else
+     (define reads
+       (match expr
+         ;; Unwrap the types
+         [(int8_t v) (extract-lane-buffer-reads v live-buffers)]
+         [(int16_t v) (extract-lane-buffer-reads v live-buffers)]
+         [(int32_t v) (extract-lane-buffer-reads v live-buffers)]
+         [(int64_t v) (extract-lane-buffer-reads v live-buffers)]
+         [(uint1_t v) (extract-lane-buffer-reads v live-buffers)]
+         [(uint8_t v) (extract-lane-buffer-reads v live-buffers)]
+         [(uint16_t v) (extract-lane-buffer-reads v live-buffers)]
+         [(uint32_t v) (extract-lane-buffer-reads v live-buffers)]
+         [(uint64_t v) (extract-lane-buffer-reads v live-buffers)]
     
-    ;; If it is a read from a symbolic buffer, extract
-    [(expression (== @app) xs ...)
-      (define app-target (list-ref xs 0))
-      (define expr-type (for/or ([lb live-buffers]) (if (eq? (buffer-data lb) app-target) (buffer-elemT lb) #f)))
-      (if expr-type (list (mk-cpp-expr expr expr-type)) (list))]
+         ;; If it is a read from a symbolic buffer, extract
+         [(expression (== @app) xs ...)
+          (define app-target (list-ref xs 0))
+          (define expr-type (for/or ([lb live-buffers]) (if (eq? (buffer-data lb) app-target) (buffer-elemT lb) #f)))
+          (if expr-type (list (mk-cpp-expr expr expr-type)) (list))]
 
-    ;; For all other expressions, recurse
-    [(expression op xs ...)
-     (flatten (for/list ([x xs]) (extract-lane-buffer-reads x live-buffers)))]
+         ;; For all other expressions, recurse
+         [(expression op xs ...)
+          (flatten (for/list ([x xs]) (extract-lane-buffer-reads x live-buffers)))]
 
-    ;; Ignore constants
-    [(bv _ _) (list)]
-    [(bitvector _) (list)]
-    [(? number? n) (list)]
-    [(constant id type) (list)]
+         ;; Ignore constants
+         [(bv _ _) (list)]
+         [(bitvector _) (list)]
+         [(? number? n) (list)]
+         [(constant id type) (list)]
 
-    [else (error "halide/ir/analysis: NYI how to extract buffer reads from" expr)]))
+         [else (error "halide/ir/analysis: NYI how to extract buffer reads from" expr)]))
+       (hash-set! cache expr reads)
+       reads]))
 
 (define (extract-add-consts expr)
   (define add-consts (mutable-set))
@@ -238,7 +249,7 @@
    ;; It cannot be a symbolic value
    (empty? (symbolics val))
    ;; Is a power of 2
-   (let ([x (log (eval-to-int val) 2)]) (eq? x (exact-round x)))))
+   (and (bveq (bvand (eval val) (bvsub (eval val) (bv 1 (expr-bw val)))) (bv 0 (expr-bw val))) (not (bveq (eval val) (bv 0 (expr-bw val)))))))
 
 (define (log-2 val)
   (mk-cpp-expr (bv (exact-round (log (eval-to-int val) 2)) (expr-bw val)) (cpp-type val)))
@@ -250,6 +261,7 @@
     [(x64 sca) (set ((interpret-halide vec) 0))]
     [(x128 sca) (set ((interpret-halide vec) 0))]
     [(x256 sca) (set ((interpret-halide vec) 0))]
+    [(x512 sca) (set ((interpret-halide vec) 0))]
     [_ (set)]))
 
 (define (strip-casts expr)
@@ -293,6 +305,16 @@
     [(int16x256 vec) (strip-casts vec)]
     [(int32x256 vec) (strip-casts vec)]
     [(int64x256 vec) (strip-casts vec)]
+
+    [(uint8x512 vec) (strip-casts vec)]
+    [(uint16x512 vec) (strip-casts vec)]
+    [(uint32x512 vec) (strip-casts vec)]
+    [(uint64x512 vec) (strip-casts vec)]
+
+    [(int8x512 vec) (strip-casts vec)]
+    [(int16x512 vec) (strip-casts vec)]
+    [(int32x512 vec) (strip-casts vec)]
+    [(int64x512 vec) (strip-casts vec)]
     
     [_ expr]))
 
@@ -347,5 +369,15 @@
     [(int16x256 vec) #t]
     [(int32x256 vec) #t]
     [(int64x256 vec) #t]
+
+    [(uint8x512 vec) #t]
+    [(uint16x512 vec) #t]
+    [(uint32x512 vec) #t]
+    [(uint64x512 vec) #t]
+
+    [(int8x512 vec) #t]
+    [(int16x512 vec) #t]
+    [(int32x512 vec) #t]
+    [(int64x512 vec) #t]
     
     [_ #f]))

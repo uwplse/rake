@@ -47,7 +47,8 @@
     [(uint1x32 vec) 32]
     [(uint1x64 vec) 64]
     [(uint1x128 vec) 128]
-    [(uint1x256 vec) 256]    
+    [(uint1x256 vec) 256]
+    [(uint1x512 vec) 512]
    
     [(uint8x32 vec) 32]
     [(uint16x32 vec) 32]
@@ -88,6 +89,16 @@
     [(int16x256 vec) 256]
     [(int32x256 vec) 256]
     [(int64x256 vec) 256]
+
+    [(uint8x512 vec) 512]
+    [(uint16x512 vec) 512]
+    [(uint32x512 vec) 512]
+    [(uint64x512 vec) 512]
+
+    [(int8x512 vec) 512]
+    [(int16x512 vec) 512]
+    [(int32x512 vec) 512]
+    [(int64x512 vec) 512]
 
     ;; Operations
     [(vec-add v1 v2) (vec-len v1)]
@@ -146,6 +157,7 @@
     [(uint1x64 vec) (list vec)]
     [(uint1x128 vec) (list vec)]
     [(uint1x256 vec) (list vec)]
+    [(uint1x512 vec) (list vec)]
    
     [(uint8x32 vec) (list vec)]
     [(uint16x32 vec) (list vec)]
@@ -186,6 +198,16 @@
     [(int16x256 vec) (list vec)]
     [(int32x256 vec) (list vec)]
     [(int64x256 vec) (list vec)]
+
+    [(uint8x512 vec) (list vec)]
+    [(uint16x512 vec) (list vec)]
+    [(uint32x512 vec) (list vec)]
+    [(uint64x512 vec) (list vec)]
+
+    [(int8x512 vec) (list vec)]
+    [(int16x512 vec) (list vec)]
+    [(int32x512 vec) (list vec)]
+    [(int64x512 vec) (list vec)]
 
     ;; Operations
     [(vec-add v1 v2) (list v1 v2)]
@@ -262,41 +284,49 @@
     [(uint8x64 vec) (lambda (i) (cpp-cast ((interpret vec) i) 'uint8))]
     [(uint8x128 vec) (lambda (i) (cpp-cast ((interpret vec) i) 'uint8))]
     [(uint8x256 vec) (lambda (i) (cpp-cast ((interpret vec) i) 'uint8))]
+    [(uint8x512 vec) (lambda (i) (cpp-cast ((interpret vec) i) 'uint8))]
 
     [(int8x32 vec) (lambda (i) (cpp-cast ((interpret vec) i) 'int8))]
     [(int8x64 vec) (lambda (i) (cpp-cast ((interpret vec) i) 'int8))]
     [(int8x128 vec) (lambda (i) (cpp-cast ((interpret vec) i) 'int8))]
     [(int8x256 vec) (lambda (i) (cpp-cast ((interpret vec) i) 'int8))]
+    [(int8x512 vec) (lambda (i) (cpp-cast ((interpret vec) i) 'int8))]
 
     [(uint16x32 vec) (lambda (i) (cpp-cast ((interpret vec) i) 'uint16))]
     [(uint16x64 vec) (lambda (i) (cpp-cast ((interpret vec) i) 'uint16))]
     [(uint16x128 vec) (lambda (i) (cpp-cast ((interpret vec) i) 'uint16))]
     [(uint16x256 vec) (lambda (i) (cpp-cast ((interpret vec) i) 'uint16))]
+    [(uint16x512 vec) (lambda (i) (cpp-cast ((interpret vec) i) 'uint16))]
 
     [(int16x32 vec) (lambda (i) (cpp-cast ((interpret vec) i) 'int16))]
     [(int16x64 vec) (lambda (i) (cpp-cast ((interpret vec) i) 'int16))]
     [(int16x128 vec) (lambda (i) (cpp-cast ((interpret vec) i) 'int16))]
     [(int16x256 vec) (lambda (i) (cpp-cast ((interpret vec) i) 'int16))]
+    [(int16x512 vec) (lambda (i) (cpp-cast ((interpret vec) i) 'int16))]
     
     [(uint32x32 vec) (lambda (i) (cpp-cast ((interpret vec) i) 'uint32))]
     [(uint32x64 vec) (lambda (i) (cpp-cast ((interpret vec) i) 'uint32))]
     [(uint32x128 vec) (lambda (i) (cpp-cast ((interpret vec) i) 'uint32))]
     [(uint32x256 vec) (lambda (i) (cpp-cast ((interpret vec) i) 'uint32))]
+    [(uint32x512 vec) (lambda (i) (cpp-cast ((interpret vec) i) 'uint32))]
 
     [(int32x32 vec) (lambda (i) (cpp-cast ((interpret vec) i) 'int32))]
     [(int32x64 vec) (lambda (i) (cpp-cast ((interpret vec) i) 'int32))]
     [(int32x128 vec) (lambda (i) (cpp-cast ((interpret vec) i) 'int32))]
-    [(int32x64 vec) (lambda (i) (cpp-cast ((interpret vec) i) 'int32))]
+    [(int32x256 vec) (lambda (i) (cpp-cast ((interpret vec) i) 'int32))]
+    [(int32x512 vec) (lambda (i) (cpp-cast ((interpret vec) i) 'int32))]
     
     [(uint64x32 vec) (lambda (i) (cpp-cast ((interpret vec) i) 'uint64))]
     [(uint64x64 vec) (lambda (i) (cpp-cast ((interpret vec) i) 'uint64))]
     [(uint64x128 vec) (lambda (i) (cpp-cast ((interpret vec) i) 'uint64))]
     [(uint64x256 vec) (lambda (i) (cpp-cast ((interpret vec) i) 'uint64))]
+    [(uint64x512 vec) (lambda (i) (cpp-cast ((interpret vec) i) 'uint64))]
 
     [(int64x32 vec) (lambda (i) (cpp-cast ((interpret vec) i) 'int64))]
     [(int64x64 vec) (lambda (i) (cpp-cast ((interpret vec) i) 'int64))]
     [(int64x128 vec) (lambda (i) (cpp-cast ((interpret vec) i) 'int64))]
     [(int64x256 vec) (lambda (i) (cpp-cast ((interpret vec) i) 'int64))]
+    [(int64x512 vec) (lambda (i) (cpp-cast ((interpret vec) i) 'int64))]
     
     ;; Operations
     [(sca-add v1 v2) (do-add (interpret v1) (interpret v2))]
@@ -307,9 +337,15 @@
     [(sca-min v1 v2) (do-min (interpret v1) (interpret v2))]
     [(sca-max v1 v2) (do-max (interpret v1) (interpret v2))]
 
+    [(sca-if v1 v2 v3) (do-if (interpret v1) (interpret v2) (interpret v3))]
+    [(sca-lt v1 v2) (do-lt (interpret v1) (interpret v2))]
+    [(sca-le v1 v2) (do-le (interpret v1) (interpret v2))]
+
     [(sca-absd v1 v2) (do-absd (interpret v1) (interpret v2))]
     [(sca-shl v1 v2) (do-shl (interpret v1) (interpret v2))]
     [(sca-shr v1 v2) (do-shr (interpret v1) (interpret v2))]
+
+    [(sca-bwand v1 v2) (do-bwand (interpret v1) (interpret v2))]
     
     [(vec-add v1 v2) (lambda (i) (do-add ((interpret v1) i) ((interpret v2) i)))]
     [(vec-sub v1 v2) (lambda (i) (do-sub ((interpret v1) i) ((interpret v2) i)))]
@@ -318,9 +354,10 @@
     [(vec-mod v1 v2) (lambda (i) (do-mod ((interpret v1) i) ((interpret v2) i)))]
     [(vec-min v1 v2) (lambda (i) (do-min ((interpret v1) i) ((interpret v2) i)))]
     [(vec-max v1 v2) (lambda (i) (do-max ((interpret v1) i) ((interpret v2) i)))]
+
     [(vec-if v1 v2 v3) (lambda (i) (do-if ((interpret v1) i) ((interpret v2) i) ((interpret v3) i)))]
     [(vec-lt v1 v2) (lambda (i) (do-lt ((interpret v1) i) ((interpret v2) i)))]
-    [(vec-le v1 v2) (lambda (i) (do-le ((interpret v1) i) ((interpret v2) i)))]        
+    [(vec-le v1 v2) (lambda (i) (do-le ((interpret v1) i) ((interpret v2) i)))]
 
     [(vec-shl v1 v2) (lambda (i) (do-shl ((interpret v1) i) ((interpret v2) i)))]
     [(vec-shr v1 v2) (lambda (i) (do-shr ((interpret v1) i) ((interpret v2) i)))]
@@ -391,19 +428,7 @@
      (define outT (infer-out-type lhs rhs))
      (cond
        [(signed-type? outT)
-        (define lhs64 (cpp-cast lhs 'int64))
-        (define rhs64 (cpp-cast rhs 'int64))
-        (define ia (eval lhs64))
-        (define ib (eval rhs64))
-        (define a-neg (bvashr ia (bv 63 64)))
-        (define b-neg (bvashr ib (bv 63 64)))
-        (define b-zero (if (bveq ib (bv 0 64)) (bv -1 64) (bv 0 64)))
-        (set! ib (bvsub ib b-zero))
-        (set! ia (bvsub ia a-neg))
-        (define q (bvsdiv ia ib))
-        (set! q (bvadd q (bvand a-neg (bvsub (bvnot b-neg) b-neg))))
-        (set! q (bvand q (bvnot b-zero)))
-        (cpp-cast (int64_t q) (cpp-type-str outT))]
+        (euclidean-div lhs rhs outT)]
        [else
         (mk-cpp-expr (bvudiv (eval lhs) (eval rhs)) outT)])]))
 
@@ -448,7 +473,7 @@
         (maxF lhs rhs)])]))
 
 (define (do-shr lhs rhs)
-  (define outT (infer-out-type lhs rhs))
+  (define outT (cpp-type lhs))
   (cond
     [(signed-type? outT)
      (mk-cpp-expr (bvashr (eval lhs) (eval rhs)) outT)]
@@ -456,7 +481,7 @@
      (mk-cpp-expr (bvlshr (eval lhs) (eval rhs)) outT)]))
 
 (define (do-shl lhs rhs)
-  (define outT (infer-out-type lhs rhs))
+  (define outT (cpp-type lhs))
   (mk-cpp-expr (bvshl (eval lhs) (eval rhs)) outT))
 
 (define (do-if condition lhs rhs)

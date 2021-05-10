@@ -30,6 +30,7 @@
 ;; change any uber-instruction in the IR expression, only their
 ;; inputs.
 (define (fold-grammar lifted-sub-expr halide-expr [depth 0])
+  
   (define candidates
     (destruct lifted-sub-expr
       [(load-data live-data gather-tbl)
@@ -50,7 +51,9 @@
        (cond
          [(halide-cast-op? halide-expr)
           ;; Try folding by updating the output type
-          (list (vs-mpy-add (get-node-id) sub-expr weight-matrix (halide-elem-type halide-expr) saturate?))]
+          (define e-type (halide-elem-type halide-expr))
+          (define narrower-type (if (<= (type-bw e-type) (type-bw output-type)) e-type output-type))
+          (list (vs-mpy-add (get-node-id) sub-expr weight-matrix narrower-type saturate?))]
          [(or (vec-min? halide-expr) (vec-max? halide-expr))
           ;; Try folding the min/max as a saturate
           (list (vs-mpy-add (get-node-id) sub-expr weight-matrix output-type (choose* #t #f)))]
@@ -74,7 +77,9 @@
        (cond
          [(halide-cast-op? halide-expr)
           ;; Try folding by updating the output type
-          (list (vv-mpy-add (get-node-id) sub-expr width (halide-elem-type halide-expr) saturate?))]
+          (define e-type (halide-elem-type halide-expr))
+          (define narrower-type (if (<= (type-bw e-type) (type-bw output-type)) e-type output-type))
+          (list (vv-mpy-add (get-node-id) sub-expr width narrower-type saturate?))]
          [(or (vec-min? halide-expr) (vec-max? halide-expr))
           ;; Try folding the min/max as a saturate
           (list (vv-mpy-add (get-node-id) sub-expr width output-type (choose* #t #f)))]
@@ -90,12 +95,23 @@
          [else
           '()])]
 
+      [(vs-mpy-hh sub-expr sca round?)
+       (define mul-consts (append (extract-mul-consts-halide halide-expr) (list (int8_t (bv 1 8)))))
+       (define f (apply choose* mul-consts))
+       (define updated-sca (mk-cpp-expr (bvmul (eval (cpp-cast sca 'int32)) (eval (cpp-cast f 'int32))) 'int32))
+       (list (vs-mpy-hh (get-node-id) sub-expr updated-sca (choose* #t #f)))]
+
+      [(vv-mpy-hh-rnd sub-expr) '()]
+      
       [(vs-frac-mpy sub-expr sca round?)
        (define mul-consts (append (extract-mul-consts-halide halide-expr) (list (int8_t (bv 1 8)))))
        (define f (apply choose* mul-consts))
        (define updated-sca (mk-cpp-expr (bvmul (eval (cpp-cast sca 'int32)) (eval (cpp-cast f 'int32))) 'int32))
        (list (vs-frac-mpy (get-node-id) sub-expr updated-sca (choose* #t #f)))]
 
+      [(vs-shift-left sub-expr shift) '()]
+      [(vv-shift-left sub-expr0 SUB-expr1) '()]
+      
       [(add-const sub-expr const-val output-type saturate?)
        (define add-consts (extract-add-consts-halide halide-expr))
        (list (add-const (get-node-id) sub-expr (apply choose* add-consts) (halide-elem-type halide-expr) (choose* #t #f)))]
@@ -106,6 +122,11 @@
        (define narrower-type (if (<= (type-bw e-type) (type-bw output-type)) e-type output-type))
        (list (shift-right (get-node-id) sub-expr (apply choose* shr-consts) (choose* #t #f) (choose* #t #f) (choose* #t #f) narrower-type))]
 
+      [(vs-divide sub-expr scalar-val output-type)
+       (define e-type (halide-elem-type halide-expr))
+       (define narrower-type (if (<= (type-bw e-type) (type-bw output-type)) e-type output-type))
+       (list (vs-divide (get-node-id) sub-expr scalar-val narrower-type))]
+      
       [(average sub-expr round? output-type)
        (define e-type (halide-elem-type halide-expr))
        (define narrower-type (if (<= (type-bw e-type) (type-bw output-type)) e-type output-type))
@@ -155,11 +176,21 @@
        (flatten
         (list
          (if (empty? shr-consts) '() (average (get-node-id) sub-expr (choose* #t #f) (halide-elem-type halide-expr)))
-         (if (eq? (length weight-matrix) 1) (vs-frac-mpy (get-node-id) sub-expr (list-ref weight-matrix 0) (choose* #t #f)) '())))]
+         (if (eq? (length weight-matrix) 1) (vs-frac-mpy (get-node-id) sub-expr (list-ref weight-matrix 0) (choose* #t #f)) '())
+         (if (eq? (length weight-matrix) 1) (vs-mpy-hh (get-node-id) sub-expr (list-ref weight-matrix 0) (choose* #t #f)) '())))]
 
-      [(vv-mpy-add sub-expr width output-type saturate?) '()]
+      [(vv-mpy-add sub-expr width output-type saturate?)
+       (flatten
+        (list
+         (if (eq? width 1) (vv-mpy-hh-rnd (get-node-id) sub-expr) '())))]
 
+      [(vs-mpy-hh sub-expr sca round?) '()]
+      [(vv-mpy-hh-rnd sub-expr) '()]
+      
       [(vs-frac-mpy sub-expr sca round?) '()]
+
+      [(vs-shift-left sub-expr shift) '()]
+      [(vv-shift-left sub-expr0 SUB-expr1) '()]
     
       [(shift-right sub-expr const-val round? saturate? arithmetic? output-type) '()]
 
@@ -172,6 +203,8 @@
              '()
              (shift-right (get-node-id) sub-expr (apply choose* shr-consts) #t #f (signed-type? output-type) output-type))))]
 
+      [(vs-divide sub-expr scalar-val output-type) '()]
+      
       [(average sub-expr round? output-type) '()]
 
       [(modulo-by-const sub-expr const-val) '()]
@@ -257,8 +290,10 @@
      (define live-reads (extract-buffer-reads-halide halide-expr))
      (define gather-tbl (map (lambda (i) (define-symbolic* idx integer?) idx) (range 25)))
      (define read-tbl (map (lambda (i) (define-symbolic* idx integer?) (define-symbolic* c boolean?) (cons idx c)) (range 25)))
-     (list
-      (combine (get-load-id) (list-ref lifted-sub-exprs 0) (list-ref lifted-sub-exprs 1) read-tbl))]
+     (if (eq? (length lifted-sub-exprs) 2)
+         (list
+          (combine (get-load-id) (list-ref lifted-sub-exprs 0) (list-ref lifted-sub-exprs 1) read-tbl))
+         '())]
 
     [(dynamic_shuffle vec idxs st end)
      (define live-reads (extract-buffer-reads-halide halide-expr))
@@ -270,41 +305,49 @@
     [(uint8x64 vec) (list (cast (get-node-id) (list-ref lifted-sub-exprs 0) 'uint8))]
     [(uint8x128 vec) (list (cast (get-node-id) (list-ref lifted-sub-exprs 0) 'uint8))]
     [(uint8x256 vec) (list (cast (get-node-id) (list-ref lifted-sub-exprs 0) 'uint8))]
+    [(uint8x512 vec) (list (cast (get-node-id) (list-ref lifted-sub-exprs 0) 'uint8))]
 
     [(uint16x32 vec) (list (cast (get-node-id) (list-ref lifted-sub-exprs 0) 'uint16))]
     [(uint16x64 vec) (list (cast (get-node-id) (list-ref lifted-sub-exprs 0) 'uint16))]
     [(uint16x128 vec) (list (cast (get-node-id) (list-ref lifted-sub-exprs 0) 'uint16))]
     [(uint16x256 vec) (list (cast (get-node-id) (list-ref lifted-sub-exprs 0) 'uint16))]
+    [(uint16x512 vec) (list (cast (get-node-id) (list-ref lifted-sub-exprs 0) 'uint16))]
 
     [(uint32x32 vec) (list (cast (get-node-id) (list-ref lifted-sub-exprs 0) 'uint32))]
     [(uint32x64 vec) (list (cast (get-node-id) (list-ref lifted-sub-exprs 0) 'uint32))]
     [(uint32x128 vec) (list (cast (get-node-id) (list-ref lifted-sub-exprs 0) 'uint32))]
     [(uint32x256 vec) (list (cast (get-node-id) (list-ref lifted-sub-exprs 0) 'uint32))]
+    [(uint32x512 vec) (list (cast (get-node-id) (list-ref lifted-sub-exprs 0) 'uint32))]
 
     [(uint64x32 vec) (list (cast (get-node-id) (list-ref lifted-sub-exprs 0) 'uint64))]
     [(uint64x64 vec) (list (cast (get-node-id) (list-ref lifted-sub-exprs 0) 'uint64))]
     [(uint64x128 vec) (list (cast (get-node-id) (list-ref lifted-sub-exprs 0) 'uint64))]
     [(uint64x256 vec) (list (cast (get-node-id) (list-ref lifted-sub-exprs 0) 'uint64))]
+    [(uint64x512 vec) (list (cast (get-node-id) (list-ref lifted-sub-exprs 0) 'uint64))]
 
     [(int8x32 vec) (list (cast (get-node-id) (list-ref lifted-sub-exprs 0) 'int8))]
     [(int8x64 vec) (list (cast (get-node-id) (list-ref lifted-sub-exprs 0) 'int8))]
     [(int8x128 vec) (list (cast (get-node-id) (list-ref lifted-sub-exprs 0) 'int8))]
     [(int8x256 vec) (list (cast (get-node-id) (list-ref lifted-sub-exprs 0) 'int8))]
+    [(int8x512 vec) (list (cast (get-node-id) (list-ref lifted-sub-exprs 0) 'int8))]
 
     [(int16x32 vec) (list (cast (get-node-id) (list-ref lifted-sub-exprs 0) 'int16))]
     [(int16x64 vec) (list (cast (get-node-id) (list-ref lifted-sub-exprs 0) 'int16))]
     [(int16x128 vec) (list (cast (get-node-id) (list-ref lifted-sub-exprs 0) 'int16))]
     [(int16x256 vec) (list (cast (get-node-id) (list-ref lifted-sub-exprs 0) 'int16))]
+    [(int16x512 vec) (list (cast (get-node-id) (list-ref lifted-sub-exprs 0) 'int16))]
 
     [(int32x32 vec) (list (cast (get-node-id) (list-ref lifted-sub-exprs 0) 'int32))]
     [(int32x64 vec) (list (cast (get-node-id) (list-ref lifted-sub-exprs 0) 'int32))]
     [(int32x128 vec) (list (cast (get-node-id) (list-ref lifted-sub-exprs 0) 'int32))]
     [(int32x256 vec) (list (cast (get-node-id) (list-ref lifted-sub-exprs 0) 'int32))]
+    [(int32x512 vec) (list (cast (get-node-id) (list-ref lifted-sub-exprs 0) 'int32))]
 
     [(int64x32 vec) (list (cast (get-node-id) (list-ref lifted-sub-exprs 0) 'int64))]
     [(int64x64 vec) (list (cast (get-node-id) (list-ref lifted-sub-exprs 0) 'int64))]
     [(int64x128 vec) (list (cast (get-node-id) (list-ref lifted-sub-exprs 0) 'int64))]
     [(int64x256 vec) (list (cast (get-node-id) (list-ref lifted-sub-exprs 0) 'int64))]
+    [(int64x512 vec) (list (cast (get-node-id) (list-ref lifted-sub-exprs 0) 'int64))]
  
     [(vec-add v1 v2)
      (define add-consts (extract-add-consts-halide halide-expr))
@@ -378,15 +421,15 @@
                       #f)
                      '()))))
             (vs-mpy-add
-            (get-node-id)
-            (combine
              (get-node-id)
-             (list-ref lifted-sub-exprs 0)
-             (list-ref lifted-sub-exprs 1)
-             read-tbl)
-            (list (int8_t (bv 1 8)) (int8_t (bv 1 8)))
-            (halide-elem-type halide-expr)
-            #f))
+             (combine
+              (get-node-id)
+              (list-ref lifted-sub-exprs 0)
+              (list-ref lifted-sub-exprs 1)
+              read-tbl)
+             (list (int8_t (bv 1 8)) (int8_t (bv 1 8)))
+             (halide-elem-type halide-expr)
+             #f))
            '())
            ))]
 
@@ -513,6 +556,7 @@
 
     [(vec-shl v1 v2)
      (define mul-consts (extract-mul-consts-halide halide-expr))
+     (define shl-consts (extract-mul-consts-halide halide-expr))
      (list
       ;; We can extend using either vector-scalar multiply-add
       (vs-mpy-add
@@ -521,14 +565,15 @@
        (list (apply choose* mul-consts))
        (halide-elem-type halide-expr)
        #f)
-      ;; or vector-vector multiply-add (todo)
-;      (vv-mpy-add
-;       (get-node-id)
-;       (apply choose* lifted-sub-exprs)
-;       (list (apply choose* mul-consts))
-;       (halide-elem-type halide-expr)
-;       #f)
-      )]
+      ;; or shift-left
+      (vs-shift-left
+       (get-node-id)
+       (apply choose* lifted-sub-exprs)
+       (list (apply choose* shl-consts)))
+      (vv-shift-left
+       (get-node-id)
+       (apply choose* lifted-sub-exprs)
+       (apply choose* lifted-sub-exprs)))]
 
     [(vec-div v1 v2)
      (define shr-consts (extract-shr-consts-halide halide-expr))
@@ -547,13 +592,20 @@
               #f
               (signed-type? output-type)
               output-type)))
-       ;; or using the divide-by-const instruction
+       ;; or using the divide instructions
        (if (empty? div-consts)
            '()
            (divide-by-const
             (get-node-id)
             (apply choose* lifted-sub-exprs)
-            (apply choose* div-consts)))))]
+            (apply choose* div-consts)))
+       (if (empty? div-consts)
+           '()
+           (vs-divide
+            (get-node-id)
+            (apply choose* lifted-sub-exprs)
+            (apply choose* div-consts)
+            (halide-elem-type halide-expr)))))]
 
     [(vec-shr v1 v2)
      (define shr-consts (extract-shr-consts-halide halide-expr))
@@ -585,13 +637,13 @@
     [(vec-min v1 v2) (if (eq? (length lifted-sub-exprs) 2) (list (minimum (get-node-id) (list-ref lifted-sub-exprs 0) (list-ref lifted-sub-exprs 1))) '())]
     [(vec-max v1 v2) (if (eq? (length lifted-sub-exprs) 2) (list (maximum (get-node-id) (list-ref lifted-sub-exprs 0) (list-ref lifted-sub-exprs 1))) '())]
 
-    [(vec-if v1 v2 v3) (list (select (get-node-id) (list-ref lifted-sub-exprs 0) (list-ref lifted-sub-exprs 1) (list-ref lifted-sub-exprs 2)))]
-    [(vec-lt v1 v2) (list (less-than (get-node-id) (list-ref lifted-sub-exprs 0) (list-ref lifted-sub-exprs 1)))]
-    [(vec-le v1 v2) (list (less-than-eq (get-node-id) (list-ref lifted-sub-exprs 0) (list-ref lifted-sub-exprs 1)))]
+    [(vec-if v1 v2 v3) (if (eq? (length lifted-sub-exprs) 3) (list (select (get-node-id) (list-ref lifted-sub-exprs 0) (list-ref lifted-sub-exprs 1) (list-ref lifted-sub-exprs 2))) '())]
+    [(vec-lt v1 v2) (if (eq? (length lifted-sub-exprs) 2) (list (less-than (get-node-id) (list-ref lifted-sub-exprs 0) (list-ref lifted-sub-exprs 1))) '())]
+    [(vec-le v1 v2) (if (eq? (length lifted-sub-exprs) 2) (list (less-than-eq (get-node-id) (list-ref lifted-sub-exprs 0) (list-ref lifted-sub-exprs 1))) '())]
     
-    [(vec-absd v1 v2) (list (abs-diff (get-node-id) (list-ref lifted-sub-exprs 0) (list-ref lifted-sub-exprs 1)))]
+    [(vec-absd v1 v2) (if (eq? (length lifted-sub-exprs) 2) (list (abs-diff (get-node-id) (list-ref lifted-sub-exprs 0) (list-ref lifted-sub-exprs 1))) '())]
 
-    [(vec-bwand v1 v2) (list (bitwise-and (get-node-id) (list-ref lifted-sub-exprs 0) (list-ref lifted-sub-exprs 1)))]
+    [(vec-bwand v1 v2) (if (eq? (length lifted-sub-exprs) 2) (list (bitwise-and (get-node-id) (list-ref lifted-sub-exprs 0) (list-ref lifted-sub-exprs 1))) '())]
     
     [_ (error "NYI: Please define a (extend) grammar for halide node:" halide-expr)]))
 

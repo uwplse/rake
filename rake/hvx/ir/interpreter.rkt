@@ -44,8 +44,8 @@
        (define idx (car (list-ref read-tbl i)))
        (define c (cdr (list-ref read-tbl i)))
        (assert (<= 0 idx i))
-       (define lhs (input0 idx))
-       (define rhs (input1 idx))
+       (define lhs (input0 0))
+       (define rhs (input1 0))
        (if c lhs rhs))]
     
     [(cast sub-expr type)
@@ -68,13 +68,16 @@
      (cond
        [round?
         (lambda (i)
-          ;; Promote to avoid overflows
-          (define val (cpp-cast (input i) 'int64))
-          (define shift (cpp-cast n 'int64))
-          (define one (bv 1 64))
-          (define rounded_v (bvadd (eval val) (bvshl (eval one) (bvsub (eval shift) (eval one)))))
-          (define shifted_v (shiftF rounded_v (eval shift)))
-          (define saturated_v (if saturate? (satF (int64_t shifted_v)) (cpp-cast (int64_t shifted_v) output-type)))
+          (define val (input i))
+          (define shift (if (eq? (expr-bw n) (expr-bw val)) n (cpp-cast n (cpp-type val))))
+          (define zero (cpp-cast (int8_t (bv 0 8)) (cpp-type val)))
+          (define one (cpp-cast (int8_t (bv 1 8)) (cpp-type val)))
+        
+          (define shr_1 (shiftF (eval val) (eval shift)))
+          (define shr_2 (shiftF (eval val) (bvsub (eval shift) (eval one))))
+          (define rnd (bvand shr_2 (if ((if (signed-expr? shift) bvslt bvult) (eval zero) (eval shift)) (eval one) (eval zero))))
+          (define res (bvadd shr_1 rnd))
+          (define saturated_v (if saturate? (satF (mk-cpp-expr res (cpp-type val))) (mk-cpp-expr res output-type)))
           saturated_v)]
        [else
         (lambda(i)
@@ -94,6 +97,19 @@
          [(uint8_t? v) (mk-cpp-expr (bvudiv (eval v) (eval den)) 'uint8)]
          [(uint16_t? v) (mk-cpp-expr (bvudiv (eval v) (eval den)) 'uint16)]))]
 
+    [(vs-divide sub-expr sca-val output-type)
+     (define input (interpret sub-expr))
+     (define den (interpret sca-val))
+     (lambda (i)
+       (define v (input i))
+       (cond
+         [(int8_t? v) (euclidean-div v den output-type)]
+         [(int16_t? v) (euclidean-div v den output-type)]
+         [(int32_t? v) (euclidean-div v den output-type)]
+         [(uint8_t? v) (euclidean-div v den output-type)]
+         [(uint16_t? v) (euclidean-div v den output-type)]
+         [(uint32_t? v) (euclidean-div v den output-type)]))]
+    
     [(average sub-expr round? output-type)
      (define input (interpret sub-expr))
      (lambda (i)
@@ -245,13 +261,65 @@
     
     [(vs-frac-mpy sub-expr sca round?)
      (define input (interpret sub-expr))
+     (define multiplier (interpret sca))
      (lambda (i)
        (define v1 (cpp-cast (input i) 'int64))
-       (define v2 (cpp-cast sca 'int64))
+       (define v2 (cpp-cast multiplier 'int64))
        (define mpy (bvmul (eval v1) (eval v2)))
        (define rnd (if round? (bvadd mpy (bv #x40000000 64)) mpy))
        (define shift (bvashr rnd (bv 31 64)))
        (sat32 (int64_t shift)))]
+
+    [(vs-mpy-hh sub-expr sca round?)
+     (define input (interpret sub-expr))
+     (define multiplier (interpret sca))
+     (lambda (i)
+       (define v1 (cpp-cast (input i) 'int64))
+       (define v2 (cpp-cast multiplier 'int64))
+       (define mpy (bvmul (eval v1) (eval v2)))
+       (define dbl (bvshl mpy (bv 1 64)))
+       (define rnd (if round? (bvadd dbl (bv #x8000 64)) dbl))
+       (define res (sat32 (int64_t rnd)))
+       (int16_t (extract 31 16 (eval res))))]
+
+    [(vv-mpy-hh-rnd sub-expr)
+     (define input (interpret sub-expr))
+     (lambda (i)
+       (define v1 (cpp-cast (input (* i 2)) 'int64))
+       (define v2 (cpp-cast (input (+ (* i 2) 1)) 'int64))
+       (define mpy (bvmul (eval v1) (eval v2)))
+       (define dbl (bvshl mpy (bv 1 64)))
+       (define rnd (bvadd dbl (bv #x8000 64)))
+       (define res (sat32 (int64_t rnd)))
+       (int16_t (extract 31 16 (eval res))))]
+
+    [(vs-shift-left sub-expr sca)
+     (define input0 (interpret sub-expr))
+     (define input1 (interpret sca))
+     (lambda (i)
+       (define lhs (input0 i))
+       (define rhs input1)
+       (destruct* (lhs rhs)
+         [((uint8_t v0) (uint8_t v1)) (uint8_t (bvshl v0 v1))]
+         [((uint16_t v0) (uint16_t v1)) (uint16_t (bvshl v0 v1))]
+         [((uint32_t v0) (uint32_t v1)) (uint32_t (bvshl v0 v1))]
+         [((int8_t v0) (int8_t v1)) (int8_t (bvshl v0 v1))]
+         [((int16_t v0) (int16_t v1)) (int16_t (bvshl v0 v1))]
+         [((int32_t v0) (int32_t v1)) (int32_t (bvshl v0 v1))]))]
+    
+    [(vv-shift-left sub-expr0 sub-expr1)
+     (define input0 (interpret sub-expr0))
+     (define input1 (interpret sub-expr1))
+     (lambda (i)
+       (define lhs (input0 i))
+       (define rhs (input1 i))
+       (destruct* (lhs rhs)
+         [((uint8_t v0) (uint8_t v1)) (uint8_t (bvshl v0 v1))]
+         [((uint16_t v0) (uint16_t v1)) (uint16_t (bvshl v0 v1))]
+         [((uint32_t v0) (uint32_t v1)) (uint32_t (bvshl v0 v1))]
+         [((int8_t v0) (int8_t v1)) (int8_t (bvshl v0 v1))]
+         [((int16_t v0) (int16_t v1)) (int16_t (bvshl v0 v1))]
+         [((int32_t v0) (int32_t v1)) (int32_t (bvshl v0 v1))]))]
     
     [(vs-mpy-add sub-expr weights output-type saturate?)
      (define input (interpret sub-expr))
@@ -509,12 +577,19 @@
     [(vs-mpy-add-acc acc-expr sub-expr weight-matrix output-type saturate?) (list acc-expr sub-expr)]
     [(vv-mpy-add sub-expr width output-type saturate?) (list sub-expr)]
 
+    [(vs-mpy-hh sub-expr sca round?) (list sub-expr)]
+    [(vv-mpy-hh-rnd sub-expr) (list sub-expr)]
+    
     [(vs-frac-mpy sub-expr sca round?) (list sub-expr)]
+
+    [(vs-shift-left sub-expr sca) (list sub-expr)]
+    [(vv-shift-left sub-expr0 sub-expr1) (list sub-expr0 sub-expr1)]
 
     [(add-const sub-expr const-val output-type saturate?) (list sub-expr)]
     
     [(shift-right sub-expr const-val round? saturate? arithmetic? output-type) (list sub-expr)]
     [(divide-by-const sub-expr const-val) (list sub-expr)]
+    [(vs-divide sub-expr sca-val output-type) (list sub-expr)]
     [(average sub-expr round? output-type) (list sub-expr)]
     
     [(modulo-by-const sub-expr const-val) (list sub-expr)]
@@ -547,12 +622,19 @@
     [(vs-mpy-add-acc acc-expr sub-expr weight-matrix output-type saturate?) (+ (instr-count acc-expr) (instr-count sub-expr) 1)]
     [(vv-mpy-add sub-expr width output-type saturate?) (+ (instr-count sub-expr) 1)]
 
+    [(vs-mpy-hh sub-expr sca round?) (+ (instr-count sub-expr) 1)]
+    [(vv-mpy-hh-rnd sub-expr) (+ (instr-count sub-expr) 1)]
+    
     [(vs-frac-mpy sub-expr sca round?) (+ (instr-count sub-expr) 1)]
+
+    [(vs-shift-left sub-expr sca) (+ (instr-count sub-expr) 1)]
+    [(vv-shift-left sub-expr0 sub-expr1) (+ (instr-count sub-expr0) (instr-count sub-expr1) 1)]
 
     [(add-const sub-expr const-val output-type saturate?) (+ (instr-count sub-expr) 1)]
     
     [(shift-right sub-expr const-val round? saturate? arithmetic? output-type) (+ (instr-count sub-expr) 1)]
     [(divide-by-const sub-expr const-val) (+ (instr-count sub-expr) 1)]
+    [(vs-divide sub-expr scalar-val output-type) (+ (instr-count sub-expr) 1)]
     [(average sub-expr round? output-type) (+ (instr-count sub-expr) 1)]
     
     [(modulo-by-const sub-expr const-val) (+ (instr-count sub-expr) 1)]

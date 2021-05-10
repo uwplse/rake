@@ -34,7 +34,8 @@
     [(uint1x32 vec) (handler (uint1x32 (visit vec handler)))]
     [(uint1x64 vec) (handler (uint1x64 (visit vec handler)))]
     [(uint1x128 vec) (handler (uint1x128 (visit vec handler)))]
-    [(uint1x256 vec) (handler (uint1x256 (visit vec handler)))]    
+    [(uint1x256 vec) (handler (uint1x256 (visit vec handler)))]
+    [(uint1x512 vec) (handler (uint1x512 (visit vec handler)))]
    
     [(uint8x32 vec) (handler (uint8x32 (visit vec handler)))]
     [(uint16x32 vec) (handler (uint16x32 (visit vec handler)))]
@@ -75,6 +76,16 @@
     [(int16x256 vec) (handler (int16x256 (visit vec handler)))]
     [(int32x256 vec) (handler (int32x256 (visit vec handler)))]
     [(int64x256 vec) (handler (int64x256 (visit vec handler)))]
+
+    [(uint8x512 vec) (handler (uint8x512 (visit vec handler)))]
+    [(uint16x512 vec) (handler (uint16x512 (visit vec handler)))]
+    [(uint32x512 vec) (handler (uint32x512 (visit vec handler)))]
+    [(uint64x512 vec) (handler (uint64x512 (visit vec handler)))]
+
+    [(int8x512 vec) (handler (int8x512 (visit vec handler)))]
+    [(int16x512 vec) (handler (int16x512 (visit vec handler)))]
+    [(int32x512 vec) (handler (int32x512 (visit vec handler)))]
+    [(int64x512 vec) (handler (int64x512 (visit vec handler)))]
 
     ;; Operations
     [(vec-add v1 v2) (handler (vec-add (visit v1 handler) (visit v2 handler)))]
