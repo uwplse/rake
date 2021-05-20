@@ -98,14 +98,21 @@
     [(vec-shl v1 v2) (handler (vec-shl (visit v1 handler) (visit v2 handler)))]
     [(vec-shr v1 v2) (handler (vec-shr (visit v1 handler) (visit v2 handler)))]
     [(vec-absd v1 v2) (handler (vec-absd (visit v1 handler) (visit v2 handler)))]
+    
+    [(vec-abs v1) (handler (vec-abs (visit v1 handler)))]
+    [(vec-clz v1) (handler (vec-clz (visit v1 handler)))]
 
     [(vec-lt v1 v2) (handler (vec-lt (visit v1 handler) (visit v2 handler)))]
+    [(vec-eq v1 v2) (handler (vec-eq (visit v1 handler) (visit v2 handler)))]
     [(vec-le v1 v2) (handler (vec-le (visit v1 handler) (visit v2 handler)))]
     [(vec-if v1 v2 v3) (handler (vec-if (visit v1 handler) (visit v2 handler) (visit v3 handler)))]
 
     [(vec-bwand v1 v2) (handler (vec-bwand (visit v1 handler) (visit v2 handler)))]
 
+    [(vector_reduce op width vec) (handler (vector_reduce op width (visit vec handler)))]
+
     ;; Shuffles
+    [(vec-broadcast n vec) (handler (vec-broadcast n (visit vec handler)))]
     [(slice_vectors vec base stride len) (handler (slice_vectors (visit vec handler) (visit base handler) (visit stride handler) (visit len handler)))]
     [(concat_vectors v1 v2) (handler (concat_vectors (visit v1 handler) (visit v2 handler)))]
     [(interleave v1 v2) (handler (interleave (visit v1 handler) (visit v2 handler)))]

@@ -110,20 +110,28 @@
     [(vec-max v1 v2) (vec-len v1)]
 
     [(vec-if v1 v2 v3) (vec-len v2)]
+    [(vec-eq v1 v2) (vec-len v1)]
     [(vec-lt v1 v2) (vec-len v1)]
     [(vec-le v1 v2) (vec-len v1)]
-    
+
+    [(vec-abs v1) (vec-len v1)]
+    [(vec-clz v1) (vec-len v1)]
+
     [(vec-absd v1 v2) (vec-len v1)]
     [(vec-shl v1 v2) (vec-len v1)]
     [(vec-shr v1 v2) (vec-len v1)]
 
     [(vec-bwand v1 v2) (vec-len v1)]
 
+    [(vector_reduce op width vec) (quotient (vec-len vec) width)]
+
     ;; Shuffles
     [(slice_vectors vec base stride len) len]
     [(concat_vectors v1 v2) (+ (vec-len v1) (vec-len v2))]
     [(interleave v1 v2) (+ (vec-len v1) (vec-len v2))]
     [(dynamic_shuffle vec idxs st end) (vec-len idxs)]
+
+    [(vec-broadcast n vec) (* n (vec-len vec))]
     
     ;; Base case
     [_ (error "halide\\ir\\interpreter.rkt: Don't know how to infer vector length for Halide expression:" expr)]))
@@ -218,8 +226,12 @@
     [(vec-min v1 v2) (list v1 v2)]
     [(vec-max v1 v2) (list v1 v2)]
     [(vec-if v1 v2 v3) (list v1 v2 v3)]
+    [(vec-eq v1 v2) (list v1 v2)]
     [(vec-lt v1 v2) (list v1 v2)]
     [(vec-le v1 v2) (list v1 v2)]
+
+    [(vec-abs v1) (list v1)]
+    [(vec-clz v1) (list v1)]
     
     [(vec-absd v1 v2) (list v1 v2)]
     [(vec-shl v1 v2) (list v1 v2)]
@@ -227,7 +239,10 @@
 
     [(vec-bwand v1 v2) (list v1 v2)]
 
+    [(vector_reduce op width vec) (list vec)]
+
     ;; Shuffles
+    [(vec-broadcast n vec) (list vec)]
     [(slice_vectors vec base stride len) (list vec)]
     [(concat_vectors v1 v2) (list v1 v2)]
     [(interleave v1 v2) (list v1 v2)]
@@ -238,6 +253,9 @@
 
 (define (interpret p)
   (destruct p
+    ;; Abstract expressions
+    [(abstr-halide-expr orig-expr abstr-vals) (lambda (i) (buffer-ref abstr-vals i))]
+            
     ;; Constructors
     [(x32 sca) (lambda (i) (interpret sca))]
     [(x64 sca) (lambda (i) (interpret sca))]
@@ -338,12 +356,15 @@
     [(sca-max v1 v2) (do-max (interpret v1) (interpret v2))]
 
     [(sca-if v1 v2 v3) (do-if (interpret v1) (interpret v2) (interpret v3))]
+    [(sca-eq v1 v2) (do-eq (interpret v1) (interpret v2))]
     [(sca-lt v1 v2) (do-lt (interpret v1) (interpret v2))]
     [(sca-le v1 v2) (do-le (interpret v1) (interpret v2))]
 
+    [(sca-abs v1) (do-abs (interpret v1))]
     [(sca-absd v1 v2) (do-absd (interpret v1) (interpret v2))]
     [(sca-shl v1 v2) (do-shl (interpret v1) (interpret v2))]
     [(sca-shr v1 v2) (do-shr (interpret v1) (interpret v2))]
+    [(sca-clz v1) (do-clz (interpret v1))]
 
     [(sca-bwand v1 v2) (do-bwand (interpret v1) (interpret v2))]
     
@@ -356,16 +377,26 @@
     [(vec-max v1 v2) (lambda (i) (do-max ((interpret v1) i) ((interpret v2) i)))]
 
     [(vec-if v1 v2 v3) (lambda (i) (do-if ((interpret v1) i) ((interpret v2) i) ((interpret v3) i)))]
+    [(vec-eq v1 v2) (lambda (i) (do-eq ((interpret v1) i) ((interpret v2) i)))]
     [(vec-lt v1 v2) (lambda (i) (do-lt ((interpret v1) i) ((interpret v2) i)))]
     [(vec-le v1 v2) (lambda (i) (do-le ((interpret v1) i) ((interpret v2) i)))]
 
+    [(vec-abs v1) (lambda (i) (do-abs ((interpret v1) i)))]
     [(vec-shl v1 v2) (lambda (i) (do-shl ((interpret v1) i) ((interpret v2) i)))]
     [(vec-shr v1 v2) (lambda (i) (do-shr ((interpret v1) i) ((interpret v2) i)))]
     [(vec-absd v1 v2) (lambda (i) (do-absd ((interpret v1) i) ((interpret v2) i)))]
+    [(vec-clz v1) (lambda (i) (do-clz ((interpret v1) i)))]
 
     [(vec-bwand v1 v2) (lambda (i) (do-bwand ((interpret v1) i) ((interpret v2) i)))]
 
+    [(vector_reduce op width vec)
+     (cond
+       [(eq? op 'add)
+        (lambda (i) (do-reduce (interpret vec) bvadd (* i width) width))]
+       [else (error "Unexpected vector_reduce op:" op)])]
+
     ;; Shuffles
+    [(vec-broadcast n vec) (define l (vec-len vec)) (lambda (i) ((interpret vec) (modulo i l)))]
     [(slice_vectors vec base stride len) (lambda (i) ((interpret vec) (+ (interpret base) (* i (interpret stride)))))]
     [(concat_vectors v1 v2) (lambda (i) (if (< i (vec-len v1)) ((interpret v1) i) ((interpret v2) (- i (vec-len v1)))))]
     [(interleave v1 v2) (lambda (i) (if (even? i) ((interpret v1) (quotient i 2)) ((interpret v2) (quotient i 2))))]
@@ -382,6 +413,7 @@
     [(eq? elemT 'int16) (int16_t (data idx))]
     [(eq? elemT 'int32) (int32_t (data idx))]
     [(eq? elemT 'int64) (int64_t (data idx))]
+    [(eq? elemT 'uint1) (uint1_t (data idx))]
     [(eq? elemT 'uint8) (uint8_t (data idx))]
     [(eq? elemT 'uint16) (uint16_t (data idx))]
     [(eq? elemT 'uint32) (uint32_t (data idx))]
@@ -492,6 +524,15 @@
      (define outT (infer-out-type lhs rhs))
      (mk-cpp-expr (if (eval condition) (eval lhs) (eval rhs)) outT)]))
 
+(define (do-eq lhs rhs)
+  (cond
+    [(and (integer? lhs) (integer? rhs))
+     (eq? lhs rhs)]
+    [(signed-expr? lhs)
+     (mk-cpp-expr (bveq (eval lhs) (eval rhs)) 'uint1)]
+    [else
+     (mk-cpp-expr (bveq (eval lhs) (eval rhs)) 'uint1)]))
+
 (define (do-lt lhs rhs)
   (cond
     [(and (integer? lhs) (integer? rhs))
@@ -510,6 +551,12 @@
     [else
      (mk-cpp-expr (bvule (eval lhs) (eval rhs)) 'uint1)]))
 
+(define (do-abs lhs)
+  (define outT (infer-out-type lhs lhs))
+  (define zero (cpp-cast (int8_t (bv 1 8)) (cpp-type-str outT)))
+  (define minus1 (cpp-cast (int8_t (bv -1 8)) (cpp-type-str outT)))
+  (if (bvsge (eval lhs) (eval zero)) lhs (mk-cpp-expr (bvmul (eval lhs) (eval minus1)) outT)))
+
 (define (do-absd lhs rhs)
   (define outT (infer-out-type lhs rhs))
   (cond
@@ -518,6 +565,11 @@
     [else
      (mk-cpp-expr (if (bvule (eval lhs) (eval rhs)) (bvsub (eval rhs) (eval lhs)) (bvsub (eval lhs) (eval rhs))) outT)]))
 
+(define (do-clz lhs)
+  (define outT (infer-out-type lhs lhs))
+  (cond
+    [(eq? int32_t outT) (clz32 lhs)]))
+
 (define (do-bwand lhs rhs)
   (cond
     [(and (integer? lhs) (integer? rhs))
@@ -525,3 +577,13 @@
     [else
      (define outT (infer-out-type lhs rhs))
      (mk-cpp-expr (bvand (eval lhs) (eval rhs)) outT)]))
+
+(define (do-reduce vec op base width)
+  (define outT (cpp-type (vec 0)))
+  (mk-cpp-expr
+   (cond
+     [(eq? width 2) (op (eval (vec base)) (eval (vec (+ base 1))))]
+     [(eq? width 3) (op (eval (vec base)) (eval (vec (+ base 1))) (eval (vec (+ base 2))))]
+     [(eq? width 4) (op (eval (vec base)) (eval (vec (+ base 1))) (eval (vec (+ base 2))) (eval (vec (+ base 3))))]
+     [else (error "NYI: Halide vector_reduce for reduction factor of:" width)])
+   outT))

@@ -7,7 +7,7 @@
 (provide abs8 abs16 abs32 absu8 absu16 absu32
          min8 min16 min32 min64 minu8 minu16 minu32 minu64
          max8 max16 max32 max64 maxu8 maxu16 maxu32 maxu64
-         euclidean-div)
+         euclidean-div clz32)
 
 ;;;;; Absolute Functions ;;;;;
 
@@ -130,6 +130,21 @@
   (set! q (bvadd q (bvand a-neg (bvsub (bvnot b-neg) b-neg))))
   (set! q (bvand q (bvnot b-zero)))
   (cpp-cast (int64_t q) (cpp-type-str outT)))
+
+(define (clz32 val)
+  (define x (eval val))
+  (define numIntBits (bv 32 32))
+  (set! x (or x (bvashr x (bv 1 32))))
+  (set! x (or x (bvashr x (bv 2 32))))
+  (set! x (or x (bvashr x (bv 4 32))))
+  (set! x (or x (bvashr x (bv 8 32))))
+  (set! x (or x (bvashr x (bv 16 32))))
+  (set! x (bvsub x (bvand (bvashr x (bv 1 32)) (bv #x55555555 32))))
+  (set! x (bvadd (bvand (bvashr x (bv 2 32)) (bv #x33333333 32)) (bvand x (bv #x33333333 32))))
+  (set! x (bvand (bvadd (bvashr x (bv 3 32)) x) (bv #x0f0f0f0f 32)))
+  (set! x (bvadd x (bvashr x (bv 8 32))))
+  (set! x (bvadd x (bvashr x (bv 16 32))))
+  (int32_t (bvsub numIntBits (bvand x (bv #x0000003f 32)))))
 
 ;(define (promote var)
 ;  (match var

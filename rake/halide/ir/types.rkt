@@ -10,6 +10,9 @@
 
 ;; Define Halide's IR
 
+;; A node to represent abstract expressions
+(struct abstr-halide-expr (orig-expr abstr-vals))
+
 ;; Constructors
 (struct x32 (sca) #:transparent)
 (struct x64 (sca) #:transparent)
@@ -98,8 +101,12 @@
 (struct sca-max (v1 v2) #:transparent)
 
 (struct sca-if (v1 v2 v3) #:transparent)
+(struct sca-eq (v1 v2) #:transparent)
 (struct sca-lt (v1 v2) #:transparent)
 (struct sca-le (v1 v2) #:transparent)
+
+(struct sca-abs (v1) #:transparent)
+(struct sca-clz (v1) #:transparent)
 
 (struct sca-absd (v1 v2) #:transparent)
 (struct sca-shl (v1 v2) #:transparent)
@@ -116,16 +123,22 @@
 (struct vec-min (v1 v2) #:transparent)
 
 (struct vec-if (v1 v2 v3) #:transparent)
+(struct vec-eq (v1 v2) #:transparent)
 (struct vec-lt (v1 v2) #:transparent)
 (struct vec-le (v1 v2) #:transparent)
 
+(struct vec-abs (v1) #:transparent)
+(struct vec-clz (v1) #:transparent)
 (struct vec-absd (v1 v2) #:transparent)
 (struct vec-shl (v1 v2) #:transparent)
 (struct vec-shr (v1 v2) #:transparent)
 
 (struct vec-bwand (v1 v2) #:transparent)
 
+(struct vector_reduce (op width vec) #:transparent)
+
 ;; Shuffles
+(struct vec-broadcast (n vec) #:transparent)
 (struct slice_vectors (vec base stride len) #:transparent)
 (struct concat_vectors (v1 v2) #:transparent)
 (struct interleave (v1 v2) #:transparent)
