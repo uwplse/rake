@@ -5,9 +5,11 @@
   rosette/lib/destruct
   rosette/lib/angelic
   rake/cpp
+  rake/halide
   rake/hvx/ir/instructions)
 
 (provide
+ (rename-out [visit visit-hvx-ir])
  (rename-out [instr-count hvx-ir-instr-count])
  (rename-out [get-subexprs get-hvx-ir-subexprs])
  (rename-out [set-cn set-cn-hvx-ir])
@@ -23,6 +25,8 @@
 (define (interpret p)
   (destruct p
 
+    [(abstr-ir-expr orig-expr abstr-vals) (lambda (i) (halide-buffer-ref abstr-vals i))]
+            
     [(broadcast value) (lambda (i) value)]
 
     [(build-vec base stride len)
@@ -60,7 +64,7 @@
        [saturate? (lambda (i) (satF (int64_t (bvadd (eval (cpp-cast (input i) 'int64)) (eval (cpp-cast const-val 'int64))))))]
        [else (lambda (i) (mk-cpp-expr (bvadd (eval (cpp-cast (input i) output-type)) c) output-type))])]
 
-    [(shift-right sub-expr shift round? saturate? arithmetic? output-type)
+    [(vs-shift-right sub-expr shift round? saturate? arithmetic? output-type)
      (define input (interpret sub-expr))
      (define n (interpret shift))
      (define satF (get-sat-fn output-type))
@@ -85,6 +89,29 @@
           (define shifted_v (shiftF (eval v) (eval (cpp-cast n (cpp-type v)))))
           (define saturated_v (if saturate? (satF (mk-cpp-expr shifted_v (cpp-type v))) (cpp-cast (mk-cpp-expr shifted_v (cpp-type v)) output-type)))
           saturated_v)])]
+
+    [(vv-shift-right sub-expr0 sub-expr1 round? arithmetic?)
+     (define input0 (interpret sub-expr0))
+     (define input1 (interpret sub-expr1))
+     (define shiftF (if arithmetic? bvashr bvlshr))
+     (cond
+       [round?
+        (lambda(i)
+          (define val (input0 i))
+          (define shift (input1 i))
+          (define zero (cpp-cast (int8_t (bv 0 8)) (cpp-type val)))
+          (define one (cpp-cast (int8_t (bv 1 8)) (cpp-type val)))
+
+          (define shr_1 (shiftF (eval val) (eval shift)))
+          (define shr_2 (shiftF (eval val) (bvsub (eval shift) (eval one))))
+          (define rnd (bvand shr_2 (if ((if (signed-expr? shift) bvslt bvult) (eval zero) (eval shift)) (eval one) (eval zero))))
+          (define res (bvadd shr_1 rnd))
+          (mk-cpp-expr res (cpp-type val)))]
+       [else
+        (lambda(i)
+          (define v0 (input0 i))
+          (define v1 (input1 i))
+          (mk-cpp-expr (shiftF (eval v0) (eval v1)) (cpp-type v0)))])]
 
     [(divide-by-const sub-expr const-val)
      (define input (interpret sub-expr))
@@ -195,6 +222,18 @@
        (define rounded (if round? (shiftF (bvadd (eval v) offset) shift) (eval v)))
        (satF (mk-cpp-expr rounded (cpp-type v))))]
 
+    [(absolute sub-expr)
+     (define input (interpret sub-expr))
+     (lambda (i)
+       (define val (input i))
+       (destruct val
+         [(uint8_t v0) (uint8_t (if (bvuge v0 (bv 0 8)) v0 (bvmul v0 (bv -1 8))))]
+         [(uint16_t v0) (uint16_t (if (bvuge v0 (bv 0 16)) v0 (bvmul v0 (bv -1 16))))]
+         [(uint32_t v0) (uint32_t (if (bvuge v0 (bv 0 32)) v0 (bvmul v0 (bv -1 32))))]
+         [(int8_t v0) (int8_t (if (bvsge v0 (bv 0 8)) v0 (bvmul v0 (bv -1 8))))]
+         [(int16_t v0) (int16_t (if (bvsge v0 (bv 0 16)) v0 (bvmul v0 (bv -1 16))))]
+         [(int32_t v0) (int32_t (if (bvsge v0 (bv 0 32)) v0 (bvmul v0 (bv -1 32))))]))]
+    
     [(abs-diff sub-expr0 sub-expr1)
      (define input0 (interpret sub-expr0))
      (define input1 (interpret sub-expr1))
@@ -229,6 +268,20 @@
          [((int16_t v0) (int16_t v1)) (uint1_t (bvslt v0 v1))]
          [((int32_t v0) (int32_t v1)) (uint1_t (bvslt v0 v1))]))]
 
+    [(is-equal sub-expr0 sub-expr1)
+     (define input0 (interpret sub-expr0))
+     (define input1 (interpret sub-expr1))
+     (lambda (i)
+       (define lhs (input0 i))
+       (define rhs (input1 i))
+       (destruct* (lhs rhs)
+         [((uint8_t v0) (uint8_t v1)) (uint1_t (bveq v0 v1))]
+         [((uint16_t v0) (uint16_t v1)) (uint1_t (bveq v0 v1))]
+         [((uint32_t v0) (uint32_t v1)) (uint1_t (bveq v0 v1))]
+         [((int8_t v0) (int8_t v1)) (uint1_t (bveq v0 v1))]
+         [((int16_t v0) (int16_t v1)) (uint1_t (bveq v0 v1))]
+         [((int32_t v0) (int32_t v1)) (uint1_t (bveq v0 v1))]))]
+
     [(less-than-eq sub-expr0 sub-expr1)
      (define input0 (interpret sub-expr0))
      (define input1 (interpret sub-expr1))
@@ -258,6 +311,13 @@
          [((int16_t v0) (int16_t v1)) (int16_t (bvand v0 v1))]
          [((int32_t v0) (int32_t v1)) (int32_t (bvand v0 v1))]
          [((int64_t v0) (int64_t v1)) (int64_t (bvand v0 v1))]))]
+
+    [(count-leading-zeroes sub-expr)
+     (define input (interpret sub-expr))
+     (lambda (i)
+       (define val (input i))
+       (destruct val
+         [(int32_t v0) (clz32 val)]))]
     
     [(vs-frac-mpy sub-expr sca round?)
      (define input (interpret sub-expr))
@@ -269,6 +329,19 @@
        (define rnd (if round? (bvadd mpy (bv #x40000000 64)) mpy))
        (define shift (bvashr rnd (bv 31 64)))
        (sat32 (int64_t shift)))]
+
+    [(vv-frac-mpy sub-expr0 sub-expr1 round?)
+     (define input0 (interpret sub-expr0))
+     (define input1 (interpret sub-expr1))
+     (lambda (i)
+       (define v1 (cpp-cast (input0 i) 'int64))
+       (define v2 (cpp-cast (input1 i) 'int64))
+       (define mpy (bvmul (eval v1) (eval v2)))
+       (define shr_1 (bvashr mpy (bv 31 64)))
+       (define shr_2 (bvashr mpy (bv 30 64)))
+       (define rnd (bvand shr_2 (bv 1 64)))
+       (define res (bvadd shr_1 rnd))
+       (sat32 (int64_t res)))]
 
     [(vs-mpy-hh sub-expr sca round?)
      (define input (interpret sub-expr))
@@ -285,10 +358,11 @@
     [(vv-mpy-hh-rnd sub-expr)
      (define input (interpret sub-expr))
      (lambda (i)
-       (define v1 (cpp-cast (input (* i 2)) 'int64))
-       (define v2 (cpp-cast (input (+ (* i 2) 1)) 'int64))
+       (define v1 (cpp-cast (input (* i 2)) 'int32))
+       (define v2 (cpp-cast (input (+ (* i 2) 1)) 'int32))
        (define mpy (bvmul (eval v1) (eval v2)))
-       (define dbl (bvshl mpy (bv 1 64)))
+       (define prm (cpp-cast (int32_t mpy) 'int64))
+       (define dbl (bvshl (eval prm) (bv 1 64)))
        (define rnd (bvadd dbl (bv #x8000 64)))
        (define res (sat32 (int64_t rnd)))
        (int16_t (extract 31 16 (eval res))))]
@@ -324,154 +398,155 @@
     [(vs-mpy-add sub-expr weights output-type saturate?)
      (define input (interpret sub-expr))
      (define width (length weights))
+     (define interm-type (if saturate? 'int64 output-type))
      (lambda (i)
        (define out
          (mk-cpp-expr
           (cond
             [(eq? width 1) (bvmul
-                            (eval (cpp-cast (input i) output-type))
-                            (eval (cpp-cast (list-ref weights 0) output-type)))]
+                            (eval (cpp-cast (input i) interm-type))
+                            (eval (cpp-cast (list-ref weights 0) interm-type)))]
             [(eq? width 2) (bvadd
                             (bvmul
-                             (eval (cpp-cast (input (* i 2)) output-type))
-                             (eval (cpp-cast (list-ref weights 0) output-type)))
+                             (eval (cpp-cast (input (* i 2)) interm-type))
+                             (eval (cpp-cast (list-ref weights 0) interm-type)))
                             (bvmul
-                             (eval (cpp-cast (input (+ (* i 2) 1)) output-type))
-                             (eval (cpp-cast (list-ref weights 1) output-type))))]
+                             (eval (cpp-cast (input (+ (* i 2) 1)) interm-type))
+                             (eval (cpp-cast (list-ref weights 1) interm-type))))]
             [(eq? width 3) (bvadd
                             (bvmul
-                             (eval (cpp-cast (input (* i 3)) output-type))
-                             (eval (cpp-cast (list-ref weights 0) output-type)))
+                             (eval (cpp-cast (input (* i 3)) interm-type))
+                             (eval (cpp-cast (list-ref weights 0) interm-type)))
                             (bvmul
-                             (eval (cpp-cast (input (+ (* i 3) 1)) output-type))
-                             (eval (cpp-cast (list-ref weights 1) output-type)))
+                             (eval (cpp-cast (input (+ (* i 3) 1)) interm-type))
+                             (eval (cpp-cast (list-ref weights 1) interm-type)))
                             (bvmul
-                             (eval (cpp-cast (input (+ (* i 3) 2)) output-type))
-                             (eval (cpp-cast (list-ref weights 2) output-type))))]
+                             (eval (cpp-cast (input (+ (* i 3) 2)) interm-type))
+                             (eval (cpp-cast (list-ref weights 2) interm-type))))]
             [(eq? width 4) (bvadd
                             (bvmul
-                             (eval (cpp-cast (input (* i 4)) output-type))
-                             (eval (cpp-cast (list-ref weights 0) output-type)))
+                             (eval (cpp-cast (input (* i 4)) interm-type))
+                             (eval (cpp-cast (list-ref weights 0) interm-type)))
                             (bvmul
-                             (eval (cpp-cast (input (+ (* i 4) 1)) output-type))
-                             (eval (cpp-cast (list-ref weights 1) output-type)))
+                             (eval (cpp-cast (input (+ (* i 4) 1)) interm-type))
+                             (eval (cpp-cast (list-ref weights 1) interm-type)))
                             (bvmul
-                             (eval (cpp-cast (input (+ (* i 4) 2)) output-type))
-                             (eval (cpp-cast (list-ref weights 2) output-type)))
+                             (eval (cpp-cast (input (+ (* i 4) 2)) interm-type))
+                             (eval (cpp-cast (list-ref weights 2) interm-type)))
                             (bvmul
-                             (eval (cpp-cast (input (+ (* i 4) 3)) output-type))
-                             (eval (cpp-cast (list-ref weights 3) output-type))))]
+                             (eval (cpp-cast (input (+ (* i 4) 3)) interm-type))
+                             (eval (cpp-cast (list-ref weights 3) interm-type))))]
             [(eq? width 5) (bvadd
                             (bvmul
-                             (eval (cpp-cast (input (* i 5)) output-type))
-                             (eval (cpp-cast (list-ref weights 0) output-type)))
+                             (eval (cpp-cast (input (* i 5)) interm-type))
+                             (eval (cpp-cast (list-ref weights 0) interm-type)))
                             (bvmul
-                             (eval (cpp-cast (input (+ (* i 5) 1)) output-type))
-                             (eval (cpp-cast (list-ref weights 1) output-type)))
+                             (eval (cpp-cast (input (+ (* i 5) 1)) interm-type))
+                             (eval (cpp-cast (list-ref weights 1) interm-type)))
                             (bvmul
-                             (eval (cpp-cast (input (+ (* i 5) 2)) output-type))
-                             (eval (cpp-cast (list-ref weights 2) output-type)))
+                             (eval (cpp-cast (input (+ (* i 5) 2)) interm-type))
+                             (eval (cpp-cast (list-ref weights 2) interm-type)))
                             (bvmul
-                             (eval (cpp-cast (input (+ (* i 5) 3)) output-type))
-                             (eval (cpp-cast (list-ref weights 3) output-type)))
+                             (eval (cpp-cast (input (+ (* i 5) 3)) interm-type))
+                             (eval (cpp-cast (list-ref weights 3) interm-type)))
                             (bvmul
-                             (eval (cpp-cast (input (+ (* i 5) 4)) output-type))
-                             (eval (cpp-cast (list-ref weights 4) output-type))))]
+                             (eval (cpp-cast (input (+ (* i 5) 4)) interm-type))
+                             (eval (cpp-cast (list-ref weights 4) interm-type))))]
             [(eq? width 6) (bvadd
                             (bvmul
-                             (eval (cpp-cast (input (* i 6)) output-type))
-                             (eval (cpp-cast (list-ref weights 0) output-type)))
+                             (eval (cpp-cast (input (* i 6)) interm-type))
+                             (eval (cpp-cast (list-ref weights 0) interm-type)))
                             (bvmul
-                             (eval (cpp-cast (input (+ (* i 6) 1)) output-type))
-                             (eval (cpp-cast (list-ref weights 1) output-type)))
+                             (eval (cpp-cast (input (+ (* i 6) 1)) interm-type))
+                             (eval (cpp-cast (list-ref weights 1) interm-type)))
                             (bvmul
-                             (eval (cpp-cast (input (+ (* i 6) 2)) output-type))
-                             (eval (cpp-cast (list-ref weights 2) output-type)))
+                             (eval (cpp-cast (input (+ (* i 6) 2)) interm-type))
+                             (eval (cpp-cast (list-ref weights 2) interm-type)))
                             (bvmul
-                             (eval (cpp-cast (input (+ (* i 6) 3)) output-type))
-                             (eval (cpp-cast (list-ref weights 3) output-type)))
+                             (eval (cpp-cast (input (+ (* i 6) 3)) interm-type))
+                             (eval (cpp-cast (list-ref weights 3) interm-type)))
                             (bvmul
-                             (eval (cpp-cast (input (+ (* i 6) 4)) output-type))
-                             (eval (cpp-cast (list-ref weights 4) output-type)))
+                             (eval (cpp-cast (input (+ (* i 6) 4)) interm-type))
+                             (eval (cpp-cast (list-ref weights 4) interm-type)))
                             (bvmul
-                             (eval (cpp-cast (input (+ (* i 6) 5)) output-type))
-                             (eval (cpp-cast (list-ref weights 5) output-type))))]
+                             (eval (cpp-cast (input (+ (* i 6) 5)) interm-type))
+                             (eval (cpp-cast (list-ref weights 5) interm-type))))]
             [(eq? width 7) (bvadd
                             (bvmul
-                             (eval (cpp-cast (input (* i 7)) output-type))
-                             (eval (cpp-cast (list-ref weights 0) output-type)))
+                             (eval (cpp-cast (input (* i 7)) interm-type))
+                             (eval (cpp-cast (list-ref weights 0) interm-type)))
                             (bvmul
-                             (eval (cpp-cast (input (+ (* i 7) 1)) output-type))
-                             (eval (cpp-cast (list-ref weights 1) output-type)))
+                             (eval (cpp-cast (input (+ (* i 7) 1)) interm-type))
+                             (eval (cpp-cast (list-ref weights 1) interm-type)))
                             (bvmul
-                             (eval (cpp-cast (input (+ (* i 7) 2)) output-type))
-                             (eval (cpp-cast (list-ref weights 2) output-type)))
+                             (eval (cpp-cast (input (+ (* i 7) 2)) interm-type))
+                             (eval (cpp-cast (list-ref weights 2) interm-type)))
                             (bvmul
-                             (eval (cpp-cast (input (+ (* i 7) 3)) output-type))
-                             (eval (cpp-cast (list-ref weights 3) output-type)))
+                             (eval (cpp-cast (input (+ (* i 7) 3)) interm-type))
+                             (eval (cpp-cast (list-ref weights 3) interm-type)))
                             (bvmul
-                             (eval (cpp-cast (input (+ (* i 7) 4)) output-type))
-                             (eval (cpp-cast (list-ref weights 4) output-type)))
+                             (eval (cpp-cast (input (+ (* i 7) 4)) interm-type))
+                             (eval (cpp-cast (list-ref weights 4) interm-type)))
                             (bvmul
-                             (eval (cpp-cast (input (+ (* i 7) 5)) output-type))
-                             (eval (cpp-cast (list-ref weights 5) output-type)))
+                             (eval (cpp-cast (input (+ (* i 7) 5)) interm-type))
+                             (eval (cpp-cast (list-ref weights 5) interm-type)))
                             (bvmul
-                             (eval (cpp-cast (input (+ (* i 7) 6)) output-type))
-                             (eval (cpp-cast (list-ref weights 6) output-type))))]
+                             (eval (cpp-cast (input (+ (* i 7) 6)) interm-type))
+                             (eval (cpp-cast (list-ref weights 6) interm-type))))]
             [(eq? width 8) (bvadd
                             (bvmul
-                             (eval (cpp-cast (input (* i 8)) output-type))
-                             (eval (cpp-cast (list-ref weights 0) output-type)))
+                             (eval (cpp-cast (input (* i 8)) interm-type))
+                             (eval (cpp-cast (list-ref weights 0) interm-type)))
                             (bvmul
-                             (eval (cpp-cast (input (+ (* i 8) 1)) output-type))
-                             (eval (cpp-cast (list-ref weights 1) output-type)))
+                             (eval (cpp-cast (input (+ (* i 8) 1)) interm-type))
+                             (eval (cpp-cast (list-ref weights 1) interm-type)))
                             (bvmul
-                             (eval (cpp-cast (input (+ (* i 8) 2)) output-type))
-                             (eval (cpp-cast (list-ref weights 2) output-type)))
+                             (eval (cpp-cast (input (+ (* i 8) 2)) interm-type))
+                             (eval (cpp-cast (list-ref weights 2) interm-type)))
                             (bvmul
-                             (eval (cpp-cast (input (+ (* i 8) 3)) output-type))
-                             (eval (cpp-cast (list-ref weights 3) output-type)))
+                             (eval (cpp-cast (input (+ (* i 8) 3)) interm-type))
+                             (eval (cpp-cast (list-ref weights 3) interm-type)))
                             (bvmul
-                             (eval (cpp-cast (input (+ (* i 8) 4)) output-type))
-                             (eval (cpp-cast (list-ref weights 4) output-type)))
+                             (eval (cpp-cast (input (+ (* i 8) 4)) interm-type))
+                             (eval (cpp-cast (list-ref weights 4) interm-type)))
                             (bvmul
-                             (eval (cpp-cast (input (+ (* i 8) 5)) output-type))
-                             (eval (cpp-cast (list-ref weights 5) output-type)))
+                             (eval (cpp-cast (input (+ (* i 8) 5)) interm-type))
+                             (eval (cpp-cast (list-ref weights 5) interm-type)))
                             (bvmul
-                             (eval (cpp-cast (input (+ (* i 8) 6)) output-type))
-                             (eval (cpp-cast (list-ref weights 6) output-type)))
+                             (eval (cpp-cast (input (+ (* i 8) 6)) interm-type))
+                             (eval (cpp-cast (list-ref weights 6) interm-type)))
                             (bvmul
-                             (eval (cpp-cast (input (+ (* i 8) 7)) output-type))
-                             (eval (cpp-cast (list-ref weights 7) output-type))))]
+                             (eval (cpp-cast (input (+ (* i 8) 7)) interm-type))
+                             (eval (cpp-cast (list-ref weights 7) interm-type))))]
             [(eq? width 9) (bvadd
                             (bvmul
-                             (eval (cpp-cast (input (* i 9)) output-type))
-                             (eval (cpp-cast (list-ref weights 0) output-type)))
+                             (eval (cpp-cast (input (* i 9)) interm-type))
+                             (eval (cpp-cast (list-ref weights 0) interm-type)))
                             (bvmul
-                             (eval (cpp-cast (input (+ (* i 9) 1)) output-type))
-                             (eval (cpp-cast (list-ref weights 1) output-type)))
+                             (eval (cpp-cast (input (+ (* i 9) 1)) interm-type))
+                             (eval (cpp-cast (list-ref weights 1) interm-type)))
                             (bvmul
-                             (eval (cpp-cast (input (+ (* i 9) 2)) output-type))
-                             (eval (cpp-cast (list-ref weights 2) output-type)))
+                             (eval (cpp-cast (input (+ (* i 9) 2)) interm-type))
+                             (eval (cpp-cast (list-ref weights 2) interm-type)))
                             (bvmul
-                             (eval (cpp-cast (input (+ (* i 9) 3)) output-type))
-                             (eval (cpp-cast (list-ref weights 3) output-type)))
+                             (eval (cpp-cast (input (+ (* i 9) 3)) interm-type))
+                             (eval (cpp-cast (list-ref weights 3) interm-type)))
                             (bvmul
-                             (eval (cpp-cast (input (+ (* i 9) 4)) output-type))
-                             (eval (cpp-cast (list-ref weights 4) output-type)))
+                             (eval (cpp-cast (input (+ (* i 9) 4)) interm-type))
+                             (eval (cpp-cast (list-ref weights 4) interm-type)))
                             (bvmul
-                             (eval (cpp-cast (input (+ (* i 9) 5)) output-type))
-                             (eval (cpp-cast (list-ref weights 5) output-type)))
+                             (eval (cpp-cast (input (+ (* i 9) 5)) interm-type))
+                             (eval (cpp-cast (list-ref weights 5) interm-type)))
                             (bvmul
-                             (eval (cpp-cast (input (+ (* i 9) 6)) output-type))
-                             (eval (cpp-cast (list-ref weights 6) output-type)))
+                             (eval (cpp-cast (input (+ (* i 9) 6)) interm-type))
+                             (eval (cpp-cast (list-ref weights 6) interm-type)))
                             (bvmul
-                             (eval (cpp-cast (input (+ (* i 9) 7)) output-type))
-                             (eval (cpp-cast (list-ref weights 7) output-type)))
+                             (eval (cpp-cast (input (+ (* i 9) 7)) interm-type))
+                             (eval (cpp-cast (list-ref weights 7) interm-type)))
                             (bvmul
-                             (eval (cpp-cast (input (+ (* i 9) 8)) output-type))
-                             (eval (cpp-cast (list-ref weights 8) output-type))))])
-          output-type))
+                             (eval (cpp-cast (input (+ (* i 9) 8)) interm-type))
+                             (eval (cpp-cast (list-ref weights 8) interm-type))))])
+          interm-type))
        
        (if saturate?
            (cond
@@ -581,13 +656,16 @@
     [(vv-mpy-hh-rnd sub-expr) (list sub-expr)]
     
     [(vs-frac-mpy sub-expr sca round?) (list sub-expr)]
+    [(vv-frac-mpy sub-expr0 sub-expr1 round?) (list sub-expr0 sub-expr1)]
 
     [(vs-shift-left sub-expr sca) (list sub-expr)]
     [(vv-shift-left sub-expr0 sub-expr1) (list sub-expr0 sub-expr1)]
 
     [(add-const sub-expr const-val output-type saturate?) (list sub-expr)]
     
-    [(shift-right sub-expr const-val round? saturate? arithmetic? output-type) (list sub-expr)]
+    [(vs-shift-right sub-expr const-val round? saturate? arithmetic? output-type) (list sub-expr)]
+    [(vv-shift-right sub-expr0 sub-expr1 round? arithmetic?) (list sub-expr0 sub-expr1)]
+    
     [(divide-by-const sub-expr const-val) (list sub-expr)]
     [(vs-divide sub-expr sca-val output-type) (list sub-expr)]
     [(average sub-expr round? output-type) (list sub-expr)]
@@ -597,20 +675,23 @@
     [(maximum sub-expr0 sub-expr1) (list sub-expr0 sub-expr1)]
     [(minimum sub-expr0 sub-expr1) (list sub-expr0 sub-expr1)]
     [(saturate sub-expr round? output-type) (list sub-expr)]
-    
+
+    [(absolute sub-expr) (list sub-expr)]
     [(abs-diff sub-expr0 sub-expr1) (list sub-expr0 sub-expr1)]
     
     [(select sub-expr0 sub-expr1 sub-expr2) (list sub-expr0 sub-expr1 sub-expr2)]
+    [(is-equal sub-expr0 sub-expr1) (list sub-expr0 sub-expr1)]
     [(less-than sub-expr0 sub-expr1) (list sub-expr0 sub-expr1)]
     [(less-than-eq sub-expr0 sub-expr1) (list sub-expr0 sub-expr1)]
 
     [(bitwise-and sub-expr0 sub-expr1) (list sub-expr0 sub-expr1)]
+    [(count-leading-zeroes sub-expr) (list sub-expr)]
     
     [_ (error "NYI: Extracing sub-expression for IR Expr:" ir-expr)]))
 
 (define (instr-count ir-expr)
   (destruct ir-expr
-    [(load-data live-data gather-tbl) 1]
+    [(load-data live-data gather-tbl) 0]
     [(broadcast value) 1]
     [(build-vec base stride len) 1]
 
@@ -626,13 +707,16 @@
     [(vv-mpy-hh-rnd sub-expr) (+ (instr-count sub-expr) 1)]
     
     [(vs-frac-mpy sub-expr sca round?) (+ (instr-count sub-expr) 1)]
+    [(vv-frac-mpy sub-expr0 sub-expr1 round?) (+ (instr-count sub-expr0) (instr-count sub-expr1) 1)]
 
     [(vs-shift-left sub-expr sca) (+ (instr-count sub-expr) 1)]
     [(vv-shift-left sub-expr0 sub-expr1) (+ (instr-count sub-expr0) (instr-count sub-expr1) 1)]
 
     [(add-const sub-expr const-val output-type saturate?) (+ (instr-count sub-expr) 1)]
     
-    [(shift-right sub-expr const-val round? saturate? arithmetic? output-type) (+ (instr-count sub-expr) 1)]
+    [(vs-shift-right sub-expr const-val round? saturate? arithmetic? output-type) (+ (instr-count sub-expr) 1)]
+    [(vv-shift-right sub-expr0 sub-expr1 round? arithmetic?) (+ (instr-count sub-expr0) (instr-count sub-expr1) 1)]
+    
     [(divide-by-const sub-expr const-val) (+ (instr-count sub-expr) 1)]
     [(vs-divide sub-expr scalar-val output-type) (+ (instr-count sub-expr) 1)]
     [(average sub-expr round? output-type) (+ (instr-count sub-expr) 1)]
@@ -642,13 +726,69 @@
     [(maximum sub-expr0 sub-expr1) (+ (instr-count sub-expr0) (instr-count sub-expr1) 1)]
     [(minimum sub-expr0 sub-expr1) (+ (instr-count sub-expr0) (instr-count sub-expr1) 1)]
     [(saturate sub-expr round? output-type) (+ (instr-count sub-expr) 1)]
-    
+
+    [(absolute sub-expr) (+ (instr-count sub-expr) 1)]
     [(abs-diff sub-expr0 sub-expr1) (+ (instr-count sub-expr0) (instr-count sub-expr1) 1)]
     
     [(select sub-expr0 sub-expr1 sub-expr2) (+ (instr-count sub-expr0) (instr-count sub-expr1) (instr-count sub-expr2) 1)]
+    [(is-equal sub-expr0 sub-expr1) (+ (instr-count sub-expr0) (instr-count sub-expr1) 1)]
     [(less-than sub-expr0 sub-expr1) (+ (instr-count sub-expr0) (instr-count sub-expr1) 1)]
     [(less-than-eq sub-expr0 sub-expr1) (+ (instr-count sub-expr0) (instr-count sub-expr1) 1)]
 
     [(bitwise-and sub-expr0 sub-expr1) (+ (instr-count sub-expr0) (instr-count sub-expr1) 1)]
+    [(count-leading-zeroes sub-expr) (+ (instr-count sub-expr) 1)]
     
     [_ (error "NYI: Extracing sub-expression for IR Expr:" ir-expr)]))
+
+(define (visit ir-expr handler)
+  (destruct ir-expr
+    [(load-data live-data gather-tbl) (handler ir-expr)]
+    [(broadcast value) (handler ir-expr)]
+    [(build-vec base stride len) (handler ir-expr)]
+
+    [(combine sub-expr0 sub-expr1 read-tbl) (handler (combine (ir-node-id ir-expr) (visit sub-expr0 handler) (visit sub-expr1 handler) read-tbl))]
+    
+    [(cast sub-expr type) (handler (cast (ir-node-id ir-expr) (visit sub-expr handler) type))]
+
+    [(vs-mpy-add sub-expr weight-matrix output-type saturate?) (handler (vs-mpy-add (ir-node-id ir-expr) (visit sub-expr handler) weight-matrix output-type saturate?))]
+    [(vs-mpy-add-acc acc-expr sub-expr weight-matrix output-type saturate?) (handler (vs-mpy-add-acc (ir-node-id ir-expr) (visit sub-expr handler) weight-matrix output-type saturate?))]
+    [(vv-mpy-add sub-expr width output-type saturate?) (handler (vv-mpy-add (ir-node-id ir-expr) (visit sub-expr handler) width output-type saturate?))]
+
+    [(vs-mpy-hh sub-expr sca round?) (handler (vs-mpy-hh (ir-node-id ir-expr) (visit sub-expr handler) sca round?))]
+    [(vv-mpy-hh-rnd sub-expr) (handler (vv-mpy-hh-rnd (ir-node-id ir-expr) (visit sub-expr handler)))]
+    
+    [(vs-frac-mpy sub-expr sca round?) (handler (vs-frac-mpy (ir-node-id ir-expr) (visit sub-expr handler) sca round?))]
+    [(vv-frac-mpy sub-expr0 sub-expr1 round?) (handler (vv-frac-mpy (ir-node-id ir-expr) (visit sub-expr0 handler) (visit sub-expr1 handler) round?))]
+
+    [(vs-shift-left sub-expr sca) (handler (vs-shift-left (ir-node-id ir-expr) (visit sub-expr handler) sca))]
+    [(vv-shift-left sub-expr0 sub-expr1) (handler (vv-shift-left (ir-node-id ir-expr) (visit sub-expr0 handler) (visit sub-expr1 handler)))]
+
+    [(add-const sub-expr const-val output-type saturate?) (handler (add-const (ir-node-id ir-expr) (visit sub-expr handler)  const-val output-type saturate?))]
+    
+    [(vs-shift-right sub-expr const-val round? saturate? arithmetic? output-type) (handler (vs-shift-right (ir-node-id ir-expr) (visit sub-expr handler) const-val round? saturate? arithmetic? output-type))]
+    [(vv-shift-right sub-expr0 sub-expr1 round? arithmetic?) (handler (vv-shift-right (ir-node-id ir-expr) (visit sub-expr0 handler) (visit sub-expr1 handler) round? arithmetic?))]
+    
+    [(divide-by-const sub-expr const-val) (handler (divide-by-const (ir-node-id ir-expr) (visit sub-expr handler) const-val))]
+    [(vs-divide sub-expr scalar-val output-type) (handler (vs-divide (ir-node-id ir-expr) (visit sub-expr handler) scalar-val output-type))]
+    [(average sub-expr round? output-type) (handler (average (ir-node-id ir-expr) (visit sub-expr handler) round? output-type))]
+    
+    [(modulo-by-const sub-expr const-val) (handler (modulo-by-const (ir-node-id ir-expr) (visit sub-expr handler) const-val))]
+    
+    [(maximum sub-expr0 sub-expr1) (handler (maximum (ir-node-id ir-expr) (visit sub-expr0 handler) (visit sub-expr1 handler)))]
+    [(minimum sub-expr0 sub-expr1) (handler (minimum (ir-node-id ir-expr) (visit sub-expr0 handler) (visit sub-expr1 handler)))]
+    [(saturate sub-expr round? output-type) (handler (saturate (ir-node-id ir-expr) (visit sub-expr handler) round? output-type))]
+    
+    [(absolute sub-expr) (handler (absolute (ir-node-id ir-expr) (visit sub-expr handler)))]
+    [(abs-diff sub-expr0 sub-expr1) (handler (abs-diff (ir-node-id ir-expr) (visit sub-expr0 handler) (visit sub-expr1 handler)))]
+    
+    [(select sub-expr0 sub-expr1 sub-expr2) (handler (select (ir-node-id ir-expr) (visit sub-expr0 handler) (visit sub-expr1 handler) (visit sub-expr2 handler)))]
+    [(is-equal sub-expr0 sub-expr1) (handler (is-equal (ir-node-id ir-expr) (visit sub-expr0 handler) (visit sub-expr1 handler)))]
+    [(less-than sub-expr0 sub-expr1) (handler (less-than (ir-node-id ir-expr) (visit sub-expr0 handler) (visit sub-expr1 handler)))]
+    [(less-than-eq sub-expr0 sub-expr1) (handler (less-than-eq (ir-node-id ir-expr) (visit sub-expr0 handler) (visit sub-expr1 handler)))]
+
+    [(bitwise-and sub-expr0 sub-expr1) (handler (bitwise-and (ir-node-id ir-expr) (visit sub-expr0 handler) (visit sub-expr1 handler)))]
+    [(count-leading-zeroes sub-expr) (handler (count-leading-zeroes (ir-node-id ir-expr) (visit sub-expr handler)))]
+
+    [(abstr-ir-expr orig-expr abstr-vals) (handler ir-expr)]
+    
+    [_ (error "NYI: Visitor for IR Expr:" ir-expr)]))
