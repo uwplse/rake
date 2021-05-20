@@ -39,13 +39,12 @@
 ;; Usage: When synthesizing (swizzling) hash-tables, we restrict the hashtables to only point to the data-elements that appear in
 ;; the original expression. 
 (define (extract-buffer-reads expr)
-  (println "starting")
   (define live-buffers (extract-live-buffers expr))
   (define interpreted-expr (interpret-halide expr))
-  (time (for/fold
+  (for/fold
     ([buff-reads '()])
     ([i (halide-vec-len expr)])
-      (append buff-reads (list (set->list (list->set (extract-lane-buffer-reads (interpreted-expr i) live-buffers))))))))
+      (append buff-reads (list (set->list (list->set (extract-lane-buffer-reads (interpreted-expr i) live-buffers)))))))
 
 (define cache (make-hash))
 

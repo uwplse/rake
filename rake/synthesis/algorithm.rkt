@@ -23,7 +23,7 @@
      (define-values (lifting-success? ir-expr ir-expr-sol ir-annotations)
        (synthesize-ir-expr spec 'hvx-uberinstrs lifting-algo))
 
-     (exit)]
+     ir-expr]
 ;     (cond
 ;       [lifting-success?
 ;        ;; Synthesize equivalent HVX expression
