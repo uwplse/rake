@@ -18,6 +18,7 @@
  (rename-out
   [extract-live-buffers extract-live-buffers-halide]
   [extract-buffer-reads extract-buffer-reads-halide]
+  [extract-loads extract-loads-halide]
   [extract-add-consts extract-add-consts-halide]
   [extract-sub-consts extract-sub-consts-halide]
   [extract-mul-consts extract-mul-consts-halide]
@@ -164,82 +165,36 @@
   (visit-halide expr extract-mod-const)
   (set->list mod-consts))
 
-;;; Extract vectors
-;(define (extract-loads-as-hvx-vecs expr)
-;  (list->set
-;   (match expr
-;     ;; Constructors
-;     ;[(x32 sca) (list (vsplat sca))]
-;     ;[(x64 sca) (list (vsplat sca))]
-;     ;[(x128 sca) (list (vsplat sca))]
-;     ;[(x256 sca) (list (vsplat sca))]
-;     [(x32 sca) (list)]
-;     [(x64 sca) (list)]
-;     [(x128 sca) (list)]
-;     [(x256 sca) (list)]
-;
-;     [(ramp base stride len) (list)]
-;     [(load buf idxs align)
-;      (match idxs
-;        [(ramp base stride len)
-;         (define elem-bw (bw (hash-ref type-dict buf)))
-;         (define tile-w (* len elem-bw))
-;         (cond
-;           [(eq? tile-w 1024)
-;            (list (list buf base align))]
-;           [(eq? tile-w 2048)
-;            (list
-;             (list buf base align)
-;             (list buf (+ base (quotient 1024 elem-bw)) align))]
-;           [(eq? tile-w 4096)
-;            (list
-;             (list buf base align)
-;             (list buf (+ base (quotient 1024 elem-bw)) align)
-;             (list buf (+ base (quotient 2048 elem-bw)) align)
-;             (list buf (+ base (quotient 3072 elem-bw)) align))])]
-;        [_ (error "NYI: Extracting vec from:" expr)])]
-;
-;     [(slice_vectors vec base stride len) (extract-loads-as-hvx-vecs vec)]
-;     [(concat_vectors v1 v2) (set-union (extract-loads-as-hvx-vecs v1) (extract-loads-as-hvx-vecs v2))]
-;
-;     ;; Type Casts
-;     [(uint8x32 vec) (extract-loads-as-hvx-vecs vec)]
-;     [(uint16x32 vec) (extract-loads-as-hvx-vecs vec)]
-;     [(uint32x32 vec) (extract-loads-as-hvx-vecs vec)]
-;     [(int8x32 vec) (extract-loads-as-hvx-vecs vec)]
-;     [(int16x32 vec) (extract-loads-as-hvx-vecs vec)]
-;     [(int32x32 vec) (extract-loads-as-hvx-vecs vec)]
-;     [(uint8x64 vec) (extract-loads-as-hvx-vecs vec)]
-;     [(uint16x64 vec) (extract-loads-as-hvx-vecs vec)]
-;     [(uint32x64 vec) (extract-loads-as-hvx-vecs vec)]
-;     [(int8x64 vec) (extract-loads-as-hvx-vecs vec)]
-;     [(int16x64 vec) (extract-loads-as-hvx-vecs vec)]
-;     [(int32x64 vec) (extract-loads-as-hvx-vecs vec)]
-;     [(uint8x128 vec) (extract-loads-as-hvx-vecs vec)]
-;     [(uint16x128 vec) (extract-loads-as-hvx-vecs vec)]
-;     [(uint32x128 vec) (extract-loads-as-hvx-vecs vec)]
-;     [(int8x128 vec) (extract-loads-as-hvx-vecs vec)]
-;     [(int16x128 vec) (extract-loads-as-hvx-vecs vec)]
-;     [(int32x128 vec) (extract-loads-as-hvx-vecs vec)]
-;     [(uint8x256 vec) (extract-loads-as-hvx-vecs vec)]
-;
-;     ;; Operations
-;     [(vec-add v1 v2) (set-union (extract-loads-as-hvx-vecs v1) (extract-loads-as-hvx-vecs v2))]
-;     [(vec-sub v1 v2) (set-union (extract-loads-as-hvx-vecs v1) (extract-loads-as-hvx-vecs v2))]
-;     [(vec-div v1 v2) (set-union (extract-loads-as-hvx-vecs v1) (extract-loads-as-hvx-vecs v2))]
-;     [(vec-mul v1 v2) (set-union (extract-loads-as-hvx-vecs v1) (extract-loads-as-hvx-vecs v2))]
-;     [(vec-max v1 v2) (set-union (extract-loads-as-hvx-vecs v1) (extract-loads-as-hvx-vecs v2))]
-;     [(vec-min v1 v2) (set-union (extract-loads-as-hvx-vecs v1) (extract-loads-as-hvx-vecs v2))]
-;     [(vec-if v1 v2 v3) (set-union (set-union (extract-loads-as-hvx-vecs v1) (extract-loads-as-hvx-vecs v2)) (extract-loads-as-hvx-vecs v3))]
-;     [(vec-lt v1 v2) (set-union (extract-loads-as-hvx-vecs v1) (extract-loads-as-hvx-vecs v2))]     
-;     [(vec-le v1 v2) (set-union (extract-loads-as-hvx-vecs v1) (extract-loads-as-hvx-vecs v2))]     
-;
-;     [(vec-shl v1 v2) (set-union (extract-loads-as-hvx-vecs v1) (extract-loads-as-hvx-vecs v2))]
-;     [(vec-shr v1 v2) (set-union (extract-loads-as-hvx-vecs v1) (extract-loads-as-hvx-vecs v2))]
-;     [(vec-absd v1 v2) (set-union (extract-loads-as-hvx-vecs v1) (extract-loads-as-hvx-vecs v2))]
-;    
-;     ;; Base case
-;     [_ (error "Don't know how to get loads from:" expr)])))
+;; Extract vectors
+(define (extract-loads expr)
+  (define loads (mutable-set))
+  (define (extract-load-ops node)
+    (destruct node
+      [(load buf idxs align)
+        (destruct idxs
+          [(ramp base stride len)
+           (define elem-bw (type-bw (buffer-elemT buf)))
+           (define tile-w (* len elem-bw))
+           (define lds
+             (cond
+               [(eq? tile-w 1024)
+                (set (list buf base align))]
+               [(eq? tile-w 2048)
+                (set
+                 (list buf base align)
+                 (list buf (+ base (quotient 1024 elem-bw)) align))]
+               [(eq? tile-w 4096)
+                (set
+                 (list buf base align)
+                 (list buf (+ base (quotient 1024 elem-bw)) align)
+                 (list buf (+ base (quotient 2048 elem-bw)) align)
+                 (list buf (+ base (quotient 3072 elem-bw)) align))]))
+           (set-union! loads lds)]
+        [_ (error "NYI: Extracting vec from:" expr)])]
+      ;; Ignore everything else
+      [_ node]))
+  (visit-halide expr extract-load-ops)
+  (set->list loads))
 
 ;;;;;;;;;;;;;;;;;; Some helper functions ;;;;;;;;;;;;;;;;;;;;;;
 
