@@ -1,9 +1,9 @@
-#lang rosette
+#lang rosette/safe
 
-(require rake/hvx/ast/types)
-(require rake/hvx/ast/visitor)
-
-(require rosette/lib/match)
+(require
+  rosette/lib/match
+  rake/hvx/ast/types
+  rake/hvx/ast/visitor)
 
 (struct hvx-resource-usage (load shift permute mpy1 mpy2) #:transparent)
 
@@ -30,7 +30,8 @@
     [(vcombine Vu Vv) 1]
     [(vshuffe Vu Vv) 1]
     [(vshuffo Vu Vv) 1]
-    [(vshuffo-n Vu Vv signed?) 1]
+    [(vshuffe-n Vu Vv signed?) 1]
+    [(vshuffo-n Vu Vv) 1]
     [(vshuffoe Vu Vv) 1]
     [(vswap Qt Vu Vv) 1]
     [(vmux Qt Vu Vv) 1]
@@ -44,19 +45,20 @@
     [(vshuff Vu) 1]
     [(vtranspose Vu Vv Rt) 1]
     [(vinterleave Vuu) 1]
+    [(vinterleave4 Vuu Vvv Rt) 1]
     [(vpack Vu Vv signed?) 1]
     [(vpacke Vu Vv) 1]
     [(vpacko Vu Vv) 1]
     [(vpacke-n Vu Vv signed?) 1]
-    [(vpacko-n Vu Vv signed?) 1]
+    [(vpacko-n Vu Vv) 1]
     [(vunpack Vu) 1]
     [(vunpacko Vu) 1]
     [(vlut Vu Vv) 1]
     [(vgather Rt Mu Vv) 1]
 
     ;; HVX instructions for type-casting
-    [(vzxt Vu signed?) 1]
-    [(vsxt Vu signed?) 1]
+    [(vzxt Vu) 1]
+    [(vsxt Vu) 1]
     [(reinterpret Vu) 0]
 
     ;; HVX instructions for data processing
@@ -65,20 +67,23 @@
     [(vadd-w-acc Vdd Vu Vv) 1]
     [(vmpy Vu Rt) 1]
     [(vmpyi Vu Rt) 1]
+    [(vmpyie Vu Rt) 2]
     [(vmpye Vu Rt) 1]
     [(vmpy-acc Vdd Vu Rt) 1]
     [(vmpyi-acc Vd Vu Rt) 1]
     [(vmpye-acc Vd Vu Rt) 1]
-    [(vmpa Vuu Rt signed?) 1]
-    [(vmpa-acc Vdd Vuu Rt signed?) 1]
+    [(vmpa Vuu Rt) 1]
+    [(vmpa-acc Vdd Vuu Rt) 1]
     [(vdmpy Vu Rt) 1]
     [(vdmpy-sw Vuu Rt) 1]
     [(vdmpy-acc Vd Vu Rt) 1]
     [(vdmpy-sw-acc Vdd Vuu Rt) 1]
-    [(vtmpy Vuu Rt signed?) 1]
-    [(vtmpy-acc Vdd Vuu Rt signed?) 1]
+    [(vtmpy Vuu Rt) 1]
+    [(vtmpy-acc Vdd Vuu Rt) 1]
     [(vrmpy Vu Rt) 1]
     [(vrmpy-acc Vd Vu Rt) 1]
+    [(vrmpy-2 Vu Rt) 1]
+    [(vrmpy-acc-2 Vd Vu Rt) 1]
     [(vrmpy-p Vuu Rt u1) 1]
     [(vrmpy-p-acc Vdd Vuu Rt u1) 1]
     [(vavg Vu Vv rnd?) 1]
@@ -95,15 +100,15 @@
 
     ;; New instructions types we introduce to abstract away data-movement.
     ;; These instr types should never exist in output code.
-    [(gather* buff-reads) 1]
-    [(gather-vec buff-reads) 1]
-    [(gather-vecp buff-reads) 1]
-    [(swizzle* vec) 1]
-    [(swizzle vec) 1]
-    [(??vread buf-opts idxs) 1]
-    [(??vreadp buf-opts idxs) 1]
+    ;[(gather* buff-reads) 1]
+    ;[(gather-vec buff-reads) 1]
+    ;[(gather-vecp buff-reads) 1]
+    ;[(swizzle* vec) 1]
+    ;[(swizzle vec) 1]
+    ;[(??vread buf-opts idxs) 1]
+    ;[(??vreadp buf-opts idxs) 1]
 
-    [(abstr-sub-expr _ _) 1]
+    ;[(abstr-sub-expr _ _) 1]
     
     [_ 0]))
 
@@ -113,16 +118,14 @@
     [(vadd-w-acc Vdd Vu Vv) 1]
     [(vmpy Vu Rt) 1]
     [(vmpy-acc Vdd Vu Rt) 1]
-    [(vmpa Vuu Rt signed?) 1]
-    [(vmpa-acc Vdd Vuu Rt signed?) 1]
+    [(vmpa Vuu Rt) 1]
+    [(vmpa-acc Vdd Vuu Rt) 1]
     [(vdmpy Vu Rt) 1]
     [(vdmpy-sw Vuu Rt) 1]
     [(vdmpy-acc Vd Vu Rt) 1]
     [(vdmpy-sw-acc Vdd Vuu Rt) 1]
-    [(vtmpy Vuu Rt signed?) 1]
-    [(vtmpy-acc Vdd Vuu Rt signed?) 1]
-    [(vrmpy Vu Rt) 1]
-    [(vrmpy-acc Vd Vu Rt) 1]
+    [(vtmpy Vuu Rt) 1]
+    [(vtmpy-acc Vdd Vuu Rt) 1]
     [(vrmpy-p Vuu Rt u1) 1]
     [(vrmpy-p-acc Vdd Vuu Rt u1) 1]
     [_ 0]))
@@ -133,10 +136,12 @@
     [(vdmpy-sw Vuu Rt) 1]
     [(vdmpy-acc Vd Vu Rt) 1]
     [(vdmpy-sw-acc Vdd Vuu Rt) 1]
-    [(vtmpy Vuu Rt signed?) 1]
-    [(vtmpy-acc Vdd Vuu Rt signed?) 1]
+    [(vtmpy Vuu Rt) 1]
+    [(vtmpy-acc Vdd Vuu Rt) 1]
     [(vrmpy Vu Rt) 1]
     [(vrmpy-acc Vd Vu Rt) 1]
+    [(vrmpy-2 Vu Rt) 1]
+    [(vrmpy-acc-2 Vd Vu Rt) 1]
     [(vrmpy-p Vuu Rt u1) 1]
     [(vrmpy-p-acc Vdd Vuu Rt u1) 1]
     [_ 0]))

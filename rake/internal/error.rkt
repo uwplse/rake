@@ -1,5 +1,7 @@
 #lang racket
 
+(provide (all-defined-out) error exit)
+
 ;; Debugging
 (define debug-flag-set? #f)
 
