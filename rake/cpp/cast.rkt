@@ -80,6 +80,16 @@
        [(eq? type 'uint16) (uint16_t (extract 15 0 val))]
        [(eq? type 'uint32) (uint32_t (extract 31 0 val))]
        [(eq? type 'uint64) (uint64_t (extract 63 0 val))])]
+    [(uint64_t val)
+     (cond 
+       [(eq? type 'int8) (int8_t (extract 7 0 val))]
+       [(eq? type 'int16) (int16_t (extract 15 0 val))]
+       [(eq? type 'int32) (int32_t (extract 31 0 val))]
+       [(eq? type 'int64) (int64_t val)]
+       [(eq? type 'uint8) (uint8_t (extract 7 0 val))]
+       [(eq? type 'uint16) (uint16_t (extract 15 0 val))]
+       [(eq? type 'uint32) (uint32_t (extract 31 0 val))]
+       [(eq? type 'uint64) v])]
 
     ;; Casts on indexing variables (modelled as ints not bvs) are currently assumed to never change value
     [_ (if (integer? v) v (error "NYI: Casting from type ~a" v))]))
