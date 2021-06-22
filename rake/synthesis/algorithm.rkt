@@ -1,50 +1,43 @@
 #lang rosette/safe
 
 (require
-  (only-in racket/base values error exit)
-  rake/synthesis/spec
+  (only-in racket/base values)
+  rake/internal/error
   rake/cpp
   rake/halide
-  ;rake/hvx
-  rake/synthesis/ir-expr-synthesizer
-  ;rake/synthesis/hvx-expr-synthesizer
-  ;rake/synthesis/arm-expr-synthesizer
-  ;rake/synthesis/verifier
-  )
+  rake/synthesis/spec
+  rake/synthesis/ir
+  rake/synthesis/hvx
+  rake/synthesis/verify)
 
 (provide synthesize-hvx)
 
 (define (synthesize-hvx spec [lifting-algo 'greedy] [lowering-algo 'enumerative] [swizzling-algo 'enumerative])
   (cond
     [(eq? (spec-lang spec) 'halide-ir)
-     (define halide-expr (spec-expr spec))
-     (define halide-expr-axioms (spec-axioms spec))
-     
-     (define-values (lifting-success? ir-expr ir-expr-sol ir-annotations)
+
+     ;; First lift the expression from Halide IR to our HVX IR of super-instructions
+     (define-values (lifting-success? ir-expr ir-annotations ir-bounds)
        (synthesize-ir-expr spec 'hvx-uberinstrs lifting-algo))
 
-     ir-expr]
-;     (cond
-;       [lifting-success?
-;        ;; Synthesize equivalent HVX expression
-;        (define-values (successful? hvx-expr)
-;          (synthesize-hvx-expr halide-expr halide-expr-axioms ir-expr ir-expr-sol ir-annotations lowering-algo swizzling-algo))
-;
-;        (set! hvx-expr (unpack-if-needed hvx-expr halide-expr))
-;
-;        (define verifies? #f)
-;        (when successful?
-;          ;; Full expr verification
-;          (set! verifies? #t);(verify-equiv? halide-expr hvx-expr (symbolics halide-expr) halide-expr-axioms))
-;
-;          (if verifies?
-;              (begin (display "Synthesized solution is correct.\n\n") hvx-expr)
-;              (begin (display "Synthesized solution is incorrect.\n\n") #f)))
-;
-;        ;(when (not verifies?) (exit))
-;
-;        hvx-expr]
-;       [else (error (format "Could not lift Halide expression to HVX IR."))])]
+     (cond
+       [lifting-success?
+        ;; Lower the super-instructions to an expression template (in HVX ISA)
+        (define hvx-expr (synthesize-hvx-expr ir-expr ir-annotations ir-bounds lowering-algo swizzling-algo))
+
+        ;; Full verification of the synthesized expression
+        (define correct? #t);(verify-equivalence (spec-expr spec) hvx-expr (spec-axioms spec)))
+
+        (cond
+          [correct?
+            (pretty-print hvx-expr)
+            (display "Synthesized solution is correct.\n\n")
+            hvx-expr]
+          [else
+            (display "Synthesized solution is incorrect.\n\n")
+            (exit 1)])]
+       
+       [else (error (format "Could not lift Halide expression to HVX IR."))])]
 
     [else (error (format "Input specification is provided in a language Rake currently does not support: '~a. Supported IRs: ['halide-ir]" spec-lang))]))
 

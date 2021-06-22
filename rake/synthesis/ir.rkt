@@ -7,11 +7,11 @@
 (provide synthesize-ir-expr)
 
 (define (synthesize-ir-expr spec ir-name lifting-algo)
-  (define-values (expr sol annot)
+  (define-values (expr annot bounds)
     (cond
       [(eq? lifting-algo 'greedy) (synthesize-ir-expr-greedy ir-name spec)]
       [else (error (format "Unrecognized lifting algorithm specified: '~a. Supported algorithms: ['greedy]" lifting-algo))]))
 
   (if (void? expr)
       (values #f (void) (void) (void))
-      (values #t expr sol annot)))
+      (values #t expr annot bounds)))
