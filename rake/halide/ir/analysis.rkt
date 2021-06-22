@@ -19,12 +19,12 @@
   [extract-live-buffers extract-live-buffers-halide]
   [extract-buffer-reads extract-buffer-reads-halide]
   [extract-loads extract-loads-halide]
-  [extract-add-consts extract-add-consts-halide]
-  [extract-sub-consts extract-sub-consts-halide]
-  [extract-mul-consts extract-mul-consts-halide]
-  [extract-div-consts extract-div-consts-halide]
-  [extract-shr-consts extract-shr-consts-halide]
-  [extract-mod-consts extract-mod-consts-halide]
+  [extract-add-scalars extract-add-scalars-halide]
+  [extract-sub-scalars extract-sub-scalars-halide]
+  [extract-mul-scalars extract-mul-scalars-halide]
+  [extract-div-scalars extract-div-scalars-halide]
+  [extract-shr-scalars extract-shr-scalars-halide]
+  [extract-mod-scalars extract-mod-scalars-halide]
   [cast-op? halide-cast-op?]))
 
 (define (extract-live-buffers expr)
@@ -38,7 +38,7 @@
 
 ;; Extract buffer reads. Current strategy is to interpret the expression and traverse the symbolic vector generated.
 ;; Usage: When synthesizing (swizzling) hash-tables, we restrict the hashtables to only point to the data-elements that appear in
-;; the original expression. 
+;; the original expression.
 (define (extract-buffer-reads expr)
   (define live-buffers (extract-live-buffers expr))
   (define interpreted-expr (interpret-halide expr))
@@ -87,83 +87,87 @@
        (hash-set! cache expr reads)
        reads]))
 
-(define (extract-add-consts expr)
-  (define add-consts (mutable-set))
+(define (extract-add-scalars expr)
+  (define add-scalars (mutable-set))
   (define (extract-add-const node)
     (destruct node
       ;; We only need to examine add nodes
-      [(vec-add v1 v2) (set-union! add-consts (extract-consts v1) (extract-consts v2))]
+      [(vec-add v1 v2) (set-union! add-scalars (extract-scalars v1) (extract-scalars v2))]
       ;; Ignore everything else
       [_ node]))
   (visit-halide expr extract-add-const)
-  (set->list add-consts))
+  (set->list add-scalars))
 
-(define (extract-sub-consts expr)
-  (define sub-consts (mutable-set))
+(define (extract-sub-scalars expr)
+  (define sub-scalars (mutable-set))
   (define (extract-sub-const node)
     (destruct node
       ;; We only need to examine sub nodes
-      [(vec-sub v1 v2) (set-union! sub-consts (extract-consts v1) (extract-consts v2))]
+      [(vec-sub v1 v2) (set-union! sub-scalars (extract-scalars v1) (extract-scalars v2))]
       ;; Ignore everything else
       [_ node]))
   (visit-halide expr extract-sub-const)
-  (set->list sub-consts))
+  (set->list sub-scalars))
 
-(define (extract-mul-consts expr)
-  (define mul-consts (mutable-set))
+(define (extract-mul-scalars expr)
+  (define mul-scalars (mutable-set))
   (define (extract-mul-const node)
     (destruct node
       ;; We only need to examing shift-left and multiply nodes
-      [(vec-mul v1 v2) (set-union! mul-consts (extract-consts v1) (extract-consts v2))]
-      [(vec-shl v1 v2) (set-union! mul-consts (extract-consts v1) (two^ (extract-consts v2)))]
+      [(vec-mul v1 v2) (set-union! mul-scalars (extract-scalars v1) (extract-scalars v2))]
+      [(vec-shl v1 v2) (set-union! mul-scalars (extract-scalars v1) (two^ (extract-scalars v2)))]
+      [(vec-broadcast n vec)
+       (when (<= (halide-vec-len vec) 4)
+         (define vec-out (interpret-halide vec))
+         (set-union! mul-scalars (set (vec-out 0) (vec-out 1) (vec-out 2) (vec-out 3))))]
       ;; Ignore everything else
       [_ node]))
   (visit-halide expr extract-mul-const)
-  (set->list mul-consts))
+  (set->list mul-scalars))
 
-(define (extract-shr-consts expr)
-  (define shr-consts (mutable-set))
+(define (extract-shr-scalars expr)
+  (define shr-scalars (mutable-set))
   (define (extract-shr-const node)
     (destruct node
       ;; We only need to examing shift-right and divide
       [(vec-div v1 v2)
-       (define div-consts (extract-consts v2))
-       (define pow-of-2-consts (filter (lambda (c) (is-power-of-2? c)) (set->list div-consts)))
-       (define log-2-consts (list->set (map (lambda (c) (log-2 c)) pow-of-2-consts)))
-       (set-union! shr-consts log-2-consts)]
-      [(vec-shr v1 v2) (set-union! shr-consts (extract-consts v2))]
+       (define div-scalars (extract-scalars v2))
+       (define pow-of-2-scalars (filter (lambda (c) (is-power-of-2? c)) (set->list div-scalars)))
+       (define log-2-scalars (list->set (map (lambda (c) (log-2 c)) pow-of-2-scalars)))
+       (set-union! shr-scalars log-2-scalars)]
+      [(vec-shr v1 v2) (set-union! shr-scalars (extract-scalars v2))]
       ;; Ignore everything else
       [_ node]))
   (visit-halide expr extract-shr-const)
-  (set->list shr-consts))
+  (set->list shr-scalars))
 
-(define (extract-div-consts expr)
-  (define shr-consts (mutable-set))
+(define (extract-div-scalars expr)
+  (define shr-scalars (mutable-set))
   (define (extract-shr-const node)
     (destruct node
       ;; We only need to examing shift-right and divide
-      [(vec-div v1 v2) (set-union! shr-consts (extract-consts v2))]
-      [(vec-shr v1 v2) (set-union! shr-consts (two^ (extract-consts v2)))]
+      [(vec-div v1 v2) (set-union! shr-scalars (extract-scalars v2))]
+      [(vec-shr v1 v2) (set-union! shr-scalars (two^ (extract-scalars v2)))]
       ;; Ignore everything else
       [_ node]))
   (visit-halide expr extract-shr-const)
-  (set->list shr-consts))
+  (set->list shr-scalars))
 
-(define (extract-mod-consts expr)
-  (define mod-consts (mutable-set))
+(define (extract-mod-scalars expr)
+  (define mod-scalars (mutable-set))
   (define (extract-mod-const node)
     (destruct node
       ;; We only need to examing mod and bit-wise and
       ;[(vec-and v1 v2)
-       ;(define div-consts (extract-consts v2))
-       ;(define pow-of-2-consts (filter (lambda (c) (is-power-of-2? c)) (set->list div-consts)))
-       ;(define log-2-consts (list->set (map (lambda (c) (log-2 c)) pow-of-2-consts)))
-       ;(set-union! mod-consts log-2-consts)]
-      [(vec-mod v1 v2) (set-union! mod-consts (extract-consts v2))]
+       ;(define div-scalars (extract-scalars v2))
+       ;(define pow-of-2-scalars (filter (lambda (c) (is-power-of-2? c)) (set->list div-scalars)))
+       ;(define log-2-scalars (list->set (map (lambda (c) (log-2 c)) pow-of-2-scalars)))
+       ;(set-union! mod-scalars log-2-scalars)]
+      [(vec-mod v1 v2) (set-union! mod-scalars (extract-scalars v2))]
       ;; Ignore everything else
       [_ node]))
   (visit-halide expr extract-mod-const)
-  (set->list mod-consts))
+  (set->list mod-scalars))
 
 ;; Extract vectors
 (define (extract-loads expr)
@@ -174,9 +178,11 @@
         (destruct idxs
           [(ramp base stride len)
            (define elem-bw (type-bw (buffer-elemT buf)))
-           (define tile-w (* len elem-bw))
+           (define tile-w (* len stride elem-bw))
            (define lds
              (cond
+               [(< tile-w 1024)
+                (set)]
                [(eq? tile-w 1024)
                 (set (list buf base align))]
                [(eq? tile-w 2048)
@@ -188,7 +194,19 @@
                  (list buf base align)
                  (list buf (+ base (quotient 1024 elem-bw)) align)
                  (list buf (+ base (quotient 2048 elem-bw)) align)
-                 (list buf (+ base (quotient 3072 elem-bw)) align))]))
+                 (list buf (+ base (quotient 3072 elem-bw)) align))]
+               [(eq? tile-w 8192)
+                (set
+                 (list buf base align)
+                 (list buf (+ base (quotient 1024 elem-bw)) align)
+                 (list buf (+ base (quotient 2048 elem-bw)) align)
+                 (list buf (+ base (quotient 3072 elem-bw)) align)
+                 (list buf (+ base (quotient 4096 elem-bw)) align)
+                 (list buf (+ base (quotient 5120 elem-bw)) align)
+                 (list buf (+ base (quotient 6144 elem-bw)) align)
+                 (list buf (+ base (quotient 7168 elem-bw)) align))]
+               [else
+                (error "NYI: Extracting vec from:" expr)]))
            (set-union! loads lds)]
         [_ (error "NYI: Extracting vec from:" expr)])]
       ;; Ignore everything else
@@ -208,7 +226,7 @@
 (define (log-2 val)
   (mk-cpp-expr (bv (exact-round (log (eval-to-int val) 2)) (expr-bw val)) (cpp-type val)))
 
-(define (extract-consts vec)
+(define (extract-scalars vec)
   (define v (strip-casts vec))
   (match v
     [(x32 sca) (set ((interpret-halide vec) 0))]
@@ -272,8 +290,8 @@
     
     [_ expr]))
 
-(define (two^ consts)
-  (for/set ([n consts])
+(define (two^ scalars)
+  (for/set ([n scalars])
     (match n
       [(int8_t v) (int8_t (bvshl (bv 1 8) v))]
       [(uint8_t v) (uint8_t (bvshl (bv 1 8) v))]
