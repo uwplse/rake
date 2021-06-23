@@ -5,10 +5,10 @@
   rosette/lib/destruct
   rake/cpp/types)
 
-(provide cpp-cast satu8 satu16 satu32 satu64 sat8 sat16 sat32 sat64)
+(provide (prefix-out cpp: (all-defined-out)))
 
 ;; Model C++ casting
-(define (cpp-cast v type)
+(define (cast v type)
   (destruct v
     [(int8_t val)
      (cond 

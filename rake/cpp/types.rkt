@@ -34,7 +34,7 @@
     [_ (error "Cannot eval: ~a" e)]))
 
 ;; Get integer value of the integer expression
-(define (eval-to-int e)
+(define (cpp:eval-to-int e)
   (destruct e
     [(int8_t v) (bitvector->integer v)]
     [(int16_t v) (bitvector->integer v)]
@@ -89,7 +89,7 @@
     [else (error "NYI. Creating cpp exprs of type: ~a" type)]))
 
 ;; Misc functions
-(define (cpp-type e)
+(define (cpp:type e)
   (destruct e
     [(int8_t v) 'int8]
     [(int16_t v) 'int16]
@@ -102,7 +102,7 @@
     [(uint64_t v) 'uint64]
     [_ (error "Cannot infer type: ~a" e)]))
 
-(define (cpp-type-str type)
+(define (cpp:type-str type)
   (cond
     [(eq? type int8_t) 'int8]
     [(eq? type int16_t) 'int16]
@@ -124,7 +124,7 @@
     [(eq? type 'uint64) 'uint64]
     [else (error "cpp-type-str: Unexpected type: " type)]))
 
-(define (signed-expr? e)
+(define (cpp:signed-expr? e)
   (destruct e
     [(int8_t v) #t]
     [(int16_t v) #t]
@@ -137,10 +137,10 @@
     [(uint64_t v) #f]
     [_ (error "Cannot infer signed-ness of expr" e)]))
 
-(define (unsigned-expr? e)
-  (not (signed-expr? e)))
+(define (cpp:unsigned-expr? e)
+  (not (cpp:signed-expr? e)))
 
-(define (signed-type? t)
+(define (cpp:signed-type? t)
   (cond
     [(eq? t 'int8) #t]
     [(eq? t 'int16) #t]
@@ -162,10 +162,10 @@
     [(eq? t uint64_t) #f]
     [else (error "Cannot infer signed-ness of type" t)]))
 
-(define (unsigned-type? e)
-  (not (signed-type? e)))
+(define (cpp:unsigned-type? e)
+  (not (cpp:signed-type? e)))
 
-(define (expr-bw e)
+(define (cpp:expr-bw e)
   (destruct e
     [(int8_t v) 8]
     [(int16_t v) 16]
@@ -178,7 +178,7 @@
     [(uint64_t v) 64]
     [_ (error "Cannot infer bit-width from expression: ~a" e)]))
 
-(define (type-bw t)
+(define (cpp:type-bw t)
   (cond
     [(eq? t 'int8) 8]
     [(eq? t 'int16) 16]
