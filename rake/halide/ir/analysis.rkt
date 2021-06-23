@@ -15,17 +15,17 @@
   rake/halide/ir/interpreter)
 
 (provide
- (rename-out
-  [extract-live-buffers extract-live-buffers-halide]
-  [extract-buffer-reads extract-buffer-reads-halide]
-  [extract-loads extract-loads-halide]
-  [extract-add-scalars extract-add-scalars-halide]
-  [extract-sub-scalars extract-sub-scalars-halide]
-  [extract-mul-scalars extract-mul-scalars-halide]
-  [extract-div-scalars extract-div-scalars-halide]
-  [extract-shr-scalars extract-shr-scalars-halide]
-  [extract-mod-scalars extract-mod-scalars-halide]
-  [cast-op? halide-cast-op?]))
+ (prefix-out halide: extract-live-buffers)
+ (prefix-out halide: extract-buffer-reads)
+ (prefix-out halide: extract-loads)
+ (prefix-out halide: extract-add-scalars)
+ (prefix-out halide: extract-sub-scalars)
+ (prefix-out halide: extract-mul-scalars)
+ (prefix-out halide: extract-div-scalars)
+ (prefix-out halide: extract-shr-scalars)
+ (prefix-out halide: extract-shr-scalars)
+ (prefix-out halide: extract-mod-scalars)
+ (prefix-out halide: cast-op?))
 
 (define (extract-live-buffers expr)
   (define live-buffers (mutable-set))
@@ -41,10 +41,10 @@
 ;; the original expression.
 (define (extract-buffer-reads expr)
   (define live-buffers (extract-live-buffers expr))
-  (define interpreted-expr (interpret-halide expr))
+  (define interpreted-expr (halide:interpret expr))
   (for/fold
     ([buff-reads '()])
-    ([i (halide-vec-len expr)])
+    ([i (halide:vec-len expr)])
       (append buff-reads (list (set->list (list->set (extract-lane-buffer-reads (interpreted-expr i) live-buffers)))))))
 
 (define cache (make-hash))
@@ -117,8 +117,8 @@
       [(vec-mul v1 v2) (set-union! mul-scalars (extract-scalars v1) (extract-scalars v2))]
       [(vec-shl v1 v2) (set-union! mul-scalars (extract-scalars v1) (two^ (extract-scalars v2)))]
       [(vec-broadcast n vec)
-       (when (<= (halide-vec-len vec) 4)
-         (define vec-out (interpret-halide vec))
+       (when (<= (halide:vec-len vec) 4)
+         (define vec-out (halide:interpret vec))
          (set-union! mul-scalars (set (vec-out 0) (vec-out 1) (vec-out 2) (vec-out 3))))]
       ;; Ignore everything else
       [_ node]))
@@ -177,7 +177,7 @@
       [(load buf idxs align)
         (destruct idxs
           [(ramp base stride len)
-           (define elem-bw (type-bw (buffer-elemT buf)))
+           (define elem-bw (cpp:type-bw (buffer-elemT buf)))
            (define tile-w (* len stride elem-bw))
            (define lds
              (cond
@@ -221,19 +221,19 @@
    ;; It cannot be a symbolic value
    (empty? (symbolics val))
    ;; Is a power of 2
-   (and (bveq (bvand (eval val) (bvsub (eval val) (bv 1 (expr-bw val)))) (bv 0 (expr-bw val))) (not (bveq (eval val) (bv 0 (expr-bw val)))))))
+   (and (bveq (bvand (cpp:eval val) (bvsub (cpp:eval val) (bv 1 (cpp:expr-bw val)))) (bv 0 (cpp:expr-bw val))) (not (bveq (cpp:eval val) (bv 0 (cpp:expr-bw val)))))))
 
 (define (log-2 val)
-  (mk-cpp-expr (bv (exact-round (log (eval-to-int val) 2)) (expr-bw val)) (cpp-type val)))
+  (mk-cpp-expr (bv (exact-round (log (cpp:eval-to-int val) 2)) (cpp:expr-bw val)) (cpp:type val)))
 
 (define (extract-scalars vec)
   (define v (strip-casts vec))
   (match v
-    [(x32 sca) (set ((interpret-halide vec) 0))]
-    [(x64 sca) (set ((interpret-halide vec) 0))]
-    [(x128 sca) (set ((interpret-halide vec) 0))]
-    [(x256 sca) (set ((interpret-halide vec) 0))]
-    [(x512 sca) (set ((interpret-halide vec) 0))]
+    [(x32 sca) (set (x32-sca v))]
+    [(x64 sca) (set (x64-sca v))]
+    [(x128 sca) (set (x128-sca v))]
+    [(x256 sca) (set (x256-sca v))]
+    [(x512 sca) (set (x512-sca v))]
     [_ (set)]))
 
 (define (strip-casts expr)
