@@ -19,7 +19,7 @@
 (struct uint64_t (v) #:transparent)
 
 ;; Get bit-vector value of the integer expression
-(define (eval e)
+(define (cpp:eval e)
   (destruct e
     [(int8_t v) v]
     [(int16_t v) v]
