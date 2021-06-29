@@ -28,7 +28,7 @@
   (set! trace (append (list ir-expr) trace))
   
   ;; Lower the sub-expressions to hvx
-  (define ir-sub-exprs (get-hvx-ir-subexprs ir-expr))
+  (define ir-sub-exprs (hvx-ir:get-subexprs ir-expr))
   (define hvx-sub-exprs
     (flatten
      (for/list ([ir-sub-expr ir-sub-exprs])
@@ -51,8 +51,8 @@
     [(load-data? ir-expr)
       (define parent-expr (first trace))
       (define parent-spec (hash-ref ir-annotations (ir-node-id parent-expr)))
-      (define live-data (extract-buffer-reads-halide parent-spec))
-      (define live-buffers (extract-live-buffers-halide parent-spec))
+      (define live-data (halide:extract-buffer-reads parent-spec))
+      (define live-buffers (halide:extract-live-buffers parent-spec))
       (for/list ([b live-buffers]) (??abstr-load live-data b))]))
 
 (define (lower-to-hvx halide-expr ir-expr hvx-sub-exprs lowering-algo swizzling-algo sub-expr?)
@@ -62,10 +62,10 @@
   (cond
     [(and sub-expr? (swizzle-only? hvx-template)) hvx-template]
     [else
-      (define hvx-tile-size (if (hvx-pair? (interpret-hvx hvx-template)) 2048 1024))
+      (define hvx-tile-size (if (hvx:vec-pair? (hvx:interpret hvx-template)) 2048 1024))
 
-      (define halide-tile-elem-cnt (halide-vec-len halide-expr))
-      (define halide-tile-elem-bits (type-bw (halide-elem-type halide-expr)))
+      (define halide-tile-elem-cnt (halide:vec-len halide-expr))
+      (define halide-tile-elem-bits (cpp:type-bw (halide:elem-type halide-expr)))
       (define halide-tile-size (* halide-tile-elem-cnt halide-tile-elem-bits))
       (define elems-per-hvx-tile (quotient hvx-tile-size halide-tile-elem-bits))
   
@@ -94,7 +94,7 @@
                   (define-values (successful? rem-tiles) (swizzle-incrementally (rest tiles) (add1 tile-id)))
                   (cond
                     [successful? 
-                     (define curr-tile (if (and sub-expr? (vinterleave? hvx-expr)) (vinterleave-Vuu hvx-expr) hvx-expr))
+                     (define curr-tile (if sub-expr? (strip-swizzles hvx-expr) hvx-expr))
                      (values #t (append (list curr-tile) rem-tiles))]
                     [else
                      (values #f '())])]
@@ -114,12 +114,18 @@
            (synthesize-hvx-swizzles halide-expr hvx-template swizzling-algo hvx-sub-exprs translation-history))
 
          (cond
-            [successful? (if (and sub-expr? (vinterleave? hvx-expr)) (vinterleave-Vuu hvx-expr) hvx-expr)]
+            [successful? (if sub-expr? (strip-swizzles hvx-expr) hvx-expr)]
             [else
              (lower-to-hvx halide-expr ir-expr hvx-sub-exprs lowering-algo swizzling-algo sub-expr?)])])]))
 
 (define (swizzle-only? hvx-template)
   (or (??load? hvx-template) (??abstr-load? hvx-template) (??shuffle? hvx-template)))
+
+(define (strip-swizzles hvx-expr)
+  (destruct hvx-expr
+    [(vdeal Vu) (strip-swizzles Vu)]
+    [(vinterleave Vuu) (strip-swizzles Vuu)]
+    [_ hvx-expr]))
 
 (define (clone hvx-template)
   (define swizzle-node-id -1)
@@ -129,4 +135,4 @@
       [(??load id live-data buffer gather-tbl pair?) (??load (get-sw-node-id) live-data buffer gather-tbl pair?)]
       [(??swizzle id live-data expr gather-tbl pair?) (??swizzle (get-sw-node-id) live-data expr gather-tbl pair?)]
       [_ node]))
-  (visit-hvx hvx-template clone-swizzle-node))
+  (hvx:visit hvx-template clone-swizzle-node))

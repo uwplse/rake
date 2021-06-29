@@ -36,7 +36,7 @@
                (set!-values (updated-spec updated-template) (abstr-equiv-subexprs updated-spec updated-template tile halide-sub-expr abstracted-halide-subexpr offset (hash-ref value-bounds sub-expr)))]
               [else
                (set!-values (updated-spec updated-template) (abstr-equiv-subexprs updated-spec updated-template tile halide-sub-expr abstracted-halide-subexpr offset))])
-            (set! offset (+ offset (num-elems-hvx (interpret-hvx tile)))))]
+            (set! offset (+ offset (hvx:num-elems (hvx:interpret tile)))))]
          [else
           (cond
             [(hash-has-key? value-bounds sub-expr)
@@ -58,14 +58,14 @@
         (cond
           [(rkt-equal? (unpack-abstr-exprs node) halide-sub-expr) abstracted-halide-subexpr]
           [else node]))
-      (set! spec (visit-halide spec abstract-sub-expr-halide))
+      (set! spec (halide:visit spec abstract-sub-expr-halide))
       
       (define (abstract-sub-expr-hvx node [pos -1])
         (cond
           [(abstr-hvx-expr? node) node]
           [(eq? node hvx-sub-expr) abstracted-hvx-subexpr]
           [else node]))
-      (set! template (visit-hvx template abstract-sub-expr-hvx))
+      (set! template (hvx:visit template abstract-sub-expr-hvx))
       (values spec template)]))
 
 (define (unpack-abstr-exprs expr)
@@ -73,10 +73,10 @@
     (cond
       [(abstr-halide-expr? node) (abstr-halide-expr-orig-expr node)]
       [else node]))
-  (visit-halide expr unpacker))
+  (halide:visit expr unpacker))
 
 (define (make-abstr-halide-expr halide-expr)
-  (define elemT (halide-elem-type halide-expr))
+  (define elemT (halide:elem-type halide-expr))
   (define abstr-vals
     (cond
       [(eq? elemT 'int8) (define-symbolic-buffer* abstr-vals int8_t) abstr-vals]
@@ -99,9 +99,9 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (define (fix-swizzle-reads spec template)
-  (define new-reads (extract-buffer-reads-halide spec))
+  (define new-reads (halide:extract-buffer-reads spec))
   (define (fix-reads node [pos -1])
     (match node
       [(??swizzle id live-data exprs gather-tbl pair?) (??swizzle id new-reads exprs gather-tbl pair?)]
       [_ node]))
-  (visit-hvx template fix-reads))
+  (hvx:visit template fix-reads))

@@ -38,8 +38,8 @@
   ;(pretty-print halide-expr)
   ;(pretty-print template)
   
-  ;(println ((interpret-halide halide-expr) 0))
-  ;(set-cn-hvx-ir 0) (println ((interpret-hvx-ir template) 0))
+  ;(println ((halide:interpret halide-expr) 0))
+  ;(hvx-ir:set-cn 0) (println ((hvx-ir:interpret template) 0))
   
   (define-values (optimized-template optimized-halide-expr inferred-axioms abstr-value-bounds)
     (optimize-query halide-expr template translation-history value-bounds))
@@ -48,8 +48,8 @@
   ;(pretty-print optimized-template)
   ;(pretty-print inferred-axioms)
   
-  ;(println ((interpret-halide optimized-halide-expr) 0))
-  ;(set-cn-hvx-ir 0) (println ((interpret-hvx-ir optimized-template) 0))
+  ;(println ((halide:interpret optimized-halide-expr) 0))
+  ;(hvx-ir:set-cn 0) (println ((hvx-ir:interpret optimized-template) 0))
 
   (cond
     [(subset? (symbolics optimized-halide-expr) (symbolics optimized-template))
@@ -59,7 +59,7 @@
                              #:guarantee (begin
                                            (for-each (lambda (axiom) (assume axiom)) axioms)
                                            (for-each (lambda (axiom) (assume axiom)) inferred-axioms)
-                                           (equiv-fn (interpret-halide optimized-halide-expr) (interpret-hvx-ir optimized-template)))))
+                                           (equiv-fn (halide:interpret optimized-halide-expr) (hvx-ir:interpret optimized-template)))))
      (define runtime (- (current-milliseconds) st))
   
      (display (format "Ran synthesizer for ~a ms\n" runtime))
@@ -72,7 +72,7 @@
        ;(pretty-print (evaluate template sol))
 
        (define e (evaluate optimized-template sol))
-       (when (> (expr-bw ((interpret-hvx-ir e) 0)) 1)
+       (when (> (cpp:expr-bw ((hvx-ir:interpret e) 0)) 1)
          (define-values (expr-lb expr-ub)
            (infer-value-range-hvx-ir e axioms abstr-value-bounds))
          (hash-set! value-bounds (ir-node-id template) (cons expr-lb expr-ub)))

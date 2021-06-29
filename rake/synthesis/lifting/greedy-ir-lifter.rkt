@@ -51,7 +51,7 @@
 (define annotations (make-hash))
 
 (define (build-ir-expr halide-expr axioms uber-instrs context)
-  (define sub-exprs (halide-sub-exprs halide-expr))
+  (define sub-exprs (halide:sub-exprs halide-expr))
 
   (cond
     ;; Have we lifted this halide-expr before?
@@ -77,7 +77,7 @@
 
      ;; Explore folding templates in increasing cost (cost is defined as the number if IR instructions)
      (define sorted-templates
-       (sort (append fold-templates repl-templates) (lambda (t1 t2) (< (hvx-ir-instr-count t1) (hvx-ir-instr-count t2)))))
+       (sort (append fold-templates repl-templates) (lambda (t1 t2) (< (hvx-ir:instr-count t1) (hvx-ir:instr-count t2)))))
 
      (define bounded-eq? (if (interleave? halide-expr) bounded-eq-1? bounded-eq-0?))
      (define-values (success? folded-ir-expr)
@@ -133,13 +133,13 @@
 (define (bounded-eq-0? oe se)
   (for-each
    (lambda (lane)
-     (set-cn-hvx-ir lane)
+     (hvx-ir:set-cn lane)
      (assert (eq? (oe lane) (se lane))))
    (list 0)))
 
 (define (bounded-eq-1? oe se)
   (for-each
    (lambda (lane)
-     (set-cn-hvx-ir lane)
+     (hvx-ir:set-cn lane)
      (assert (eq? (oe lane) (se lane))))
    (list 0 1)))

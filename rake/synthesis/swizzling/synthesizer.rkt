@@ -21,18 +21,18 @@
 
 (define (verification-lanes type)
   (cond
-    [(eq? type 'i8x128) '(0 63 64 127)]
-    [(eq? type 'u8x128) '(0 63 64 127)]
-    [(eq? type 'i16x64) '(0 31 32 63)]
-    [(eq? type 'u16x64) '(0 31 32 63)]
-    [(eq? type 'i32x32) '(0 15 16 31)]
-    [(eq? type 'u32x32) '(0 15 16 31)]
-    [(eq? type 'i8x128x2) '(0 63 64 127 128 191 192 255)]
-    [(eq? type 'u8x128x2) '(0 63 64 127 128 191 192 255)]
-    [(eq? type 'i16x64x2) '(0 31 32 63 64 95 96 127)]
-    [(eq? type 'u16x64x2) '(0 31 32 63 64 95 96 127)]
-    [(eq? type 'i32x32x2) '(0 15 16 31 32 47 48 63)]
-    [(eq? type 'u32x32x2) '(0 15 16 31 32 47 48 63)]))
+    [(eq? type 'i8x128) '(0 1 63 64 65 127)]
+    [(eq? type 'u8x128) '(0 1 63 64 65 127)]
+    [(eq? type 'i16x64) '(0 1 31 32 33 63)]
+    [(eq? type 'u16x64) '(0 1 31 32 33 63)]
+    [(eq? type 'i32x32) '(0 1 15 16 17 31)]
+    [(eq? type 'u32x32) '(0 1 15 16 17 31)]
+    [(eq? type 'i8x128x2) '(0 1 63 64 127 128 129 191 192 255)]
+    [(eq? type 'u8x128x2) '(0 1 63 64 127 128 129 191 192 255)]
+    [(eq? type 'i16x64x2) '(0 1 31 32 63 64 65 95 96 127)]
+    [(eq? type 'u16x64x2) '(0 1 31 32 63 64 65 95 96 127)]
+    [(eq? type 'i32x32x2) '(0 1 15 16 31 32 33 47 48 63)]
+    [(eq? type 'u32x32x2) '(0 1 15 16 31 32 33 47 48 63)]))
 
 (define (synthesize-translation templates halide-expr)
   (cond
@@ -54,19 +54,19 @@
   ;(pretty-print template)
   
   ;(set-curr-cn-hvx 0)
-  ;(println ((interpret-halide halide-expr) 0))
-  ;(println (let ([x (interpret-hvx template)]) (if (hvx-pair? x) (v0-elem-hvx x 0) (elem-hvx x 0))))
-  ;(println (interpret-hvx template))
+  ;(println ((halide:interpret halide-expr) 0))
+  ;(println (let ([x (hvx:interpret template)]) (if (hvx-pair? x) (v0-elem-hvx x 0) (elem-hvx x 0))))
+  ;(println (hvx:interpret template))
   ;(set-curr-cn-hvx 1)
-  ;(println ((interpret-halide halide-expr) 1))
-  ;(println (let ([x (interpret-hvx template)]) (if (hvx-pair? x) (v0-elem-hvx x 1) (elem-hvx x 1))))
+  ;(println ((halide:interpret halide-expr) 1))
+  ;(println (let ([x (hvx:interpret template)]) (if (hvx-pair? x) (v0-elem-hvx x 1) (elem-hvx x 1))))
   ;(set-curr-cn-hvx 16)
-  ;(println ((interpret-halide halide-expr) 16))
-  ;(println (let ([x (interpret-hvx template)]) (if (hvx-pair? x) (v0-elem-hvx x 16) (elem-hvx x 16))))
+  ;(println ((halide:interpret halide-expr) 16))
+  ;(println (let ([x (hvx:interpret template)]) (if (hvx-pair? x) (v0-elem-hvx x 16) (elem-hvx x 16))))
 
   ;; Incrementally checks the template for more and more lanes
   (define sym-consts (set->list (set-subtract (list->set (symbolics template)) (list->set (symbolics halide-expr)))))
-  (define lanes-to-verify (verification-lanes (hvx-type (interpret-hvx template))))
+  (define lanes-to-verify (verification-lanes (hvx:type (hvx:interpret template))))
   (synthesize-incremental halide-expr template sym-consts lanes-to-verify '()))
 
 (define (synthesize-incremental halide-expr template sym-consts lanes-to-verify discarded-sols)
@@ -78,15 +78,15 @@
      ;(display (format "Verifying lane: ~a\n" curr-lane))
 
      ;(set-curr-cn-hvx curr-lane)
-     ;(println ((interpret-halide halide-expr) curr-lane))
-     ;(println (let ([x (interpret-hvx template)]) (if (hvx-pair? x) (v0-elem-hvx x curr-lane) (elem-hvx x curr-lane))))
+     ;(println ((halide:interpret halide-expr) curr-lane))
+     ;(println (let ([x (hvx:interpret template)]) (if (hvx-pair? x) (v0-elem-hvx x curr-lane) (elem-hvx x curr-lane))))
      
      (define st (current-milliseconds))
      (clear-vc!)
      (define sol (synthesize #:forall (symbolics halide-expr)
                              #:guarantee (begin
                                            (assert (not (ormap (lambda (discarded-sol) (equal? template discarded-sol)) discarded-sols)))
-                                           (lane-eq? (interpret-halide halide-expr) (interpret-hvx template) curr-lane))))
+                                           (lane-eq? (halide:interpret halide-expr) (hvx:interpret template) curr-lane))))
      (define runtime (- (current-milliseconds) st))
 
      (display (format "Ran synthesizer for ~a ms\n" runtime))
@@ -94,7 +94,7 @@
 
      (cond
        [(correct? sol)
-        (define c-sol (complete-solution sol sym-consts))
+        (define c-sol sol);(complete-solution sol sym-consts))
         (define updated-template (evaluate template c-sol))
         (define sub-sol (synthesize-incremental halide-expr updated-template sym-consts (rest lanes-to-verify) '()))
         (cond
@@ -106,15 +106,15 @@
         (unsat)])]))
 
 (define (lane-eq? oe se lane)
-  (set-curr-cn-hvx lane)
-  (define offset (quotient (num-elems-hvx se) 2))
+  (hvx:set-curr-cn lane)
+  (define offset (quotient (hvx:num-elems se) 2))
   (cond
-    [(and (hvx-pair? se) (< lane offset))
-     (assert (eq? (oe lane) (v0-elem-hvx se lane)))]
-    [(hvx-pair? se)
-     (assert (eq? (oe lane) (v1-elem-hvx se (- lane offset))))]
+    [(and (hvx:vec-pair? se) (< lane offset))
+     (assert (eq? (oe lane) (hvx:v0-elem se lane)))]
+    [(hvx:vec-pair? se)
+     (assert (eq? (oe lane) (hvx:v1-elem se (- lane offset))))]
     [else
-     (assert (eq? (oe lane) (elem-hvx se lane)))]))
+     (assert (eq? (oe lane) (hvx:elem se lane)))]))
 
 ;(define (bounded-eq? oe se lanes)
 ;  (define offset (quotient (num-elems-hvx se) 2))

@@ -52,16 +52,16 @@
 
 (define (run-synthesizer template halide-expr hvx-sub-exprs value-bounds translation-history)
   ;(pretty-print halide-expr)
-  (pretty-print template)
+  ;(pretty-print template)
   
   (define-values (optimized-halide-expr optimized-template inferred-axioms)
     (optimize-query halide-expr template hvx-sub-exprs value-bounds translation-history))
 
   ;(pretty-print optimized-halide-expr)
-  (pretty-print optimized-template)
+  ;(pretty-print optimized-template)
 
   ;; Incrementally checks the template for more and more lanes
-  (define lanes-to-verify (verification-lanes (hvx-type (interpret-hvx optimized-template))))
+  (define lanes-to-verify (verification-lanes (hvx:type (hvx:interpret optimized-template))))
   (synthesize-incremental optimized-halide-expr optimized-template inferred-axioms lanes-to-verify '()))
 
 (define (synthesize-incremental optimized-halide-expr optimized-template inferred-axioms lanes-to-verify discarded-sols)
@@ -70,12 +70,10 @@
     [else
      (define curr-lane (first lanes-to-verify))
 
-     (display (format "Verifying lane: ~a\n" curr-lane))
-     (println ((interpret-halide optimized-halide-expr) curr-lane))
-     (set-curr-cn-hvx curr-lane)
-     (println (let ([x (interpret-hvx optimized-template)]) (if (hvx-pair? x) (v0-elem-hvx x curr-lane) (elem-hvx x curr-lane))))
-
-     (println inferred-axioms)
+     ;(display (format "Verifying lane: ~a\n" curr-lane))
+     ;(println ((halide:interpret optimized-halide-expr) curr-lane))
+     ;(hvx:set-curr-cn curr-lane)
+     ;(println (let ([x (hvx:interpret optimized-template)]) (if (hvx:vec-pair? x) (hvx:v0-elem x curr-lane) (hvx:elem x curr-lane))))
      
      (define st (current-milliseconds))
      (clear-vc!)
@@ -83,7 +81,7 @@
      (define sol (synthesize #:forall (symbolics optimized-halide-expr)
                              #:guarantee (begin
                                            (assert (not (ormap (lambda (discarded-sol) (equal? optimized-template discarded-sol)) discarded-sols)))
-                                           (lane-eq? (interpret-halide optimized-halide-expr) (interpret-hvx optimized-template) curr-lane))))
+                                           (lane-eq? (halide:interpret optimized-halide-expr) (hvx:interpret optimized-template) curr-lane))))
      (define runtime (- (current-milliseconds) st))
 
      (display (format "Ran synthesizer for ~a ms\n" runtime))
@@ -102,12 +100,12 @@
         (unsat)])]))
 
 (define (lane-eq? oe se lane)
-  (set-curr-cn-hvx lane)
-  (define offset (quotient (num-elems-hvx se) 2))
+  (hvx:set-curr-cn lane)
+  (define offset (quotient (hvx:num-elems se) 2))
   (cond
-    [(and (hvx-pair? se) (< lane offset))
-     (assert (eq? (oe lane) (v0-elem-hvx se lane)))]
-    [(hvx-pair? se)
-     (assert (eq? (oe lane) (v1-elem-hvx se (- lane offset))))]
+    [(and (hvx:vec-pair? se) (< lane offset))
+     (assert (eq? (oe lane) (hvx:v0-elem se lane)))]
+    [(hvx:vec-pair? se)
+     (assert (eq? (oe lane) (hvx:v1-elem se (- lane offset))))]
     [else
-     (assert (eq? (oe lane) (elem-hvx se lane)))]))
+     (assert (eq? (oe lane) (hvx:elem se lane)))]))

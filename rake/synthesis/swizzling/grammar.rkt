@@ -55,17 +55,15 @@
        (define trimmed-exprs (set->list (list->set (map (lambda (e) (if (lo? e) (lo-Vuu e) (if (hi? e) (hi-Vuu e) e))) exprs))))
        (values id trimmed-exprs pair?)]))
 
-  (define elemT (hvx-elem-type (interpret-hvx swizzle-node)))
+  (define elemT (hvx:elem-type (hvx:interpret swizzle-node)))
   (define out-type (get-vec-type elemT pair?))
 
-  ;(define isa (list lo hi vinterleave vshuff vshuffe vshuffo vshuffoe vcombine vdeal vdeale valign vror vpacke vpacko))
-  (define isa (list lo hi vinterleave vinterleave4))
+  ;(define isa (list lo hi vinterleave vshuff vshuffe vshuffo vshuffoe vcombine vdeal vdeale valign vror vpacke vpacko ))
+  (define isa (list lo hi vdeal vinterleave vinterleave4))
 
   (define candidate-swizzles (enumerate-hvx isa out-type base-exprs 2 3))
 
   ;(pretty-print candidate-swizzles)
-  
-  (define sorted-swizzles (sort (set->list candidate-swizzles) (lambda (v1 v2) (<= (cdr v1) (cdr v2)))))
 
   ;; Enable scalar swizzling
   (define (permute-scalars Rt)
@@ -86,27 +84,40 @@
       [(vrmpy Vu Rt) (if (swizzle-node? Vu) (vrmpy Vu (permute-scalars Rt)) node)]
       [(vrmpy-acc Vdd Vu Rt) (if (swizzle-node? Vu) (vrmpy-acc Vdd Vu (permute-scalars Rt)) node)]
       [_ node]))
-  (define updated-template (visit-hvx hvx-template enable-scalar-movement))
+  (define updated-template (hvx:visit hvx-template enable-scalar-movement))
 
+  (define tmpl-type (hvx:type (hvx:interpret hvx-template)))
+  (define tmpl-etype (hvx:elem-type tmpl-type))
+  
   ;; Replace swizzle node with candidates
   (define candidates
-    (for/list ([candidate-swizzle sorted-swizzles])
-      ;; Update template: Replace target swizzle node with swizzle grammar
-      (define (repl-swizzle-node-wth-candidate node [pos -1])
-        (destruct node
-          [(??load id live-data buffer gather-tbl pair?) (if (equal? id target-node-id) (car candidate-swizzle) (update-swizzle-data node halide-expr hvx-sub-exprs translation-history))]
-          [(??swizzle id live-data expr gather-tbl pair?) (if (equal? id target-node-id) (car candidate-swizzle) (update-swizzle-data node halide-expr hvx-sub-exprs translation-history))]
-          [_ node]))
-      (define c (visit-hvx updated-template repl-swizzle-node-wth-candidate))
-      (define c2 (visit-hvx updated-template repl-swizzle-node-wth-candidate))
-      ;(pretty-print (vinterleave-2 c c))
-      (choose c (vinterleave c))))
+    (apply append
+     (for/list ([candidate-swizzle candidate-swizzles])
+       ;; Update template: Replace target swizzle node with swizzle grammar
+       (define (repl-swizzle-node-wth-candidate node [pos -1])
+         (destruct node
+                   [(??load id live-data buffer gather-tbl pair?) (if (equal? id target-node-id) (car candidate-swizzle) (update-swizzle-data node halide-expr hvx-sub-exprs translation-history))]
+                   [(??swizzle id live-data expr gather-tbl pair?) (if (equal? id target-node-id) (car candidate-swizzle) (update-swizzle-data node halide-expr hvx-sub-exprs translation-history))]
+                   [_ node]))
+       (define c (hvx:visit updated-template repl-swizzle-node-wth-candidate))
+       ;(for/list ([e (enumerate-hvx (list vinterleave vdeal) tmpl-type (list c) 1 5)])
+         ;(cons (car e) (+ (cdr e) (cdr candidate-swizzle) -1)))
+       (define cost (cdr candidate-swizzle))
+       (cond
+         [(hvx:vec-pair? tmpl-type) (list (cons c cost) (cons (vinterleave c) (add1 cost)))]
+         [(< (cpp:type-bw tmpl-etype) 32) (list (cons c cost) (cons (vdeal c) (add1 cost)))]
+         [else (list (cons c cost))]))))
+  
+  (define sorted-candidates (sort (set->list candidates) (lambda (v1 v2) (<= (cdr v1) (cdr v2)))))
 
+  ;(pretty-print sorted-candidates)
+  ;(exit)
+  
   (define (fill-arg-grammars node [pos -1])
     (match node
       ['const (??)]
       [_ node]))
-  (for/list ([candidate candidates]) (visit-hvx candidate fill-arg-grammars)))
+  (for/list ([candidate sorted-candidates]) (hvx:visit (car candidate) fill-arg-grammars)))
 
 (define (update-swizzle-data swizzle-node halide-expr hvx-sub-exprs translation-history)
   (define (update-swizzle-node node [pos -1])
@@ -114,12 +125,12 @@
       [(??load id live-data buffer gather-tbl pair?)
         ;(define-symbolic* tbl (~> integer? integer?))
         (define tbl (map (lambda (i) (define-symbolic* idx integer?) idx) (range 256)))
-        (??load id (extract-buffer-reads-halide halide-expr) buffer tbl pair?)]
+        (??load id (halide:extract-buffer-reads halide-expr) buffer tbl pair?)]
       [(??swizzle id live-data exprs gather-tbl pair?)
         ;; Abstract out common sub-expressions
         (define-values (abstr-halide-expr abstr-template _) (optimize-query halide-expr node hvx-sub-exprs (make-hash) translation-history))
         ;; Extract the reads from this expression, essentially representing each "read" from the sub-expressions as a symbolic constant
-        (define new-data (extract-buffer-reads-halide abstr-halide-expr))
+        (define new-data (halide:extract-buffer-reads abstr-halide-expr))
         ;; Now we replace the symbolic constants with the original expressions they represent. This gives us the set of sub-expression accesses
         ;; to consider. There is certainly a cleaner way to do this, but the following way re-uses existing code.
         (define abstr-exprs (make-hash))
@@ -127,14 +138,14 @@
           (cond
             [(abstr-halide-expr? node) (hash-set! abstr-exprs (buffer-data (abstr-halide-expr-abstr-vals node)) (abstr-halide-expr-orig-expr node)) node]
             [else node]))
-        (visit-halide abstr-halide-expr extract-abstr-exprs)
+        (halide:visit abstr-halide-expr extract-abstr-exprs)
         (define (unwrap-reads data exprs)
           (for/list ([lane-reads data])
             (for/list ([lane-read lane-reads])
-              (match (eval lane-read)
+              (match (cpp:eval lane-read)
                 [(expression (== @app) xs ...)
                  (cond
-                   [(hash-has-key? abstr-exprs (list-ref xs 0)) ((interpret-halide (hash-ref abstr-exprs (list-ref xs 0))) (list-ref xs 1))]
+                   [(hash-has-key? abstr-exprs (list-ref xs 0)) ((halide:interpret (hash-ref abstr-exprs (list-ref xs 0))) (list-ref xs 1))]
                    [else lane-read])]
                 [_ (error "Extracted read from the Halide expression does not match any expected patterns.")]))))
         ;; Finally create the swizzle node
@@ -142,7 +153,7 @@
         (define tbl (map (lambda (i) (define-symbolic* idx integer?) idx) (range 256)))
         (??swizzle id (unwrap-reads new-data abstr-exprs) exprs tbl pair?)]
       [_ node]))
-  (visit-hvx swizzle-node update-swizzle-node))
+  (hvx:visit swizzle-node update-swizzle-node))
 
 (define (skip? parent-instr child-instr)
   (or
@@ -168,7 +179,7 @@
 
     ;; Recursive base case
     [(<= depth 0)
-     (define res (filter (lambda (expr) (eq? output-type (hvx-type (interpret-hvx expr)))) base-exprs))
+     (define res (filter (lambda (expr) (eq? output-type (hvx:type (hvx:interpret expr)))) base-exprs))
      (when (or (eq? parent-instr lo) (eq? parent-instr hi))
         (set! res (filter (lambda (expr) (not (vreadp? expr))) res)))
      (list->set (map (lambda (expr) (cons expr 1)) res))]
@@ -177,8 +188,9 @@
     [else
      (define candidates (enumerate-hvx instr-set output-type base-exprs (sub1 depth) max-cost parent-instr))
      (for ([instr instr-set])
+       (define instr-cost (swizzle-instr-cost instr))
        (when (not (skip? parent-instr instr))
-         (for ([sig (instr-forms instr)])
+         (for ([sig (hvx:instr-forms instr)])
            (when (eq? output-type (instr-sig-ret-val sig))
              (define arg-opts (list))
              (for ([arg (instr-sig-args sig)])
@@ -211,3 +223,10 @@
      (define filtered-candidates (list->set (filter (lambda (e) (<= (cdr e) max-cost)) (set->list candidates))))
      (hash-set! enumeration-database query filtered-candidates)
      filtered-candidates]))
+
+(define (swizzle-instr-cost instr)
+  (cond
+    [(eq? instr lo) 0]
+    [(eq? instr hi) 0]
+    [(eq? vinterleave4 hi) 2]
+    [else 1]))

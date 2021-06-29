@@ -13,18 +13,18 @@
 (provide infer-value-range-hvx infer-value-range-hvx-ir infer-value-range-expr)
 
 (define (infer-value-range-hvx expr axioms)
-  (let ([x (interpret-hvx expr)])
-    (if (hvx-pair? x) (infer-value-range-expr (v0-elem-hvx x 0) axioms) (infer-value-range-expr (elem-hvx x 0) axioms))))
+  (let ([x (hvx:interpret expr)])
+    (if (hvx:vec-pair? x) (infer-value-range-expr (hvx:v0-elem x 0) axioms) (infer-value-range-expr (hvx:elem x 0) axioms))))
 
 (define (infer-value-range-hvx-ir expr axioms abstr-val-bounds)
-  (infer-value-range-expr ((interpret-hvx-ir expr) 0) axioms abstr-val-bounds))
+  (infer-value-range-expr ((hvx-ir:interpret expr) 0) axioms abstr-val-bounds))
 
 ;; Infer the value bounds for the input expression
 (define (infer-value-range-expr expr-in axioms abstr-val-bounds)
   (set! inferred-axioms (list))
   (define expr (simplify-to-solvable-types expr-in abstr-val-bounds))
 
-  (define toInt (if (signed-expr? expr) bitvector->integer bitvector->natural))
+  (define toInt (if (cpp:signed-expr? expr) bitvector->integer bitvector->natural))
 
   ;; Save default solver
   (define z3-base (current-solver))
@@ -46,7 +46,7 @@
   (for-each (lambda (axiom) (assert axiom)) inferred-axioms)
   (define st (current-milliseconds))
   (define sol-lb
-    (optimize #:minimize (list (toInt (eval expr)))
+    (optimize #:minimize (list (toInt (cpp:eval expr)))
               #:guarantee #t))
   (define runtime (- (current-milliseconds) st))
   
@@ -59,7 +59,7 @@
   (for-each (lambda (axiom) (assert axiom)) inferred-axioms)
   (set! st (current-milliseconds))
   (define sol-ub
-    (optimize #:maximize (list (toInt (eval expr)))
+    (optimize #:maximize (list (toInt (cpp:eval expr)))
               #:guarantee #t))
   (set! runtime (- (current-milliseconds) st))
   
@@ -111,20 +111,20 @@
         (when (hash-has-key? bounds (list-ref xs 0))
           (define bnds (hash-ref bounds (list-ref xs 0)))
           (cond
-            [(signed-expr? (car bnds))
-             (set! inferred-axioms (append inferred-axioms (list (and (bvsle v (eval (cdr bnds))) (bvsge v (eval (car bnds)))))))]
+            [(cpp:signed-expr? (car bnds))
+             (set! inferred-axioms (append inferred-axioms (list (and (bvsle v (cpp:eval (cdr bnds))) (bvsge v (cpp:eval (car bnds)))))))]
             [else
-             (set! inferred-axioms (append inferred-axioms (list (and (bvule v (eval (cdr bnds))) (bvuge v (eval (car bnds)))))))]))
+             (set! inferred-axioms (append inferred-axioms (list (and (bvule v (cpp:eval (cdr bnds))) (bvuge v (cpp:eval (car bnds)))))))]))
         v]
        [else
         (define-symbolic* v (type-of expr))
         (when (hash-has-key? bounds (list-ref xs 0))
           (define bnds (hash-ref bounds (list-ref xs 0)))
           (cond
-            [(signed-expr? (car bnds))
-             (set! inferred-axioms (append inferred-axioms (list (and (bvsle v (eval (cdr bnds))) (bvsge v (eval (car bnds)))))))]
+            [(cpp:signed-expr? (car bnds))
+             (set! inferred-axioms (append inferred-axioms (list (and (bvsle v (cpp:eval (cdr bnds))) (bvsge v (cpp:eval (car bnds)))))))]
             [else
-             (set! inferred-axioms (append inferred-axioms (list (and (bvule v (eval (cdr bnds))) (bvuge v (eval (car bnds)))))))]))
+             (set! inferred-axioms (append inferred-axioms (list (and (bvule v (cpp:eval (cdr bnds))) (bvuge v (cpp:eval (car bnds)))))))]))
         v])]
 
     ;; For all other expressions, recurse

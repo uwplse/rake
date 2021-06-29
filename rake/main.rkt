@@ -10,10 +10,7 @@
 (require rake/synthesis/axioms)
 (require rake/synthesis/algorithm)
 
-;(require rake/hvx/cost-model)
-;(require rake/hvx/codegen/llvm)
-
-;
+(require rake/hvx/codegen/llvm)
 
 (provide
  (all-from-out rake/internal/log)
@@ -26,8 +23,4 @@
  (all-from-out rake/synthesis/axioms)
  (all-from-out rake/synthesis/algorithm)
  
-; (all-from-out rake/hvx/cost-model)
-; (all-from-out rake/hvx/codegen/llvm)
- 
- 
- )
+ (all-from-out rake/hvx/codegen/llvm))

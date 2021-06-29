@@ -26,7 +26,7 @@
   (display "Verifying expression equivalence over full-length vectors...\n")
   (display "============================================================\n")
 
-  (define elem-count-hal (halide-vec-len halide-expr))
+  (define elem-count-hal (halide:vec-len halide-expr))
   (define elem-count-hvx (hvx-vec-len (if (concat-tiles? hvx-expr) (concat-tiles-vecs hvx-expr) (list hvx-expr))))
 
   (define st (current-milliseconds))
@@ -38,9 +38,9 @@
       [(concat-tiles? hvx-expr)
         (verify-equiv-tiles halide-expr (concat-tiles-vecs hvx-expr) axioms)]
       [else
-        (define halide-output (interpret-halide halide-expr))
-        (define hvx-output (interpret-hvx hvx-expr))
-        (verify-equiv halide-output hvx-output (verification-lanes (hvx-type hvx-output)))]))
+        (define halide-output (halide:interpret halide-expr))
+        (define hvx-output (hvx:interpret hvx-expr))
+        (verify-equiv halide-output hvx-output (verification-lanes (hvx:type hvx-output)))]))
 
   (define runtime (- (current-milliseconds) st))
   (display (format "Verification time: ~a ms\n\n" runtime))
@@ -52,15 +52,15 @@
     [(empty? hvx-tiles) #t]
     [else
       (define hvx-tile (first hvx-tiles))
-      (define halide-output (interpret-halide halide-expr))
-      (define hvx-output (interpret-hvx hvx-tile))
-      (define is-hvx-pair? (hvx-pair? hvx-output))
-      (define offset (quotient (num-elems-hvx hvx-output) 2))
-      (define correct? (verify-equiv halide-output hvx-output (verification-lanes (hvx-type hvx-output)) (symbolics halide-expr) axioms is-hvx-pair? offset))
+      (define halide-output (halide:interpret halide-expr))
+      (define hvx-output (hvx:interpret hvx-tile))
+      (define is-hvx-pair? (hvx:vec-pair? hvx-output))
+      (define offset (quotient (hvx:num-elems hvx-output) 2))
+      (define correct? (verify-equiv halide-output hvx-output (verification-lanes (hvx:type hvx-output)) (symbolics halide-expr) axioms is-hvx-pair? offset))
       (cond
         [correct?
-         (define elems-in-hvx-tile (num-elems-hvx (interpret-hvx hvx-tile)))
-         (define elems-in-hal-tile (halide-vec-len halide-expr))
+         (define elems-in-hvx-tile (hvx:num-elems (hvx:interpret hvx-tile)))
+         (define elems-in-hal-tile (halide:vec-len halide-expr))
          (verify-equiv-tiles (slice_vectors halide-expr elems-in-hvx-tile 1 (- elems-in-hal-tile elems-in-hvx-tile)) (rest hvx-tiles) axioms)]
         [else #f])]))
 
@@ -86,10 +86,10 @@
                                 (eq?
                                  (halide-output lane)
                                  (if (< lane offset)
-                                     (v0-elem-hvx hvx-output lane)
-                                     (v1-elem-hvx hvx-output (- lane offset)))))]
+                                     (hvx:v0-elem hvx-output lane)
+                                     (hvx:v1-elem hvx-output (- lane offset)))))]
                               [else
-                               (assert (eq? (halide-output lane) (elem-hvx hvx-output lane)))])))
+                               (assert (eq? (halide-output lane) (hvx:elem hvx-output lane)))])))
   (define runtime (- (current-milliseconds) st))
   (log (format "Verification query: ~a ms\n" runtime))
   
@@ -100,6 +100,6 @@
     [(empty? hvx-tiles) 0]
     [else
       (define hvx-tile (first hvx-tiles))
-      (+ (num-elems-hvx (interpret-hvx hvx-tile)) (hvx-vec-len (rest hvx-tiles)))]))
+      (+ (hvx:num-elems (hvx:interpret hvx-tile)) (hvx-vec-len (rest hvx-tiles)))]))
 
 (provide verify-equivalence)

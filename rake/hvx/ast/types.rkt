@@ -6,12 +6,31 @@
   rosette/lib/destruct
   rake/cpp/types)
 
+(provide
+ (except-out (all-defined-out) instr-forms v0 v1 elem v0-elem v1-elem elem-type num-elems vec-pair? type)
+ (prefix-out hvx: instr-forms)
+ (prefix-out hvx: v0)
+ (prefix-out hvx: v1)
+ (prefix-out hvx: elem)
+ (prefix-out hvx: v0-elem)
+ (prefix-out hvx: v1-elem)
+ (prefix-out hvx: elem-type)
+ (prefix-out hvx: num-elems)
+ (prefix-out hvx: vec-pair?)
+ (prefix-out hvx: type))
+
 (struct hvx-ast-node (id))
 
 ;; Let exprs
 (struct let-expr (var val body) #:transparent)
 
 ;; Scalar types
+(struct Rt.b (v0) #:transparent)
+(struct Rt.ub (v0) #:transparent)
+(struct Rt.h (v0) #:transparent)
+(struct Rt.uh (v0) #:transparent)
+(struct Rt.w (v0) #:transparent)
+(struct Rt.uw (v0) #:transparent)
 (struct Rt2.b (v0 v1) #:transparent)
 (struct Rt2.ub (v0 v1) #:transparent)
 (struct Rt2.h (v0 v1) #:transparent)
@@ -632,7 +651,7 @@
     [(i32x32x2 v0 v1) (v1 idx)]
     [(u32x32x2 v0 v1) (v1 idx)]))
 
-(define (hvx-elem-type expr)
+(define (elem-type expr)
   (cond
     [(eq? i8x128 expr) 'int8]
     [(eq? u8x128 expr) 'uint8]
@@ -688,7 +707,7 @@
     [(i32x32x2 data-v0 data-v1) 64]
     [(u32x32x2 data-v0 data-v1) 64]))
 
-(define (hvx-pair? v)
+(define (vec-pair? v)
   (cond
     [(i8x128? v) #f]
     [(u8x128? v) #f]
@@ -716,7 +735,7 @@
     [(eq? v 'i32x32x2) #t]
     [(eq? v 'u32x32x2) #t]))
 
-(define (hvx-type expr)
+(define (type expr)
   (destruct expr
     [(i8x128 data) 'i8x128]
     [(u8x128 data) 'u8x128]
@@ -730,7 +749,3 @@
     [(u16x64x2 data-v0 data-v1) 'u16x64x2]
     [(i32x32x2 data-v0 data-v1) 'i32x32x2]
     [(u32x32x2 data-v0 data-v1) 'u32x32x2]))
-
-(provide
- (except-out (all-defined-out) elem v0-elem v1-elem num-elems)
- (rename-out [elem elem-hvx] [v0-elem v0-elem-hvx] [v1-elem v1-elem-hvx] [num-elems num-elems-hvx]))

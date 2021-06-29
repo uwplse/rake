@@ -12,36 +12,36 @@
 ;; Infer the value bounds for the input expression
 (define (infer-value-range hvx-expr axioms)
   (set! hvx-expr (if (concat-tiles? hvx-expr) (list-ref (concat-tiles-vecs hvx-expr) 0) hvx-expr))
-  (set! hvx-expr (let ([xs (interpret-hvx hvx-expr)]) (if (hvx-pair? xs) (v0-elem-hvx xs 0) (elem-hvx xs 0))))
+  (set! hvx-expr (let ([xs (interpret-hvx hvx-expr)]) (if (hvx:vec-pair? xs) (hvx:v0-elem xs 0) (hvx:elem xs 0))))
   
   (define expr (simplify-to-solvable-types hvx-expr))
 
   (define-values (lb ub)
     (cond
-      [(eq? (expr-bw expr) 8)
+      [(eq? (cpp:expr-bw expr) 8)
        (define-symbolic lb (bitvector 8))
        (define-symbolic ub (bitvector 8))
        (values lb ub)]
-      [(eq? (expr-bw expr) 16)
+      [(eq? (cpp:expr-bw expr) 16)
        (define-symbolic lb (bitvector 16))
        (define-symbolic ub (bitvector 16))
        (values lb ub)]
-      [(eq? (expr-bw expr) 32)
+      [(eq? (cpp:expr-bw expr) 32)
        (define-symbolic lb (bitvector 32))
        (define-symbolic ub (bitvector 32))
        (values lb ub)]
-      [(eq? (expr-bw expr) 64)
+      [(eq? (cpp:expr-bw expr) 64)
        (define-symbolic lb (bitvector 64))
        (define-symbolic ub (bitvector 64))
        (values lb ub)]))
 
-  (define op (if (signed-expr? expr) bvsle bvule))
-  (define toInt (if (signed-expr? expr) bitvector->integer bitvector->natural))
+  (define op (if (cpp:signed-expr? expr) bvsle bvule))
+  (define toInt (if (cpp:signed-expr? expr) bitvector->integer bitvector->natural))
   
   (clear-vc!)
   (for-each (lambda (axiom) (assume axiom)) axioms)
-  (assert (forall (symbolics expr) (op lb (eval expr))))
-  (assert (forall (symbolics expr) (op (eval expr) ub)))
+  (assert (forall (symbolics expr) (op lb (cpp:eval expr))))
+  (assert (forall (symbolics expr) (op (cpp:eval expr) ub)))
 
   ;; Save default solver
   (define z3-base (current-solver))

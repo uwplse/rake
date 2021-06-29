@@ -32,7 +32,7 @@
             
     ;; Data loading/shuffling
     [(load-data live-data gather-tbl)
-     (define buffers (set->list (extract-live-buffers-halide halide-expr)))
+     (define buffers (set->list (halide:extract-live-buffers halide-expr)))
      (define (buffer) (apply choose* buffers))
      (define (gen-gather-tbl)
        ;(define-symbolic* tbl (~> integer? integer?))
@@ -46,8 +46,8 @@
 
     ;; Casting
     [(cast ir-sub-expr output-type)
-     (define input-type (hvx-ir-elem-type ir-sub-expr))
-     (define narrowing? (< (type-bw output-type) (type-bw input-type)))
+     (define input-type (hvx-ir:elem-type ir-sub-expr))
+     (define narrowing? (< (cpp:type-bw output-type) (cpp:type-bw input-type)))
 
      (define isa
        (cond
@@ -65,7 +65,7 @@
     
     ;; Min Max
     [(maximum ir-sub-expr0 ir-sub-expr1)
-     (define outT (halide-elem-type halide-expr))
+     (define outT (halide:elem-type halide-expr))
      (define isa (list vmax))
 
      (define grouped-sub-exprs (prepare-sub-exprs hvx-sub-exprs))
@@ -82,10 +82,10 @@
          [#f #f]
          ['bool (bool-const)]
          [_ node]))
-     (for/list ([candidate candidates]) (uniquify-swizzles (visit-hvx candidate fill-arg-grammars)))]
+     (for/list ([candidate candidates]) (uniquify-swizzles (hvx:visit candidate fill-arg-grammars)))]
     
     [(minimum ir-sub-expr0 ir-sub-expr1)
-     (define outT (halide-elem-type halide-expr))
+     (define outT (halide:elem-type halide-expr))
      (define isa (list vmin))
 
      (define grouped-sub-exprs (prepare-sub-exprs hvx-sub-exprs))
@@ -102,7 +102,7 @@
          [#f #f]
          ['bool (bool-const)]
          [_ node]))
-     (for/list ([candidate candidates]) (uniquify-swizzles (visit-hvx candidate fill-arg-grammars)))]
+     (for/list ([candidate candidates]) (uniquify-swizzles (hvx:visit candidate fill-arg-grammars)))]
 
     [(add-const sub-expr const-val output-type saturate?)
      (define outT output-type)
@@ -117,12 +117,12 @@
      ;; Fill in param grammars
      (define int-consts (list const-val))
      (define (bool-const) (define-symbolic* b boolean?) b)
-     (define (int8-const) (cpp-cast (apply choose* int-consts) 'int8))
-     (define (uint8-const) (cpp-cast (apply choose* int-consts) 'uint8))
-     (define (int16-const) (cpp-cast (apply choose* int-consts) 'int16))
-     (define (uint16-const) (cpp-cast (apply choose* int-consts) 'uint16))
-     (define (int32-const) (cpp-cast (apply choose* int-consts) 'int32))
-     (define (uint32-const) (cpp-cast (apply choose* int-consts) 'uint32))
+     (define (int8-const) (cpp:cast  (apply choose* int-consts) 'int8))
+     (define (uint8-const) (cpp:cast  (apply choose* int-consts) 'uint8))
+     (define (int16-const) (cpp:cast  (apply choose* int-consts) 'int16))
+     (define (uint16-const) (cpp:cast  (apply choose* int-consts) 'uint16))
+     (define (int32-const) (cpp:cast  (apply choose* int-consts) 'int32))
+     (define (uint32-const) (cpp:cast  (apply choose* int-consts) 'uint32))
      (define (fill-arg-grammars node [pos -1])
        (match node
          [#t #t]
@@ -135,12 +135,12 @@
          ['int32 (int32-const)]
          ['uint32 (int32-const)]
          [_ node]))
-     (for/list ([candidate candidates]) (uniquify-swizzles (visit-hvx candidate fill-arg-grammars)))]
+     (for/list ([candidate candidates]) (uniquify-swizzles (hvx:visit candidate fill-arg-grammars)))]
     
     ;; Shift right
     [(vs-shift-right ir-sub-expr shift round? saturate? arithmetic? output-type)
-     (define input-type (hvx-ir-elem-type ir-sub-expr))
-     (define narrowing? (< (type-bw output-type) (type-bw input-type)))
+     (define input-type (hvx-ir:elem-type ir-sub-expr))
+     (define narrowing? (< (cpp:type-bw output-type) (cpp:type-bw input-type)))
 
      ;; Desired output type
      (define desired-expr-types (enum-types output-type))
@@ -152,21 +152,19 @@
      (set! isa (list vasr-n vround)) ; vpacko-n vround vasr vlsr
      (set! grouped-sub-exprs (prepare-sub-exprs hvx-sub-exprs))
 
-     (pretty-print (enumerate-hvx isa desired-expr-types grouped-sub-exprs 1))
-     
-     (set! candidates (append '() (set->list (enumerate-hvx isa desired-expr-types grouped-sub-exprs 1))))
+     (set! candidates (append candidates (set->list (enumerate-hvx isa desired-expr-types grouped-sub-exprs 1))))
 
      ;; Sort them
      (set! candidates (map (lambda (c) (cons c (basic-expr-cost c))) candidates))
      (set! candidates (sort candidates (lambda (v1 v2) (<= (cdr v1) (cdr v2)))))
 
-;     (pretty-print candidates)
-;     (exit)
+     ;(pretty-print candidates)
+     ;(exit)
      
      ;; Fill in param grammars
      (define int-consts (list shift))
      (define (bool-const) (define-symbolic* b boolean?) b)
-     (define (int8-const) (cpp-cast (apply choose* int-consts) 'int8))
+     (define (int8-const) (cpp:cast  (apply choose* int-consts) 'int8))
      (define (fill-arg-grammars node [pos -1])
        (match node
          [#t #t]
@@ -174,21 +172,21 @@
          ['bool (bool-const)]
          ['int8 (int8-const)]
          [_ node]))
-     (for/list ([candidate candidates]) (uniquify-swizzles (visit-hvx (car candidate) fill-arg-grammars)))]
+     (for/list ([candidate candidates]) (uniquify-swizzles (hvx:visit (car candidate) fill-arg-grammars)))]
     
     ;; Saturation
     [(saturate ir-sub-expr round? output-type)
-     (define input-type (hvx-ir-elem-type ir-sub-expr))
+     (define input-type (hvx-ir:elem-type ir-sub-expr))
      ;; Todo: we can optimize by specializing grammar based on flags
      (define isa (list vsat vpack vround)) ;vmin vmax vpacke-n vshuffe-n
 
      ;; Sub-expr types
      (define consts
        (cond
-         [(eq? output-type 'uint8) (list (vsplat (cpp-cast (uint8_t (bv 0 8)) input-type)) (vsplat (cpp-cast (uint8_t (bv 255 8)) input-type)))]
-         [(eq? output-type 'int8) (list (vsplat (cpp-cast (uint8_t (bv -128 8)) input-type)) (vsplat (cpp-cast (uint8_t (bv 127 8)) input-type)))]
-         [(eq? output-type 'uint16) (list (vsplat (cpp-cast (uint16_t (bv 0 16)) input-type)) (vsplat (cpp-cast (uint16_t (bv 65535 16)) input-type)))]
-         [(eq? output-type 'uint8) (list (vsplat (cpp-cast (int16_t (bv -32768 32)) input-type)) (vsplat (cpp-cast (int16_t (bv 32767 32)) input-type)))]))
+         [(eq? output-type 'uint8) (list (vsplat (cpp:cast  (uint8_t (bv 0 8)) input-type)) (vsplat (cpp:cast  (uint8_t (bv 255 8)) input-type)))]
+         [(eq? output-type 'int8) (list (vsplat (cpp:cast  (uint8_t (bv -128 8)) input-type)) (vsplat (cpp:cast  (uint8_t (bv 127 8)) input-type)))]
+         [(eq? output-type 'uint16) (list (vsplat (cpp:cast  (uint16_t (bv 0 16)) input-type)) (vsplat (cpp:cast  (uint16_t (bv 65535 16)) input-type)))]
+         [(eq? output-type 'uint8) (list (vsplat (cpp:cast  (int16_t (bv -32768 32)) input-type)) (vsplat (cpp:cast  (int16_t (bv 32767 32)) input-type)))]))
 
      (define grouped-sub-exprs (prepare-sub-exprs hvx-sub-exprs))
      
@@ -207,7 +205,7 @@
          [#f #f]
          ['bool (bool-const)]
          [_ node]))
-     (for/list ([candidate candidates]) (uniquify-swizzles (visit-hvx (car candidate) fill-arg-grammars)))]
+     (for/list ([candidate candidates]) (uniquify-swizzles (hvx:visit (car candidate) fill-arg-grammars)))]
 
     ;; Vector-scalar fractional multiply
     [(vs-frac-mpy sub-expr sca round?)
@@ -232,29 +230,29 @@
      ;; Fill in param grammars
      (define int-consts (list sca))
      (define (bool-const) (define-symbolic* b boolean?) b)
-     (define (int32-const) (cpp-cast (apply choose* int-consts) 'int32))
+     (define (int32-const) (cpp:cast (apply choose* int-consts) 'int32))
      (define (fill-arg-grammars node [pos -1])
        (match node
          ['bool (bool-const)]
          ['int32 (int32-const)]
          [_ node]))
-     (for/list ([candidate candidates]) (uniquify-swizzles (visit-hvx (car candidate) fill-arg-grammars)))]
+     (for/list ([candidate candidates]) (uniquify-swizzles (hvx:visit (car candidate) fill-arg-grammars)))]
     
     ;; Vector-scalar multiply adds
     [(vs-mpy-add ir-sub-expr weights output-type saturate?)
      (define input-type
        (cond
          [(combine? ir-sub-expr)
-          (define t0 (hvx-ir-elem-type (combine-sub-expr0 ir-sub-expr)))
-          (define t1 (hvx-ir-elem-type (combine-sub-expr1 ir-sub-expr)))
-          (if (< (type-bw t0) (type-bw t1)) t0 t1)]
-         [else (hvx-ir-elem-type ir-sub-expr)]))
+          (define t0 (hvx-ir:elem-type (combine-sub-expr0 ir-sub-expr)))
+          (define t1 (hvx-ir:elem-type (combine-sub-expr1 ir-sub-expr)))
+          (if (< (cpp:type-bw t0) (cpp:type-bw t1)) t0 t1)]
+         [else (hvx-ir:elem-type ir-sub-expr)]))
 
      ;; We consider different instructions depending on whether the multiply-add is widening or not
      (define isa
        (cond
          ;; When its a widening fused multiply add
-         [(> (type-bw output-type) (type-bw input-type))
+         [(> (cpp:type-bw output-type) (cpp:type-bw input-type))
           (list
            reinterpret ;; Allow reinterpretation
            vzxt vsxt vunpack  ;; Basic sign and zero-extension instructions
@@ -299,12 +297,12 @@
      ;; Fill in param grammars
      (define int-consts (set->list (list->set weights)))
      (define (bool-const) (define-symbolic* b boolean?) b)
-     (define (int8-const) (cpp-cast (apply choose* int-consts) 'int8))
-     (define (uint8-const) (cpp-cast (apply choose* int-consts) 'uint8))
-     (define (int16-const) (cpp-cast (apply choose* int-consts) 'int16))
-     (define (uint16-const) (cpp-cast (apply choose* int-consts) 'uint16))
-     (define (int32-const) (cpp-cast (apply choose* int-consts) 'int32))
-     (define (uint32-const) (cpp-cast (apply choose* int-consts) 'uint32))
+     (define (int8-const) (cpp:cast (apply choose* int-consts) 'int8))
+     (define (uint8-const) (cpp:cast (apply choose* int-consts) 'uint8))
+     (define (int16-const) (cpp:cast (apply choose* int-consts) 'int16))
+     (define (uint16-const) (cpp:cast (apply choose* int-consts) 'uint16))
+     (define (int32-const) (cpp:cast (apply choose* int-consts) 'int32))
+     (define (uint32-const) (cpp:cast (apply choose* int-consts) 'uint32))
      (define (fill-arg-grammars node [pos -1])
        (match node
          [#t #t]
@@ -323,23 +321,23 @@
          ['int8x4 (Rt4.b (int8-const) (int8-const) (int8-const) (int8-const))]
          ['uint8x4 (Rt4.ub (uint8-const) (uint8-const) (uint8-const) (uint8-const))]
          [_ node]))
-     (for/list ([candidate candidates]) (uniquify-swizzles (visit-hvx (car candidate) fill-arg-grammars)))]
+     (for/list ([candidate candidates]) (uniquify-swizzles (hvx:visit (car candidate) fill-arg-grammars)))]
 
     ;; Vector-scalar multiply adds
     [(vv-mpy-add ir-sub-expr width output-type saturate?)
      (define input-type
        (cond
          [(combine? ir-sub-expr)
-          (define t0 (hvx-ir-elem-type (combine-sub-expr0 ir-sub-expr)))
-          (define t1 (hvx-ir-elem-type (combine-sub-expr1 ir-sub-expr)))
-          (if (< (type-bw t0) (type-bw t1)) t0 t1)]
-         [else (hvx-ir-elem-type ir-sub-expr)]))
+          (define t0 (hvx-ir:elem-type (combine-sub-expr0 ir-sub-expr)))
+          (define t1 (hvx-ir:elem-type (combine-sub-expr1 ir-sub-expr)))
+          (if (< (cpp:type-bw t0) (cpp:type-bw t1)) t0 t1)]
+         [else (hvx-ir:elem-type ir-sub-expr)]))
 
      ;; We consider different instructions depending on whether the multiply-add is widening or not
      (define isa
        (cond
          ;; When its a widening fused multiply add
-         [(> (type-bw output-type) (type-bw input-type))
+         [(> (cpp:type-bw output-type) (cpp:type-bw input-type))
           (list
            reinterpret ;; Allow reinterpretation
            vzxt vsxt vunpack ;; Basic sign and zero-extension instructions
@@ -381,7 +379,7 @@
          [#f #f]
          ['bool (bool-const)]
          [_ node]))
-     (for/list ([candidate candidates]) (uniquify-swizzles (visit-hvx (car candidate) fill-arg-grammars)))]
+     (for/list ([candidate candidates]) (uniquify-swizzles (hvx:visit (car candidate) fill-arg-grammars)))]
 
     ;; Throw error
     [_ (error "NYI: Please define a grammar for lowering the following ir-expression to HVX ISA:" ir-expr)]))
@@ -396,7 +394,7 @@
        (define tbl (map (lambda (i) (define-symbolic* idx integer?) idx) (range 256)))
        (??swizzle (get-sw-node-id) live-data expr tbl pair?)]
       [_ node]))
-  (visit-hvx hvx-template clone-swizzle-node))
+  (hvx:visit hvx-template clone-swizzle-node))
 
 (define (is-vsplat? expr)
   (or
@@ -439,7 +437,7 @@
     [else
       (define candidates (enumerate-hvx instr-set output-types hvx-sub-exprs (sub1 depth)))
       (for ([instr instr-set])
-        (for ([sig (instr-forms instr)])
+        (for ([sig (hvx:instr-forms instr)])
           (when (set-member? output-types (instr-sig-ret-val sig))
             (define arg-opts (list))
             (for ([arg (instr-sig-args sig)])
@@ -491,25 +489,25 @@
   (for ([hvx-sub-expr hvx-sub-exprs-untiled])
     (cond
       [(??abstr-load? hvx-sub-expr)
-       (define elemT (hvx-elem-type (interpret-hvx hvx-sub-expr)))
+       (define elemT (hvx:elem-type (hvx:interpret hvx-sub-expr)))
        (for ([out-type (enum-types elemT)])
          (set! swizzle-node-id (add1 swizzle-node-id))
          (define live-data (??abstr-load-live-data hvx-sub-expr))
          (define buffer (??abstr-load-buffer hvx-sub-expr))
          ;(define-symbolic* tbl (~> integer? integer?))
          (define tbl (map (lambda (i) (define-symbolic* idx integer?) idx) (range 256)))
-         (define base-load-expr (if (hvx-pair? out-type) (??load swizzle-node-id live-data buffer tbl #t) (??load swizzle-node-id live-data buffer tbl #f)))
+         (define base-load-expr (if (hvx:vec-pair? out-type) (??load swizzle-node-id live-data buffer tbl #t) (??load swizzle-node-id live-data buffer tbl #f)))
          (define exprs (hash-ref! grouped-sub-exprs out-type (set)))
          (hash-set! grouped-sub-exprs out-type (set-add exprs base-load-expr)))]
       [(vsplat? hvx-sub-expr)
-       (define elemT (hvx-elem-type (interpret-hvx hvx-sub-expr)))
+       (define elemT (hvx:elem-type (hvx:interpret hvx-sub-expr)))
        (for ([out-type (enum-types elemT)])
          (define exprs (hash-ref! grouped-sub-exprs out-type (set)))
-         (hash-set! grouped-sub-exprs out-type (set-add exprs (if (hvx-pair? out-type) (vcombine hvx-sub-expr hvx-sub-expr) hvx-sub-expr))))]
+         (hash-set! grouped-sub-exprs out-type (set-add exprs (if (hvx:vec-pair? out-type) (vcombine hvx-sub-expr hvx-sub-expr) hvx-sub-expr))))]
       [else
-       (define sub-expr-type (hvx-type (interpret-hvx hvx-sub-expr)))
-       (when (hvx-pair? sub-expr-type)
-         (define sub-expr-type-2 (hvx-type (interpret-hvx (lo hvx-sub-expr))))
+       (define sub-expr-type (hvx:type (hvx:interpret hvx-sub-expr)))
+       (when (hvx:vec-pair? sub-expr-type)
+         (define sub-expr-type-2 (hvx:type (hvx:interpret (lo hvx-sub-expr))))
          (define exprs (hash-ref! grouped-sub-exprs sub-expr-type-2 (set)))
          (hash-set! grouped-sub-exprs sub-expr-type-2 (set-add exprs hvx-sub-expr)))
        (define exprs (hash-ref! grouped-sub-exprs sub-expr-type (set)))
@@ -527,7 +525,7 @@
        (let ([c (filter (lambda (c) (not (or (is-vsplat? c) (??load? c)))) candidates-l)])
          (cond
            [(empty? c) '()]
-           [else (list (??swizzle swizzle-node-id '() c (void) (hvx-pair? output-type)))]))))
+           [else (list (??swizzle swizzle-node-id '() c (void) (hvx:vec-pair? output-type)))]))))
     (hash-set! grouped-merged-sub-exprs output-type merged-candidates))
 
   grouped-merged-sub-exprs)

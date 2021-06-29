@@ -18,7 +18,7 @@
       (display (format "Synthesizing Swizzle implementations... (Tile ~a of ~a) \n" tile-id num-tiles))
       (display "=====================================================\n\n")
       
-      (define starting-vecs (extract-loads-halide halide-expr))
+      (define starting-vecs (halide:extract-loads halide-expr))
       
       ;; Extract set of swizzle nodes to be synthesized
       (define swizzle-nodes (list))
@@ -27,7 +27,7 @@
           [(??load id live-data buffer gather-tbl pair?) (set! swizzle-nodes (append (list node) swizzle-nodes)) node]
           [(??swizzle id live-data expr gather-tbl pair?) (set! swizzle-nodes (append (list node) swizzle-nodes)) node]
           [_ node]))
-      (visit-hvx hvx-template register-gather-node)
+      (hvx:visit hvx-template register-gather-node)
       
       ;; Synthesize an implementation for each swizzle node incrementally
       (synthesize-swizzle-nodes (reverse swizzle-nodes) starting-vecs hvx-template halide-expr hvx-sub-exprs translation-history)]

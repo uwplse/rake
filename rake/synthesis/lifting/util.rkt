@@ -16,7 +16,7 @@
 (define (optimize-query halide-expr template translation-history value-bounds)
   (define abstr-buff-bounds (make-hash))
   (define inferred-axioms (list))
-  (define sub-exprs (flatten (map (lambda (v) (if (combine? v) (list (combine-sub-expr0 v) (combine-sub-expr1 v)) v)) (get-hvx-ir-subexprs template))))
+  (define sub-exprs (flatten (map (lambda (v) (if (combine? v) (list (combine-sub-expr0 v) (combine-sub-expr1 v)) v)) (hvx-ir:get-subexprs template))))
   (define updated-spec halide-expr)
   (define updated-template template)
   (for-each
@@ -30,14 +30,14 @@
          (cond
            [(rkt-equal? (unpack-abstr-exprs node) equiv-halide-subexpr) abstracted-halide-subexpr]
            [else node]))
-       (set! updated-spec (visit-halide updated-spec abstract-sub-expr-halide))
+       (set! updated-spec (halide:visit updated-spec abstract-sub-expr-halide))
 
        (define (abstract-sub-expr-ir node)
          (cond
            [(abstr-ir-expr? node) node]
            [(eq? (ir-node-id node) (ir-node-id sub-expr))
-            (define val ((interpret-hvx-ir abstracted-ir-subexpr) 0))
-            (when (> (expr-bw val) 1)
+            (define val ((hvx-ir:interpret abstracted-ir-subexpr) 0))
+            (when (> (cpp:expr-bw val) 1)
               (define bounds (hash-ref value-bounds (ir-node-id sub-expr)))
               (define abstr-expr-buffer (abstr-ir-expr-abstr-vals abstracted-ir-subexpr))
               (define ax (values-range-from abstr-expr-buffer (car bounds) (cdr bounds)))
@@ -45,7 +45,7 @@
               (hash-set! abstr-buff-bounds (buffer-data abstr-expr-buffer) (cons (car bounds) (cdr bounds))))
             abstracted-ir-subexpr]
            [else node]))
-       (set! updated-template (visit-hvx-ir updated-template abstract-sub-expr-ir))))
+       (set! updated-template (hvx-ir:visit updated-template abstract-sub-expr-ir))))
    sub-exprs)
   (values updated-template updated-spec inferred-axioms abstr-buff-bounds))
 
@@ -54,10 +54,10 @@
     (cond
       [(abstr-halide-expr? node) (abstr-halide-expr-orig-expr node)]
       [else node]))
-  (visit-halide expr unpacker))
+  (halide:visit expr unpacker))
 
 (define (make-abstr-halide-expr halide-expr)
-  (define elemT (halide-elem-type halide-expr))
+  (define elemT (halide:elem-type halide-expr))
   (define abstr-vals
     (cond
       [(eq? elemT 'int8) (define-symbolic-buffer* abstr-vals int8_t) abstr-vals]

@@ -33,7 +33,7 @@
     (destruct node
       [(buffer data elemT) (set-add! live-buffers node)]
       [_ node]))
-  (visit-halide expr extract-buffer)
+  (halide:visit expr extract-buffer)
   live-buffers)
 
 ;; Extract buffer reads. Current strategy is to interpret the expression and traverse the symbolic vector generated.
@@ -95,7 +95,7 @@
       [(vec-add v1 v2) (set-union! add-scalars (extract-scalars v1) (extract-scalars v2))]
       ;; Ignore everything else
       [_ node]))
-  (visit-halide expr extract-add-const)
+  (halide:visit expr extract-add-const)
   (set->list add-scalars))
 
 (define (extract-sub-scalars expr)
@@ -106,7 +106,7 @@
       [(vec-sub v1 v2) (set-union! sub-scalars (extract-scalars v1) (extract-scalars v2))]
       ;; Ignore everything else
       [_ node]))
-  (visit-halide expr extract-sub-const)
+  (halide:visit expr extract-sub-const)
   (set->list sub-scalars))
 
 (define (extract-mul-scalars expr)
@@ -122,7 +122,7 @@
          (set-union! mul-scalars (set (vec-out 0) (vec-out 1) (vec-out 2) (vec-out 3))))]
       ;; Ignore everything else
       [_ node]))
-  (visit-halide expr extract-mul-const)
+  (halide:visit expr extract-mul-const)
   (set->list mul-scalars))
 
 (define (extract-shr-scalars expr)
@@ -138,7 +138,7 @@
       [(vec-shr v1 v2) (set-union! shr-scalars (extract-scalars v2))]
       ;; Ignore everything else
       [_ node]))
-  (visit-halide expr extract-shr-const)
+  (halide:visit expr extract-shr-const)
   (set->list shr-scalars))
 
 (define (extract-div-scalars expr)
@@ -150,7 +150,7 @@
       [(vec-shr v1 v2) (set-union! shr-scalars (two^ (extract-scalars v2)))]
       ;; Ignore everything else
       [_ node]))
-  (visit-halide expr extract-shr-const)
+  (halide:visit expr extract-shr-const)
   (set->list shr-scalars))
 
 (define (extract-mod-scalars expr)
@@ -166,7 +166,7 @@
       [(vec-mod v1 v2) (set-union! mod-scalars (extract-scalars v2))]
       ;; Ignore everything else
       [_ node]))
-  (visit-halide expr extract-mod-const)
+  (halide:visit expr extract-mod-const)
   (set->list mod-scalars))
 
 ;; Extract vectors
@@ -211,7 +211,7 @@
         [_ (error "NYI: Extracting vec from:" expr)])]
       ;; Ignore everything else
       [_ node]))
-  (visit-halide expr extract-load-ops)
+  (halide:visit expr extract-load-ops)
   (set->list loads))
 
 ;;;;;;;;;;;;;;;;;; Some helper functions ;;;;;;;;;;;;;;;;;;;;;;

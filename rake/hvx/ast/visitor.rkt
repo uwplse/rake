@@ -3,6 +3,13 @@
 (require rosette/lib/match)
 (require rake/hvx/ast/types)
 
+(provide
+ (rename-out
+  [visit hvx:visit]
+  [peek-trace hvx:visitor-trace-peek]
+  [peek-parent-trace hvx:visitor-trace-peek-parent]
+  [trace-length hvx:visitor-trace-length]))
+
 (define trace (list))
 (define (trace-length) (length trace))
 (define (peek-trace) (first trace))
@@ -127,10 +134,3 @@
   (pop-trace)
     
   outp)
-
-(provide
- (rename-out
-  [visit visit-hvx]
-  [peek-trace visitor-trace-peek]
-  [peek-parent-trace visitor-trace-peek-parent]
-  [trace-length visitor-trace-length]))
