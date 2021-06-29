@@ -12,8 +12,12 @@
 ;; a weight function. By default, all instructions have an equal cost.
 (define (basic-expr-cost p [weightf const-weight])
   (define cost 0)
-  (define (update-cost instr [arg-pos -1]) (set! cost (+ cost (weightf instr))))
-  (visit-hvx p update-cost)
+  (define (update-cost instr [arg-pos -1])
+    (define offset 0)
+    (when (abstr-hvx-expr? instr)
+      (set! offset (basic-expr-cost (abstr-hvx-expr-orig-expr instr) weightf)))
+    (set! cost (- (+ cost (weightf instr)) offset)))
+  (hvx:visit p update-cost)
   cost)
 
 ;; Constant weight function. Implements the crudest base-line cost model.
@@ -171,5 +175,5 @@
 ;    [(vmpa Vuu Rt) (+ 1 (num-instrs-lb Vuu))]
 ;    [(vmpa-acc Vdd Vuu Rt) (+ 1 (num-instrs-lb Vdd) (num-instrs-lb Vuu))]
 ;    [(vdmpy Vu Rt) 
-     
+
 (provide basic-expr-cost count-vecR-instrs count-2mpy-instrs)
