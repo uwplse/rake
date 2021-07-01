@@ -1,0 +1,183 @@
+(halide.concat_vectors
+ uint16x256
+ (list
+  (uint16x64
+   #(struct:vlsr
+     #(struct:vshuffo-n
+       #(struct:hi
+         #(struct:vmpy
+           #(struct:vadd
+             #(struct:lo
+               #(struct:vadd
+                 #(struct:vreadp
+                   #(struct:buffer blur_x uint16)
+                   (+ -256 t144)
+                   #(struct:aligned 1 0))
+                 #(struct:vreadp
+                   #(struct:buffer blur_x uint16)
+                   (+ -256 t145)
+                   #(struct:aligned 1 0))
+                 #f))
+             #(struct:vread
+               #(struct:buffer blur_x uint16)
+               (+ -256 t143)
+               #(struct:aligned 1 0))
+             #f)
+           #(struct:uint16_t (bv 43691 16))))
+       #(struct:lo
+         #(struct:vmpy
+           #(struct:vadd
+             #(struct:lo
+               #(struct:vadd
+                 #(struct:vreadp
+                   #(struct:buffer blur_x uint16)
+                   (+ -256 t144)
+                   #(struct:aligned 1 0))
+                 #(struct:vreadp
+                   #(struct:buffer blur_x uint16)
+                   (+ -256 t145)
+                   #(struct:aligned 1 0))
+                 #f))
+             #(struct:vread
+               #(struct:buffer blur_x uint16)
+               (+ -256 t143)
+               #(struct:aligned 1 0))
+             #f)
+           #(struct:uint16_t (bv 43691 16))))
+       #f)
+     #(struct:int8_t (bv 1 8))))
+  (uint16x64
+   #(struct:vlsr
+     #(struct:vshuffo-n
+       #(struct:hi
+         #(struct:vmpy
+           #(struct:vadd
+             #(struct:hi
+               #(struct:vadd
+                 #(struct:vreadp
+                   #(struct:buffer blur_x uint16)
+                   (+ -256 t144)
+                   #(struct:aligned 1 0))
+                 #(struct:vreadp
+                   #(struct:buffer blur_x uint16)
+                   (+ -256 t145)
+                   #(struct:aligned 1 0))
+                 #f))
+             #(struct:vread
+               #(struct:buffer blur_x uint16)
+               (+ -192 t143)
+               #(struct:aligned 1 0))
+             #f)
+           #(struct:uint16_t (bv 43691 16))))
+       #(struct:lo
+         #(struct:vmpy
+           #(struct:vadd
+             #(struct:hi
+               #(struct:vadd
+                 #(struct:vreadp
+                   #(struct:buffer blur_x uint16)
+                   (+ -256 t144)
+                   #(struct:aligned 1 0))
+                 #(struct:vreadp
+                   #(struct:buffer blur_x uint16)
+                   (+ -256 t145)
+                   #(struct:aligned 1 0))
+                 #f))
+             #(struct:vread
+               #(struct:buffer blur_x uint16)
+               (+ -192 t143)
+               #(struct:aligned 1 0))
+             #f)
+           #(struct:uint16_t (bv 43691 16))))
+       #f)
+     #(struct:int8_t (bv 1 8))))
+  (uint16x64
+   #(struct:vlsr
+     #(struct:vshuffo-n
+       #(struct:hi
+         #(struct:vmpy
+           #(struct:vadd
+             #(struct:lo
+               #(struct:vadd
+                 #(struct:vreadp
+                   #(struct:buffer blur_x uint16)
+                   (+ -128 t144)
+                   #(struct:aligned 1 0))
+                 #(struct:vreadp
+                   #(struct:buffer blur_x uint16)
+                   (+ -128 t145)
+                   #(struct:aligned 1 0))
+                 #f))
+             #(struct:vread
+               #(struct:buffer blur_x uint16)
+               (+ -128 t143)
+               #(struct:aligned 1 0))
+             #f)
+           #(struct:uint16_t (bv 43691 16))))
+       #(struct:lo
+         #(struct:vmpy
+           #(struct:vadd
+             #(struct:lo
+               #(struct:vadd
+                 #(struct:vreadp
+                   #(struct:buffer blur_x uint16)
+                   (+ -128 t144)
+                   #(struct:aligned 1 0))
+                 #(struct:vreadp
+                   #(struct:buffer blur_x uint16)
+                   (+ -128 t145)
+                   #(struct:aligned 1 0))
+                 #f))
+             #(struct:vread
+               #(struct:buffer blur_x uint16)
+               (+ -128 t143)
+               #(struct:aligned 1 0))
+             #f)
+           #(struct:uint16_t (bv 43691 16))))
+       #f)
+     #(struct:int8_t (bv 1 8))))
+  (uint16x64
+   #(struct:vlsr
+     #(struct:vshuffo-n
+       #(struct:hi
+         #(struct:vmpy
+           #(struct:vadd
+             #(struct:hi
+               #(struct:vadd
+                 #(struct:vreadp
+                   #(struct:buffer blur_x uint16)
+                   (+ -128 t144)
+                   #(struct:aligned 1 0))
+                 #(struct:vreadp
+                   #(struct:buffer blur_x uint16)
+                   (+ -128 t145)
+                   #(struct:aligned 1 0))
+                 #f))
+             #(struct:vread
+               #(struct:buffer blur_x uint16)
+               (+ -64 t143)
+               #(struct:aligned 1 0))
+             #f)
+           #(struct:uint16_t (bv 43691 16))))
+       #(struct:lo
+         #(struct:vmpy
+           #(struct:vadd
+             #(struct:hi
+               #(struct:vadd
+                 #(struct:vreadp
+                   #(struct:buffer blur_x uint16)
+                   (+ -128 t144)
+                   #(struct:aligned 1 0))
+                 #(struct:vreadp
+                   #(struct:buffer blur_x uint16)
+                   (+ -128 t145)
+                   #(struct:aligned 1 0))
+                 #f))
+             #(struct:vread
+               #(struct:buffer blur_x uint16)
+               (+ -64 t143)
+               #(struct:aligned 1 0))
+             #f)
+           #(struct:uint16_t (bv 43691 16))))
+       #f)
+     #(struct:int8_t (bv 1 8))))))

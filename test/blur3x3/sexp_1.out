@@ -1,0 +1,93 @@
+(halide.concat_vectors
+ uint16x128
+ (list
+  (uint16x64
+   #(struct:vlsr
+     #(struct:vshuffo-n
+       #(struct:hi
+         #(struct:vmpy
+           #(struct:vadd
+             #(struct:lo
+               #(struct:vadd
+                 #(struct:vreadp
+                   #(struct:buffer input uint16)
+                   (+ -126 (+ t133 (+ t114 (* 2 t124))))
+                   #(struct:aligned 1 0))
+                 #(struct:vreadp
+                   #(struct:buffer input uint16)
+                   (+ -128 (+ t133 (+ t114 (* 2 t124))))
+                   #(struct:aligned 1 0))
+                 #f))
+             #(struct:vread
+               #(struct:buffer input uint16)
+               (+ -127 (+ t133 (+ t114 (* 2 t124))))
+               #(struct:aligned 1 0))
+             #f)
+           #(struct:uint16_t (bv 43691 16))))
+       #(struct:lo
+         #(struct:vmpy
+           #(struct:vadd
+             #(struct:lo
+               #(struct:vadd
+                 #(struct:vreadp
+                   #(struct:buffer input uint16)
+                   (+ -126 (+ t133 (+ t114 (* 2 t124))))
+                   #(struct:aligned 1 0))
+                 #(struct:vreadp
+                   #(struct:buffer input uint16)
+                   (+ -128 (+ t133 (+ t114 (* 2 t124))))
+                   #(struct:aligned 1 0))
+                 #f))
+             #(struct:vread
+               #(struct:buffer input uint16)
+               (+ -127 (+ t133 (+ t114 (* 2 t124))))
+               #(struct:aligned 1 0))
+             #f)
+           #(struct:uint16_t (bv 43691 16))))
+       #f)
+     #(struct:int8_t (bv 1 8))))
+  (uint16x64
+   #(struct:vlsr
+     #(struct:vshuffo-n
+       #(struct:hi
+         #(struct:vmpy
+           #(struct:vadd
+             #(struct:hi
+               #(struct:vadd
+                 #(struct:vreadp
+                   #(struct:buffer input uint16)
+                   (+ -126 (+ t133 (+ t114 (* 2 t124))))
+                   #(struct:aligned 1 0))
+                 #(struct:vreadp
+                   #(struct:buffer input uint16)
+                   (+ -128 (+ t133 (+ t114 (* 2 t124))))
+                   #(struct:aligned 1 0))
+                 #f))
+             #(struct:vread
+               #(struct:buffer input uint16)
+               (+ -63 (+ t133 (+ t114 (* 2 t124))))
+               #(struct:aligned 1 0))
+             #f)
+           #(struct:uint16_t (bv 43691 16))))
+       #(struct:lo
+         #(struct:vmpy
+           #(struct:vadd
+             #(struct:hi
+               #(struct:vadd
+                 #(struct:vreadp
+                   #(struct:buffer input uint16)
+                   (+ -126 (+ t133 (+ t114 (* 2 t124))))
+                   #(struct:aligned 1 0))
+                 #(struct:vreadp
+                   #(struct:buffer input uint16)
+                   (+ -128 (+ t133 (+ t114 (* 2 t124))))
+                   #(struct:aligned 1 0))
+                 #f))
+             #(struct:vread
+               #(struct:buffer input uint16)
+               (+ -63 (+ t133 (+ t114 (* 2 t124))))
+               #(struct:aligned 1 0))
+             #f)
+           #(struct:uint16_t (bv 43691 16))))
+       #f)
+     #(struct:int8_t (bv 1 8))))))
