@@ -5,6 +5,7 @@ if (Test-Path $tblFile) {
 
 Get-ChildItem $args[0] -Filter *.rkt | 
 Foreach-Object {
+  cd $_.DirectoryName
 	$bmName = Split-Path $_.DirectoryName -Leaf
 	$rktFile = $_
 	$filedir = join-path $_.DirectoryName $_.BaseName
