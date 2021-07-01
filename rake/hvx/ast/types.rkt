@@ -68,7 +68,7 @@
 (struct vshuffe (Vu Vv) #:transparent)
 (struct vshuffo (Vu Vv) #:transparent)
 (struct vshuffe-n (Vu Vv signed?) #:transparent)
-(struct vshuffo-n (Vu Vv) #:transparent)
+(struct vshuffo-n (Vu Vv signed?) #:transparent)
 (struct vshuffoe (Vu Vv) #:transparent)
 (struct vswap (Qt Vu Vv) #:transparent)
 (struct vmux (Qt Vu Vv) #:transparent)
@@ -362,6 +362,16 @@
                             (instr-sig 'u16x64 (list 'i32x32 'i32x32 #f))
                             (instr-sig 'i16x64 (list 'u32x32 'u32x32 #t))
                             (instr-sig 'u16x64 (list 'u32x32 'u32x32 #f)))]
+
+    [(eq? vshuffo-n instr) (list
+                            (instr-sig 'i8x128 (list 'i16x64 'i16x64 #t))
+                            (instr-sig 'u8x128 (list 'i16x64 'i16x64 #f))
+                            (instr-sig 'i8x128 (list 'u16x64 'u16x64 #t))
+                            (instr-sig 'u8x128 (list 'u16x64 'u16x64 #f))
+                            (instr-sig 'i16x64 (list 'i32x32 'i32x32 #t))
+                            (instr-sig 'u16x64 (list 'i32x32 'i32x32 #f))
+                            (instr-sig 'i16x64 (list 'u32x32 'u32x32 #t))
+                            (instr-sig 'u16x64 (list 'u32x32 'u32x32 #f)))]
     
     ;; HVX instructions for data processing
     [(eq? vadd instr) (list
@@ -553,9 +563,14 @@
                        (instr-sig 'u8x128 (list 'u8x128 'u8x128))
                        (instr-sig 'u16x64 (list 'u16x64 'u16x64))
                        (instr-sig 'u32x32 (list 'u32x32 'u32x32)))]
-    
-    ;[vasr
-    ;[vasr-acc
+
+    [(eq? vasr instr) (list
+                       (instr-sig 'i16x64 (list 'i16x64 'int8))
+                       (instr-sig 'u16x64 (list 'u16x64 'int8))
+                       (instr-sig 'i32x32 (list 'i32x32 'int8))
+                       (instr-sig 'u32x32 (list 'u32x32 'int8)))]
+
+     ;[vasr-acc
     
     [(eq? vasr-n instr) (list
                          (instr-sig 'u8x128 (list 'i16x64 'i16x64 'int8 'bool #t #t))

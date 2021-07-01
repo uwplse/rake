@@ -828,6 +828,33 @@
           [(not round?) (u16x64 (lambda (i) (cpp:satu16 (asr (if (even? i) (v1 (quotient i 2)) (v0 (quotient i 2))) (int8_t n)))))]
           [round? (u16x64 (lambda (i) (cpp:satu16 (round-asr (if (even? i) (v1 (quotient i 2)) (v0 (quotient i 2))) (int8_t n)))))])])]
 
+    [(vshuffo-n Vd Vu signed?)
+     (destruct* ((interpret Vd) (interpret Vu))
+       [((i16x64 v0) (i16x64 v1))
+        (if signed?
+            (i8x128 (lambda (i) (if (even? i) (hi-i8 (v1 (quotient i 2))) (hi-i8 (v0 (quotient i 2))))))
+            (u8x128 (lambda (i) (if (even? i) (hi-u8 (v1 (quotient i 2))) (hi-u8 (v0 (quotient i 2)))))))]
+       [((u16x64 v0) (u16x64 v1))
+        (if signed?
+            (i8x128 (lambda (i) (if (even? i) (hi-i8 (v1 (quotient i 2))) (hi-i8 (v0 (quotient i 2))))))
+            (u8x128 (lambda (i) (if (even? i) (hi-u8 (v1 (quotient i 2))) (hi-u8 (v0 (quotient i 2)))))))]
+       [((i32x32 v0) (i32x32 v1))
+        (if signed?
+            (i16x64 (lambda (i) (if (even? i) (hi-i16 (v1 (quotient i 2))) (hi-i16 (v0 (quotient i 2))))))
+            (u16x64 (lambda (i) (if (even? i) (hi-u16 (v1 (quotient i 2))) (hi-u16 (v0 (quotient i 2)))))))]
+       [((u32x32 v0) (u32x32 v1))
+        (if signed?
+            (i16x64 (lambda (i) (if (even? i) (hi-i16 (v1 (quotient i 2))) (hi-i16 (v0 (quotient i 2))))))
+            (u16x64 (lambda (i) (if (even? i) (hi-u16 (v1 (quotient i 2))) (hi-u16 (v0 (quotient i 2)))))))])]
+    
+    ;; Arithmetic shift-right (all elems right-shifted by the same value)
+    [(vasr Vu Rt)
+     (destruct* ((interpret Vu) (interpret Rt))
+       [((i16x64 data) (int8_t n)) (i16x64 (lambda (i) (int16_t (bvashr (cpp:eval (data i)) (cpp:eval (cpp:cast Rt 'int16))))))]
+       [((u16x64 data) (int8_t n)) (u16x64 (lambda (i) (int16_t (bvashr (cpp:eval (data i)) (cpp:eval (cpp:cast Rt 'int16))))))]
+       [((i32x32 data) (int8_t n)) (i32x32 (lambda (i) (int32_t (bvashr (cpp:eval (data i)) (cpp:eval (cpp:cast Rt 'int32))))))]
+       [((u32x32 data) (int8_t n)) (u32x32 (lambda (i) (int32_t (bvashr (cpp:eval (data i)) (cpp:eval (cpp:cast Rt 'int32))))))])]
+    
     ;; Rounding
     [(vround Vu Vv signed?)
      (destruct* ((interpret Vu) (interpret Vv))
@@ -1319,6 +1346,11 @@
 (define (lo-u8 val) (uint8_t (extract 7 0 (cpp:eval val))))
 (define (lo-i16 val) (int16_t (extract 15 0 (cpp:eval val))))
 (define (lo-u16 val) (uint16_t (extract 15 0 (cpp:eval val))))
+
+(define (hi-i8 val) (int8_t (extract 15 8 (cpp:eval val))))
+(define (hi-u8 val) (uint8_t (extract 15 8 (cpp:eval val))))
+(define (hi-i16 val) (int16_t (extract 31 16 (cpp:eval val))))
+(define (hi-u16 val) (uint16_t (extract 31 16 (cpp:eval val))))
 
 (define (add lhs rhs outT)
   (mk-cpp-expr (bvadd (cpp:eval (cpp:cast lhs outT)) (cpp:eval (cpp:cast rhs outT))) outT))

@@ -35,7 +35,7 @@
     [(vshuffe Vu Vv) 1]
     [(vshuffo Vu Vv) 1]
     [(vshuffe-n Vu Vv signed?) 1]
-    [(vshuffo-n Vu Vv) 1]
+    [(vshuffo-n Vu Vv signed?) 1]
     [(vshuffoe Vu Vv) 1]
     [(vswap Qt Vu Vv) 1]
     [(vmux Qt Vu Vv) 1]

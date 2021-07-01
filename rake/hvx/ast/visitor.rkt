@@ -6,6 +6,7 @@
 (provide
  (rename-out
   [visit hvx:visit]
+  [visit-shallow hvx:visit-shallow]
   [peek-trace hvx:visitor-trace-peek]
   [peek-parent-trace hvx:visitor-trace-peek-parent]
   [trace-length hvx:visitor-trace-length]))
@@ -40,7 +41,7 @@
       [(vshuffe Vu Vv) (transform (vshuffe (visit Vu transform) (visit Vv transform)))]
       [(vshuffo Vu Vv) (transform (vshuffo (visit Vu transform) (visit Vv transform)))]
       [(vshuffe-n Vu Vv signed?) (transform (vshuffe-n (visit Vu transform) (visit Vv transform) (visit signed? transform)))]
-      [(vshuffo-n Vu Vv) (transform (vshuffo-n (visit Vu transform) (visit Vv transform)))]
+      [(vshuffo-n Vu Vv signed?) (transform (vshuffo-n (visit Vu transform) (visit Vv transform) (visit signed? transform)))]
       [(vshuffoe Vu Vv) (transform (vshuffoe (visit Vu transform) (visit Vv transform)))]
       ;[(vswap Qt Vu Vv)
       ;[(vmux Qt Vu Vv)
@@ -119,6 +120,125 @@
       [(abstr-hvx-expr orig-expr abstr-vals offset) (transform p)]
       [(??load id live-data buffer idx-tbl pair?) (transform (??load id live-data buffer idx-tbl pair?) arg-pos)]
       [(??swizzle id live-data exprs idx-tbl pair?) (transform (??swizzle id live-data (for/list ([expr exprs]) (visit expr transform)) idx-tbl pair?))]
+      ;[(??lo/hi expr) (transform (??lo/hi (visit expr transform)))]
+
+      ;[(gather* buff-reads) (transform (gather* buff-reads) arg-pos)]
+      ;[(gather-vec buff-reads) (transform (gather-vec (hvx-ast-node-id p) buff-reads))]
+      ;[(gather-vecp buff-reads) (transform (gather-vecp (hvx-ast-node-id p) buff-reads))]
+      ;[(swizzle* vec) (transform (swizzle* (visit vec transform)))]
+
+      ;[(??vread buf-opts idxs) (transform (??vread (visit buf-opts transform) (visit idxs transform)))]
+      ;[(??vreadp buf-opts idxs) (transform (??vreadp (visit buf-opts transform) (visit idxs transform)))]
+      
+      [_ (transform p)]))
+
+  (pop-trace)
+    
+  outp)
+
+
+(define (visit-shallow p transform [arg-pos -1])
+  (push-trace p)
+  ;(println p)
+  (define outp
+    (match p
+      ;; Let Exprs
+      [(let-expr var val body) (let-expr (transform var) (visit-shallow val transform) (visit-shallow body transform))]
+
+      ;; Concat tiles
+      [(concat-tiles exprs) (transform (concat-tiles (for/list ([expr exprs]) (visit-shallow expr transform))))]
+      
+      ;; HVX instructions for vector creation
+      [(vread buf loc align) (transform (vread buf loc align))]
+      [(vreadp buf loc align) (transform (vreadp buf loc align))]
+      [(vsplat Rt) (transform (vsplat (visit-shallow Rt transform)))]
+
+      ;; HVX instructions for data swizzling
+      [(lo Vuu) (transform (lo (visit-shallow Vuu transform)))]
+      [(hi Vuu) (transform (hi (visit-shallow Vuu transform)))]
+      [(vcombine Vu Vv) (transform (vcombine (visit-shallow Vu transform) (visit-shallow Vv transform)))]
+      [(vshuffe Vu Vv) (transform (vshuffe (visit-shallow Vu transform) (visit-shallow Vv transform)))]
+      [(vshuffo Vu Vv) (transform (vshuffo (visit-shallow Vu transform) (visit-shallow Vv transform)))]
+      [(vshuffe-n Vu Vv signed?) (transform (vshuffe-n (visit-shallow Vu transform) (visit-shallow Vv transform) (visit-shallow signed? transform)))]
+      [(vshuffo-n Vu Vv signed?) (transform (vshuffo-n (visit-shallow Vu transform) (visit-shallow Vv transform) (visit-shallow signed? transform)))]
+      [(vshuffoe Vu Vv) (transform (vshuffoe (visit-shallow Vu transform) (visit-shallow Vv transform)))]
+      ;[(vswap Qt Vu Vv)
+      ;[(vmux Qt Vu Vv)
+      [(vsat Vu Vv) (transform (vsat (visit-shallow Vu transform) (visit-shallow Vv transform)))]
+      [(valign Vu Vv Rt) (transform (valign (visit-shallow Vu transform) (visit-shallow Vv transform) (visit-shallow Rt transform)))]
+      [(vlalign Vu Vv Rt) (transform (vlalign (visit-shallow Vu transform) (visit-shallow Vv transform) (visit-shallow Rt transform)))]
+      [(vror Vu Rt) (transform (vror (visit-shallow Vu transform) (visit-shallow Rt transform)))]
+      ;[(vrotr Vu Vv)
+      [(vdeal Vu) (transform (vdeal (visit-shallow Vu transform)))]
+      [(vdeale Vu Vv) (transform (vdeale (visit-shallow Vu transform) (visit-shallow Vv transform)))]
+      [(vshuff Vu) (transform (vshuff (visit-shallow Vu transform)))]
+      [(vtranspose Vu Vv Rt) (transform (vtranspose (visit-shallow Vu transform) (visit-shallow Vv transform) (visit-shallow Rt transform)))]
+      [(vinterleave Vuu) (transform (vinterleave (visit-shallow Vuu transform)))]
+      [(vinterleave4 Vuu Vvv Rt) (transform (vinterleave4 (visit-shallow Vuu transform) (visit-shallow Vvv transform) (visit-shallow Rt transform)))]
+      [(vtranspose Vu Vv Rt) (transform (vtranspose (visit-shallow Vu transform) (visit-shallow Vv transform) (visit-shallow Rt transform)))]
+      [(vpack Vu Vv signed?) (transform (vpack (visit-shallow Vu transform) (visit-shallow Vv transform) (visit-shallow signed? transform)))]
+      [(vpacke Vu Vv) (transform (vpacke (visit-shallow Vu transform) (visit-shallow Vv transform)))]
+      [(vpacko Vu Vv) (transform (vpacko (visit-shallow Vu transform) (visit-shallow Vv transform)))]
+      [(vpacke-n Vu Vv signed?) (transform (vpacke-n (visit-shallow Vu transform) (visit-shallow Vv transform) (visit-shallow signed? transform)))]
+      [(vpacko-n Vu Vv) (transform (vpacko-n (visit-shallow Vu transform) (visit-shallow Vv transform)))]
+      [(vunpack Vu) (transform (vunpack (visit-shallow Vu transform)))]
+      ;[(vunpacko Vu)
+      ;[(vlut Vu Vv)
+      ;[(vgather Rt Mu Vv)
+
+      ;; HVX instructions for type-casting
+      [(vzxt Vu) (transform (vzxt (visit-shallow Vu transform)))]
+      [(vsxt Vu) (transform (vsxt (visit-shallow Vu transform)))]
+      [(reinterpret Vu) (transform (reinterpret (visit-shallow Vu transform)))]
+
+      ;; HVX instructions for data processing
+      [(vadd Vu Vv sat?) (transform (vadd (visit-shallow Vu transform) (visit-shallow Vv transform) (visit-shallow sat? transform)))]
+      [(vadd-w Vu Vv) (transform (vadd-w (visit-shallow Vu transform) (visit-shallow Vv transform)))]
+      [(vadd-w-acc Vdd Vu Vv) (transform (vadd-w-acc (visit-shallow Vdd transform 0) (visit-shallow Vu transform 1) (visit-shallow Vv transform 2)))]
+      [(vsub Vu Vv sat?) (transform (vsub (visit-shallow Vu transform) (visit-shallow Vv transform) (visit-shallow sat? transform)))]
+      [(vsub-w Vu Vv) (transform (vsub-w (visit-shallow Vu transform) (visit-shallow Vv transform)))]
+      [(vmpy Vu Rt) (transform (vmpy (visit-shallow Vu transform) (visit-shallow Rt transform)))]
+      [(vmpy-2 Vu Vv) (transform (vmpy-2 (visit-shallow Vu transform) (visit-shallow Vv transform)))]
+      [(vmpyi Vu Rt) (transform (vmpyi (visit-shallow Vu transform) (visit-shallow Rt transform)))]
+      [(vmpyie Vu Rt) (transform (vmpyie (visit-shallow Vu transform) (visit-shallow Rt transform)))]
+      [(vmpye Vu Rt) (transform (vmpye (visit-shallow Vu transform) (visit-shallow Rt transform)))]
+      [(vmpy-acc Vdd Vu Rt) (transform (vmpy-acc (visit-shallow Vdd transform 0) (visit-shallow Vu transform 1) (visit-shallow Rt transform 2)))]
+      [(vmpyi-acc Vd Vu Rt) (transform (vmpyi-acc (visit-shallow Vd transform) (visit-shallow Vu transform) (visit-shallow Rt transform)))]
+      [(vmpye-acc Vd Vu Rt) (transform (vmpye-acc (visit-shallow Vd transform) (visit-shallow Vu transform) (visit-shallow Rt transform)))]
+      [(vmpy-frac Vd Vu rnd?) (transform (vmpy-frac (visit-shallow Vd transform) (visit-shallow Vu transform) (visit-shallow rnd? transform)))]
+      [(vmpa Vuu Rt) (transform (vmpa (visit-shallow Vuu transform) (visit-shallow Rt transform)))]
+      [(vmpa-acc Vdd Vuu Rt) (transform (vmpa-acc (visit-shallow Vdd transform) (visit-shallow Vuu transform) (visit-shallow Rt transform)))]
+      [(vdmpy Vu Rt) (transform (vdmpy (visit-shallow Vu transform) (visit-shallow Rt transform)))]
+      [(vdmpy-sw Vuu Rt) (transform (vdmpy-sw (visit-shallow Vuu transform) (visit-shallow Rt transform)))]
+      [(vdmpy-acc Vd Vu Rt) (transform (vdmpy-acc (visit-shallow Vd transform) (visit-shallow Vu transform) (visit-shallow Rt transform)))]
+      [(vdmpy-sw-acc Vdd Vuu Rt) (transform (vdmpy-sw-acc (visit-shallow Vdd transform) (visit-shallow Vuu transform) (visit-shallow Rt transform)))]
+      [(vtmpy Vuu Rt) (transform (vtmpy (visit-shallow Vuu transform) (visit-shallow Rt transform)))]
+      [(vtmpy-acc Vdd Vuu Rt) (transform (vtmpy-acc (visit-shallow Vdd transform) (visit-shallow Vuu transform) (visit-shallow Rt transform)))]
+      [(vrmpy Vu Rt) (transform (vrmpy (visit-shallow Vu transform) (visit-shallow Rt transform)))]
+      [(vrmpy-acc Vd Vu Rt) (transform (vrmpy-acc (visit-shallow Vd transform) (visit-shallow Vu transform) (visit-shallow Rt transform)))]
+      [(vrmpy-2 Vu Vv) (transform (vrmpy-2 (visit-shallow Vu transform) (visit-shallow Vv transform)))]
+      [(vrmpy-acc-2 Vd Vu Vv) (transform (vrmpy-acc-2 (visit-shallow Vd transform) (visit-shallow Vu transform) (visit-shallow Vv transform)))]
+      [(vrmpy-p Vuu Rt u1) (transform (vrmpy-p (visit-shallow Vuu transform) (visit-shallow Rt transform) (visit-shallow u1 transform)))]
+      [(vrmpy-p-acc Vdd Vuu Rt u1) (transform (vrmpy-p-acc (visit-shallow Vdd transform) (visit-shallow Vuu transform) (visit-shallow Rt transform) (visit-shallow u1 transform)))]
+      ;[(vavg Vu Vv rnd?)
+      ;[(vnavg Vu Vv)
+      ;[(vasl Vu Rt)
+      [(vrsr Vu Vv) (transform (vrsr (visit-shallow Vu transform) (visit-shallow Vv transform)))]
+      [(vlsr Vu Rt) (transform (vlsr (visit-shallow Vu transform) (visit-shallow Rt transform)))]
+      [(vasr Vu Rt) (transform (vasr (visit-shallow Vu transform) (visit-shallow Rt transform)))]
+      [(vasr-acc Vd Vu Rt) (transform (vasr-acc (visit-shallow Vd transform) (visit-shallow Vu transform) (visit-shallow Rt transform)))]
+      [(vasr-n Vu Vv Rt round? sat? unsigned?) (transform (vasr-n (visit-shallow Vu transform) (visit-shallow Vv transform) (visit-shallow Rt transform) (visit-shallow round? transform) (visit-shallow sat? transform) (visit-shallow unsigned? transform)))]
+      [(vround Vu Vv signed?) (transform (vround (visit-shallow Vu transform) (visit-shallow Vv transform) (visit-shallow signed? transform)))]
+      [(vabs Vu sat?) (transform (vabs (visit-shallow Vu transform) (visit-shallow sat? transform)))]
+      [(vabsdiff Vu Vv) (transform (vabsdiff (visit-shallow Vu transform) (visit-shallow Vv transform)))]
+
+      [(vmax Vu Vv) (transform (vmax (visit-shallow Vu transform) (visit-shallow Vv transform)))]
+      [(vmin Vu Vv) (transform (vmin (visit-shallow Vu transform) (visit-shallow Vv transform)))]
+    
+      ;; New types to represent abstract expression / data movement (these types should never appear in output code)
+      [(abstr-hvx-expr orig-expr abstr-vals offset) (transform p)]
+      [(??load id live-data buffer idx-tbl pair?) (transform (??load id live-data buffer idx-tbl pair?) arg-pos)]
+      [(??swizzle id live-data exprs idx-tbl pair?) (transform p)]
       ;[(??lo/hi expr) (transform (??lo/hi (visit expr transform)))]
 
       ;[(gather* buff-reads) (transform (gather* buff-reads) arg-pos)]

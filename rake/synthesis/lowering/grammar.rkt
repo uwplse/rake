@@ -136,6 +136,75 @@
          ['uint32 (int32-const)]
          [_ node]))
      (for/list ([candidate candidates]) (uniquify-swizzles (hvx:visit candidate fill-arg-grammars)))]
+
+    [(divide-by-const ir-sub-expr const-val)
+     (define outT (hvx-ir:elem-type ir-expr))
+     (define isa (list vmpy vasr vlsr vshuffo-n vasr-n lo hi))
+
+     (define grouped-sub-exprs (prepare-sub-exprs hvx-sub-exprs))
+     
+     ;; Desired output type
+     (define desired-expr-types (enum-types outT))
+     (define candidates (set->list (enumerate-hvx isa desired-expr-types grouped-sub-exprs 4)))
+
+     ;; Sort them
+     (set! candidates (map (lambda (c) (cons c (basic-expr-cost c))) candidates))
+     (set! candidates (sort candidates (lambda (v1 v2) (<= (cdr v1) (cdr v2)))))
+
+     ;; Filter them
+     (define (instr-repeat? candidate)
+       (define instrs (mutable-set))
+       (define keep? #t)
+       (define (check-instr node [pos -1])
+         (cond
+           [(lo? node) (when (set-member? instrs 'lo) (set! keep? #f)) (set-add! instrs 'lo)]
+           [(hi? node) (when (set-member? instrs 'hi) (set! keep? #f)) (set-add! instrs 'hi)]
+           ;[(vmpy? node) (when (set-member? instrs 'vmpy) (set! keep? #f)) (set-add! instrs 'vmpy)]
+           [(vasr? node) (when (set-member? instrs 'vasr) (set! keep? #f)) (set-add! instrs 'vasr)]
+           [(vlsr? node) (when (set-member? instrs 'vlsr) (set! keep? #f)) (set-add! instrs 'vlsr)]
+           [(vasr-n? node) (when (set-member? instrs 'vasr-n) (set! keep? #f)) (set-add! instrs 'vasr-n)]
+           [(vshuffo-n? node) (when (set-member? instrs 'vshuffo-n) (set! keep? #f)) (set-add! instrs 'vshuffo-n)])
+         node)
+       (hvx:visit-shallow (car candidate) check-instr)
+       keep?)
+     (set! candidates (filter instr-repeat? candidates))
+
+     ;; Fill in param grammars
+     (define-symbolic bvc8 (bitvector 8))
+     (define-symbolic bvc16 (bitvector 16))
+     (define int-consts (list (int8_t bvc8) (int16_t bvc16) (uint8_t bvc8) (uint16_t bvc16)))
+     (define (bool-const) (define-symbolic* b boolean?) b)
+     (define (int8-const) (cpp:cast  (apply choose* int-consts) 'int8))
+     (define (uint8-const) (cpp:cast  (apply choose* int-consts) 'uint8))
+     (define (int16-const) (cpp:cast  (apply choose* int-consts) 'int16))
+     (define (uint16-const) (cpp:cast  (apply choose* int-consts) 'uint16))
+     (define (fill-arg-grammars node [pos -1])
+       (match node
+         [#t #t]
+         [#f #f]
+         ['bool (bool-const)]
+         ['int8 (int8-const)]
+         ['uint8 (uint8-const)]
+         ['int16 (int16-const)]
+         ['uint16 (uint16-const)]
+         [_ node]))
+     (for/list ([candidate candidates]) (uniquify-swizzles (hvx:visit (car candidate) fill-arg-grammars)))]
+
+;    (define (get-hvx-div-isa den)
+;  (define (??hvx-div-instr registers)
+;    (define t0 (apply choose* registers))
+;    (define shift (int8_t (zero-extend (?? (bitvector 4)) (bitvector 8))))
+;    (define-symbolic bvc8 (bitvector 8))
+;    (define-symbolic bvc16 (bitvector 16))
+;    (define multiplier (choose (int8_t bvc8) (int16_t bvc16) (uint8_t bvc8) (uint16_t bvc16)))
+;    (choose*
+;     (vmpy t0 multiplier)
+;     (vasr t0 shift)
+;     (vlsr t0 shift)
+;     (let-expr 'x0 t0 (vshuffo-n (hi 'x0) (lo 'x0) (bool-const)))
+;     (let-expr 'x0 t0 (vasr-n (hi 'x0) (lo 'x0) shift (bool-const) (bool-const) (bool-const)))
+;     ))
+;  ??hvx-div-instr)
     
     ;; Shift right
     [(vs-shift-right ir-sub-expr shift round? saturate? arithmetic? output-type)
