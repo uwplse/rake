@@ -847,7 +847,7 @@
     [(vsat Vu Vv)
      (destruct* ((interpret Vu) (interpret Vv))
        [((i16x64 v0) (i16x64 v1)) (u8x128 (lambda (i) (if (even? i) (cpp:satu8 (v1 (quotient i 2))) (cpp:satu8 (v0 (quotient i 2))))))]
-       ;[((u16x64 v0) (u16x64 v1)) (u8x128 (lambda (i) (if (even? i) (cpp:satu8 (v1 (quotient i 2))) (cpp:satu8 (v0 (quotient i 2))))))]
+       [((u16x64 v0) (u16x64 v1)) (u8x128 (lambda (i) (if (even? i) (cpp:satu8 (v1 (quotient i 2))) (cpp:satu8 (v0 (quotient i 2))))))]
        [((i32x32 v0) (i32x32 v1)) (i16x64 (lambda (i) (if (even? i) (cpp:sat16 (v1 (quotient i 2))) (cpp:sat16 (v0 (quotient i 2))))))]
        [((u32x32 v0) (u32x32 v1)) (u16x64 (lambda (i) (if (even? i) (cpp:satu16 (v1 (quotient i 2))) (cpp:satu16 (v0 (quotient i 2))))))])]
     

@@ -27,12 +27,19 @@
      (define tile-elems (hvx:num-elems (hvx:interpret (list-ref tiles 0))))
      (define tile-elemT (hvx:elem-type (hvx:interpret (list-ref tiles 0))))
      (define output-type (format "~ax~a" tile-elemT (* tile-cnt tile-elems)))
+     
+     (set! tiles (flatten (for/list ([tile tiles]) (if (hvx:vec-pair? (hvx:interpret tile)) (list (lo tile) (hi tile)) tile))))
 
+     (define (tiles->compiled-str tiles)
+       (cond
+         [(eq? (length tiles) 1) (input-arg (first tiles))]
+         [else
+          (define curr-tile (input-arg (first tiles)))
+          (format "~a ~a" curr-tile (tiles->compiled-str (rest tiles)))]))
+     
      (match (length tiles)
        [1 (compile (first tiles))]
-       [2 `(halide.concat_vectors, (string->sexp output-type), `(list, (input-arg (first tiles)), (input-arg (second tiles))))]
-       [4 `(halide.concat_vectors, (string->sexp output-type), `(list, (input-arg (first tiles)), (input-arg (second tiles)), (input-arg (third tiles)), (input-arg (fourth tiles))))]
-       [_ (error "NYI: Codegen concat tiles")])]
+       [_ `(halide.concat_vectors, (string->sexp output-type), (string->sexp (format "(list ~a)" (tiles->compiled-str tiles))))])]
     
     ;;;;;;;;;;;;;;;;; Instructions for vector creation ;;;;;;;;;;;;;;;
 
@@ -57,7 +64,7 @@
     [(vsplat Rt)
      (destruct (hvx:interpret Rt)
        ;[(uint8_t _) `(halide.ir.x128, (to-llvm-type hvx-expr), `(list, (compile-scalar Rt)))]
-       ;[(int16_t _) `(halide.ir.x64, (to-llvm-type hvx-expr), `(list, (compile-scalar Rt)))]
+       [(int16_t _) `(halide.ir.x64, (to-llvm-type hvx-expr), `(list, (compile-scalar Rt)))]
        [(int8_t _) (generate `lvsplatw (to-llvm-type hvx-expr) `(list (,t_i32 ,(string->sexp (format "(halide.hexagon.dup4.b int32 (list ~a))" (compile-scalar Rt))))))]
        [(uint8_t _) (generate `lvsplatw (to-llvm-type hvx-expr) `(list (,t_i32 ,(string->sexp (format "(halide.hexagon.dup4.b int32 (list ~a))" (compile-scalar Rt))))))]
        [(int16_t _) (generate `lvsplatw (to-llvm-type hvx-expr) `(list (,t_i32 ,(string->sexp (format "(halide.hexagon.dup2.h int32 (list ~a))" (compile-scalar Rt))))))]
@@ -95,6 +102,57 @@
        [(u16x64x2 v1 v0) (generate `vshuffvdd (to-llvm-type hvx-expr) `(list ,(input-arg (hi Vuu)) ,(input-arg (lo Vuu)) (,t_i32 ,-2)))]
        [(i32x32x2 v1 v0) (generate `vshuffvdd (to-llvm-type hvx-expr) `(list ,(input-arg (hi Vuu)) ,(input-arg (lo Vuu)) (,t_i32 ,-4)))]
        [(u32x32x2 v1 v0) (generate `vshuffvdd (to-llvm-type hvx-expr) `(list ,(input-arg (hi Vuu)) ,(input-arg (lo Vuu)) (,t_i32 ,-4)))])]
+
+    [(vinterleave4 Vuu Vvv Rt)
+     (destruct* ((hvx:interpret Vuu) (hvx:interpret Vvv))
+       [((i8x128x2 v1 v0) (i8x128x2 v3 v2))
+        (define lo-intrlv (generate `vshuffvdd (to-llvm-type Vvv) `(list ,(input-arg (lo (vinterleave Vvv))) ,(input-arg (lo (vinterleave Vuu))) (,t_i32 ,-1))))
+        (define hi-intrlv (generate `vshuffvdd (to-llvm-type Vvv) `(list ,(input-arg (hi (vinterleave Vvv))) ,(input-arg (hi (vinterleave Vuu))) (,t_i32 ,-1))))
+        (cond
+          [(eq? Rt 0) (generate `lo (to-llvm-type hvx-expr) `(list (,(to-llvm-type Vvv) , lo-intrlv)))]
+          [(eq? Rt 1) (generate `hi (to-llvm-type hvx-expr) `(list (,(to-llvm-type Vvv) , lo-intrlv)))]
+          [(eq? Rt 2) (generate `lo (to-llvm-type hvx-expr) `(list (,(to-llvm-type Vvv) , hi-intrlv)))]
+          [(eq? Rt 3) (generate `hi (to-llvm-type hvx-expr) `(list (,(to-llvm-type Vvv) , hi-intrlv)))])]
+       [((u8x128x2 v1 v0) (u8x128x2 v3 v2))
+        (define lo-intrlv (generate `vshuffvdd (to-llvm-type Vvv) `(list ,(input-arg (lo (vinterleave Vvv))) ,(input-arg (lo (vinterleave Vuu))) (,t_i32 ,-1))))
+        (define hi-intrlv (generate `vshuffvdd (to-llvm-type Vvv) `(list ,(input-arg (hi (vinterleave Vvv))) ,(input-arg (hi (vinterleave Vuu))) (,t_i32 ,-1))))
+        (cond
+          [(eq? Rt 0) (generate `lo (to-llvm-type hvx-expr) `(list (,(to-llvm-type Vvv) , lo-intrlv)))]
+          [(eq? Rt 1) (generate `hi (to-llvm-type hvx-expr) `(list (,(to-llvm-type Vvv) , lo-intrlv)))]
+          [(eq? Rt 2) (generate `lo (to-llvm-type hvx-expr) `(list (,(to-llvm-type Vvv) , hi-intrlv)))]
+          [(eq? Rt 3) (generate `hi (to-llvm-type hvx-expr) `(list (,(to-llvm-type Vvv) , hi-intrlv)))])]
+       [((i16x64x2 v1 v0) (i16x64x2 v3 v2))
+        (define lo-intrlv (generate `vshuffvdd (to-llvm-type Vvv) `(list ,(input-arg (lo (vinterleave Vvv))) ,(input-arg (lo (vinterleave Vuu))) (,t_i32 ,-2))))
+        (define hi-intrlv (generate `vshuffvdd (to-llvm-type Vvv) `(list ,(input-arg (hi (vinterleave Vvv))) ,(input-arg (hi (vinterleave Vuu))) (,t_i32 ,-2))))
+        (cond
+          [(eq? Rt 0) (generate `lo (to-llvm-type hvx-expr) `(list (,(to-llvm-type Vvv) , lo-intrlv)))]
+          [(eq? Rt 1) (generate `hi (to-llvm-type hvx-expr) `(list (,(to-llvm-type Vvv) , lo-intrlv)))]
+          [(eq? Rt 2) (generate `lo (to-llvm-type hvx-expr) `(list (,(to-llvm-type Vvv) , hi-intrlv)))]
+          [(eq? Rt 3) (generate `hi (to-llvm-type hvx-expr) `(list (,(to-llvm-type Vvv) , hi-intrlv)))])]
+       [((u16x64x2 v1 v0) (u16x64x2 v3 v2))
+        (define lo-intrlv (generate `vshuffvdd (to-llvm-type Vvv) `(list ,(input-arg (lo (vinterleave Vvv))) ,(input-arg (lo (vinterleave Vuu))) (,t_i32 ,-2))))
+        (define hi-intrlv (generate `vshuffvdd (to-llvm-type Vvv) `(list ,(input-arg (hi (vinterleave Vvv))) ,(input-arg (hi (vinterleave Vuu))) (,t_i32 ,-2))))
+        (cond
+          [(eq? Rt 0) (generate `lo (to-llvm-type hvx-expr) `(list (,(to-llvm-type Vvv) , lo-intrlv)))]
+          [(eq? Rt 1) (generate `hi (to-llvm-type hvx-expr) `(list (,(to-llvm-type Vvv) , lo-intrlv)))]
+          [(eq? Rt 2) (generate `lo (to-llvm-type hvx-expr) `(list (,(to-llvm-type Vvv) , hi-intrlv)))]
+          [(eq? Rt 3) (generate `hi (to-llvm-type hvx-expr) `(list (,(to-llvm-type Vvv) , hi-intrlv)))])]
+       [((i32x32x2 v1 v0) (i32x32x2 v3 v2))
+        (define lo-intrlv (generate `vshuffvdd (to-llvm-type Vvv) `(list ,(input-arg (lo (vinterleave Vvv))) ,(input-arg (lo (vinterleave Vuu))) (,t_i32 ,-4))))
+        (define hi-intrlv (generate `vshuffvdd (to-llvm-type Vvv) `(list ,(input-arg (hi (vinterleave Vvv))) ,(input-arg (hi (vinterleave Vuu))) (,t_i32 ,-4))))
+        (cond
+          [(eq? Rt 0) (generate `lo (to-llvm-type hvx-expr) `(list (,(to-llvm-type Vvv) , lo-intrlv)))]
+          [(eq? Rt 1) (generate `hi (to-llvm-type hvx-expr) `(list (,(to-llvm-type Vvv) , lo-intrlv)))]
+          [(eq? Rt 2) (generate `lo (to-llvm-type hvx-expr) `(list (,(to-llvm-type Vvv) , hi-intrlv)))]
+          [(eq? Rt 3) (generate `hi (to-llvm-type hvx-expr) `(list (,(to-llvm-type Vvv) , hi-intrlv)))])]
+       [((u32x32x2 v1 v0) (u32x32x2 v3 v2))
+         (define lo-intrlv (generate `vshuffvdd (to-llvm-type Vvv) `(list ,(input-arg (lo (vinterleave Vvv))) ,(input-arg (lo (vinterleave Vuu))) (,t_i32 ,-4))))
+         (define hi-intrlv (generate `vshuffvdd (to-llvm-type Vvv) `(list ,(input-arg (hi (vinterleave Vvv))) ,(input-arg (hi (vinterleave Vuu))) (,t_i32 ,-4))))
+         (cond
+           [(eq? Rt 0) (generate `lo (to-llvm-type hvx-expr) `(list (,(to-llvm-type Vvv) , lo-intrlv)))]
+           [(eq? Rt 1) (generate `hi (to-llvm-type hvx-expr) `(list (,(to-llvm-type Vvv) , lo-intrlv)))]
+           [(eq? Rt 2) (generate `lo (to-llvm-type hvx-expr) `(list (,(to-llvm-type Vvv) , hi-intrlv)))]
+           [(eq? Rt 3) (generate `hi (to-llvm-type hvx-expr) `(list (,(to-llvm-type Vvv) , hi-intrlv)))])])]
 
     ;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Addition ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -160,6 +218,15 @@
           [sat? (generate `vadduwsat.dv (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv)))]
           [else (generate `vaddw.dv (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv)))])])]
 
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Subtraction ;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+    ;; Widening
+    [(vsub-w Vu Vv)
+     (match (list (hvx:interpret Vu) (hvx:interpret Vv))
+       [(list (u8x128 _) (u8x128 _)) (generate `vsububh (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv)))]
+       [(list (i16x64 _) (i16x64 _)) (generate `vsubhw (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv)))]
+       [(list (u16x64 _) (u16x64 _)) (generate `vsubuhw (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv)))])]
+    
     ;;;;;;;;;;;;;;;;;;;;;;;;;; Multiplication ;;;;;;;;;;;;;;;;;;;;;;;;
 
     ;; Vector-scalar multiplication (widening)
@@ -195,6 +262,7 @@
     [(vsat Vu Vv)
      (destruct* ((hvx:interpret Vu) (hvx:interpret Vv))
        [((i16x64 v0) (i16x64 v1)) (generate `vsathub (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv)))]
+       [((u16x64 v0) (u16x64 v1)) (generate `vsathub (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv)))]
        [((i32x32 v0) (i32x32 v1)) (generate `vsatwh (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv)))]
        [((u32x32 v0) (u32x32 v1)) (generate `vsatuwuh (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv)))])]
 
@@ -231,6 +299,15 @@
        [((i16x64 v0) (i16x64 v1)) (generate `vminh (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv)))]
        [((u16x64 v0) (u16x64 v1)) (generate `vminuh (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv)))]
        [((i32x32 v0) (i32x32 v1)) (generate `vminw (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv)))])]
+
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;; Type Casts ;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+    [(vunpack Vu)
+     (destruct (hvx:interpret Vu)
+      [(i8x128 v0) (generate `vunpackb (to-llvm-type hvx-expr) `(list ,(input-arg Vu)))]
+      [(u8x128 v0) (generate `vunpackub (to-llvm-type hvx-expr) `(list ,(input-arg Vu)))]
+      [(i16x64 v0) (generate `vunpackh (to-llvm-type hvx-expr) `(list ,(input-arg Vu)))]
+      [(u16x64 v0) (generate `vunpackuh (to-llvm-type hvx-expr) `(list ,(input-arg Vu)))])]
     
     [_ (read (open-input-string (format "~a" hvx-expr)))]))
 
@@ -309,7 +386,13 @@
          [(concrete? Rt)
           (format "0x~a~a"
                   (bv->str (cpp:eval v0))
-                  (bv->str (cpp:eval v0))
+                  (bv->str (cpp:eval v0)))]
+         [else
+          (format "(halide.hexagon.dup2.h int32 (list ~a))" (compile-scalar v0))])]
+      [(Rt.uh v0)
+       (cond
+         [(concrete? Rt)
+          (format "0x~a~a"
                   (bv->str (cpp:eval v0))
                   (bv->str (cpp:eval v0)))]
          [else
@@ -335,8 +418,7 @@
                   (bv->str (cpp:eval v1))
                   (bv->str (cpp:eval v0)))]
          [else
-          (error "NYI: codegen scalar ~a" Rt)
-          (format "(& (int32x1 ~a) (<< (int32x1 ~a) 16))" (compile-scalar v0) (compile-scalar v1))])]
+          (format "(halide.hexagon.pack2.h int32 (list ~a ~a))" (compile-scalar v1) (compile-scalar v0))])]
       [(Rt2.uh v0 v1)
        (assert (concrete? Rt))
        (format "0x~a~a"
@@ -707,13 +789,6 @@
 ;       [(i8x128 _) (generate `vsb (p-type p) `(list (,(p-type Vu) ,(codegen Vu))))]
 ;       [(u16x64 _) (generate `vsb (p-type p) `(list (,(p-type Vu) ,(codegen Vu))))]
 ;       [(i16x64 _) (generate `vsh (p-type p) `(list (,(p-type Vu) ,(codegen Vu))))])]
-;    
-;    ;;vadd-w
-;    [(vadd-w Vu Vv)
-;     (match (list (hvx:interpret Vu) (hvx:interpret Vv))
-;       [(list (u8x128 _) (u8x128 _)) (generate `vaddubh (p-type p) `(list ,(input-arg Vu) ,(input-arg Vv)))]
-;       [(list (i16x64 _) (i16x64 _)) (generate `vaddhw (p-type p) `(list ,(input-arg Vu) ,(input-arg Vv)))]
-;       [(list (u16x64 _) (u16x64 _)) (generate `vadduhw (p-type p) `(list ,(input-arg Vu) ,(input-arg Vv)))])]
 ;
 ;    ;;vadd-w-acc
 ;    [(vadd-w-acc Vdd Vu Vv)

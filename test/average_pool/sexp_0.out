@@ -1,0 +1,327 @@
+(halide.concat_vectors
+ uint16x512
+ (list
+  (uint16x64
+   (llvm.hexagon.V6.lo.128B
+    uint16x64
+    (list
+     (uint16x128
+      (llvm.hexagon.V6.vaddh.dv.128B
+       uint16x128
+       (list
+        (uint16x128
+         (llvm.hexagon.V6.vreadp.128B
+          uint16x128
+          (list (int32 sum) (int32 0) (int32 0) (int32 0))))
+        (uint16x128
+         (llvm.hexagon.V6.vunpackub.128B
+          uint16x128
+          (list
+           (uint8x128
+            (llvm.hexagon.V6.vread.128B
+             uint8x128
+             (list
+              (int32 input)
+              (int32
+               (+
+                (+
+                 t439
+                 (+
+                  (+
+                   t438
+                   (+
+                    (+ (+ (+ t398 (- 0 t427)) (- 0 t426)) (- 0 t425))
+                    (- 0 t398)))
+                  (max (* 512 output.s0.c.c) (+ -512 t399))))
+                (*
+                 t403
+                 (+
+                  sum.s1.r12$x.rebased
+                  (+ t435 (max (max (+ t401 (- 0 t432)) filter_width) 0))))))
+              (int32 1)
+              (int32 0)))))))))))))
+  (uint16x64
+   (llvm.hexagon.V6.hi.128B
+    uint16x64
+    (list
+     (uint16x128
+      (llvm.hexagon.V6.vaddh.dv.128B
+       uint16x128
+       (list
+        (uint16x128
+         (llvm.hexagon.V6.vreadp.128B
+          uint16x128
+          (list (int32 sum) (int32 0) (int32 0) (int32 0))))
+        (uint16x128
+         (llvm.hexagon.V6.vunpackub.128B
+          uint16x128
+          (list
+           (uint8x128
+            (llvm.hexagon.V6.vread.128B
+             uint8x128
+             (list
+              (int32 input)
+              (int32
+               (+
+                (+
+                 t439
+                 (+
+                  (+
+                   t438
+                   (+
+                    (+ (+ (+ t398 (- 0 t427)) (- 0 t426)) (- 0 t425))
+                    (- 0 t398)))
+                  (max (* 512 output.s0.c.c) (+ -512 t399))))
+                (*
+                 t403
+                 (+
+                  sum.s1.r12$x.rebased
+                  (+ t435 (max (max (+ t401 (- 0 t432)) filter_width) 0))))))
+              (int32 1)
+              (int32 0)))))))))))))
+  (uint16x64
+   (llvm.hexagon.V6.lo.128B
+    uint16x64
+    (list
+     (uint16x128
+      (llvm.hexagon.V6.vaddh.dv.128B
+       uint16x128
+       (list
+        (uint16x128
+         (llvm.hexagon.V6.vreadp.128B
+          uint16x128
+          (list (int32 sum) (int32 128) (int32 0) (int32 0))))
+        (uint16x128
+         (llvm.hexagon.V6.vunpackub.128B
+          uint16x128
+          (list
+           (uint8x128
+            (llvm.hexagon.V6.vread.128B
+             uint8x128
+             (list
+              (int32 input)
+              (int32
+               (+
+                128
+                (+
+                 (+
+                  t439
+                  (+
+                   (+
+                    t438
+                    (+
+                     (+ (+ (+ t398 (- 0 t427)) (- 0 t426)) (- 0 t425))
+                     (- 0 t398)))
+                   (max (* 512 output.s0.c.c) (+ -512 t399))))
+                 (*
+                  t403
+                  (+
+                   sum.s1.r12$x.rebased
+                   (+ t435 (max (max (+ t401 (- 0 t432)) filter_width) 0)))))))
+              (int32 1)
+              (int32 0)))))))))))))
+  (uint16x64
+   (llvm.hexagon.V6.hi.128B
+    uint16x64
+    (list
+     (uint16x128
+      (llvm.hexagon.V6.vaddh.dv.128B
+       uint16x128
+       (list
+        (uint16x128
+         (llvm.hexagon.V6.vreadp.128B
+          uint16x128
+          (list (int32 sum) (int32 128) (int32 0) (int32 0))))
+        (uint16x128
+         (llvm.hexagon.V6.vunpackub.128B
+          uint16x128
+          (list
+           (uint8x128
+            (llvm.hexagon.V6.vread.128B
+             uint8x128
+             (list
+              (int32 input)
+              (int32
+               (+
+                128
+                (+
+                 (+
+                  t439
+                  (+
+                   (+
+                    t438
+                    (+
+                     (+ (+ (+ t398 (- 0 t427)) (- 0 t426)) (- 0 t425))
+                     (- 0 t398)))
+                   (max (* 512 output.s0.c.c) (+ -512 t399))))
+                 (*
+                  t403
+                  (+
+                   sum.s1.r12$x.rebased
+                   (+ t435 (max (max (+ t401 (- 0 t432)) filter_width) 0)))))))
+              (int32 1)
+              (int32 0)))))))))))))
+  (uint16x64
+   (llvm.hexagon.V6.lo.128B
+    uint16x64
+    (list
+     (uint16x128
+      (llvm.hexagon.V6.vaddh.dv.128B
+       uint16x128
+       (list
+        (uint16x128
+         (llvm.hexagon.V6.vreadp.128B
+          uint16x128
+          (list (int32 sum) (int32 256) (int32 0) (int32 0))))
+        (uint16x128
+         (llvm.hexagon.V6.vunpackub.128B
+          uint16x128
+          (list
+           (uint8x128
+            (llvm.hexagon.V6.vread.128B
+             uint8x128
+             (list
+              (int32 input)
+              (int32
+               (+
+                256
+                (+
+                 (+
+                  t439
+                  (+
+                   (+
+                    t438
+                    (+
+                     (+ (+ (+ t398 (- 0 t427)) (- 0 t426)) (- 0 t425))
+                     (- 0 t398)))
+                   (max (* 512 output.s0.c.c) (+ -512 t399))))
+                 (*
+                  t403
+                  (+
+                   sum.s1.r12$x.rebased
+                   (+ t435 (max (max (+ t401 (- 0 t432)) filter_width) 0)))))))
+              (int32 1)
+              (int32 0)))))))))))))
+  (uint16x64
+   (llvm.hexagon.V6.hi.128B
+    uint16x64
+    (list
+     (uint16x128
+      (llvm.hexagon.V6.vaddh.dv.128B
+       uint16x128
+       (list
+        (uint16x128
+         (llvm.hexagon.V6.vreadp.128B
+          uint16x128
+          (list (int32 sum) (int32 256) (int32 0) (int32 0))))
+        (uint16x128
+         (llvm.hexagon.V6.vunpackub.128B
+          uint16x128
+          (list
+           (uint8x128
+            (llvm.hexagon.V6.vread.128B
+             uint8x128
+             (list
+              (int32 input)
+              (int32
+               (+
+                256
+                (+
+                 (+
+                  t439
+                  (+
+                   (+
+                    t438
+                    (+
+                     (+ (+ (+ t398 (- 0 t427)) (- 0 t426)) (- 0 t425))
+                     (- 0 t398)))
+                   (max (* 512 output.s0.c.c) (+ -512 t399))))
+                 (*
+                  t403
+                  (+
+                   sum.s1.r12$x.rebased
+                   (+ t435 (max (max (+ t401 (- 0 t432)) filter_width) 0)))))))
+              (int32 1)
+              (int32 0)))))))))))))
+  (uint16x64
+   (llvm.hexagon.V6.lo.128B
+    uint16x64
+    (list
+     (uint16x128
+      (llvm.hexagon.V6.vaddh.dv.128B
+       uint16x128
+       (list
+        (uint16x128
+         (llvm.hexagon.V6.vreadp.128B
+          uint16x128
+          (list (int32 sum) (int32 384) (int32 0) (int32 0))))
+        (uint16x128
+         (llvm.hexagon.V6.vunpackub.128B
+          uint16x128
+          (list
+           (uint8x128
+            (llvm.hexagon.V6.vread.128B
+             uint8x128
+             (list
+              (int32 input)
+              (int32
+               (+
+                384
+                (+
+                 (+
+                  t439
+                  (+
+                   (+
+                    t438
+                    (+
+                     (+ (+ (+ t398 (- 0 t427)) (- 0 t426)) (- 0 t425))
+                     (- 0 t398)))
+                   (max (* 512 output.s0.c.c) (+ -512 t399))))
+                 (*
+                  t403
+                  (+
+                   sum.s1.r12$x.rebased
+                   (+ t435 (max (max (+ t401 (- 0 t432)) filter_width) 0)))))))
+              (int32 1)
+              (int32 0)))))))))))))
+  (uint16x64
+   (llvm.hexagon.V6.hi.128B
+    uint16x64
+    (list
+     (uint16x128
+      (llvm.hexagon.V6.vaddh.dv.128B
+       uint16x128
+       (list
+        (uint16x128
+         (llvm.hexagon.V6.vreadp.128B
+          uint16x128
+          (list (int32 sum) (int32 384) (int32 0) (int32 0))))
+        (uint16x128
+         (llvm.hexagon.V6.vunpackub.128B
+          uint16x128
+          (list
+           (uint8x128
+            (llvm.hexagon.V6.vread.128B
+             uint8x128
+             (list
+              (int32 input)
+              (int32
+               (+
+                384
+                (+
+                 (+
+                  t439
+                  (+
+                   (+
+                    t438
+                    (+
+                     (+ (+ (+ t398 (- 0 t427)) (- 0 t426)) (- 0 t425))
+                     (- 0 t398)))
+                   (max (* 512 output.s0.c.c) (+ -512 t399))))
+                 (*
+                  t403
+                  (+
+                   sum.s1.r12$x.rebased
+                   (+ t435 (max (max (+ t401 (- 0 t432)) filter_width) 0)))))))
+              (int32 1)
+              (int32 0)))))))))))))))

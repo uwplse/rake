@@ -1,0 +1,46 @@
+#lang rosette/safe
+
+(require rake)
+(init-logging "expr_4.runtimes")
+
+(define-symbolic-buffer input uint8_t)
+(define-symbolic-buffer sum uint16_t)
+(define-symbolic t398 integer?)
+(define-symbolic t399 integer?)
+(define-symbolic t483 integer?)
+(define-symbolic t476 integer?)
+(define-symbolic t471 integer?)
+(define-symbolic output.s0.c.c integer?)
+(define-symbolic t479 integer?)
+(define-symbolic sum.s1.r12$x.rebased integer?)
+(define-symbolic t401 integer?)
+(define-symbolic t470 integer?)
+(define-symbolic t482 integer?)
+(define-symbolic filter_width integer?)
+(define-symbolic t403 integer?)
+(define-symbolic t469 integer?)
+
+(define axioms 
+  (list ))
+
+(define input.min.0 t398)
+(define input.extent.0 t399)
+(define input.min.1 t401)
+(define input.stride.1 t403)
+(define t332.s (-  (-  (-  input.min.0  t471)  t470)  t469))
+(define t342 (min  (-  input.min.1  t476)  filter_width))
+(define t355 (+  (max  t342  0)  t479))
+(define t354 (+  t482  (-  t332.s  input.min.0)))
+(define output.s0.c.v8.base.s (min  (*  output.s0.c.c  128)  (+  input.extent.0  -128)))
+(define t362 (+  t483  (+  output.s0.c.v8.base.s  t354)))
+
+(define halide-expr
+ (vec-add
+  (load sum (ramp 0 1 128) (aligned 0 0))
+  (uint16x128
+   (load input (ramp (+ (* (+ sum.s1.r12$x.rebased t355) input.stride.1) t362) 1 128) (aligned 1 0)))))
+
+(define spec (synthesis-spec 'halide-ir halide-expr axioms))
+(define hvx-expr (synthesize-hvx spec 'greedy 'enumerative 'enumerative))
+
+(llvm-codegen hvx-expr "sexp_4.out")

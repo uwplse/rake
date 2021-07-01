@@ -1,0 +1,163 @@
+(halide.concat_vectors
+ uint16x256
+ (list
+  (uint16x64
+   (llvm.hexagon.V6.lo.128B
+    uint16x64
+    (list
+     (uint16x128
+      (llvm.hexagon.V6.vaddh.dv.128B
+       uint16x128
+       (list
+        (uint16x128
+         (llvm.hexagon.V6.vreadp.128B
+          uint16x128
+          (list (int32 sum) (int32 0) (int32 0) (int32 0))))
+        (uint16x128
+         (llvm.hexagon.V6.vunpackub.128B
+          uint16x128
+          (list
+           (uint8x128
+            (llvm.hexagon.V6.vread.128B
+             uint8x128
+             (list
+              (int32 input)
+              (int32
+               (+
+                (+
+                 t461
+                 (+
+                  (+
+                   t460
+                   (+
+                    (+ (+ (+ t398 (- 0 t449)) (- 0 t448)) (- 0 t447))
+                    (- 0 t398)))
+                  (max (* 256 output.s0.c.c) (+ -256 t399))))
+                (*
+                 t403
+                 (+
+                  sum.s1.r12$x.rebased
+                  (+ t457 (max (max (+ t401 (- 0 t454)) filter_width) 0))))))
+              (int32 1)
+              (int32 0)))))))))))))
+  (uint16x64
+   (llvm.hexagon.V6.hi.128B
+    uint16x64
+    (list
+     (uint16x128
+      (llvm.hexagon.V6.vaddh.dv.128B
+       uint16x128
+       (list
+        (uint16x128
+         (llvm.hexagon.V6.vreadp.128B
+          uint16x128
+          (list (int32 sum) (int32 0) (int32 0) (int32 0))))
+        (uint16x128
+         (llvm.hexagon.V6.vunpackub.128B
+          uint16x128
+          (list
+           (uint8x128
+            (llvm.hexagon.V6.vread.128B
+             uint8x128
+             (list
+              (int32 input)
+              (int32
+               (+
+                (+
+                 t461
+                 (+
+                  (+
+                   t460
+                   (+
+                    (+ (+ (+ t398 (- 0 t449)) (- 0 t448)) (- 0 t447))
+                    (- 0 t398)))
+                  (max (* 256 output.s0.c.c) (+ -256 t399))))
+                (*
+                 t403
+                 (+
+                  sum.s1.r12$x.rebased
+                  (+ t457 (max (max (+ t401 (- 0 t454)) filter_width) 0))))))
+              (int32 1)
+              (int32 0)))))))))))))
+  (uint16x64
+   (llvm.hexagon.V6.lo.128B
+    uint16x64
+    (list
+     (uint16x128
+      (llvm.hexagon.V6.vaddh.dv.128B
+       uint16x128
+       (list
+        (uint16x128
+         (llvm.hexagon.V6.vreadp.128B
+          uint16x128
+          (list (int32 sum) (int32 128) (int32 0) (int32 0))))
+        (uint16x128
+         (llvm.hexagon.V6.vunpackub.128B
+          uint16x128
+          (list
+           (uint8x128
+            (llvm.hexagon.V6.vread.128B
+             uint8x128
+             (list
+              (int32 input)
+              (int32
+               (+
+                128
+                (+
+                 (+
+                  t461
+                  (+
+                   (+
+                    t460
+                    (+
+                     (+ (+ (+ t398 (- 0 t449)) (- 0 t448)) (- 0 t447))
+                     (- 0 t398)))
+                   (max (* 256 output.s0.c.c) (+ -256 t399))))
+                 (*
+                  t403
+                  (+
+                   sum.s1.r12$x.rebased
+                   (+ t457 (max (max (+ t401 (- 0 t454)) filter_width) 0)))))))
+              (int32 1)
+              (int32 0)))))))))))))
+  (uint16x64
+   (llvm.hexagon.V6.hi.128B
+    uint16x64
+    (list
+     (uint16x128
+      (llvm.hexagon.V6.vaddh.dv.128B
+       uint16x128
+       (list
+        (uint16x128
+         (llvm.hexagon.V6.vreadp.128B
+          uint16x128
+          (list (int32 sum) (int32 128) (int32 0) (int32 0))))
+        (uint16x128
+         (llvm.hexagon.V6.vunpackub.128B
+          uint16x128
+          (list
+           (uint8x128
+            (llvm.hexagon.V6.vread.128B
+             uint8x128
+             (list
+              (int32 input)
+              (int32
+               (+
+                128
+                (+
+                 (+
+                  t461
+                  (+
+                   (+
+                    t460
+                    (+
+                     (+ (+ (+ t398 (- 0 t449)) (- 0 t448)) (- 0 t447))
+                     (- 0 t398)))
+                   (max (* 256 output.s0.c.c) (+ -256 t399))))
+                 (*
+                  t403
+                  (+
+                   sum.s1.r12$x.rebased
+                   (+ t457 (max (max (+ t401 (- 0 t454)) filter_width) 0)))))))
+              (int32 1)
+              (int32 0)))))))))))))))
