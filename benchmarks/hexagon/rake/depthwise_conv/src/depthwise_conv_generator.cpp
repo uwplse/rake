@@ -1,5 +1,5 @@
 #include "Halide.h"
-#include "common_halide.h"
+#include "../../hannk/common_halide.h"
 
 using namespace Halide;
 using namespace Halide::BoundaryConditions;
@@ -10,23 +10,21 @@ namespace hannk {
 class DepthwiseConv : public Generator<DepthwiseConv> {
 public:
     // If positive, a constant inverse depth multiplier.
-    GeneratorParam<int> inv_depth_multiplier_{"inv_depth_multiplier", -1};
+    GeneratorParam<int> inv_depth_multiplier_{ "inv_depth_multiplier", -1 };
 
     // Unsigned 8-bit input tensor, indexed by ci, x, y, b.
-    Input<Buffer<uint8_t>> input_{"input", 4};
+    Input<Buffer<uint8_t>> input_{ "input", 4 };
+    Input<uint8_t> input_zero_{ "input_zero" };
 
     // A 3D array of 8-bit filter coefficients indexed by co, x, y.
-    Input<Buffer<uint8_t>> filter_{"filter", 3};
+    Input<Buffer<uint8_t>> filter_{ "filter", 3 };
+    Input<uint8_t> filter_zero_{ "filter_zero" };
 
     // A 1D array of 32-bit biases indexed by co.
-    Input<Buffer<int32_t>> bias_{"bias", 1};
+    Input<Buffer<int32_t>> bias_{ "bias", 1 };
 
     // The depth multiplier specifies the ratio between co and ci.
-    Input<int> depth_multiplier_{"depth_multiplier"};
-
-    // Zero points for the input and filter.
-    Input<uint8_t> input_zero_{"input_zero"};
-    Input<uint8_t> filter_zero_{"filter_zero"};
+    Input<int> depth_multiplier_{ "depth_multiplier" };
 
     // The stride specifies how the input [x, y] are sub-subsampled. For every
     // spatial location [x, y] in the output buffer, the input buffer is sampled
@@ -34,18 +32,18 @@ public:
     // [x * stride, y * stride] is a valid spatial location in the input buffer.
     // Generally, this means setting the output buffer's [width, height] to be
     // the input buffer's [width, height] / stride.
-    Input<int> stride_x_{"stride_x"};
-    Input<int> stride_y_{"stride_y"};
-    Input<int> dilation_x_{"dilation_x"};
-    Input<int> dilation_y_{"dilation_y"};
+    Input<int> stride_x_{ "stride_x" };
+    Input<int> stride_y_{ "stride_y" };
+    Input<int> dilation_x_{ "dilation_x" };
+    Input<int> dilation_y_{ "dilation_y" };
 
-    Input<int32_t> output_multiplier_{"output_multiplier"};
-    Input<uint32_t> output_shift_{"output_shift"};
-    Input<uint8_t> output_zero_{"output_zero"};
-    Input<uint8_t> output_min_{"output_min"};
-    Input<uint8_t> output_max_{"output_max"};
+    Input<int32_t> output_multiplier_{ "output_multiplier" };
+    Input<uint32_t> output_shift_{ "output_shift" };
+    Input<uint8_t> output_zero_{ "output_zero" };
+    Input<uint8_t> output_min_{ "output_min" };
+    Input<uint8_t> output_max_{ "output_max" };
 
-    Output<Buffer<uint8_t>> output_{"output", 4};
+    Output<Buffer<uint8_t>> output_{ "output", 4 };
 
     void generate() {
         // The algorithm.
@@ -59,9 +57,7 @@ public:
         resampled_input(c, x, y, b) = input_(c_resampled, x, y, b);
 
         Func filter_zeroed("filter_zeroed");
-        Func input_zeroed("input_zeroed");
         filter_zeroed(c, x, y) = i16(filter_(c, x, y)) - i16(filter_zero_);
-        input_zeroed(c, x, y, b) = i16(resampled_input(c, x, y, b)) - i16(input_zero_);
 
         // Do the convolution in 32-bit.
         filter_.dim(1).set_min(0);
@@ -69,18 +65,40 @@ public:
         Expr filter_width = filter_.dim(1).extent();
         Expr filter_height = filter_.dim(2).extent();
         RDom r(0, filter_width, 0, filter_height);
-        Expr filter_drxy = filter_zeroed(c, r.x, r.y);
-        Expr input_drxyb =
-            input_zeroed(c, x * stride_x_ + r.x * dilation_x_, y * stride_y_ + r.y * dilation_y_, b);
+        Expr filter_zeroed_rdxy = filter_zeroed(c, r.x, r.y);
+
+        // We want to compute the reduction:
+        // convolved(c, x, y, b) = bias_(c)
+        // convolved(c, x, y, b) +=
+        //    i32(filter_zeroed_rdxy) *
+        //    (i32(input_rdxy) - i32(input_zero_))
+        //
+        // However, this requires subtracting the input zero at every output.
+        // We can factor the reduction like so:
+        //
+        // convolved(c, x, y, b) = bias_(c)
+        // convolved(c, x, y, b) +=
+        //    i32(filter_zeroed_rdxy) * i32(input_rdxyc) -
+        //    i32(filter_zeroed_rdxy) * i32(input_zero_)
+        //
+        // The latter reduction can be computed once per output channel.
+        Func sum_filter("sum_filter");
+        sum_filter(c) += i32(filter_zeroed_rdxy);
+
+        Func offset_c("offset_c");
+        offset_c(c) = bias_(c) - sum_filter(c) * i32(input_zero_);
+
+        Expr input_rdxy =
+            resampled_input(c, x * stride_x_ + r.x * dilation_x_, y * stride_y_ + r.y * dilation_y_, b);
         Func convolved("convolved");
-        convolved(c, x, y, b) = bias_(c);
-        convolved(c, x, y, b) += i32(filter_drxy) * i32(input_drxyb);
+        convolved(c, x, y, b) = offset_c(c);
+        convolved(c, x, y, b) += i32(filter_zeroed_rdxy) * i32(input_rdxy);
 
         // Saturate and narrow the output.
-        Expr output =
-            multiply_quantized(convolved(c, x, y, b), output_multiplier_, output_shift_);
-        output = saturating_add(i16_sat(output), output_zero_);
-        output_(c, x, y, b) = clamp(u8_sat(output), output_min_, output_max_);
+        Expr output = multiply_2x_high(convolved(c, x, y, b), output_multiplier_);
+        output = i16_sat(rounding_shift_right(output, output_shift_));
+        output = u8_sat(saturating_add(output, output_zero_));
+        output_(c, x, y, b) = clamp(output, output_min_, output_max_);
 
         // Schedule.
         interpret_as_tensor(input_);
@@ -95,14 +113,11 @@ public:
             // When we're broadcasting input channels, require that the input has only
             // one channel.
             input_.dim(0).set_extent(1);
-            input_.dim(1).set_stride(1);
         }
 
         int vector_size = natural_vector_size<uint8_t>();
         if (get_register_count(target) < 32) {
-            // If we are compiling without simd, vector_size can be 1.
-            // Don't let it go to zero.
-            vector_size = std::max(vector_size / 2, 1);
+            vector_size = natural_vector_size<int16_t>();
         }
 
         // Tile the output, so we can try to re-use loads spatially when performing
@@ -145,7 +160,7 @@ public:
             .reorder(x, y, c, xo, yo, b, co)
             .vectorize(c);
         output_
-            .split(c, co, c, vector_size, TailStrategy::GuardWithIf)
+            .split(c, co, c, vector_size, TailStrategy::Predicate)
             .reorder(x, y, c, xo, yo, b, co)
             .vectorize(c);
 
@@ -165,10 +180,6 @@ public:
             .unroll(r.x)
             .unroll(r.y);
 
-        // TODO: This is a padded wrapper on a constant buffer, we could
-        // pad it and constant fold it outside.
-        bias_.in().compute_at(output_, co).store_in(MemoryType::Stack);
-
         if (inv_depth_multiplier_ < 0) {
             // The reason inv_depth_multiplier_ is a GeneratorParam and not a
             // specialization is that we can't specialize the (lack of) compute_at here.
@@ -180,12 +191,16 @@ public:
             resampled_input.specialize(depth_multiplier_ == 1);
         }
 
-        filter_zeroed
-            .compute_at(output_, co)
+        filter_zeroed.compute_at(output_, co)
             .store_in(MemoryType::Stack)
             .align_storage(c, natural_vector_size<int16_t>())
             .vectorize(c, natural_vector_size<int16_t>(), TailStrategy::GuardWithIf)
             .unroll(c, 2, TailStrategy::GuardWithIf);
+
+        offset_c.compute_at(output_, co)
+            .store_in(MemoryType::Stack)
+            .align_storage(c, natural_vector_size<int32_t>())
+            .vectorize(c, vector_size, TailStrategy::GuardWithIf);
     }
 };
 

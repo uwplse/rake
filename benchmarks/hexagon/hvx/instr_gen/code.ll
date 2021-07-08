@@ -1,0 +1,55 @@
+	.text
+	.file	"code.c"
+	.globl	getllvm2                // -- Begin function getllvm2
+	.balign 32
+	.type	getllvm2,@function
+getllvm2:                               // @getllvm2
+// %bb.0:                               // %entry
+	{
+		r2 = add(r0,#1)
+		r3 = ##33817092
+		v0 = vmem(r0+#0)
+	}
+	{
+		r4 = add(r0,#129)
+		r7 = #-2
+		v1 = vmem(r0+#1)
+	}
+	{
+		v1:0.w += vmpy(v4.h,r3.h)
+		v4.cur = vmem(r2+#0)
+	}
+	{
+		v2 = vmem(r0+#2)
+	}
+	{
+		v3 = vmem(r0+#3)
+	}
+	{
+		v3:2.w += vmpy(v1.h,r3.h)
+		v1.cur = vmem(r4+#0)
+	}
+	{
+		v5:4 = vshuff(v0,v2,r7)
+		jumpr r31
+		vmem(r1+#0) = v4.new
+	}
+.Lfunc_end0:
+	.size	getllvm2, .Lfunc_end0-getllvm2
+                                        // -- End function
+	.globl	main                    // -- Begin function main
+	.balign 32
+	.type	main,@function
+main:                                   // @main
+// %bb.0:                               // %entry
+	{
+		r0 = #0
+		jumpr r31
+	}
+.Lfunc_end1:
+	.size	main, .Lfunc_end1-main
+                                        // -- End function
+
+	.ident	"QuIC LLVM Hexagon Clang version 8.3.07 (based on LLVM 7.0.0)"
+	.section	".note.GNU-stack","",@progbits
+	.addrsig

@@ -5,10 +5,10 @@ using namespace Halide::ConciseCasts;
 
 namespace hannk {
 
-int get_register_count(const Target& target) {
+int get_register_count(const Target &target) {
     switch (target.arch) {
     case Target::X86:
-        return target.features_any_of({ Target::AVX512_Skylake, Target::AVX512_Cannonlake, Target::AVX512_SapphireRapids }) ? 32 : 16;
+        return target.features_any_of({Target::AVX512_Skylake, Target::AVX512_Cannonlake, Target::AVX512_SapphireRapids}) ? 32 : 16;
     case Target::ARM:
         return target.bits == 64 ? 32 : 16;
     case Target::Hexagon:
@@ -18,7 +18,7 @@ int get_register_count(const Target& target) {
     }
 }
 
-int get_vector_reduction_factor(const Target& target, Type t) {
+int get_vector_reduction_factor(const Target &target, Type t) {
     if (target.arch == Target::Hexagon ||
         target.has_feature(Target::ARMDotProd) ||
         target.has_feature(Target::AVX512_SapphireRapids)) {
@@ -40,27 +40,27 @@ void require_same_min_extent(int d, OutputImageParam first, OutputImageParam sec
 
 Expr is_interleaved(OutputImageParam p, int channels) {
     return p.dim(0).min() == 0 &&
-        p.dim(0).extent() == channels &&
-        p.dim(1).stride() == channels;
+           p.dim(0).extent() == channels &&
+           p.dim(1).stride() == channels;
 }
 
-Expr align_down(const Expr& x, const Expr& n) {
+Expr align_down(const Expr &x, const Expr &n) {
     return (x / n) * n;
 }
 
-Expr align_up(const Expr& x, const Expr& n) {
+Expr align_up(const Expr &x, const Expr &n) {
     return ((x + n - 1) / n) * n;
 }
 
-Expr align(const Expr& x, const Expr& n) {
+Expr align(const Expr &x, const Expr &n) {
     return align_down(x, n);
 }
 
-Expr multiply_2x_high(const Expr& a, const Expr& b) {
+Expr multiply_2x_high(const Expr &a, const Expr &b) {
     return rounding_mul_shift_right(a, b, std::max(a.type().bits(), b.type().bits()) - 1);
 }
 
-Expr floor_log2(const Expr& x) {
+Expr floor_log2(const Expr &x) {
     //   floor(log2(x)) = B - clz(x) => log2(x) ~ B - clz(x)
     //   B = sizeof(x)*8 - 1
     //   clz(x) = count_leading_zeros(x)
@@ -68,7 +68,7 @@ Expr floor_log2(const Expr& x) {
     return log2_max_x - i16(count_leading_zeros(x));
 }
 
-Expr approx_log2(int q, const Expr& x, int q_x, const Type& type) {
+Expr approx_log2(int q, const Expr &x, int q_x, const Type &type) {
     Expr floor_log2_x = floor_log2(x);
 
     // Use a cubic polynomial to interpolate the fractional part of the result.
@@ -103,8 +103,7 @@ Expr approx_log2(int q, const Expr& x, int q_x, const Type& type) {
     Expr frac_result;
     if (q < poly_bits) {
         frac_result = cast(type, rounding_shift_right(poly, poly_bits - q));
-    }
-    else {
+    } else {
         frac_result = cast(type, poly) << (q - poly_bits);
     }
 
@@ -115,7 +114,7 @@ Expr approx_log2(int q, const Expr& x, int q_x, const Type& type) {
     return saturating_add(floor_result, frac_result);
 }
 
-Expr approx_exp2(int q, const Expr& x, const Expr& q_x, const Type& type) {
+Expr approx_exp2(int q, const Expr &x, const Expr &q_x, const Type &type) {
     // Compute floor(x / precision_x) and frac(x / precision_x)
     Expr floor_x = cast(type, x >> q_x);
 
@@ -153,7 +152,7 @@ Expr approx_exp2(int q, const Expr& x, const Expr& q_x, const Type& type) {
     return saturating_add(exp2_floor_x, multiply_2x_high(exp2_floor_x, poly));
 }
 
-Expr approx_reciprocal(int q, const Expr& x, const Type& type) {
+Expr approx_reciprocal(int q, const Expr &x, const Type &type) {
     //   precision / x
     // = precision / 2^log2(x)
     // = precision * 2^(-log2(x))
@@ -161,7 +160,7 @@ Expr approx_reciprocal(int q, const Expr& x, const Type& type) {
     return approx_exp2(q, -log2_x, 15, type);
 }
 
-Expr approx_reciprocal_sqrt(int q, const Expr& x, const Type& type) {
+Expr approx_reciprocal_sqrt(int q, const Expr &x, const Type &type) {
     //   precision / sqrt(x)
     // = precision / 2^log2(x^(1/2))
     // = precision * 2^(-log2(x)/2)
@@ -189,17 +188,17 @@ Expr approx_log2_exp2_plus_or_minus_one(int q, Expr x, int sign, Expr q_x, Type 
     return select((x >> q_x) < threshold, raw, line);
 }
 
-Expr approx_log2p1_exp2(int q, const Expr& x, const Expr& q_x, const Type& type) {
+Expr approx_log2p1_exp2(int q, const Expr &x, const Expr &q_x, const Type &type) {
     return approx_log2_exp2_plus_or_minus_one(q, x, 1, q_x, type);
 }
 
-Expr approx_log2m1_exp2(int q, const Expr& x, const Expr& q_x, const Type& type) {
+Expr approx_log2m1_exp2(int q, const Expr &x, const Expr &q_x, const Type &type) {
     return approx_log2_exp2_plus_or_minus_one(q, x, -1, q_x, type);
 }
 
 const float log2_e = 1.442695f;
 
-Expr approx_logistic(int q, const Expr& x, const Expr& q_x, const Type& type) {
+Expr approx_logistic(int q, const Expr &x, const Expr &q_x, const Type &type) {
     // log2(e) is ~1.5, so to implement this, we quantize log2(e)/2, and adjust
     // q_x to compensate.
     const int log2_e_q = std::lround(log2_e * (1 << (x.type().bits() - 2)));
@@ -210,7 +209,7 @@ Expr approx_logistic(int q, const Expr& x, const Expr& q_x, const Type& type) {
     return approx_exp2(q, -log2_d, log_q, type);
 }
 
-Expr approx_tanh(int q, const Expr& x, const Expr& q_x, const Type& type) {
+Expr approx_tanh(int q, const Expr &x, const Expr &q_x, const Type &type) {
     // log2(e) is ~1.5, so to implement this, we quantize log2(e)/2, and adjust
     // q_x to compensate.
     const int log2_e_q = std::lround(log2_e * (1 << (x.type().bits() - 2)));
