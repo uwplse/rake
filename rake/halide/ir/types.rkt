@@ -1,6 +1,7 @@
 #lang rosette/safe
 
 (require
+  (only-in racket/struct make-constructor-style-printer)
   (only-in racket/base error)
   rosette/lib/destruct)
 
@@ -12,6 +13,18 @@
 
 ;; A node to represent abstract expressions
 (struct abstr-halide-expr (orig-expr abstr-vals))
+
+;; A dummy node to capture var lookups
+;; (Because for variables that live outside the loop
+;; we wish to interpret them for semantics, but not
+;; actually inline the computation)
+(struct var-lookup (var val)
+  #:transparent
+  #:methods gen:custom-write
+  [(define write-proc
+     (make-constructor-style-printer
+      (lambda (obj) 'var-lookup)
+      (lambda (obj) (list (var-lookup-var obj)))))])
 
 ;; Constructors
 (struct x32 (sca) #:transparent)

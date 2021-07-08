@@ -252,7 +252,10 @@
   (destruct p
     ;; Abstract expressions
     [(abstr-halide-expr orig-expr abstr-vals) (lambda (i) (buffer-ref abstr-vals i))]
-            
+
+    ;; Var lookups
+    [(var-lookup var val) (interpret val)]
+    
     ;; Constructors
     [(x32 sca) (lambda (i) (interpret sca))]
     [(x64 sca) (lambda (i) (interpret sca))]
@@ -264,7 +267,7 @@
      (define intr-base (interpret base))
      (define intr-stride (interpret stride))
      (cond
-       [(integer? base)
+       [(integer? intr-base)
         (lambda (i) (+ (interpret base) (* i (interpret stride))))]
        [else
         (lambda (i)
@@ -578,9 +581,9 @@
   (define outT (infer-out-type lhs rhs))
   (cond
     [(cpp:signed-type? outT)
-     (mk-cpp-expr (if (bvsle (cpp:eval lhs) (cpp:eval rhs)) (bvsub (cpp:eval rhs) (cpp:eval lhs)) (bvsub (cpp:eval lhs) (cpp:eval rhs))) outT)]
+     (mk-cpp-expr (if (bvsle (cpp:eval lhs) (cpp:eval rhs)) (bvsub (cpp:eval rhs) (cpp:eval lhs)) (bvsub (cpp:eval lhs) (cpp:eval rhs))) (mk-cpp-type (cpp:type-bw outT) #f))]
     [else
-     (mk-cpp-expr (if (bvule (cpp:eval lhs) (cpp:eval rhs)) (bvsub (cpp:eval rhs) (cpp:eval lhs)) (bvsub (cpp:eval lhs) (cpp:eval rhs))) outT)]))
+     (mk-cpp-expr (if (bvule (cpp:eval lhs) (cpp:eval rhs)) (bvsub (cpp:eval rhs) (cpp:eval lhs)) (bvsub (cpp:eval lhs) (cpp:eval rhs))) (mk-cpp-type (cpp:type-bw outT) #f))]))
 
 (define (do-clz lhs)
   (define outT (infer-out-type lhs lhs))

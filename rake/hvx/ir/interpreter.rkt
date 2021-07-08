@@ -20,13 +20,18 @@
 (define (set-cn v) (set! curr-cn v))
 
 (define (elem-type expr)
-  (cpp:type ((interpret expr) 0)))
+  (define e (interpret expr))
+  (define a (cpp:type (e 0)))
+  (define b (cpp:type (e 1)))
+  (if (< (cpp:type-bw a) (cpp:type-bw b)) a b))
 
 (define (interpret p)
   (destruct p
 
     ;;;;;;;;;;;;;;;;;;;; Scalar Halide Expressions ;;;;;;;;;;;;;;;;;;;;;
 
+    [(var-lookup var val) (interpret val)]
+            
     [(uint8x1 sca) (cpp:cast (interpret sca) 'uint8)]
     [(uint16x1 sca) (cpp:cast (interpret sca) 'uint16)]    
     [(uint32x1 sca) (cpp:cast (interpret sca) 'uint32)]
@@ -281,9 +286,9 @@
          [((uint8_t v0) (uint8_t v1)) (uint8_t (if (bvule v0 v1) (bvsub v1 v0) (bvsub v0 v1)))]
          [((uint16_t v0) (uint16_t v1)) (uint16_t (if (bvule v0 v1) (bvsub v1 v0) (bvsub v0 v1)))]
          [((uint32_t v0) (uint32_t v1)) (uint32_t (if (bvule v0 v1) (bvsub v1 v0) (bvsub v0 v1)))]
-         [((int8_t v0) (int8_t v1)) (int8_t (if (bvsle v0 v1) (bvsub v1 v0) (bvsub v0 v1)))]
-         [((int16_t v0) (int16_t v1)) (int16_t (if (bvsle v0 v1) (bvsub v1 v0) (bvsub v0 v1)))]
-         [((int32_t v0) (int32_t v1)) (int32_t (if (bvsle v0 v1) (bvsub v1 v0) (bvsub v0 v1)))]))]
+         [((int8_t v0) (int8_t v1)) (uint8_t (if (bvsle v0 v1) (bvsub v1 v0) (bvsub v0 v1)))]
+         [((int16_t v0) (int16_t v1)) (uint16_t (if (bvsle v0 v1) (bvsub v1 v0) (bvsub v0 v1)))]
+         [((int32_t v0) (int32_t v1)) (uint32_t (if (bvsle v0 v1) (bvsub v1 v0) (bvsub v0 v1)))]))]
 
     [(select sub-expr0 sub-expr1 sub-expr2)
      (define input0 (interpret sub-expr0))

@@ -20,7 +20,9 @@
   (destruct p
 
     ;;;;;;;;;;;;;;;;;;;; Scalar Halide Expressions ;;;;;;;;;;;;;;;;;;;;;
-
+            
+    [(var-lookup var val) (interpret val)]
+    
     [(uint8x1 sca) (cpp:cast (interpret sca) 'uint8)]
     [(uint16x1 sca) (cpp:cast (interpret sca) 'uint16)]    
     [(uint32x1 sca) (cpp:cast (interpret sca) 'uint32)]
@@ -100,6 +102,8 @@
       
       (vecType (lambda (i) (list-ref (list-ref filtered-reads curr-cn) (idx-tbl i))))]
 
+    [(??sub-expr exprs c) (interpret (list-ref exprs c))]
+    
     [(??load id live-data buffer idx-tbl pair?)
       (define data (buffer-data buffer))
       (define elemT (buffer-elemT buffer))
@@ -198,13 +202,10 @@
              (vecType
               (lambda (i) (list-ref (list-ref live-data curr-cn) (list-ref idx-tbl i)))))])]
 
-    ;[(??lo/hi expr)
-      ;(choose* (interpret (lo expr)) (interpret (hi expr)))]
-
     ;;;;;;;;;;;;;;;;; Instructions for vector creation ;;;;;;;;;;;;;;;
     
-    [(vread buf loc align) ((get-vec-type buf) (lambda (i) (halide:buffer-ref buf (+ loc i))))]
-    [(vreadp buf loc align) ((get-vecp-type buf) (lambda (i) (halide:buffer-ref buf (+ loc i))) (lambda (i) (halide:buffer-ref buf (+ loc i (get-offset buf)))))]
+    [(vread buf loc align) ((get-vec-type buf) (lambda (i) (halide:buffer-ref buf (+ (interpret loc) i))))]
+    [(vreadp buf loc align) ((get-vecp-type buf) (lambda (i) (halide:buffer-ref buf (+ (interpret loc) i))) (lambda (i) (halide:buffer-ref buf (+ (interpret loc) i (get-offset buf)))))]
 
     [(vsplat Rt)
      (define iRt (interpret Rt))
@@ -250,7 +251,72 @@
        [((u8x128 v0) (u8x128 v1)) (u8x128 (lambda (i) (if (even? i) (v1 (+ i 1)) (v0 i))))]
        [((i16x64 v0) (i16x64 v1)) (i16x64 (lambda (i) (if (even? i) (v1 (+ i 1)) (v0 i))))]
        [((u16x64 v0) (u16x64 v1)) (u16x64 (lambda (i) (if (even? i) (v1 (+ i 1)) (v0 i))))])]
+
+    [(vshuffoe Vu Vv)
+     (destruct* ((interpret Vu) (interpret Vv))
+       [((i8x128 v0) (i8x128 v1)) (i8x128x2 (lambda (i) (if (even? i) (v1 i) (v0 (- i 1)))) (lambda (i) (if (even? i) (v1 (+ i 1)) (v0 i))))]
+       [((u8x128 v0) (u8x128 v1)) (u8x128x2 (lambda (i) (if (even? i) (v1 i) (v0 (- i 1)))) (lambda (i) (if (even? i) (v1 (+ i 1)) (v0 i))))]
+       [((i16x64 v0) (i16x64 v1)) (i16x64x2 (lambda (i) (if (even? i) (v1 i) (v0 (- i 1)))) (lambda (i) (if (even? i) (v1 (+ i 1)) (v0 i))))]
+       [((u16x64 v0) (u16x64 v1)) (u16x64x2 (lambda (i) (if (even? i) (v1 i) (v0 (- i 1)))) (lambda (i) (if (even? i) (v1 (+ i 1)) (v0 i))))])]
     
+    [(vpacke Vu Vv)
+     (destruct* ((interpret Vu) (interpret Vv))
+       [((i8x128 v0) (i8x128 v1)) (i8x128 (lambda (i) (if (< i 64) (v1 (* i 2)) (v0 (* 2 (- i 64))))))]
+       [((u8x128 v0) (u8x128 v1)) (u8x128 (lambda (i) (if (< i 64) (v1 (* i 2)) (v0 (* 2 (- i 64))))))]
+       [((i16x64 v0) (i16x64 v1)) (i16x64 (lambda (i) (if (< i 32) (v1 (* i 2)) (v0 (* 2 (- i 32))))))]
+       [((u16x64 v0) (u16x64 v1)) (u16x64 (lambda (i) (if (< i 32) (v1 (* i 2)) (v0 (* 2 (- i 32))))))])]
+    
+    [(vpacko Vu Vv)
+     (destruct* ((interpret Vu) (interpret Vv))
+       [((i8x128 v0) (i8x128 v1)) (i8x128 (lambda (i) (if (< i 64) (v1 (+ (* i 2) 1)) (v0 (+ (* 2 (- i 64)) 1)))))]
+       [((u8x128 v0) (u8x128 v1)) (u8x128 (lambda (i) (if (< i 64) (v1 (+ (* i 2) 1)) (v0 (+ (* 2 (- i 64)) 1)))))]
+       [((i16x64 v0) (i16x64 v1)) (i16x64 (lambda (i) (if (< i 32) (v1 (+ (* i 2) 1)) (v0 (+ (* 2 (- i 32)) 1)))))]
+       [((u16x64 v0) (u16x64 v1)) (u16x64 (lambda (i) (if (< i 32) (v1 (+ (* i 2) 1)) (v0 (+ (* 2 (- i 32)) 1)))))])]
+
+    [(vdeal Vu)
+     (destruct (interpret Vu)
+       [(u8x128 v0) (u8x128 (lambda (i) (if (< i 64) (v0 (* i 2)) (v0 (+ (* (- i 64) 2) 1)))))]
+       [(i8x128 v0) (i8x128 (lambda (i) (if (< i 64) (v0 (* i 2)) (v0 (+ (* (- i 64) 2) 1)))))]
+       [(u16x64 v0) (u16x64 (lambda (i) (if (< i 32) (v0 (* i 2)) (v0 (+ (* (- i 32) 2) 1)))))]
+       [(i16x64 v0) (i16x64 (lambda (i) (if (< i 32) (v0 (* i 2)) (v0 (+ (* (- i 32) 2) 1)))))])]
+
+    [(vdeale Vu Vv)
+     (destruct* ((interpret Vu) (interpret Vv))
+       [((u8x128 v0) (u8x128 v1))
+        (u8x128
+         (lambda (i)
+           (cond
+             [(< i 32) (v1 (* i 4))]
+             [(< i 64) (v1 (+ (* (- i 32) 4) 2))]
+             [(< i 96) (v0 (* (- i 64) 4))]
+             [else     (v0 (+ (* (- i 64) 4) 2))])))]
+       [((i8x128 v0) (i8x128 v1))
+        (i8x128
+         (lambda (i)
+           (cond
+             [(< i 32) (v1 (* i 4))]
+             [(< i 64) (v1 (+ (* (- i 32) 4) 2))]
+             [(< i 96) (v0 (* (- i 64) 4))]
+             [else     (v0 (+ (* (- i 64) 4) 2))])))])]
+    
+    [(valign Vu Vv Rt)
+     (destruct* ((interpret Vu) (interpret Vv))
+       [((i8x128 v0) (i8x128 v1)) (i8x128 (lambda (i) (assert (not (equal? Vu Vv))) (assert (<= 1 Rt 127)) (if (< i (- 128 Rt)) (v1 (+ i Rt)) (v0 (modulo (+ i Rt) 128)))))]
+       [((u8x128 v0) (u8x128 v1)) (u8x128 (lambda (i) (assert (not (equal? Vu Vv))) (assert (<= 1 Rt 127)) (if (< i (- 128 Rt)) (v1 (+ i Rt)) (v0 (modulo (+ i Rt) 128)))))]
+       [((i16x64 v0) (i16x64 v1)) (i16x64 (lambda (i) (assert (not (equal? Vu Vv))) (assert (<= 1 Rt 63)) (if (< i (- 64 Rt)) (v1 (+ i Rt)) (v0 (modulo (+ i Rt) 64)))))]
+       [((u16x64 v0) (u16x64 v1)) (u16x64 (lambda (i) (assert (not (equal? Vu Vv))) (assert (<= 1 Rt 63)) (if (< i (- 64 Rt)) (v1 (+ i Rt)) (v0 (modulo (+ i Rt) 64)))))]
+       [((i32x32 v0) (i32x32 v1)) (i32x32 (lambda (i) (assert (not (equal? Vu Vv))) (assert (<= 1 Rt 31)) (if (< i (- 32 Rt)) (v1 (+ i Rt)) (v0 (modulo (+ i Rt) 32)))))]
+       [((u32x32 v0) (u32x32 v1)) (u32x32 (lambda (i) (assert (not (equal? Vu Vv))) (assert (<= 1 Rt 31)) (if (< i (- 32 Rt)) (v1 (+ i Rt)) (v0 (modulo (+ i Rt) 32)))))])]
+
+    [(vror Vu Rt)
+     (destruct (interpret Vu)
+       [(i8x128 v0) (i8x128 (lambda (i) (assert (<= 1 Rt 126)) (v0 (let ([idx (+ i Rt)]) (if (< idx 128) idx (- idx 127))))))]
+       [(u8x128 v0) (u8x128 (lambda (i) (assert (<= 1 Rt 126)) (v0 (let ([idx (+ i Rt)]) (if (< idx 128) idx (- idx 127))))))]
+       [(i16x64 v0) (i16x64 (lambda (i) (assert (<= 1 Rt 62)) (v0 (let ([idx (+ i Rt)]) (if (< idx 64) idx (- idx 63))))))]
+       [(u16x64 v0) (u16x64 (lambda (i) (assert (<= 1 Rt 62)) (v0 (let ([idx (+ i Rt)]) (if (< idx 64) idx (- idx 63))))))]
+       [(i32x32 v0) (i32x32 (lambda (i) (assert (<= 1 Rt 30)) (v0 (let ([idx (+ i Rt)]) (if (< idx 32) idx (- idx 31))))))]
+       [(u32x32 v0) (u32x32 (lambda (i) (assert (<= 1 Rt 30)) (v0 (let ([idx (+ i Rt)]) (if (< idx 32) idx (- idx 31))))))])]
+
     [(vinterleave Vuu)
      (destruct (interpret Vuu)
        [(i8x128x2 v1 v0)
@@ -274,6 +340,33 @@
          (lambda (i) (if (even? i) (v1 (quotient i 2)) (v0 (quotient i 2))))
          (lambda (i) (if (even? i) (v1 (+ (quotient i 2) 16)) (v0 (+ (quotient i 2) 16)))))]
        [(u32x32x2 v1 v0)
+        (u32x32x2
+         (lambda (i) (if (even? i) (v1 (quotient i 2)) (v0 (quotient i 2))))
+         (lambda (i) (if (even? i) (v1 (+ (quotient i 2) 16)) (v0 (+ (quotient i 2) 16)))))])]
+
+    [(vinterleave2 Vu Vv)
+     (destruct* ((interpret Vu) (interpret Vv))
+       [((i8x128 v1) (i8x128 v0))
+        (i8x128x2
+         (lambda (i) (if (even? i) (v1 (quotient i 2)) (v0 (quotient i 2))))
+         (lambda (i) (if (even? i) (v1 (+ (quotient i 2) 64)) (v0 (+ (quotient i 2) 64)))))]
+       [((u8x128 v1) (u8x128 v0))
+        (u8x128x2
+         (lambda (i) (if (even? i) (v1 (quotient i 2)) (v0 (quotient i 2))))
+         (lambda (i) (if (even? i) (v1 (+ (quotient i 2) 64)) (v0 (+ (quotient i 2) 64)))))]
+       [((i16x64 v1) (i16x64 v0))
+        (i16x64x2
+         (lambda (i) (if (even? i) (v1 (quotient i 2)) (v0 (quotient i 2))))
+         (lambda (i) (if (even? i) (v1 (+ (quotient i 2) 32)) (v0 (+ (quotient i 2) 32)))))]
+       [((u16x64 v1) (u16x64 v0))
+        (u16x64x2
+         (lambda (i) (if (even? i) (v1 (quotient i 2)) (v0 (quotient i 2))))
+         (lambda (i) (if (even? i) (v1 (+ (quotient i 2) 32)) (v0 (+ (quotient i 2) 32)))))]
+       [((i32x32 v1) (i32x32 v0))
+        (i32x32x2
+         (lambda (i) (if (even? i) (v1 (quotient i 2)) (v0 (quotient i 2))))
+         (lambda (i) (if (even? i) (v1 (+ (quotient i 2) 16)) (v0 (+ (quotient i 2) 16)))))]
+       [((u32x32 v1) (u32x32 v0))
         (u32x32x2
          (lambda (i) (if (even? i) (v1 (quotient i 2)) (v0 (quotient i 2))))
          (lambda (i) (if (even? i) (v1 (+ (quotient i 2) 16)) (v0 (+ (quotient i 2) 16)))))])]
@@ -346,20 +439,6 @@
              [(eq? 1 rem) (v1 quo)]
              [(eq? 2 rem) (v2 quo)]
              [(eq? 3 rem) (v3 quo)])))])]
-
-    [(vpacke Vu Vv)
-     (destruct* ((interpret Vu) (interpret Vv))
-       [((i8x128 v0) (i8x128 v1)) (i8x128 (lambda (i) (if (< i 64) (v1 (* i 2)) (v0 (* 2 (- i 64))))))]
-       [((u8x128 v0) (u8x128 v1)) (u8x128 (lambda (i) (if (< i 64) (v1 (* i 2)) (v0 (* 2 (- i 64))))))]
-       [((i16x64 v0) (i16x64 v1)) (i16x64 (lambda (i) (if (< i 32) (v1 (* i 2)) (v0 (* 2 (- i 32))))))]
-       [((u16x64 v0) (u16x64 v1)) (u16x64 (lambda (i) (if (< i 32) (v1 (* i 2)) (v0 (* 2 (- i 32))))))])]
-
-    [(vdeal Vu)
-     (destruct (interpret Vu)
-       [(u8x128 v0) (u8x128 (lambda (i) (if (< i 64) (v0 (* i 2)) (v0 (+ (* (- i 64) 2) 1)))))]
-       [(i8x128 v0) (i8x128 (lambda (i) (if (< i 64) (v0 (* i 2)) (v0 (+ (* (- i 64) 2) 1)))))]
-       [(u16x64 v0) (u16x64 (lambda (i) (if (< i 32) (v0 (* i 2)) (v0 (+ (* (- i 32) 2) 1)))))]
-       [(i16x64 v0) (i16x64 (lambda (i) (if (< i 32) (v0 (* i 2)) (v0 (+ (* (- i 32) 2) 1)))))])]
     
     ;;;;;;;;;;;;;;;;;;;;;;;;;;; Type Casting ;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -828,6 +907,7 @@
           [(not round?) (u16x64 (lambda (i) (cpp:satu16 (asr (if (even? i) (v1 (quotient i 2)) (v0 (quotient i 2))) (int8_t n)))))]
           [round? (u16x64 (lambda (i) (cpp:satu16 (round-asr (if (even? i) (v1 (quotient i 2)) (v0 (quotient i 2))) (int8_t n)))))])])]
 
+    ;; Narrowing cast, takes high half of input elements
     [(vshuffo-n Vd Vu signed?)
      (destruct* ((interpret Vd) (interpret Vu))
        [((i16x64 v0) (i16x64 v1))
@@ -897,6 +977,15 @@
             (i16x64 (lambda (i) (if (< i 32) (cpp:sat16 (v1 i)) (cpp:sat16 (v0 (- i 32))))))
             (u16x64 (lambda (i) (if (< i 32) (cpp:satu16 (v1 i)) (cpp:satu16 (v0 (- i 32)))))))])]
 
+    [(vavg Vu Vv rnd?)
+     (destruct* ((interpret Vu) (interpret Vv))
+       [((i8x128 v0) (i8x128 v1)) (if rnd? (i8x128 (lambda (i) (rounding-average (v1 i) (v0 i)))) (i8x128 (lambda (i) (average (v1 i) (v0 i)))))]
+       [((u8x128 v0) (u8x128 v1)) (if rnd? (u8x128 (lambda (i) (rounding-average (v1 i) (v0 i)))) (i8x128 (lambda (i) (average (v1 i) (v0 i)))))]
+       [((i16x64 v0) (i16x64 v1)) (if rnd? (i16x64 (lambda (i) (rounding-average (v1 i) (v0 i)))) (i8x128 (lambda (i) (average (v1 i) (v0 i)))))]
+       [((u16x64 v0) (u16x64 v1)) (if rnd? (u16x64 (lambda (i) (rounding-average (v1 i) (v0 i)))) (i8x128 (lambda (i) (average (v1 i) (v0 i)))))]
+       [((i32x32 v0) (i32x32 v1)) (if rnd? (i32x32 (lambda (i) (rounding-average (v1 i) (v0 i)))) (i8x128 (lambda (i) (average (v1 i) (v0 i)))))]
+       [((u32x32 v0) (u32x32 v1)) (if rnd? (u32x32 (lambda (i) (rounding-average (v1 i) (v0 i)))) (i8x128 (lambda (i) (average (v1 i) (v0 i)))))])]
+
     ;;;;;;;;;;;;;;;;;;;;;;;;;;;; Min / Max ;;;;;;;;;;;;;;;;;;;;;;;;;;;
     
     [(vmax Vu Vv)
@@ -914,6 +1003,15 @@
        [((i16x64 v0) (i16x64 v1)) (i16x64 (lambda (i) (cpp:min16 (v0 i) (v1 i))))]
        [((u16x64 v0) (u16x64 v1)) (u16x64 (lambda (i) (cpp:minu16 (v0 i) (v1 i))))]
        [((i32x32 v0) (i32x32 v1)) (i32x32 (lambda (i) (cpp:min32 (v0 i) (v1 i))))])]
+
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;; Absolute Difference ;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    
+    [(vabsdiff Vu Vv)
+     (destruct* ((interpret Vu) (interpret Vv))
+       [((u8x128 v0) (u8x128 v1)) (u8x128 (lambda (i) (absolute-diff (v0 i) (v1 i))))]
+       [((i16x64 v0) (i16x64 v1)) (u16x64 (lambda (i) (absolute-diff (v0 i) (v1 i))))]
+       [((u16x64 v0) (u16x64 v1)) (u16x64 (lambda (i) (absolute-diff (v0 i) (v1 i))))]
+       [((i32x32 v0) (i32x32 v1)) (u32x32 (lambda (i) (absolute-diff (v0 i) (v1 i))))])]
     
 ;    ;[(sca-max v1 v2) (max (interpret v1) (interpret v2))]
 ;
@@ -962,168 +1060,6 @@
 ;         [else node]))
 ;     (interpret (visit-hvx body repl-var))]
 ;    
-    ;;;;;;;;;;;;;;;; Instructions for data movement ;;;;;;;;;;;;;;;;
-;
-;    ;; Extract n/2 bits
-;    [(vshuffo-n Vd Vu signed?)
-;     (match (list (interpret Vd) (interpret Vu))
-;       [(list (i16x64 v0) (i16x64 v1))
-;        (if signed?
-;            (i8x128 (lambda (i) (if (even? i) (i8hi (v1 (quotient i 2))) (i8hi (v0 (quotient i 2))))))
-;            (u8x128 (lambda (i) (if (even? i) (u8hi (v1 (quotient i 2))) (u8hi (v0 (quotient i 2)))))))]
-;       [(list (u16x64 v0) (u16x64 v1))
-;        (if signed?
-;            (i8x128 (lambda (i) (if (even? i) (i8hi (v1 (quotient i 2))) (i8hi (v0 (quotient i 2))))))
-;            (u8x128 (lambda (i) (if (even? i) (u8hi (v1 (quotient i 2))) (u8hi (v0 (quotient i 2)))))))]
-;       [(list (i32x32 v0) (i32x32 v1))
-;        (if signed?
-;            (i16x64 (lambda (i) (if (even? i) (i16hi (v1 (quotient i 2))) (i16hi (v0 (quotient i 2))))))
-;            (u16x64 (lambda (i) (if (even? i) (u16hi (v1 (quotient i 2))) (u16hi (v0 (quotient i 2)))))))]
-;       [(list (u32x32 v0) (u32x32 v1))
-;        (if signed?
-;            (i16x64 (lambda (i) (if (even? i) (i16hi (v1 (quotient i 2))) (i16hi (v0 (quotient i 2))))))
-;            (u16x64 (lambda (i) (if (even? i) (u16hi (v1 (quotient i 2))) (u16hi (v0 (quotient i 2)))))))])]
-;
-;    [(vshuffoe Vu Vv)
-;     (match (list (interpret Vu) (interpret Vv))
-;       [(list (i8x128 v0) (i8x128 v1)) (i8x128x2 (lambda (i) (if (even? i) (v1 (+ i 1)) (v0 i))) (lambda (i) (if (even? i) (v1 i) (v0 (- i 1)))))]
-;       [(list (u8x128 v0) (u8x128 v1)) (u8x128x2 (lambda (i) (if (even? i) (v1 (+ i 1)) (v0 i))) (lambda (i) (if (even? i) (v1 i) (v0 (- i 1)))))]
-;       [(list (i16x64 v0) (i16x64 v1)) (i16x64x2 (lambda (i) (if (even? i) (v1 (+ i 1)) (v0 i))) (lambda (i) (if (even? i) (v1 i) (v0 (- i 1)))))]
-;       [(list (u16x64 v0) (u16x64 v1)) (u16x64x2 (lambda (i) (if (even? i) (v1 (+ i 1)) (v0 i))) (lambda (i) (if (even? i) (v1 i) (v0 (- i 1)))))])]
-;    
-;    [(vdeale Vu Vv)
-;     (match (list (interpret Vu) (interpret Vv))
-;       [(list (u8x128 v0) (u8x128 v1))
-;        (u8x128
-;         (lambda (i)
-;           (cond
-;             [(< i 32) (v1 (* i 4))]
-;             [(< i 64) (v1 (+ (* (- i 32) 4) 2))]
-;             [(< i 96) (v0 (* (- i 64) 4))]
-;             [else     (v0 (+ (* (- i 64) 4) 2))])))]
-;       [(list (i8x128 v0) (i8x128 v1))
-;        (i8x128
-;         (lambda (i)
-;           (cond
-;             [(< i 32) (v1 (* i 4))]
-;             [(< i 64) (v1 (+ (* (- i 32) 4) 2))]
-;             [(< i 96) (v0 (* (- i 64) 4))]
-;             [else     (v0 (+ (* (- i 64) 4) 2))])))])]
-;
-;    [(vror Vu Rt)
-;     (match (interpret Vu)
-;       [(i8x128 v0) (i8x128 (lambda (i) (assert (<= 1 Rt 126)) (v0 (let ([idx (+ i Rt)]) (if (< idx 128) idx (- idx 127))))))]
-;       [(u8x128 v0) (u8x128 (lambda (i) (assert (<= 1 Rt 126)) (v0 (let ([idx (+ i Rt)]) (if (< idx 128) idx (- idx 127))))))]
-;       [(i16x64 v0) (i16x64 (lambda (i) (assert (<= 1 Rt 62)) (v0 (let ([idx (+ i Rt)]) (if (< idx 64) idx (- idx 63))))))]
-;       [(u16x64 v0) (u16x64 (lambda (i) (assert (<= 1 Rt 62)) (v0 (let ([idx (+ i Rt)]) (if (< idx 64) idx (- idx 63))))))]
-;       [(i32x32 v0) (i32x32 (lambda (i) (assert (<= 1 Rt 30)) (v0 (let ([idx (+ i Rt)]) (if (< idx 32) idx (- idx 31))))))]
-;       [(u32x32 v0) (u32x32 (lambda (i) (assert (<= 1 Rt 30)) (v0 (let ([idx (+ i Rt)]) (if (< idx 32) idx (- idx 31))))))])]
-;
-;    [(valign Vu Vv Rt)
-;     (match (list (interpret Vu) (interpret Vv))
-;       [(list (i8x128 v0) (i8x128 v1)) (i8x128 (lambda (i) (assert (not (equal-expr-hvx? Vu Vv))) (assert (<= 1 Rt 127)) (if (< i (- 128 Rt)) (v1 (+ i Rt)) (v0 (modulo (+ i Rt) 128)))))]
-;       [(list (u8x128 v0) (u8x128 v1)) (u8x128 (lambda (i) (assert (not (equal-expr-hvx? Vu Vv))) (assert (<= 1 Rt 127)) (if (< i (- 128 Rt)) (v1 (+ i Rt)) (v0 (modulo (+ i Rt) 128)))))]
-;       [(list (i16x64 v0) (i16x64 v1)) (i16x64 (lambda (i) (assert (not (equal-expr-hvx? Vu Vv))) (assert (<= 1 Rt 63)) (if (< i (- 64 Rt)) (v1 (+ i Rt)) (v0 (modulo (+ i Rt) 64)))))]
-;       [(list (u16x64 v0) (u16x64 v1)) (u16x64 (lambda (i) (assert (not (equal-expr-hvx? Vu Vv))) (assert (<= 1 Rt 63)) (if (< i (- 64 Rt)) (v1 (+ i Rt)) (v0 (modulo (+ i Rt) 64)))))]
-;       [(list (i32x32 v0) (i32x32 v1)) (i32x32 (lambda (i) (assert (not (equal-expr-hvx? Vu Vv))) (assert (<= 1 Rt 31)) (if (< i (- 32 Rt)) (v1 (+ i Rt)) (v0 (modulo (+ i Rt) 32)))))]
-;       [(list (u32x32 v0) (u32x32 v1)) (u32x32 (lambda (i) (assert (not (equal-expr-hvx? Vu Vv))) (assert (<= 1 Rt 31)) (if (< i (- 32 Rt)) (v1 (+ i Rt)) (v0 (modulo (+ i Rt) 32)))))])]
-;    
-;    [(vlalign Vu Vv Rt)
-;     (match (list (interpret Vu) (interpret Vv))
-;       [(list (i8x128 v0) (i8x128 v1)) (i8x128 (lambda (i) (assert (<= 1 Rt 127)) (if (< i Rt) (v1 (+ (- 128 Rt) i)) (v0 (- i Rt)))))]
-;       [(list (u8x128 v0) (u8x128 v1)) (u8x128 (lambda (i) (assert (<= 1 Rt 127)) (if (< i Rt) (v1 (+ (- 128 Rt) i)) (v0 (- i Rt)))))]
-;       [(list (i16x64 v0) (i16x64 v1)) (i16x64 (lambda (i) (assert (<= 1 Rt 63)) (if (< i Rt) (v1 (+ (- 64 Rt) i)) (v0 (- i Rt)))))]
-;       [(list (u16x64 v0) (u16x64 v1)) (u16x64 (lambda (i) (assert (<= 1 Rt 63)) (if (< i Rt) (v1 (+ (- 64 Rt) i)) (v0 (- i Rt)))))]
-;       [(list (i32x32 v0) (i32x32 v1)) (i32x32 (lambda (i) (assert (<= 1 Rt 31)) (if (< i Rt) (v1 (+ (- 32 Rt) i)) (v0 (- i Rt)))))]
-;       [(list (u32x32 v0) (u32x32 v1)) (u32x32 (lambda (i) (assert (<= 1 Rt 31)) (if (< i Rt) (v1 (+ (- 32 Rt) i)) (v0 (- i Rt)))))])]
-;
-;    [(vtranspose Vu Vv Rt)
-;     (match (list (interpret Vu) (interpret Vv))
-;       ;[(list (i8x128 v0) (i8x128 v1))
-;        ;(i8x128x2 (lambda (i) (assert (<= 0 Rt 127)) (if (< i Rt) (v1 (+ (- 128 Rt) i)) (v0 (- i Rt)))))]
-;       ;[(list (u8x128 v0) (u8x128 v1))
-;        ;(u8x128 (lambda (i) (assert (<= 0 Rt 127)) (if (< i Rt) (v1 (+ (- 128 Rt) i)) (v0 (- i Rt)))))]
-;       [(list (i16x64 v0) (i16x64 v1))
-;        (cond
-;          [(eq? Rt 1)
-;           (i16x64x2
-;            (lambda (i) (if (even? i) (v1 (quotient i 2)) (v0 (quotient i 2))))
-;            (lambda (i) (if (even? i) (v1 (+ (quotient i 2) 32)) (v0 (+ (quotient i 2) 32)))))]
-;          [(eq? Rt 2)
-;           (i16x64x2
-;            (lambda (i) (if (even? (quotient i 2)) (v1 (+ (quotient i 2) (remainder i 2))) (v0 (+ (quotient i 2) (remainder i 2)))))
-;            (lambda (i) (if (even? (quotient i 2)) (v1 (+ (quotient i 2) (remainder i 2) 32)) (v0 (+ (quotient i 2) (remainder i 2) 32)))))])]
-;       [(list (u16x64 v0) (u16x64 v1))
-;        (cond
-;          [(eq? Rt 1)
-;           (u16x64x2
-;            (lambda (i) (if (even? i) (v1 (quotient i 2)) (v0 (quotient i 2))))
-;            (lambda (i) (if (even? i) (v1 (+ (quotient i 2) 32)) (v0 (+ (quotient i 2) 32)))))]
-;          [(eq? Rt 2)
-;           (u16x64x2
-;            (lambda (i) (if (even? (quotient i 2)) (v1 (+ (quotient i 2) (remainder i 2))) (v0 (+ (quotient i 2) (remainder i 2)))))
-;            (lambda (i) (if (even? (quotient i 2)) (v1 (+ (quotient i 2) (remainder i 2) 32)) (v0 (+ (quotient i 2) (remainder i 2) 32)))))])]
-;       ;[(list (u16x64 v0) (u16x64 v1))
-;        ;(u16x64 (lambda (i) (assert (<= 0 Rt 63)) (if (< i Rt) (v1 (+ (- 64 Rt) i)) (v0 (- i Rt)))))]
-;       [(list (i32x32 v0) (i32x32 v1))
-;        (i32x32 (lambda (i) (assert (<= 0 Rt 31)) (if (< i Rt) (v1 (+ (- 32 Rt) i)) (v0 (- i Rt)))))]
-;       ;[(list (u32x32 v0) (u32x32 v1))
-;        ;(u32x32 (lambda (i) (assert (<= 0 Rt 31)) (if (< i Rt) (v1 (+ (- 32 Rt) i)) (v0 (- i Rt)))))]
-;       )]
-;    
-;    ;(struct vswap (Qt Vu Vv) #:transparent)
-;    ;(struct vmux (Qt Vu Vv) #:transparent)
-;    
-;    ;(struct vlut (Vu Vv) #:transparent)
-;    ;(struct vgather (Rt Mu Vv) #:transparent)
-;    
-;    ;;;;;;;;; New constructs to abstract away data movement;;;;;;;;;
-;
-;    ;[(swizzle* vec) (get-from-vec* buff-reads)]
-;    [(swizzle vec) (get-from-vec (interpret vec) (hvx-ast-node-id p))]
-;    
-;    [(gather* buff-reads) (get-from-buf* buff-reads)]
-;    [(gather-vec buff-reads) (get-vec-from-buf buff-reads (hvx-ast-node-id p))]
-;    [(gather-vecp buff-reads) (get-vecp-from-buf buff-reads (hvx-ast-node-id p))]
-;
-;    [(serve-vec vec otype opts sols)
-;     (otype
-;      (lambda (i)
-;        (list-ref
-;         (filter (lambda(v) (eq? (type v) (elem-type otype))) (list-ref opts curr-cn))
-;         ((evaluate vec (list-ref sols curr-cn)) i))))]
-;    
-;    [(serve-vec-pair v0 v1 otype opts sols)
-;     (otype
-;      (lambda (i)
-;        (list-ref
-;         (filter (lambda(v) (eq? (type v) (elem-type otype))) (list-ref opts curr-cn))
-;         ((evaluate v0 (list-ref sols curr-cn)) i)))
-;      (lambda (i)
-;        (list-ref
-;         (filter (lambda(v) (eq? (type v) (elem-type otype))) (list-ref opts curr-cn))
-;         ((evaluate v1 (list-ref sols curr-cn)) i))))]
-;
-;    [(??vread buf-opts load-idxs)
-;     (define-symbolic i integer?)
-;     (define buf (list-ref buf-opts i))
-;     (define-symbolic b integer?)
-;     (define idx (list-ref (hash-ref load-idxs buf) b))
-;     (interpret (vread buf (car idx) (cdr idx)))]
-;;     (match elem-type
-;;       ['uint8  (u8x128 (lambda (i) ))]
-;;       ['uint16 (u16x64 (lambda (i) ))]
-;;       ['uint32 (u32x32 (lambda (i) ))]
-;;       ['int8   (i8x128 (lambda (i) ))]
-;;       ['int16  (i16x64 (lambda (i) ))]
-;;       ['int32  (i32x32 (lambda (i) ))])]
-;
-;    [(??vreadp buf-opts load-idxs)
-;     (define-symbolic i integer?)
-;     (define buf (list-ref buf-opts i))
-;     (define-symbolic b integer?)
-;     (define idx (list-ref (hash-ref load-idxs buf) b))
-;     (interpret (vreadp buf (car idx) (cdr idx)))]
 ;    
 ;    ;;;;;;;;;;;;;;;; Instructions for data processing ;;;;;;;;;;;;;;;;
 
@@ -1494,14 +1430,32 @@
 ;    [(int8_t v) (mk-typed-expr (if (bvsge v (bv 0 8)) v (if (and sat? (eq? v (bv -128 8))) (bv 127 8) (bvmul v (bv -1 8)))) 'int8)]
 ;    [(int16_t v) (mk-typed-expr (if (bvsge v (bv 0 16)) v (if (and sat? (eq? v (bv -32768 16))) (bv 32767 16) (bvmul v (bv -1 16)))) 'int16)]
 ;    [(int32_t v) (mk-typed-expr (if (bvsge v (bv 0 32)) v (if (and sat? (eq? v (bv -2147483648 32))) (bv 2147483647 8) (bvmul v (bv -1 32)))) 'int32)]))
-;
-;(define (absolute-diff val1 val2)
-;  (match (list val1 val2)
-;    [(list (uint8_t v1) (uint8_t v2)) (mk-typed-expr (abs8 (bvsub v1 v2)) 'uint8)]
-;    [(list (int16_t v1) (int16_t v2)) (mk-typed-expr (abs16 (bvsub v1 v2)) 'uint16)]
-;    [(list (uint16_t v1) (uint16_t v2)) (mk-typed-expr (abs16 (bvsub v1 v2)) 'uint16)]
-;    [(list (int32_t v1) (int32_t v2)) (mk-typed-expr (abs32 (bvsub v1 v2)) 'uint32)]))
-;
+
+(define (absolute-diff val1 val2)
+  (destruct* (val1 val2)
+    [((uint8_t v1) (uint8_t v2)) (uint8_t (if (bvule v1 v2) (bvsub v2 v1) (bvsub v1 v2)))]
+    [((int16_t v1) (int16_t v2)) (uint16_t (if (bvsle v1 v2) (bvsub v2 v1) (bvsub v1 v2)))]
+    [((uint16_t v1) (uint16_t v2)) (uint16_t (if (bvule v1 v2) (bvsub v2 v1) (bvsub v1 v2)))]
+    [((int32_t v1) (int32_t v2)) (uint32_t (if (bvsle v1 v2) (bvsub v2 v1) (bvsub v1 v2)))]))
+
+(define (average val1 val2)
+  (destruct* (val1 val2)
+    [((int8_t v1) (int8_t v2)) (cpp:cast (int16_t (bvashr (cpp:eval (add val1 val2 'int16)) (bv 1 16))) 'int8)]
+    [((uint8_t v1) (uint8_t v2)) (cpp:cast (int16_t (bvashr (cpp:eval (add val1 val2 'int16)) (bv 1 16))) 'uint8)]
+    [((int16_t v1) (int16_t v2)) (cpp:cast (int32_t (bvashr (cpp:eval (add val1 val2 'int32)) (bv 1 32))) 'int16)]
+    [((uint16_t v1) (uint16_t v2)) (cpp:cast (int32_t (bvashr (cpp:eval (add val1 val2 'int32)) (bv 1 32))) 'uint16)]
+    [((int32_t v1) (int32_t v2)) (cpp:cast (int64_t (bvashr (cpp:eval (add val1 val2 'int64)) (bv 1 64))) 'int32)]
+    [((uint32_t v1) (uint32_t v2)) (cpp:cast (int64_t (bvashr (cpp:eval (add val1 val2 'int64)) (bv 1 64))) 'uint32)]))
+
+(define (rounding-average val1 val2)
+  (destruct* (val1 val2)
+    [((int8_t v1) (int8_t v2)) (cpp:cast (int16_t (bvashr (bvadd (bv 1 16) (cpp:eval (add val1 val2 'int16))) (bv 1 16))) 'int8)]
+    [((uint8_t v1) (uint8_t v2)) (cpp:cast (int16_t (bvashr (bvadd (bv 1 16) (cpp:eval (add val1 val2 'int16))) (bv 1 16))) 'uint8)]
+    [((int16_t v1) (int16_t v2)) (cpp:cast (int32_t (bvashr (bvadd (bv 1 32) (cpp:eval (add val1 val2 'int32))) (bv 1 32))) 'int16)]
+    [((uint16_t v1) (uint16_t v2)) (cpp:cast (int32_t (bvashr (bvadd (bv 1 32) (cpp:eval (add val1 val2 'int32))) (bv 1 32))) 'uint16)]
+    [((int32_t v1) (int32_t v2)) (cpp:cast (int64_t (bvashr (bvadd (bv 1 64) (cpp:eval (add val1 val2 'int64))) (bv 1 64))) 'int32)]
+    [((uint32_t v1) (uint32_t v2)) (cpp:cast (int64_t (bvashr (bvadd (bv 1 64) (cpp:eval (add val1 val2 'int64))) (bv 1 64))) 'uint32)]))
+
 ;;;;;;;;;;;;;;;;; Util Fns ;;;;;;;;;;;;;;;;;;;
 
 (define (get-vec-type buf)

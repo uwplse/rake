@@ -188,23 +188,23 @@
                [(eq? tile-w 2048)
                 (set
                  (list buf base align)
-                 (list buf (+ base (quotient 1024 elem-bw)) align))]
+                 (list buf (sca-add base (quotient 1024 elem-bw)) align))]
                [(eq? tile-w 4096)
                 (set
                  (list buf base align)
-                 (list buf (+ base (quotient 1024 elem-bw)) align)
-                 (list buf (+ base (quotient 2048 elem-bw)) align)
-                 (list buf (+ base (quotient 3072 elem-bw)) align))]
+                 (list buf (sca-add base (quotient 1024 elem-bw)) align)
+                 (list buf (sca-add base (quotient 2048 elem-bw)) align)
+                 (list buf (sca-add base (quotient 3072 elem-bw)) align))]
                [(eq? tile-w 8192)
                 (set
                  (list buf base align)
-                 (list buf (+ base (quotient 1024 elem-bw)) align)
-                 (list buf (+ base (quotient 2048 elem-bw)) align)
-                 (list buf (+ base (quotient 3072 elem-bw)) align)
-                 (list buf (+ base (quotient 4096 elem-bw)) align)
-                 (list buf (+ base (quotient 5120 elem-bw)) align)
-                 (list buf (+ base (quotient 6144 elem-bw)) align)
-                 (list buf (+ base (quotient 7168 elem-bw)) align))]
+                 (list buf (sca-add base (quotient 1024 elem-bw)) align)
+                 (list buf (sca-add base (quotient 2048 elem-bw)) align)
+                 (list buf (sca-add base (quotient 3072 elem-bw)) align)
+                 (list buf (sca-add base (quotient 4096 elem-bw)) align)
+                 (list buf (sca-add base (quotient 5120 elem-bw)) align)
+                 (list buf (sca-add base (quotient 6144 elem-bw)) align)
+                 (list buf (sca-add base (quotient 7168 elem-bw)) align))]
                [else
                 (error "NYI: Extracting vec from:" expr)]))
            (set-union! loads lds)]

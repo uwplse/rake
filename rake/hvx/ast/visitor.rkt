@@ -55,6 +55,7 @@
       [(vshuff Vu) (transform (vshuff (visit Vu transform)))]
       [(vtranspose Vu Vv Rt) (transform (vtranspose (visit Vu transform) (visit Vv transform) (visit Rt transform)))]
       [(vinterleave Vuu) (transform (vinterleave (visit Vuu transform)))]
+      [(vinterleave2 Vu Vv) (transform (vinterleave2 (visit Vu transform) (visit Vv transform)))]
       [(vinterleave4 Vuu Vvv Rt) (transform (vinterleave4 (visit Vuu transform) (visit Vvv transform) (visit Rt transform)))]
       [(vtranspose Vu Vv Rt) (transform (vtranspose (visit Vu transform) (visit Vv transform) (visit Rt transform)))]
       [(vpack Vu Vv signed?) (transform (vpack (visit Vu transform) (visit Vv transform) (visit signed? transform)))]
@@ -101,7 +102,7 @@
       [(vrmpy-acc-2 Vd Vu Vv) (transform (vrmpy-acc-2 (visit Vd transform) (visit Vu transform) (visit Vv transform)))]
       [(vrmpy-p Vuu Rt u1) (transform (vrmpy-p (visit Vuu transform) (visit Rt transform) (visit u1 transform)))]
       [(vrmpy-p-acc Vdd Vuu Rt u1) (transform (vrmpy-p-acc (visit Vdd transform) (visit Vuu transform) (visit Rt transform) (visit u1 transform)))]
-      ;[(vavg Vu Vv rnd?)
+      [(vavg Vu Vv rnd?) (transform (vavg (visit Vu transform) (visit Vv transform) (visit rnd? transform)))]
       ;[(vnavg Vu Vv)
       ;[(vasl Vu Rt)
       [(vrsr Vu Vv) (transform (vrsr (visit Vu transform) (visit Vv transform)))]
@@ -118,9 +119,9 @@
     
       ;; New types to represent abstract expression / data movement (these types should never appear in output code)
       [(abstr-hvx-expr orig-expr abstr-vals offset) (transform p)]
+      [(??sub-expr exprs c) (transform p)]
       [(??load id live-data buffer idx-tbl pair?) (transform (??load id live-data buffer idx-tbl pair?) arg-pos)]
       [(??swizzle id live-data exprs idx-tbl pair?) (transform (??swizzle id live-data (for/list ([expr exprs]) (visit expr transform)) idx-tbl pair?))]
-      ;[(??lo/hi expr) (transform (??lo/hi (visit expr transform)))]
 
       ;[(gather* buff-reads) (transform (gather* buff-reads) arg-pos)]
       ;[(gather-vec buff-reads) (transform (gather-vec (hvx-ast-node-id p) buff-reads))]
@@ -174,6 +175,7 @@
       [(vshuff Vu) (transform (vshuff (visit-shallow Vu transform)))]
       [(vtranspose Vu Vv Rt) (transform (vtranspose (visit-shallow Vu transform) (visit-shallow Vv transform) (visit-shallow Rt transform)))]
       [(vinterleave Vuu) (transform (vinterleave (visit-shallow Vuu transform)))]
+      [(vinterleave2 Vu Vv) (transform (vinterleave2 (visit-shallow Vu transform)  (visit-shallow Vv transform)))]
       [(vinterleave4 Vuu Vvv Rt) (transform (vinterleave4 (visit-shallow Vuu transform) (visit-shallow Vvv transform) (visit-shallow Rt transform)))]
       [(vtranspose Vu Vv Rt) (transform (vtranspose (visit-shallow Vu transform) (visit-shallow Vv transform) (visit-shallow Rt transform)))]
       [(vpack Vu Vv signed?) (transform (vpack (visit-shallow Vu transform) (visit-shallow Vv transform) (visit-shallow signed? transform)))]
@@ -220,7 +222,7 @@
       [(vrmpy-acc-2 Vd Vu Vv) (transform (vrmpy-acc-2 (visit-shallow Vd transform) (visit-shallow Vu transform) (visit-shallow Vv transform)))]
       [(vrmpy-p Vuu Rt u1) (transform (vrmpy-p (visit-shallow Vuu transform) (visit-shallow Rt transform) (visit-shallow u1 transform)))]
       [(vrmpy-p-acc Vdd Vuu Rt u1) (transform (vrmpy-p-acc (visit-shallow Vdd transform) (visit-shallow Vuu transform) (visit-shallow Rt transform) (visit-shallow u1 transform)))]
-      ;[(vavg Vu Vv rnd?)
+      [(vavg Vu Vv rnd?) (transform (vavg (visit Vu transform) (visit Vv transform) (visit rnd? transform)))]
       ;[(vnavg Vu Vv)
       ;[(vasl Vu Rt)
       [(vrsr Vu Vv) (transform (vrsr (visit-shallow Vu transform) (visit-shallow Vv transform)))]

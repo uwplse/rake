@@ -108,6 +108,8 @@
 (struct vmpyie (Vu Rt) #:transparent)
 (struct vmpyie-2 (Vu Vv) #:transparent)
 (struct vmpye (Vu Rt) #:transparent)
+(struct vmpyieo (Vu Vv) #:transparent)
+(struct vmpyio (Vu Vv) #:transparent)
 (struct vmpyo (Vu Rt rnd?) #:transparent)
 (struct vmpy-acc (Vdd Vu Rt) #:transparent)
 (struct vmpyi-acc (Vd Vu Rt) #:transparent)
@@ -137,19 +139,21 @@
 (struct vround (Vu Vv signed?) #:transparent)
 (struct vabs (Vu sat?) #:transparent)
 (struct vabsdiff (Vu Vv) #:transparent)
+(struct vdsad (Vuu Rt) #:transparent)
+(struct vrsad (Vuu Rt u1) #:transparent)
 (struct vmax (Vu Vv) #:transparent)
 (struct vmin (Vu Vv) #:transparent)
 
 ;; Halide HVX abstractions
 (struct vrsr (Vu Vv) #:transparent)
 (struct vinterleave (Vuu) #:transparent)
+(struct vinterleave2 (Vu Vv) #:transparent)
 (struct vinterleave4 (Vuu Vvv Rt) #:transparent)
 
 ;; New types to represent abstract computation (these types should never appear in output code)
 (struct abstr-hvx-expr (orig-expr abstr-vals offset))
 
 ;; New types to represent abstract data movement (these types should never appear in output code)
-;(struct ??lo/hi (expr) #:transparent)
 (struct ??shuffle (Vu Vv shuffle-tbl) #:transparent)
 (struct ??abstr-load (live-data buffer))
 (struct ??load (id live-data buffer gather-tbl pair?)
@@ -160,7 +164,7 @@
       (lambda (obj) `??load)
       (lambda (obj) (list (??load-id obj) (??load-buffer obj) (??load-pair? obj)))))]
   #:methods gen:equal+hash
-  [(define (equal-proc a b equal?-recur) (equal?-recur (??load-id a) (??load-id b)))
+  [(define (equal-proc a b equal?-recur) (and (equal?-recur (??load-id a) (??load-id b)) (equal?-recur (??load-live-data a) (??load-live-data b))))
    (define (hash-proc a hash-recur) (??load-id a))
    (define (hash2-proc a hash2-recur) (??load-id a))])
 (struct ??swizzle (id live-data exprs gather-tbl pair?)
@@ -171,15 +175,38 @@
       (lambda (obj) `??swizzle)
       (lambda (obj) (list (??swizzle-id obj) (??swizzle-pair? obj)))))]
   #:methods gen:equal+hash
-  [(define (equal-proc a b equal?-recur) (equal?-recur (??swizzle-id a) (??swizzle-id b)))
+  [(define (equal-proc a b equal?-recur) (and (equal?-recur (??swizzle-id a) (??swizzle-id b)) (equal?-recur (??swizzle-live-data a) (??swizzle-live-data b))))
    (define (hash-proc a hash-recur) (??swizzle-id a))
    (define (hash2-proc a hash2-recur) (??swizzle-id a))])
+(struct ??sub-expr (exprs c)
+  #:transparent
+  #:methods gen:custom-write
+  [(define write-proc
+     (make-constructor-style-printer
+      (lambda (obj) `??sub-expr)
+      (lambda (obj) (list (length (??sub-expr-exprs obj)) (??sub-expr-c obj)))))])
 
 ;; Type signatures
 (struct instr-sig (ret-val args) #:transparent)
 
 (define (instr-forms instr)
   (cond
+    [(eq? vread instr) (list
+                        (instr-sig 'i8x128 (list 'bufi8))
+                        (instr-sig 'i16x64 (list 'bufi16))
+                        (instr-sig 'i32x32 (list 'bufi32))
+                        (instr-sig 'u8x128 (list 'bufu8))
+                        (instr-sig 'u16x64 (list 'bufu16))
+                        (instr-sig 'u32x32 (list 'bufu32)))]
+
+    [(eq? vreadp instr) (list
+                        (instr-sig 'i8x128x2 (list 'bufi8))
+                        (instr-sig 'i16x64x2 (list 'bufi16))
+                        (instr-sig 'i32x32x2 (list 'bufi32))
+                        (instr-sig 'u8x128x2 (list 'bufu8))
+                        (instr-sig 'u16x64x2 (list 'bufu16))
+                        (instr-sig 'u32x32x2 (list 'bufu32)))]
+    
     [(eq? vsplat instr) (list
                          (instr-sig 'i8x128 (list 'int8))
                          (instr-sig 'i16x64 (list 'int16))
@@ -187,15 +214,6 @@
                          (instr-sig 'u8x128 (list 'uint8))
                          (instr-sig 'u16x64 (list 'uint16))
                          (instr-sig 'u32x32 (list 'uint32)))]
-    
-    ;; HVX instructions for data swizzling
-;    [(eq? ??lo/hi instr) (list
-;                          (instr-sig 'i8x128 (list 'i8x128x2))
-;                          (instr-sig 'i16x64 (list 'i16x64x2))
-;                          (instr-sig 'i32x32 (list 'i32x32x2))
-;                          (instr-sig 'u8x128 (list 'u8x128x2))
-;                          (instr-sig 'u16x64 (list 'u16x64x2))
-;                          (instr-sig 'u32x32 (list 'u32x32x2)))]
     
     [(eq? lo instr) (list
                      (instr-sig 'i8x128 (list 'i8x128x2))
@@ -304,6 +322,14 @@
                               (instr-sig 'u16x64x2 (list 'u16x64x2))
                               (instr-sig 'i32x32x2 (list 'i32x32x2))
                               (instr-sig 'u32x32x2 (list 'u32x32x2)))]
+
+    [(eq? vinterleave2 instr) (list
+                               (instr-sig 'i8x128x2 (list 'i8x128 'i8x128))
+                               (instr-sig 'u8x128x2 (list 'u8x128 'u8x128))
+                               (instr-sig 'i16x64x2 (list 'i16x64 'i16x64))
+                               (instr-sig 'u16x64x2 (list 'u16x64 'u16x64))
+                               (instr-sig 'i32x32x2 (list 'i32x32 'i32x32))
+                               (instr-sig 'u32x32x2 (list 'u32x32 'u32x32)))]
 
     [(eq? vinterleave4 instr) (list
                                (instr-sig 'i8x128 (list 'i8x128x2 'i8x128x2 'const))
@@ -450,6 +476,19 @@
                          (instr-sig 'i32x32x2 (list 'u16x64 'int32))
                          (instr-sig 'i32x32x2 (list 'i16x64 'int32)))]
 
+    [(eq? vmpyie-2 instr) (list
+                           (instr-sig 'i32x32x2 (list 'i32x32 'u16x64))
+                           (instr-sig 'i32x32x2 (list 'i32x32 'i16x64)))]
+
+    ;[(eq? vmpyieo instr) (list
+                          ;(instr-sig 'i32x32 (list 'i16x64 'i16x64)))]
+
+    ;[(eq? vmpyio instr) (list
+                          ;(instr-sig 'i32x32 (list 'i32x32 'i16x64)))]
+
+    ;[(eq? vmpyo instr) (list
+                          ;(instr-sig 'i32x32 (list 'i32x32 'i16x64)))]
+
     [(eq? vmpye instr) (list
                         (instr-sig 'u32x32 (list 'i32x32 'uint16))
                         (instr-sig 'u32x32 (list 'u32x32 'uint16)))]
@@ -545,8 +584,20 @@
                               (instr-sig 'i32x32 (list 'i32x32 'i8x128 'i8x128))
                               (instr-sig 'i32x32 (list 'i32x32 'u8x128 'i8x128)))]
     
-    ;[vavg
-    ;[vnavg
+    [(eq? vavg instr) (list
+                       (instr-sig 'i8x128 (list 'i8x128 'i8x128 'bool))
+                       (instr-sig 'u8x128 (list 'u8x128 'u8x128 'bool))
+                       (instr-sig 'i16x64 (list 'i16x64 'i16x64 'bool))
+                       (instr-sig 'u16x64 (list 'u16x64 'u16x64 'bool))
+                       (instr-sig 'i32x32 (list 'i32x32 'i32x32 'bool))
+                       (instr-sig 'u32x32 (list 'u32x32 'u32x32 'bool)))]
+     
+    [(eq? vnavg instr) (list
+                        (instr-sig 'i8x128 (list 'i8x128 'i8x128))
+                        (instr-sig 'i8x128 (list 'u8x128 'u8x128))
+                        (instr-sig 'i16x64 (list 'i16x64 'i16x64))
+                        (instr-sig 'i32x32 (list 'i32x32 'i32x32)))]
+    
     [(eq? vasl instr) (list
                        (instr-sig 'i16x64 (list 'i16x64 'i8x128x2 'int8))
                        (instr-sig 'i16x64 (list 'i16x64 'i8x128x2 'int8)))]
@@ -603,6 +654,22 @@
                          (instr-sig 'u16x64 (list 'i32x32 'i32x32 #f))
                          (instr-sig 'u16x64 (list 'u32x32 'u32x32 #f)))]
 
+    [(eq? vabs instr) (list
+                           (instr-sig 'i8x128 (list 'i8x128 'bool))
+                           (instr-sig 'i16x64 (list 'i16x64 'bool)))]
+    
+    [(eq? vabsdiff instr) (list
+                           (instr-sig 'u8x128 (list 'u8x128 'u8x128))
+                           (instr-sig 'u16x64 (list 'i16x64 'i16x64))
+                           (instr-sig 'u16x64 (list 'u16x64 'u16x64))
+                           (instr-sig 'u32x32 (list 'i32x32 'i32x32)))]
+
+    [(eq? vdsad instr) (list
+                        (instr-sig 'u32x32x2 (list 'u16x64x2 'uint16x2)))]
+
+    [(eq? vrsad instr) (list
+                        (instr-sig 'u32x32x2 (list 'u8x128x2 'uint8x4 'const)))]
+    
     [(eq? vmax instr) (list
                        (instr-sig 'i8x128 (list 'i8x128 'i8x128))
                        (instr-sig 'u8x128 (list 'u8x128 'u8x128))

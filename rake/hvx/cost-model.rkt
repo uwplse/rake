@@ -49,6 +49,7 @@
     [(vshuff Vu) 1]
     [(vtranspose Vu Vv Rt) 1]
     [(vinterleave Vuu) 1]
+    [(vinterleave2 Vu Vv) 1]
     [(vinterleave4 Vuu Vvv Rt) 1]
     [(vpack Vu Vv signed?) 1]
     [(vpacke Vu Vv) 1]
