@@ -63,7 +63,7 @@
       (define (abstract-sub-expr-hvx node [pos -1])
         (cond
           [(abstr-hvx-expr? node) node]
-          [(eq? node hvx-sub-expr) abstracted-hvx-subexpr]
+          [(rkt-equal? node hvx-sub-expr) abstracted-hvx-subexpr]
           [else node]))
       (set! template (hvx:visit template abstract-sub-expr-hvx))
       (values spec template)]))

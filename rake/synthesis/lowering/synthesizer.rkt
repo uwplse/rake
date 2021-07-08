@@ -42,7 +42,7 @@
      (synthesize-translation (rest templates) halide-expr hvx-sub-exprs value-bounds translation-history)]
     [else
      (define template (first templates))
-     (define sol (run-synthesizer template halide-expr hvx-sub-exprs value-bounds translation-history))
+     (define sol (run-synthesizer (car template) halide-expr hvx-sub-exprs value-bounds translation-history))
      (hash-set! synthesis-db (cons (first templates) halide-expr) #t)
      (cond
        [(correct? sol)

@@ -30,9 +30,9 @@
 
         (cond
           [correct?
-            (pretty-print hvx-expr)
+            (pretty-print (first hvx-expr))
             (display "Synthesized solution is correct.\n\n")
-            hvx-expr]
+            (first hvx-expr)]
           [else
             (display "Synthesized solution is incorrect.\n\n")
             (exit 1)])]

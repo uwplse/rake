@@ -16,12 +16,12 @@
 
 (define grammar-lib (make-hash))
 
-(define (get-hvx-swizzle-grammar halide-expr hvx-template swizzle-node starting-vecs hvx-sub-exprs translation-history)
+(define (get-hvx-swizzle-grammar halide-expr hvx-template output-layout swizzle-budget swizzle-node starting-vecs hvx-sub-exprs translation-history)
   (cond
     [(hash-has-key? grammar-lib (list halide-expr hvx-template swizzle-node))
       (hash-ref grammar-lib (list halide-expr hvx-template swizzle-node))]
     [else
-      (define candidates (get-hvx-swizzle-grammar-gen halide-expr hvx-template swizzle-node starting-vecs hvx-sub-exprs translation-history))
+      (define candidates (get-hvx-swizzle-grammar-gen halide-expr hvx-template swizzle-budget swizzle-node starting-vecs hvx-sub-exprs translation-history))
       (hash-set! grammar-lib (list halide-expr hvx-template swizzle-node) candidates)
       candidates]))
 
@@ -34,11 +34,26 @@
     [(eq? elemT 'uint16) (if pair? 'u16x64x2 'u16x64)]
     [(eq? elemT 'uint32) (if pair? 'u32x32x2 'u32x32)]))
 
-(define (get-hvx-swizzle-grammar-gen halide-expr hvx-template swizzle-node starting-vecs hvx-sub-exprs translation-history)
+(define (get-hvx-swizzle-grammar-gen halide-expr hvx-template swizzle-budget swizzle-node starting-vecs hvx-sub-exprs translation-history)
   ;(pretty-print starting-vecs)
   
   (define-values (target-node-id base-exprs pair?)
     (destruct swizzle-node
+      [(??abstr-load live-data buffer)
+       (define buffer (??abstr-load-buffer swizzle-node))
+       (define base-exprs
+         (flatten
+          (map
+           (lambda (base-expr)
+             (list
+              (vread (list-ref base-expr 0) (list-ref base-expr 1) (list-ref base-expr 2))
+              (vreadp (list-ref base-expr 0) (list-ref base-expr 1) (list-ref base-expr 2))))
+           (filter (lambda (vec) (eq? buffer (list-ref vec 0))) starting-vecs))))
+
+       (define id 0)
+       (define tile-w (* (halide:vec-len halide-expr) (cpp:type-bw (halide:elem-type halide-expr))))
+       (define pair? (if (eq? tile-w 1024) #f #t))
+       (values id base-exprs pair?)]
       [(??load id live-data buffer gather-tbl pair?)
        (define buffer (??load-buffer swizzle-node))
        (define base-exprs
@@ -58,13 +73,20 @@
   (define elemT (hvx:elem-type (hvx:interpret swizzle-node)))
   (define out-type (get-vec-type elemT pair?))
 
-  ;(define isa (list lo hi vinterleave vshuff vshuffe vshuffo vshuffoe vcombine vdeal vdeale valign vror vpacke vpacko ))
-  (define isa (list lo hi vdeal vinterleave vinterleave4))
+  (define isa (list vcombine lo hi vinterleave vinterleave2 vdeal vdeale vshuff vshuffe vshuffo vshuffoe vpacke vpacko valign vror))
+  ;(define isa (list lo hi vdeal vshuff vinterleave vinterleave2 vinterleave4))
 
-  (define candidate-swizzles (enumerate-hvx isa out-type base-exprs 2 3))
+  (define grouped-base-exprs (make-hash))
+  (for ([be base-exprs])
+    (define beT (hvx:type (hvx:interpret be)))
+    (hash-set! grouped-base-exprs beT (append (hash-ref! grouped-base-exprs beT '()) (list be))))
+  (for ([(t bes) grouped-base-exprs])
+    (define-symbolic* c integer?)
+    (define beC (if (??swizzle? swizzle-node) 0 1))
+    (hash-set! grouped-base-exprs t (list (cons (??sub-expr bes c) beC))))
 
-  ;(pretty-print candidate-swizzles)
-
+  (define candidate-swizzles (time (enumerate-hvx isa out-type grouped-base-exprs 2 (min swizzle-budget 3))))
+  
   ;; Enable scalar swizzling
   (define (permute-scalars Rt)
     (destruct Rt
@@ -84,22 +106,33 @@
       [(vrmpy Vu Rt) (if (swizzle-node? Vu) (vrmpy Vu (permute-scalars Rt)) node)]
       [(vrmpy-acc Vdd Vu Rt) (if (swizzle-node? Vu) (vrmpy-acc Vdd Vu (permute-scalars Rt)) node)]
       [_ node]))
-  (define updated-template (hvx:visit hvx-template enable-scalar-movement))
+  (define (update-swizzle-nodes node [pos -1])
+    (destruct node
+      [(??load id live-data buffer gather-tbl pair?) (if (not (equal? id target-node-id)) (update-swizzle-data node halide-expr hvx-sub-exprs translation-history) node)]
+      [(??swizzle id live-data expr gather-tbl pair?) (if (not (equal? id target-node-id)) (update-swizzle-data node halide-expr hvx-sub-exprs translation-history) node)]
+      [_ node]))
+  (define updated-template (hvx:visit (hvx:visit hvx-template enable-scalar-movement) update-swizzle-nodes))
 
   (define tmpl-type (hvx:type (hvx:interpret hvx-template)))
   (define tmpl-etype (hvx:elem-type tmpl-type))
-  
+
   ;; Replace swizzle node with candidates
   (define candidates
     (apply append
      (for/list ([candidate-swizzle candidate-swizzles])
+       (define (uniquify-sub-exprs node [pos -1])
+         (destruct node
+           [(??sub-expr exprs c) (define-symbolic* ch integer?) (??sub-expr exprs ch)]
+           [_ node]))
+       
        ;; Update template: Replace target swizzle node with swizzle grammar
        (define (repl-swizzle-node-wth-candidate node [pos -1])
          (destruct node
-                   [(??load id live-data buffer gather-tbl pair?) (if (equal? id target-node-id) (car candidate-swizzle) (update-swizzle-data node halide-expr hvx-sub-exprs translation-history))]
-                   [(??swizzle id live-data expr gather-tbl pair?) (if (equal? id target-node-id) (car candidate-swizzle) (update-swizzle-data node halide-expr hvx-sub-exprs translation-history))]
-                   [_ node]))
-       (define c (hvx:visit updated-template repl-swizzle-node-wth-candidate))
+            [(??abstr-load live-data buffer) (car candidate-swizzle)]
+            [(??load id live-data buffer gather-tbl pair?) (if (equal? id target-node-id) (hvx:visit (car candidate-swizzle) uniquify-sub-exprs) node)]
+            [(??swizzle id live-data expr gather-tbl pair?) (if (equal? id target-node-id) (hvx:visit (car candidate-swizzle) uniquify-sub-exprs) node)]
+            [_ node]))
+       (define c (hvx:visit-shallow updated-template repl-swizzle-node-wth-candidate))
        ;(for/list ([e (enumerate-hvx (list vinterleave vdeal) tmpl-type (list c) 1 5)])
          ;(cons (car e) (+ (cdr e) (cdr candidate-swizzle) -1)))
        (define cost (cdr candidate-swizzle))
@@ -107,9 +140,7 @@
          [(hvx:vec-pair? tmpl-type) (list (cons c cost) (cons (vinterleave c) (add1 cost)))]
          [(< (cpp:type-bw tmpl-etype) 32) (list (cons c cost) (cons (vdeal c) (add1 cost)))]
          [else (list (cons c cost))]))))
-  
-  (define sorted-candidates (sort (set->list candidates) (lambda (v1 v2) (<= (cdr v1) (cdr v2)))))
-
+  (define sorted-candidates (sort candidates (lambda (v1 v2) (<= (cdr v1) (cdr v2)))))
   ;(pretty-print sorted-candidates)
   ;(exit)
   
@@ -117,7 +148,7 @@
     (match node
       ['const (??)]
       [_ node]))
-  (for/list ([candidate sorted-candidates]) (hvx:visit (car candidate) fill-arg-grammars)))
+  (for/list ([candidate sorted-candidates]) (cons (hvx:visit (car candidate) fill-arg-grammars) (cdr candidate))))
 
 (define (update-swizzle-data swizzle-node halide-expr hvx-sub-exprs translation-history)
   (define (update-swizzle-node node [pos -1])
@@ -155,20 +186,6 @@
       [_ node]))
   (hvx:visit swizzle-node update-swizzle-node))
 
-(define (skip? parent-instr child-instr)
-  (or
-   (and (eq? lo parent-instr) (eq? vcombine child-instr))
-   (and (eq? hi parent-instr) (eq? vcombine child-instr))
-   (and (eq? lo parent-instr) (eq? vreadp child-instr))
-   (and (eq? hi parent-instr) (eq? vreadp child-instr))
-   (and (eq? vshuff parent-instr) (eq? vdeal child-instr))
-   (and (eq? vdeal parent-instr) (eq? vshuff child-instr))
-   (and (eq? vror parent-instr) (eq? vror child-instr))
-   (and (eq? valign parent-instr) (eq? valign child-instr))
-   (and (eq? vinterleave parent-instr) (eq? vinterleave child-instr))
-   (and (eq? vtranspose parent-instr) (eq? vtranspose child-instr))
-   (and (eq? vshuffoe parent-instr) (eq? vshuffoe child-instr))))
-
 (define enumeration-database (make-hash))
 
 (define (enumerate-hvx instr-set output-type base-exprs depth max-cost [parent-instr (void)])
@@ -178,55 +195,155 @@
     [(hash-has-key? enumeration-database query) (hash-ref enumeration-database query)]
 
     ;; Recursive base case
-    [(<= depth 0)
-     (define res (filter (lambda (expr) (eq? output-type (hvx:type (hvx:interpret expr)))) base-exprs))
-     (when (or (eq? parent-instr lo) (eq? parent-instr hi))
-        (set! res (filter (lambda (expr) (not (vreadp? expr))) res)))
-     (list->set (map (lambda (expr) (cons expr 1)) res))]
+    [(<= depth 0) (hash-ref! base-exprs output-type '())]
 
     ;; Enumerate recursively
     [else
-     (define candidates (enumerate-hvx instr-set output-type base-exprs (sub1 depth) max-cost parent-instr))
-     (for ([instr instr-set])
-       (define instr-cost (swizzle-instr-cost instr))
-       (when (not (skip? parent-instr instr))
-         (for ([sig (hvx:instr-forms instr)])
-           (when (eq? output-type (instr-sig-ret-val sig))
-             (define arg-opts (list))
-             (for ([arg (instr-sig-args sig)])
-               (define opts (match arg
-                              [#t (list (cons #t 0))]
-                              [#f (list (cons #f 0))]
-                              ['const (list (cons (??) 0))]
-                              [_ (set->list (enumerate-hvx instr-set arg base-exprs (sub1 depth) max-cost instr))]))
-               (set! arg-opts (append arg-opts (list opts))))
-             (define sig-exprs
-               (list->set
-                (match (length arg-opts)
-                  [1 (cartesian-product (list (cons instr 1)) (first arg-opts))]
-                  [2 (cartesian-product (list (cons instr 1)) (first arg-opts) (second arg-opts))]
-                  [3 (cartesian-product (list (cons instr 1)) (first arg-opts) (second arg-opts) (third arg-opts))]
-                  [4 (cartesian-product (list (cons instr 1)) (first arg-opts) (second arg-opts) (third arg-opts) (fourth arg-opts))]
-                  [5 (cartesian-product (list (cons instr 1)) (first arg-opts) (second arg-opts) (third arg-opts) (fourth arg-opts) (fifth arg-opts))]
-                  [6 (cartesian-product (list (cons instr 1)) (first arg-opts) (second arg-opts) (third arg-opts) (fourth arg-opts) (fifth arg-opts) (sixth arg-opts))]
-                  [_ (error "NYI: enumeration instrs with the following number of args:" (length arg-opts))])))
-             (set! sig-exprs (for/set ([sig-expr sig-exprs])
-                               (define cost (for/fold ([sum 0]) ([sub-expr sig-expr]) (+ sum (cdr sub-expr))))
-                               (match (length sig-expr)
-                                  [2 (cons ((car (list-ref sig-expr 0)) (car (list-ref sig-expr 1))) cost)]
-                                  [3 (cons ((car (list-ref sig-expr 0)) (car (list-ref sig-expr 1)) (car (list-ref sig-expr 2))) cost)]
-                                  [4 (cons ((car (list-ref sig-expr 0)) (car (list-ref sig-expr 1)) (car (list-ref sig-expr 2)) (car (list-ref sig-expr 3))) cost)]
-                                  [5 (cons ((car (list-ref sig-expr 0)) (car (list-ref sig-expr 1)) (car (list-ref sig-expr 2)) (car (list-ref sig-expr 3)) (car (list-ref sig-expr 4))) cost)]
-                                  [6 (cons ((car (list-ref sig-expr 0)) (car (list-ref sig-expr 1)) (car (list-ref sig-expr 2)) (car (list-ref sig-expr 3)) (car (list-ref sig-expr 4)) (car (list-ref sig-expr 5))) cost)]
-                                  [_ (error "NYI. Sig-expr of size" (length sig-expr))])))
-             (set! candidates (set-union candidates sig-exprs))))))
-     (define filtered-candidates (list->set (filter (lambda (e) (<= (cdr e) max-cost)) (set->list candidates))))
-     (hash-set! enumeration-database query filtered-candidates)
-     filtered-candidates]))
+     (define candidates
+       (let ([sub-cands (enumerate-hvx instr-set output-type base-exprs (sub1 depth) max-cost parent-instr)])
+         (let ([c-build-instr-exprs (curryr build-instr-exprs instr-set output-type base-exprs depth max-cost)])
+           (foldr append sub-cands (map c-build-instr-exprs (filter (curry keep? parent-instr) instr-set))))))
 
-(define (swizzle-instr-cost instr)
+    (define filtered-candidates (set->list (list->set (filter (lambda (e) (<= (cdr e) max-cost)) candidates))))
+    (hash-set! enumeration-database query filtered-candidates)
+    filtered-candidates]))
+
+(define (build-instr-exprs instr instr-set output-type base-exprs depth max-cost)
+  (let ([c-build-sig-exprs (curryr build-sig-exprs instr-set base-exprs depth max-cost instr)])
+    (foldr append '() (map c-build-sig-exprs (filter (curry out-eq? output-type) (hvx:instr-forms instr))))))
+
+(define (build-sig-exprs sig instr-set base-exprs depth max-cost instr)
+  (let ([sig-exprs
+    (let ([arg-opts (get-arg-opts (instr-sig-args sig) instr-set base-exprs depth max-cost instr)])
+      (apply cartesian-product arg-opts))])
+    (map (curry build-ast instr) sig-exprs)))
+
+(define (get-arg-opts args instr-set base-exprs depth max-cost instr)
+  (cond
+    [(empty? args) '()]
+    [else
+     (let ([arg (first args)])
+       (let ([opts (match arg
+                     [#t (list (cons #t 0))]
+                     [#f (list (cons #f 0))]
+                     ['const (list (cons (??) 0))]
+                     [_ (enumerate-hvx instr-set arg base-exprs (sub1 depth) max-cost instr)])])
+         (append (list opts) (get-arg-opts (rest args) instr-set base-exprs depth max-cost instr))))]))
+
+(define (build-ast instr sig-expr)
+  (define cost (foldr + (instr-cost instr) (map cdr sig-expr)))
+  (define expr (apply instr (map car sig-expr)))
+  (cons expr cost))
+
+(define (instr-cost instr)
   (cond
     [(eq? instr lo) 0]
     [(eq? instr hi) 0]
-    [(eq? vinterleave4 hi) 2]
+    [(eq? instr vdeal) 0.95]
+    [(eq? instr vdeale) 0.95]
+    [(eq? instr vpacke) 0.95]
+    [(eq? instr vpacko) 0.95]
+    [(eq? instr vshuff) 0.95]
+    [(eq? instr vshuffo) 0.95]
+    [(eq? instr vshuffe) 0.95]
+    [(eq? instr valign) 0.95]
+    [(eq? instr vror) 0.95]
+    [(eq? instr vshuffoe) 1]
+    [(eq? instr vcombine) 1]
+    [(eq? instr vinterleave) 1]
+    [(eq? instr vinterleave2) 1]
+    [(eq? instr vinterleave4) 2]
     [else 1]))
+
+(define (out-eq? output-type sig)
+  (eq? (instr-sig-ret-val sig) output-type))
+
+(define (keep? parent-instr child-instr)
+  (not
+   (or
+    (eq? parent-instr child-instr)
+    (and (eq? parent-instr lo) (eq? child-instr vcombine))
+    (and (eq? parent-instr hi) (eq? child-instr vcombine))
+    (and (eq? parent-instr lo) (eq? child-instr vreadp))
+    (and (eq? parent-instr hi) (eq? child-instr vreadp))
+    (and (eq? parent-instr vshuff) (eq? child-instr vdeal))
+    (and (eq? parent-instr vdeal) (eq? child-instr vshuff))
+    (and (eq? parent-instr vinterleave) (eq? child-instr vinterleave2))
+    (and (eq? parent-instr vinterleave2) (eq? child-instr vinterleave)))))
+
+;;;;;;;;;;;;;;;;;;;;;; Legacy Implementation
+
+;(define (skip? parent-instr child-instr)
+;  (or
+;   (and (eq? lo parent-instr) (eq? vcombine child-instr))
+;   (and (eq? hi parent-instr) (eq? vcombine child-instr))
+;   (and (eq? lo parent-instr) (eq? vreadp child-instr))
+;   (and (eq? hi parent-instr) (eq? vreadp child-instr))
+;   (and (eq? vshuff parent-instr) (eq? vdeal child-instr))
+;   (and (eq? vdeal parent-instr) (eq? vshuff child-instr))
+;   (and (eq? vror parent-instr) (eq? vror child-instr))
+;   (and (eq? valign parent-instr) (eq? valign child-instr))
+;   (and (eq? vinterleave parent-instr) (eq? vinterleave child-instr))
+;   (and (eq? vtranspose parent-instr) (eq? vtranspose child-instr))
+;   (and (eq? vshuffoe parent-instr) (eq? vshuffoe child-instr))))
+;
+;
+;(define (enumerate-hvx instr-set output-type base-exprs depth max-cost [parent-instr (void)])
+;  (define query (list instr-set output-type base-exprs depth parent-instr))
+;  (cond
+;    ;; Have we enumerated this tree before?
+;    [(hash-has-key? enumeration-database query) (hash-ref enumeration-database query)]
+;
+;    ;; Recursive base case
+;    [(<= depth 0)
+;     (define res (filter (lambda (expr) (eq? output-type (hvx:type (hvx:interpret expr)))) base-exprs))
+;     (when (or (eq? parent-instr lo) (eq? parent-instr hi))
+;        (set! res (filter (lambda (expr) (not (vreadp? expr))) res)))
+;     (list->set (map (lambda (expr) (cons expr 1)) res))]
+;
+;    ;; Enumerate recursively
+;    [else
+;     (define candidates (enumerate-hvx instr-set output-type base-exprs (sub1 depth) max-cost parent-instr))
+;     (for ([instr instr-set])
+;       (define instr-cost (swizzle-instr-cost instr))
+;       (when (not (skip? parent-instr instr))
+;         (for ([sig (hvx:instr-forms instr)])
+;           (when (eq? output-type (instr-sig-ret-val sig))
+;             (define arg-opts (list))
+;             (for ([arg (instr-sig-args sig)])
+;               (define opts (match arg
+;                              [#t (list (cons #t 0))]
+;                              [#f (list (cons #f 0))]
+;                              ['const (list (cons (??) 0))]
+;                              [_ (set->list (enumerate-hvx instr-set arg base-exprs (sub1 depth) max-cost instr))]))
+;               (set! arg-opts (append arg-opts (list opts))))
+;             (define sig-exprs
+;               (list->set
+;                (match (length arg-opts)
+;                  [1 (cartesian-product (list (cons instr instr-cost)) (first arg-opts))]
+;                  [2 (cartesian-product (list (cons instr instr-cost)) (first arg-opts) (second arg-opts))]
+;                  [3 (cartesian-product (list (cons instr instr-cost)) (first arg-opts) (second arg-opts) (third arg-opts))]
+;                  [4 (cartesian-product (list (cons instr instr-cost)) (first arg-opts) (second arg-opts) (third arg-opts) (fourth arg-opts))]
+;                  [5 (cartesian-product (list (cons instr instr-cost)) (first arg-opts) (second arg-opts) (third arg-opts) (fourth arg-opts) (fifth arg-opts))]
+;                  [6 (cartesian-product (list (cons instr instr-cost)) (first arg-opts) (second arg-opts) (third arg-opts) (fourth arg-opts) (fifth arg-opts) (sixth arg-opts))]
+;                  [_ (error "NYI: enumeration instrs with the following number of args:" (length arg-opts))])))
+;             (set! sig-exprs (for/set ([sig-expr sig-exprs])
+;                               (define cost (for/fold ([sum 0]) ([sub-expr sig-expr]) (+ sum (cdr sub-expr))))
+;                               (match (length sig-expr)
+;                                  [2 (cons ((car (list-ref sig-expr 0)) (car (list-ref sig-expr 1))) cost)]
+;                                  [3 (cons ((car (list-ref sig-expr 0)) (car (list-ref sig-expr 1)) (car (list-ref sig-expr 2))) cost)]
+;                                  [4 (cons ((car (list-ref sig-expr 0)) (car (list-ref sig-expr 1)) (car (list-ref sig-expr 2)) (car (list-ref sig-expr 3))) cost)]
+;                                  [5 (cons ((car (list-ref sig-expr 0)) (car (list-ref sig-expr 1)) (car (list-ref sig-expr 2)) (car (list-ref sig-expr 3)) (car (list-ref sig-expr 4))) cost)]
+;                                  [6 (cons ((car (list-ref sig-expr 0)) (car (list-ref sig-expr 1)) (car (list-ref sig-expr 2)) (car (list-ref sig-expr 3)) (car (list-ref sig-expr 4)) (car (list-ref sig-expr 5))) cost)]
+;                                  [_ (error "NYI. Sig-expr of size" (length sig-expr))])))
+;             (set! candidates (set-union candidates sig-exprs))))))
+;     (define filtered-candidates (list->set (filter (lambda (e) (<= (cdr e) max-cost)) (set->list candidates))))
+;     (hash-set! enumeration-database query filtered-candidates)
+;     filtered-candidates]))
+;
+;(define (swizzle-instr-cost instr)
+;  (cond
+;    [(eq? instr lo) 0]
+;    [(eq? instr hi) 0]
+;    [(eq? vinterleave4 hi) 2]
+;    [else 1]))

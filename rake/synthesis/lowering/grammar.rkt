@@ -18,10 +18,11 @@
 
 (define grammar-lib (make-hash))
 
-(define (get-hvx-grammar halide-expr ir-expr hvx-sub-exprs)
+(define (get-hvx-grammar halide-expr ir-expr hvx-sub-exprs cost-ub)
   (cond
-    [(hash-has-key? grammar-lib (ir-node-id ir-expr))
-      (hash-ref grammar-lib (ir-node-id ir-expr))]
+    [(and (hash-has-key? grammar-lib (ir-node-id ir-expr)) (not (load-data? ir-expr)))
+      (let ([candidates (hash-ref grammar-lib (ir-node-id ir-expr))])
+        (filter (lambda (c) (<= (cdr c) cost-ub)) candidates))]
     [else
       (define candidates (get-hvx-grammar-gen halide-expr ir-expr hvx-sub-exprs))
       (hash-set! grammar-lib (ir-node-id ir-expr) candidates)
@@ -38,30 +39,82 @@
        ;(define-symbolic* tbl (~> integer? integer?))
        (define tbl (map (lambda (i) (define-symbolic* idx integer?) idx) (range 256)))
        tbl)
-     (list (??load-shuffle-expr live-data (buffer) (gen-gather-tbl) #:depth 1))]
+     (list (cons (??load-shuffle-expr live-data (buffer) (gen-gather-tbl) #:depth 1) 1))]
 
     ;; Data broadcasting
     [(broadcast scalar-expr)
-     (list (vsplat scalar-expr))]
-
+     (list (cons (vsplat scalar-expr) 1))]
+    
     ;; Casting
     [(cast ir-sub-expr output-type)
      (define input-type (hvx-ir:elem-type ir-sub-expr))
      (define narrowing? (< (cpp:type-bw output-type) (cpp:type-bw input-type)))
+     (define widening (> (cpp:type-bw output-type) (cpp:type-bw input-type)))
 
      (define isa
        (cond
          [narrowing? (list vpacke-n vshuffe-n)]
-         [else (list vunpack vzxt vsxt)])) ;??lo/hi
+         [widening (list vunpack vzxt vsxt)]
+         [else (list reinterpret)]))
 
      (define grouped-sub-exprs (prepare-sub-exprs hvx-sub-exprs))
 
      ;; Desired output type
      (define desired-expr-types (enum-types output-type))
-     (define candidates (set->list (enumerate-hvx isa desired-expr-types grouped-sub-exprs 3)))
+     (define candidates (enumerate-hvx isa desired-expr-types grouped-sub-exprs 2 2))
+     
+     ;; Sort them
+     (set! candidates (sort candidates (lambda (v1 v2) (<= (cdr v1) (cdr v2)))))
      
      ;; Fill in param grammars
-     (for/list ([candidate candidates]) (uniquify-swizzles candidate))]
+     (for/list ([candidate candidates]) (cons (uniquify-swizzles (car candidate)) (cdr candidate)))]
+
+    ;; Absolute difference
+    [(abs-diff ir-sub-expr0 ir-sub-expr1)
+     (define outT (halide:elem-type halide-expr))
+     (define isa (list vabsdiff))
+
+     (define grouped-sub-exprs (prepare-sub-exprs hvx-sub-exprs))
+     
+     ;; Desired output type
+     (define desired-expr-types (enum-types outT))
+     (define candidates (enumerate-hvx isa desired-expr-types grouped-sub-exprs 1 2))
+
+     ;; Sort them
+     (set! candidates (sort candidates (lambda (v1 v2) (<= (cdr v1) (cdr v2)))))
+     
+     ;; Fill in param grammars
+     (define (bool-const) (define-symbolic* b boolean?) b)
+     (define (fill-arg-grammars node [pos -1])
+       (match node
+         [#t #t]
+         [#f #f]
+         ['bool (bool-const)]
+         [_ node]))
+     (for/list ([candidate candidates]) (cons (uniquify-swizzles (hvx:visit (car candidate) fill-arg-grammars)) (cdr candidate)))]
+
+    ;; Average
+    [(average ir-sub-expr0 round? outT)
+     (define isa (list vavg))
+
+     (define grouped-sub-exprs (prepare-sub-exprs hvx-sub-exprs))
+     
+     ;; Desired output type
+     (define desired-expr-types (enum-types outT))
+     (define candidates (enumerate-hvx isa desired-expr-types grouped-sub-exprs 1 2))
+
+     ;; Sort them
+     (set! candidates (sort candidates (lambda (v1 v2) (<= (cdr v1) (cdr v2)))))
+     
+     ;; Fill in param grammars
+     (define (bool-const) (define-symbolic* b boolean?) b)
+     (define (fill-arg-grammars node [pos -1])
+       (match node
+         [#t #t]
+         [#f #f]
+         ['bool round?]
+         [_ node]))
+     (for/list ([candidate candidates]) (cons (uniquify-swizzles (hvx:visit (car candidate) fill-arg-grammars)) (cdr candidate)))]
     
     ;; Min Max
     [(maximum ir-sub-expr0 ir-sub-expr1)
@@ -72,8 +125,11 @@
      
      ;; Desired output type
      (define desired-expr-types (enum-types outT))
-     (define candidates (set->list (enumerate-hvx isa desired-expr-types grouped-sub-exprs 1)))
+     (define candidates (enumerate-hvx isa desired-expr-types grouped-sub-exprs 1 2))
 
+     ;; Sort them
+     (set! candidates (sort candidates (lambda (v1 v2) (<= (cdr v1) (cdr v2)))))
+     
      ;; Fill in param grammars
      (define (bool-const) (define-symbolic* b boolean?) b)
      (define (fill-arg-grammars node [pos -1])
@@ -82,7 +138,7 @@
          [#f #f]
          ['bool (bool-const)]
          [_ node]))
-     (for/list ([candidate candidates]) (uniquify-swizzles (hvx:visit candidate fill-arg-grammars)))]
+     (for/list ([candidate candidates]) (cons (uniquify-swizzles (hvx:visit (car candidate) fill-arg-grammars)) (cdr candidate)))]
     
     [(minimum ir-sub-expr0 ir-sub-expr1)
      (define outT (halide:elem-type halide-expr))
@@ -92,7 +148,10 @@
      
      ;; Desired output type
      (define desired-expr-types (enum-types outT))
-     (define candidates (set->list (enumerate-hvx isa desired-expr-types grouped-sub-exprs 1)))
+     (define candidates (enumerate-hvx isa desired-expr-types grouped-sub-exprs 1 2))
+
+     ;; Sort them
+     (set! candidates (sort candidates (lambda (v1 v2) (<= (cdr v1) (cdr v2)))))
 
      ;; Fill in param grammars
      (define (bool-const) (define-symbolic* b boolean?) b)
@@ -102,7 +161,7 @@
          [#f #f]
          ['bool (bool-const)]
          [_ node]))
-     (for/list ([candidate candidates]) (uniquify-swizzles (hvx:visit candidate fill-arg-grammars)))]
+     (for/list ([candidate candidates]) (cons (uniquify-swizzles (hvx:visit (car candidate) fill-arg-grammars)) (cdr candidate)))]
 
     [(add-const sub-expr const-val output-type saturate?)
      (define outT output-type)
@@ -112,7 +171,10 @@
      
      ;; Desired output type
      (define desired-expr-types (enum-types outT))
-     (define candidates (set->list (enumerate-hvx isa desired-expr-types grouped-sub-exprs 2)))
+     (define candidates (enumerate-hvx isa desired-expr-types grouped-sub-exprs 2 2))
+
+     ;; Sort them
+     (set! candidates (sort candidates (lambda (v1 v2) (<= (cdr v1) (cdr v2)))))
 
      ;; Fill in param grammars
      (define int-consts (list const-val))
@@ -135,7 +197,7 @@
          ['int32 (int32-const)]
          ['uint32 (int32-const)]
          [_ node]))
-     (for/list ([candidate candidates]) (uniquify-swizzles (hvx:visit candidate fill-arg-grammars)))]
+     (for/list ([candidate candidates]) (cons (uniquify-swizzles (hvx:visit (car candidate) fill-arg-grammars)) (cdr candidate)))]
 
     [(divide-by-const ir-sub-expr const-val)
      (define outT (hvx-ir:elem-type ir-expr))
@@ -145,10 +207,9 @@
      
      ;; Desired output type
      (define desired-expr-types (enum-types outT))
-     (define candidates (set->list (enumerate-hvx isa desired-expr-types grouped-sub-exprs 4)))
+     (define candidates (enumerate-hvx isa desired-expr-types grouped-sub-exprs 4 5))
 
      ;; Sort them
-     (set! candidates (map (lambda (c) (cons c (basic-expr-cost c))) candidates))
      (set! candidates (sort candidates (lambda (v1 v2) (<= (cdr v1) (cdr v2)))))
 
      ;; Filter them
@@ -167,7 +228,7 @@
          node)
        (hvx:visit-shallow (car candidate) check-instr)
        keep?)
-     (set! candidates (filter instr-repeat? candidates))
+     (set! candidates (filter (lambda (c) (instr-repeat? (car c))) candidates))
 
      ;; Fill in param grammars
      (define-symbolic bvc8 (bitvector 8))
@@ -188,7 +249,7 @@
          ['int16 (int16-const)]
          ['uint16 (uint16-const)]
          [_ node]))
-     (for/list ([candidate candidates]) (uniquify-swizzles (hvx:visit (car candidate) fill-arg-grammars)))]
+     (for/list ([candidate candidates]) (cons (uniquify-swizzles (hvx:visit (car candidate) fill-arg-grammars)) (cdr candidate)))]
 
 ;    (define (get-hvx-div-isa den)
 ;  (define (??hvx-div-instr registers)
@@ -213,18 +274,17 @@
 
      ;; Desired output type
      (define desired-expr-types (enum-types output-type))
-     
+
      (define isa (list vrsr vpack)) ; vpacko-n vround vasr vlsr
      (define grouped-sub-exprs (prepare-sub-exprs (append (list (vsplat shift)) hvx-sub-exprs)))
-     (define candidates (set->list (enumerate-hvx isa desired-expr-types grouped-sub-exprs 2)))
+     (define candidates (enumerate-hvx isa desired-expr-types grouped-sub-exprs 1 2))
 
      (set! isa (list vasr-n vround)) ; vpacko-n vround vasr vlsr
      (set! grouped-sub-exprs (prepare-sub-exprs hvx-sub-exprs))
-
-     (set! candidates (append candidates (set->list (enumerate-hvx isa desired-expr-types grouped-sub-exprs 1))))
+     
+     (set! candidates (append candidates (enumerate-hvx isa desired-expr-types grouped-sub-exprs 1 2)))
 
      ;; Sort them
-     (set! candidates (map (lambda (c) (cons c (basic-expr-cost c))) candidates))
      (set! candidates (sort candidates (lambda (v1 v2) (<= (cdr v1) (cdr v2)))))
 
      ;(pretty-print candidates)
@@ -241,7 +301,7 @@
          ['bool (bool-const)]
          ['int8 (int8-const)]
          [_ node]))
-     (for/list ([candidate candidates]) (uniquify-swizzles (hvx:visit (car candidate) fill-arg-grammars)))]
+     (for/list ([candidate candidates]) (cons (uniquify-swizzles (hvx:visit (car candidate) fill-arg-grammars)) (cdr candidate)))]
     
     ;; Saturation
     [(saturate ir-sub-expr round? output-type)
@@ -261,9 +321,9 @@
      
      ;; Desired output type
      (define desired-expr-types (enum-types output-type))
-     (define candidates (set->list (enumerate-hvx isa desired-expr-types grouped-sub-exprs 1)))
-     
-     (set! candidates (map (lambda (c) (cons c (basic-expr-cost c))) candidates))
+     (define candidates (enumerate-hvx isa desired-expr-types grouped-sub-exprs 1 2))
+
+     ;; Sort them
      (set! candidates (sort candidates (lambda (v1 v2) (<= (cdr v1) (cdr v2)))))
      
      ;; Fill in param grammars
@@ -274,7 +334,7 @@
          [#f #f]
          ['bool (bool-const)]
          [_ node]))
-     (for/list ([candidate candidates]) (uniquify-swizzles (hvx:visit (car candidate) fill-arg-grammars)))]
+     (for/list ([candidate candidates]) (cons (uniquify-swizzles (hvx:visit (car candidate) fill-arg-grammars)) (cdr candidate)))]
 
     ;; Vector-scalar fractional multiply
     [(vs-frac-mpy sub-expr sca round?)
@@ -282,18 +342,17 @@
      (define grouped-sub-exprs (prepare-sub-exprs hvx-sub-exprs))
      (define desired-expr-types (set 'i32x32))
      
-     (define candidates (set->list (enumerate-hvx isa desired-expr-types grouped-sub-exprs 2)))
+     (define candidates (enumerate-hvx isa desired-expr-types grouped-sub-exprs 2 2))
 
      ;(println (length candidates))
 
      ;; Filter out templates that read too much or too little data
-     (set! candidates (filter (lambda (c) (eq? (max-unique-inputs c) 2)) candidates))
+     (set! candidates (filter (lambda (c) (eq? (max-unique-inputs (car c)) 2)) candidates))
 
      ;(println (length candidates))
      ;(pretty-print candidates)
 
      ;; Sort them
-     (set! candidates (map (lambda (c) (cons c (basic-expr-cost c))) candidates))
      (set! candidates (sort candidates (lambda (v1 v2) (<= (cdr v1) (cdr v2)))))
      
      ;; Fill in param grammars
@@ -305,7 +364,7 @@
          ['bool (bool-const)]
          ['int32 (int32-const)]
          [_ node]))
-     (for/list ([candidate candidates]) (uniquify-swizzles (hvx:visit (car candidate) fill-arg-grammars)))]
+     (for/list ([candidate candidates]) (cons (uniquify-swizzles (hvx:visit (car candidate) fill-arg-grammars)) (cdr candidate)))]
     
     ;; Vector-scalar multiply adds
     [(vs-mpy-add ir-sub-expr weights output-type saturate?)
@@ -341,9 +400,11 @@
      
      (define grouped-sub-exprs (prepare-sub-exprs hvx-sub-exprs))
 
+     ;(pretty-print grouped-sub-exprs)
+     
      ;; Desired output type
      (define desired-expr-types (enum-types output-type))
-     (define candidates (set->list (enumerate-hvx isa desired-expr-types grouped-sub-exprs 2)))
+     (define candidates (enumerate-hvx isa desired-expr-types grouped-sub-exprs 2 5))
 
      ;(println isa)
      ;(println desired-expr-types)
@@ -352,13 +413,12 @@
 
      ;; Filter out templates that read too much or too little data
      (define spec-rad (length weights))
-     (set! candidates (filter (lambda (c) (eq? (max-unique-inputs c) spec-rad)) candidates))
+     (set! candidates (filter (lambda (c) (eq? (max-unique-inputs (car c)) spec-rad)) candidates))
 
      ;(length candidates)
      ;(pretty-print candidates)
 
      ;; Sort them
-     (set! candidates (map (lambda (c) (cons c (basic-expr-cost c))) candidates))
      (set! candidates (sort candidates (lambda (v1 v2) (<= (cdr v1) (cdr v2)))))
 
      ;(pretty-print candidates)
@@ -390,7 +450,7 @@
          ['int8x4 (Rt4.b (int8-const) (int8-const) (int8-const) (int8-const))]
          ['uint8x4 (Rt4.ub (uint8-const) (uint8-const) (uint8-const) (uint8-const))]
          [_ node]))
-     (for/list ([candidate candidates]) (uniquify-swizzles (hvx:visit (car candidate) fill-arg-grammars)))]
+     (for/list ([candidate candidates]) (cons (uniquify-swizzles (hvx:visit (car candidate) fill-arg-grammars)) (cdr candidate)))]
 
     ;; Vector-scalar multiply adds
     [(vv-mpy-add ir-sub-expr width output-type saturate?)
@@ -426,18 +486,17 @@
 
      ;; Desired output type
      (define desired-expr-types (enum-types output-type))
-     (define candidates (set->list (enumerate-hvx isa desired-expr-types grouped-sub-exprs 2)))
+     (define candidates (enumerate-hvx isa desired-expr-types grouped-sub-exprs 2 2))
      
      ;; Filter out templates that read too much or too little data
      (define spec-rad (* width 2))
-     (set! candidates (filter (lambda (c) (eq? (max-unique-inputs c) spec-rad)) candidates))
+     (set! candidates (filter (lambda (c) (eq? (max-unique-inputs (car c)) spec-rad)) candidates))
 
      ;(println desired-expr-types)
      ;(pretty-print grouped-sub-exprs)
      ;(pretty-print candidates)
      
      ;; Sort them
-     (set! candidates (map (lambda (c) (cons c (basic-expr-cost c))) candidates))
      (set! candidates (sort candidates (lambda (v1 v2) (<= (cdr v1) (cdr v2)))))
      
      ;; Fill in param grammars
@@ -448,7 +507,7 @@
          [#f #f]
          ['bool (bool-const)]
          [_ node]))
-     (for/list ([candidate candidates]) (uniquify-swizzles (hvx:visit (car candidate) fill-arg-grammars)))]
+     (for/list ([candidate candidates]) (cons (uniquify-swizzles (hvx:visit (car candidate) fill-arg-grammars)) (cdr candidate)))]
 
     ;; Throw error
     [_ (error "NYI: Please define a grammar for lowering the following ir-expression to HVX ISA:" ir-expr)]))
@@ -490,67 +549,6 @@
     [(eq? type 'uint16) (set 'u16x64 'u16x64x2)]
     [(eq? type 'uint32) (set 'u32x32 'u32x32x2)]))
 
-(define enumeration-database (make-hash))
-
-(define (enumerate-hvx instr-set output-types hvx-sub-exprs depth)
-  (define query (list instr-set output-types hvx-sub-exprs depth))
-  (cond
-    ;; Have we enumerated this tree before?
-    [(hash-has-key? enumeration-database query) (hash-ref enumeration-database query)]
-
-    ;; Recursive base case
-    [(<= depth 0)
-     (list->set (flatten (for/list ([output-type output-types]) (hash-ref! hvx-sub-exprs output-type (list)))))]
-
-    ;; Enumerate recursively
-    [else
-      (define candidates (enumerate-hvx instr-set output-types hvx-sub-exprs (sub1 depth)))
-      (for ([instr instr-set])
-        (for ([sig (hvx:instr-forms instr)])
-          (when (set-member? output-types (instr-sig-ret-val sig))
-            (define arg-opts (list))
-            (for ([arg (instr-sig-args sig)])
-              (define opts (match arg
-                             [#t (list #t)]
-                             [#f (list #f)]
-                             ['bool (list 'bool)]
-                             ['int8 (list 'int8)]
-                             ['uint8 (list 'uint8)]
-                             ['int16 (list 'int16)]
-                             ['uint16 (list 'uint16)]
-                             ['int32 (list 'int32)]
-                             ['uint32 (list 'uint32)]
-                             ['int8x2 (list 'int8x2)]
-                             ['uint8x2 (list 'uint8x2)]
-                             ['int16x2 (list 'int16x2)]
-                             ['uint16x2 (list 'uint16x2)]
-                             ['int8x4 (list 'int8x4)]
-                             ['uint8x4 (list 'uint8x4)]
-                             [_ (set->list (enumerate-hvx instr-set (set arg) hvx-sub-exprs (sub1 depth)))]))
-              (set! arg-opts (append arg-opts (list opts))))
-            (define sig-exprs
-              (list->set
-               (match (length arg-opts)
-                 [1 (cartesian-product (list instr) (first arg-opts))]
-                 [2 (cartesian-product (list instr) (first arg-opts) (second arg-opts))]
-                 [3 (cartesian-product (list instr) (first arg-opts) (second arg-opts) (third arg-opts))]
-                 [4 (cartesian-product (list instr) (first arg-opts) (second arg-opts) (third arg-opts) (fourth arg-opts))]
-                 [5 (cartesian-product (list instr) (first arg-opts) (second arg-opts) (third arg-opts) (fourth arg-opts) (fifth arg-opts))]
-                 [6 (cartesian-product (list instr) (first arg-opts) (second arg-opts) (third arg-opts) (fourth arg-opts) (fifth arg-opts) (sixth arg-opts))]
-                 [_ (error "NYI: enumeration instrs with the following number of args:" (length arg-opts))])))
-            (set! sig-exprs (for/set ([sig-expr sig-exprs]) (match (length sig-expr)
-                                                              [2 ((list-ref sig-expr 0) (list-ref sig-expr 1))]
-                                                              [3 ((list-ref sig-expr 0) (list-ref sig-expr 1) (list-ref sig-expr 2))]
-                                                              [4 ((list-ref sig-expr 0) (list-ref sig-expr 1) (list-ref sig-expr 2) (list-ref sig-expr 3))]
-                                                              [5 ((list-ref sig-expr 0) (list-ref sig-expr 1) (list-ref sig-expr 2) (list-ref sig-expr 3) (list-ref sig-expr 4))]
-                                                              [6 ((list-ref sig-expr 0) (list-ref sig-expr 1) (list-ref sig-expr 2) (list-ref sig-expr 3) (list-ref sig-expr 4) (list-ref sig-expr 5))]
-                                                              [7 ((list-ref sig-expr 0) (list-ref sig-expr 1) (list-ref sig-expr 2) (list-ref sig-expr 3) (list-ref sig-expr 4) (list-ref sig-expr 5) (list-ref sig-expr 6))]
-                                                              [_ (error "NYI. Sig-expr of size" (length sig-expr))])))
-            (set! candidates (set-union candidates sig-exprs)))))
-
-        (hash-set! enumeration-database query candidates)
-        candidates]))
-
 (define (prepare-sub-exprs hvx-sub-exprs)
   (define grouped-sub-exprs (make-hash))
   (define swizzle-node-id -1)
@@ -589,14 +587,14 @@
     (set! swizzle-node-id (add1 swizzle-node-id))
     (define merged-candidates
       (append
-       (filter ??load? candidates-l)
-       (filter is-vsplat? candidates-l)
+       (map (curryr cons 0) (filter ??load? candidates-l))
+       (map (curryr cons 0) (filter is-vsplat? candidates-l))
        (let ([c (filter (lambda (c) (not (or (is-vsplat? c) (??load? c)))) candidates-l)])
          (cond
            [(empty? c) '()]
-           [else (list (??swizzle swizzle-node-id '() c (void) (hvx:vec-pair? output-type)))]))))
+           [else (list (cons (??swizzle swizzle-node-id '() c (void) (hvx:vec-pair? output-type)) 0))]))))
     (hash-set! grouped-merged-sub-exprs output-type merged-candidates))
-
+  
   grouped-merged-sub-exprs)
 
 (define (max-unique-inputs expr)
@@ -644,3 +642,140 @@
     [(??swizzle _ _ _ _ _) 1]
 
     [_ (error (format "NYI lowering grammar max-unique-inputs ~a" expr))]))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;; New enumerator
+
+(define enumeration-database (make-hash))
+
+(define (enumerate-hvx instr-set output-types base-exprs depth max-cost)
+  (define query (list instr-set output-types base-exprs depth))
+  (cond
+    ;; Have we enumerated this tree before?
+    [(hash-has-key? enumeration-database query) (hash-ref enumeration-database query)]
+
+    ;; Recursive base case
+    [(<= depth 0)
+     (apply append (for/list ([output-type output-types]) (hash-ref! base-exprs output-type (list))))]
+
+    ;; Enumerate recursively
+    [else
+     (define candidates
+       (let ([sub-cands (enumerate-hvx instr-set output-types base-exprs (sub1 depth) max-cost)])
+         (let ([c-build-instr-exprs (curryr build-instr-exprs instr-set output-types base-exprs depth max-cost)])
+           (foldr append sub-cands (map c-build-instr-exprs instr-set)))))
+     
+     (define filtered-candidates (set->list (list->set (filter (lambda (e) (<= (cdr e) max-cost)) candidates))))
+     (hash-set! enumeration-database query filtered-candidates)
+     filtered-candidates]))
+
+(define (build-instr-exprs instr instr-set output-types base-exprs depth max-cost)
+  (let ([c-build-sig-exprs (curryr build-sig-exprs instr-set base-exprs depth max-cost instr)])
+    (foldr append '() (map c-build-sig-exprs (filter (curry out-member? output-types) (hvx:instr-forms instr))))))
+
+(define (build-sig-exprs sig instr-set base-exprs depth max-cost instr)
+  (let ([sig-exprs
+    (let ([arg-opts (get-arg-opts (instr-sig-args sig) instr-set base-exprs depth max-cost instr)])
+      (apply cartesian-product arg-opts))])
+    (map (curry build-ast instr sig) sig-exprs)))
+
+(define (get-arg-opts args instr-set base-exprs depth max-cost instr)
+  (cond
+    [(empty? args) '()]
+    [else
+     (let ([arg (first args)])
+       (let ([opts (match arg
+                     [#t (list (cons #t 0))]
+                     [#f (list (cons #f 0))]
+                     ['bool (list (cons 'bool 0))]
+                     ['int8 (list (cons 'int8 0))]
+                     ['uint8 (list (cons 'uint8 0))]
+                     ['int16 (list (cons 'int16 0))]
+                     ['uint16 (list (cons 'uint16 0))]
+                     ['int32 (list (cons 'int32 0))]
+                     ['uint32 (list (cons 'uint32 0))]
+                     ['int8x2 (list (cons 'int8x2 0))]
+                     ['uint8x2 (list (cons 'uint8x2 0))]
+                     ['int16x2 (list (cons 'int16x2 0))]
+                     ['uint16x2 (list (cons 'uint16x2 0))]
+                     ['int8x4 (list (cons 'int8x4 0))]
+                     ['uint8x4 (list (cons 'uint8x4 0))]
+                     [_ (enumerate-hvx instr-set (set arg) base-exprs (sub1 depth) max-cost)])])
+         (append (list opts) (get-arg-opts (rest args) instr-set base-exprs depth max-cost instr))))]))
+
+(define (build-ast instr sig sig-expr)
+  (define cost (foldr + (instr-cost instr sig) (map cdr sig-expr)))
+  (define expr (apply instr (map car sig-expr)))
+  (cons expr cost))
+
+(define (instr-cost instr sig)
+  (cond
+    [(eq? instr reinterpret) 0.05]
+    [(eq? instr vmpyie) 2]
+    [else
+     (if (hvx:vec-pair? (instr-sig-ret-val sig)) 1 2)]))
+
+(define (out-member? output-types sig)
+  (set-member? output-types (instr-sig-ret-val sig)))
+
+;;;;;;;;;;;;;;;;;; Legacy enumerator
+
+;(define enumeration-database (make-hash))
+;
+;(define (enumerate-hvx instr-set output-types hvx-sub-exprs depth)
+;  (define query (list instr-set output-types hvx-sub-exprs depth))
+;  (cond
+;    ;; Have we enumerated this tree before?
+;    [(hash-has-key? enumeration-database query) (hash-ref enumeration-database query)]
+;
+;    ;; Recursive base case
+;    [(<= depth 0)
+;     (list->set (flatten (for/list ([output-type output-types]) (hash-ref! hvx-sub-exprs output-type (list)))))]
+;
+;    ;; Enumerate recursively
+;    [else
+;      (define candidates (enumerate-hvx instr-set output-types hvx-sub-exprs (sub1 depth)))
+;      (for ([instr instr-set])
+;        (for ([sig (hvx:instr-forms instr)])
+;          (when (set-member? output-types (instr-sig-ret-val sig))
+;            (define arg-opts (list))
+;            (for ([arg (instr-sig-args sig)])
+;              (define opts (match arg
+;                             [#t (list #t)]
+;                             [#f (list #f)]
+;                             ['bool (list 'bool)]
+;                             ['int8 (list 'int8)]
+;                             ['uint8 (list 'uint8)]
+;                             ['int16 (list 'int16)]
+;                             ['uint16 (list 'uint16)]
+;                             ['int32 (list 'int32)]
+;                             ['uint32 (list 'uint32)]
+;                             ['int8x2 (list 'int8x2)]
+;                             ['uint8x2 (list 'uint8x2)]
+;                             ['int16x2 (list 'int16x2)]
+;                             ['uint16x2 (list 'uint16x2)]
+;                             ['int8x4 (list 'int8x4)]
+;                             ['uint8x4 (list 'uint8x4)]
+;                             [_ (set->list (enumerate-hvx instr-set (set arg) hvx-sub-exprs (sub1 depth)))]))
+;              (set! arg-opts (append arg-opts (list opts))))
+;            (define sig-exprs
+;              (list->set
+;               (match (length arg-opts)
+;                 [1 (cartesian-product (list instr) (first arg-opts))]
+;                 [2 (cartesian-product (list instr) (first arg-opts) (second arg-opts))]
+;                 [3 (cartesian-product (list instr) (first arg-opts) (second arg-opts) (third arg-opts))]
+;                 [4 (cartesian-product (list instr) (first arg-opts) (second arg-opts) (third arg-opts) (fourth arg-opts))]
+;                 [5 (cartesian-product (list instr) (first arg-opts) (second arg-opts) (third arg-opts) (fourth arg-opts) (fifth arg-opts))]
+;                 [6 (cartesian-product (list instr) (first arg-opts) (second arg-opts) (third arg-opts) (fourth arg-opts) (fifth arg-opts) (sixth arg-opts))]
+;                 [_ (error "NYI: enumeration instrs with the following number of args:" (length arg-opts))])))
+;            (set! sig-exprs (for/set ([sig-expr sig-exprs]) (match (length sig-expr)
+;                                                              [2 ((list-ref sig-expr 0) (list-ref sig-expr 1))]
+;                                                              [3 ((list-ref sig-expr 0) (list-ref sig-expr 1) (list-ref sig-expr 2))]
+;                                                              [4 ((list-ref sig-expr 0) (list-ref sig-expr 1) (list-ref sig-expr 2) (list-ref sig-expr 3))]
+;                                                              [5 ((list-ref sig-expr 0) (list-ref sig-expr 1) (list-ref sig-expr 2) (list-ref sig-expr 3) (list-ref sig-expr 4))]
+;                                                              [6 ((list-ref sig-expr 0) (list-ref sig-expr 1) (list-ref sig-expr 2) (list-ref sig-expr 3) (list-ref sig-expr 4) (list-ref sig-expr 5))]
+;                                                              [7 ((list-ref sig-expr 0) (list-ref sig-expr 1) (list-ref sig-expr 2) (list-ref sig-expr 3) (list-ref sig-expr 4) (list-ref sig-expr 5) (list-ref sig-expr 6))]
+;                                                              [_ (error "NYI. Sig-expr of size" (length sig-expr))])))
+;            (set! candidates (set-union candidates sig-exprs)))))
+;
+;        (hash-set! enumeration-database query candidates)
+;        candidates]))
