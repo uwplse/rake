@@ -5,87 +5,91 @@
 
 (define-symbolic-buffer input1 uint8_t)
 (define-symbolic-buffer input2 uint8_t)
-(define-symbolic t86 integer?)
-(define-symbolic t85 integer?)
-(define-symbolic-var input2_multiplier int16_t)
-(define-symbolic t68 integer?)
-(define-symbolic t84 integer?)
+(define-symbolic t69 integer?)
 (define-symbolic output.s0.x.x integer?)
-(define-symbolic t76 integer?)
+(define-symbolic t79 integer?)
+(define-symbolic t73 integer?)
+(define-symbolic-var input2_multiplier int16_t)
 (define-symbolic-var input2_zero uint8_t)
+(define-symbolic t70 integer?)
+(define-symbolic t78 integer?)
+(define-symbolic t62 integer?)
+(define-symbolic output.s0.y.rebased integer?)
 (define-symbolic-var output_zero uint8_t)
 (define-symbolic-var output_min uint8_t)
 (define-symbolic-var output_max uint8_t)
+(define-symbolic t65 integer?)
+(define-symbolic t66 integer?)
 (define-symbolic-var input1_multiplier int16_t)
 (define-symbolic-var input1_zero uint8_t)
-(define-symbolic t87 integer?)
-(define-symbolic t72 integer?)
 
 (define axioms 
   (list ))
 
-(define input1.min.0 t68)
-(define input2.min.0 t72)
-(define output.min.0 t76)
-(define t40.s (-  output.min.0  t84))
-(define t39.s (-  output.min.0  t85))
-(define t61 (+  (*  output.s0.x.x  256)  (+  t86  (-  t39.s  input1.min.0))))
-(define t62 (+  (*  output.s0.x.x  256)  (+  t87  (-  t40.s  input2.min.0))))
+(define input1.min.0 (var-lookup 'input1.min.0 t62))
+(define input1.stride.1 (var-lookup 'input1.stride.1 t65))
+(define input2.min.0 (var-lookup 'input2.min.0 t66))
+(define input2.stride.1 (var-lookup 'input2.stride.1 t69))
+(define output.min.0 (var-lookup 'output.min.0 t70))
+(define output.min.1 (var-lookup 'output.min.1 t73))
+(define t40.s (var-lookup 't40.s (sca-sub  output.min.0  t78)))
+(define t39.s (var-lookup 't39.s (sca-sub  output.min.0  t79)))
 
 (define halide-expr
- (let ([t88  (vec-add
-  (vec-mul
-   (int32x256
-    (vec-add
-     (vec-mul
-      (int16x256
-       (load input1 (ramp t61 1 256) (aligned 1 0)))
-      (x256 (int16_t (bv 64 16))))
-     (x256 (sca-mul (int16x1 input1_zero) (int16_t (bv -64 16))))))
-   (int32x256
-    (x256 input1_multiplier)))
-  (vec-mul
-   (int32x256
-    (vec-add
-     (vec-mul
-      (int16x256
-       (load input2 (ramp t62 1 256) (aligned 1 0)))
-      (x256 (int16_t (bv 64 16))))
-     (x256 (sca-mul (int16x1 input2_zero) (int16_t (bv -64 16))))))
-   (int32x256
-    (x256 input2_multiplier))))])
-  (vec-max
-   (vec-min
-    (uint8x256
-     (vec-max
-      (vec-min
-       (int16x256
-        (vec-max
-         (vec-min
-          (vec-add
-           (int32x256
-            (int16x256
-             (vec-max
-              (vec-min
-               (vec-add
-                (vec-bwand
-                 (x256 (int32_t (bv 1 32)))
+ (let ([t80  (sca-add  output.min.1  output.s0.y.rebased)])
+  (let ([t81   (vec-add
+   (vec-mul
+    (int32x128
+     (vec-add
+      (vec-mul
+       (int16x128
+        (load input1 (ramp (sca-add (sca-mul output.s0.x.x 128) (sca-add (sca-mul t80 input1.stride.1) (sca-sub t39.s input1.min.0))) 1 128) (aligned 1 0)))
+       (x128 (int16_t (bv 64 16))))
+      (x128 (sca-mul (int16x1 input1_zero) (int16_t (bv -64 16))))))
+    (int32x128
+     (x128 input1_multiplier)))
+   (vec-mul
+    (int32x128
+     (vec-add
+      (vec-mul
+       (int16x128
+        (load input2 (ramp (sca-add (sca-mul output.s0.x.x 128) (sca-add (sca-mul t80 input2.stride.1) (sca-sub t40.s input2.min.0))) 1 128) (aligned 1 0)))
+       (x128 (int16_t (bv 64 16))))
+      (x128 (sca-mul (int16x1 input2_zero) (int16_t (bv -64 16))))))
+    (int32x128
+     (x128 input2_multiplier))))])
+   (vec-max
+    (vec-min
+     (uint8x128
+      (vec-max
+       (vec-min
+        (int16x128
+         (vec-max
+          (vec-min
+           (vec-add
+            (int32x128
+             (int16x128
+              (vec-max
+               (vec-min
+                (vec-add
+                 (vec-bwand
+                  (x128 (int32_t (bv 1 32)))
+                  (vec-div
+                   t81
+                   (x128 (int32_t (bv 32768 32)))))
                  (vec-div
-                  t88
-                  (x256 (int32_t (bv 32768 32)))))
-                (vec-div
-                 t88
-                 (x256 (int32_t (bv 65536 32)))))
-               (x256 (int32_t (bv 32767 32))))
-              (x256 (int32_t (bv -32768 32))))))
-           (int32x256
-            (x256 (int16x1 output_zero))))
-          (x256 (int32_t (bv 32767 32))))
-         (x256 (int32_t (bv -32768 32)))))
-       (x256 (int16_t (bv 255 16))))
-      (x256 (int16_t (bv 0 16)))))
-    (x256 output_max))
-   (x256 output_min))))
+                  t81
+                  (x128 (int32_t (bv 65536 32)))))
+                (x128 (int32_t (bv 32767 32))))
+               (x128 (int32_t (bv -32768 32))))))
+            (int32x128
+             (x128 (int16x1 output_zero))))
+           (x128 (int32_t (bv 32767 32))))
+          (x128 (int32_t (bv -32768 32)))))
+        (x128 (int16_t (bv 255 16))))
+       (x128 (int16_t (bv 0 16)))))
+     (x128 output_max))
+    (x128 output_min)))))
 
 (define spec (synthesis-spec 'halide-ir halide-expr axioms))
 (define hvx-expr (synthesize-hvx spec 'greedy 'enumerative 'enumerative))
