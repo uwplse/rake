@@ -184,7 +184,9 @@
   [(define write-proc
      (make-constructor-style-printer
       (lambda (obj) `??sub-expr)
-      (lambda (obj) (list (length (??sub-expr-exprs obj)) (??sub-expr-c obj)))))])
+      (lambda (obj) (if (concrete? (??sub-expr-c obj))
+                        (list (list-ref (??sub-expr-exprs obj) (??sub-expr-c obj)))
+                        (list (length (??sub-expr-exprs obj)) (??sub-expr-c obj))))))])
 
 ;; Type signatures
 (struct instr-sig (ret-val args) #:transparent)
