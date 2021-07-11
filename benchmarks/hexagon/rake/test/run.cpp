@@ -163,10 +163,10 @@ int main(int argc, char **argv) {
     #endif
 
 #if average_pool
-      halide_dimension_t c_dim{ 0, 128, 1 };
-      halide_dimension_t x_dim{ 0, width/16, 128 };
-      halide_dimension_t y_dim{ 0, height/8, 128*(width/16) };
-      halide_dimension_t b_dim{ 0, 1, 128 * (width / 16) * (height/8) };
+      halide_dimension_t c_dim{ 0, 1024, 1 };
+      halide_dimension_t x_dim{ 0, width/32, 128 };
+      halide_dimension_t y_dim{ 0, height/32, 128 * (width / 32) };
+      halide_dimension_t b_dim{ 0, 1, 128 * (width / 32) * (height / 32) };
       halide_dimension_t shape[4] = { c_dim, x_dim, y_dim, b_dim };
 
       Halide::Runtime::Buffer<uint8_t> input_buf(input, 4, shape);
