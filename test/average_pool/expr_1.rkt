@@ -5,8 +5,8 @@
 
 (define-symbolic-buffer sum uint16_t)
 (define-symbolic-var t288 uint16_t)
-(define-symbolic-var output_max uint8_t)
 (define-symbolic-var output_min uint8_t)
+(define-symbolic-var output_max uint8_t)
 
 (define axioms 
   (list ))
