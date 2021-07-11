@@ -20,15 +20,16 @@
 
 (define (get-hvx-grammar halide-expr ir-expr hvx-sub-exprs cost-ub)
   (cond
-    [(and (hash-has-key? grammar-lib (ir-node-id ir-expr)) (not (load-data? ir-expr)))
-      (let ([candidates (hash-ref grammar-lib (ir-node-id ir-expr))])
+    [(and (hash-has-key? grammar-lib (cons (ir-node-id ir-expr) hvx-sub-exprs)) (not (load-data? ir-expr)))
+      (let ([candidates (hash-ref grammar-lib (cons (ir-node-id ir-expr) hvx-sub-exprs))])
         (filter (lambda (c) (<= (cdr c) cost-ub)) candidates))]
     [else
       (define candidates (get-hvx-grammar-gen halide-expr ir-expr hvx-sub-exprs))
-      (hash-set! grammar-lib (ir-node-id ir-expr) candidates)
+      (hash-set! grammar-lib (cons (ir-node-id ir-expr) hvx-sub-exprs) candidates)
       candidates]))
 
 (define (get-hvx-grammar-gen halide-expr ir-expr hvx-sub-exprs)
+  (set! enumeration-database (make-hash))
   (destruct ir-expr
             
     ;; Data loading/shuffling
@@ -204,10 +205,10 @@
      (define isa (list vmpy vasr vlsr vshuffo-n vasr-n lo hi))
 
      (define grouped-sub-exprs (prepare-sub-exprs hvx-sub-exprs))
-     
+
      ;; Desired output type
      (define desired-expr-types (enum-types outT))
-     (define candidates (enumerate-hvx isa desired-expr-types grouped-sub-exprs 4 5))
+     (define candidates (enumerate-hvx isa desired-expr-types grouped-sub-exprs 4 10))
 
      ;; Sort them
      (set! candidates (sort candidates (lambda (v1 v2) (<= (cdr v1) (cdr v2)))))
@@ -226,7 +227,7 @@
            [(vasr-n? node) (when (set-member? instrs 'vasr-n) (set! keep? #f)) (set-add! instrs 'vasr-n)]
            [(vshuffo-n? node) (when (set-member? instrs 'vshuffo-n) (set! keep? #f)) (set-add! instrs 'vshuffo-n)])
          node)
-       (hvx:visit-shallow (car candidate) check-instr)
+       (hvx:visit-shallow candidate check-instr)
        keep?)
      (set! candidates (filter (lambda (c) (instr-repeat? (car c))) candidates))
 
@@ -521,6 +522,9 @@
        ;(define-symbolic* tbl (~> integer? integer?))
        (define tbl (map (lambda (i) (define-symbolic* idx integer?) idx) (range 256)))
        (??swizzle (get-sw-node-id) live-data expr tbl pair?)]
+      [(??load id live-data buffer tbl pair?)
+       (define tbl (map (lambda (i) (define-symbolic* idx integer?) idx) (range 256)))
+       (??load (get-sw-node-id) live-data buffer tbl pair?)]
       [_ node]))
   (hvx:visit hvx-template clone-swizzle-node))
 
@@ -592,7 +596,8 @@
        (let ([c (filter (lambda (c) (not (or (is-vsplat? c) (??load? c)))) candidates-l)])
          (cond
            [(empty? c) '()]
-           [else (list (cons (??swizzle swizzle-node-id '() c (void) (hvx:vec-pair? output-type)) 0))]))))
+           [else
+            (list (cons (??swizzle swizzle-node-id '() c (void) (hvx:vec-pair? output-type)) 0))]))))
     (hash-set! grouped-merged-sub-exprs output-type merged-candidates))
   
   grouped-merged-sub-exprs)

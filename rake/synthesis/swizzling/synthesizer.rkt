@@ -65,10 +65,10 @@
     [else
      (define curr-lane (first lanes-to-verify))
 
-     ;(display (format "Verifying lane: ~a\n" curr-lane))
-     ;(hvx:set-curr-cn 64)
-     ;(println ((halide:interpret halide-expr) 64))
-     ;(println (let ([x (hvx:interpret template)]) (if (hvx:vec-pair? x) (hvx:v1-elem x 16) (hvx:elem x curr-lane))))
+     (display (format "Verifying lane: ~a\n" curr-lane))
+     ;(hvx:set-curr-cn curr-lane)
+     ;(println ((halide:interpret halide-expr) curr-lane))
+     ;(println (let ([x (hvx:interpret template)]) (if (hvx:vec-pair? x) (hvx:v0-elem x curr-lane) (hvx:elem x curr-lane))))
      
      (define st (current-milliseconds))
      (clear-vc!)
@@ -129,6 +129,20 @@
         [else
          (hvx:set-curr-cn (* 4 lane))
          (assert (eq? (oe (* 4 lane)) (hvx:elem se lane)))])]
+    [(eq? output-layout 'interleaved)
+      (cond
+        [(and (hvx:vec-pair? se) (< lane offset))
+         (hvx:set-curr-cn (* 4 lane))
+         (assert (eq? (oe (* 4 lane)) (hvx:v0-elem se lane)))]
+        [(hvx:vec-pair? se)
+         (hvx:set-curr-cn (+ 2 (* 4 (- lane offset))))
+         (assert (eq? (oe (+ 2 (* 4 (- lane offset)))) (hvx:v1-elem se (- lane offset))))]
+        [(even? lane)
+         (hvx:set-curr-cn (quotient lane 2))
+         (assert (eq? (oe (quotient lane 2)) (hvx:elem se lane)))]
+        [else
+         (hvx:set-curr-cn (+ (quotient lane 2) offset))
+         (assert (eq? (oe (+ (quotient lane 2) offset)) (hvx:elem se lane)))])]
     [else
      (error "NYI")]
     ))

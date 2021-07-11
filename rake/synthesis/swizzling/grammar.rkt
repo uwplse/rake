@@ -18,11 +18,11 @@
 
 (define (get-hvx-swizzle-grammar halide-expr hvx-template output-layout swizzle-budget swizzle-node starting-vecs hvx-sub-exprs translation-history)
   (cond
-    [(hash-has-key? grammar-lib (list halide-expr hvx-template swizzle-node))
-      (hash-ref grammar-lib (list halide-expr hvx-template swizzle-node))]
+    [(hash-has-key? grammar-lib (list halide-expr hvx-template swizzle-node output-layout starting-vecs hvx-sub-exprs))
+      (hash-ref grammar-lib (list halide-expr hvx-template swizzle-node output-layout starting-vecs hvx-sub-exprs))]
     [else
       (define candidates (get-hvx-swizzle-grammar-gen halide-expr hvx-template swizzle-budget swizzle-node starting-vecs hvx-sub-exprs translation-history))
-      (hash-set! grammar-lib (list halide-expr hvx-template swizzle-node) candidates)
+      (hash-set! grammar-lib (list halide-expr hvx-template swizzle-node output-layout starting-vecs hvx-sub-exprs) candidates)
       candidates]))
 
 (define (get-vec-type elemT pair?)
@@ -75,7 +75,7 @@
 
   (define isa (list vcombine lo hi vinterleave vinterleave2 vdeal vdeale vshuff vshuffe vshuffo vshuffoe vpacke vpacko valign vror))
   ;(define isa (list lo hi vdeal vshuff vinterleave vinterleave2 vinterleave4))
-
+  
   (define grouped-base-exprs (make-hash))
   (for ([be base-exprs])
     (define beT (hvx:type (hvx:interpret be)))
@@ -85,6 +85,8 @@
     (define beC (if (??swizzle? swizzle-node) 0 1))
     (hash-set! grouped-base-exprs t (list (cons (??sub-expr bes c) beC))))
 
+  ;(pretty-print grouped-base-exprs)
+  (set! enumeration-database (make-hash))
   (define candidate-swizzles (time (enumerate-hvx isa out-type grouped-base-exprs 2 (min swizzle-budget 3))))
   
   ;; Enable scalar swizzling
@@ -141,6 +143,7 @@
          [(< (cpp:type-bw tmpl-etype) 32) (list (cons c cost) (cons (vdeal c) (add1 cost)))]
          [else (list (cons c cost))]))))
   (define sorted-candidates (sort candidates (lambda (v1 v2) (<= (cdr v1) (cdr v2)))))
+
   ;(pretty-print sorted-candidates)
   ;(exit)
   
@@ -204,9 +207,9 @@
          (let ([c-build-instr-exprs (curryr build-instr-exprs instr-set output-type base-exprs depth max-cost)])
            (foldr append sub-cands (map c-build-instr-exprs (filter (curry keep? parent-instr) instr-set))))))
 
-    (define filtered-candidates (set->list (list->set (filter (lambda (e) (<= (cdr e) max-cost)) candidates))))
-    (hash-set! enumeration-database query filtered-candidates)
-    filtered-candidates]))
+     (define filtered-candidates (set->list (list->set (filter (lambda (e) (<= (cdr e) max-cost)) candidates))))
+     (hash-set! enumeration-database query filtered-candidates)
+     filtered-candidates]))
 
 (define (build-instr-exprs instr instr-set output-type base-exprs depth max-cost)
   (let ([c-build-sig-exprs (curryr build-sig-exprs instr-set base-exprs depth max-cost instr)])
@@ -237,8 +240,8 @@
 
 (define (instr-cost instr)
   (cond
-    [(eq? instr lo) 0]
-    [(eq? instr hi) 0]
+    [(eq? instr lo) 0.01]
+    [(eq? instr hi) 0.01]
     [(eq? instr vdeal) 0.95]
     [(eq? instr vdeale) 0.95]
     [(eq? instr vpacke) 0.95]

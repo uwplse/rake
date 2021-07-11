@@ -1,7 +1,7 @@
 #lang rosette/safe
 
 (require
-  (only-in racket/base values make-hash hash-set! hash-has-key?)
+  (only-in racket/base values for make-hash hash-set! hash-has-key?)
   rosette/lib/destruct
   rosette/lib/synthax
   rake/internal/log
@@ -10,7 +10,7 @@
   rake/hvx/interpreter
   rake/synthesis/lowering/util)
 
-(provide synthesize-translation)
+(provide synthesize-translation lowering:synthesizer:reset-db)
 
 (define (incorrect? sol)
   (or (unsat? sol) (unknown? sol)))
@@ -19,6 +19,14 @@
   (not (incorrect? sol)))
 
 (define synthesis-db (make-hash))
+
+(define (lowering:synthesizer:reset-db)
+  ;; Eliminate history of all correct solutions
+  (define new-db (make-hash))
+  (for ([(k v) synthesis-db])
+    (when (not v)
+      (hash-set! new-db k v)))
+  (set! synthesis-db new-db))
 
 (define (verification-lanes type)
   (cond
@@ -43,7 +51,7 @@
     [else
      (define template (first templates))
      (define sol (run-synthesizer (car template) halide-expr hvx-sub-exprs value-bounds translation-history))
-     (hash-set! synthesis-db (cons (first templates) halide-expr) #t)
+     (hash-set! synthesis-db (cons (first templates) halide-expr) (correct? sol))
      (cond
        [(correct? sol)
         (values #t (evaluate template sol))]
