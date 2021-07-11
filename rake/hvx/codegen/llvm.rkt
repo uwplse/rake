@@ -121,6 +121,20 @@
           [(u16x64 v0) (generate `vdealh (to-llvm-type hvx-expr) `(list ,(input-arg Vu)))]
           [(i16x64 v0) (generate `vdealh (to-llvm-type hvx-expr) `(list ,(input-arg Vu)))])])]
 
+    [(vpacke Vu Vv)
+     (destruct* ((hvx:interpret Vu) (hvx:interpret Vv))
+       [((i8x128 v0) (i8x128 v1)) (generate `vpackeb (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv)))]
+       [((u8x128 v0) (u8x128 v1)) (generate `vpackeb (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv)))]
+       [((i16x64 v0) (i16x64 v1)) (generate `vpackeh (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv)))]
+       [((u16x64 v0) (u16x64 v1)) (generate `vpackeh (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv)))])]
+    
+    [(vpacko Vu Vv)
+     (destruct* ((hvx:interpret Vu) (hvx:interpret Vv))
+       [((i8x128 v0) (i8x128 v1)) (generate `vpackob (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv)))]
+       [((u8x128 v0) (u8x128 v1)) (generate `vpackob (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv)))]
+       [((i16x64 v0) (i16x64 v1)) (generate `vpackoh (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv)))]
+       [((u16x64 v0) (u16x64 v1)) (generate `vpackoh (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv)))])]
+    
     [(vinterleave Vuu)
      (destruct (hvx:interpret Vuu)
        [(i8x128x2 v1 v0) (generate `vshuffvdd (to-llvm-type hvx-expr) `(list ,(input-arg (hi Vuu)) ,(input-arg (lo Vuu)) (,t_i32 ,-1)))]
@@ -336,10 +350,10 @@
     
     [(vshuffo-n Vu Vv signed?)
      (destruct* ((hvx:interpret Vu) (hvx:interpret Vv))
-       [((i16x64 v0) (i16x64 v1)) (generate `vshuffob (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv)))]
-       [((u16x64 v0) (u16x64 v1)) (generate `vshuffob (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv)))]
-       [((i32x32 v0) (i32x32 v1)) (generate `vshuffoh (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv)))]
-       [((u32x32 v0) (u32x32 v1)) (generate `vshuffoh (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv)))])]
+       [((i16x64 v0) (i16x64 v1)) (generate `vshufob (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv)))]
+       [((u16x64 v0) (u16x64 v1)) (generate `vshufob (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv)))]
+       [((i32x32 v0) (i32x32 v1)) (generate `vshufoh (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv)))]
+       [((u32x32 v0) (u32x32 v1)) (generate `vshufoh (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv)))])]
     
     ;;;;;;;;;;;;;;;;;;;;;;;;;;;; Min / Max ;;;;;;;;;;;;;;;;;;;;;;;;;;;
     
@@ -443,6 +457,16 @@
                   (bv->str (cpp:eval v0)))]
          [else
           (format "(halide.hexagon.dup4.b int32 (list ~a))" (compile-scalar v0))])]
+      [(Rt.ub v0)
+       (cond
+         [(concrete? Rt)
+          (format "0x~a~a~a~a"
+                  (bv->str (cpp:eval v0))
+                  (bv->str (cpp:eval v0))
+                  (bv->str (cpp:eval v0))
+                  (bv->str (cpp:eval v0)))]
+         [else
+          (format "(halide.hexagon.dup4.b int32 (list ~a))" (compile-scalar v0))])]
       [(Rt.h v0)
        (cond
          [(concrete? Rt)
@@ -516,8 +540,12 @@
     [else
      (match idx
        [(sca-add a b) (format "(+ ~a ~a)" (compile-idx a) (compile-idx b))]
-       [(sca-mul a b) (format "(* ~a ~a)" (compile-idx a) (compile-idx b))]
        [(sca-sub a b) (format "(- ~a ~a)" (compile-idx a) (compile-idx b))]
+       [(sca-mul a b) (format "(* ~a ~a)" (compile-idx a) (compile-idx b))]
+       [(sca-div a b) (format "(/ ~a ~a)" (compile-idx a) (compile-idx b))]
+       [(sca-mod a b) (format "(% ~a ~a)" (compile-idx a) (compile-idx b))]
+       [(sca-min a b) (format "(max ~a ~a)" (compile-idx a) (compile-idx b))]
+       [(sca-max a b) (format "(max ~a ~a)" (compile-idx a) (compile-idx b))]
        [(var-lookup var val) (format "~a" var)]
     
        ;; Special handing for ite
@@ -794,18 +822,7 @@
 ;    [(vtranspose Vu Vv Rt)
 ;     (match (list (hvx:interpret Vu) (hvx:interpret Vu))
 ;       [(list (i16x64 _) (i16x64 _)) (generate `vshuffvdd (p-type p) `(list ,(input-arg Vu) ,(input-arg Vv) (,t_i32 ,(- (* 2 Rt)))))])]  
-;    
-;    ;;vpacke
-;    [(vpacke Vu Vv)
-;     (match (list (hvx:interpret Vu) (hvx:interpret Vv))
-;       [(list (i32x32 _)(i32x32 _)) (generate `vpackeh (p-type p) `(list ,(input-arg Vu) ,(input-arg Vv)))]
-;       [(list (i16x64 _)(i16x64 _)) (generate `vpackeb (p-type p) `(list ,(input-arg Vu) ,(input-arg Vv)))])]
-;    
-;    ;;vpacko
-;    [(vpacko-n Vu Vv signed?)
-;     (match (list (hvx:interpret Vu) (hvx:interpret Vv))
-;       [(list (i32x32 _)(i32x32 _)) (generate `vpackoh (p-type p) `(list ,(input-arg Vu) ,(input-arg Vv)))]
-;       [(list (i16x64 _)(i16x64 _)) (generate `vpackob (p-type p) `(list ,(input-arg Vu) ,(input-arg Vv)))])]
+;   
 ;    
 ;    ;;vunpack
 ;    [(vunpack Vu)
