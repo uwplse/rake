@@ -301,21 +301,21 @@
     
     [(valign Vu Vv Rt)
      (destruct* ((interpret Vu) (interpret Vv))
-       [((i8x128 v0) (i8x128 v1)) (i8x128 (lambda (i) (assert (not (equal? Vu Vv))) (assert (<= 1 Rt 127)) (if (< i (- 128 Rt)) (v1 (+ i Rt)) (v0 (modulo (+ i Rt) 128)))))]
-       [((u8x128 v0) (u8x128 v1)) (u8x128 (lambda (i) (assert (not (equal? Vu Vv))) (assert (<= 1 Rt 127)) (if (< i (- 128 Rt)) (v1 (+ i Rt)) (v0 (modulo (+ i Rt) 128)))))]
-       [((i16x64 v0) (i16x64 v1)) (i16x64 (lambda (i) (assert (not (equal? Vu Vv))) (assert (<= 1 Rt 63)) (if (< i (- 64 Rt)) (v1 (+ i Rt)) (v0 (modulo (+ i Rt) 64)))))]
-       [((u16x64 v0) (u16x64 v1)) (u16x64 (lambda (i) (assert (not (equal? Vu Vv))) (assert (<= 1 Rt 63)) (if (< i (- 64 Rt)) (v1 (+ i Rt)) (v0 (modulo (+ i Rt) 64)))))]
-       [((i32x32 v0) (i32x32 v1)) (i32x32 (lambda (i) (assert (not (equal? Vu Vv))) (assert (<= 1 Rt 31)) (if (< i (- 32 Rt)) (v1 (+ i Rt)) (v0 (modulo (+ i Rt) 32)))))]
-       [((u32x32 v0) (u32x32 v1)) (u32x32 (lambda (i) (assert (not (equal? Vu Vv))) (assert (<= 1 Rt 31)) (if (< i (- 32 Rt)) (v1 (+ i Rt)) (v0 (modulo (+ i Rt) 32)))))])]
+       [((i8x128 v0) (i8x128 v1)) (i8x128 (lambda (i) (assert (not (equal? Vu Vv))) (assert (<= 1 Rt 8)) (if (< i (- 128 Rt)) (v1 (+ i Rt)) (v0 (modulo (+ i Rt) 128)))))]
+       [((u8x128 v0) (u8x128 v1)) (u8x128 (lambda (i) (assert (not (equal? Vu Vv))) (assert (<= 1 Rt 8)) (if (< i (- 128 Rt)) (v1 (+ i Rt)) (v0 (modulo (+ i Rt) 128)))))]
+       [((i16x64 v0) (i16x64 v1)) (i16x64 (lambda (i) (assert (not (equal? Vu Vv))) (assert (<= 1 Rt 8)) (if (< i (- 64 Rt)) (v1 (+ i Rt)) (v0 (modulo (+ i Rt) 64)))))]
+       [((u16x64 v0) (u16x64 v1)) (u16x64 (lambda (i) (assert (not (equal? Vu Vv))) (assert (<= 1 Rt 8)) (if (< i (- 64 Rt)) (v1 (+ i Rt)) (v0 (modulo (+ i Rt) 64)))))]
+       [((i32x32 v0) (i32x32 v1)) (i32x32 (lambda (i) (assert (not (equal? Vu Vv))) (assert (<= 1 Rt 8)) (if (< i (- 32 Rt)) (v1 (+ i Rt)) (v0 (modulo (+ i Rt) 32)))))]
+       [((u32x32 v0) (u32x32 v1)) (u32x32 (lambda (i) (assert (not (equal? Vu Vv))) (assert (<= 1 Rt 8)) (if (< i (- 32 Rt)) (v1 (+ i Rt)) (v0 (modulo (+ i Rt) 32)))))])]
 
     [(vror Vu Rt)
      (destruct (interpret Vu)
-       [(i8x128 v0) (i8x128 (lambda (i) (assert (<= 1 Rt 126)) (v0 (let ([idx (+ i Rt)]) (if (< idx 128) idx (- idx 127))))))]
-       [(u8x128 v0) (u8x128 (lambda (i) (assert (<= 1 Rt 126)) (v0 (let ([idx (+ i Rt)]) (if (< idx 128) idx (- idx 127))))))]
-       [(i16x64 v0) (i16x64 (lambda (i) (assert (<= 1 Rt 62)) (v0 (let ([idx (+ i Rt)]) (if (< idx 64) idx (- idx 63))))))]
-       [(u16x64 v0) (u16x64 (lambda (i) (assert (<= 1 Rt 62)) (v0 (let ([idx (+ i Rt)]) (if (< idx 64) idx (- idx 63))))))]
-       [(i32x32 v0) (i32x32 (lambda (i) (assert (<= 1 Rt 30)) (v0 (let ([idx (+ i Rt)]) (if (< idx 32) idx (- idx 31))))))]
-       [(u32x32 v0) (u32x32 (lambda (i) (assert (<= 1 Rt 30)) (v0 (let ([idx (+ i Rt)]) (if (< idx 32) idx (- idx 31))))))])]
+       [(i8x128 v0) (i8x128 (lambda (i) (assert (<= 1 Rt 8)) (v0 (let ([idx (+ i Rt)]) (if (< idx 128) idx (- idx 127))))))]
+       [(u8x128 v0) (u8x128 (lambda (i) (assert (<= 1 Rt 8)) (v0 (let ([idx (+ i Rt)]) (if (< idx 128) idx (- idx 127))))))]
+       [(i16x64 v0) (i16x64 (lambda (i) (assert (<= 1 Rt 8)) (v0 (let ([idx (+ i Rt)]) (if (< idx 64) idx (- idx 63))))))]
+       [(u16x64 v0) (u16x64 (lambda (i) (assert (<= 1 Rt 8)) (v0 (let ([idx (+ i Rt)]) (if (< idx 64) idx (- idx 63))))))]
+       [(i32x32 v0) (i32x32 (lambda (i) (assert (<= 1 Rt 8)) (v0 (let ([idx (+ i Rt)]) (if (< idx 32) idx (- idx 31))))))]
+       [(u32x32 v0) (u32x32 (lambda (i) (assert (<= 1 Rt 8)) (v0 (let ([idx (+ i Rt)]) (if (< idx 32) idx (- idx 31))))))])]
 
     [(vinterleave Vuu)
      (destruct (interpret Vuu)
@@ -966,16 +966,16 @@
             (u8x128 (lambda (i) (if (< i 64) (cpp:satu8 (v1 i)) (cpp:satu8 (v0 (- i 64)))))))]
        [((u16x64 v0) (u16x64 v1))
         (if signed?
-            (i8x128 (lambda (i) (if (< i 64) (cpp:sat8 (v1 i)) (cpp:sat8 (v0 (- i 64))))))
-            (u8x128 (lambda (i) (if (< i 64) (cpp:satu8 (v1 i)) (cpp:satu8 (v0 (- i 64)))))))]
+            (i8x128 (lambda (i) (if (< i 64) (cpp:sat8 (v1 i)) (cpp:sat8 (cpp:cast (v0 (- i 64)) 'int16)))))
+            (u8x128 (lambda (i) (if (< i 64) (cpp:satu8 (v1 i)) (cpp:satu8 (cpp:cast (v0 (- i 64)) 'int16))))))]
        [((i32x32 v0) (i32x32 v1))
         (if signed?
             (i16x64 (lambda (i) (if (< i 32) (cpp:sat16 (v1 i)) (cpp:sat16 (v0 (- i 32))))))
             (u16x64 (lambda (i) (if (< i 32) (cpp:satu16 (v1 i)) (cpp:satu16 (v0 (- i 32)))))))]
        [((u32x32 v0) (u32x32 v1))
         (if signed?
-            (i16x64 (lambda (i) (if (< i 32) (cpp:sat16 (v1 i)) (cpp:sat16 (v0 (- i 32))))))
-            (u16x64 (lambda (i) (if (< i 32) (cpp:satu16 (v1 i)) (cpp:satu16 (v0 (- i 32)))))))])]
+            (i16x64 (lambda (i) (if (< i 32) (cpp:sat16 (v1 i)) (cpp:sat16 (cpp:cast (v0 (- i 32)))))))
+            (u16x64 (lambda (i) (if (< i 32) (cpp:satu16 (v1 i)) (cpp:satu16 (cpp:cast (v0 (- i 32))))))))])]
 
     [(vavg Vu Vv rnd?)
      (destruct* ((interpret Vu) (interpret Vv))
