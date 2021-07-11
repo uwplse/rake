@@ -14,9 +14,11 @@
   rake/hvx/ast/types
   rake/hvx/ast/visitor
   rake/hvx/interpreter
+  rake/hvx/cost-model
   rake/synthesis/bounds
   rake/synthesis/lowering/algorithm
-  rake/synthesis/swizzling/algorithm)
+  rake/synthesis/swizzling/algorithm
+  rake/synthesis/lowering/synthesizer)
 
 (provide synthesize-hvx-expr)
 
@@ -28,41 +30,52 @@
   ;; Generate an implementation for each desired layout
   (define impls (make-hash))
   (for/list ([output-layout desired-output-layouts])
-    (define desired-subexpr-layout (infer-ideal-subexpr-layout ir-expr output-layout))
+    ;; Reset the state of synthesis database, otherwise the synthesizer will ignore previously
+    ;; seen correct solutions
+    (lowering:synthesizer:reset-db)
     
-    ;; Push node to trace
-    (set! trace (append (list ir-expr) trace))
+    (define desired-subexpr-layouts (infer-ideal-subexpr-layout ir-expr output-layout))
+
+    (display (format "Preferred subexpr layout for op ~a is ~a\n\n" (object-name ir-expr) desired-subexpr-layouts))
     
-    ;; Lower the sub-expressions to hvx
-    (define ir-sub-exprs (hvx-ir:get-subexprs ir-expr))
-    (define hvx-sub-exprs
-      (flatten
-       (for/list ([ir-sub-expr ir-sub-exprs])
-         (define hvx-sub-expr-impls (synthesize-hvx-expr ir-sub-expr ir-annotations ir-bounds lowering-algo swizzling-algo #t desired-subexpr-layout))
-         (when (hash-has-key? ir-bounds (ir-node-id ir-sub-expr))
-           (for ([impl hvx-sub-expr-impls])
-             (hash-set! value-bounds impl (hash-ref ir-bounds (ir-node-id ir-sub-expr)))))
-         hvx-sub-expr-impls)))
+    ;; For each candidate input layout
+    (define lowered-implementations
+      (for/list ([subexpr-layout desired-subexpr-layouts])
 
-    ;(display (format "Preferred output layout for op ~a is ~a\n\n" (object-name ir-expr) desired-output-layout))
+        ;; Push node to trace
+        (set! trace (append (list ir-expr) trace))
+        
+        ;; Generate HVX sub-expressions that produce output in selected layout
+        (define ir-sub-exprs (hvx-ir:get-subexprs ir-expr))
+        (define hvx-sub-exprs
+          (flatten
+           (for/list ([ir-sub-expr ir-sub-exprs])
+             (define hvx-sub-expr-impls (synthesize-hvx-expr ir-sub-expr ir-annotations ir-bounds lowering-algo swizzling-algo #t (set subexpr-layout)))
+             (when (hash-has-key? ir-bounds (ir-node-id ir-sub-expr))
+               (for ([impl hvx-sub-expr-impls])
+                 (hash-set! value-bounds impl (hash-ref ir-bounds (ir-node-id ir-sub-expr)))))
+             hvx-sub-expr-impls)))
 
-    ;; Pop node from trace
-    (set! trace (rest trace))
+        ;; Pop node from trace
+        (set! trace (rest trace))
   
-    ;; Lower the current uber-instruction using the lowered sub-expressions as leaves in the expression graph
-    (cond
-      [(combine? ir-expr) hvx-sub-exprs]
-      [(hash-has-key? ir-annotations (ir-node-id ir-expr))
-       (define halide-spec (hash-ref ir-annotations (ir-node-id ir-expr)))
-       (define-values (successful? hvx-expr _) (lower-to-optimal-hvx halide-spec ir-expr hvx-sub-exprs lowering-algo swizzling-algo sub-expr? output-layout))
-       (hash-set! translation-history hvx-expr halide-spec)
-       hvx-expr]
-      [(load-data? ir-expr)
-       (define parent-expr (first trace))
-       (define parent-spec (hash-ref ir-annotations (ir-node-id parent-expr)))
-       (define live-data (halide:extract-buffer-reads parent-spec))
-       (define live-buffers (halide:extract-live-buffers parent-spec))
-       (for/list ([b live-buffers]) (??abstr-load live-data b))])))
+        ;; Lower the current uber-instruction using the lowered sub-expressions as leaves in the expression graph
+        ;; The lower expression will produce output in the selected output-layout
+        (cond
+          [(combine? ir-expr) hvx-sub-exprs]
+          [(hash-has-key? ir-annotations (ir-node-id ir-expr))
+           (define halide-spec (hash-ref ir-annotations (ir-node-id ir-expr)))
+           (define-values (successful? hvx-expr _) (lower-to-optimal-hvx halide-spec ir-expr hvx-sub-exprs lowering-algo swizzling-algo sub-expr? output-layout))
+           (hash-set! translation-history hvx-expr halide-spec)
+           hvx-expr]
+          [(load-data? ir-expr)
+           (define parent-expr (first trace))
+           (define parent-spec (hash-ref ir-annotations (ir-node-id parent-expr)))
+           (define live-data (halide:extract-buffer-reads parent-spec))
+           (define live-buffers (halide:extract-live-buffers parent-spec))
+           (for/list ([b live-buffers]) (??abstr-load live-data b))])))
+
+    (first (sort lowered-implementations (lambda (v1 v2) (< (basic-expr-cost v1) (basic-expr-cost v2)))))))
 
 (define (lower-to-optimal-hvx halide-expr ir-expr hvx-sub-exprs lowering-algo swizzling-algo sub-expr? output-layout [cost-ub 99999])
   (define-values (successful? hvx-expr expr-cost)
@@ -87,7 +100,7 @@
   ;; Synthesize equivalent HVX template (compute instructions)
   (define-values (successful? hvx-template template-cost)
     (synthesize-hvx-template halide-expr ir-expr hvx-sub-exprs value-bounds translation-history lowering-algo cost-ub))
-
+  
   (cond
     [successful?
      (cond
@@ -149,6 +162,10 @@
              (break-to-deinterleavedx2-tiles halide-expr (* 4 elems-per-hvx-tile) 0)]
             [(and (eq? output-layout 'deinterleavedx2) (eq? hvx-tile-size 2048))
              (break-to-deinterleaved-tiles halide-expr (* 2 elems-per-hvx-tile) 0)]
+            [(and (eq? output-layout 'interleaved) (eq? hvx-tile-size 1024))
+             (break-to-standard-tiles halide-expr elems-per-hvx-tile 0)]
+            [(and (eq? output-layout 'interleaved) (eq? hvx-tile-size 2048))
+             (break-to-standard-tiles halide-expr (* 2 elems-per-hvx-tile) 0)]
             [else (error "NYI")]))
       
         (cond
@@ -224,7 +241,7 @@
      (define desired-input-layouts
        (match* (ir-expr desired-output-layout)
          ;; Interleaving instructions
-         [((saturate ir-sub-expr round? output-type) 'standard) (if round? (set 'deinterleaved) (set 'deinterleaved))] ;'standard
+         [((saturate ir-sub-expr round? output-type) 'standard) (if round? (set 'deinterleaved) (set 'deinterleaved 'standard))]
          [((saturate ir-sub-expr round? output-type) 'deinterleaved) (if round? (set 'deinterleavedx2) (set 'deinterleaved))]
          [((saturate ir-sub-expr round? output-type) 'deinterleavedx2) (set)]
          ;-----
