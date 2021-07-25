@@ -16,7 +16,7 @@ prof_dirs = $(addsuffix /profile,$(benchmarks))
 all: $(benchmarks)
 
 $(benchmarks): %: %/bin %/out %/profile
-	$(HEXAGON_CLANG) -O2 -mv66 -mhvx -mhvx-length=128B -DLOG2VLEN=7 -I $(HEADERS) -DQDSP6SS_PUB_BASE=0xFE200000 -c -S -emit-llvm $@/src/$@.c -o $@/bin/$@.ll
+	$(HEXAGON_CLANG) -O2 -mv66 -mhvx -mhvx-length=128B -DLOG2VLEN=7 -I $(HEADERS) -DQDSP6SS_PUB_BASE=0xFE200000 -c -S $@/src/$@.c -o $@/bin/$@.ll
 
 	$(HEXAGON_CLANG) -O2 -mv66 -mhvx -mhvx-length=128B -DLOG2VLEN=7 -I $(HEADERS) -DQDSP6SS_PUB_BASE=0xFE200000 -c -o $@/bin/$@.o $@/src/$@.c
 

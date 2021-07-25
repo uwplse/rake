@@ -124,7 +124,7 @@ int main(int argc, char **argv) {
   RESET_PMU();
   start_time = READ_PCYCLES();
 
-  Gaussian7x7u8(input, stride, width, height, output);
+  Gaussian7x7u8_2(input, stride, width, height, output);
 
   total_cycles = READ_PCYCLES() - start_time;
   DUMP_PMU();

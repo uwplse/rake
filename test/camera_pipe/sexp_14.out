@@ -1,0 +1,27 @@
+(halide.concat_vectors
+ int16x128
+ (list
+  (int16x64
+   #(struct:valign
+     #(struct:hi
+       #(struct:vreadp
+         #(struct:buffer deinterleaved int16)
+         (* 64 (+ t3069 (* 2 f7.s0.v0.fused.v0)))
+         #(struct:aligned 64 0)))
+     #(struct:vread
+       #(struct:buffer deinterleaved int16)
+       (* 64 (+ t3069 (* 2 f7.s0.v0.fused.v0)))
+       #(struct:aligned 64 0))
+     1))
+  (int16x64
+   #(struct:valign
+     #(struct:vread
+       #(struct:buffer deinterleaved int16)
+       (+ 128 (* 64 (+ t3069 (* 2 f7.s0.v0.fused.v0))))
+       #(struct:aligned 64 0))
+     #(struct:hi
+       #(struct:vreadp
+         #(struct:buffer deinterleaved int16)
+         (* 64 (+ t3069 (* 2 f7.s0.v0.fused.v0)))
+         #(struct:aligned 64 0)))
+     1))))

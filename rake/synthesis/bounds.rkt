@@ -30,7 +30,7 @@
   (define z3-base (current-solver))
 
   ;; Set solver timeout of 5 eseconds
-  (define z3-with-timeout (z3 #:options (hash-set (solver-options (current-solver)) ':timeout 3000)))
+  (define z3-with-timeout (z3 #:options (hash-set (solver-options (current-solver)) ':timeout 30000)))
   (current-solver z3-with-timeout)
 
   ;; I modded rosette to emit custom tactics. However, when custom tactics are provided, z3 ignores the optimization
@@ -77,14 +77,14 @@
     ;; Engine timed out / returned unsat / returned unknown
     [(or (unsat? sol-lb) (unknown? sol-lb) (unsat? sol-ub) (unknown? sol-ub))
      (destruct expr-in
-       [(int8_t _) (values (bv #x80 8) (bv #x7f 8))]
-       [(uint8_t _) (values (bv #x00 8) (bv #xff 8))]
-       [(int16_t _) (values (bv #x8000 16) (bv #x7fff 16))]
-       [(uint16_t _) (values (bv #x0000 16) (bv #xffff 16))]
-       [(int32_t _) (values (bv #x80000000 32) (bv #x7fffffff 32))]
-       [(uint32_t _) (values (bv #x00000000 32) (bv #xffffffff 32))]
-       [(int64_t _) (values (bv #x8000000000000000 32) (bv #x7fffffffffffffff 32))]
-       [(uint64_t _) (values (bv #x0000000000000000 32) (bv #xffffffffffffffff 32))])]
+       [(int8_t _) (values (int8_t (bv #x80 8)) (int8_t (bv #x7f 8)))]
+       [(uint8_t _) (values (uint8_t (bv #x00 8)) (uint8_t (bv #xff 8)))]
+       [(int16_t _) (values (int16_t (bv #x8000 16)) (int16_t (bv #x7fff 16)))]
+       [(uint16_t _) (values (uint16_t (bv #x0000 16)) (uint16_t (bv #xffff 16)))]
+       [(int32_t _) (values (int32_t (bv #x80000000 32)) (int32_t (bv #x7fffffff 32)))]
+       [(uint32_t _) (values (uint32_t (bv #x00000000 32)) (uint32_t (bv #xffffffff 32)))]
+       [(int64_t _) (values (int64_t (bv #x8000000000000000 64)) (int64_t (bv #x7fffffffffffffff 64)))]
+       [(uint64_t _) (values (uint64_t (bv #x0000000000000000 64)) (uint64_t (bv #xffffffffffffffff 64)))])]
     [else
      (values (evaluate expr sol-lb) (evaluate expr sol-ub))]))
 
@@ -125,6 +125,7 @@
              (set! inferred-axioms (append inferred-axioms (list (and (bvsle v (cpp:eval (cdr bnds))) (bvsge v (cpp:eval (car bnds)))))))]
             [else
              (set! inferred-axioms (append inferred-axioms (list (and (bvule v (cpp:eval (cdr bnds))) (bvuge v (cpp:eval (car bnds)))))))]))
+        (hash-set! mapping expr v)
         v])]
 
     ;; For all other expressions, recurse

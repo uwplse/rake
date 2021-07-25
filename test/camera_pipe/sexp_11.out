@@ -1,0 +1,19 @@
+(halide.concat_vectors
+ int16x128
+ (list
+  (int16x64
+   #(struct:vavg
+     #(struct:vread #(struct:buffer t2624-buf int16) 0 #(struct:aligned 0 0))
+     #(struct:vread #(struct:buffer t2625-buf int16) 0 #(struct:aligned 0 0))
+     #t))
+  (int16x64
+   #(struct:vavg
+     #(struct:vread
+       #(struct:buffer t2624-buf int16)
+       #(struct:sca-add 0 64)
+       #(struct:aligned 0 0))
+     #(struct:vread
+       #(struct:buffer t2625-buf int16)
+       #(struct:sca-add 0 64)
+       #(struct:aligned 0 0))
+     #t))))

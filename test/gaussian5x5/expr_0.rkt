@@ -1,29 +1,42 @@
 #lang rosette/safe
 
 (require rake)
+(init-logging "expr_0.runtimes")
 
-(define-symbolic-var bounded_input.s0.x.x int32_t)
-(define-symbolic-var t300 int32_t)
+(define-symbolic-buffer bounded_input uint8_t)
+(define-symbolic t279 integer?)
+(define-symbolic rows.s0.x.x integer?)
 
 (define axioms 
   (list ))
 
-(define input.extent.0 t300)
-(define t262.s (sca-min  (sca-mul  bounded_input.s0.x.x  (int32_t (bv 128 32)))  (sca-add  input.extent.0  (int32_t (bv 1 32)))))
+(define output.extent.0 (var-lookup 'output.extent.0 t279))
 
 (define halide-expr
- (uint8x128
+ (vec-add
   (vec-add
-   (vec-max
-    (vec-min
-     (ramp (sca-add (sca-mul bounded_input.s0.x.x (int32_t (bv 128 32))) (int32_t (bv -2 32))) (int32_t (bv 1 32)) 128)
-     (x128 (sca-add input.extent.0 (int32_t (bv -1 32)))))
-    (x128 (int32_t (bv 0 32))))
-   (x128 (sca-sub (int32_t (bv 2 32)) (sca-max t262.s (int32_t (bv 2 32))))))))
+   (vec-add
+    (vec-mul
+     (int16x128
+      (load bounded_input (ramp (sca-mul (sca-add (sca-div (sca-add output.extent.0 255) 128) rows.s0.x.x) 128) 1 128) (aligned 128 0)))
+     (x128 (int16_t (bv 4 16))))
+    (vec-add
+     (vec-mul
+      (int16x128
+       (uint16x128
+        (load bounded_input (ramp (sca-mul (sca-add (sca-mul (sca-div (sca-add output.extent.0 255) 128) 2) rows.s0.x.x) 128) 1 128) (aligned 128 0))))
+      (int16x128
+       (x128 (int8_t (bv 6 8)))))
+     (vec-mul
+      (int16x128
+       (load bounded_input (ramp (sca-mul (sca-add (sca-mul (sca-div (sca-add output.extent.0 255) 128) 3) rows.s0.x.x) 128) 1 128) (aligned 128 0)))
+      (x128 (int16_t (bv 4 16))))))
+   (int16x128
+    (load bounded_input (ramp (sca-mul rows.s0.x.x 128) 1 128) (aligned 128 0))))
+  (int16x128
+   (load bounded_input (ramp (sca-mul (sca-add (sca-mul (sca-div (sca-add output.extent.0 255) 128) 4) rows.s0.x.x) 128) 1 128) (aligned 128 0)))))
 
 (define spec (synthesis-spec 'halide-ir halide-expr axioms))
 (define hvx-expr (synthesize-hvx spec 'greedy 'enumerative 'enumerative))
 
-;(define out (open-output-file "sexp_0.out" #:exists 'replace))
-;(pretty-write (llvm-codegen hvx-expr) out)
-;(close-output-port out)
+(llvm-codegen hvx-expr "sexp_0.out")

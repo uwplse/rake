@@ -1,0 +1,57 @@
+(halide.concat_vectors
+ uint32x128
+ (list
+  (uint32x64
+   (llvm.hexagon.V6.vunpackuh.128B
+    uint32x64
+    (list
+     (uint16x64
+      (llvm.hexagon.V6.lo.128B
+       uint16x64
+       (list
+        (uint16x128
+         (llvm.hexagon.V6.vunpackub.128B
+          uint16x128
+          (list
+           (uint8x128
+            (llvm.hexagon.V6.vread.128B
+             uint8x128
+             (list
+              (int32 input)
+              (int32
+               (+
+                (* sum_input.s1.r9$x.r9$x 128)
+                (-
+                 (*
+                  (- (+ output.min.1 sum_input.s1.b.rebased) input.min.1)
+                  input.stride.1)
+                 input.min.0)))
+              (int32 1)
+              (int32 0)))))))))))))
+  (uint32x64
+   (llvm.hexagon.V6.vunpackuh.128B
+    uint32x64
+    (list
+     (uint16x64
+      (llvm.hexagon.V6.hi.128B
+       uint16x64
+       (list
+        (uint16x128
+         (llvm.hexagon.V6.vunpackub.128B
+          uint16x128
+          (list
+           (uint8x128
+            (llvm.hexagon.V6.vread.128B
+             uint8x128
+             (list
+              (int32 input)
+              (int32
+               (+
+                (* sum_input.s1.r9$x.r9$x 128)
+                (-
+                 (*
+                  (- (+ output.min.1 sum_input.s1.b.rebased) input.min.1)
+                  input.stride.1)
+                 input.min.0)))
+              (int32 1)
+              (int32 0)))))))))))))))

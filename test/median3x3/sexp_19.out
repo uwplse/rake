@@ -1,0 +1,103 @@
+(llvm.hexagon.V6.vmaxub.128B
+ uint8x128
+ (list
+  (uint8x128
+   (llvm.hexagon.V6.vminub.128B
+    uint8x128
+    (list
+     (uint8x128
+      (llvm.hexagon.V6.vmaxub.128B
+       uint8x128
+       (list
+        (uint8x128
+         (llvm.hexagon.V6.vread.128B
+          uint8x128
+          (list (int32 t1180-buf) (int32 0) (int32 0) (int32 0))))
+        (uint8x128
+         (llvm.hexagon.V6.vread.128B
+          uint8x128
+          (list (int32 t1181-buf) (int32 0) (int32 0) (int32 0)))))))
+     (uint8x128
+      (llvm.hexagon.V6.vmaxub.128B
+       uint8x128
+       (list
+        (uint8x128
+         (llvm.hexagon.V6.vminub.128B
+          uint8x128
+          (list
+           (uint8x128
+            (llvm.hexagon.V6.vmaxub.128B
+             uint8x128
+             (list
+              (uint8x128
+               (llvm.hexagon.V6.vread.128B
+                uint8x128
+                (list (int32 t1182-buf) (int32 0) (int32 0) (int32 0))))
+              (uint8x128
+               (llvm.hexagon.V6.vread.128B
+                uint8x128
+                (list (int32 t1183-buf) (int32 0) (int32 0) (int32 0)))))))
+           (uint8x128
+            (llvm.hexagon.V6.vmaxub.128B
+             uint8x128
+             (list
+              (uint8x128
+               (llvm.hexagon.V6.vminub.128B
+                uint8x128
+                (list
+                 (uint8x128
+                  (llvm.hexagon.V6.vread.128B
+                   uint8x128
+                   (list (int32 t1177-buf) (int32 0) (int32 0) (int32 0))))
+                 (uint8x128
+                  (llvm.hexagon.V6.vread.128B
+                   uint8x128
+                   (list (int32 t1179-buf) (int32 0) (int32 0) (int32 0)))))))
+              (uint8x128
+               (llvm.hexagon.V6.vminub.128B
+                uint8x128
+                (list
+                 (uint8x128
+                  (llvm.hexagon.V6.vread.128B
+                   uint8x128
+                   (list (int32 t1178-buf) (int32 0) (int32 0) (int32 0))))
+                 (uint8x128
+                  (llvm.hexagon.V6.vmaxub.128B
+                   uint8x128
+                   (list
+                    (uint8x128
+                     (llvm.hexagon.V6.vread.128B
+                      uint8x128
+                      (list (int32 t1177-buf) (int32 0) (int32 0) (int32 0))))
+                    (uint8x128
+                     (llvm.hexagon.V6.vread.128B
+                      uint8x128
+                      (list
+                       (int32 t1179-buf)
+                       (int32 0)
+                       (int32 0)
+                       (int32 0))))))))))))))))
+        (uint8x128
+         (llvm.hexagon.V6.vminub.128B
+          uint8x128
+          (list
+           (uint8x128
+            (llvm.hexagon.V6.vread.128B
+             uint8x128
+             (list (int32 t1182-buf) (int32 0) (int32 0) (int32 0))))
+           (uint8x128
+            (llvm.hexagon.V6.vread.128B
+             uint8x128
+             (list (int32 t1183-buf) (int32 0) (int32 0) (int32 0)))))))))))))
+  (uint8x128
+   (llvm.hexagon.V6.vminub.128B
+    uint8x128
+    (list
+     (uint8x128
+      (llvm.hexagon.V6.vread.128B
+       uint8x128
+       (list (int32 t1180-buf) (int32 0) (int32 0) (int32 0))))
+     (uint8x128
+      (llvm.hexagon.V6.vread.128B
+       uint8x128
+       (list (int32 t1181-buf) (int32 0) (int32 0) (int32 0)))))))))

@@ -1,0 +1,99 @@
+(halide.concat_vectors
+ uint32x128
+ (list
+  (uint32x32
+   (llvm.hexagon.V6.vrmpyub.acc.128B
+    uint32x32
+    (list
+     (uint32x32
+      (llvm.hexagon.V6.vread.128B
+       uint32x32
+       (list (int32 multiplied_no_offsets) (int32 256) (int32 0) (int32 256))))
+     (uint8x128
+      (llvm.hexagon.V6.vread.128B
+       uint8x128
+       (list
+        (int32 mat_b_swizzled)
+        (int32 (* multiplied_no_offsets.s1.k$x 512))
+        (int32 512)
+        (int32 0))))
+     (int32
+      (halide.reinterpret
+       uint32
+       (list
+        (uint8x4
+         (llvm.hexagon.V6.vread.128B
+          uint8x4
+          (list (int32 mat_a) (int32 t73) (int32 4) (int32 0))))))))))
+  (uint32x32
+   (llvm.hexagon.V6.vrmpyub.acc.128B
+    uint32x32
+    (list
+     (uint32x32
+      (llvm.hexagon.V6.vread.128B
+       uint32x32
+       (list (int32 multiplied_no_offsets) (int32 288) (int32 0) (int32 256))))
+     (uint8x128
+      (llvm.hexagon.V6.vread.128B
+       uint8x128
+       (list
+        (int32 mat_b_swizzled)
+        (int32 (+ (* multiplied_no_offsets.s1.k$x 512) 128))
+        (int32 512)
+        (int32 0))))
+     (int32
+      (halide.reinterpret
+       uint32
+       (list
+        (uint8x4
+         (llvm.hexagon.V6.vread.128B
+          uint8x4
+          (list (int32 mat_a) (int32 t73) (int32 4) (int32 0))))))))))
+  (uint32x32
+   (llvm.hexagon.V6.vrmpyub.acc.128B
+    uint32x32
+    (list
+     (uint32x32
+      (llvm.hexagon.V6.vread.128B
+       uint32x32
+       (list (int32 multiplied_no_offsets) (int32 320) (int32 0) (int32 256))))
+     (uint8x128
+      (llvm.hexagon.V6.vread.128B
+       uint8x128
+       (list
+        (int32 mat_b_swizzled)
+        (int32 (+ (* multiplied_no_offsets.s1.k$x 512) 256))
+        (int32 512)
+        (int32 0))))
+     (int32
+      (halide.reinterpret
+       uint32
+       (list
+        (uint8x4
+         (llvm.hexagon.V6.vread.128B
+          uint8x4
+          (list (int32 mat_a) (int32 t73) (int32 4) (int32 0))))))))))
+  (uint32x32
+   (llvm.hexagon.V6.vrmpyub.acc.128B
+    uint32x32
+    (list
+     (uint32x32
+      (llvm.hexagon.V6.vread.128B
+       uint32x32
+       (list (int32 multiplied_no_offsets) (int32 352) (int32 0) (int32 256))))
+     (uint8x128
+      (llvm.hexagon.V6.vread.128B
+       uint8x128
+       (list
+        (int32 mat_b_swizzled)
+        (int32 (+ (* multiplied_no_offsets.s1.k$x 512) 384))
+        (int32 512)
+        (int32 0))))
+     (int32
+      (halide.reinterpret
+       uint32
+       (list
+        (uint8x4
+         (llvm.hexagon.V6.vread.128B
+          uint8x4
+          (list (int32 mat_a) (int32 t73) (int32 4) (int32 0))))))))))))

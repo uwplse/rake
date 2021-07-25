@@ -1,29 +1,32 @@
 #lang rosette/safe
 
 (require rake)
+(init-logging "expr_11.runtimes")
 
-(define-symbolic-buffer deinterleaved int16_t)
-(define-symbolic-buffer f13 int16_t)
-(define-symbolic f28.s0.v0.v0 integer?)
-(define-symbolic t3139 integer?)
-(define-symbolic t3141 integer?)
+(define-symbolic-buffer t2624-buf int16_t)
+(define-symbolic-buffer t2625-buf int16_t)
+(define t2624 (load t2624-buf (ramp 0 1 128) (aligned 0 0)))
+(define t2625 (load t2625-buf (ramp 0 1 128) (aligned 0 0)))
 
 (define axioms 
-  (list ))
+  (list 
+   (values-range-from t2624-buf (int16_t (bv -32768 16)) (int16_t (bv 32767 16)))
+   (values-range-from t2625-buf (int16_t (bv -32768 16)) (int16_t (bv 32767 16)))))
 
-(define t2858.s t3139)
-(define t2852.s t3141)
 
 (define halide-expr
- (interleave
-  (slice_vectors
-   (load deinterleaved (ramp (* (+ f28.s0.v0.v0 t2852.s) 64) 1 128) (aligned 64 0)) 1 1 64)
-  (slice_vectors
-   (load f13 (ramp (* (+ f28.s0.v0.v0 t2858.s) 64) 1 128) (aligned 64 0)) 1 1 64)))
+ (int16x128
+  (vec-div
+   (vec-add
+    (vec-add
+     (int32x128
+      t2624)
+     (int32x128
+      t2625))
+    (x128 (int32_t (bv 1 32))))
+   (x128 (int32_t (bv 2 32))))))
 
 (define spec (synthesis-spec 'halide-ir halide-expr axioms))
 (define hvx-expr (synthesize-hvx spec 'greedy 'enumerative 'enumerative))
 
-;(define out (open-output-file "sexp_11.out" #:exists 'replace))
-;(pretty-write (llvm-codegen hvx-expr) out)
-;(close-output-port out)
+(llvm-codegen hvx-expr "sexp_11.out")

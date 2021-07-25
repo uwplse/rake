@@ -1,0 +1,27 @@
+(llvm.hexagon.V6.vsubw.128B
+ int32x32
+ (list
+  (int32x32
+   (llvm.hexagon.V6.vaddw.128B
+    int32x32
+    (list
+     (int32x32
+      (llvm.hexagon.V6.vread.128B
+       int32x32
+       (list
+        (int32 bias_im_global_wrapper$0)
+        (int32 (* offset_c.s2.c.c 32))
+        (int32 32)
+        (int32 0))))
+     (int32x32
+      (llvm.hexagon.V6.lvsplatw.128B
+       int32x32
+       (list (int32 (* (int32 t843.s) (int32 0x00000004)))))))))
+  (int32x32
+   (llvm.hexagon.V6.vread.128B
+    int32x32
+    (list
+     (int32 offset_c)
+     (int32 (* offset_c.s2.c.c 32))
+     (int32 32)
+     (int32 0))))))

@@ -1,36 +1,91 @@
 #lang rosette/safe
 
 (require rake)
+(init-logging "expr_2.runtimes")
 
-(define-symbolic-var bounded_input.s0.x.x.rebased int32_t)
-(define-symbolic-var t425 int32_t)
-(define-symbolic-var t430 int32_t)
-(define-symbolic-var t436 int32_t)
-(define-symbolic-var t437 int32_t)
-(define-symbolic-var t439 int32_t)
+(define-symbolic-buffer bounded_input uint8_t)
+(define-symbolic-buffer c6 uint8_t)
+(define-symbolic-buffer c7 uint8_t)
+(define-symbolic-buffer t256.s.s-buf uint8_t)
+(define-symbolic-buffer t258.s-buf uint8_t)
+(define-symbolic-buffer t255.s-buf uint8_t)
+(define-symbolic-buffer t259.s.s-buf uint8_t)
+(define-symbolic-buffer t433-buf uint8_t)
+(define t256.s.s (load t256.s.s-buf (ramp 0 1 256) (aligned 0 0)))
+(define-symbolic t454 integer?)
+(define-symbolic t455 integer?)
+(define t258.s (load t258.s-buf (ramp 0 1 128) (aligned 0 0)))
+(define t255.s (load t255.s-buf (ramp 0 1 128) (aligned 0 0)))
+(define t259.s.s (load t259.s.s-buf (ramp 0 1 256) (aligned 0 0)))
+(define t433 (load t433-buf (ramp 0 1 128) (aligned 0 0)))
+(define-symbolic output.s0.x.x integer?)
 
 (define axioms 
-  (list ))
+  (list 
+   (values-range-from t256.s.s-buf (uint8_t (bv 0 8)) (uint8_t (bv 255 8)))
+   (values-range-from t258.s-buf (uint8_t (bv 0 8)) (uint8_t (bv 255 8)))
+   (values-range-from t255.s-buf (uint8_t (bv 0 8)) (uint8_t (bv 255 8)))
+   (values-range-from t259.s.s-buf (uint8_t (bv 0 8)) (uint8_t (bv 255 8)))
+   (values-range-from t433-buf (uint8_t (bv 0 8)) (uint8_t (bv 255 8)))))
 
-(define input.extent.0 t425)
-(define output.min.0 t430)
-(define t309 (sca-min  t437  (sca-add  (sca-max  t436  (int32_t (bv -1 32)))  (int32_t (bv 1 32)))))
-(define t304 (sca-max  t439  t309))
-(define t414.s (sca-min  (sca-add  (sca-mul  (sca-add  bounded_input.s0.x.x.rebased  t304)  (int32_t (bv 128 32)))  output.min.0)  input.extent.0))
+(define t301 (var-lookup 't301 (sca-max  (sca-mul  t455  128)  (sca-add  (sca-mul  t454  128)  2))))
 
 (define halide-expr
- (uint8x128
-  (vec-add
-   (vec-max
+ (let ([t485  (uint16x128
+  (slice_vectors
+   t256.s.s 2 1 128))])
+  (let ([t486   (uint16x128
+   (slice_vectors
+    t259.s.s 2 1 128))])
+   (uint8x128
     (vec-min
-     (ramp (sca-add (sca-add (sca-mul (sca-add bounded_input.s0.x.x.rebased t304) (int32_t (bv 128 32))) output.min.0) (int32_t (bv -1 32))) (int32_t (bv 1 32)) 128)
-     (x128 (sca-add input.extent.0 (int32_t (bv -1 32)))))
-    (x128 (int32_t (bv 0 32))))
-   (x128 (sca-sub (int32_t (bv 1 32)) (sca-max t414.s (int32_t (bv 1 32))))))))
+     (vec-add
+      (vec-absd
+       (vec-add
+        (vec-add
+         (vec-shl
+          (uint16x128
+           (slice_vectors
+            (load c6 (ramp 0 1 256) (aligned 0 0)) 1 1 128))
+          (x128 (uint16_t (bv 1 16))))
+         (uint16x128
+          t255.s))
+        t485)
+       (vec-add
+        (vec-add
+         (vec-shl
+          (uint16x128
+           (slice_vectors
+            (load c7 (ramp 0 1 256) (aligned 0 0)) 1 1 128))
+          (x128 (uint16_t (bv 1 16))))
+         (uint16x128
+          t258.s))
+        t486))
+      (vec-absd
+       (vec-add
+        (vec-add
+         (vec-shl
+          (uint16x128
+           t433)
+          (x128 (uint16_t (bv 1 16))))
+         (uint16x128
+          t255.s))
+        (uint16x128
+         t258.s))
+       (vec-add
+        (vec-add
+         (vec-shl
+          (uint16x128
+           (slice_vectors
+            (concat_vectors
+             t433
+             (load bounded_input (ramp (sca-add (sca-mul (sca-add (sca-mul (sca-div (sca-add t301 255) 128) 3) output.s0.x.x) 128) 128) 1 128) (aligned 128 0))) 2 1 128))
+          (x128 (uint16_t (bv 1 16))))
+         t485)
+        t486)))
+     (x128 (uint16_t (bv 255 16))))))))
 
 (define spec (synthesis-spec 'halide-ir halide-expr axioms))
 (define hvx-expr (synthesize-hvx spec 'greedy 'enumerative 'enumerative))
 
-;(define out (open-output-file "sexp_2.out" #:exists 'replace))
-;(pretty-write (llvm-codegen hvx-expr) out)
-;(close-output-port out)
+(llvm-codegen hvx-expr "sexp_2.out")

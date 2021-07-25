@@ -829,7 +829,7 @@ void Gaussian7x7u8(
 
     HEXAGON_Vect dims = 0x000007800780000C;
 
-    uint16_t *rows  = memalign(VLEN, width*4*sizeof(uint16_t));
+    uint16_t *rows  = (uint16_t*)memalign(VLEN, width*4*sizeof(uint16_t));
 
     for( y = 3; y < height - 3; y+=4 )
     {

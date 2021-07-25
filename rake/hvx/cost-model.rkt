@@ -55,7 +55,7 @@
     [(vpacke Vu Vv) 1]
     [(vpacko Vu Vv) 1]
     [(vpacke-n Vu Vv signed?) 1]
-    [(vpacko-n Vu Vv) 1]
+    [(vpacko-n Vu Vv signed?) 1]
     [(vunpack Vu) 1]
     [(vunpacko Vu) 1]
     [(vlut Vu Vv) 1]
@@ -72,7 +72,7 @@
     [(vadd-w-acc Vdd Vu Vv) 1]
     [(vmpy Vu Rt) 1]
     [(vmpyi Vu Rt) 1]
-    [(vmpyie Vu Rt) 2]
+    [(vmpyie/o Vu Rt) 2]
     [(vmpye Vu Rt) 1]
     [(vmpy-acc Vdd Vu Rt) 1]
     [(vmpyi-acc Vd Vu Rt) 1]
@@ -89,8 +89,8 @@
     [(vrmpy-acc Vd Vu Rt) 1]
     [(vrmpy-2 Vu Rt) 1]
     [(vrmpy-acc-2 Vd Vu Rt) 1]
-    [(vrmpy-p Vuu Rt u1) 1]
-    [(vrmpy-p-acc Vdd Vuu Rt u1) 1]
+    [(vrmpy-sw Vuu Rt u1) 1]
+    [(vrmpy-sw-acc Vdd Vuu Rt u1) 1]
     [(vavg Vu Vv rnd?) 1]
     [(vnavg Vu Vv) 1]
     [(vasl Vu Rt) 1]
@@ -131,8 +131,8 @@
     [(vdmpy-sw-acc Vdd Vuu Rt) 1]
     [(vtmpy Vuu Rt) 1]
     [(vtmpy-acc Vdd Vuu Rt) 1]
-    [(vrmpy-p Vuu Rt u1) 1]
-    [(vrmpy-p-acc Vdd Vuu Rt u1) 1]
+    [(vrmpy-sw Vuu Rt u1) 1]
+    [(vrmpy-sw-acc Vdd Vuu Rt u1) 1]
     [_ 0]))
 
 (define (vecR-instr? p)
@@ -147,8 +147,8 @@
     [(vrmpy-acc Vd Vu Rt) 1]
     [(vrmpy-2 Vu Rt) 1]
     [(vrmpy-acc-2 Vd Vu Rt) 1]
-    [(vrmpy-p Vuu Rt u1) 1]
-    [(vrmpy-p-acc Vdd Vuu Rt u1) 1]
+    [(vrmpy-sw Vuu Rt u1) 1]
+    [(vrmpy-sw-acc Vdd Vuu Rt u1) 1]
     [_ 0]))
 
 (define (count-vecR-instrs p)

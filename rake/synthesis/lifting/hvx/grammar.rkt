@@ -5,6 +5,7 @@
   (only-in racket/base error exit)
   (rename-in racket/list [remove-duplicates remove-dups])
   rosette/lib/destruct
+  rosette/lib/match
   rosette/lib/angelic
   rake/cpp
   rake/halide
@@ -48,7 +49,7 @@
          [(halide:cast-op? halide-expr)
           ;; Try folding by updating the output type or the saturation flag saturate
           (define e-type (halide:elem-type halide-expr))
-          (define in-type (hvx-ir:elem-type sub-expr))
+          (define in-type (hvx-ir:elem-type^ sub-expr))
           (define narrower-type (if (<= (cpp:type-bw e-type) (cpp:type-bw output-type)) e-type output-type))
           (define wider-type (if (>= (cpp:type-bw in-type) (cpp:type-bw narrower-type)) in-type narrower-type))
           (list (vs-mpy-add (get-node-id) sub-expr weight-matrix wider-type (choose* #t #f)))]
@@ -58,7 +59,8 @@
           (list (vs-mpy-add (get-node-id) updated-sub-expr (append weight-matrix (list f)) (halide:elem-type halide-expr) saturate?))]
          [(or (vec-mul? halide-expr) (vec-shl? halide-expr))
           ;; Try folding the mul by updating the weight-matrix
-          (define updated-weights (map (lambda (w) (mk-cpp-expr (bvmul (cpp:eval (cpp:cast w output-type)) (cpp:eval (cpp:cast f output-type))) output-type)) weight-matrix))
+          (define castfn (match output-type ['int8 int8x1] ['int16 int16x1] ['int32 int32x1] ['uint8 uint8x1] ['uint16 uint16x1] ['uint32 uint32x1]))
+          (define updated-weights (map (lambda (w) (sca-mul (castfn w) (castfn f))) weight-matrix))
           (list (vs-mpy-add (get-node-id) sub-expr updated-weights output-type saturate?))]
          [(and (vector_reduce? halide-expr) (eq? (length weight-matrix) 1))
           ;; Try folding the vr by updating the weight-matrix
@@ -76,15 +78,20 @@
        (cond
          [(halide:cast-op? halide-expr)
           ;; Try folding by updating the output type or the saturation flag
-          (list (vv-mpy-add (get-node-id) sub-expr width (halide:elem-type halide-expr) (choose* #t #f)))]
+          (define e-type (halide:elem-type halide-expr))
+          (define in-type (hvx-ir:elem-type^ sub-expr))
+          (define narrower-type (if (<= (cpp:type-bw e-type) (cpp:type-bw output-type)) e-type output-type))
+          (define wider-type (if (>= (cpp:type-bw in-type) (cpp:type-bw narrower-type)) in-type narrower-type))
+          (list (vv-mpy-add (get-node-id) sub-expr width wider-type (choose* #t #f)))]
          [(vec-add? halide-expr)
           ;; Try folding the add by increasing the width
           (define updated-sub-expr (update-input-data sub-expr halide-expr))
           (list (vv-mpy-add (get-node-id) updated-sub-expr (add1 width) output-type saturate?))]
          [(vector_reduce? halide-expr)
           ;; Try folding the add by increasing the width
+          (define e-type (halide:elem-type halide-expr))
           (define updated-sub-expr (update-input-data sub-expr halide-expr))
-          (list (vv-mpy-add (get-node-id) updated-sub-expr (vector_reduce-width halide-expr) output-type saturate?))]
+          (list (vv-mpy-add (get-node-id) updated-sub-expr (vector_reduce-width halide-expr) e-type saturate?))]
          [else
           ;; Check if the new node is an identity func. Ex: saturation where its not needed etc.
           (list (vv-mpy-add (get-node-id) sub-expr width output-type (choose* #t #f)))])]
@@ -302,8 +309,7 @@
     [(x512 sca) (list (broadcast (get-node-id) sca))]
 
     ;; Data loads & shuffles
-    [(ramp base stride len)
-     (list (build-vec (get-load-id) (halide:interpret base) (halide:interpret stride) (halide:interpret len)))]
+    [(ramp base stride len) (list (build-vec (get-load-id) base stride len))]
     
     [(load buf idxs align) (list (mk-load-instr halide-expr))]
     [(slice_vectors vec base stride len) (list (mk-load-instr halide-expr))]
@@ -376,13 +382,13 @@
         (list (int8_t (bv 1 8)) (int8_t (bv 1 8)))
         (halide:elem-type halide-expr)
         #f)
-       ;(if (subexprs-are-loads? lifted-sub-exprs)
-         ;(vs-mpy-add
-          ;(get-node-id)
-          ;(mk-load-instr halide-expr)       ;; Use a new load-data node as the sub-expr
-          ;(list (int8_t (bv 1 8)) (int8_t (bv 1 8)))
-          ;(halide:elem-type halide-expr)
-          ;#f) '())
+       (if (subexprs-are-loads? lifted-sub-exprs)
+         (vs-mpy-add
+          (get-node-id)
+          (mk-load-instr halide-expr)       ;; Use a new load-data node as the sub-expr
+          (list (int8_t (bv 1 8)) (int8_t (bv 1 8)))
+          (halide:elem-type halide-expr)
+          #f) '())
        (mk-vs-mpy-add-combine-subsubexprs ;; Extend sub-sub-exprs (combine them)
         lifted-sub-exprs
         (list (int8_t (bv 1 8)) (int8_t (bv 1 8)))

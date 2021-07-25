@@ -1,0 +1,77 @@
+(halide.concat_vectors
+ int16x128
+ (list
+  (int16x64
+   (llvm.hexagon.V6.vpackeh.128B
+    int16x64
+    (list
+     (int16x64
+      (llvm.hexagon.V6.vread.128B
+       int16x64
+       (list
+        (int32 f1)
+        (int32
+         (+
+          (+
+           120
+           (+
+            (* 256 deinterleaved.s0.v0.v0)
+            (+ (* 128 t3060) (- 0 (max (* 128 t3059) 120)))))
+          64))
+        (int32 8)
+        (int32 0))))
+     (int16x64
+      (llvm.hexagon.V6.lo.128B
+       int16x64
+       (list
+        (int16x128
+         (llvm.hexagon.V6.vreadp.128B
+          int16x128
+          (list
+           (int32 f1)
+           (int32
+            (+
+             120
+             (+
+              (* 256 deinterleaved.s0.v0.v0)
+              (+ (* 128 t3060) (- 0 (max (* 128 t3059) 120))))))
+           (int32 8)
+           (int32 0))))))))))
+  (int16x64
+   (llvm.hexagon.V6.vpackeh.128B
+    int16x64
+    (list
+     (int16x64
+      (llvm.hexagon.V6.vread.128B
+       int16x64
+       (list
+        (int32 f1)
+        (int32
+         (+
+          (+
+           120
+           (+
+            (* 256 deinterleaved.s0.v0.v0)
+            (+ (* 128 t3060) (- 0 (max (* 128 t3059) 120)))))
+          192))
+        (int32 8)
+        (int32 0))))
+     (int16x64
+      (llvm.hexagon.V6.hi.128B
+       int16x64
+       (list
+        (int16x128
+         (llvm.hexagon.V6.vreadp.128B
+          int16x128
+          (list
+           (int32 f1)
+           (int32
+            (+
+             (+
+              120
+              (+
+               (* 256 deinterleaved.s0.v0.v0)
+               (+ (* 128 t3060) (- 0 (max (* 128 t3059) 120)))))
+             64))
+           (int32 8)
+           (int32 0))))))))))))

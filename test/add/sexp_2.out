@@ -14,6 +14,10 @@
           int16x64
           (list
            (int16x64
+            (halide.ir.x64
+             int16x64
+             (list (int16 (int16x1 int16 (list (uint8 output_zero)))))))
+           (int16x64
             (llvm.hexagon.V6.vroundwh.128B
              int16x64
              (list
@@ -154,7 +158,11 @@
                     (int32
                      (halide.hexagon.dup2.h
                       int32
-                      (list (int16 input1_multiplier))))))))))
+                      (list
+                       (int16
+                        (int16x1
+                         int16
+                         (list (int16 input1_multiplier)))))))))))))
               (int32x32
                (llvm.hexagon.V6.lo.128B
                 int32x32
@@ -292,16 +300,20 @@
                     (int32
                      (halide.hexagon.dup2.h
                       int32
-                      (list (int16 input1_multiplier)))))))))))))
-           (int16x64
-            (halide.ir.x64
-             int16x64
-             (list (int16 (int16x1 int16 (list (uint8 output_zero))))))))))
+                      (list
+                       (int16
+                        (int16x1
+                         int16
+                         (list (int16 input1_multiplier)))))))))))))))))))
         (int16x64
          (llvm.hexagon.V6.vaddh.128B
           int16x64
           (list
            (int16x64
+            (halide.ir.x64
+             int16x64
+             (list (int16 (int16x1 int16 (list (uint8 output_zero)))))))
+           (int16x64
             (llvm.hexagon.V6.vroundwh.128B
              int16x64
              (list
@@ -442,7 +454,11 @@
                     (int32
                      (halide.hexagon.dup2.h
                       int32
-                      (list (int16 input1_multiplier))))))))))
+                      (list
+                       (int16
+                        (int16x1
+                         int16
+                         (list (int16 input1_multiplier)))))))))))))
               (int32x32
                (llvm.hexagon.V6.lo.128B
                 int32x32
@@ -580,10 +596,10 @@
                     (int32
                      (halide.hexagon.dup2.h
                       int32
-                      (list (int16 input1_multiplier)))))))))))))
-           (int16x64
-            (halide.ir.x64
-             int16x64
-             (list (int16 (int16x1 int16 (list (uint8 output_zero)))))))))))))
+                      (list
+                       (int16
+                        (int16x1
+                         int16
+                         (list (int16 input1_multiplier))))))))))))))))))))))
      (uint8x128 (halide.ir.x128 uint8x128 (list (uint8 output_max)))))))
   (uint8x128 (halide.ir.x128 uint8x128 (list (uint8 output_min))))))

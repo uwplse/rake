@@ -1,125 +1,128 @@
 #lang rosette/safe
 
 (require rake)
+(init-logging "expr_7.runtimes")
 
-(define-symbolic-buffer input_bounded uint8_t)
 (define-symbolic-buffer mask int8_t)
-(define-symbolic output.s0.x.x integer?)
-(define-symbolic t287 integer?)
-(define-symbolic t286 integer?)
+(define-symbolic-buffer t249-buf uint8_t)
+(define-symbolic-buffer t250.s-buf uint8_t)
+(define-symbolic-buffer t245-buf uint8_t)
+(define-symbolic-buffer t247-buf uint8_t)
+(define-symbolic-buffer t246.s-buf uint8_t)
+(define-symbolic-buffer t248.s-buf uint8_t)
+(define t249 (load t249-buf (ramp 0 1 128) (aligned 0 0)))
+(define t250.s (load t250.s-buf (ramp 0 1 128) (aligned 0 0)))
+(define t245 (load t245-buf (ramp 0 1 128) (aligned 0 0)))
+(define t247 (load t247-buf (ramp 0 1 128) (aligned 0 0)))
+(define t246.s (load t246.s-buf (ramp 0 1 128) (aligned 0 0)))
+(define t248.s (load t248.s-buf (ramp 0 1 128) (aligned 0 0)))
 
 (define axioms 
-  (list ))
+  (list 
+   (values-range-from t249-buf (uint8_t (bv 0 8)) (uint8_t (bv 255 8)))
+   (values-range-from t250.s-buf (uint8_t (bv 0 8)) (uint8_t (bv 255 8)))
+   (values-range-from t245-buf (uint8_t (bv 0 8)) (uint8_t (bv 255 8)))
+   (values-range-from t247-buf (uint8_t (bv 0 8)) (uint8_t (bv 255 8)))
+   (values-range-from t246.s-buf (uint8_t (bv 0 8)) (uint8_t (bv 255 8)))
+   (values-range-from t248.s-buf (uint8_t (bv 0 8)) (uint8_t (bv 255 8)))))
 
-(define t160 (max  (*  t287  128)  (+  (*  t286  128)  2)))
-(define t261 (load input_bounded (ramp (* (+ (* (quotient (+ t160 255) 128) 3) output.s0.x.x) 128) 1 128) (aligned 128 0)))
-(define t262.s (load input_bounded (ramp (+ (* (+ (* (quotient (+ t160 255) 128) 3) output.s0.x.x) 128) 128) 1 128) (aligned 128 0)))
-(define t263 (load input_bounded (ramp (* (+ (* (quotient (+ t160 255) 128) 4) output.s0.x.x) 128) 1 128) (aligned 128 0)))
-(define t264.s (load input_bounded (ramp (+ (* (+ (* (quotient (+ t160 255) 128) 4) output.s0.x.x) 128) 128) 1 128) (aligned 128 0)))
-(define t265 (load input_bounded (ramp (* (+ (* (quotient (+ t160 255) 128) 5) output.s0.x.x) 128) 1 128) (aligned 128 0)))
-(define t266.s (load input_bounded (ramp (+ (* (+ (* (quotient (+ t160 255) 128) 5) output.s0.x.x) 128) 128) 1 128) (aligned 128 0)))
 
 (define halide-expr
- (uint8x128
-  (vec-max
-   (vec-min
-    (vec-div
-     (vec-add
-      (vec-add
-       (vec-add
+ (let ([t312  (concat_vectors
+  t245
+  t246.s)])
+  (let ([t313   (concat_vectors
+   t247
+   t248.s)])
+   (let ([t314    (concat_vectors
+    t249
+    t250.s)])
+    (uint8x128
+     (vec-max
+      (vec-min
+       (vec-div
         (vec-add
          (vec-add
           (vec-add
            (vec-add
             (vec-add
-             (int32x128
-              (vec-mul
-               (int16x128
-                (uint16x128
-                 t261))
-               (int16x128
-                (x128 (load-sca mask 0)))))
+             (vec-add
+              (vec-add
+               (vec-add
+                (int32x128
+                 (vec-mul
+                  (int16x128
+                   (uint16x128
+                    t245))
+                  (int16x128
+                   (x128 (load-sca mask 0)))))
+                (int32x128
+                 (vec-mul
+                  (int16x128
+                   (uint16x128
+                    (slice_vectors
+                     t312 1 1 128)))
+                  (int16x128
+                   (x128 (load-sca mask 1))))))
+               (int32x128
+                (vec-mul
+                 (int16x128
+                  (uint16x128
+                   (slice_vectors
+                    t312 2 1 128)))
+                 (int16x128
+                  (x128 (load-sca mask 2))))))
+              (int32x128
+               (vec-mul
+                (int16x128
+                 (uint16x128
+                  t247))
+                (int16x128
+                 (x128 (load-sca mask 3))))))
              (int32x128
               (vec-mul
                (int16x128
                 (uint16x128
                  (slice_vectors
-                  (concat_vectors
-                   t261
-                   t262.s) 1 1 128)))
+                  t313 1 1 128)))
                (int16x128
-                (x128 (load-sca mask 1))))))
+                (x128 (load-sca mask 4))))))
             (int32x128
              (vec-mul
               (int16x128
                (uint16x128
                 (slice_vectors
-                 (concat_vectors
-                  t261
-                  t262.s) 2 1 128)))
+                 t313 2 1 128)))
               (int16x128
-               (x128 (load-sca mask 2))))))
+               (x128 (load-sca mask 5))))))
            (int32x128
             (vec-mul
              (int16x128
               (uint16x128
-               t263))
+               t249))
              (int16x128
-              (x128 (load-sca mask 3))))))
+              (x128 (load-sca mask 6))))))
           (int32x128
            (vec-mul
             (int16x128
              (uint16x128
               (slice_vectors
-               (concat_vectors
-                t263
-                t264.s) 1 1 128)))
+               t314 1 1 128)))
             (int16x128
-             (x128 (load-sca mask 4))))))
+             (x128 (load-sca mask 7))))))
          (int32x128
           (vec-mul
            (int16x128
             (uint16x128
              (slice_vectors
-              (concat_vectors
-               t263
-               t264.s) 2 1 128)))
+              t314 2 1 128)))
            (int16x128
-            (x128 (load-sca mask 5))))))
-        (int32x128
-         (vec-mul
-          (int16x128
-           (uint16x128
-            t265))
-          (int16x128
-           (x128 (load-sca mask 6))))))
-       (int32x128
-        (vec-mul
-         (int16x128
-          (uint16x128
-           (slice_vectors
-            (concat_vectors
-             t265
-             t266.s) 1 1 128)))
-         (int16x128
-          (x128 (load-sca mask 7))))))
-      (int32x128
-       (vec-mul
-        (int16x128
-         (uint16x128
-          (slice_vectors
-           (concat_vectors
-            t265
-            t266.s) 2 1 128)))
-        (int16x128
-         (x128 (load-sca mask 8))))))
-     (x128 (int32_t (bv 16 32))))
-    (x128 (int32_t (bv 255 32))))
-   (x128 (int32_t (bv 0 32))))))
+            (x128 (load-sca mask 8))))))
+        (x128 (int32_t (bv 16 32))))
+       (x128 (int32_t (bv 255 32))))
+      (x128 (int32_t (bv 0 32)))))))))
 
 (define spec (synthesis-spec 'halide-ir halide-expr axioms))
 (define hvx-expr (synthesize-hvx spec 'greedy 'enumerative 'enumerative))
 
-;(define out (open-output-file "sexp_7.out" #:exists 'replace))
-;(pretty-write (llvm-codegen hvx-expr) out)
-;(close-output-port out)
+(llvm-codegen hvx-expr "sexp_7.out")

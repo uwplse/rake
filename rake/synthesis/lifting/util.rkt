@@ -21,7 +21,7 @@
   (define updated-template template)
   (for-each
    (lambda (sub-expr)
-     (when (and (not (union? sub-expr)) (not (load-data? sub-expr)) (hash-has-key? translation-history (ir-node-id sub-expr)))
+     (when (and (not (union? sub-expr)) (not (load-data? sub-expr)) (not (broadcast? sub-expr)) (hash-has-key? translation-history (ir-node-id sub-expr)))
        (define equiv-halide-subexpr (hash-ref translation-history (ir-node-id sub-expr)))
        (define abstracted-halide-subexpr (make-abstr-halide-expr equiv-halide-subexpr))
        (define abstracted-ir-subexpr (make-ir-abstr-sub-expr sub-expr abstracted-halide-subexpr))
@@ -31,7 +31,7 @@
            [(rkt-equal? (unpack-abstr-exprs node) equiv-halide-subexpr) abstracted-halide-subexpr]
            [else node]))
        (set! updated-spec (halide:visit updated-spec abstract-sub-expr-halide))
-
+       
        (define (abstract-sub-expr-ir node)
          (cond
            [(abstr-ir-expr? node) node]

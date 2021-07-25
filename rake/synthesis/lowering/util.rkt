@@ -44,12 +44,13 @@
             [else
              (set!-values (updated-spec updated-template) (abstr-equiv-subexprs updated-spec updated-template sub-expr halide-sub-expr abstracted-halide-subexpr 0))])])))
    hvx-sub-exprs)
-  (values updated-spec (fix-swizzle-reads updated-spec updated-template) axioms))
+  (values updated-spec (if (not (empty? hvx-sub-exprs)) (fix-swizzle-reads updated-spec updated-template) updated-template) axioms))
 
 (define (abstr-equiv-subexprs spec template hvx-sub-expr halide-sub-expr abstracted-halide-subexpr offset [sub-expr-bounds (void)])
   (cond
     ;; Don't bother if the sub-expr is just a load or a broadcast (leaf nodes anyways)
     [(??abstr-load? hvx-sub-expr) (values spec template)]
+    [(??shuffle? hvx-sub-expr) (values spec template)]
     [(vsplat? hvx-sub-expr) (values spec template)]
     [else
       (define abstracted-hvx-subexpr (make-hvx-abstr-sub-expr hvx-sub-expr abstracted-halide-subexpr offset sub-expr-bounds))
@@ -63,7 +64,7 @@
       (define (abstract-sub-expr-hvx node [pos -1])
         (cond
           [(abstr-hvx-expr? node) node]
-          [(rkt-equal? node hvx-sub-expr) abstracted-hvx-subexpr]
+          [(rkt-equal? (unpack-abstr-exprs-hvx node) hvx-sub-expr) abstracted-hvx-subexpr]
           [else node]))
       (set! template (hvx:visit template abstract-sub-expr-hvx))
       (values spec template)]))
@@ -74,6 +75,13 @@
       [(abstr-halide-expr? node) (abstr-halide-expr-orig-expr node)]
       [else node]))
   (halide:visit expr unpacker))
+
+(define (unpack-abstr-exprs-hvx expr)
+  (define (unpacker node [pos -1])
+    (cond
+      [(abstr-hvx-expr? node) (abstr-hvx-expr-orig-expr node)]
+      [else node]))
+  (hvx:visit expr unpacker))
 
 (define (make-abstr-halide-expr halide-expr)
   (define elemT (halide:elem-type halide-expr))

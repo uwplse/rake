@@ -1,7 +1,7 @@
 #lang rosette/safe
 
 (require
-  (only-in racket/base values for make-hash hash-set! hash-has-key?)
+  (only-in racket/base exit values for make-hash hash-set! hash-has-key?)
   rosette/lib/destruct
   rosette/lib/synthax
   rake/internal/log
@@ -30,6 +30,9 @@
 
 (define (verification-lanes type)
   (cond
+    [(eq? type 'Qt8) '(0 63 64 127)]
+    [(eq? type 'Qt16) '(0 31 32 63)]
+    [(eq? type 'Qt32) '(0 15 16 31)]
     [(eq? type 'i8x128) '(0 63 64 127)]
     [(eq? type 'u8x128) '(0 63 64 127)]
     [(eq? type 'i16x64) '(0 31 32 63)]
@@ -61,7 +64,10 @@
 (define (run-synthesizer template halide-expr hvx-sub-exprs value-bounds translation-history)
   ;(pretty-print halide-expr)
   ;(pretty-print template)
-  
+
+  ;(pretty-print translation-history)
+  ;(pretty-print hvx-sub-exprs)
+
   (define-values (optimized-halide-expr optimized-template inferred-axioms)
     (optimize-query halide-expr template hvx-sub-exprs value-bounds translation-history))
 
@@ -78,11 +84,12 @@
     [else
      (define curr-lane (first lanes-to-verify))
 
-     ;(display (format "Verifying lane: ~a\n" curr-lane))
-     ;(println ((halide:interpret optimized-halide-expr) curr-lane))
-     ;(hvx:set-curr-cn curr-lane)
-     ;(println (let ([x (hvx:interpret optimized-template)]) (if (hvx:vec-pair? x) (hvx:v0-elem x curr-lane) (hvx:elem x curr-lane))))
-     
+;     (display (format "Verifying lane: ~a\n" curr-lane))
+;     (println inferred-axioms)
+;     (println ((halide:interpret optimized-halide-expr) curr-lane))
+;     (hvx:set-curr-cn curr-lane)
+;     (println (let ([x (hvx:interpret optimized-template)]) (let ([offset (quotient (hvx:num-elems x) 2)]) (if (hvx:vec-pair? x) (if (< curr-lane offset) (hvx:v0-elem x curr-lane) (hvx:v1-elem x (- curr-lane offset))) (hvx:elem x curr-lane)))))
+
      (define st (current-milliseconds))
      (clear-vc!)
      (for-each (lambda (axiom) (assume axiom)) inferred-axioms)
@@ -98,6 +105,7 @@
      (cond
        [(correct? sol)
         (define updated-template (evaluate optimized-template sol))
+        
         (define sub-sol (synthesize-incremental optimized-halide-expr updated-template inferred-axioms (rest lanes-to-verify) '()))
         (cond
           [(correct? sub-sol) sol]
@@ -108,12 +116,38 @@
         (unsat)])]))
 
 (define (lane-eq? oe se lane)
-  (hvx:set-curr-cn lane)
   (define offset (quotient (hvx:num-elems se) 2))
   (cond
     [(and (hvx:vec-pair? se) (< lane offset))
+     (hvx:set-curr-cn lane)
      (assert (eq? (oe lane) (hvx:v0-elem se lane)))]
     [(hvx:vec-pair? se)
+     (hvx:set-curr-cn lane)
      (assert (eq? (oe lane) (hvx:v1-elem se (- lane offset))))]
     [else
+     (hvx:set-curr-cn lane)
      (assert (eq? (oe lane) (hvx:elem se lane)))]))
+
+;[(hvx:vec-pair? se)
+; (hvx:set-curr-cn (* 2 lane))
+; (assert (eq? (oe (* 2 lane)) (hvx:v0-elem se lane)))
+; (hvx:set-curr-cn (+ 1 (* 2 lane)))
+; (assert (eq? (oe (+ 1 (* 2 lane))) (hvx:v1-elem se lane)))]
+;
+;(define (verification-lanes type)
+;  (cond
+;    [(eq? type 'Qt8) '(0 63 64 127)]
+;    [(eq? type 'Qt16) '(0 31 32 63)]
+;    [(eq? type 'Qt32) '(0 15 16 31)]
+;    [(eq? type 'i8x128) '(0 63 64 127)]
+;    [(eq? type 'u8x128) '(0 63 64 127)]
+;    [(eq? type 'i16x64) '(0 31 32 63)]
+;    [(eq? type 'u16x64) '(0 31 32 63)]
+;    [(eq? type 'i32x32) '(0 15 16 31)]
+;    [(eq? type 'u32x32) '(0 15 16 31)]
+;    [(eq? type 'i8x128x2) '(0 63 64 127)]
+;    [(eq? type 'u8x128x2) '(0 63 64 127)]
+;    [(eq? type 'i16x64x2) '(0 31 32 63)]
+;    [(eq? type 'u16x64x2) '(0 31 32 63)]
+;    [(eq? type 'i32x32x2) '(0 15 16 31)]
+;    [(eq? type 'u32x32x2) '(0 15 16 31)]))

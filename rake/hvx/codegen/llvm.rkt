@@ -3,6 +3,7 @@
 (require
   (only-in rosette/base/core/term @app)
   (only-in rosette/base/core/polymorphic ite)
+  (only-in rosette/base/core/term @app)
   rosette/lib/match
   rosette/lib/destruct
   rake/cpp
@@ -72,6 +73,10 @@
        [(int32_t _) (generate `lvsplatw (to-llvm-type hvx-expr) `(list ,(compile-scalar Rt)))]
        [(uint32_t _) (generate `lvsplatw (to-llvm-type hvx-expr) `(list ,(compile-scalar Rt)))])]
 
+    [(ramp base stride len)
+     `(halide.ir.ramp, (to-llvm-type hvx-expr)
+      `(list, (compile-scalar base), (compile-scalar stride), (compile-scalar len)))]
+
     ;;;;;;;;;;;;;;;; Instructions for data movement ;;;;;;;;;;;;;;;;
 
     [(lo Vuu) (generate `lo (to-llvm-type hvx-expr) `(list ,(input-arg Vuu)))]
@@ -87,6 +92,15 @@
        [((i32x32 v0) (i32x32 v1)) (generate `vcombine (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv)))]
        [((u32x32 v0) (u32x32 v1)) (generate `vcombine (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv)))])]
 
+    [(valign Vu Vv Rt)
+     (destruct* ((hvx:interpret Vu) (hvx:interpret Vv))
+       [((i8x128 v0) (i8x128 v1)) (generate (if (> Rt 7) `valignb `valignbi) (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv) (,t_i32 ,Rt)))]
+       [((u8x128 v0) (u8x128 v1)) (generate (if (> Rt 7) `valignb `valignbi) (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv) (,t_i32 ,Rt)))]
+       [((i16x64 v0) (i16x64 v1)) (generate (if (> (* 2 Rt) 7) `valignb `valignbi) (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv) (,t_i32 ,(* Rt 2))))]
+       [((u16x64 v0) (u16x64 v1)) (generate (if (> (* 2 Rt) 7) `valignb `valignbi) (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv) (,t_i32 ,(* Rt 2))))]
+       [((i32x32 v0) (i32x32 v1)) (generate (if (> (* 4 Rt) 7) `valignb `valignbi) (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv) (,t_i32 ,(* Rt 4))))]
+       [((u32x32 v0) (u32x32 v1)) (generate (if (> (* 4 Rt) 7) `valignb `valignbi) (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv) (,t_i32 ,(* Rt 4))))])]
+    
     [(vshuff Vu)
      (destruct (hvx:interpret Vu)
        [(i8x128 _) (generate `vshuffb (to-llvm-type hvx-expr) `(list ,(input-arg Vu)))]
@@ -273,12 +287,109 @@
     ;; Widening
     [(vsub-w Vu Vv)
      (match (list (hvx:interpret Vu) (hvx:interpret Vv))
-       [(list (u8x128 _) (u8x128 _)) (generate `vsububh (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv)))]
-       [(list (i16x64 _) (i16x64 _)) (generate `vsubhw (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv)))]
-       [(list (u16x64 _) (u16x64 _)) (generate `vsubuhw (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv)))])]
+       [(list (u8x128 v0) (u8x128 v1)) (generate `vsububh (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv)))]
+       [(list (i16x64 v0) (i16x64 v1)) (generate `vsubhw (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv)))]
+       [(list (u16x64 v0) (u16x64 v1)) (generate `vsubuhw (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv)))])]
+
+    [(vsub Vu Vv sat?)
+     (destruct* ((hvx:interpret Vu) (hvx:interpret Vv))
+       ;; Signed types
+       [((i8x128 lhs) (i8x128 rhs))
+        (cond
+          [sat? (generate `vsubbsat (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv)))]
+          [else (generate `vsubb (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv)))])]
+       [((i16x64 lhs) (i16x64 rhs))
+        (cond
+          [sat? (generate `vsubhsat (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv)))]
+          [else (generate `vsubh (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv)))])]
+       [((i32x32 lhs) (i32x32 rhs))
+        (cond
+          [sat? (generate `vsubwsat (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv)))]
+          [else (generate `vsubw (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv)))])]
+
+       ;; Unsigned types
+       [((u8x128 lhs) (i8x128 rhs))
+        (cond
+          [sat? (generate `vsubububb.sat (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv)))]
+          [else (generate `vsubb (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv)))])]
+       [((u8x128 lhs) (u8x128 rhs))
+        (cond
+          [sat? (generate `vsububsat (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv)))]
+          [else (generate `vsubb (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv)))])]
+       [((u16x64 lhs) (u16x64 rhs))
+        (cond
+          [sat? (generate `vsubuhsat (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv)))]
+          [else (generate `vsubh (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv)))])]
+       [((u32x32 lhs) (u32x32 rhs))
+        (cond
+          [sat? (generate `vsubuwsat (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv)))]
+          [else (generate `vsubw (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv)))])]
+
+       ;; Unsigned pair types
+       [((i8x128x2 lhs-v0 lhs-v1) (i8x128x2 rhs-v0 rhs-v1))
+        (cond
+          [sat? (generate `vsubbsat.dv (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv)))]
+          [else (generate `vsubb.dv (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv)))])]
+       [((i16x64x2 lhs-v0 lhs-v1) (i16x64x2 rhs-v0 rhs-v1))
+        (cond
+          [sat? (generate `vsubhsat.dv (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv)))]
+          [else (generate `vsubh.dv (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv)))])]
+       [((i32x32x2 lhs-v0 lhs-v1) (i32x32x2 rhs-v0 rhs-v1))
+        (cond
+          [sat? (generate `vsubwsat.dv (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv)))]
+          [else (generate `vsubw.dv (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv)))])]
+
+       ;; Unsigned pair types
+       [((u8x128x2 lhs-v0 lhs-v1) (u8x128x2 rhs-v0 rhs-v1))
+        (cond
+          [sat? (generate `vsububsat.dv (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv)))]
+          [else (generate `vsubb.dv (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv)))])]
+       [((u16x64x2 lhs-v0 lhs-v1) (u16x64x2 rhs-v0 rhs-v1))
+        (cond
+          [sat? (generate `vsubuhsat.dv (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv)))]
+          [else (generate `vsubh.dv (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv)))])]
+       [((u32x32x2 lhs-v0 lhs-v1) (u32x32x2 rhs-v0 rhs-v1))
+        (cond
+          [sat? (generate `vsubuwsat.dv (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv)))]
+          [else (generate `vsubw.dv (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv)))])])]
     
     ;;;;;;;;;;;;;;;;;;;;;;;;;; Multiplication ;;;;;;;;;;;;;;;;;;;;;;;;
 
+    ;; Vector scalar multiplication (non-widening)
+    [(vmpyi Vu Rt)
+     (destruct* ((hvx:interpret Vu) (hvx:interpret Rt))
+       [((i16x64 v0) (int8_t v1)) (generate `vmpyihb (to-llvm-type hvx-expr) `(list ,(input-arg Vu) (,t_i32 ,(compile-scalar (Rt.b Rt)))))]
+       [((i32x32 v0) (int8_t v1)) (generate `vmpyiwb (to-llvm-type hvx-expr) `(list ,(input-arg Vu) (,t_i32 ,(compile-scalar (Rt.b Rt)))))]
+       [((i32x32 v0) (uint8_t v1)) (generate `vmpyiwub (to-llvm-type hvx-expr) `(list ,(input-arg Vu) (,t_i32 ,(compile-scalar (Rt.ub Rt)))))]
+       [((i32x32 v0) (int16_t v1)) (generate `vmpyiwh (to-llvm-type hvx-expr) `(list ,(input-arg Vu) (,t_i32 ,(compile-scalar (Rt.h Rt)))))])]
+
+    [(vmpyi-acc Vd Vu Rt)
+     (define iRt (hvx:interpret Rt))
+     (define one (cpp:eval (cpp:cast (int8_t (bv 1 8)) (cpp:type iRt))))
+     (define minus_one (cpp:eval (cpp:cast (int8_t (bv -1 8)) (cpp:type iRt))))
+     (define zero (cpp:eval (cpp:cast (int8_t (bv 0 8)) (cpp:type iRt))))
+     (cond
+       ;; If we are multiplying with 1, emit an add instead
+       [(and (concrete? iRt) (eq? (cpp:eval iRt) one))
+        (compile (vadd Vd Vu #f))]
+       ;; If we are multiplying with -11, emit a sub instead
+       [(and (concrete? iRt) (eq? (cpp:eval iRt) minus_one))
+        (compile (vsub Vd Vu #f))]
+       ;; If we are multiplying with a power of two, emit a shift left instead
+       [(and (concrete? iRt) (eq? (bvand (cpp:eval iRt) (bvsub (cpp:eval iRt) one)) zero)) 
+        (compile (vasl-acc Vd Vu (log-2 iRt)))]
+       [else
+        (destruct* ((hvx:interpret Vu) (hvx:interpret Rt))
+          [((i16x64 v0) (int8_t v1)) (generate `vmpyihb.acc (to-llvm-type hvx-expr) `(list ,(input-arg Vd) ,(input-arg Vu) (,t_i32 ,(compile-scalar (Rt.b Rt)))))]
+          [((i32x32 v0) (int8_t v1)) (generate `vmpyiwb.acc (to-llvm-type hvx-expr) `(list ,(input-arg Vd) ,(input-arg Vu) (,t_i32 ,(compile-scalar (Rt.b Rt)))))]
+          [((i32x32 v0) (uint8_t v1)) (generate `vmpyiwub.acc (to-llvm-type hvx-expr) `(list ,(input-arg Vd) ,(input-arg Vu) (,t_i32 ,(compile-scalar (Rt.ub Rt)))))]
+          [((i32x32 v0) (int16_t v1)) (generate `vmpyiwh.acc (to-llvm-type hvx-expr) `(list ,(input-arg Vd) ,(input-arg Vu) (,t_i32 ,(compile-scalar (Rt.h Rt)))))])])]
+
+    [(vasl-acc Vd Vu Rt)
+     (destruct* ((hvx:interpret Vu) (hvx:interpret Vu) (hvx:interpret Rt))
+       [((i16x64 v0) (i16x64 v1) (int8_t r)) (generate `vaslh.acc (to-llvm-type hvx-expr) `(list ,(input-arg Vd) ,(input-arg Vu) (,t_i32 ,(compile-scalar r))))]
+       [((i32x32 v0) (i32x32 v1) (int8_t r)) (generate `vaslw.acc (to-llvm-type hvx-expr) `(list ,(input-arg Vd) ,(input-arg Vu) (,t_i32 ,(compile-scalar r))))])]
+ 
     ;; Vector-scalar multiplication (widening)
     [(vmpy Vu Rt)
      (destruct* ((hvx:interpret Vu) (hvx:interpret Rt))
@@ -298,6 +409,42 @@
        [((i32x32x2 acc-v0 acc-v1) (i16x64 lhs) (int16_t v))
         (generate `vmpyhsat.acc (to-llvm-type hvx-expr) `(list ,(input-arg Vdd) ,(input-arg Vu) (,t_i32 ,(compile-scalar (Rt.h Rt)))))])]
 
+    ;; Vector-vector multiplication (widening)
+    [(vmpy-2 Vu Vv)
+     (destruct* ((hvx:interpret Vu) (hvx:interpret Vv))
+       [((i8x128 v0) (i8x128 v1)) (generate `vmpybv (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv)))]
+       [((u8x128 v0) (i8x128 v1)) (generate `vmpybusv (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv)))]
+       [((u8x128 v0) (u8x128 v1)) (generate `vmpyubv (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv)))]
+       [((u16x64 v0) (u16x64 v1)) (generate `vmpyuhv (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv)))]
+       [((i16x64 v0) (i16x64 v1)) (generate `vmpyhv (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv)))]
+       [((i16x64 v0) (u16x64 v1)) (generate `vmpyhus (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv)))])]
+
+    ;; 32x32 Fractional Multiply
+    [(vmpy-frac Vu Vv rnd?)
+     (destruct* ((hvx:interpret Vu) (hvx:interpret Vv))
+      [((i32x32 v0) (i32x32 v1))
+       (generate
+        `vmpyowh.rnd.sacc
+        (to-llvm-type hvx-expr)
+        `(list
+          ,`(,(to-llvm-type hvx-expr) ,(generate `vmpyewuh (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv))))
+          ,(input-arg Vu)
+          ,(input-arg Vv)))])]
+
+    ;; Multiply even half words with scalar-words
+    [(vmpyie Vu Rt)
+     (define w (hvx:interpret Rt))
+     (destruct (hvx:interpret Vu)
+      [(i16x64 v0) (generate `vmpyiewuh (to-llvm-type hvx-expr) `(list ,(input-arg (vsplat Rt)) ,(input-arg Vu)))]
+      [(u16x64 v0) (generate `vmpyiewuh (to-llvm-type hvx-expr) `(list ,(input-arg (vsplat Rt)) ,(input-arg Vu)))])]
+
+    ;; Multiply odd half words with scalar-words
+    [(vmpyio Vu Rt)
+     (define w (hvx:interpret Rt))
+     (destruct (hvx:interpret Vu)
+      [(i16x64 v0) (generate `vmpyiowh (to-llvm-type hvx-expr) `(list ,(input-arg (vsplat Rt)) ,(input-arg Vu)))]
+      [(u16x64 v0) (generate `vmpyiowh (to-llvm-type hvx-expr) `(list ,(input-arg (vsplat Rt)) ,(input-arg Vu)))])]
+    
     ;;;;;;;;;;;;;;;;;;;;;;; Fused Multiply Adds ;;;;;;;;;;;;;;;;;;;;;;
     
     [(vdmpy Vu Rt)
@@ -307,6 +454,58 @@
        [((i16x64 data) (Rt2.h w1 w2)) (generate `vdmpyhsat (to-llvm-type hvx-expr) `(list ,(input-arg Vu) (,t_i32 ,(compile-scalar Rt))))]
        [((i16x64 data) (Rt2.uh w1 w2)) (generate `vdmpyhsusat (to-llvm-type hvx-expr) `(list ,(input-arg Vu) (,t_i32 ,(compile-scalar Rt))))])]
 
+    [(vmpa Vuu Rt)
+     (destruct* ((hvx:interpret Vuu) (hvx:interpret Rt))
+       [((u8x128x2 v0 v1) (Rt2.b w1 w2))
+        (generate `vmpabus (to-llvm-type hvx-expr) `(list ,(input-arg Vuu) (,t_i32 ,(compile-scalar Rt))))]
+       [((u8x128x2 v0 v1) (Rt2.ub w1 w2))
+        (generate `vmpabuu (to-llvm-type hvx-expr) `(list ,(input-arg Vuu) (,t_i32 ,(compile-scalar Rt))))]
+       [((u16x64x2 v0 v1) (Rt2.b w1 w2))
+        (generate `vmpauhb (to-llvm-type hvx-expr) `(list ,(input-arg Vuu) (,t_i32 ,(compile-scalar Rt))))]
+       [((i16x64x2 v0 v1) (Rt2.b w1 w2))
+        (generate `vmpahb (to-llvm-type hvx-expr) `(list ,(input-arg Vuu) (,t_i32 ,(compile-scalar Rt))))])]
+    
+    [(vmpa-acc Vdd Vuu Rt)
+     (destruct* ((hvx:interpret Vdd) (hvx:interpret Vuu) (hvx:interpret Rt))
+       [((i16x64x2 v0 v1) (u8x128x2 v2 v3) (Rt2.b w1 w2))
+        (generate `vmpabus.acc (to-llvm-type hvx-expr) `(list ,(input-arg Vdd) ,(input-arg Vuu) (,t_i32 ,(compile-scalar Rt))))]
+       [((i16x64x2 v0 v1) (u8x128x2 v2 v3) (Rt2.ub w1 w2))
+        (generate `vmpabuu.acc (to-llvm-type hvx-expr) `(list ,(input-arg Vdd) ,(input-arg Vuu) (,t_i32 ,(compile-scalar Rt))))]
+       [((i32x32x2 v0 v1) (u16x64x2 v2 v3) (Rt2.b w1 w2))
+        (generate `vmpauhb.acc (to-llvm-type hvx-expr) `(list ,(input-arg Vdd) ,(input-arg Vuu) (,t_i32 ,(compile-scalar Rt))))]
+       [((i32x32x2 v0 v1) (i16x64x2 v2 v3) (Rt2.b w1 w2))
+        (generate `vmpahb.acc (to-llvm-type hvx-expr) `(list ,(input-arg Vdd) ,(input-arg Vuu) (,t_i32 ,(compile-scalar Rt))))])]
+
+    [(vtmpy Vuu Rt)
+     (destruct* ((hvx:interpret Vuu) (hvx:interpret Rt))
+       [((i8x128x2 v0 v1) (Rt2.b w1 w2)) (generate `vtmpyb (to-llvm-type hvx-expr) `(list ,(input-arg Vuu) (,t_i32 ,(compile-scalar Rt))))]
+       [((u8x128x2 v0 v1) (Rt2.b w1 w2)) (generate `vtmpybus (to-llvm-type hvx-expr) `(list ,(input-arg Vuu) (,t_i32 ,(compile-scalar Rt))))]
+       [((i16x64x2 v0 v1) (Rt2.b w1 w2)) (generate `vtmpyhb (to-llvm-type hvx-expr) `(list ,(input-arg Vuu) (,t_i32 ,(compile-scalar Rt))))])]
+    
+    [(vtmpy-acc Vdd Vuu Rt)
+     (destruct* ((hvx:interpret Vuu) (hvx:interpret Rt))
+       [((i8x128x2 v0 v1) (Rt2.b w1 w2)) (generate `vtmpyb.acc (to-llvm-type hvx-expr) `(list ,(input-arg Vdd) ,(input-arg Vuu) (,t_i32 ,(compile-scalar Rt))))]
+       [((u8x128x2 v0 v1) (Rt2.b w1 w2)) (generate `vtmpybus.acc (to-llvm-type hvx-expr) `(list ,(input-arg Vdd) ,(input-arg Vuu) (,t_i32 ,(compile-scalar Rt))))]
+       [((i16x64x2 v0 v1) (Rt2.b w1 w2)) (generate `vtmpyhb.acc (to-llvm-type hvx-expr) `(list ,(input-arg Vdd) ,(input-arg Vuu) (,t_i32 ,(compile-scalar Rt))))])]
+
+    [(vrmpy Vu Rt)
+     (destruct* ((hvx:interpret Vu) (hvx:interpret Rt))
+       [((u8x128 v0) (Rt4.b w1 w2 w3 w4)) (generate `vrmpybus (to-llvm-type hvx-expr) `(list ,(input-arg Vu) (,t_i32 ,(compile-scalar Rt))))]
+       [((u8x128 v0) (Rt4.ub w1 w2 w3 w4)) (generate `vrmpyub (to-llvm-type hvx-expr) `(list ,(input-arg Vu) (,t_i32 ,(compile-scalar Rt))))])]
+
+    [(vrmpy-acc Vd Vu Rt)
+     (destruct* ((hvx:interpret Vu) (hvx:interpret Rt))
+       [((u8x128 v0) (Rt4.b w1 w2 w3 w4)) (generate `vrmpybus.acc (to-llvm-type hvx-expr) `(list ,(input-arg Vd) ,(input-arg Vu) (,t_i32 ,(compile-scalar Rt))))]
+       [((u8x128 v0) (Rt4.ub w1 w2 w3 w4)) (generate `vrmpyub.acc (to-llvm-type hvx-expr) `(list ,(input-arg Vd) ,(input-arg Vu) (,t_i32 ,(compile-scalar Rt))))])]
+
+    [(vrmpy-2 Vu Vv)
+     (destruct* ((hvx:interpret Vu) (hvx:interpret Vv))
+       [((u8x128 v0) (u8x128 v1)) (generate `vrmpyubv (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv)))]
+       [((i8x128 v0) (i8x128 v1)) (generate `vrmpybv (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv)))]
+       [((u8x128 v0) (i8x128 v1)) (generate `vrmpybusv (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv)))])]
+
+    [(vrmpy-acc-2 Vd Vu Vv) (compile (vadd Vd (vrmpy-2 Vu Vv) #f))]
+    
     ;;;;;;;;;;;;;;;;;;;;;;;; Shifts & Rounding ;;;;;;;;;;;;;;;;;;;;;;;
 
     [(vsat Vu Vv)
@@ -319,6 +518,10 @@
     [(vpack Vu Vv signed?)
      (destruct* ((hvx:interpret Vu) (hvx:interpret Vv))
        [((i16x64 _) (i16x64 _))
+        (if signed?
+            (generate `vpackhb.sat (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv)))
+            (generate `vpackhub.sat (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv))))]
+       [((u16x64 _) (u16x64 _))
         (if signed?
             (generate `vpackhb.sat (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv)))
             (generate `vpackhub.sat (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv))))]
@@ -342,6 +545,15 @@
        [((u32x32 v0) (u32x32 v1))
         (generate `vrounduwuh (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv)))])]
 
+    [(vrsr Vu Vv) `(halide.ir.rounding_shift_right, (to-llvm-type hvx-expr), `(list ,(input-arg Vu) ,(input-arg Vv)))]
+
+    [(vasr Vu Rt)
+     (destruct (hvx:interpret Vu)
+       [(i16x64 v0) (generate `vasrh (to-llvm-type hvx-expr) `(list ,(input-arg Vu) (,t_i32 ,(compile-scalar (cpp:eval Rt)))))]
+       [(u16x64 v0) (generate `vasrh (to-llvm-type hvx-expr) `(list ,(input-arg Vu) (,t_i32 ,(compile-scalar (cpp:eval Rt)))))]
+       [(i32x32 v0) (generate `vasrw (to-llvm-type hvx-expr) `(list ,(input-arg Vu) (,t_i32 ,(compile-scalar (cpp:eval Rt)))))]
+       [(u32x32 v0) (generate `vasrw (to-llvm-type hvx-expr) `(list ,(input-arg Vu) (,t_i32 ,(compile-scalar (cpp:eval Rt)))))])]
+    
     [(vlsr Vu Rt)
      (destruct (hvx:interpret Vu)
        [(u8x128 v0) (generate `vlsrb (to-llvm-type hvx-expr) `(list ,(input-arg Vu) (,t_i32 ,(compile-scalar (cpp:eval Rt)))))]
@@ -354,6 +566,50 @@
        [((u16x64 v0) (u16x64 v1)) (generate `vshufob (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv)))]
        [((i32x32 v0) (i32x32 v1)) (generate `vshufoh (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv)))]
        [((u32x32 v0) (u32x32 v1)) (generate `vshufoh (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv)))])]
+
+    [(vpacko-n Vu Vv signed?)
+     (destruct* ((hvx:interpret Vu) (hvx:interpret Vv))
+       [((i16x64 v0) (i16x64 v1)) (generate `vpackob (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv)))]
+       [((u16x64 v0) (u16x64 v1)) (generate `vpackob (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv)))]
+       [((i32x32 v0) (i32x32 v1)) (generate `vpackoh (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv)))]
+       [((u32x32 v0) (u32x32 v1)) (generate `vpackoh (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv)))])]
+
+    [(vasr-n Vu Vv Rt round? sat? unsigned?)
+     (destruct* ((hvx:interpret Vu) (hvx:interpret Vv) (hvx:interpret Rt))
+       [((i16x64 v0) (i16x64 v1) (int8_t n))
+        (cond
+          [(and round? unsigned?)
+           (generate `vasrhubrndsat (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv) ,(compile-scalar (int32x1 Rt))))]
+          [round?
+           (generate `vasrhrndsat (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv) ,(compile-scalar (int32x1 Rt))))]
+          [unsigned?
+           (generate `vasrhubsat (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv) ,(compile-scalar (int32x1 Rt))))]
+          [else
+           (generate `vasrhsat (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv) ,(compile-scalar (int32x1 Rt))))])]
+       [((u16x64 v0) (u16x64 v1) (int8_t n))
+        (cond
+          [round?
+           (generate `vasruhubrndsat (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv) ,(compile-scalar (int32x1 Rt))))]
+          [else
+           (generate `vasruhubsat (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv) ,(compile-scalar (int32x1 Rt))))])]
+       [((i32x32 v0) (i32x32 v1) (int8_t n))
+        (cond
+          [(and (not round?) unsigned?)
+           (generate `vasrwubsat (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv) ,(compile-scalar (int32x1 Rt))))]
+          [(and round? unsigned?)
+           (generate `vasrwubrndsat (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv) ,(compile-scalar (int32x1 Rt))))]
+          [(and (not round?) sat? (not unsigned?))
+           (generate `vasrwhsat (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv) ,(compile-scalar (int32x1 Rt))))]
+          [(and (not round?) (not sat?) (not unsigned?))
+           (generate `vasrw (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv) ,(compile-scalar (int32x1 Rt))))]
+          [(and round? (not unsigned?))
+           (generate `vasrwhrndsat (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv) ,(compile-scalar (int32x1 Rt))))])]
+       [((u32x32 v0) (u32x32 v1) (int8_t n))
+        (cond
+          [round?
+           (generate `vasruwubrndsat (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv) ,(compile-scalar (int32x1 Rt))))]
+          [else
+           (generate `vasruwubsat (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv) ,(compile-scalar (int32x1 Rt))))])])]
     
     ;;;;;;;;;;;;;;;;;;;;;;;;;;;; Min / Max ;;;;;;;;;;;;;;;;;;;;;;;;;;;
     
@@ -377,6 +633,16 @@
     ;;;;;;;;;;;;;;;;;;;;;;;;;;;; Type Casts ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
     [(reinterpret Vu) (compile Vu)]
+
+    [(vzxt Vu)
+     (destruct (hvx:interpret Vu)
+       [(u8x128 v0) (generate `vzb (to-llvm-type hvx-expr) `(list ,(input-arg Vu)))]
+       [(u16x64 v0) (generate `vzh (to-llvm-type hvx-expr) `(list ,(input-arg Vu)))])]
+    
+    [(vsxt Vu)
+     (destruct (hvx:interpret Vu)
+       [(u8x128 v0) (generate `vsb (to-llvm-type hvx-expr) `(list ,(input-arg Vu)))]
+       [(u16x64 v0) (generate `vsh (to-llvm-type hvx-expr) `(list ,(input-arg Vu)))])]
     
     [(vunpack Vu)
      (destruct (hvx:interpret Vu)
@@ -384,6 +650,29 @@
       [(u8x128 v0) (generate `vunpackub (to-llvm-type hvx-expr) `(list ,(input-arg Vu)))]
       [(i16x64 v0) (generate `vunpackh (to-llvm-type hvx-expr) `(list ,(input-arg Vu)))]
       [(u16x64 v0) (generate `vunpackuh (to-llvm-type hvx-expr) `(list ,(input-arg Vu)))])]
+
+    [(vunpack Vu)
+     (destruct (hvx:interpret Vu)
+      [(i8x128 v0) (generate `vunpackb (to-llvm-type hvx-expr) `(list ,(input-arg Vu)))]
+      [(u8x128 v0) (generate `vunpackub (to-llvm-type hvx-expr) `(list ,(input-arg Vu)))]
+      [(i16x64 v0) (generate `vunpackh (to-llvm-type hvx-expr) `(list ,(input-arg Vu)))]
+      [(u16x64 v0) (generate `vunpackuh (to-llvm-type hvx-expr) `(list ,(input-arg Vu)))])]
+
+     [(vpacke-n Vu Vv signed?)
+     (destruct* ((hvx:interpret Vu) (hvx:interpret Vv))
+       [((i16x64 v0) (i16x64 v1)) (generate `vpackeb (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv)))]
+       [((u16x64 v0) (u16x64 v1)) (generate `vpackeb (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv)))]
+       [((i32x32 v0) (i32x32 v1)) (generate `vpackeh (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv)))]
+       [((u32x32 v0) (u32x32 v1)) (generate `vpackeh (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv)))])]
+
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;; Absolute Difference ;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    
+    [(vabsdiff Vu Vv)
+     (destruct* ((hvx:interpret Vu) (hvx:interpret Vv))
+       [((u8x128 v0) (u8x128 v1)) (generate `vabsdiffub (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv)))]
+       [((i16x64 v0) (i16x64 v1)) (generate `vabsdiffh (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv)))]
+       [((u16x64 v0) (u16x64 v1)) (generate `vabsdiffuh (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv)))]
+       [((i32x32 v0) (i32x32 v1)) (generate `vabsdiffw (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv)))])]
     
     [_ (string->sexp (format "~a" hvx-expr))]))
 
@@ -450,66 +739,134 @@
       [(Rt.b v0)
        (cond
          [(concrete? Rt)
+          (define val (hvx:interpret v0))
           (format "0x~a~a~a~a"
-                  (bv->str (cpp:eval v0))
-                  (bv->str (cpp:eval v0))
-                  (bv->str (cpp:eval v0))
-                  (bv->str (cpp:eval v0)))]
+                  (bv->str (cpp:eval val))
+                  (bv->str (cpp:eval val))
+                  (bv->str (cpp:eval val))
+                  (bv->str (cpp:eval val)))]
          [else
           (format "(halide.hexagon.dup4.b int32 (list ~a))" (compile-scalar v0))])]
       [(Rt.ub v0)
        (cond
          [(concrete? Rt)
+          (define val (hvx:interpret v0))
           (format "0x~a~a~a~a"
-                  (bv->str (cpp:eval v0))
-                  (bv->str (cpp:eval v0))
-                  (bv->str (cpp:eval v0))
-                  (bv->str (cpp:eval v0)))]
+                  (bv->str (cpp:eval val))
+                  (bv->str (cpp:eval val))
+                  (bv->str (cpp:eval val))
+                  (bv->str (cpp:eval val)))]
          [else
           (format "(halide.hexagon.dup4.b int32 (list ~a))" (compile-scalar v0))])]
       [(Rt.h v0)
        (cond
          [(concrete? Rt)
+          (define val (hvx:interpret v0))
           (format "0x~a~a"
-                  (bv->str (cpp:eval v0))
-                  (bv->str (cpp:eval v0)))]
+                  (bv->str (cpp:eval val))
+                  (bv->str (cpp:eval val)))]
          [else
           (format "(halide.hexagon.dup2.h int32 (list ~a))" (compile-scalar v0))])]
       [(Rt.uh v0)
        (cond
          [(concrete? Rt)
+          (define val (hvx:interpret v0))
           (format "0x~a~a"
-                  (bv->str (cpp:eval v0))
-                  (bv->str (cpp:eval v0)))]
+                  (bv->str (cpp:eval val))
+                  (bv->str (cpp:eval val)))]
          [else
           (format "(halide.hexagon.dup2.h int32 (list ~a))" (compile-scalar v0))])]
       [(Rt2.b v0 v1)
        (assert (concrete? Rt))
+       (define val0 (hvx:interpret v0))
+       (define val1 (hvx:interpret v1))
        (format "0x~a~a~a~a"
-               (bv->str (cpp:eval v1))
-               (bv->str (cpp:eval v0))
-               (bv->str (cpp:eval v1))
-               (bv->str (cpp:eval v0)))]
+               (bv->str (cpp:eval val1))
+               (bv->str (cpp:eval val0))
+               (bv->str (cpp:eval val1))
+               (bv->str (cpp:eval val0)))]
       [(Rt2.ub v0 v1)
        (assert (concrete? Rt))
+       (define val0 (hvx:interpret v0))
+       (define val1 (hvx:interpret v1))
        (format "0x~a~a~a~a"
-               (bv->str (cpp:eval v1))
-               (bv->str (cpp:eval v0))
-               (bv->str (cpp:eval v1))
-               (bv->str (cpp:eval v0)))]
+               (bv->str (cpp:eval val1))
+               (bv->str (cpp:eval val0))
+               (bv->str (cpp:eval val1))
+               (bv->str (cpp:eval val0)))]
       [(Rt2.h v0 v1)
        (cond
          [(concrete? Rt)
+          (define val0 (hvx:interpret v0))
+          (define val1 (hvx:interpret v1))
           (format "0x~a~a"
-                  (bv->str (cpp:eval v1))
-                  (bv->str (cpp:eval v0)))]
+                  (bv->str (cpp:eval val1))
+                  (bv->str (cpp:eval val0)))]
          [else
           (format "(halide.hexagon.pack2.h int32 (list ~a ~a))" (compile-scalar v1) (compile-scalar v0))])]
       [(Rt2.uh v0 v1)
        (assert (concrete? Rt))
+       (define val0 (hvx:interpret v0))
+       (define val1 (hvx:interpret v1))
        (format "0x~a~a"
-               (bv->str (cpp:eval v1))
-               (bv->str (cpp:eval v0)))]
+               (bv->str (cpp:eval val1))
+               (bv->str (cpp:eval val0)))]
+      [(Rt4.b v0 v1 v2 v3)
+       (define val0 (hvx:interpret v0))
+       (define val1 (hvx:interpret v1))
+       (define val2 (hvx:interpret v2))
+       (define val3 (hvx:interpret v3))
+       (cond
+         [(concrete? Rt)
+          (format "0x~a~a~a~a"
+                  (bv->str (cpp:eval val3))
+                  (bv->str (cpp:eval val2))
+                  (bv->str (cpp:eval val1))
+                  (bv->str (cpp:eval val0)))]
+         [(contiguous-reads? val0 val1 val2 val3)
+          (define rd (strip-casts v0))
+          (assert (load-sca? rd))
+          (define buf (load-sca-buf rd))
+          (define loc (load-sca-idx rd))
+          (define align (aligned 4 0))
+          (define ld (generate
+                      `vread `uint8x4
+                      `(list
+                        (,t_i32 ,(buffer-data buf))
+                        (,t_i32 ,(string->sexp (compile-idx loc)))
+                        (,t_i32 ,(string->sexp 4))
+                        (,t_i32 ,(string->sexp 0)))))
+          (format "(halide.reinterpret int32 (list (int8x4 ~a)))" ld)]
+         [else
+          (assert #f)])]
+      [(Rt4.ub v0 v1 v2 v3)
+       (define val0 (hvx:interpret v0))
+       (define val1 (hvx:interpret v1))
+       (define val2 (hvx:interpret v2))
+       (define val3 (hvx:interpret v3))
+       (cond
+         [(concrete? Rt)
+          (format "0x~a~a~a~a"
+                  (bv->str (cpp:eval val3))
+                  (bv->str (cpp:eval val2))
+                  (bv->str (cpp:eval val1))
+                  (bv->str (cpp:eval val0)))]
+         [(contiguous-reads? val0 val1 val2 val3)
+          (define rd (strip-casts v0))
+          (assert (load-sca? rd))
+          (define buf (load-sca-buf rd))
+          (define loc (load-sca-idx rd))
+          (define align (aligned 4 0))
+          (define ld (generate
+                      `vread `uint8x4
+                      `(list
+                        (,t_i32 ,(buffer-data buf))
+                        (,t_i32 ,(string->sexp (compile-idx loc)))
+                        (,t_i32 ,(string->sexp 4))
+                        (,t_i32 ,(string->sexp 0)))))
+          (format "(halide.reinterpret uint32 (list (uint8x4 ~a)))" ld)]
+         [else
+          (assert #f)])]
 
       [(int8_t val) (format "(int8 ~a)" (compile-scalar val))]
       [(uint8_t val) (format "(uint8 ~a)" (compile-scalar val))]
@@ -518,19 +875,31 @@
       [(int32_t val) (format "(int32 ~a)" (compile-scalar val))]
       [(uint32_t val) (format "(uint32 ~a)" (compile-scalar val))]
 
+      [(int8x1 val) (format "(int8 (int8x1 int8 (list ~a)))" (compile-scalar val))]
       [(int16x1 val) (format "(int16 (int16x1 int16 (list ~a)))" (compile-scalar val))]
       [(int32x1 val) (format "(int32 (int32x1 int32 (list ~a)))" (compile-scalar val))]
+      [(uint8x1 val) (format "(uint8 (uint8x1 uint8 (list ~a)))" (compile-scalar val))]
+      [(uint16x1 val) (format "(uint16 (uint16x1 uint16 (list ~a)))" (compile-scalar val))]
+      [(uint32x1 val) (format "(uint32 (uint32x1 uint32 (list ~a)))" (compile-scalar val))]
 
+      [(sca-add a b) (format "(~a (+ ~a ~a))" (to-llvm-type Rt) (compile-scalar a) (compile-scalar b))]
       [(sca-sub a b) (format "(~a (- ~a ~a))" (to-llvm-type Rt) (compile-scalar a) (compile-scalar b))]
       [(sca-mul a b) (format "(~a (* ~a ~a))" (to-llvm-type Rt) (compile-scalar a) (compile-scalar b))]
+      [(sca-min a b) (format "(~a (min ~a ~a))" (to-llvm-type Rt) (compile-scalar a) (compile-scalar b))]
+      [(sca-max a b) (format "(~a (max ~a ~a))" (to-llvm-type Rt) (compile-scalar a) (compile-scalar b))]
 
       [(load-sca buffer idx) (format "(~a (halide.load.scalar ~a (list (int32 ~a) (int32 ~a))))"
                                      (to-llvm-type Rt) (to-llvm-type Rt) (buffer-data buffer) (compile-idx idx))]
       
       [(constant id type) (format "~a" (syntax->datum id))]
       [(bv _ _) (format "0x~a" (bv->str Rt))]
-
-      [_ (error "NYI: codegen scalar ~a" Rt)]))
+      [(? number? n) (format "~a" n)]
+      [(expression op child ...)
+       (match (length child)
+         [1 (format "(~a ~a)" op (compile-scalar (list-ref child 0)))]
+         [2 (format "(~a ~a ~a)" op (compile-scalar (list-ref child 0)) (compile-scalar (list-ref child 1)))])]
+      
+      [_ (error "NYI: compile scalar ~a" Rt)]))
   
   (string->sexp res))
 
@@ -577,6 +946,35 @@
           [2 (format "(~a ~a ~a)" op (compile-idx (list-ref child 0)) (compile-idx (list-ref child 1)))])]
 
        [_ idx])]))
+
+(define (log-2 val)
+  (int8_t (bv (exact-round (log (cpp:eval-to-int val) 2)) 8)))
+
+(define (contiguous-reads? . reads)
+  (define (contiguous? vals)
+    (cond
+      [(< (length vals) 2) #t]
+      [else
+       (define v1 (first vals))
+       (define v2 (second vals))
+
+       (define (check val1 val2)
+         (for*/all ([v1 val1 #:exhaustive] [v2 val2 #:exhaustive])
+           (match* (v1 v2)
+             [((expression (== @app) xs ...) (expression (== @app) xs2 ...))
+              (and
+               (eq? (list-ref xs 0) (list-ref xs2 0))
+               (eq? (add1 (list-ref xs 1)) (list-ref xs2 1)))]
+             [(_ _) #f])))
+
+       (and (check v1 v2) (contiguous? (rest vals)))]))
+  (contiguous? (map cpp:eval reads)))
+
+(define (strip-casts expr)
+  (cond
+    [(uint8x1? expr) (uint8x1-sca expr)]
+    [(int8x1? expr) (int8x1-sca expr)]
+    [else (error "NYI")]))
 
 ;(define-symbolic-buffer input2 uint8_t)
 ;(define-symbolic-var input2_zero uint8_t)
@@ -719,70 +1117,11 @@
 ;       [(list? body) (codegen (for/list ([e body]) (visit-hvx e repl-var)))]
 ;       [else (codegen (visit-hvx body repl-var))])]
 ;    
-;    ;;vread
-;    [(vread buf loc align)
-;     (generate
-;        `vread (p-type p)
-;        `(list
-;          (,t_i32 ,(codegen buf))
-;          (,t_i32 ,(string->sexp (codegen-idx loc)))
-;          (,t_i32 ,(string->sexp (aligned-mod align)))
-;          (,t_i32 ,(string->sexp (aligned-rem align)))))]
-;
-;    [(vreadp buf loc align)
-;     (generate `vreadp (p-type p) `(list (,t_i32 ,(codegen buf)) (,t_i32 ,(string->sexp (codegen-idx loc)))))]
-;
-;    ;;vsplat
-;    [(vsplat Rt)
-;     (match (hvx:interpret Rt)
-;       [(int32_t _) (generate `lvsplatw (p-type p) `(list (,t_i32 ,(eval-to-int Rt))))]
-;       [(int16_t _) (generate `lvsplath (p-type p) `(list (,t_i32 ,(eval-to-int Rt))))]
-;       [(int8_t _) (generate `lvsplatb (p-type p) `(list (,t_i32 ,(eval-to-int Rt))))]
-;      )]
-;    
-;    ;;vcombine
-;    [(vcombine Vu Vv)
-;     (match (list (hvx:interpret Vu) (hvx:interpret Vv))
-;       [(list (i8x128 _) (i8x128 _)) (generate `vcombine (p-type p) `(list ,(input-arg Vv) ,(input-arg Vu)))]
-;       [(list (u8x128 _) (u8x128 _)) (generate `vcombine (p-type p) `(list ,(input-arg Vv) ,(input-arg Vu)))]
-;       [(list (i16x64 _) (i16x64 _)) (generate `vcombine (p-type p) `(list ,(input-arg Vv) ,(input-arg Vu)))]
-;       [(list (u16x64 _) (u16x64 _)) (generate `vcombine (p-type p) `(list ,(input-arg Vv) ,(input-arg Vu)))]
-;       [(list (i32x32 _) (i32x32 _)) (generate `vcombine (p-type p) `(list ,(input-arg Vv) ,(input-arg Vu)))]
-;       [(list (u32x32 _) (u32x32 _)) (generate `vcombine (p-type p) `(list ,(input-arg Vv) ,(input-arg Vu)))])]
-;    
-;    ;;vshuffoe
-;    [(vshuffoe Vu Vv)
-;     (match (list (hvx:interpret Vu) (hvx:interpret Vv))
-;       [(list (u8x128 _)(u8x128 _)) (generate `vshufoeb (p-type p) `(list ,(input-arg Vu) ,(input-arg Vv)))]
-;       [(list (i8x128 _)(i8x128 _)) (generate `vshufoeb (p-type p) `(list ,(input-arg Vu) ,(input-arg Vv)))]
-;       [(list (i16x64 _)(i16x64 _)) (generate `vshufoeh (p-type p) `(list ,(input-arg Vu) ,(input-arg Vv)))]
-;       [(list (u16x64 _)(u16x64 _)) (generate `vshufoeh (p-type p) `(list ,(input-arg Vu) ,(input-arg Vv)))])]
-;    
-;    ;;vswap
-;    
+; 
 ;    ;;vmux
 ;    [(vmux Qt Vu Vv)
 ;     (match (list (hvx:interpret Vu) (hvx:interpret Vv))
 ;       [(list (i32x32 _)(i32x32 _)) (generate `vmux (p-type p) `(list (int32 ,(codegen Qt)) ,(input-arg Vu) ,(input-arg Vv)))])]
-;    
-;    ;;vsat
-;    [(vsat Vu Vv)
-;     (match (list (hvx:interpret Vu) (hvx:interpret Vv))
-;       [(list (i32x32 _)(i32x32 _)) (generate `vsatwh (p-type p) `(list ,(input-arg Vu) ,(input-arg Vv)))]
-;       [(list (i16x64 _)(i16x64 _)) (generate `vsathub (p-type p) `(list ,(input-arg Vu) ,(input-arg Vv)))]
-;       [(list (u16x64 _)(u16x64 _)) (generate `vsathub (p-type p) `(list ,(input-arg Vu) ,(input-arg Vv)))]
-;       [(list (u32x32 _)(u32x32 _)) (generate `vsatuwuh (p-type p) `(list ,(input-arg Vu) ,(input-arg Vv)))]  )]
-;    
-;    ;;valign
-;    [(valign Vu Vv Rt)
-;     ;;Register version not included
-;     (match (list (hvx:interpret Vv) (hvx:interpret Vu))
-;       [(list (i8x128 _) (i8x128 _)) (generate `valignbi (p-type p) `(list ,(input-arg Vu) ,(input-arg Vv) (,t_i32 ,Rt)))]
-;       [(list (u8x128 _) (u8x128 _)) (generate `valignbi (p-type p) `(list ,(input-arg Vu) ,(input-arg Vv) (,t_i32 ,Rt)))]
-;       [(list (i16x64 _) (i16x64 _)) (generate `valignbi (p-type p) `(list ,(input-arg Vu) ,(input-arg Vv) (,t_i32 ,(* Rt 2))))]
-;       [(list (u16x64 _) (u16x64 _)) (generate `valignbi (p-type p) `(list ,(input-arg Vu) ,(input-arg Vv) (,t_i32 ,(* Rt 2))))]
-;       [(list (i32x32 _) (i32x32 _)) (generate `valignbi (p-type p) `(list ,(input-arg Vu) ,(input-arg Vv) (,t_i32 ,(* Rt 4))))]
-;       [(list (u32x32 _) (u32x32 _)) (generate `valignbi (p-type p) `(list ,(input-arg Vu) ,(input-arg Vv) (,t_i32 ,(* Rt 4))))])]
 ;
 ;    ;;vlalign
 ;    [(vlalign Vu Vv Rt)
@@ -831,24 +1170,6 @@
 ;       [(i16x64 _) (generate `vunpackh (p-type p) `(list ,(input-arg Vu)))]
 ;       [(u8x128 _) (generate `vunpackub (p-type p) `(list ,(input-arg Vu)))]
 ;       [(u16x64 _) (generate `vunpackuh (p-type p) `(list ,(input-arg Vu)))])]
-;    
-;    ;;vunpacko
-;
-;    ;;vgather
-;
-;    ;;vzxt
-;    [(vzxt Vu signed?)
-;     (match (hvx:interpret Vu)
-;       [(u8x128 _) (generate `vzb (p-type p) `(list ,(input-arg Vu)))]
-;       [(u16x64 _) (generate `vzh (p-type p) `(list ,(input-arg Vu)))])]
-;    
-;    ;;vsxt
-;    [(vsxt Vu signed?)
-;     (match (hvx:interpret Vu)
-;       [(u8x128 _) (generate `vsb (p-type p) `(list (,(p-type Vu) ,(codegen Vu))))]
-;       [(i8x128 _) (generate `vsb (p-type p) `(list (,(p-type Vu) ,(codegen Vu))))]
-;       [(u16x64 _) (generate `vsb (p-type p) `(list (,(p-type Vu) ,(codegen Vu))))]
-;       [(i16x64 _) (generate `vsh (p-type p) `(list (,(p-type Vu) ,(codegen Vu))))])]
 ;
 ;    ;;vadd-w-acc
 ;    [(vadd-w-acc Vdd Vu Vv)
@@ -870,14 +1191,6 @@
 ;       [(list (u16x64 _) (uint16_t _)) (generate `vmpyuh (p-type p) `(list ,(input-arg Vu) (,t_i32 ,(codegen-scalar (list Rt Rt)))))]
 ;       [(list (i16x64 _) (int16_t _)) (generate `vmpyh (p-type p) `(list ,(input-arg Vu) (,t_i32 ,(codegen-scalar (list Rt Rt)))))])]
 ;    
-;    ;;vmpyi
-;    [(vmpyi Vu Rt)
-;     (match (list (hvx:interpret Vu) (hvx:interpret Rt))
-;       [(list (i32x32 _) (int16_t _)) (generate `vmpyiwh (p-type p) `(list ,(input-arg Vu) (,t_i32 ,(codegen-scalar (list Rt Rt)))))]
-;       [(list (i16x64 _) (int8_t _)) (generate `vmpyihh (p-type p) `(list ,(input-arg Vu) (,t_i32 ,(codegen-scalar (list Rt Rt Rt Rt)))))]
-;       [(list (i32x32 _) (int8_t _)) (generate `vmpyiwb (p-type p) `(list ,(input-arg Vu) (,t_i32 ,(codegen-scalar (list Rt Rt Rt Rt)))))]
-;       [(list (i32x32 _) (uint8_t _)) (generate `vmpyiwub (p-type p) `(list ,(input-arg Vu) (,t_i32 ,(codegen-scalar (list Rt Rt Rt Rt)))))])]
-;    
 ;    ;;vmpye
 ;    [(vmpye Vu Rt) (generate `vmpyuhe (p-type p) `(list ,(input-arg Vu) (,t_i32 ,(codegen-scalar (list Rt Rt)))))]
 ;    
@@ -895,45 +1208,9 @@
 ;       ;; todo:
 ;       ; Vxx.w+=vmpy(Vu.h,Rt.h):sat ;;do not have a sat field
 ;     )]
-;    
-;    ;;vmpyi-acc
-;    [(vmpyi-acc Vd Vu Rt)
-;     (match (list (hvx:interpret Vu) (hvx:interpret Rt))
-;       [(list (i32x32 _) (int16_t _)) (generate `vmpyiwh.acc (p-type p) `(list ,(input-arg Vd) ,(input-arg Vu) (,t_i32 ,(codegen-scalar (list Rt Rt)))))]
-;       [(list (i16x64 _) (int8_t _)) (generate `vmpyihb.acc (p-type p) `(list ,(input-arg Vd) ,(input-arg Vu) (,t_i32 ,(codegen-scalar (list Rt Rt Rt Rt)))))]
-;       [(list (i32x32 _) (int8_t _)) (generate `vmpyiwb.acc (p-type p) `(list ,(input-arg Vd) ,(input-arg Vu) (,t_i32 ,(codegen-scalar (list Rt Rt Rt Rt)))))]
-;       [(list (i32x32 _) (uint8_t _)) (generate `vmpyiwub.acc (p-type p) `(list ,(input-arg Vd) ,(input-arg Vu) (,t_i32 ,(codegen-scalar (list Rt Rt Rt Rt)))))])]
-; 
+;
 ;    ;;vmpye-acc
 ;    [(vmpye-acc Vd Vu Rt) (generate `vmpyuhe.acc (p-type p) `(list ,(input-arg Vd) ,(input-arg Vu) (,t_i32 ,(codegen-scalar (list Rt Rt)))))]
-;
-;    ;;(
-;    [(vmpa Vuu Rt signed?)
-;     (match (list (hvx:interpret Vuu) (hvx:interpret Rt))
-;       [(list (u8x128x2 _ _) (cons (int8_t _) (int8_t _)))
-;        (generate `vmpabus (p-type p) `(list ,(input-arg Vuu) (,t_i32 ,(codegen-scalar Rt))))]
-;       [(list (u8x128x2 _ _) (cons (uint8_t _) (uint8_t _)))
-;        (generate `vmpabuu (p-type p) `(list ,(input-arg Vuu) (,t_i32 ,(codegen-scalar Rt))))]
-;       [(list (u16x64x2 _ _) (cons (int8_t _) (int8_t _)))
-;        (generate `vmpauhb (p-type p) `(list ,(input-arg Vuu) (,t_i32 ,(codegen-scalar Rt))))]
-;       [(list (i16x64x2 _ _) (cons (int8_t _) (int8_t _)))
-;        (generate `vmpahb (p-type p) `(list ,(input-arg Vuu) (,t_i32 ,(codegen-scalar Rt))))])]
-;    
-;    ;;vmpa-acc
-;    [(vmpa-acc Vdd Vuu Rt signed?)
-;     (match (list (hvx:interpret Vdd) (hvx:interpret Vuu) (hvx:interpret Rt))
-;       [(list (i16x64x2 _ _) (u8x128x2 _ _) (cons (int8_t w1) (int8_t w2)))
-;        (generate `vmpabus.acc (p-type p) `(list ,(input-arg Vdd) ,(input-arg Vuu) (,t_i32 ,(codegen-scalar Rt))))]
-;       [(list (i16x64x2 _ _) (u8x128x2 _ _) (cons (uint8_t w1) (uint8_t w2)))
-;        (generate `vmpabuu.acc (p-type p) `(list ,(input-arg Vdd) ,(input-arg Vuu) (,t_i32 ,(codegen-scalar Rt))))]
-;       [(list (u16x64x2 _ _) (u8x128x2 _ _) (cons (uint8_t w1) (uint8_t w2)))
-;        (generate `vmpabuu.acc (p-type p) `(list ,(input-arg Vdd) ,(input-arg Vuu) (,t_i32 ,(codegen-scalar Rt))))]
-;       [(list (i32x32x2 _ _) (u16x64x2 _ _) (cons (int8_t w1) (int8_t w2)))
-;        (generate `vmpauhb.acc (p-type p) `(list ,(input-arg Vdd) ,(input-arg Vuu) (,t_i32 ,(codegen-scalar Rt))))]
-;       [(list (i32x32x2 _ _) (i16x64x2 _ _) (cons (int8_t w1) (int8_t w2)))
-;        (generate `vmpahb.acc (p-type p) `(list ,(input-arg Vdd) ,(input-arg Vuu) (,t_i32 ,(codegen-scalar Rt))))]
-;       [(list (i32x32x2 _ _) (i16x64x2 _ _) (cons (uint8_t w1) (uint8_t w2)))
-;        (generate `vmpahb.acc (p-type p) `(list ,(input-arg Vdd) ,(input-arg Vuu) (,t_i32 ,(codegen-scalar Rt))))])]
 ;    
 ;    ;;vdmpy
 ;    [(vdmpy Vu Rt)
@@ -966,33 +1243,6 @@
 ;       [(list (i16x64x2 _ _) (uint16_t _)) (generate `vdmpyhsuisat.acc (p-type p) `(list ,(input-arg Vdd) ,(input-arg Vuu) (,t_i32 ,(codegen-scalar (list Rt Rt)))))]
 ;       [(list (u8x128x2 _ _) (cons (int8_t _) (int8_t _))) (generate `vdmpybus.dv.acc (p-type p) `(list ,(input-arg Vdd) ,(input-arg Vuu) (,t_i32 ,(codegen-scalar Rt))))]
 ;       [(list (i16x64x2 _ _) (cons (int8_t _) (int8_t _))) (generate `vdmpyhb.dv.acc (p-type p) `(list ,(input-arg Vdd) ,(input-arg Vuu) (,t_i32 ,(codegen-scalar Rt))))])]
-;    
-;    ;;vtmpy
-;    [(vtmpy Vuu Rt signed?)
-;     (match (list (hvx:interpret Vuu) (hvx:interpret Rt))
-;       [(list (i8x128x2 _ _) (cons (int8_t _) (int8_t _))) (generate `vtmpyb (p-type p) `(list ,(input-arg Vuu) (,t_i32 ,(codegen-scalar Rt))))]
-;       [(list (u8x128x2 _ _) (cons (int8_t _) (int8_t _))) (generate `vtmpybus (p-type p) `(list ,(input-arg Vuu) (,t_i32 ,(codegen-scalar Rt))))]
-;       [(list (u8x128x2 _ _) (cons (uint8_t _) (uint8_t _))) (generate `vtmpybus (p-type p) `(list ,(input-arg Vuu) (,t_i32 ,(codegen-scalar Rt))))]
-;       [(list (i16x64x2 _ _) (cons (int8_t _) (int8_t _))) (generate `vtmpyhb (p-type p) `(list ,(input-arg Vuu) (,t_i32 ,(codegen-scalar Rt))))])]
-;    
-;    ;;vtmpy-acc
-;    [(vtmpy-acc Vdd Vuu Rt signed?)
-;     (match (list (hvx:interpret Vuu) (hvx:interpret Rt))
-;       [(list (i8x128x2 _ _) (cons (int8_t _) (int8_t _))) (generate `vtmpyb.acc (p-type p) `(list ,(input-arg Vdd) ,(input-arg Vuu) (,t_i32 ,(codegen-scalar Rt))))]
-;       [(list (u8x128x2 _ _) (cons (int8_t _) (int8_t _))) (generate `vtmpybus.acc (p-type p) `(list ,(input-arg Vdd) ,(input-arg Vuu) (,t_i32 ,(codegen-scalar Rt))))]
-;       [(list (i16x64x2 _ _) (cons (int8_t _) (int8_t _))) (generate `vtmpyhb.acc (p-type p) `(list ,(input-arg Vdd) ,(input-arg Vuu) (,t_i32 ,(codegen-scalar Rt))))])]
-;    
-;    ;;vrmpy
-;    [(vrmpy Vu Rt)
-;     (match (list (hvx:interpret Vu) (hvx:interpret Rt))
-;       [(list (u8x128 _) (list (uint8_t _) (uint8_t _) (uint8_t _) (uint8_t _))) (generate `vrmpyub (p-type p) `(list ,(input-arg Vu) (,t_i32 ,(codegen-scalar Rt))))]
-;       [(list (u8x128 _) (list (int8_t _) (int8_t _) (int8_t _) (int8_t _))) (generate `vrmpybus (p-type p) `(list ,(input-arg Vu) (,t_i32 ,(codegen-scalar Rt))))])]
-;
-;    ;;vrmpy-acc
-;    [(vrmpy-acc Vd Vu Rt)
-;     (match (list (hvx:interpret Vu) (hvx:interpret Rt))
-;       [(list (u8x128 _) (list (uint8_t _) (uint8_t _) (uint8_t _) (uint8_t _))) (generate `vrmpyub.acc (p-type p) `(list ,(input-arg Vd) ,(input-arg Vu) (,t_i32 ,(codegen-scalar Rt))))]
-;       [(list (u8x128 _) (list (int8_t _) (int8_t _) (int8_t _) (int8_t _))) (generate `vrmpybus.acc (p-type p) `(list ,(input-arg Vd) ,(input-arg Vu) (,t_i32 ,(codegen-scalar Rt))))])]
 ;    
 ;    ;;vrmpy-p
 ;    [(vrmpy-p Vuu Rt u1)
@@ -1049,38 +1299,11 @@
 ;       [(i16x64 _) (generate `vlsrh (p-type p) `(list ,(input-arg Vu) (,t_i32 ,(codegen-scalar Rt))))]
 ;       [(i32x32 _) (generate `vlsrw (p-type p) `(list ,(input-arg Vu) (,t_i32 ,(codegen-scalar Rt))))])]
 ;    
-;    ;;vasr
-;    [(vasr Vu Rt)
-;     (match (hvx:interpret Vu)
-;       [(i16x64 _) (generate `vasrh (p-type p) `(list ,(input-arg Vu) (,t_i32 ,(codegen-scalar Rt))))]
-;       [(i32x32 _) (generate `vasrw (p-type p) `(list ,(input-arg Vu) (,t_i32 ,(codegen-scalar Rt))))])]
-;    
 ;    ;;vasr-acc
 ;    [(vasr-acc Vd Vu Rt)
 ;     (match (hvx:interpret Vu)
 ;       [(i16x64 _) (generate `vasrh.acc (p-type p) `(list ,(input-arg Vd) ,(input-arg Vu) (,t_i32 ,(codegen-scalar Rt))))]
 ;       [(i32x32 _) (generate `vasrw.acc (p-type p) `(list ,(input-arg Vd) ,(input-arg Vu) (,t_i32 ,(codegen-scalar Rt))))])]
-;    
-;    ;;vasr-n
-;    [(vasr-n Vu Vv Rt round? sat? unsigned?)
-;     (match (list (hvx:interpret Vu) (hvx:interpret Vv) (hvx:interpret Rt) (hvx:interpret round?) (hvx:interpret sat?) (hvx:interpret unsigned?))
-;       [(list (i16x64 v0) (i16x64 v1) (int8_t n) #f _ #t) (generate `vasrhubsat (p-type p) `(list ,(input-arg Vu) ,(input-arg Vv) (,t_i32 ,(codegen-scalar Rt))))]
-;       [(list (i16x64 v0) (i16x64 v1) (int8_t n) #f _ #f) (generate `vasrhsat (p-type p) `(list ,(input-arg Vu) ,(input-arg Vv) (,t_i32 ,(codegen-scalar Rt))))]
-;       [(list (i16x64 v0) (i16x64 v1) (int8_t n) #t _ #t) (generate `vasrhubrndsat (p-type p) `(list ,(input-arg Vu) ,(input-arg Vv) (,t_i32 ,(codegen-scalar Rt))))]
-;       [(list (i16x64 v0) (i16x64 v1) (int8_t n) #t _ #f) (generate `vasrhrndsat (p-type p) `(list ,(input-arg Vu) ,(input-arg Vv) (,t_i32 ,(codegen-scalar Rt))))]
-;
-;       [(list (u16x64 v0) (u16x64 v1) (int8_t n) #f _ _) (generate `vasruhubsat (p-type p) `(list ,(input-arg Vu) ,(input-arg Vv) (,t_i32 ,(codegen-scalar Rt))))]
-;       [(list (u16x64 v0) (u16x64 v1) (int8_t n) #t _ _) (generate `vasruhubrndsat (p-type p) `(list ,(input-arg Vu) ,(input-arg Vv) (,t_i32 ,(codegen-scalar Rt))))]
-;
-;       [(list (i32x32 v0) (i32x32 v1) (int8_t n) #f _ #t) (generate `vasrwubsat (p-type p) `(list ,(input-arg Vu) ,(input-arg Vv) (,t_i32 ,(codegen-scalar Rt))))]
-;       [(list (i32x32 v0) (i32x32 v1) (int8_t n) #t _ #t) (generate `vasrwubrndsat (p-type p) `(list ,(input-arg Vu) ,(input-arg Vv) (,t_i32 ,(codegen-scalar Rt))))]
-;
-;       [(list (i32x32 v0) (i32x32 v1) (int8_t n) #f #t #f) (generate `vasrwhsat (p-type p) `(list ,(input-arg Vu) ,(input-arg Vv) (,t_i32 ,(codegen-scalar Rt))))]
-;       [(list (i32x32 v0) (i32x32 v1) (int8_t n) #f #f #f) (generate `vasrw (p-type p) `(list ,(input-arg Vu) ,(input-arg Vv) (,t_i32 ,(codegen-scalar Rt))))]
-;       [(list (i32x32 v0) (i32x32 v1) (int8_t n) #t _ #f) (generate `vasrwrndsat (p-type p) `(list ,(input-arg Vu) ,(input-arg Vv) (,t_i32 ,(codegen-scalar Rt))))]
-;       
-;       [(list (u32x32 v0) (u32x32 v1) (int8_t n) #f _ _) (generate `vasruwubsat (p-type p) `(list ,(input-arg Vu) ,(input-arg Vv) (,t_i32 ,(codegen-scalar Rt))))]
-;       [(list (u32x32 v0) (u32x32 v1) (int8_t n) #t _ _) (generate `vasruwubrndsat (p-type p) `(list ,(input-arg Vu) ,(input-arg Vv) (,t_i32 ,(codegen-scalar Rt))))])]
 ;
 ;    ;vabs
 ;    [(vabs Vu sat?)

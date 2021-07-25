@@ -1,0 +1,181 @@
+(halide.concat_vectors
+ int16x128
+ (list
+  (int16x64
+   (llvm.hexagon.V6.vmaxh.128B
+    int16x64
+    (list
+     (int16x64
+      (llvm.hexagon.V6.vminh.128B
+       int16x64
+       (list
+        (int16x64
+         (llvm.hexagon.V6.vmaxh.128B
+          int16x64
+          (list
+           (int16x64
+            (llvm.hexagon.V6.vread.128B
+             uint16x64
+             (list
+              (int32 input)
+              (int32
+               (+
+                10
+                (+
+                 (+ (* 128 f1.s0.v0.v0) (+ t3035 (- 0 t2982)))
+                 (* 16 t2987))))
+              (int32 1)
+              (int32 0))))
+           (int16x64
+            (llvm.hexagon.V6.vmaxh.128B
+             int16x64
+             (list
+              (int16x64
+               (llvm.hexagon.V6.vread.128B
+                uint16x64
+                (list
+                 (int32 input)
+                 (int32
+                  (+
+                   14
+                   (+
+                    (+ (* 128 f1.s0.v0.v0) (+ t3035 (- 0 t2982)))
+                    (* 16 t2987))))
+                 (int32 1)
+                 (int32 0))))
+              (int16x64
+               (llvm.hexagon.V6.vmaxh.128B
+                int16x64
+                (list
+                 (int16x64
+                  (llvm.hexagon.V6.vread.128B
+                   uint16x64
+                   (list
+                    (int32 input)
+                    (int32
+                     (+
+                      12
+                      (+
+                       (+ (* 128 f1.s0.v0.v0) (+ t3035 (- 0 t2982)))
+                       (* 18 t2987))))
+                    (int32 1)
+                    (int32 0))))
+                 (int16x64
+                  (llvm.hexagon.V6.vread.128B
+                   uint16x64
+                   (list
+                    (int32 input)
+                    (int32
+                     (+
+                      12
+                      (+
+                       (+ (* 128 f1.s0.v0.v0) (+ t3035 (- 0 t2982)))
+                       (* 14 t2987))))
+                    (int32 1)
+                    (int32 0)))))))))))))
+        (int16x64
+         (llvm.hexagon.V6.vread.128B
+          uint16x64
+          (list
+           (int32 input)
+           (int32
+            (+
+             12
+             (+ (+ (* 128 f1.s0.v0.v0) (+ t3035 (- 0 t2982))) (* 16 t2987))))
+           (int32 1)
+           (int32 0)))))))
+     (int16x64 (halide.ir.x64 int16x64 (list (int16 0x0000)))))))
+  (int16x64
+   (llvm.hexagon.V6.vmaxh.128B
+    int16x64
+    (list
+     (int16x64
+      (llvm.hexagon.V6.vminh.128B
+       int16x64
+       (list
+        (int16x64
+         (llvm.hexagon.V6.vmaxh.128B
+          int16x64
+          (list
+           (int16x64
+            (llvm.hexagon.V6.vread.128B
+             uint16x64
+             (list
+              (int32 input)
+              (int32
+               (+
+                (+
+                 10
+                 (+
+                  (+ (* 128 f1.s0.v0.v0) (+ t3035 (- 0 t2982)))
+                  (* 16 t2987)))
+                64))
+              (int32 1)
+              (int32 0))))
+           (int16x64
+            (llvm.hexagon.V6.vmaxh.128B
+             int16x64
+             (list
+              (int16x64
+               (llvm.hexagon.V6.vmaxh.128B
+                int16x64
+                (list
+                 (int16x64
+                  (llvm.hexagon.V6.vread.128B
+                   uint16x64
+                   (list
+                    (int32 input)
+                    (int32
+                     (+
+                      (+
+                       12
+                       (+
+                        (+ (* 128 f1.s0.v0.v0) (+ t3035 (- 0 t2982)))
+                        (* 14 t2987)))
+                      64))
+                    (int32 1)
+                    (int32 0))))
+                 (int16x64
+                  (llvm.hexagon.V6.vread.128B
+                   uint16x64
+                   (list
+                    (int32 input)
+                    (int32
+                     (+
+                      (+
+                       12
+                       (+
+                        (+ (* 128 f1.s0.v0.v0) (+ t3035 (- 0 t2982)))
+                        (* 18 t2987)))
+                      64))
+                    (int32 1)
+                    (int32 0)))))))
+              (int16x64
+               (llvm.hexagon.V6.vread.128B
+                uint16x64
+                (list
+                 (int32 input)
+                 (int32
+                  (+
+                   (+
+                    14
+                    (+
+                     (+ (* 128 f1.s0.v0.v0) (+ t3035 (- 0 t2982)))
+                     (* 16 t2987)))
+                   64))
+                 (int32 1)
+                 (int32 0))))))))))
+        (int16x64
+         (llvm.hexagon.V6.vread.128B
+          uint16x64
+          (list
+           (int32 input)
+           (int32
+            (+
+             (+
+              12
+              (+ (+ (* 128 f1.s0.v0.v0) (+ t3035 (- 0 t2982))) (* 16 t2987)))
+             64))
+           (int32 1)
+           (int32 0)))))))
+     (int16x64 (halide.ir.x64 int16x64 (list (int16 0x0000)))))))))

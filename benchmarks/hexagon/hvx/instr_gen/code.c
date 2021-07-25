@@ -12,16 +12,16 @@
 }*/
 
 HVX_Vector getllvm2(unsigned char *restrict src, unsigned char *restrict dst){
-    HVX_VectorPair *p1 = (HVX_VectorPair *)(src);
+    //HVX_VectorPair *p1 = (HVX_VectorPair *)(src);
     HVX_Vector *p2 = (HVX_Vector *)(src + 1);
-    HVX_VectorPair x = *p1++;
+    HVX_Vector x = *p2++;
     HVX_Vector y = *p2++;
-    HVX_VectorPair a = *p1++;
-    HVX_Vector b = *p2++;
-    HEXAGON_Vect32 c = 0x02040204;
-    HVX_Vector *optr = (HVX_Vector *)(dst);
-    *optr = Q6_V_lo_W(Q6_W_vshuff_VVR(Q6_V_lo_W(Q6_Ww_vmpyacc_WwVhRh(x, y, c)), Q6_V_lo_W(Q6_Ww_vmpyacc_WwVhRh(a, b, c)), -2));
-    return Q6_V_lo_W(Q6_Ww_vmpyacc_WwVhRh(x, y, c));
+    //HVX_VectorPair a = *p1++;
+    //HVX_Vector b = *p2++;
+    HEXAGON_Vect32 c = 0x02;
+    //HVX_Vector *optr = (HVX_Vector *)(dst);
+    //*optr = Q6_V_lo_W(Q6_W_vshuff_VVR(Q6_V_lo_W(Q6_Ww_vmpyacc_WwVhRh(x, y, c)), Q6_V_lo_W(Q6_Ww_vmpyacc_WwVhRh(a, b, c)), -2));
+    return Q6_Vw_vrmpy_VubVb(x, y);
 }
 
 /*HVX_Vector getllvm3(unsigned short *restrict src){

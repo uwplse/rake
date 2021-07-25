@@ -1,32 +1,44 @@
 #lang rosette/safe
 
 (require rake)
+(init-logging "expr_1.runtimes")
 
-(define-symbolic-var bounded_input.s0.x.x int32_t)
-(define-symbolic-var t357 int32_t)
-(define-symbolic-var t351 int32_t)
+(define-symbolic-buffer bounded_input uint8_t)
+(define-symbolic t368 integer?)
+(define-symbolic t398 integer?)
+(define-symbolic t397 integer?)
+(define-symbolic output.s0.x.x integer?)
+(define-symbolic t358 integer?)
 
 (define axioms 
   (list ))
 
-(define input.extent.0 t351)
-(define output.extent.0 t357)
-(define bounded_input.s0.x.v0.base.s (sca-add  (sca-min  output.extent.0  (int32_t (bv 128 32)))  (sca-mul  bounded_input.s0.x.x  (int32_t (bv 128 32)))))
-(define t343.s (sca-min  (sca-add  input.extent.0  (int32_t (bv 128 32)))  bounded_input.s0.x.v0.base.s))
+(define output.extent.0 (var-lookup 'output.extent.0 t358))
+(define t246 (var-lookup 't246 (sca-sub  (sca-mul  t368  256)  (sca-min  output.extent.0  128))))
+(define t208 (var-lookup 't208 (sca-add  (sca-mul  t397  128)  (sca-add  (sca-mul  output.s0.x.x  128)  t246))))
+(define t209 (var-lookup 't209 (sca-add  (sca-mul  t398  -128)  (sca-add  (sca-mul  output.s0.x.x  128)  t246))))
 
 (define halide-expr
- (uint8x128
-  (vec-add
+ (let ([t399  (sca-add  (sca-mul  output.s0.x.x  128)  t246)])
+  (vec-max
+   (load bounded_input (ramp (sca-add t208 129) 1 128) (aligned 1 0))
    (vec-max
-    (vec-min
-     (ramp (sca-add bounded_input.s0.x.v0.base.s (int32_t (bv -129 32))) (int32_t (bv 1 32)) 128)
-     (x128 (sca-add input.extent.0 (int32_t (bv -1 32)))))
-    (x128 (int32_t (bv 0 32))))
-   (x128 (sca-sub (int32_t (bv 129 32)) (sca-max t343.s (int32_t (bv 129 32))))))))
+    (load bounded_input (ramp (sca-add t399 129) 1 128) (aligned 1 0))
+    (vec-max
+     (load bounded_input (ramp (sca-add t209 129) 1 128) (aligned 1 0))
+     (vec-max
+      (load bounded_input (ramp (sca-add t209 130) 1 128) (aligned 1 0))
+      (vec-max
+       (load bounded_input (ramp (sca-add t399 130) 1 128) (aligned 1 0))
+       (vec-max
+        (load bounded_input (ramp (sca-add t208 130) 1 128) (aligned 1 0))
+        (vec-max
+         (load bounded_input (ramp (sca-add t209 128) 1 128) (aligned 1 0))
+         (vec-max
+          (load bounded_input (ramp (sca-add t399 128) 1 128) (aligned 1 0))
+          (load bounded_input (ramp (sca-add t208 128) 1 128) (aligned 1 0))))))))))))
 
 (define spec (synthesis-spec 'halide-ir halide-expr axioms))
 (define hvx-expr (synthesize-hvx spec 'greedy 'enumerative 'enumerative))
 
-;(define out (open-output-file "sexp_1.out" #:exists 'replace))
-;(pretty-write (llvm-codegen hvx-expr) out)
-;(close-output-port out)
+(llvm-codegen hvx-expr "sexp_1.out")

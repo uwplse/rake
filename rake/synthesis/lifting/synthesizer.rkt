@@ -68,7 +68,6 @@
      ;(println sol)
      
      (when (correct? sol)
-       ;(println halide-expr)
        ;(pretty-print (evaluate template sol))
 
        (define e (evaluate optimized-template sol))

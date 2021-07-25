@@ -5,45 +5,45 @@
 
 (define-symbolic-buffer input1 uint8_t)
 (define-symbolic-buffer input2 uint8_t)
-(define-symbolic t69 integer?)
 (define-symbolic output.s0.x.x integer?)
-(define-symbolic t79 integer?)
-(define-symbolic t73 integer?)
-(define-symbolic-var input2_multiplier int16_t)
-(define-symbolic-var input2_zero uint8_t)
 (define-symbolic t70 integer?)
-(define-symbolic t78 integer?)
-(define-symbolic t62 integer?)
+(define-symbolic t63 integer?)
+(define-symbolic-var input2_multiplier int16_t)
+(define-symbolic t66 integer?)
+(define-symbolic t67 integer?)
+(define-symbolic-var input2_zero uint8_t)
 (define-symbolic output.s0.y.rebased integer?)
+(define-symbolic t71 integer?)
+(define-symbolic t79 integer?)
 (define-symbolic-var output_zero uint8_t)
 (define-symbolic-var output_min uint8_t)
 (define-symbolic-var output_max uint8_t)
-(define-symbolic t65 integer?)
-(define-symbolic t66 integer?)
+(define-symbolic t74 integer?)
+(define-symbolic t80 integer?)
 (define-symbolic-var input1_multiplier int16_t)
 (define-symbolic-var input1_zero uint8_t)
 
 (define axioms 
   (list ))
 
-(define input1.min.0 (var-lookup 'input1.min.0 t62))
-(define input1.stride.1 (var-lookup 'input1.stride.1 t65))
-(define input2.min.0 (var-lookup 'input2.min.0 t66))
-(define input2.stride.1 (var-lookup 'input2.stride.1 t69))
-(define output.min.0 (var-lookup 'output.min.0 t70))
-(define output.min.1 (var-lookup 'output.min.1 t73))
-(define t40.s (var-lookup 't40.s (sca-sub  output.min.0  t78)))
-(define t39.s (var-lookup 't39.s (sca-sub  output.min.0  t79)))
+(define input1.min.0 (var-lookup 'input1.min.0 t63))
+(define input1.stride.1 (var-lookup 'input1.stride.1 t66))
+(define input2.min.0 (var-lookup 'input2.min.0 t67))
+(define input2.stride.1 (var-lookup 'input2.stride.1 t70))
+(define output.min.0 (var-lookup 'output.min.0 t71))
+(define output.min.1 (var-lookup 'output.min.1 t74))
+(define t40.s (var-lookup 't40.s (sca-sub  output.min.0  t79)))
+(define t39.s (var-lookup 't39.s (sca-sub  output.min.0  t80)))
 
 (define halide-expr
- (let ([t80  (sca-add  output.min.1  output.s0.y.rebased)])
-  (let ([t81   (vec-add
+ (let ([t81  (sca-add  output.min.1  output.s0.y.rebased)])
+  (let ([t82   (vec-add
    (vec-mul
     (int32x128
      (vec-add
       (vec-mul
        (int16x128
-        (load input1 (ramp (sca-add (sca-mul output.s0.x.x 128) (sca-add (sca-mul t80 input1.stride.1) (sca-sub t39.s input1.min.0))) 1 128) (aligned 1 0)))
+        (load input1 (ramp (sca-add (sca-mul output.s0.x.x 128) (sca-add (sca-mul t81 input1.stride.1) (sca-sub t39.s input1.min.0))) 1 128) (aligned 1 0)))
        (x128 (int16_t (bv 64 16))))
       (x128 (sca-mul (int16x1 input1_zero) (int16_t (bv -64 16))))))
     (int32x128
@@ -53,7 +53,7 @@
      (vec-add
       (vec-mul
        (int16x128
-        (load input2 (ramp (sca-add (sca-mul output.s0.x.x 128) (sca-add (sca-mul t80 input2.stride.1) (sca-sub t40.s input2.min.0))) 1 128) (aligned 1 0)))
+        (load input2 (ramp (sca-add (sca-mul output.s0.x.x 128) (sca-add (sca-mul t81 input2.stride.1) (sca-sub t40.s input2.min.0))) 1 128) (aligned 1 0)))
        (x128 (int16_t (bv 64 16))))
       (x128 (sca-mul (int16x1 input2_zero) (int16_t (bv -64 16))))))
     (int32x128
@@ -75,10 +75,10 @@
                  (vec-bwand
                   (x128 (int32_t (bv 1 32)))
                   (vec-div
-                   t81
+                   t82
                    (x128 (int32_t (bv 32768 32)))))
                  (vec-div
-                  t81
+                  t82
                   (x128 (int32_t (bv 65536 32)))))
                 (x128 (int32_t (bv 32767 32))))
                (x128 (int32_t (bv -32768 32))))))

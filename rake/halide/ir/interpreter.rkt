@@ -126,6 +126,7 @@
     [(slice_vectors vec base stride len) len]
     [(concat_vectors v1 v2) (+ (vec-len v1) (vec-len v2))]
     [(interleave v1 v2) (+ (vec-len v1) (vec-len v2))]
+    [(interleave4 v1 v2 v3 v4) (+ (vec-len v1) (vec-len v2) (vec-len v3) (vec-len v4))]
     [(dynamic_shuffle vec idxs st end) (vec-len idxs)]
 
     [(vec-broadcast n vec) (* n (vec-len vec))]
@@ -243,6 +244,7 @@
     [(slice_vectors vec base stride len) (list vec)]
     [(concat_vectors v1 v2) (list v1 v2)]
     [(interleave v1 v2) (list v1 v2)]
+    [(interleave4 v1 v2 v3 v4) (list v1 v2 v3 v4)]
     [(dynamic_shuffle vec idxs st end) (list vec idxs)]
     
     ;; Base case
@@ -399,8 +401,15 @@
     [(vec-broadcast n vec) (define l (vec-len vec)) (lambda (i) ((interpret vec) (modulo i l)))]
     [(slice_vectors vec base stride len) (lambda (i) ((interpret vec) (+ (interpret base) (* i (interpret stride)))))]
     [(concat_vectors v1 v2) (lambda (i) (if (< i (vec-len v1)) ((interpret v1) i) ((interpret v2) (- i (vec-len v1)))))]
-    [(interleave v1 v2) (lambda (i) (if (even? i) ((interpret v1) (quotient i 2)) ((interpret v2) (quotient i 2))))]
     [(dynamic_shuffle vec idxs st end) (lambda (i) ((interpret vec) (+ ((interpret idxs) i) st)))]
+    [(interleave v1 v2) (lambda (i) (if (even? i) ((interpret v1) (quotient i 2)) ((interpret v2) (quotient i 2))))]
+    [(interleave4 v1 v2 v3 v4)
+     (lambda (i)
+       (cond
+         [(eq? 0 (remainder i 4)) ((interpret v1) (quotient i 4))]
+         [(eq? 1 (remainder i 4)) ((interpret v2) (quotient i 4))]
+         [(eq? 2 (remainder i 4)) ((interpret v3) (quotient i 4))]
+         [(eq? 3 (remainder i 4)) ((interpret v4) (quotient i 4))]))]
     
     ;; Base case
     [_ p]))

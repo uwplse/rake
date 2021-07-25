@@ -1,17 +1,18 @@
 #lang rosette/safe
 
 (require rake)
+(init-logging "expr_3.runtimes")
 
 (define-symbolic-buffer input uint8_t)
+(define-symbolic t134 integer?)
 (define-symbolic rows.s0.x.x integer?)
-(define-symbolic t99 integer?)
-(define-symbolic t133 integer?)
+(define-symbolic t100 integer?)
 
 (define axioms 
   (list ))
 
-(define input.stride.1 t99)
-(define t6 (+  (*  rows.s0.x.x  128)  t133))
+(define input.stride.1 (var-lookup 'input.stride.1 t100))
+(define t7 (var-lookup 't7 (sca-add  (sca-mul  rows.s0.x.x  128)  t134)))
 
 (define halide-expr
  (vec-add
@@ -24,45 +25,43 @@
         (vec-mul
          (int16x128
           (uint16x128
-           (load input (ramp (+ (+ (* input.stride.1 2) t6) -3) 1 128) (aligned 128 125))))
+           (load input (ramp (sca-add (sca-add (sca-mul input.stride.1 2) t7) -3) 1 128) (aligned 128 125))))
          (int16x128
           (x128 (int8_t (bv 6 8))))))
        (int32x128
         (vec-mul
          (int16x128
           (uint16x128
-           (load input (ramp (+ (+ input.stride.1 t6) -3) 1 128) (aligned 128 125))))
+           (load input (ramp (sca-add (sca-add input.stride.1 t7) -3) 1 128) (aligned 128 125))))
          (int16x128
           (x128 (int8_t (bv 15 8)))))))
       (int32x128
        (vec-mul
         (int16x128
          (uint16x128
-          (load input (ramp (+ t6 -3) 1 128) (aligned 128 125))))
+          (load input (ramp (sca-add t7 -3) 1 128) (aligned 128 125))))
         (int16x128
          (x128 (int8_t (bv 20 8)))))))
      (int32x128
       (vec-mul
        (int16x128
         (uint16x128
-         (load input (ramp (+ (- t6 input.stride.1) -3) 1 128) (aligned 128 125))))
+         (load input (ramp (sca-add (sca-sub t7 input.stride.1) -3) 1 128) (aligned 128 125))))
        (int16x128
         (x128 (int8_t (bv 15 8)))))))
     (int32x128
      (vec-mul
       (int16x128
        (uint16x128
-        (load input (ramp (+ (+ (* input.stride.1 -2) t6) -3) 1 128) (aligned 128 125))))
+        (load input (ramp (sca-add (sca-add (sca-mul input.stride.1 -2) t7) -3) 1 128) (aligned 128 125))))
       (int16x128
        (x128 (int8_t (bv 6 8)))))))
    (int32x128
-    (load input (ramp (+ (+ (* input.stride.1 -3) t6) -3) 1 128) (aligned 128 125))))
+    (load input (ramp (sca-add (sca-add (sca-mul input.stride.1 -3) t7) -3) 1 128) (aligned 128 125))))
   (int32x128
-   (load input (ramp (+ (+ (* input.stride.1 3) t6) -3) 1 128) (aligned 128 125)))))
+   (load input (ramp (sca-add (sca-add (sca-mul input.stride.1 3) t7) -3) 1 128) (aligned 128 125)))))
 
 (define spec (synthesis-spec 'halide-ir halide-expr axioms))
 (define hvx-expr (synthesize-hvx spec 'greedy 'enumerative 'enumerative))
 
-;(define out (open-output-file "sexp_3.out" #:exists 'replace))
-;(pretty-write (llvm-codegen hvx-expr) out)
-;(close-output-port out)
+(llvm-codegen hvx-expr "sexp_3.out")

@@ -25,8 +25,9 @@
       (hash-set! grammar-lib (list halide-expr hvx-template swizzle-node output-layout starting-vecs hvx-sub-exprs) candidates)
       candidates]))
 
-(define (get-vec-type elemT pair?)
+(define (get-vec-type elemT pair? expr)
   (cond
+    [(eq? elemT 'uint1)  (hvx:type expr)]
     [(eq? elemT 'int8)   (if pair? 'i8x128x2 'i8x128)]
     [(eq? elemT 'int16)  (if pair? 'i16x64x2 'i16x64)]
     [(eq? elemT 'int32)  (if pair? 'i32x32x2 'i32x32)]
@@ -39,7 +40,7 @@
   
   (define-values (target-node-id base-exprs pair?)
     (destruct swizzle-node
-      [(??abstr-load live-data buffer)
+      [(??abstr-load id live-data buffer)
        (define buffer (??abstr-load-buffer swizzle-node))
        (define base-exprs
          (flatten
@@ -50,9 +51,19 @@
               (vreadp (list-ref base-expr 0) (list-ref base-expr 1) (list-ref base-expr 2))))
            (filter (lambda (vec) (eq? buffer (list-ref vec 0))) starting-vecs))))
 
-       (define id 0)
        (define tile-w (* (halide:vec-len halide-expr) (cpp:type-bw (halide:elem-type halide-expr))))
        (define pair? (if (eq? tile-w 1024) #f #t))
+       (values id base-exprs pair?)]
+      [(??shuffle id lds pair?)
+       (define buffers (halide:extract-live-buffers halide-expr))
+       (define base-exprs
+         (flatten
+          (map
+           (lambda (base-expr)
+             (list
+              (vread (list-ref base-expr 0) (list-ref base-expr 1) (list-ref base-expr 2))
+              (vreadp (list-ref base-expr 0) (list-ref base-expr 1) (list-ref base-expr 2))))
+           (filter (lambda (vec) (set-member? buffers (list-ref vec 0))) starting-vecs))))       
        (values id base-exprs pair?)]
       [(??load id live-data buffer gather-tbl pair?)
        (define buffer (??load-buffer swizzle-node))
@@ -70,11 +81,12 @@
        (define trimmed-exprs (set->list (list->set (map (lambda (e) (if (lo? e) (lo-Vuu e) (if (hi? e) (hi-Vuu e) e))) exprs))))
        (values id trimmed-exprs pair?)]))
 
-  (define elemT (hvx:elem-type (hvx:interpret swizzle-node)))
-  (define out-type (get-vec-type elemT pair?))
-
-  (define isa (list vcombine lo hi vinterleave vinterleave2 vdeal vdeale vshuff vshuffe vshuffo vshuffoe vpacke vpacko valign vror))
-  ;(define isa (list lo hi vdeal vshuff vinterleave vinterleave2 vinterleave4))
+  (define intr_expr (hvx:interpret swizzle-node))
+  (define elemT (hvx:elem-type intr_expr))
+  (define out-type (get-vec-type elemT pair? intr_expr))
+  
+  (define isa (list vcombine lo hi vinterleave vinterleave2 vinterleave4 vdeal vdeale vshuff vshuffe vshuffo vshuffoe vpacke vpacko valign))
+  ;(define isa (list lo hi vinterleave vinterleave2 vcombine))
   
   (define grouped-base-exprs (make-hash))
   (for ([be base-exprs])
@@ -82,16 +94,26 @@
     (hash-set! grouped-base-exprs beT (append (hash-ref! grouped-base-exprs beT '()) (list be))))
   (for ([(t bes) grouped-base-exprs])
     (define-symbolic* c integer?)
-    (define beC (if (??swizzle? swizzle-node) 0 1))
+    ;(define beC (if (??swizzle? swizzle-node) 0 1))
+    (define beC (if (??swizzle? swizzle-node) 0 0))
     (hash-set! grouped-base-exprs t (list (cons (??sub-expr bes c) beC))))
 
-  ;(pretty-print grouped-base-exprs)
+  (pretty-print grouped-base-exprs)
+  
   (set! enumeration-database (make-hash))
-  (define candidate-swizzles (time (enumerate-hvx isa out-type grouped-base-exprs 2 (min swizzle-budget 3))))
+  (define candidate-swizzles (time (enumerate-hvx isa out-type grouped-base-exprs 2 (min swizzle-budget 5))))
+
+  ;(println (length candidate-swizzles))
   
   ;; Enable scalar swizzling
   (define (permute-scalars Rt)
     (destruct Rt
+      [(Rt2.b v0 v1)
+       (define rts (map (lambda (p) (Rt2.b (first p) (second p))) (permutations (list v0 v1))))
+       (apply choose* rts)]
+      [(Rt2.ub v0 v1)
+       (define rts (map (lambda (p) (Rt2.ub (first p) (second p))) (permutations (list v0 v1))))
+       (apply choose* rts)]
       [(Rt4.b v0 v1 v2 v3)
        (define rts (map (lambda (p) (Rt4.b (first p) (second p) (third p) (fourth p))) (permutations (list v0 v1 v2 v3))))
        (apply choose* rts)]
@@ -102,16 +124,22 @@
     (destruct n
       [(??load id live-data buffer gather-tbl pair?) (if (equal? id target-node-id) #t #f)]
       [(??swizzle id live-data expr gather-tbl pair?) (if (equal? id target-node-id) #t #f)]
+      [(??shuffle id lds pair?) (if (equal? id target-node-id) #t #f)]
       [_ #f]))
   (define (enable-scalar-movement node [pos -1])
     (destruct node
+      [(vtmpy Vuu Rt) (if (swizzle-node? Vuu) (vtmpy Vuu (permute-scalars Rt)) node)]
+      [(vtmpy-acc Vdd Vuu Rt) (if (swizzle-node? Vuu) (vtmpy-acc Vdd Vuu (permute-scalars Rt)) node)]
       [(vrmpy Vu Rt) (if (swizzle-node? Vu) (vrmpy Vu (permute-scalars Rt)) node)]
       [(vrmpy-acc Vdd Vu Rt) (if (swizzle-node? Vu) (vrmpy-acc Vdd Vu (permute-scalars Rt)) node)]
       [_ node]))
   (define (update-swizzle-nodes node [pos -1])
     (destruct node
       [(??load id live-data buffer gather-tbl pair?) (if (not (equal? id target-node-id)) (update-swizzle-data node halide-expr hvx-sub-exprs translation-history) node)]
+      [(??shuffle id live-data buffer) (if (not (equal? id target-node-id)) (update-swizzle-data node halide-expr hvx-sub-exprs translation-history) node)]
       [(??swizzle id live-data expr gather-tbl pair?) (if (not (equal? id target-node-id)) (update-swizzle-data node halide-expr hvx-sub-exprs translation-history) node)]
+      [(??lo/hi Vuu interleave?) (choose* (lo (vinterleave Vuu)) (hi (vinterleave Vuu)) (lo Vuu) (hi Vuu))]
+      [(vmpyie/o Vu Rt) (choose* (vmpyie Vu Rt) (vmpyio Vu Rt))]
       [_ node]))
   (define updated-template (hvx:visit (hvx:visit hvx-template enable-scalar-movement) update-swizzle-nodes))
 
@@ -130,7 +158,8 @@
        ;; Update template: Replace target swizzle node with swizzle grammar
        (define (repl-swizzle-node-wth-candidate node [pos -1])
          (destruct node
-            [(??abstr-load live-data buffer) (car candidate-swizzle)]
+            [(??abstr-load id live-data buffer) (hvx:visit (car candidate-swizzle) uniquify-sub-exprs)]
+            [(??shuffle id lds pair?) (if (equal? id target-node-id) (hvx:visit (car candidate-swizzle) uniquify-sub-exprs) node)]
             [(??load id live-data buffer gather-tbl pair?) (if (equal? id target-node-id) (hvx:visit (car candidate-swizzle) uniquify-sub-exprs) node)]
             [(??swizzle id live-data expr gather-tbl pair?) (if (equal? id target-node-id) (hvx:visit (car candidate-swizzle) uniquify-sub-exprs) node)]
             [_ node]))
@@ -139,17 +168,18 @@
          ;(cons (car e) (+ (cdr e) (cdr candidate-swizzle) -1)))
        (define cost (cdr candidate-swizzle))
        (cond
-         [(hvx:vec-pair? tmpl-type) (list (cons c cost) (cons (vinterleave c) (add1 cost)))]
-         [(< (cpp:type-bw tmpl-etype) 32) (list (cons c cost) (cons (vdeal c) (add1 cost)))]
+         ;[(hvx:vec-pair? tmpl-type) (list (cons c cost) (cons (vinterleave c) (+ 1 cost)))]
+         ;[(and (< (cpp:type-bw tmpl-etype) 32) (> (cpp:type-bw tmpl-etype) 1)) (list (cons c cost) (cons (vdeal c) (+ 0.5 cost)))]
          [else (list (cons c cost))]))))
   (define sorted-candidates (sort candidates (lambda (v1 v2) (<= (cdr v1) (cdr v2)))))
 
+  (println (length sorted-candidates))
   ;(pretty-print sorted-candidates)
   ;(exit)
   
   (define (fill-arg-grammars node [pos -1])
     (match node
-      ['const (??)]
+      ['const (define-symbolic* c integer?) c]
       [_ node]))
   (for/list ([candidate sorted-candidates]) (cons (hvx:visit (car candidate) fill-arg-grammars) (cdr candidate))))
 
@@ -160,6 +190,12 @@
         ;(define-symbolic* tbl (~> integer? integer?))
         (define tbl (map (lambda (i) (define-symbolic* idx integer?) idx) (range 256)))
         (??load id (halide:extract-buffer-reads halide-expr) buffer tbl pair?)]
+      [(??shuffle id lds pair?)
+        (??shuffle id
+         (for/list ([ld lds])
+           (define tbl (map (lambda (i) (define-symbolic* idx integer?) idx) (range 256)))
+           (??load (??load-id ld) (halide:extract-buffer-reads halide-expr) (??load-buffer ld) tbl #f))
+         pair?)]
       [(??swizzle id live-data exprs gather-tbl pair?)
         ;; Abstract out common sub-expressions
         (define-values (abstr-halide-expr abstr-template _) (optimize-query halide-expr node hvx-sub-exprs (make-hash) translation-history))
@@ -192,13 +228,27 @@
 (define enumeration-database (make-hash))
 
 (define (enumerate-hvx instr-set output-type base-exprs depth max-cost [parent-instr (void)])
-  (define query (list instr-set output-type base-exprs depth parent-instr))
+  (define query (list instr-set output-type base-exprs depth max-cost parent-instr))
   (cond
     ;; Have we enumerated this tree before?
     [(hash-has-key? enumeration-database query) (hash-ref enumeration-database query)]
 
     ;; Recursive base case
-    [(<= depth 0) (hash-ref! base-exprs output-type '())]
+    [(<= depth 0)
+     (cond
+       [(or (eq? parent-instr lo) (eq? parent-instr hi))
+        (filter-map
+         (lambda (se)
+           (define x (car se))
+           (define y (cdr se))
+           (cond
+             [(??sub-expr? x)
+               (let ([filtered-exprs (filter (lambda (e) (not (vreadp? e))) (??sub-expr-exprs x))])
+                 (if (empty? filtered-exprs) #f (cons (??sub-expr filtered-exprs (??sub-expr-c x)) y)))]
+             [else se]))
+         (hash-ref! base-exprs output-type '()))]
+       [else
+        (hash-ref! base-exprs output-type '())])]
 
     ;; Enumerate recursively
     [else
@@ -229,7 +279,7 @@
        (let ([opts (match arg
                      [#t (list (cons #t 0))]
                      [#f (list (cons #f 0))]
-                     ['const (list (cons (??) 0))]
+                     ['const (list (cons 'const 0))]
                      [_ (enumerate-hvx instr-set arg base-exprs (sub1 depth) max-cost instr)])])
          (append (list opts) (get-arg-opts (rest args) instr-set base-exprs depth max-cost instr))))]))
 
@@ -242,6 +292,8 @@
   (cond
     [(eq? instr lo) 0.01]
     [(eq? instr hi) 0.01]
+    [(eq? instr vcombine) 0.2]
+    [(eq? instr valign) 0.2]
     [(eq? instr vdeal) 0.95]
     [(eq? instr vdeale) 0.95]
     [(eq? instr vpacke) 0.95]
@@ -249,10 +301,8 @@
     [(eq? instr vshuff) 0.95]
     [(eq? instr vshuffo) 0.95]
     [(eq? instr vshuffe) 0.95]
-    [(eq? instr valign) 0.95]
     [(eq? instr vror) 0.95]
     [(eq? instr vshuffoe) 1]
-    [(eq? instr vcombine) 1]
     [(eq? instr vinterleave) 1]
     [(eq? instr vinterleave2) 1]
     [(eq? instr vinterleave4) 2]

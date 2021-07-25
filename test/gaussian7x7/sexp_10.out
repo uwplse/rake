@@ -1,0 +1,11 @@
+(llvm.hexagon.V6.vcombine.128B
+ int32x64
+ (list
+  (int32x32
+   (llvm.hexagon.V6.vread.128B
+    int32x32
+    (list (int32 t78-buf) (int32 0) (int32 0) (int32 0))))
+  (int32x32
+   (llvm.hexagon.V6.vread.128B
+    int32x32
+    (list (int32 t76-buf) (int32 0) (int32 0) (int32 0))))))

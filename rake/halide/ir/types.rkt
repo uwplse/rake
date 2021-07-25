@@ -155,4 +155,5 @@
 (struct slice_vectors (vec base stride len) #:transparent)
 (struct concat_vectors (v1 v2) #:transparent)
 (struct interleave (v1 v2) #:transparent)
+(struct interleave4 (v1 v2 v3 v4) #:transparent)
 (struct dynamic_shuffle (vec idx st end) #:transparent)

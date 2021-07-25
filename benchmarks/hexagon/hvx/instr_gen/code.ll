@@ -1,55 +1,39 @@
-	.text
-	.file	"code.c"
-	.globl	getllvm2                // -- Begin function getllvm2
-	.balign 32
-	.type	getllvm2,@function
-getllvm2:                               // @getllvm2
-// %bb.0:                               // %entry
-	{
-		r2 = add(r0,#1)
-		r3 = ##33817092
-		v0 = vmem(r0+#0)
-	}
-	{
-		r4 = add(r0,#129)
-		r7 = #-2
-		v1 = vmem(r0+#1)
-	}
-	{
-		v1:0.w += vmpy(v4.h,r3.h)
-		v4.cur = vmem(r2+#0)
-	}
-	{
-		v2 = vmem(r0+#2)
-	}
-	{
-		v3 = vmem(r0+#3)
-	}
-	{
-		v3:2.w += vmpy(v1.h,r3.h)
-		v1.cur = vmem(r4+#0)
-	}
-	{
-		v5:4 = vshuff(v0,v2,r7)
-		jumpr r31
-		vmem(r1+#0) = v4.new
-	}
-.Lfunc_end0:
-	.size	getllvm2, .Lfunc_end0-getllvm2
-                                        // -- End function
-	.globl	main                    // -- Begin function main
-	.balign 32
-	.type	main,@function
-main:                                   // @main
-// %bb.0:                               // %entry
-	{
-		r0 = #0
-		jumpr r31
-	}
-.Lfunc_end1:
-	.size	main, .Lfunc_end1-main
-                                        // -- End function
+; ModuleID = 'code.c'
+source_filename = "code.c"
+target datalayout = "e-m:e-p:32:32:32-a:0-n16:32-i64:64:64-i32:32:32-i16:16:16-i1:8:8-f32:32:32-f64:64:64-v32:32:32-v64:64:64-v512:512:512-v1024:1024:1024-v2048:2048:2048"
+target triple = "hexagon"
 
-	.ident	"QuIC LLVM Hexagon Clang version 8.3.07 (based on LLVM 7.0.0)"
-	.section	".note.GNU-stack","",@progbits
-	.addrsig
+; Function Attrs: nounwind readonly
+define dso_local inreg <32 x i32> @getllvm2(i8* noalias nocapture readonly %src, i8* noalias nocapture readnone %dst) local_unnamed_addr #0 {
+entry:
+  %add.ptr = getelementptr inbounds i8, i8* %src, i32 1
+  %0 = bitcast i8* %add.ptr to <32 x i32>*
+  %incdec.ptr = getelementptr inbounds i8, i8* %src, i32 129
+  %1 = bitcast i8* %incdec.ptr to <32 x i32>*
+  %2 = load <32 x i32>, <32 x i32>* %0, align 128, !tbaa !2
+  %3 = load <32 x i32>, <32 x i32>* %1, align 128, !tbaa !2
+  %4 = tail call <32 x i32> @llvm.hexagon.V6.vrmpybusv.128B(<32 x i32> %2, <32 x i32> %3)
+  ret <32 x i32> %4
+}
+
+; Function Attrs: nounwind readnone
+declare <32 x i32> @llvm.hexagon.V6.vrmpybusv.128B(<32 x i32>, <32 x i32>) #1
+
+; Function Attrs: norecurse nounwind readnone
+define dso_local i32 @main() local_unnamed_addr #2 {
+entry:
+  ret i32 0
+}
+
+attributes #0 = { nounwind readonly "correctly-rounded-divide-sqrt-fp-math"="false" "disable-tail-calls"="false" "less-precise-fpmad"="false" "no-frame-pointer-elim"="true" "no-frame-pointer-elim-non-leaf" "no-infs-fp-math"="false" "no-jump-tables"="false" "no-nans-fp-math"="false" "no-signed-zeros-fp-math"="false" "no-trapping-math"="false" "stack-protector-buffer-size"="8" "target-cpu"="hexagonv66" "target-features"="+hvx-length128b,+hvxv66,-long-calls" "unsafe-fp-math"="false" "use-soft-float"="false" }
+attributes #1 = { nounwind readnone }
+attributes #2 = { norecurse nounwind readnone "correctly-rounded-divide-sqrt-fp-math"="false" "disable-tail-calls"="false" "less-precise-fpmad"="false" "no-frame-pointer-elim"="true" "no-frame-pointer-elim-non-leaf" "no-infs-fp-math"="false" "no-jump-tables"="false" "no-nans-fp-math"="false" "no-signed-zeros-fp-math"="false" "no-trapping-math"="false" "stack-protector-buffer-size"="8" "target-cpu"="hexagonv66" "target-features"="+hvx-length128b,+hvxv66,-long-calls" "unsafe-fp-math"="false" "use-soft-float"="false" }
+
+!llvm.module.flags = !{!0}
+!llvm.ident = !{!1}
+
+!0 = !{i32 1, !"wchar_size", i32 4}
+!1 = !{!"QuIC LLVM Hexagon Clang version 8.3.07 (based on LLVM 7.0.0)"}
+!2 = !{!3, !3, i64 0}
+!3 = !{!"omnipotent char", !4, i64 0}
+!4 = !{!"Simple C/C++ TBAA"}

@@ -39,7 +39,7 @@ with open(sys.argv[1], encoding="utf16") as csvfile:
 	print (divider)
 
 	row_id = 1
-	for row in result_tbl:
+	for row in result_tbl:n
 		row = [val.strip() for val in row]
 		runtime = row[3].rjust(9) if row[2] == "passed" else "-".rjust(9)
 		tbl_row = "| " + str(row_id).ljust(3) + " | " +	\

@@ -1,43 +1,59 @@
 #lang rosette/safe
 
 (require rake)
+(init-logging "expr_23.runtimes")
 
-(define-symbolic-buffer f27 int16_t)
-(define-symbolic-buffer t3243-buf uint8_t)
-(define-symbolic-buffer t3242-buf uint8_t)
-(define t3243 (load t3243-buf (ramp 0 1 128) (aligned 0 0)))
-(define t3242 (load t3242-buf (ramp 0 1 128) (aligned 0 0)))
+(define-symbolic-buffer deinterleaved int16_t)
+(define-symbolic-buffer t2659.s-buf int16_t)
+(define-symbolic-buffer t2965-buf int16_t)
+(define t2659.s (load t2659.s-buf (ramp 0 1 128) (aligned 0 0)))
+(define-symbolic f28.s0.v0.v0 integer?)
+(define-symbolic t3113 integer?)
+(define t2965 (load t2965-buf (ramp 0 1 128) (aligned 0 0)))
+(define-symbolic t3120 integer?)
 
 (define axioms 
   (list 
-   (values-range-from t3243-buf (uint8_t (bv 0 8)) (uint8_t (bv 255 8)))
-   (values-range-from t3242-buf (uint8_t (bv 0 8)) (uint8_t (bv 255 8)))))
+   (values-range-from t2659.s-buf (int16_t (bv -32768 16)) (int16_t (bv 32767 16)))
+   (values-range-from t2965-buf (int16_t (bv -32768 16)) (int16_t (bv 32767 16)))))
 
-(define t2684 (load f27 (ramp 384 1 128) (aligned 0 384)))
-(define t2685 t3242)
+(define t2820 t3113)
+(define t2851.s t3120)
 
 (define halide-expr
- (uint8x128
-  (vec-div
+ (let ([t3150  (slice_vectors
+  t2659.s 1 1 64)])
+  (interleave
+   t3150
    (vec-add
-    (vec-mul
-     (vec-mod
-      t2684
-      (x128 (int16_t (bv 8 16))))
-     (int16x128
-      (vec-sub
-       t3243
-       t2685)))
-    (int16x128
-     (vec-shl
-      (uint16x128
-       t2685)
-      (x128 (uint16_t (bv 3 16))))))
-   (x128 (int16_t (bv 8 16))))))
+    (int16x64
+     (vec-div
+      (vec-add
+       (vec-add
+        (int32x64
+         t3150)
+        (int32x64
+         (slice_vectors
+          (load deinterleaved (ramp (* (+ f28.s0.v0.v0 t2820) 64) 1 128) (aligned 64 0)) 2 1 64)))
+       (x64 (int32_t (bv 1 32))))
+      (x64 (int32_t (bv 2 32)))))
+    (vec-sub
+     (slice_vectors
+      (load deinterleaved (ramp (* (+ f28.s0.v0.v0 t2851.s) 64) 1 128) (aligned 64 0)) 2 1 64)
+     (int16x64
+      (vec-div
+       (vec-add
+        (vec-add
+         (int32x64
+          (slice_vectors
+           t2965 2 1 64))
+         (int32x64
+          (slice_vectors
+           t2965 1 1 64)))
+        (x64 (int32_t (bv 1 32))))
+       (x64 (int32_t (bv 2 32))))))))))
 
 (define spec (synthesis-spec 'halide-ir halide-expr axioms))
 (define hvx-expr (synthesize-hvx spec 'greedy 'enumerative 'enumerative))
 
-;(define out (open-output-file "sexp_23.out" #:exists 'replace))
-;(pretty-write (llvm-codegen hvx-expr) out)
-;(close-output-port out)
+(llvm-codegen hvx-expr "sexp_23.out")

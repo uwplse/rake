@@ -14,6 +14,7 @@
  (rename-out [get-subexprs hvx-ir:get-subexprs])
  (rename-out [set-cn hvx-ir:set-cn])
  (rename-out [elem-type hvx-ir:elem-type])
+ (rename-out [elem-type^ hvx-ir:elem-type^])
  (rename-out [interpret hvx-ir:interpret]))
 
 (define curr-cn 0)
@@ -24,6 +25,12 @@
   (define a (cpp:type (e 0)))
   (define b (cpp:type (e 1)))
   (if (< (cpp:type-bw a) (cpp:type-bw b)) a b))
+
+(define (elem-type^ expr)
+  (define e (interpret expr))
+  (define a (cpp:type (e 0)))
+  (define b (cpp:type (e 1)))
+  (if (< (cpp:type-bw a) (cpp:type-bw b)) b a))
 
 (define (interpret p)
   (destruct p
@@ -72,12 +79,14 @@
     [(broadcast value) (lambda (i) (interpret value))]
 
     [(build-vec base stride len)
+     (define b (interpret base))
+     (define s (interpret stride))
      (lambda (i)
        (mk-cpp-expr
         (bvadd
-         (cpp:eval base)
-         (bvmul (cpp:eval stride) (integer->bitvector i (bitvector (cpp:expr-bw stride)))))
-        (cpp:type base)))]
+         (cpp:eval b)
+         (bvmul (cpp:eval s) (integer->bitvector i (bitvector (cpp:expr-bw s)))))
+        (cpp:type b)))]
             
     [(load-data live-data gather-tbl)
      (lambda (i)
@@ -100,10 +109,10 @@
 
     [(add-const sub-expr const-val output-type saturate?)
      (define input (interpret sub-expr))
-     (define c (cpp:eval (cpp:cast const-val output-type)))
+     (define c (cpp:eval (cpp:cast (interpret const-val) output-type)))
      (define satF (get-sat-fn output-type))
      (cond
-       [saturate? (lambda (i) (satF (int64_t (bvadd (cpp:eval (cpp:cast (input i) 'int64)) (cpp:eval (cpp:cast const-val 'int64))))))]
+       [saturate? (lambda (i) (satF (int64_t (bvadd (cpp:eval (cpp:cast (input i) 'int64)) (cpp:eval (cpp:cast (interpret const-val) 'int64))))))]
        [else (lambda (i) (mk-cpp-expr (bvadd (cpp:eval (cpp:cast (input i) output-type)) c) output-type))])]
 
     [(vs-shift-right sub-expr shift round? saturate? arithmetic? output-type)
@@ -441,6 +450,7 @@
      (define input (interpret sub-expr))
      (define width (length weights))
      (define interm-type (if saturate? 'int64 output-type))
+     (set! weights (map interpret weights))
      (lambda (i)
        (define out
          (mk-cpp-expr
@@ -652,9 +662,77 @@
                             (bvmul
                              (cpp:eval (cpp:cast (input (+ (* i 10) 6)) output-type))
                              (cpp:eval (cpp:cast (input (+ (* i 10) 7)) output-type)))
-                            (bvmul
-                             (cpp:eval (cpp:cast (input (+ (* i 10) 8)) output-type))
-                             (cpp:eval (cpp:cast (input (+ (* i 10) 9)) output-type))))])
+                            (cpp:eval (cpp:cast (input (+ (* i 10) 8)) output-type)))])
+          output-type))
+       
+       (if saturate?
+           (cond
+             [(eq? output-type 'int8) (cpp:sat8 out)]
+             [(eq? output-type 'int16) (cpp:sat16 out)]
+             [(eq? output-type 'int32) (cpp:sat32 out)]
+             [(eq? output-type 'uint8) (cpp:satu8 out)]
+             [(eq? output-type 'uint16) (cpp:satu16 out)]
+             [(eq? output-type 'uint32) (cpp:satu32 out)])
+           out))]
+
+    [(vv-mpy-add-acc acc-expr sub-expr width output-type saturate?)
+     (define acc (interpret acc-expr))
+     (define input (interpret sub-expr))
+     (lambda (i)
+       (define out
+         (mk-cpp-expr
+          (bvadd
+           (cpp:eval (cpp:cast (acc i) output-type))
+           (cond
+             [(eq? width 1) (bvmul
+                             (cpp:eval (cpp:cast (input (* i 2)) output-type))
+                             (cpp:eval (cpp:cast (input (+ (* i 2) 1)) output-type)))]
+             [(eq? width 2) (bvadd
+                             (bvmul
+                              (cpp:eval (cpp:cast (input (* i 4)) output-type))
+                              (cpp:eval (cpp:cast (input (+ (* i 4) 1)) output-type)))
+                             (bvmul
+                              (cpp:eval (cpp:cast (input (+ (* i 4) 2)) output-type))
+                              (cpp:eval (cpp:cast (input (+ (* i 4) 3)) output-type))))]
+             [(eq? width 3) (bvadd
+                             (bvmul
+                              (cpp:eval (cpp:cast (input (* i 6)) output-type))
+                              (cpp:eval (cpp:cast (input (+ (* i 6) 1)) output-type)))
+                             (bvmul
+                              (cpp:eval (cpp:cast (input (+ (* i 6) 2)) output-type))
+                              (cpp:eval (cpp:cast (input (+ (* i 6) 3)) output-type)))
+                             (bvmul
+                              (cpp:eval (cpp:cast (input (+ (* i 6) 4)) output-type))
+                              (cpp:eval (cpp:cast (input (+ (* i 6) 5)) output-type))))]
+             [(eq? width 4) (bvadd
+                             (bvmul
+                              (cpp:eval (cpp:cast (input (* i 8)) output-type))
+                              (cpp:eval (cpp:cast (input (+ (* i 8) 1)) output-type)))
+                             (bvmul
+                              (cpp:eval (cpp:cast (input (+ (* i 8) 2)) output-type))
+                              (cpp:eval (cpp:cast (input (+ (* i 8) 3)) output-type)))
+                             (bvmul
+                              (cpp:eval (cpp:cast (input (+ (* i 8) 4)) output-type))
+                              (cpp:eval (cpp:cast (input (+ (* i 8) 5)) output-type)))
+                             (bvmul
+                              (cpp:eval (cpp:cast (input (+ (* i 8) 6)) output-type))
+                              (cpp:eval (cpp:cast (input (+ (* i 8) 7)) output-type))))]
+             [(eq? width 5) (bvadd
+                             (bvmul
+                              (cpp:eval (cpp:cast (input (* i 10)) output-type))
+                              (cpp:eval (cpp:cast (input (+ (* i 10) 1)) output-type)))
+                             (bvmul
+                              (cpp:eval (cpp:cast (input (+ (* i 10) 2)) output-type))
+                              (cpp:eval (cpp:cast (input (+ (* i 10) 3)) output-type)))
+                             (bvmul
+                              (cpp:eval (cpp:cast (input (+ (* i 10) 4)) output-type))
+                              (cpp:eval (cpp:cast (input (+ (* i 10) 5)) output-type)))
+                             (bvmul
+                              (cpp:eval (cpp:cast (input (+ (* i 10) 6)) output-type))
+                              (cpp:eval (cpp:cast (input (+ (* i 10) 7)) output-type)))
+                             (bvmul
+                              (cpp:eval (cpp:cast (input (+ (* i 10) 8)) output-type))
+                              (cpp:eval (cpp:cast (input (+ (* i 10) 9)) output-type))))]))
           output-type))
        
        (if saturate?
@@ -693,6 +771,7 @@
     [(vs-mpy-add sub-expr weight-matrix output-type saturate?) (list sub-expr)]
     [(vs-mpy-add-acc acc-expr sub-expr weight-matrix output-type saturate?) (list acc-expr sub-expr)]
     [(vv-mpy-add sub-expr width output-type saturate?) (list sub-expr)]
+    [(vv-mpy-add-acc acc-expr sub-expr width output-type saturate?) (list acc-expr sub-expr)]
 
     [(vs-mpy-hh sub-expr sca round?) (list sub-expr)]
     [(vv-mpy-hh-rnd sub-expr) (list sub-expr)]
@@ -744,6 +823,7 @@
     [(vs-mpy-add sub-expr weight-matrix output-type saturate?) (+ (instr-count sub-expr) 1)]
     [(vs-mpy-add-acc acc-expr sub-expr weight-matrix output-type saturate?) (+ (instr-count acc-expr) (instr-count sub-expr) 1)]
     [(vv-mpy-add sub-expr width output-type saturate?) (+ (instr-count sub-expr) 1)]
+    [(vv-mpy-add-acc acc-expr sub-expr width output-type saturate?) (+ (instr-count acc-expr) (instr-count sub-expr) 1)]
 
     [(vs-mpy-hh sub-expr sca round?) (+ (instr-count sub-expr) 1)]
     [(vv-mpy-hh-rnd sub-expr) (+ (instr-count sub-expr) 1)]
@@ -795,6 +875,7 @@
     [(vs-mpy-add sub-expr weight-matrix output-type saturate?) (handler (vs-mpy-add (ir-node-id ir-expr) (visit sub-expr handler) weight-matrix output-type saturate?))]
     [(vs-mpy-add-acc acc-expr sub-expr weight-matrix output-type saturate?) (handler (vs-mpy-add-acc (ir-node-id ir-expr) (visit sub-expr handler) weight-matrix output-type saturate?))]
     [(vv-mpy-add sub-expr width output-type saturate?) (handler (vv-mpy-add (ir-node-id ir-expr) (visit sub-expr handler) width output-type saturate?))]
+    [(vv-mpy-add-acc acc-expr sub-expr width output-type saturate?) (handler (vv-mpy-add-acc (ir-node-id ir-expr) (visit acc-expr handler) (visit sub-expr handler) width output-type saturate?))]
 
     [(vs-mpy-hh sub-expr sca round?) (handler (vs-mpy-hh (ir-node-id ir-expr) (visit sub-expr handler) sca round?))]
     [(vv-mpy-hh-rnd sub-expr) (handler (vv-mpy-hh-rnd (ir-node-id ir-expr) (visit sub-expr handler)))]

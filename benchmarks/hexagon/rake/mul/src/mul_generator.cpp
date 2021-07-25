@@ -30,7 +30,7 @@ public:
         Expr input2 = (i16(input2_(x, y)) - i16(input2_zero_)) << mul_input_shift;
 
         Expr output = multiply_2x_high(i32(input1) * i32(input2), output_multiplier_);
-        output = i16_sat(rounding_shift_right(output, output_shift_));
+        output = i16_sat(rounding_shift_right(output, min(15, output_shift_)));
         output = u8_sat(saturating_add(output, output_zero_));
         output_(x, y) = clamp(output, output_min_, output_max_);
 
@@ -38,7 +38,7 @@ public:
         const int vector_size = natural_vector_size<uint8_t>();
 
         output_.compute_root()
-            .vectorize(x, vector_size * 2, TailStrategy::Predicate);
+            .vectorize(x, vector_size, TailStrategy::Predicate);
 
         // Support broadcasting in the c dimension for input2.
         input2_.dim(0).set_stride(Expr());

@@ -26,6 +26,7 @@
 (struct vs-mpy-add (sub-expr weight-matrix output-type saturate?) #:super struct:ir-node #:transparent)
 (struct vs-mpy-add-acc (acc-expr sub-expr weight-matrix output-type saturate?) #:super struct:ir-node #:transparent)
 (struct vv-mpy-add (sub-expr width output-type saturate?) #:super struct:ir-node #:transparent)
+(struct vv-mpy-add-acc (acc-expr sub-expr width output-type saturate?) #:super struct:ir-node #:transparent)
 
 (struct vs-mpy-hh (sub-expr sca round?) #:super struct:ir-node #:transparent)
 (struct vv-mpy-hh-rnd (sub-expr) #:super struct:ir-node #:transparent)

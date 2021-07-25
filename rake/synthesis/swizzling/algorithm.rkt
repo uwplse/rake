@@ -12,7 +12,7 @@
 
 (provide synthesize-hvx-swizzles)
 
-(define (synthesize-hvx-swizzles halide-expr hvx-template output-layout swizzle-budget swizzling-algo hvx-sub-exprs translation-history [tile-id 1] [num-tiles 1])
+(define (synthesize-hvx-swizzles halide-expr hvx-template output-layout swizzle-budget swizzling-algo hvx-sub-exprs value-bounds translation-history [tile-id 1] [num-tiles 1])
   (cond
     [(eq? swizzling-algo 'enumerative)
       (display (format "Synthesizing Swizzle implementations... (Tile ~a of ~a) \n" tile-id num-tiles))
@@ -26,17 +26,18 @@
       (define swizzle-nodes (list))
       (define (register-gather-node node [pos -1])
         (destruct node
-          [(??abstr-load live-data buffer) (set! swizzle-nodes (append (list node) swizzle-nodes)) node]
+          [(??abstr-load id live-data buffer) (set! swizzle-nodes (append (list node) swizzle-nodes)) node]
+          [(??shuffle id lds pair?) (set! swizzle-nodes (append (list node) swizzle-nodes)) node]
           [(??load id live-data buffer gather-tbl pair?) (set! swizzle-nodes (append (list node) swizzle-nodes)) node]
           [(??swizzle id live-data expr gather-tbl pair?) (set! swizzle-nodes (append (list node) swizzle-nodes)) node]
           [_ node]))
-      (hvx:visit hvx-template register-gather-node)
+      (hvx:visit-shallow hvx-template register-gather-node)
       
       ;; Synthesize an implementation for each swizzle node incrementally
-      (synthesize-swizzle-nodes (reverse swizzle-nodes) starting-vecs hvx-template output-layout swizzle-budget halide-expr hvx-sub-exprs translation-history)]
+      (synthesize-swizzle-nodes (reverse swizzle-nodes) starting-vecs hvx-template output-layout swizzle-budget halide-expr hvx-sub-exprs value-bounds translation-history)]
     [else (error (format "Unrecognized lowering algorithm specified: '~a. Supported algorithms: ['enumerative]" swizzling-algo))]))
 
-(define (synthesize-swizzle-nodes swizzle-nodes starting-vecs hvx-template output-layout swizzle-budget halide-expr hvx-sub-exprs translation-history)
+(define (synthesize-swizzle-nodes swizzle-nodes starting-vecs hvx-template output-layout swizzle-budget halide-expr hvx-sub-exprs value-bounds translation-history)
   (cond
     [(empty? swizzle-nodes)
      (display "Implementations found for all swizzle nodes!\n\n")
@@ -51,27 +52,27 @@
      (display (format "## Swizzle node id: ~a\n\n" node-id))
 
      (define-values (node-impl-found? updated-template swizzle-cost-1)
-       (synthesize-swizzle-node swizzle-node starting-vecs hvx-template output-layout swizzle-budget halide-expr hvx-sub-exprs translation-history))
+       (synthesize-swizzle-node swizzle-node starting-vecs hvx-template output-layout swizzle-budget halide-expr hvx-sub-exprs value-bounds translation-history))
      
      (cond
        [node-impl-found?
         (define-values (successful? complete-expr swizzle-cost-2)
-          (synthesize-swizzle-nodes (cdr swizzle-nodes) starting-vecs updated-template output-layout (- swizzle-budget swizzle-cost-1) halide-expr hvx-sub-exprs translation-history))
+          (synthesize-swizzle-nodes (cdr swizzle-nodes) starting-vecs updated-template output-layout (- swizzle-budget swizzle-cost-1) halide-expr hvx-sub-exprs value-bounds translation-history))
         (cond
           [successful? (values #t complete-expr (+ swizzle-cost-1 swizzle-cost-2))]
           [else
            (display (format "Backtracking. Attempting to synthesize a different implementation for swizzle node with id: ~a\n\n" node-id))
            ;(hash-set! cache (hvx-ast-node-id (second swizzle-nodes)) (make-hash))
-           (synthesize-swizzle-nodes swizzle-nodes starting-vecs hvx-template output-layout swizzle-budget halide-expr hvx-sub-exprs translation-history)])]
+           (synthesize-swizzle-nodes swizzle-nodes starting-vecs hvx-template output-layout swizzle-budget halide-expr hvx-sub-exprs value-bounds translation-history)])]
        [else
          (values #f (unsat) 0)])]))
 
-(define (synthesize-swizzle-node swizzle-node starting-vecs hvx-template output-layout swizzle-budget halide-expr hvx-sub-exprs translation-history)
+(define (synthesize-swizzle-node swizzle-node starting-vecs hvx-template output-layout swizzle-budget halide-expr hvx-sub-exprs value-bounds translation-history)
   ;; Get swizzle grammar
   (define candidates (get-hvx-swizzle-grammar halide-expr hvx-template output-layout swizzle-budget swizzle-node starting-vecs hvx-sub-exprs translation-history))
 
   ;; Run synthesizer
-  (define-values (successful? updated-template) (synthesize-translation candidates halide-expr output-layout))
+  (define-values (successful? updated-template) (synthesize-translation candidates halide-expr hvx-sub-exprs value-bounds translation-history output-layout))
   
   (cond
     [successful?
@@ -92,6 +93,7 @@
 
 (define (get-swizzle-node-id node)
   (destruct node
-    [(??abstr-load live-data buffer) 0]
+    [(??abstr-load id live-data buffer) id]
+    [(??shuffle id lds pair?) id]
     [(??load id live-data buffer gather-tbl pair?) id]
     [(??swizzle id live-data expr gather-tbl pair?) id]))

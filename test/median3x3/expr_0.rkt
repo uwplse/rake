@@ -1,32 +1,60 @@
 #lang rosette/safe
 
 (require rake)
+(init-logging "expr_0.runtimes")
 
-(define-symbolic-var bounded_input.s0.x.x int32_t)
-(define-symbolic-var t1480 int32_t)
-(define-symbolic-var t1474 int32_t)
+(define-symbolic-buffer t1106-buf uint8_t)
+(define-symbolic-buffer t1111-buf uint8_t)
+(define-symbolic-buffer t1114-buf uint8_t)
+(define-symbolic-buffer t1112-buf uint8_t)
+(define-symbolic-buffer t1115-buf uint8_t)
+(define-symbolic-buffer t1113-buf uint8_t)
+(define-symbolic-buffer t1116-buf uint8_t)
+(define-symbolic-buffer t1110-buf uint8_t)
+(define-symbolic-buffer t1108-buf uint8_t)
+(define t1106 (load t1106-buf (ramp 0 1 128) (aligned 0 0)))
+(define t1111 (load t1111-buf (ramp 0 1 128) (aligned 0 0)))
+(define t1114 (load t1114-buf (ramp 0 1 128) (aligned 0 0)))
+(define t1112 (load t1112-buf (ramp 0 1 128) (aligned 0 0)))
+(define t1115 (load t1115-buf (ramp 0 1 128) (aligned 0 0)))
+(define t1113 (load t1113-buf (ramp 0 1 128) (aligned 0 0)))
+(define t1116 (load t1116-buf (ramp 0 1 128) (aligned 0 0)))
+(define t1110 (load t1110-buf (ramp 0 1 128) (aligned 0 0)))
+(define t1108 (load t1108-buf (ramp 0 1 128) (aligned 0 0)))
 
 (define axioms 
-  (list ))
+  (list 
+   (values-range-from t1106-buf (uint8_t (bv 0 8)) (uint8_t (bv 255 8)))
+   (values-range-from t1111-buf (uint8_t (bv 0 8)) (uint8_t (bv 255 8)))
+   (values-range-from t1114-buf (uint8_t (bv 0 8)) (uint8_t (bv 255 8)))
+   (values-range-from t1112-buf (uint8_t (bv 0 8)) (uint8_t (bv 255 8)))
+   (values-range-from t1115-buf (uint8_t (bv 0 8)) (uint8_t (bv 255 8)))
+   (values-range-from t1113-buf (uint8_t (bv 0 8)) (uint8_t (bv 255 8)))
+   (values-range-from t1116-buf (uint8_t (bv 0 8)) (uint8_t (bv 255 8)))
+   (values-range-from t1110-buf (uint8_t (bv 0 8)) (uint8_t (bv 255 8)))
+   (values-range-from t1108-buf (uint8_t (bv 0 8)) (uint8_t (bv 255 8)))))
 
-(define input.extent.0 t1474)
-(define output.extent.0 t1480)
-(define bounded_input.s0.x.v0.base.s (sca-add  (sca-min  output.extent.0  (int32_t (bv 128 32)))  (sca-mul  bounded_input.s0.x.x  (int32_t (bv 128 32)))))
-(define t1466.s (sca-min  (sca-add  input.extent.0  (int32_t (bv 128 32)))  bounded_input.s0.x.v0.base.s))
 
 (define halide-expr
- (uint8x128
-  (vec-add
+ (vec-min
+  (vec-max
    (vec-max
-    (vec-min
-     (ramp (sca-add bounded_input.s0.x.v0.base.s (int32_t (bv -129 32))) (int32_t (bv 1 32)) 128)
-     (x128 (sca-add input.extent.0 (int32_t (bv -1 32)))))
-    (x128 (int32_t (bv 0 32))))
-   (x128 (sca-sub (int32_t (bv 129 32)) (sca-max t1466.s (int32_t (bv 129 32))))))))
+    t1106
+    t1108)
+   t1110)
+  (vec-min
+   (vec-max
+    (vec-max
+     t1111
+     t1112)
+    t1113)
+   (vec-max
+    (vec-max
+     t1114
+     t1115)
+    t1116))))
 
 (define spec (synthesis-spec 'halide-ir halide-expr axioms))
 (define hvx-expr (synthesize-hvx spec 'greedy 'enumerative 'enumerative))
 
-;(define out (open-output-file "sexp_0.out" #:exists 'replace))
-;(pretty-write (llvm-codegen hvx-expr) out)
-;(close-output-port out)
+(llvm-codegen hvx-expr "sexp_0.out")

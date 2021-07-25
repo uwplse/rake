@@ -25,13 +25,16 @@
  (prefix-out halide: extract-shr-scalars)
  (prefix-out halide: extract-shr-scalars)
  (prefix-out halide: extract-mod-scalars)
+ (prefix-out halide: extract-minmax-scalars)
  (prefix-out halide: cast-op?))
 
 (define (extract-live-buffers expr)
   (define live-buffers (mutable-set))
   (define (extract-buffer node)
     (destruct node
-      [(buffer data elemT) (set-add! live-buffers node)]
+      ;[(buffer data elemT) (set-add! live-buffers node)]
+      [(abstr-halide-expr orig-expr abstr-vals) (set-add! live-buffers abstr-vals) node]
+      [(load buffer idx align) (set-add! live-buffers buffer) node]
       [_ node]))
   (halide:visit expr extract-buffer)
   live-buffers)
@@ -168,6 +171,18 @@
       [_ node]))
   (halide:visit expr extract-mod-const)
   (set->list mod-scalars))
+
+(define (extract-minmax-scalars expr)
+  (define minmax-scalars (mutable-set))
+  (define (extract-minmax-const node)
+    (destruct node
+      ;; We only need to examing min and max nodes
+      [(vec-min v1 v2) (set-union! minmax-scalars (extract-scalars v1) (extract-scalars v2))]
+      [(vec-max v1 v2) (set-union! minmax-scalars (extract-scalars v1) (extract-scalars v2))]
+      ;; Ignore everything else
+      [_ node]))
+  (halide:visit expr extract-minmax-const)
+  (set->list minmax-scalars))
 
 ;; Extract vectors
 (define (extract-loads expr)

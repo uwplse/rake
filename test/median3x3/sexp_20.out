@@ -1,0 +1,71 @@
+(llvm.hexagon.V6.vminub.128B
+ uint8x128
+ (list
+  (uint8x128
+   (llvm.hexagon.V6.vmaxub.128B
+    uint8x128
+    (list
+     (uint8x128
+      (llvm.hexagon.V6.vread.128B
+       uint8x128
+       (list (int32 t1193-buf) (int32 0) (int32 0) (int32 0))))
+     (uint8x128
+      (llvm.hexagon.V6.vmaxub.128B
+       uint8x128
+       (list
+        (uint8x128
+         (llvm.hexagon.V6.vread.128B
+          uint8x128
+          (list (int32 t1189-buf) (int32 0) (int32 0) (int32 0))))
+        (uint8x128
+         (llvm.hexagon.V6.vread.128B
+          uint8x128
+          (list (int32 t1191-buf) (int32 0) (int32 0) (int32 0))))))))))
+  (uint8x128
+   (llvm.hexagon.V6.vminub.128B
+    uint8x128
+    (list
+     (uint8x128
+      (llvm.hexagon.V6.vmaxub.128B
+       uint8x128
+       (list
+        (uint8x128
+         (llvm.hexagon.V6.vread.128B
+          uint8x128
+          (list (int32 t1199-buf) (int32 0) (int32 0) (int32 0))))
+        (uint8x128
+         (llvm.hexagon.V6.vmaxub.128B
+          uint8x128
+          (list
+           (uint8x128
+            (llvm.hexagon.V6.vread.128B
+             uint8x128
+             (list (int32 t1197-buf) (int32 0) (int32 0) (int32 0))))
+           (uint8x128
+            (llvm.hexagon.V6.vread.128B
+             uint8x128
+             (list (int32 t1198-buf) (int32 0) (int32 0) (int32 0))))))))))
+     (uint8x128
+      (llvm.hexagon.V6.vmaxub.128B
+       uint8x128
+       (list
+        (uint8x128
+         (llvm.hexagon.V6.vread.128B
+          uint8x128
+          (list (int32 t1196-buf) (int32 0) (int32 0) (int32 0))))
+        (uint8x128
+         (llvm.hexagon.V6.vmaxub.128B
+          uint8x128
+          (list
+           (uint8x128
+            (llvm.hexagon.V6.vread.128B
+             uint8x128
+             (list (int32 t1194-buf) (int32 0) (int32 0) (int32 0))))
+           (uint8x128
+            (llvm.hexagon.V6.vread.128B
+             uint8x128
+             (list
+              (int32 t1195-buf)
+              (int32 0)
+              (int32 0)
+              (int32 0)))))))))))))))

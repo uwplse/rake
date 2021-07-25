@@ -1,139 +1,137 @@
 #lang rosette/safe
 
 (require rake)
+(init-logging "expr_25.runtimes")
 
-(define-symbolic-buffer f28 uint8_t)
-(define-symbolic-buffer sharpen_strength_x32 uint8_t)
-(define-symbolic processed.s0.v0.v0 integer?)
-(define-symbolic t3250 integer?)
-(define-symbolic t3251 integer?)
-(define-symbolic t3249 integer?)
+(define-symbolic-buffer deinterleaved int16_t)
+(define-symbolic-buffer f13 int16_t)
+(define-symbolic-buffer t2676.s.s-buf int16_t)
+(define-symbolic-buffer t2674.s.s-buf int16_t)
+(define-symbolic-buffer t2670.s-buf int16_t)
+(define-symbolic-buffer t2665.s-buf int16_t)
+(define-symbolic-buffer t2672.s-buf int16_t)
+(define-symbolic-buffer t2669.s-buf int16_t)
+(define-symbolic-buffer t2668.s-buf int16_t)
+(define-symbolic t3118 integer?)
+(define t2676.s.s (load t2676.s.s-buf (ramp 0 1 128) (aligned 0 0)))
+(define-symbolic f28.s0.v0.v0 integer?)
+(define t2674.s.s (load t2674.s.s-buf (ramp 0 1 128) (aligned 0 0)))
+(define t2670.s (load t2670.s-buf (ramp 0 1 128) (aligned 0 0)))
+(define t2665.s (load t2665.s-buf (ramp 0 1 128) (aligned 0 0)))
+(define-symbolic t3117 integer?)
+(define t2672.s (load t2672.s-buf (ramp 0 1 128) (aligned 0 0)))
+(define t2669.s (load t2669.s-buf (ramp 0 1 128) (aligned 0 0)))
+(define t2668.s (load t2668.s-buf (ramp 0 1 128) (aligned 0 0)))
+(define-symbolic t3120 integer?)
 
 (define axioms 
-  (list ))
+  (list 
+   (values-range-from t2676.s.s-buf (int16_t (bv -32768 16)) (int16_t (bv 32767 16)))
+   (values-range-from t2674.s.s-buf (int16_t (bv -32768 16)) (int16_t (bv 32767 16)))
+   (values-range-from t2670.s-buf (int16_t (bv -32768 16)) (int16_t (bv 32767 16)))
+   (values-range-from t2665.s-buf (int16_t (bv -32768 16)) (int16_t (bv 32767 16)))
+   (values-range-from t2672.s-buf (int16_t (bv -32768 16)) (int16_t (bv 32767 16)))
+   (values-range-from t2669.s-buf (int16_t (bv -32768 16)) (int16_t (bv 32767 16)))
+   (values-range-from t2668.s-buf (int16_t (bv -32768 16)) (int16_t (bv 32767 16)))))
 
-(define t2878 t3249)
-(define t2879 t3250)
-(define t2880 t3251)
-(define t2690.s (load f28 (ramp (+ (* processed.s0.v0.v0 128) t2878) 1 256) (aligned 128 0)))
-(define t2971 (load f28 (ramp (+ (* processed.s0.v0.v0 128) t2880) 1 128) (aligned 128 0)))
-(define t2972 (load f28 (ramp (+ (* processed.s0.v0.v0 128) t2879) 1 128) (aligned 128 0)))
-(define t2973 (load f28 (ramp (+ (* processed.s0.v0.v0 128) t2878) 1 128) (aligned 128 0)))
-(define t2974.s (load f28 (ramp (+ (+ (* processed.s0.v0.v0 128) t2880) 128) 1 128) (aligned 128 0)))
-(define t2975.s (load f28 (ramp (+ (+ (* processed.s0.v0.v0 128) t2879) 128) 1 128) (aligned 128 0)))
+(define t2853.s t3117)
+(define t2854.s t3118)
+(define t2851.s t3120)
 
 (define halide-expr
- (uint8x128
-  (vec-max
-   (vec-min
-    (vec-add
-     (vec-div
-      (vec-mul
-       (vec-sub
-        (int16x128
-         (slice_vectors
-          t2690.s 1 1 128))
-        (int16x128
-         (uint8x128
-          (vec-div
-           (vec-add
+ (let ([t3162  (slice_vectors
+  t2665.s 1 1 64)])
+  (let ([t3163   (slice_vectors
+   t2668.s 2 1 64)])
+   (let ([t3164    (slice_vectors
+    t2669.s 2 1 64)])
+    (let ([t3165     (slice_vectors
+     t2670.s 1 1 64)])
+     (let ([t3166      (int32x64
+      t3163)])
+      (let ([t3167       (slice_vectors
+       t2672.s 1 1 64)])
+       (let ([t3168        (int32x64
+        (slice_vectors
+         t2674.s.s 1 1 64))])
+        (let ([t3169         (int32x64
+         t3164)])
+         (let ([t3170          (int32x64
+          (slice_vectors
+           t2676.s.s 1 1 64))])
+          (interleave
+           (vec-if
+            (vec-lt
+             (vec-absd
+              t3162
+              t3163)
+             (vec-absd
+              t3164
+              t3165))
             (vec-add
-             (uint16x128
-              (uint8x128
+             (int16x64
+              (vec-div
+               (vec-add
+                (vec-add
+                 (int32x64
+                  t3162)
+                 t3166)
+                (x64 (int32_t (bv 1 32))))
+               (x64 (int32_t (bv 2 32)))))
+             (vec-sub
+              t3167
+              (int16x64
                (vec-div
                 (vec-add
                  (vec-add
-                  (uint16x128
-                   (uint8x128
-                    (vec-div
-                     (vec-add
-                      (vec-add
-                       (uint16x128
-                        (uint8x128
-                         (vec-div
-                          (vec-add
-                           (vec-add
-                            (uint16x128
-                             t2971)
-                            (uint16x128
-                             t2972))
-                           (x128 (uint16_t (bv 1 16))))
-                          (x128 (uint16_t (bv 2 16))))))
-                       (uint16x128
-                        t2973))
-                      (x128 (uint16_t (bv 1 16))))
-                     (x128 (uint16_t (bv 2 16))))))
-                  (uint16x128
-                   (uint8x128
-                    (vec-div
-                     (vec-add
-                      (vec-add
-                       (uint16x128
-                        (uint8x128
-                         (vec-div
-                          (vec-add
-                           (vec-add
-                            (uint16x128
-                             (slice_vectors
-                              (concat_vectors
-                               t2971
-                               t2974.s) 2 1 128))
-                            (uint16x128
-                             (slice_vectors
-                              (concat_vectors
-                               t2972
-                               t2975.s) 2 1 128)))
-                           (x128 (uint16_t (bv 1 16))))
-                          (x128 (uint16_t (bv 2 16))))))
-                       (uint16x128
-                        (slice_vectors
-                         (concat_vectors
-                          t2973
-                          (load f28 (ramp (+ (+ (* processed.s0.v0.v0 128) t2878) 128) 1 128) (aligned 128 0))) 2 1 128)))
-                      (x128 (uint16_t (bv 1 16))))
-                     (x128 (uint16_t (bv 2 16)))))))
-                 (x128 (uint16_t (bv 1 16))))
-                (x128 (uint16_t (bv 2 16))))))
-             (uint16x128
-              (uint8x128
+                  (int32x64
+                   (load f13 (ramp (* (+ f28.s0.v0.v0 t2854.s) 64) 1 64) (aligned 64 0)))
+                  t3168)
+                 (x64 (int32_t (bv 1 32))))
+                (x64 (int32_t (bv 2 32)))))))
+            (vec-add
+             (int16x64
+              (vec-div
+               (vec-add
+                (vec-add
+                 t3169
+                 (int32x64
+                  t3165))
+                (x64 (int32_t (bv 1 32))))
+               (x64 (int32_t (bv 2 32)))))
+             (vec-sub
+              t3167
+              (int16x64
                (vec-div
                 (vec-add
                  (vec-add
-                  (uint16x128
-                   (uint8x128
-                    (vec-div
-                     (vec-add
-                      (vec-add
-                       (uint16x128
-                        (slice_vectors
-                         (concat_vectors
-                          t2971
-                          t2974.s) 1 1 128))
-                       (uint16x128
-                        (slice_vectors
-                         (concat_vectors
-                          t2972
-                          t2975.s) 1 1 128)))
-                      (x128 (uint16_t (bv 1 16))))
-                     (x128 (uint16_t (bv 2 16))))))
-                  (uint16x128
-                   (slice_vectors
-                    t2690.s 1 1 128)))
-                 (x128 (uint16_t (bv 1 16))))
-                (x128 (uint16_t (bv 2 16)))))))
-            (x128 (uint16_t (bv 1 16))))
-           (x128 (uint16_t (bv 2 16)))))))
-       (x128 (int16x1 (load-sca sharpen_strength_x32 0))))
-      (x128 (int16_t (bv 32 16))))
-     (int16x128
-      (slice_vectors
-       t2690.s 1 1 128)))
-    (x128 (int16_t (bv 255 16))))
-   (x128 (int16_t (bv 0 16))))))
+                  t3170
+                  (int32x64
+                   (load f13 (ramp (* (+ f28.s0.v0.v0 t2853.s) 64) 1 64) (aligned 64 0))))
+                 (x64 (int32_t (bv 1 32))))
+                (x64 (int32_t (bv 2 32))))))))
+           (vec-add
+            (int16x64
+             (vec-div
+              (vec-add
+               (vec-add
+                t3169
+                t3166)
+               (x64 (int32_t (bv 1 32))))
+              (x64 (int32_t (bv 2 32)))))
+            (vec-sub
+             (slice_vectors
+              (load deinterleaved (ramp (* (+ f28.s0.v0.v0 t2851.s) 64) 1 128) (aligned 64 0)) 2 1 64)
+             (int16x64
+              (vec-div
+               (vec-add
+                (vec-add
+                 t3170
+                 t3168)
+                (x64 (int32_t (bv 1 32))))
+               (x64 (int32_t (bv 2 32))))))))))))))))))
 
 (define spec (synthesis-spec 'halide-ir halide-expr axioms))
 (define hvx-expr (synthesize-hvx spec 'greedy 'enumerative 'enumerative))
 
-;(define out (open-output-file "sexp_25.out" #:exists 'replace))
-;(pretty-write (llvm-codegen hvx-expr) out)
-;(close-output-port out)
+(llvm-codegen hvx-expr "sexp_25.out")

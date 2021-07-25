@@ -5,36 +5,36 @@
 
 (define-symbolic-buffer input1 uint8_t)
 (define-symbolic-buffer input2 uint8_t)
-(define-symbolic t90 integer?)
-(define-symbolic t69 integer?)
-(define-symbolic t73 integer?)
-(define-symbolic-var input2_multiplier int16_t)
-(define-symbolic-var input2_zero uint8_t)
-(define-symbolic t70 integer?)
-(define-symbolic t62 integer?)
-(define-symbolic output.s0.x.x integer?)
 (define-symbolic output.s0.y.rebased integer?)
-(define-symbolic t68 integer?)
+(define-symbolic t70 integer?)
+(define-symbolic t63 integer?)
+(define-symbolic t91 integer?)
+(define-symbolic-var input2_multiplier int16_t)
+(define-symbolic t66 integer?)
+(define-symbolic-var input2_zero uint8_t)
+(define-symbolic output.s0.x.x integer?)
+(define-symbolic t71 integer?)
 (define-symbolic-var output_zero uint8_t)
 (define-symbolic-var output_min uint8_t)
 (define-symbolic-var output_max uint8_t)
-(define-symbolic t65 integer?)
+(define-symbolic t74 integer?)
 (define-symbolic-var input1_multiplier int16_t)
 (define-symbolic-var input1_zero uint8_t)
+(define-symbolic t69 integer?)
 
 (define axioms 
   (list ))
 
-(define input1.min.0 (var-lookup 'input1.min.0 t62))
-(define input1.stride.1 (var-lookup 'input1.stride.1 t65))
-(define input2.min.1 (var-lookup 'input2.min.1 t68))
-(define input2.stride.1 (var-lookup 'input2.stride.1 t69))
-(define output.min.0 (var-lookup 'output.min.0 t70))
-(define output.min.1 (var-lookup 'output.min.1 t73))
-(define t49.s (var-lookup 't49.s (sca-sub  output.min.0  t90)))
+(define input1.min.0 (var-lookup 'input1.min.0 t63))
+(define input1.stride.1 (var-lookup 'input1.stride.1 t66))
+(define input2.min.1 (var-lookup 'input2.min.1 t69))
+(define input2.stride.1 (var-lookup 'input2.stride.1 t70))
+(define output.min.0 (var-lookup 'output.min.0 t71))
+(define output.min.1 (var-lookup 'output.min.1 t74))
+(define t49.s (var-lookup 't49.s (sca-sub  output.min.0  t91)))
 
 (define halide-expr
- (let ([t91  (vec-add
+ (let ([t92  (vec-add
   (vec-mul
    (int32x128
     (vec-add
@@ -63,10 +63,10 @@
                 (vec-bwand
                  (x128 (int32_t (bv 1 32)))
                  (vec-div
-                  t91
+                  t92
                   (x128 (int32_t (bv 32768 32)))))
                 (vec-div
-                 t91
+                 t92
                  (x128 (int32_t (bv 65536 32)))))
                (x128 (int32_t (bv 32767 32))))
               (x128 (int32_t (bv -32768 32))))))

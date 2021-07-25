@@ -1,4 +1,5 @@
 HALIDE_DIR ?= ../../../../Halide/distrib
+#HALIDE_DIR ?= ../../../../../Software/Halide-12.0.1/distrib
 
 HEXAGON_SIM ?= /home/maaz/Qualcomm/Hexagon_SDK/3.5.2/tools/HEXAGON_Tools/8.3.07/Tools/bin/hexagon-sim
 HEXAGON_CLANG ?= /home/maaz/Qualcomm/Hexagon_SDK/3.5.2/tools/HEXAGON_Tools/8.3.07/Tools/bin/hexagon-clang++
@@ -54,7 +55,7 @@ $(benchmarks): %: %/bin %/out %/profile
 	export LD_LIBRARY_PATH=$(HALIDE_DIR)/lib; ./$@/bin/$@_generator \
 		-o $@/bin \
 		-g $@ -e static_library,stmt,h,llvm_assembly,assembly \
-		-f $@_hvx128 target=hexagon-32-noos-no_bounds_query-no_asserts-hvx_128
+		-f $@_hvx128 target=hexagon-32-noos-no_bounds_query-no_asserts-hvx_128-hvx_v66
 
 	$(HEXAGON_CLANG) \
 		-D$@  \
@@ -63,7 +64,7 @@ $(benchmarks): %: %/bin %/out %/profile
 		test/run.cpp \
 		test/stubs.cpp \
 		$@/bin/$@_hvx128.a \
-		$(HALIDE_DIR)/../src/runtime/hexagon_remote/bin/v65/libsim_qurt.a -lhexagon \
+		../../../../Halide/src/runtime/hexagon_remote/bin/v65/libsim_qurt.a -lhexagon \
 		-o $@/bin/$@_run.out
 
 	$(HEXAGON_SIM) -mv66 --memfill 0x0 --simulated_returnval --nullptr=2 --timing $@/bin/$@_run.out -- 1920 1080 ../test_vectors/football1920x1080.bin $@/out/out.bin
@@ -82,7 +83,7 @@ elementwise: %: %/bin %/out %/profile
 		-o $@/bin \
 		-g $@ inputs.size=5 inputs.type=uint8 output1_type=uint8\
 		-e static_library,stmt,h,llvm_assembly,assembly \
-		-f $@_hvx128 target=hexagon-32-noos-no_bounds_query-no_asserts-hvx_128
+		-f $@_hvx128 target=hexagon-32-noos-no_bounds_query-no_asserts-hvx_128-hvx_v66
 	
 	rm -f pmu_statsfile.txt stats_dump.iss.0
 
@@ -98,7 +99,19 @@ fully_connected: %: %/bin %/out %/profile
 		-o $@/bin \
 		-g $@ output.type=uint8 \
 		-e static_library,stmt,h,llvm_assembly,assembly \
-		-f $@_hvx128 target=hexagon-32-noos-no_bounds_query-no_asserts-hvx_128
+		-f $@_hvx128 target=hexagon-32-noos-no_bounds_query-no_asserts-hvx_128-hvx_v66
+	
+	$(HEXAGON_CLANG) \
+		-D$@  \
+		--std=c++17 -mhvx -mv66 -mhvx-length=128B \
+		-I $(HALIDE_DIR)/include -I ./$@/bin \
+		test/run.cpp \
+		test/stubs.cpp \
+		$@/bin/$@_hvx128.a \
+		../../../../Halide/src/runtime/hexagon_remote/bin/v65/libsim_qurt.a -lhexagon \
+		-o $@/bin/$@_run.out
+
+	$(HEXAGON_SIM) -mv66 --memfill 0x0 --simulated_returnval --nullptr=2 --packet_analyze $@/bin/$@_run.out -- 1920 1080 ../test_vectors/football1920x1080.bin $@/out/out.bin
 	
 	rm -f pmu_statsfile.txt stats_dump.iss.0
 
