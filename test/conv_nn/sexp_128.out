@@ -1,0 +1,35 @@
+(llvm.hexagon.V6.vrmpyub.acc.128B
+ uint32x32
+ (list
+  (uint32x32
+   (llvm.hexagon.V6.vread.128B
+    int32x32
+    (list (int32 convolved) (int32 0) (int32 0) (int32 0))))
+  (uint8x128
+   (llvm.hexagon.V6.vread.128B
+    uint8x128
+    (list
+     (int32 filter)
+     (int32
+      (+
+       (*
+        (+ (* convolved.s1.r19$z.r124 32) (* filter.stride.3 output.s0.c.co))
+        4)
+       t1157))
+     (int32 128)
+     (int32 0))))
+  (int32
+   (halide.reinterpret
+    uint32
+    (list
+     (uint8x4
+      (llvm.hexagon.V6.vread.128B
+       uint8x4
+       (list
+        (int32 input)
+        (int32
+         (+
+          (* convolved.s1.r19$z.r124 4)
+          (+ (* input.stride.1 t1156.s) t1150)))
+        (int32 4)
+        (int32 0)))))))))

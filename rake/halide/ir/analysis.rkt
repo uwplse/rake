@@ -121,8 +121,16 @@
       [(vec-shl v1 v2) (set-union! mul-scalars (extract-scalars v1) (two^ (extract-scalars v2)))]
       [(vec-broadcast n vec)
        (when (<= (halide:vec-len vec) 4)
-         (define vec-out (halide:interpret vec))
-         (set-union! mul-scalars (set (vec-out 0) (vec-out 1) (vec-out 2) (vec-out 3))))]
+         (assert (load? vec))
+         (assert (ramp? (load-idxs vec)))
+         (define b (load-buf vec))
+         (define idx (ramp-base (load-idxs vec)))
+         (set-union! mul-scalars
+           (set
+            (load-sca b idx)
+            (load-sca b (sca-add idx 1))
+            (load-sca b (sca-add idx 2))
+            (load-sca b (sca-add idx 3)))))]
       ;; Ignore everything else
       [_ node]))
   (halide:visit expr extract-mul-const)

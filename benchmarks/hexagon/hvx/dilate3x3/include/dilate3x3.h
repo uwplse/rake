@@ -35,7 +35,7 @@ Performs 3x3 dilation
 */
 
 
-void dilate3x3(
+void dilate3x3_fn(
     unsigned char   *src,
     int              stride_i,
     int              width,

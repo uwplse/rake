@@ -23,40 +23,129 @@
 /*[     AUG-01-2014                                                        ]*/
 /*[                                                                        ]*/
 /*[========================================================================]*/
-
+#include "hexagon_types.h"
+#include "hvx.cfg.h"
 /* ======================================================================== */
-/*  Reference C version of dilate3x3()                                      */
+/*  Intrinsic C version of dilate3x3()                                      */
 /* ======================================================================== */
-void dilate3x3(
-    unsigned char   *src,
+void dilate3x3Per2Row(
+    unsigned char   *restrict src,
     int              stride_i,
     int              width,
-    int              height,
-    unsigned char   *dst,
+    unsigned char   *restrict dst,
     int              stride_o
     )
 {
-   int x, y, k, l;
+    int i;
 
-   for( y = 1; y < height - 1; ++y )
-   {
-        for( x = 1; x < width - 1; ++x )
-        {
-            unsigned char maxval = 0x0;
+    HVX_Vector sLine0, sLine1, sLine2, sLine3;
+    HVX_Vector sVmax0v0, sVmax0v1, sVmax1v0, sVmax1v1;
+    HVX_Vector sVmax00, sVmax10, sVmax01, sVmax11, sVmax02, sVmax12;
+    HVX_Vector sMaxl1l2, sOut0, sOut1;
 
-            for( k = -1; k <=1; ++k )
-            {
-                for( l = -1; l <=1; ++l )
-                {
-                    if( maxval < src[(y+k) * stride_i + x + l])
-                    {
-                        maxval = src[(y+k) * stride_i + x + l];
-                    }
-                }
-            }
+    HVX_Vector *inp0  = (HVX_Vector *)(src - 1*stride_i);
+    HVX_Vector *inp1  = (HVX_Vector *)(src + 0*stride_i);
+    HVX_Vector *inp2  = (HVX_Vector *)(src + 1*stride_i);
+    HVX_Vector *inp3  = (HVX_Vector *)(src + 2*stride_i);
+    HVX_Vector *outp0 = (HVX_Vector *)(dst + 0*stride_o);
+    HVX_Vector *outp1 = (HVX_Vector *)(dst + 1*stride_o);
 
-            dst[y*stride_o + x] = maxval;
-        }
+    sLine0 = *inp0++;
+    sLine1 = *inp1++;
+    sLine2 = *inp2++;
+    sLine3 = *inp3++;
+    sMaxl1l2 = Q6_Vub_vmax_VubVub(sLine1,sLine2);
+
+    sVmax0v0 = Q6_V_vzero();
+    sVmax0v1 = Q6_Vub_vmax_VubVub(sLine0,sMaxl1l2);
+    sVmax1v0 = Q6_V_vzero();
+    sVmax1v1 = Q6_Vub_vmax_VubVub(sMaxl1l2,sLine3);
+
+    for ( i=width; i>VLEN; i-=VLEN )
+    {
+        sLine0 = *inp0++;
+        sLine1 = *inp1++;
+        sLine2 = *inp2++;
+        sLine3 = *inp3++;
+        sMaxl1l2 = Q6_Vub_vmax_VubVub(sLine1,sLine2);
+
+        sVmax00 = Q6_V_vlalign_VVI(sVmax0v1,sVmax0v0,1);
+        sVmax0v0 = sVmax0v1;
+        sVmax0v1 = Q6_Vub_vmax_VubVub(sLine0,sMaxl1l2);
+        sVmax01 = sVmax0v0;
+        sOut0 = Q6_Vub_vmax_VubVub(sVmax00,sVmax01);
+        sVmax02 = Q6_V_valign_VVI( sVmax0v1,sVmax0v0,1);
+        *outp0++ = Q6_Vub_vmax_VubVub(sOut0,sVmax02);
+
+        sVmax10 = Q6_V_vlalign_VVI(sVmax1v1,sVmax1v0,1);
+        sVmax1v0 = sVmax1v1;
+        sVmax1v1 = Q6_Vub_vmax_VubVub(sMaxl1l2,sLine3);
+        sVmax11 = sVmax1v0;
+        sOut1 = Q6_Vub_vmax_VubVub(sVmax10,sVmax11);
+        sVmax12 = Q6_V_valign_VVI(sVmax1v1,sVmax1v0,1);
+        *outp1++ = Q6_Vub_vmax_VubVub(sOut1,sVmax12);
+    }
+
+    {
+//      sLine0 = *inp0++;
+//      sLine1 = *inp1++;
+//      sLine2 = *inp2++;
+//      sLine3 = *inp3++;
+        sMaxl1l2 = Q6_Vub_vmax_VubVub(sLine1,sLine2);
+
+        sVmax00 = Q6_V_vlalign_VVI(sVmax0v1,sVmax0v0,1);
+        sVmax0v0 = sVmax0v1;
+        sVmax0v1 = Q6_Vub_vmax_VubVub(sLine0,sMaxl1l2);
+        sVmax01 = sVmax0v0;
+        sOut0 = Q6_Vub_vmax_VubVub(sVmax00,sVmax01);
+        sVmax02 = Q6_V_valign_VVI( sVmax0v1,sVmax0v0,1);
+        *outp0++ = Q6_Vub_vmax_VubVub(sOut0,sVmax02);
+
+        sVmax10 = Q6_V_vlalign_VVI(sVmax1v1,sVmax1v0,1);
+        sVmax1v0 = sVmax1v1;
+        sVmax1v1 = Q6_Vub_vmax_VubVub(sMaxl1l2,sLine3);
+        sVmax11 = sVmax1v0;
+        sOut1 = Q6_Vub_vmax_VubVub(sVmax10,sVmax11);
+        sVmax12 = Q6_V_valign_VVI(sVmax1v1,sVmax1v0,1);
+        *outp1++ = Q6_Vub_vmax_VubVub(sOut1,sVmax12);
     }
 }
+
+
+
+void dilate3x3_fn(
+    unsigned char   *restrict src,
+    int              stride_i,
+    int              width,
+    int              height,
+    unsigned char   *restrict dst,
+    int              stride_o
+    )
+{
+    int y;
+
+    unsigned char *inp  = src + stride_i;
+    unsigned char *outp = dst + stride_o;
+
+    HEXAGON_Vect dims = 0x0000078007800004;
+
+    for( y = 1; y < height - 1; y+=2 )
+    {
+        Q6_l2fetch_AP(src + (stride_i * 4), dims);
+
+        dilate3x3Per2Row( inp, stride_i, width, outp, stride_o );
+        
+        inp  += 2*stride_i;
+        outp += 2*stride_o;
+    }
+}
+
+
+
+
+
+
+
+
+
 

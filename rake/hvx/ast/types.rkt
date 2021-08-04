@@ -590,10 +590,11 @@
                            (instr-sig 'u32x32x2 (list 'u32x32x2 'u16x64 'uint16)))]
     
     [(eq? vmpyi-acc instr) (list
-                            ;(instr-sig 'i16x64 (list 'i16x64 'i16x64 'int8))
-                            ;(instr-sig 'i32x32 (list 'i32x32 'i32x32 'int8))
+                            (instr-sig 'i16x64 (list 'i16x64 'i16x64 'int8))
+                            (instr-sig 'i32x32 (list 'i32x32 'i32x32 'int8))
                             ;(instr-sig 'i32x32 (list 'i32x32 'i32x32 'uint8))
-                            (instr-sig 'i32x32 (list 'i32x32 'i32x32 'int16)))]
+                            ;(instr-sig 'i32x32 (list 'i32x32 'i32x32 'int16))
+                            )]
      
     [(eq? vmpye-acc instr) (list
                             (instr-sig 'u32x32 (list 'u32x32 'i32x32 'uint16))

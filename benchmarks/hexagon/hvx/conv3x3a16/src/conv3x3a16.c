@@ -183,16 +183,11 @@ void conv3x3(
     unsigned char *input  = inp  + 1*stride_i;
     unsigned char *output = outp + 1*stride_o;
 
-    HEXAGON_Vect dims = 0x0000078007800006;
+    HEXAGON_Vect dims = 0x0000078007800004;
 
-    for (i = 1; i< (height-1); i+=4)
+    for (i = 0; i < height; i+=2)
     {
-       Q6_l2fetch_AP(inp + (stride_i * 3), dims);
-
-       conv3x3Per2Row( input, stride_i, width, mask, shift, output, stride_o );
-
-       input += 2*stride_i;
-       output+= 2*stride_o;
+       Q6_l2fetch_AP(inp + (stride_i * 2), dims);
 
        conv3x3Per2Row( input, stride_i, width, mask, shift, output, stride_o );
 

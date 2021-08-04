@@ -33,7 +33,7 @@ Performs 3x3 convolution on an image with 16bit accumulation
 */
 
 
-void median3x3(
+void median3x3_fn(
     unsigned char *inp,
     int            stride,
     int            width,

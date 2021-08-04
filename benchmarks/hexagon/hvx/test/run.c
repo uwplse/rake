@@ -31,6 +31,10 @@
   #include "conv3x3a32.h"
 #elif sobel3x3
   #include "sobel3x3.h"
+#elif median3x3
+  #include "median3x3.h"
+#elif dilate3x3
+  #include "dilate3x3.h"
 #endif
 
 signed char mask[9] =
@@ -56,12 +60,17 @@ int main(int argc, char **argv) {
   int height = atoi(argv[2]);
   int stride = (width + VLEN-1)&(-VLEN);  // make stride a multiple of HVX vector size
 
+
+  //printf("Width: %d\n", width);
+  //printf("Height: %d\n", height);
+  //printf("Stride: %d\n", stride);
+
   /* -----------------------------------------------------*/
   /*  Allocate memory for input/output                    */
   /* -----------------------------------------------------*/
 
   unsigned char *input  = (unsigned char *)memalign(1 << LOG2VLEN, width*height*sizeof(unsigned char));
-  unsigned char *output = (unsigned char *)memalign(1 << LOG2VLEN, width*height*sizeof(unsigned char));
+  unsigned char *output = (unsigned char *)memalign(1 << LOG2VLEN, width*height*4*sizeof(unsigned char));
 
   if ( input == NULL || output == NULL ) {
     printf("Error: Could not allocate Memory for image\n");
@@ -124,12 +133,12 @@ int main(int argc, char **argv) {
   RESET_PMU();
   start_time = READ_PCYCLES();
 
-  Gaussian7x7u8_2(input, stride, width, height, output);
+  Gaussian7x7u8(input, stride, width, height, output);
 
   total_cycles = READ_PCYCLES() - start_time;
   DUMP_PMU();
 
-  printf("AppReported (HVX%dB-mode): Image %dx%d - gaussian7x7: %lld cycles (%0.4f cycles/pixel)\n", VLEN, (int)width, (int)height, total_cycles, (float)total_cycles/width/height);
+  printf("AppReported (HVX%dB-mode): Image %dx%d - gaussian7x7: %lld cycles (%0.4f cycles/pixel)\n", VLEN, (int)width, (int)height, total_cycles, (float)total_cycles/(width*height));
 #endif
 
 #if conv3x3a16
@@ -166,6 +175,30 @@ int main(int argc, char **argv) {
   DUMP_PMU();
 
   printf("AppReported (HVX%dB-mode): Image %dx%d - sobel3x3: %lld cycles (%0.4f cycles/pixel)\n", VLEN, (int)width, (int)height, total_cycles, (float)total_cycles/width/height);
+#endif
+
+#if median3x3
+  RESET_PMU();
+  start_time = READ_PCYCLES();
+
+  median3x3_fn(input, stride, width, height, output);
+
+  total_cycles = READ_PCYCLES() - start_time;
+  DUMP_PMU();
+
+  printf("AppReported (HVX%dB-mode): Image %dx%d - median3x3: %lld cycles (%0.4f cycles/pixel)\n", VLEN, (int)width, (int)height, total_cycles, (float)total_cycles/width/height);
+#endif
+
+#if dilate3x3
+  RESET_PMU();
+  start_time = READ_PCYCLES();
+
+  dilate3x3_fn(input, stride, width, height, output, stride);
+
+  total_cycles = READ_PCYCLES() - start_time;
+  DUMP_PMU();
+
+  printf("AppReported (HVX%dB-mode): Image %dx%d - dilate3x3: %lld cycles (%0.4f cycles/pixel)\n", VLEN, (int)width, (int)height, total_cycles, (float)total_cycles/width/height);
 #endif
 
   SIM_RELEASE_HVX;

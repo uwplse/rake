@@ -1,0 +1,3 @@
+(llvm.hexagon.V6.vread.128B
+ int32x32
+ (list (int32 t1527-buf) (int32 0) (int32 0) (int32 0)))

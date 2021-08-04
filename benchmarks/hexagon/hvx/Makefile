@@ -5,7 +5,7 @@ HEXAGON_CLANG ?= /home/maaz/Qualcomm/Hexagon_SDK/3.5.2/tools/HEXAGON_Tools/8.3.0
 HEADERS = /home/maaz/Qualcomm/Hexagon_SDK/3.5.2/tools/HEXAGON_Tools/8.3.07/Examples/HVX/common/include
 SUBSYS = /home/maaz/Qualcomm/Hexagon_SDK/3.5.2/tools/HEXAGON_Tools/8.3.07/Examples/HVX/common/src/subsys.c
 
-benchmarks = gaussian3x3 gaussian5x5 gaussian7x7 conv3x3a16 conv3x3a32 sobel3x3
+benchmarks = gaussian3x3 gaussian5x5 gaussian7x7 conv3x3a16 conv3x3a32 sobel3x3 median3x3 dilate3x3
 
 bin_dirs = $(addsuffix /bin,$(benchmarks))
 out_dirs = $(addsuffix /out,$(benchmarks))
@@ -26,7 +26,7 @@ $(benchmarks): %: %/bin %/out %/profile
 
 	$(HEXAGON_CLANG) -O2 -mv66 -o $@/bin/$@.exe ./$@/bin/$@.o ./$@/bin/$@_run.o ./$@/bin/subsys.o -lhexagon
 
-	$(HEXAGON_SIM) $@/bin/$@.exe -mv66 --memfill 0x0 --simulated_returnval --nullptr=2 --timing --packet_analyze $@/profile/$@.json -- 1920 1080 ../test_vectors/football1920x1080.bin $@/out/out.bin
+	$(HEXAGON_SIM) $@/bin/$@.exe -mv66 --memfill 0x0 --simulated_returnval --nullptr=2 --packet_analyze $@/profile/$@.json -- 1920 1080 ../test_vectors/football1920x1080.bin $@/out/out.bin
 
 	rm pmu_statsfile.txt stats_dump.iss.0
 

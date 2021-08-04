@@ -19,16 +19,16 @@ public:
 
     void generate() {
         Expr height = input.height();
-        bounded_input(x, y) = repeat_edge_x(input)(x, y);
-        max_y(x,y) = max(bounded_input(x ,clamp(y-1, 0, height-1)),
-                         bounded_input(x, clamp(y, 0, height-1)),
-                         bounded_input(x, clamp(y+1, 0, height-1)));
-        min_y(x,y) = min(bounded_input(x, clamp(y-1, 0, height-1)),
-                         bounded_input(x, clamp(y, 0, height-1)),
-                         bounded_input(x, clamp(y+1, 0, height-1)));
-        mid_y(x,y) = mid(bounded_input(x, clamp(y-1, 0, height-1)),
-                         bounded_input(x, clamp(y, 0, height-1)),
-                         bounded_input(x, clamp(y+1, 0, height-1)));
+        //bounded_input(x, y) = repeat_edge_x(input)(x, y);
+        max_y(x,y) = max(input(x ,clamp(y-1, 0, height-1)),
+            input(x, clamp(y, 0, height-1)),
+            input(x, clamp(y+1, 0, height-1)));
+        min_y(x,y) = min(input(x, clamp(y-1, 0, height-1)),
+            input(x, clamp(y, 0, height-1)),
+            input(x, clamp(y+1, 0, height-1)));
+        mid_y(x,y) = mid(input(x, clamp(y-1, 0, height-1)),
+            input(x, clamp(y, 0, height-1)),
+            input(x, clamp(y+1, 0, height-1)));
 
         minmax_x(x,y) = min(max_y(x-1, y), max_y(x, y), max_y(x+1, y));
         maxmin_x(x,y) = max(min_y(x-1, y), min_y(x, y), min_y(x+1, y));
@@ -53,17 +53,17 @@ public:
 
             Expr output_stride = output.dim(1).stride();
             output.dim(1).set_stride((output_stride / vector_size) * vector_size);
-            bounded_input
-                .compute_at(Func(output), y)
-                .align_storage(x, 128)
-                .vectorize(x, vector_size, TailStrategy::RoundUp);
+            //bounded_input
+              //  .compute_at(Func(output), y)
+                //.align_storage(x, 128)
+                //.vectorize(x, vector_size, TailStrategy::RoundUp);
             output
                 .hexagon()
                 .tile(x, y, xi, yi, vector_size, 4)
                 .vectorize(xi)
                 .unroll(yi);
             if (use_prefetch_sched) {
-                output.prefetch(input, y, 2);
+                output.prefetch(input, y, 2, PrefetchBoundStrategy::NonFaulting);
             }
             if (use_parallel_sched) {
                 Var yo;

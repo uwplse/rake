@@ -1,5 +1,5 @@
-HALIDE_DIR ?= ../../../../Halide/distrib
-#HALIDE_DIR ?= ../../../../../Software/Halide-12.0.1/distrib
+#HALIDE_DIR ?= ../../../../Halide/distrib
+HALIDE_DIR ?= ../../../../../Software/Halide-12.0.1/distrib
 
 HEXAGON_SIM ?= /home/maaz/Qualcomm/Hexagon_SDK/3.5.2/tools/HEXAGON_Tools/8.3.07/Tools/bin/hexagon-sim
 HEXAGON_CLANG ?= /home/maaz/Qualcomm/Hexagon_SDK/3.5.2/tools/HEXAGON_Tools/8.3.07/Tools/bin/hexagon-clang++
@@ -11,12 +11,17 @@ HEXAGON_CLANG ?= /home/maaz/Qualcomm/Hexagon_SDK/3.5.2/tools/HEXAGON_Tools/8.3.0
 benchmarks = simple \
 			 gaussian3x3 \
 			 gaussian5x5 \
+			 gaussian5x5_sdk \
 			 gaussian7x7 \
+			 gaussian7x7_sdk \
 			 conv3x3a16 \
+			 conv3x3a16_sdk \
 			 conv3x3a32 \
+			 conv3x3a32_sdk \
 			 dilate3x3 \
 			 median3x3 \
 			 sobel3x3 \
+			 sobel3x3_sdk \
 			 blur3x3 \
 			 camera_pipe \
 			 matmul \
@@ -67,7 +72,7 @@ $(benchmarks): %: %/bin %/out %/profile
 		../../../../Halide/src/runtime/hexagon_remote/bin/v65/libsim_qurt.a -lhexagon \
 		-o $@/bin/$@_run.out
 
-	$(HEXAGON_SIM) -mv66 --memfill 0x0 --simulated_returnval --nullptr=2 --timing $@/bin/$@_run.out -- 1920 1080 ../test_vectors/football1920x1080.bin $@/out/out.bin
+	$(HEXAGON_SIM) -mv66 --memfill 0x0 --simulated_returnval --nullptr=2 $@/bin/$@_run.out -- 1920 1080 ../test_vectors/football1920x1080.bin $@/out/out.bin
 	
 	rm -f pmu_statsfile.txt stats_dump.iss.0
 

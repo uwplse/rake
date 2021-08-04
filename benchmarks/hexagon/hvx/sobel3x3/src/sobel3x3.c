@@ -168,8 +168,12 @@ void sobel(
     unsigned char *input  = in  + 1*stride;
     unsigned char *output = out + 1*stride;
 
+    HEXAGON_Vect dims = 0x0000078007800003;
+
     for (i = 1; i< (height-1); i+=2)
     {
+       Q6_l2fetch_AP(input + (stride * 4), dims);
+
        sobelPer2Row( input, stride, width, output );
 
        input += 2*stride;

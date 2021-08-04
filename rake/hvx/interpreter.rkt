@@ -402,12 +402,12 @@
     
     [(valign Vu Vv Rt)
      (destruct* ((interpret Vu) (interpret Vv))
-       [((i8x128 v0) (i8x128 v1)) (i8x128 (lambda (i) (assert (not (equal? Vu Vv))) (assert (<= 1 Rt 8)) (if (< i (- 128 Rt)) (v1 (+ i Rt)) (v0 (modulo (+ i Rt) 128)))))]
-       [((u8x128 v0) (u8x128 v1)) (u8x128 (lambda (i) (assert (not (equal? Vu Vv))) (assert (<= 1 Rt 8)) (if (< i (- 128 Rt)) (v1 (+ i Rt)) (v0 (modulo (+ i Rt) 128)))))]
-       [((i16x64 v0) (i16x64 v1)) (i16x64 (lambda (i) (assert (not (equal? Vu Vv))) (assert (<= 1 Rt 8)) (if (< i (- 64 Rt)) (v1 (+ i Rt)) (v0 (modulo (+ i Rt) 64)))))]
-       [((u16x64 v0) (u16x64 v1)) (u16x64 (lambda (i) (assert (not (equal? Vu Vv))) (assert (<= 1 Rt 8)) (if (< i (- 64 Rt)) (v1 (+ i Rt)) (v0 (modulo (+ i Rt) 64)))))]
-       [((i32x32 v0) (i32x32 v1)) (i32x32 (lambda (i) (assert (not (equal? Vu Vv))) (assert (<= 1 Rt 8)) (if (< i (- 32 Rt)) (v1 (+ i Rt)) (v0 (modulo (+ i Rt) 32)))))]
-       [((u32x32 v0) (u32x32 v1)) (u32x32 (lambda (i) (assert (not (equal? Vu Vv))) (assert (<= 1 Rt 8)) (if (< i (- 32 Rt)) (v1 (+ i Rt)) (v0 (modulo (+ i Rt) 32)))))])]
+       [((i8x128 v0) (i8x128 v1)) (i8x128 (lambda (i) (assert (not (equal? Vu Vv))) (if (< i (- 128 Rt)) (v1 (+ i Rt)) (v0 (modulo (+ i Rt) 128)))))]
+       [((u8x128 v0) (u8x128 v1)) (u8x128 (lambda (i) (assert (not (equal? Vu Vv))) (if (< i (- 128 Rt)) (v1 (+ i Rt)) (v0 (modulo (+ i Rt) 128)))))]
+       [((i16x64 v0) (i16x64 v1)) (i16x64 (lambda (i) (assert (not (equal? Vu Vv))) (if (< i (- 64 Rt)) (v1 (+ i Rt)) (v0 (modulo (+ i Rt) 64)))))]
+       [((u16x64 v0) (u16x64 v1)) (u16x64 (lambda (i) (assert (not (equal? Vu Vv))) (if (< i (- 64 Rt)) (v1 (+ i Rt)) (v0 (modulo (+ i Rt) 64)))))]
+       [((i32x32 v0) (i32x32 v1)) (i32x32 (lambda (i) (assert (not (equal? Vu Vv))) (if (< i (- 32 Rt)) (v1 (+ i Rt)) (v0 (modulo (+ i Rt) 32)))))]
+       [((u32x32 v0) (u32x32 v1)) (u32x32 (lambda (i) (assert (not (equal? Vu Vv))) (if (< i (- 32 Rt)) (v1 (+ i Rt)) (v0 (modulo (+ i Rt) 32)))))])]
 
     [(vror Vu Rt)
      (destruct (interpret Vu)

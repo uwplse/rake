@@ -86,7 +86,7 @@
   (define out-type (get-vec-type elemT pair? intr_expr))
   
   (define isa (list vcombine lo hi vinterleave vinterleave2 vinterleave4 vdeal vdeale vshuff vshuffe vshuffo vshuffoe vpacke vpacko valign))
-  ;(define isa (list lo hi vinterleave vinterleave2 vcombine))
+  ;(define isa (list lo hi valign vcombine))
   
   (define grouped-base-exprs (make-hash))
   (for ([be base-exprs])
@@ -98,7 +98,7 @@
     (define beC (if (??swizzle? swizzle-node) 0 0))
     (hash-set! grouped-base-exprs t (list (cons (??sub-expr bes c) beC))))
 
-  (pretty-print grouped-base-exprs)
+  ;(pretty-print grouped-base-exprs)
   
   (set! enumeration-database (make-hash))
   (define candidate-swizzles (time (enumerate-hvx isa out-type grouped-base-exprs 2 (min swizzle-budget 5))))
@@ -168,8 +168,8 @@
          ;(cons (car e) (+ (cdr e) (cdr candidate-swizzle) -1)))
        (define cost (cdr candidate-swizzle))
        (cond
-         ;[(hvx:vec-pair? tmpl-type) (list (cons c cost) (cons (vinterleave c) (+ 1 cost)))]
-         ;[(and (< (cpp:type-bw tmpl-etype) 32) (> (cpp:type-bw tmpl-etype) 1)) (list (cons c cost) (cons (vdeal c) (+ 0.5 cost)))]
+         [(hvx:vec-pair? tmpl-type) (list (cons c cost) (cons (vinterleave c) (+ 1 cost)))]
+         [(and (< (cpp:type-bw tmpl-etype) 32) (> (cpp:type-bw tmpl-etype) 1)) (list (cons c cost) (cons (vdeal c) (+ 0.5 cost)))]
          [else (list (cons c cost))]))))
   (define sorted-candidates (sort candidates (lambda (v1 v2) (<= (cdr v1) (cdr v2)))))
 

@@ -66,7 +66,7 @@
       ;; If we were able to lower the sub-exprs to the desired layout, lower the current expr using the subexprs
       [successful?
         ;; Lower the current uber-instruction using the lowered sub-expressions as leaves in the expression graph
-        ;; The lower expression will produce output in the selected output-layout
+        ;; The lowered expression will produce output in the selected output-layout
         (cond
           [(and sub-expr? (combine? ir-expr)) hvx-sub-exprs]
           [(hash-has-key? ir-annotations (ir-node-id ir-expr))
@@ -280,22 +280,22 @@
      (define desired-input-layouts
        (match* (ir-expr desired-output-layout)
          ;; Interleaving instructions
-         [((saturate ir-sub-expr round? output-type) 'standard) (if round? (set 'deinterleaved) (set 'standard))]
-         [((saturate ir-sub-expr round? output-type) 'deinterleaved) (if round? (set 'deinterleavedx2) (set 'deinterleaved))]
-         [((saturate ir-sub-expr round? output-type) 'deinterleavedx2) (set)]
-         ;-----
-         [((vs-shift-right ir-sub-expr shift round? saturate? arithmetic? output-type) 'standard) (if (interleaves? ir-expr) (set 'standard) (set 'standard))]
-         [((vs-shift-right ir-sub-expr shift round? saturate? arithmetic? output-type) 'deinterleaved) (if (interleaves? ir-expr) (set 'deinterleavedx2) (set 'deinterleaved))]
-         [((vs-shift-right ir-sub-expr shift round? saturate? arithmetic? output-type) 'deinterleavedx2) (set)]
-         [((vs-shift-right ir-sub-expr shift round? saturate? arithmetic? output-type) 'interleaved) (set 'standard)]
-         ;; Disinterleaving instructions
-         [((vs-mpy-add ir-sub-expr weights output-type saturate?) 'standard) (if (deinterleaves? ir-expr) (set 'interleaved) (set 'standard))]
-         [((vs-mpy-add ir-sub-expr weights output-type saturate?) 'deinterleaved) (if (deinterleaves? ir-expr) (set 'standard) (set 'deinterleaved))]
-         [((vs-mpy-add ir-sub-expr weights output-type saturate?) 'deinterleavedx2) (if (deinterleaves? ir-expr) (set 'deinterleaved) (set 'deinterleavedx2))]
-         ;-----
-         [((vv-mpy-add ir-sub-expr width output-type saturate?) 'standard) (if (deinterleaves? ir-expr) (set 'interleaved) (set 'standard))]
-         [((vv-mpy-add ir-sub-expr width output-type saturate?) 'deinterleaved) (if (deinterleaves? ir-expr) (set 'standard) (set 'deinterleaved))]
-         [((vv-mpy-add ir-sub-expr width output-type saturate?) 'deinterleavedx2) (if (deinterleaves? ir-expr) (set 'deinterleaved) (set 'deinterleavedx2))]
+;         [((saturate ir-sub-expr round? output-type) 'standard) (if round? (set 'deinterleaved) (set 'standard))]
+;         [((saturate ir-sub-expr round? output-type) 'deinterleaved) (if round? (set 'deinterleavedx2) (set 'deinterleaved))]
+;         [((saturate ir-sub-expr round? output-type) 'deinterleavedx2) (set)]
+;         ;-----
+;         [((vs-shift-right ir-sub-expr shift round? saturate? arithmetic? output-type) 'standard) (if (interleaves? ir-expr) (set 'standard) (set 'standard))]
+;         [((vs-shift-right ir-sub-expr shift round? saturate? arithmetic? output-type) 'deinterleaved) (if (interleaves? ir-expr) (set 'deinterleavedx2) (set 'deinterleaved))]
+;         [((vs-shift-right ir-sub-expr shift round? saturate? arithmetic? output-type) 'deinterleavedx2) (set)]
+;         [((vs-shift-right ir-sub-expr shift round? saturate? arithmetic? output-type) 'interleaved) (set 'standard)]
+;         ;; Disinterleaving instructions
+;         [((vs-mpy-add ir-sub-expr weights output-type saturate?) 'standard) (if (deinterleaves? ir-expr) (set 'interleaved) (set 'standard))]
+;         [((vs-mpy-add ir-sub-expr weights output-type saturate?) 'deinterleaved) (if (deinterleaves? ir-expr) (set 'standard) (set 'deinterleaved))]
+;         [((vs-mpy-add ir-sub-expr weights output-type saturate?) 'deinterleavedx2) (if (deinterleaves? ir-expr) (set 'deinterleaved) (set 'deinterleavedx2))]
+;         ;-----
+;         [((vv-mpy-add ir-sub-expr width output-type saturate?) 'standard) (if (deinterleaves? ir-expr) (set 'interleaved) (set 'standard))]
+;         [((vv-mpy-add ir-sub-expr width output-type saturate?) 'deinterleaved) (if (deinterleaves? ir-expr) (set 'standard) (set 'deinterleaved))]
+;         [((vv-mpy-add ir-sub-expr width output-type saturate?) 'deinterleavedx2) (if (deinterleaves? ir-expr) (set 'deinterleaved) (set 'deinterleavedx2))]
          ;-----
          [(_ _) (set desired-output-layout)]))
      desired-input-layouts]))

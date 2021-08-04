@@ -823,6 +823,8 @@
                   (bv->str (cpp:eval val2))
                   (bv->str (cpp:eval val1))
                   (bv->str (cpp:eval val0)))]
+         [(vsplatr? v0 v1 v2 v3)
+          (format "(halide.hexagon.dup4.b int32 (list ~a))" (compile-scalar v0))]
          [(contiguous-reads? val0 val1 val2 val3)
           (define rd (strip-casts v0))
           (assert (load-sca? rd))
@@ -851,6 +853,8 @@
                   (bv->str (cpp:eval val2))
                   (bv->str (cpp:eval val1))
                   (bv->str (cpp:eval val0)))]
+         [(vsplatr? v0 v1 v2 v3)
+          (format "(halide.hexagon.dup4.b int32 (list ~a))" (compile-scalar v0))]
          [(contiguous-reads? val0 val1 val2 val3)
           (define rd (strip-casts v0))
           (assert (load-sca? rd))
@@ -969,6 +973,9 @@
 
        (and (check v1 v2) (contiguous? (rest vals)))]))
   (contiguous? (map cpp:eval reads)))
+
+(define (vsplatr? . vals)
+  (eq? 1 (set-count (list->set vals))))
 
 (define (strip-casts expr)
   (cond

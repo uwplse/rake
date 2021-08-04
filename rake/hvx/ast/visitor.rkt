@@ -128,7 +128,7 @@
       [(??lo/hi Vuu interleave?) (transform (??lo/hi (visit Vuu transform) (visit interleave? transform)))]
       [(??sub-expr exprs c) (transform (??sub-expr (for/list ([e exprs]) (visit e transform)) c))]
       [(??load id live-data buffer idx-tbl pair?) (transform (??load id live-data (visit buffer transform) idx-tbl pair?) arg-pos)]
-      [(??shuffle id lds pair?) (??shuffle id (for/list ([ld lds]) (visit ld transform)) pair?)]
+      [(??shuffle id lds pair?) (transform (??shuffle id (for/list ([ld lds]) (visit ld transform)) pair?))]
       [(??swizzle id live-data exprs idx-tbl pair?) (transform (??swizzle id live-data (for/list ([expr exprs]) (visit expr transform)) idx-tbl pair?))]
 
       ;[(gather* buff-reads) (transform (gather* buff-reads) arg-pos)]

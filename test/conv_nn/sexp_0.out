@@ -1,0 +1,26 @@
+(llvm.hexagon.V6.vrmpyub.acc.128B
+ uint32x32
+ (list
+  (uint32x32
+   (llvm.hexagon.V6.vread.128B
+    int32x32
+    (list
+     (int32 offset_c)
+     (int32 (* offset_c.s1.c.co 32))
+     (int32 32)
+     (int32 0))))
+  (uint8x128
+   (llvm.hexagon.V6.vread.128B
+    uint8x128
+    (list
+     (int32 filter)
+     (int32
+      (+
+       (* offset_c.s1.r19$z.r124 128)
+       (+ (* filter.stride.4 offset_c.s1.r19$x) t840)))
+     (int32 128)
+     (int32 0))))
+  (int32
+   (halide.hexagon.dup4.b
+    int32
+    (list (uint8 (uint8x1 uint8 (list (uint8 input_zero)))))))))

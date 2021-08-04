@@ -24,91 +24,178 @@
 /*[     AUG-01-2014                                                        ]*/
 /*[                                                                        ]*/
 /*[========================================================================]*/
+#include "hexagon_types.h"
+#include "hvx.cfg.h"
 
 /* ======================================================================== */
-/*  Reference C version of median3x3()                                      */
+/*  Intrinsic C version of median3x3()                                      */
 /* ======================================================================== */
-void median3x3(
-    unsigned char   *in,
+void median3x3PerRow(
+    unsigned char   *restrict in,
+    int             stride,
+    int             width,
+    unsigned char   *restrict out
+    )
+{
+    int i;
+
+    HVX_Vector sLine0, sLine1, sLine2, sMaxr01, sMinr01;
+    HVX_Vector sRmaxv0, sRmaxv1, sRminv0, sRminv1, sRmidv0, sRmidv1;
+    HVX_Vector sRmax0, sRmax1, sRmax2, sRmin0, sRmin1, sRmin2, sRmid0, sRmid1, sRmid2;
+    HVX_Vector sMinRmax01, sMaxRmin01, sMaxRmid01, sMinRmid01;
+    HVX_Vector sMinMax, sMaxMin, sMidMid, sMaxt, sMint, sMedian;
+
+    HVX_Vector *iptr0 = (HVX_Vector *)(in  - 1*stride);
+    HVX_Vector *iptr1 = (HVX_Vector *)(in  + 0*stride);
+    HVX_Vector *iptr2 = (HVX_Vector *)(in  + 1*stride);
+    HVX_Vector *optr  = (HVX_Vector *)(out           );
+
+
+    sRmaxv0 = Q6_V_vzero();
+    sRminv0 = Q6_V_vzero();
+    sRmidv0 = Q6_V_vzero();
+
+    sLine0 = *iptr0++;
+    sLine1 = *iptr1++;
+    sLine2 = *iptr2++;
+
+    sMaxr01 = Q6_Vub_vmax_VubVub(sLine0,sLine1);
+    sMinr01 = Q6_Vub_vmin_VubVub(sLine0,sLine1);
+    sRmaxv1 = Q6_Vub_vmax_VubVub(sMaxr01,sLine2);
+    sRminv1 = Q6_Vub_vmin_VubVub(sMinr01,sLine2);
+    sRmidv1 = Q6_Vub_vmin_VubVub(sMaxr01,sLine2);
+    sRmidv1 = Q6_Vub_vmax_VubVub(sMinr01,sRmidv1);
+
+    for ( i=width; i>VLEN; i-=VLEN )
+    {
+        sRmax0 = Q6_V_vlalign_VVI(sRmaxv1,sRmaxv0,1);
+        sRmin0 = Q6_V_vlalign_VVI(sRminv1,sRminv0,1);
+        sRmid0 = Q6_V_vlalign_VVI(sRmidv1,sRmidv0,1);
+
+        sRmaxv0 = sRmaxv1;
+        sRminv0 = sRminv1;
+        sRmidv0 = sRmidv1;
+
+        sLine0 = *iptr0++;
+        sLine1 = *iptr1++;
+        sLine2 = *iptr2++;
+
+        // Step 1. sort 3 columns
+        sMaxr01 = Q6_Vub_vmax_VubVub(sLine0,sLine1);
+        sMinr01 = Q6_Vub_vmin_VubVub(sLine0,sLine1);
+        sRmaxv1 = Q6_Vub_vmax_VubVub(sMaxr01,sLine2);
+        sRminv1 = Q6_Vub_vmin_VubVub(sMinr01,sLine2);
+        sRmidv1 = Q6_Vub_vmin_VubVub(sMaxr01,sLine2);
+        sRmidv1 = Q6_Vub_vmax_VubVub(sMinr01,sRmidv1);
+
+        // Step 2.
+        sRmax1 = sRmaxv0;
+        sRmin1 = sRminv0;
+        sRmid1 = sRmidv0;
+
+        sRmax2 = Q6_V_valign_VVI(sRmaxv1,sRmaxv0,1);
+        sRmin2 = Q6_V_valign_VVI(sRminv1,sRminv0,1);
+        sRmid2 = Q6_V_valign_VVI(sRmidv1,sRmidv0,1);
+
+        // Find minimum value of maximums
+        sMinRmax01 = Q6_Vub_vmin_VubVub(sRmax0,sRmax1);
+        sMinMax    = Q6_Vub_vmin_VubVub(sMinRmax01,sRmax2);
+        // Find maximum value of minimums
+        sMaxRmin01 = Q6_Vub_vmax_VubVub(sRmin0,sRmin1);
+        sMaxMin    = Q6_Vub_vmax_VubVub(sMaxRmin01,sRmin2);
+        // Find middle value of medians
+        sMaxRmid01 = Q6_Vub_vmax_VubVub(sRmid0,sRmid1);
+        sMinRmid01 = Q6_Vub_vmin_VubVub(sRmid0,sRmid1);
+        sMidMid    = Q6_Vub_vmin_VubVub(sMaxRmid01,sRmid2);
+        sMidMid    = Q6_Vub_vmax_VubVub(sMinRmid01,sMidMid);
+
+        // Step 3. Find middle of minmax, maxmin, midmid
+        sMaxt   = Q6_Vub_vmax_VubVub(sMinMax,sMaxMin);
+        sMint   = Q6_Vub_vmin_VubVub(sMinMax,sMaxMin);
+        sMedian = Q6_Vub_vmin_VubVub(sMaxt,sMidMid);
+        sMedian = Q6_Vub_vmax_VubVub(sMint,sMedian);
+
+        *optr++ = sMedian;
+    }
+
+    // Unroll once to avoid out-of-boundary load
+    {
+        sRmax0 = Q6_V_vlalign_VVI(sRmaxv1,sRmaxv0,1);
+        sRmin0 = Q6_V_vlalign_VVI(sRminv1,sRminv0,1);
+        sRmid0 = Q6_V_vlalign_VVI(sRmidv1,sRmidv0,1);
+
+        sRmaxv0 = sRmaxv1;
+        sRminv0 = sRminv1;
+        sRmidv0 = sRmidv1;
+
+//      sLine0 = *iptr0++;
+//      sLine1 = *iptr1++;
+//      sLine2 = *iptr2++;
+
+        // Step 1. sort 3 columns
+        sMaxr01 = Q6_Vub_vmax_VubVub(sLine0,sLine1);
+        sMinr01 = Q6_Vub_vmin_VubVub(sLine0,sLine1);
+        sRmaxv1 = Q6_Vub_vmax_VubVub(sMaxr01,sLine2);
+        sRminv1 = Q6_Vub_vmin_VubVub(sMinr01,sLine2);
+        sRmidv1 = Q6_Vub_vmin_VubVub(sMaxr01,sLine2);
+        sRmidv1 = Q6_Vub_vmax_VubVub(sMinr01,sRmidv1);
+
+        // Step 2.
+        sRmax1 = sRmaxv0;
+        sRmin1 = sRminv0;
+        sRmid1 = sRmidv0;
+
+        sRmax2 = Q6_V_valign_VVI(sRmaxv1,sRmaxv0,1);
+        sRmin2 = Q6_V_valign_VVI(sRminv1,sRminv0,1);
+        sRmid2 = Q6_V_valign_VVI(sRmidv1,sRmidv0,1);
+
+        // Find minimum value of maximums
+        sMinRmax01 = Q6_Vub_vmin_VubVub(sRmax0,sRmax1);
+        sMinMax    = Q6_Vub_vmin_VubVub(sMinRmax01,sRmax2);
+        // Find maximum value of minimums
+        sMaxRmin01 = Q6_Vub_vmax_VubVub(sRmin0,sRmin1);
+        sMaxMin    = Q6_Vub_vmax_VubVub(sMaxRmin01,sRmin2);
+        // Find middle value of medians
+        sMaxRmid01 = Q6_Vub_vmax_VubVub(sRmid0,sRmid1);
+        sMinRmid01 = Q6_Vub_vmin_VubVub(sRmid0,sRmid1);
+        sMidMid    = Q6_Vub_vmin_VubVub(sMaxRmid01,sRmid2);
+        sMidMid    = Q6_Vub_vmax_VubVub(sMinRmid01,sMidMid);
+
+        // Step 3. Find middle of minmax, maxmin, midmid
+        sMaxt   = Q6_Vub_vmax_VubVub(sMinMax,sMaxMin);
+        sMint   = Q6_Vub_vmin_VubVub(sMinMax,sMaxMin);
+        sMedian = Q6_Vub_vmin_VubVub(sMaxt,sMidMid);
+        sMedian = Q6_Vub_vmax_VubVub(sMint,sMedian);
+
+        *optr++ = sMedian;
+    }
+}
+
+
+/* ======================================================================== */
+void median3x3_fn(
+    unsigned char   *restrict in,
     int             stride,
     int             width,
     int             height,
-    unsigned char   *out
+    unsigned char   *restrict out
     )
 {
-    unsigned char p[3][3], tmp, pmax_l, pmid_m, pmin_h, rmax, rmin;
-    int i, j, m, n, idx;
+    int i;
+    unsigned char *input  = in  + 1*stride;
+    unsigned char *output = out + 1*stride;
 
-    for (i=1; i < height-1; i++)
+    HEXAGON_Vect dims = 0x0000078007800003;
+
+    for (i = 1; i< (height-1); i++)
     {
-        for (j=1; j< width-1; j++)
-        {
-            idx = i*stride + j;
+       Q6_l2fetch_AP(input + (stride * 4), dims);
+       
+       median3x3PerRow( input, stride, width, output );
 
-            /* ------------------------------------------------------------ */
-            /* load neighbour 3x3 pixels                                    */
-            /* ------------------------------------------------------------ */
-            for (m=0; m <3; m++)
-                for (n=0; n<3; n++)
-                    p[m][n] = in[idx + (m-1)*stride + (n-1)];
-
-            /* ------------------------------------------------------------ */
-            /* Find the median value of p[3][3].                            */
-            /* Step 1.                                                      */
-            /* Sort 3 columns of p[3][3]                                    */
-            /* ------------------------------------------------------------ */
-            for ( n=0; n<3; n++) {
-                if (p[1][n] > p[0][n] ) {
-                   tmp = p[0][n]; p[0][n] = p[1][n]; p[1][n] = tmp;
-                }
-                if (p[2][n] > p[0][n] ) {
-                   tmp = p[0][n]; p[0][n] = p[2][n]; p[2][n] = tmp;
-                }
-                if (p[2][n] > p[1][n] ) {
-                   tmp = p[1][n]; p[1][n] = p[2][n]; p[2][n] = tmp;
-                }
-            }
-
-            /* ------------------------------------------------------------ */
-            /* Step 2                                                       */
-            /* Find minimum value of maximums, i.e., p[0][k]                */
-            /* ------------------------------------------------------------ */
-            pmax_l = p[0][0];
-            if (p[0][1] < pmax_l) pmax_l = p[0][1];
-            if (p[0][2] < pmax_l) pmax_l = p[0][2];
-
-            /* ------------------------------------------------------------ */
-            /* Find middle value of medians, i.e., p[1][k]                  */
-            /* ------------------------------------------------------------ */
-            pmid_m = p[1][0];
-            rmax = (p[1][1] > p[1][2]) ? p[1][1] : p[1][2];
-            rmin = (p[1][1] > p[1][2]) ? p[1][2] : p[1][1];
-
-            if ( rmin > pmid_m ) pmid_m = rmin;
-            if ( pmid_m > rmax ) pmid_m = rmax;
-
-            /* ------------------------------------------------------------ */
-            /* Find maximum value of minimus, i.e., p[2][k]                 */
-            /* ------------------------------------------------------------ */
-            pmin_h = p[2][0];
-            if (p[2][1] > pmin_h) pmin_h = p[2][1];
-            if (p[2][2] > pmin_h) pmin_h = p[2][2];
-
-            /* ------------------------------------------------------------ */
-            /* Step 3                                                       */
-            /* Find middle of pmax_l, pmid_m, pmin_h;                       */
-            /* ------------------------------------------------------------ */
-            if ( pmin_h > pmax_l ) {
-               tmp = pmax_l; pmax_l = pmin_h; pmin_h = tmp;
-            }
-            if ( pmin_h > pmid_m )
-               pmid_m = pmin_h;
-            if ( pmid_m > pmax_l )
-               pmid_m = pmax_l;
-
-            out[i*stride+j] = pmid_m;
-        }
-    }
+       input += stride;
+       output+= stride;
+   }
 }
 
 
