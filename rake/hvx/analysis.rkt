@@ -12,7 +12,7 @@
 ;; Infer the value bounds for the input expression
 (define (infer-value-range hvx-expr axioms)
   (set! hvx-expr (if (concat-tiles? hvx-expr) (list-ref (concat-tiles-vecs hvx-expr) 0) hvx-expr))
-  (set! hvx-expr (let ([xs (interpret-hvx hvx-expr)]) (if (hvx:vec-pair? xs) (hvx:v0-elem xs 0) (hvx:elem xs 0))))
+  (set! hvx-expr (let ([xs (hvx:interpret hvx-expr)]) (if (hvx:vec-pair? xs) (hvx:v0-elem xs 0) (hvx:elem xs 0))))
   
   (define expr (simplify-to-solvable-types hvx-expr))
 
