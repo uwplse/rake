@@ -58,16 +58,16 @@
   ;(println halide-expr)
   ;(pretty-print template)
 
-  (define-values (optimized-halide-expr optimized-template inferred-axioms)
-    (optimize-query halide-expr template hvx-sub-exprs value-bounds translation-history))
+  ;(define-values (optimized-halide-expr optimized-template inferred-axioms)
+    ;(optimize-query halide-expr template hvx-sub-exprs value-bounds translation-history))
 
   ;(pretty-print optimized-halide-expr)
   ;(pretty-print optimized-template)
   
   ;; Incrementally checks the template for more and more lanes
-  (define sym-consts (set->list (set-subtract (list->set (symbolics template)) (list->set (symbolics optimized-halide-expr)))))
+  (define sym-consts (set->list (set-subtract (list->set (symbolics template)) (list->set (symbolics halide-expr)))))
   (define lanes-to-verify (verification-lanes (hvx:type (hvx:interpret template))))
-  (synthesize-incremental optimized-halide-expr optimized-template output-layout sym-consts lanes-to-verify '()))
+  (synthesize-incremental halide-expr template output-layout sym-consts lanes-to-verify '()))
 
 (define (synthesize-incremental halide-expr template output-layout sym-consts lanes-to-verify discarded-sols)
   (cond

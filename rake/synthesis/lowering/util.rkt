@@ -87,6 +87,7 @@
   (define elemT (halide:elem-type halide-expr))
   (define abstr-vals
     (cond
+      [(eq? elemT 'uint1) (define-symbolic-buffer* abstr-vals uint1_t) abstr-vals]
       [(eq? elemT 'int8) (define-symbolic-buffer* abstr-vals int8_t) abstr-vals]
       [(eq? elemT 'int16) (define-symbolic-buffer* abstr-vals int16_t) abstr-vals]
       [(eq? elemT 'int32) (define-symbolic-buffer* abstr-vals int32_t) abstr-vals]

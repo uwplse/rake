@@ -64,6 +64,7 @@
 ;; HVX instructions for vector creation
 (struct vread (buf loc align) #:transparent)
 (struct vreadp (buf loc align) #:transparent)
+(struct vsetq (b N) #:transparent)
 (struct vsplat (Rt) #:transparent)
 (struct vsplat2 (Rt) #:transparent)
 
@@ -241,6 +242,11 @@
                         (instr-sig 'u8x128x2 (list 'bufu8))
                         (instr-sig 'u16x64x2 (list 'bufu16))
                         (instr-sig 'u32x32x2 (list 'bufu32)))]
+    
+    [(eq? vsetq instr) (list
+                       (instr-sig 'Qt8 (list 'uint1 8))
+                       (instr-sig 'Qt16 (list 'uint1 16))
+                       (instr-sig 'Qt32 (list 'uint1 32)))]
     
     [(eq? vsplat instr) (list
                          (instr-sig 'i8x128 (list 'int8))

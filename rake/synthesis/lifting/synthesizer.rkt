@@ -43,7 +43,7 @@
   
   (define-values (optimized-template optimized-halide-expr inferred-axioms abstr-value-bounds)
     (optimize-query halide-expr template translation-history value-bounds))
-
+  
   ;(pretty-print optimized-halide-expr)
   ;(pretty-print optimized-template)
   ;(pretty-print inferred-axioms)

@@ -72,7 +72,7 @@ $(benchmarks): %: %/bin %/out %/profile
 		../../../../Halide/src/runtime/hexagon_remote/bin/v65/libsim_qurt.a -lhexagon \
 		-o $@/bin/$@_run.out
 
-	$(HEXAGON_SIM) -mv66 --memfill 0x0 --simulated_returnval --nullptr=2 $@/bin/$@_run.out -- 1920 1080 ../test_vectors/football1920x1080.bin $@/out/out.bin
+	$(HEXAGON_SIM) -mv66 --memfill 0x0 --simulated_returnval --nullptr=2 --timing $@/bin/$@_run.out -- 1920 1080 ../test_vectors/football1920x1080.bin $@/out/out.bin
 	
 	rm -f pmu_statsfile.txt stats_dump.iss.0
 

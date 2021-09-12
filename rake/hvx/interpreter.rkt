@@ -298,6 +298,13 @@
     [(vread buf loc align) ((get-vec-type buf) (lambda (i) (halide:buffer-ref buf (+ (interpret loc) i))))]
     [(vreadp buf loc align) ((get-vecp-type buf) (lambda (i) (halide:buffer-ref buf (+ (interpret loc) i))) (lambda (i) (halide:buffer-ref buf (+ (interpret loc) i (get-offset buf)))))]
 
+    [(vsetq b N)
+     (define iRt (interpret b))
+     (cond
+       [(eq? N 8) (Qt8 (lambda (i) iRt))]
+       [(eq? N 16) (Qt16 (lambda (i) iRt))]
+       [(eq? N 32) (Qt32 (lambda (i) iRt))])]
+    
     [(vsplat Rt)
      (define iRt (interpret Rt))
      (cond
@@ -402,12 +409,12 @@
     
     [(valign Vu Vv Rt)
      (destruct* ((interpret Vu) (interpret Vv))
-       [((i8x128 v0) (i8x128 v1)) (i8x128 (lambda (i) (assert (not (equal? Vu Vv))) (if (< i (- 128 Rt)) (v1 (+ i Rt)) (v0 (modulo (+ i Rt) 128)))))]
-       [((u8x128 v0) (u8x128 v1)) (u8x128 (lambda (i) (assert (not (equal? Vu Vv))) (if (< i (- 128 Rt)) (v1 (+ i Rt)) (v0 (modulo (+ i Rt) 128)))))]
-       [((i16x64 v0) (i16x64 v1)) (i16x64 (lambda (i) (assert (not (equal? Vu Vv))) (if (< i (- 64 Rt)) (v1 (+ i Rt)) (v0 (modulo (+ i Rt) 64)))))]
-       [((u16x64 v0) (u16x64 v1)) (u16x64 (lambda (i) (assert (not (equal? Vu Vv))) (if (< i (- 64 Rt)) (v1 (+ i Rt)) (v0 (modulo (+ i Rt) 64)))))]
-       [((i32x32 v0) (i32x32 v1)) (i32x32 (lambda (i) (assert (not (equal? Vu Vv))) (if (< i (- 32 Rt)) (v1 (+ i Rt)) (v0 (modulo (+ i Rt) 32)))))]
-       [((u32x32 v0) (u32x32 v1)) (u32x32 (lambda (i) (assert (not (equal? Vu Vv))) (if (< i (- 32 Rt)) (v1 (+ i Rt)) (v0 (modulo (+ i Rt) 32)))))])]
+       [((i8x128 v0) (i8x128 v1)) (i8x128 (lambda (i) (assert (not (equal? Vu Vv))) (assert (<= 1 Rt 8)) (if (< i (- 128 Rt)) (v1 (+ i Rt)) (v0 (modulo (+ i Rt) 128)))))]
+       [((u8x128 v0) (u8x128 v1)) (u8x128 (lambda (i) (assert (not (equal? Vu Vv))) (assert (<= 1 Rt 8)) (if (< i (- 128 Rt)) (v1 (+ i Rt)) (v0 (modulo (+ i Rt) 128)))))]
+       [((i16x64 v0) (i16x64 v1)) (i16x64 (lambda (i) (assert (not (equal? Vu Vv))) (assert (<= 1 Rt 8)) (if (< i (- 64 Rt)) (v1 (+ i Rt)) (v0 (modulo (+ i Rt) 64)))))]
+       [((u16x64 v0) (u16x64 v1)) (u16x64 (lambda (i) (assert (not (equal? Vu Vv))) (assert (<= 1 Rt 8)) (if (< i (- 64 Rt)) (v1 (+ i Rt)) (v0 (modulo (+ i Rt) 64)))))]
+       [((i32x32 v0) (i32x32 v1)) (i32x32 (lambda (i) (assert (not (equal? Vu Vv))) (assert (<= 1 Rt 8)) (if (< i (- 32 Rt)) (v1 (+ i Rt)) (v0 (modulo (+ i Rt) 32)))))]
+       [((u32x32 v0) (u32x32 v1)) (u32x32 (lambda (i) (assert (not (equal? Vu Vv))) (assert (<= 1 Rt 8)) (if (< i (- 32 Rt)) (v1 (+ i Rt)) (v0 (modulo (+ i Rt) 32)))))])]
 
     [(vror Vu Rt)
      (destruct (interpret Vu)
@@ -1091,6 +1098,46 @@
         (i32x32
          (lambda (i) (int32_t (bvadd (cpp:eval (acc i)) (cpp:eval (dot-prod4 (v0 (* i 4)) (v0 (+ (* i 4) 1)) (v0 (+ (* i 4) 2)) (v0 (+ (* i 4) 3)) (v1 (* i 4)) (v1 (+ (* i 4) 1)) (v1 (+ (* i 4) 2)) (v1 (+ (* i 4) 3)) 'int32))))))])]
 
+    ;; Vector-scalar multiply with 4-wide within-vector reduction (partial sliding window)
+    [(vrmpy-sw Vuu Rt ub)
+     (destruct* ((interpret Vuu) (interpret Rt))
+       [((u8x128x2 data-v0 data-v1) (Rt4.ub w1 w2 w3 w4))
+        (if (eq? ub 0)
+            (u32x32x2
+             (lambda (i) (dot-prod4 (data-v0 (* i 4)) (data-v0 (+ (* i 4) 1)) (data-v0 (+ (* i 4) 2)) (data-v0 (+ (* i 4) 3)) w1 w2 w3 w4 'uint32))
+             (lambda (i) (dot-prod4 (data-v0 (+ (* i 4) 2)) (data-v0 (+ (* i 4) 3)) (data-v1 (* i 4)) (data-v1 (+ (* i 4) 1)) w1 w2 w3 w4 'uint32)))
+            (u32x32x2
+             (lambda (i) (dot-prod4 (data-v0 (+ (* i 4) 1)) (data-v0 (+ (* i 4) 2)) (data-v0 (+ (* i 4) 3)) (data-v1 (* i 4)) w1 w2 w3 w4 'uint32))
+             (lambda (i) (dot-prod4 (data-v0 (+ (* i 4) 3)) (data-v1 (* i 4)) (data-v1 (+ (* i 4) 1)) (data-v1 (+ (* i 4) 2)) w1 w2 w3 w4 'uint32))))]
+       [((u8x128x2 data-v0 data-v1) (Rt4.b w1 w2 w3 w4))
+        (if (eq? ub 0)
+            (i32x32x2
+             (lambda (i) (dot-prod4 (data-v0 (* i 4)) (data-v0 (+ (* i 4) 1)) (data-v0 (+ (* i 4) 2)) (data-v0 (+ (* i 4) 3)) w1 w2 w3 w4 'int32))
+             (lambda (i) (dot-prod4 (data-v0 (+ (* i 4) 2)) (data-v0 (+ (* i 4) 3)) (data-v1 (* i 4)) (data-v1 (+ (* i 4) 1)) w1 w2 w3 w4 'int32)))
+            (i32x32x2
+             (lambda (i) (dot-prod4 (data-v0 (+ (* i 4) 1)) (data-v0 (+ (* i 4) 2)) (data-v0 (+ (* i 4) 3)) (data-v1 (* i 4)) w1 w2 w3 w4 'int32))
+             (lambda (i) (dot-prod4 (data-v0 (+ (* i 4) 3)) (data-v1 (* i 4)) (data-v1 (+ (* i 4) 1)) (data-v1 (+ (* i 4) 2)) w1 w2 w3 w4 'int32))))])]
+
+    ;; Vector-scalar multiply with 4-wide within-vector reduction (partial sliding window)
+    [(vrmpy-sw-acc Vdd Vuu Rt ub)
+     (destruct* ((interpret Vdd) (interpret Vuu) (interpret Rt))
+       [((u32x32x2 acc-v0 acc-v1) (u8x128x2 data-v0 data-v1) (Rt4.ub w1 w2 w3 w4))
+        (if (eq? ub 0)
+            (u32x32x2
+             (lambda (i) (add (acc-v0 i) (dot-prod4 (data-v0 (* i 4)) (data-v0 (+ (* i 4) 1)) (data-v0 (+ (* i 4) 2)) (data-v0 (+ (* i 4) 3)) w1 w2 w3 w4 'uint32) 'uint32))
+             (lambda (i) (add (acc-v1 i) (dot-prod4 (data-v0 (+ (* i 4) 2)) (data-v0 (+ (* i 4) 3)) (data-v1 (* i 4)) (data-v1 (+ (* i 4) 1)) w1 w2 w3 w4 'uint32) 'uint32)))
+            (u32x32x2
+             (lambda (i) (add (acc-v0 i) (dot-prod4 (data-v0 (+ (* i 4) 1)) (data-v0 (+ (* i 4) 2)) (data-v0 (+ (* i 4) 3)) (data-v1 (* i 4)) w1 w2 w3 w4 'uint32) 'uint32))
+             (lambda (i) (add (acc-v1 i) (dot-prod4 (data-v0 (+ (* i 4) 3)) (data-v1 (* i 4)) (data-v1 (+ (* i 4) 1)) (data-v1 (+ (* i 4) 2)) w1 w2 w3 w4 'uint32) 'uint32))))]
+       [((i32x32x2 acc-v0 acc-v1) (u8x128x2 data-v0 data-v1) (Rt4.b w1 w2 w3 w4))
+        (if (eq? ub 0)
+            (i32x32x2
+             (lambda (i) (add (acc-v0 i) (dot-prod4 (data-v0 (* i 4)) (data-v0 (+ (* i 4) 1)) (data-v0 (+ (* i 4) 2)) (data-v0 (+ (* i 4) 3)) w1 w2 w3 w4 'int32) 'int32))
+             (lambda (i) (add (acc-v1 i) (dot-prod4 (data-v0 (+ (* i 4) 2)) (data-v0 (+ (* i 4) 3)) (data-v1 (* i 4)) (data-v1 (+ (* i 4) 1)) w1 w2 w3 w4 'int32) 'int32)))
+            (i32x32x2
+             (lambda (i) (add (acc-v0 i) (dot-prod4 (data-v0 (+ (* i 4) 1)) (data-v0 (+ (* i 4) 2)) (data-v0 (+ (* i 4) 3)) (data-v1 (* i 4)) w1 w2 w3 w4 'int32) 'int32))
+             (lambda (i) (add (acc-v1 i) (dot-prod4 (data-v0 (+ (* i 4) 3)) (data-v1 (* i 4)) (data-v1 (+ (* i 4) 1)) (data-v1 (+ (* i 4) 2)) w1 w2 w3 w4 'int32) 'int32))))])]
+
     ;;;;;;;;;;;;;;;;;;;;;;;; Shifts & Rounding ;;;;;;;;;;;;;;;;;;;;;;;
     
     ;; Logical shift right
@@ -1321,47 +1368,6 @@
 ;     (match (list (interpret Vd) (interpret Vu) rhs)
 ;       [(list (u32x32 acc) (i32x32 lhs) (uint16_t v)) (u32x32 (lambda (i) (uint32_t (bvadd (cpp:eval (acc i)) (bvmul (lsb16 (lhs i)) (cpp:eval (cpp:cast rhs 'uint32)))))))]
 ;       [(list (u32x32 acc) (u32x32 lhs) (uint16_t v)) (u32x32 (lambda (i) (uint32_t (bvadd (cpp:eval (acc i)) (bvmul (lsb16 (lhs i)) (cpp:eval (cpp:cast rhs 'uint32)))))))])]
-;    
-;    ;; Vector-scalar multiply with 4-wide within-vector reduction (partial sliding window)
-;    [(vrmpy-p Vuu Rt ub)
-;     (match (list (interpret Vuu) (interpret Rt) (interpret ub))
-;       [(list (u8x128x2 data-v0 data-v1) (list (uint8_t w1) (uint8_t w2) (uint8_t w3) (uint8_t w4)) #t)
-;        (u32x32x2
-;         (lambda (i) (dot-prod4 (data-v0 (* i 4)) (data-v0 (+ (* i 4) 1)) (data-v0 (+ (* i 4) 2)) (data-v0 (+ (* i 4) 3)) (uint8_t w1) (uint8_t w2) (uint8_t w3) (uint8_t w4) 'uint32))
-;         (lambda (i) (dot-prod4 (data-v0 (+ (* i 4) 2)) (data-v0 (+ (* i 4) 3)) (data-v1 (* i 4)) (data-v1 (+ (* i 4) 1)) (uint8_t w1) (uint8_t w2) (uint8_t w3) (uint8_t w4) 'uint32)))]
-;       [(list (u8x128x2 data-v0 data-v1) (list (int8_t w1) (int8_t w2) (int8_t w3) (int8_t w4)) #t)
-;        (i32x32x2
-;         (lambda (i) (dot-prod4 (data-v0 (* i 4)) (data-v0 (+ (* i 4) 1)) (data-v0 (+ (* i 4) 2)) (data-v0 (+ (* i 4) 3)) (int8_t w1) (int8_t w2) (int8_t w3) (int8_t w4) 'int32))
-;         (lambda (i) (dot-prod4 (data-v0 (+ (* i 4) 2)) (data-v0 (+ (* i 4) 3)) (data-v1 (* i 4)) (data-v1 (+ (* i 4) 1)) (int8_t w1) (int8_t w2) (int8_t w3) (int8_t w4) 'int32)))]
-;       [(list (u8x128x2 data-v0 data-v1) (list (uint8_t w1) (uint8_t w2) (uint8_t w3) (uint8_t w4)) #f)
-;        (u32x32x2
-;         (lambda (i) (dot-prod4 (data-v0 (+ (* i 4) 1)) (data-v0 (+ (* i 4) 2)) (data-v0 (+ (* i 4) 3)) (data-v1 (* i 4)) (uint8_t w1) (uint8_t w2) (uint8_t w3) (uint8_t w4) 'uint32))
-;         (lambda (i) (dot-prod4 (data-v0 (+ (* i 4) 3)) (data-v1 (* i 4)) (data-v1 (+ (* i 4) 1)) (data-v1 (+ (* i 4) 2)) (uint8_t w1) (uint8_t w2) (uint8_t w3) (uint8_t w4) 'uint32)))]
-;       [(list (u8x128x2 data-v0 data-v1) (list (int8_t w1) (int8_t w2) (int8_t w3) (int8_t w4)) #f)
-;        (i32x32x2
-;         (lambda (i) (dot-prod4 (data-v0 (+ (* i 4) 1)) (data-v0 (+ (* i 4) 2)) (data-v0 (+ (* i 4) 3)) (data-v1 (* i 4)) (int8_t w1) (int8_t w2) (int8_t w3) (int8_t w4) 'int32))
-;         (lambda (i) (dot-prod4 (data-v0 (+ (* i 4) 3)) (data-v1 (* i 4)) (data-v1 (+ (* i 4) 1)) (data-v1 (+ (* i 4) 2)) (int8_t w1) (int8_t w2) (int8_t w3) (int8_t w4) 'int32)))])]
-;
-;    ;; Vector-scalar multiply with 4-wide within-vector reduction (partial sliding window)
-;    [(vrmpy-p-acc Vdd Vuu Rt ub)
-;     (match (list (interpret Vdd) (interpret Vuu) (interpret Rt) (interpret ub))
-;       [(list (u32x32x2 acc-v0 acc-v1) (u8x128x2 data-v0 data-v1) (list (uint8_t w1) (uint8_t w2) (uint8_t w3) (uint8_t w4)) #t)
-;        (u32x32x2
-;         (lambda (i) (add (acc-v0 i) (dot-prod4 (data-v0 (* i 4)) (data-v0 (+ (* i 4) 1)) (data-v0 (+ (* i 4) 2)) (data-v0 (+ (* i 4) 3)) (uint8_t w1) (uint8_t w2) (uint8_t w3) (uint8_t w4) 'uint32) 'uint32))
-;         (lambda (i) (add (acc-v1 i) (dot-prod4 (data-v0 (+ (* i 4) 2)) (data-v0 (+ (* i 4) 3)) (data-v1 (* i 4)) (data-v1 (+ (* i 4) 1)) (uint8_t w1) (uint8_t w2) (uint8_t w3) (uint8_t w4) 'uint32) 'uint32)))]
-;       [(list (i32x32x2 acc-v0 acc-v1) (u8x128x2 data-v0 data-v1) (list (int8_t w1) (int8_t w2) (int8_t w3) (int8_t w4)) #t)
-;        (i32x32x2
-;         (lambda (i) (add (acc-v0 i) (dot-prod4 (data-v0 (* i 4)) (data-v0 (+ (* i 4) 1)) (data-v0 (+ (* i 4) 2)) (data-v0 (+ (* i 4) 3)) (int8_t w1) (int8_t w2) (int8_t w3) (int8_t w4) 'int32) 'int32))
-;         (lambda (i) (add (acc-v1 i) (dot-prod4 (data-v0 (+ (* i 4) 2)) (data-v0 (+ (* i 4) 3)) (data-v1 (* i 4)) (data-v1 (+ (* i 4) 1)) (int8_t w1) (int8_t w2) (int8_t w3) (int8_t w4) 'int32) 'int32)))]
-;       [(list (u32x32x2 acc-v0 acc-v1) (u8x128x2 data-v0 data-v1) (list (uint8_t w1) (uint8_t w2) (uint8_t w3) (uint8_t w4)) #f)
-;        (u32x32x2
-;         (lambda (i) (add (acc-v0 i) (dot-prod4 (data-v0 (+ (* i 4) 1)) (data-v0 (+ (* i 4) 2)) (data-v0 (+ (* i 4) 3)) (data-v1 (* i 4)) (uint8_t w1) (uint8_t w2) (uint8_t w3) (uint8_t w4) 'uint32) 'uint32))
-;         (lambda (i) (add (acc-v1 i) (dot-prod4 (data-v0 (+ (* i 4) 3)) (data-v1 (* i 4)) (data-v1 (+ (* i 4) 1)) (data-v1 (+ (* i 4) 2)) (uint8_t w1) (uint8_t w2) (uint8_t w3) (uint8_t w4) 'uint32) 'uint32)))]
-;       [(list (i32x32x2 acc-v0 acc-v1) (u8x128x2 data-v0 data-v1) (list (int8_t w1) (int8_t w2) (int8_t w3) (int8_t w4)) #f)
-;        (i32x32x2
-;         (lambda (i) (add (acc-v0 i) (dot-prod4 (data-v0 (+ (* i 4) 1)) (data-v0 (+ (* i 4) 2)) (data-v0 (+ (* i 4) 3)) (data-v1 (* i 4)) (int8_t w1) (int8_t w2) (int8_t w3) (int8_t w4) 'int32) 'int32))
-;         (lambda (i) (add (acc-v1 i) (dot-prod4 (data-v0 (+ (* i 4) 3)) (data-v1 (* i 4)) (data-v1 (+ (* i 4) 1)) (data-v1 (+ (* i 4) 2)) (int8_t w1) (int8_t w2) (int8_t w3) (int8_t w4) 'int32) 'int32)))])]
-;
 ;    
 ;    ;; Arithmetic shift-right (all elems right-shifted by the same value)
 ;    [(vasr Vu Rt)

@@ -55,7 +55,9 @@
     
     ;; Data broadcasting
     [(broadcast scalar-expr)
-     (list (cons (vsplat scalar-expr) 1))]
+     (if (eq? (cpp:type (halide:interpret scalar-expr)) 'uint1)
+         (list (cons (vsetq scalar-expr 8) 1))
+         (list (cons (vsplat scalar-expr) 1)))]
 
     ;; Data broadcasting
     [(build-vec base stride len)
@@ -371,7 +373,7 @@
     [(saturate ir-sub-expr round? output-type)
      (define input-type (hvx-ir:elem-type ir-sub-expr))
      ;; Todo: we can optimize by specializing grammar based on flags
-     (define isa (list vmin vsplat vpacke-n vpack)) ;vmin vmax vsat vshuffe-n 
+     (define isa (list vmin vmax vsplat vsat vshuffe-n)) ;vpacke-n vpack
 
      ;; Sub-expr types
      (define consts

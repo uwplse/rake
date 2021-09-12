@@ -236,7 +236,7 @@
       [(vrmpy-acc-2 Vd Vu Vv) (transform (vrmpy-acc-2 (visit-shallow Vd transform) (visit-shallow Vu transform) (visit-shallow Vv transform)))]
       [(vrmpy-sw Vuu Rt u1) (transform (vrmpy-sw (visit-shallow Vuu transform) (visit-shallow Rt transform) (visit-shallow u1 transform)))]
       [(vrmpy-sw-acc Vdd Vuu Rt u1) (transform (vrmpy-sw-acc (visit-shallow Vdd transform) (visit-shallow Vuu transform) (visit-shallow Rt transform) (visit-shallow u1 transform)))]
-      [(vavg Vu Vv rnd?) (transform (vavg (visit Vu transform) (visit Vv transform) (visit rnd? transform)))]
+      [(vavg Vu Vv rnd?) (transform (vavg (visit-shallow Vu transform) (visit-shallow Vv transform) (visit-shallow rnd? transform)))]
       ;[(vnavg Vu Vv)
       ;[(vasl Vu Rt)
       [(vrsr Vu Vv) (transform (vrsr (visit-shallow Vu transform) (visit-shallow Vv transform)))]

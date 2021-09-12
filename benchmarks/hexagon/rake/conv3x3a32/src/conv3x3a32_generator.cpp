@@ -21,7 +21,7 @@ public:
         Expr sum = cast(accumulator_type, 0);
         for (int i = -1; i <= 1; i++) {
             for (int j = -1; j <= 1; j++) {
-                sum += cast<int16_t>(bounded_input(x + j, y + i)) * cast<int16_t>(mask(j + 1, i + 1));
+                sum += cast<int16_t>(bounded_input(x + j, y + i)) * cast<int16_t>(i+3 * j+3 + 5);
             }
         }
         output(x, y) = cast<uint8_t>(clamp(sum >> 4, 0, 255));

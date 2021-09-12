@@ -168,8 +168,8 @@
          ;(cons (car e) (+ (cdr e) (cdr candidate-swizzle) -1)))
        (define cost (cdr candidate-swizzle))
        (cond
-         [(hvx:vec-pair? tmpl-type) (list (cons c cost) (cons (vinterleave c) (+ 1 cost)))]
-         [(and (< (cpp:type-bw tmpl-etype) 32) (> (cpp:type-bw tmpl-etype) 1)) (list (cons c cost) (cons (vdeal c) (+ 0.5 cost)))]
+         ;[(hvx:vec-pair? tmpl-type) (list (cons c cost) (cons (vinterleave c) (+ 1 cost)))]
+         ;[(and (< (cpp:type-bw tmpl-etype) 32) (> (cpp:type-bw tmpl-etype) 1)) (list (cons c cost) (cons (vdeal c) (+ 0.5 cost)))]
          [else (list (cons c cost))]))))
   (define sorted-candidates (sort candidates (lambda (v1 v2) (<= (cdr v1) (cdr v2)))))
 
