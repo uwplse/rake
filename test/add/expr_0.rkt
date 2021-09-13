@@ -5,23 +5,23 @@
 
 (define-symbolic-buffer input1 uint8_t)
 (define-symbolic-buffer input2 uint8_t)
+(define-symbolic t74 integer?)
 (define-symbolic output.s0.x.x integer?)
+(define-symbolic output.s0.y.rebased integer?)
+(define-symbolic-var t83 int16_t)
+(define-symbolic-var input2_multiplier int16_t)
 (define-symbolic t70 integer?)
 (define-symbolic t63 integer?)
-(define-symbolic-var input2_multiplier int16_t)
-(define-symbolic t66 integer?)
-(define-symbolic t67 integer?)
-(define-symbolic-var input2_zero uint8_t)
-(define-symbolic output.s0.y.rebased integer?)
 (define-symbolic t71 integer?)
-(define-symbolic t79 integer?)
-(define-symbolic-var output_zero uint8_t)
 (define-symbolic-var output_min uint8_t)
 (define-symbolic-var output_max uint8_t)
-(define-symbolic t74 integer?)
+(define-symbolic t79 integer?)
 (define-symbolic t80 integer?)
+(define-symbolic-var t82 int16_t)
+(define-symbolic-var t81 int16_t)
 (define-symbolic-var input1_multiplier int16_t)
-(define-symbolic-var input1_zero uint8_t)
+(define-symbolic t66 integer?)
+(define-symbolic t67 integer?)
 
 (define axioms 
   (list ))
@@ -36,16 +36,16 @@
 (define t39.s (var-lookup 't39.s (sca-sub  output.min.0  t80)))
 
 (define halide-expr
- (let ([t81  (sca-add  output.min.1  output.s0.y.rebased)])
-  (let ([t82   (vec-add
+ (let ([t84  (sca-add  output.min.1  output.s0.y.rebased)])
+  (let ([t85   (vec-add
    (vec-mul
     (int32x128
      (vec-add
       (vec-mul
        (int16x128
-        (load input1 (ramp (sca-add (sca-mul output.s0.x.x 128) (sca-add (sca-mul t81 input1.stride.1) (sca-sub t39.s input1.min.0))) 1 128) (aligned 1 0)))
+        (load input1 (ramp (sca-add (sca-mul output.s0.x.x 128) (sca-add (sca-mul t84 input1.stride.1) (sca-sub t39.s input1.min.0))) 1 128) (aligned 1 0)))
        (x128 (int16_t (bv 64 16))))
-      (x128 (sca-mul (int16x1 input1_zero) (int16_t (bv -64 16))))))
+      (x128 (sca-mul t81 (int16_t (bv -64 16))))))
     (int32x128
      (x128 input1_multiplier)))
    (vec-mul
@@ -53,9 +53,9 @@
      (vec-add
       (vec-mul
        (int16x128
-        (load input2 (ramp (sca-add (sca-mul output.s0.x.x 128) (sca-add (sca-mul t81 input2.stride.1) (sca-sub t40.s input2.min.0))) 1 128) (aligned 1 0)))
+        (load input2 (ramp (sca-add (sca-mul output.s0.x.x 128) (sca-add (sca-mul t84 input2.stride.1) (sca-sub t40.s input2.min.0))) 1 128) (aligned 1 0)))
        (x128 (int16_t (bv 64 16))))
-      (x128 (sca-mul (int16x1 input2_zero) (int16_t (bv -64 16))))))
+      (x128 (sca-mul t82 (int16_t (bv -64 16))))))
     (int32x128
      (x128 input2_multiplier))))])
    (vec-max
@@ -75,15 +75,15 @@
                  (vec-bwand
                   (x128 (int32_t (bv 1 32)))
                   (vec-div
-                   t82
+                   t85
                    (x128 (int32_t (bv 32768 32)))))
                  (vec-div
-                  t82
+                  t85
                   (x128 (int32_t (bv 65536 32)))))
                 (x128 (int32_t (bv 32767 32))))
                (x128 (int32_t (bv -32768 32))))))
             (int32x128
-             (x128 (int16x1 output_zero))))
+             (x128 t83)))
            (x128 (int32_t (bv 32767 32))))
           (x128 (int32_t (bv -32768 32)))))
         (x128 (int16_t (bv 255 16))))
