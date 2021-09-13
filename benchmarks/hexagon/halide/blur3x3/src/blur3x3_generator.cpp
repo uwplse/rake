@@ -23,14 +23,14 @@ public:
         blur_y.dim(1).set_min(0);
 
         if (get_target().has_feature(Target::HVX)) {
-            const int vector_size = 128;
+            const int vector_size = 64;
 
             blur_y.compute_root()
                 .hexagon()
                 .prefetch(input, y, 2)
                 .split(y, y, yi, 128)
                 .parallel(y)
-                .vectorize(x, vector_size * 2);
+                .vectorize(x, vector_size);
             blur_x
                 .store_at(blur_y, y)
                 .compute_at(blur_y, yi)

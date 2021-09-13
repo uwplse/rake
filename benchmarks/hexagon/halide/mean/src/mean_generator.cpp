@@ -8,22 +8,22 @@ namespace hannk {
 
 class Mean : public Generator<Mean> {
 public:
-    Input<Buffer<uint8_t>> input_{ "input", 4 };
+    Input<Buffer<uint8_t>> input_{"input", 4};
 
     // The bounds of the region to reduce. This pipeline is
     // implemented as a stencil over this reach at each output.
     // However, the expected usage is to have either the output
     // extent be 1, or the reduction extent be 1.
-    Input<int> c_min_{ "c_min" };
-    Input<int> c_extent_{ "c_extent" };
-    Input<int> x_min_{ "x_min" };
-    Input<int> x_extent_{ "x_extent" };
-    Input<int> y_min_{ "y_min" };
-    Input<int> y_extent_{ "y_extent" };
-    Input<int> b_min_{ "b_min" };
-    Input<int> b_extent_{ "b_extent" };
+    Input<int> c_min_{"c_min"};
+    Input<int> c_extent_{"c_extent"};
+    Input<int> x_min_{"x_min"};
+    Input<int> x_extent_{"x_extent"};
+    Input<int> y_min_{"y_min"};
+    Input<int> y_extent_{"y_extent"};
+    Input<int> b_min_{"b_min"};
+    Input<int> b_extent_{"b_extent"};
 
-    Output<Buffer<uint8_t>> output_{ "output", 4 };
+    Output<Buffer<uint8_t>> output_{"output", 4};
 
     void generate() {
         // The algorithm.

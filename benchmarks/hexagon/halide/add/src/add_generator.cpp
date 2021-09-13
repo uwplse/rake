@@ -11,19 +11,19 @@ namespace hannk {
 class Add : public Generator<Add> {
 public:
     // Input buffers and quantization parameters.
-    Input<Buffer<uint8_t>> input1_{ "input1", 2 };
-    Input<uint8_t> input1_zero_{ "input1_zero" };
-    Input<int16_t> input1_multiplier_{ "input1_multiplier" };
+    Input<Buffer<uint8_t>> input1_{"input1", 2};
+    Input<uint8_t> input1_zero_{"input1_zero"};
+    Input<int16_t> input1_multiplier_{"input1_multiplier"};
 
-    Input<Buffer<uint8_t>> input2_{ "input2", 2 };
-    Input<uint8_t> input2_zero_{ "input2_zero" };
-    Input<int16_t> input2_multiplier_{ "input2_multiplier" };
+    Input<Buffer<uint8_t>> input2_{"input2", 2};
+    Input<uint8_t> input2_zero_{"input2_zero"};
+    Input<int16_t> input2_multiplier_{"input2_multiplier"};
 
-    Input<uint8_t> output_zero_{ "output_zero" };
-    Input<uint8_t> output_min_{ "output_min" };
-    Input<uint8_t> output_max_{ "output_max" };
+    Input<uint8_t> output_zero_{"output_zero"};
+    Input<uint8_t> output_min_{"output_min"};
+    Input<uint8_t> output_max_{"output_max"};
 
-    Output<Buffer<uint8_t>> output_{ "output", 2 };
+    Output<Buffer<uint8_t>> output_{"output", 2};
 
     void generate() {
         Var x("x"), y("y");
@@ -41,8 +41,9 @@ public:
         // Schedule.
         const int vector_size = natural_vector_size<uint8_t>();
 
-        output_.compute_root()
-            .vectorize(x, vector_size * 2, TailStrategy::Predicate);
+        output_
+            .compute_root()
+            .vectorize(x, vector_size, TailStrategy::Predicate);
 
         // Support broadcasting in the c dimension for input2.
         input2_.dim(0).set_stride(Expr());

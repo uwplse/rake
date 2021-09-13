@@ -26,6 +26,7 @@ public:
     // The program to run. See elementwise_program.h for a description of
     // this buffer.
     Input<Buffer<int16_t>> program_{ "program", 2 };
+    Input<Buffer<int16_t>> intermediates_{ "intermediate", 2 };
 
     Func build() {
         Var x("x"), y("y"), u("u");
@@ -50,8 +51,8 @@ public:
         Expr op = program_(0, r.y);
         Expr arg1 = program_(1, r.y);
         Expr arg2 = program_(2, r.y);
-        Expr arg3 = cast(intermediate_type, program_(3, r.y));
-        Expr arg4 = cast(intermediate_type, program_(4, r.y));
+        Expr arg3 = cast(intermediate_type, intermediates_(3, r.y));
+        Expr arg4 = cast(intermediate_type, intermediates_(4, r.y));
 
         Expr slot = r.y + 1;
 
@@ -122,6 +123,8 @@ public:
 
         program_.dim(0).set_min(0).set_extent(ElementwiseAssembler::InstructionSize).set_stride(1);
         program_.dim(1).set_min(0).set_stride(ElementwiseAssembler::InstructionSize);
+        intermediates_.dim(0).set_min(0).set_extent(ElementwiseAssembler::InstructionSize).set_stride(1);
+        intermediates_.dim(1).set_min(0).set_stride(ElementwiseAssembler::InstructionSize);
 
         return output;
     }
