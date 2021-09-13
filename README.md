@@ -68,7 +68,7 @@ Qualcomm's SDK is available here: https://developer.qualcomm.com/software/hexago
 First, make sure environment variables `HEXAGON_SIM` and `HEXAGON_CLANG` point to your SDK installation correctly:
 ```
 $ export HEXAGON_SIM=/path/to/Qualcomm/Hexagon_SDK/3.5.2/tools/HEXAGON_Tools/8.3.07/Tools/bin/hexagon-sim
-$ export HEXAGON_SIM=/path/to/Qualcomm/Hexagon_SDK/3.5.2/tools/HEXAGON_Tools/8.3.07/Tools/bin/hexagon-sim
+$ export HEXAGON_CLANG=/path/to/Qualcomm/Hexagon_SDK/3.5.2/tools/HEXAGON_Tools/8.3.07/Tools/bin/hexagon-clang++
 ```
 Then, run the simulator:
 ```
