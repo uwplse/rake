@@ -26,7 +26,7 @@
         (define hvx-expr (synthesize-hvx-expr ir-expr ir-annotations ir-bounds lowering-algo swizzling-algo))
 
         ;; Full verification of the synthesized expression
-        (define correct? (verify-equivalence (spec-expr spec) hvx-expr (spec-axioms spec)))
+        (define correct? (verify-equivalence (spec-expr spec) (first hvx-expr) (spec-axioms spec)))
 
         (cond
           [correct?
