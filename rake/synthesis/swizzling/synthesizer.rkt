@@ -21,23 +21,41 @@
 
 (define synthesis-db (make-hash))
 
+;(define (verification-lanes type)
+;  (cond
+;    [(eq? type 'Qt8) '(0 63 126)]
+;    [(eq? type 'Qt16) '(0 31 62)]
+;    [(eq? type 'Qt32) '(0 15 31)]
+;    [(eq? type 'i8x128) '(0 62 64 126)]
+;    [(eq? type 'u8x128) '(0 62 64 126)]
+;    [(eq? type 'i16x64) '(0 30 32 62)]
+;    [(eq? type 'u16x64) '(0 30 32 62)]
+;    [(eq? type 'i32x32) '(0 14 16 30)]
+;    [(eq? type 'u32x32) '(0 14 16 30)]
+;    [(eq? type 'i8x128x2) '(0 63 126 128 191 254)]
+;    [(eq? type 'u8x128x2) '(0 63 126 128 191 254)]
+;    [(eq? type 'i16x64x2) '(0 31 62 64 95 126)]
+;    [(eq? type 'u16x64x2) '(0 31 62 64 95 126)]
+;    [(eq? type 'i32x32x2) '(0 15 30 32 47 62)]
+;    [(eq? type 'u32x32x2) '(0 15 30 32 47 62)]))
+
 (define (verification-lanes type)
   (cond
-    [(eq? type 'Qt8) '(0 63 126)]
-    [(eq? type 'Qt16) '(0 31 62)]
-    [(eq? type 'Qt32) '(0 15 31)]
-    [(eq? type 'i8x128) '(0 62 64 126)]
-    [(eq? type 'u8x128) '(0 62 64 126)]
-    [(eq? type 'i16x64) '(0 30 32 62)]
-    [(eq? type 'u16x64) '(0 30 32 62)]
-    [(eq? type 'i32x32) '(0 14 16 30)]
-    [(eq? type 'u32x32) '(0 14 16 30)]
-    [(eq? type 'i8x128x2) '(0 63 126 128 191 254)]
-    [(eq? type 'u8x128x2) '(0 63 126 128 191 254)]
-    [(eq? type 'i16x64x2) '(0 31 62 64 95 126)]
-    [(eq? type 'u16x64x2) '(0 31 62 64 95 126)]
-    [(eq? type 'i32x32x2) '(0 15 30 32 47 62)]
-    [(eq? type 'u32x32x2) '(0 15 30 32 47 62)]))
+    [(eq? type 'Qt8) '(0 1 63 64 65 127)]
+    [(eq? type 'Qt16) '(0 1 31 32 33 63)]
+    [(eq? type 'Qt32) '(0 1 15 16 17 31)]
+    [(eq? type 'i8x128) '(0 1 63 64 65 127)]
+    [(eq? type 'u8x128) '(0 1 63 64 65 127)]
+    [(eq? type 'i16x64) '(0 1 31 32 33 63)]
+    [(eq? type 'u16x64) '(0 1 31 32 33 63)]
+    [(eq? type 'i32x32) '(0 1 15 16 17 31)]
+    [(eq? type 'u32x32) '(0 1 15 16 17 31)]
+    [(eq? type 'i8x128x2) '(0 1 63 64 127 128 129 191 192 255)]
+    [(eq? type 'u8x128x2) '(0 1 63 64 127 128 129 191 192 255)]
+    [(eq? type 'i16x64x2) '(0 1 31 32 63 64 65 95 96 127)]
+    [(eq? type 'u16x64x2) '(0 1 31 32 63 64 65 95 96 127)]
+    [(eq? type 'i32x32x2) '(0 1 15 16 31 32 33 47 48 63)]
+    [(eq? type 'u32x32x2) '(0 1 15 16 31 32 33 47 48 63)]))
 
 (define (synthesize-translation templates halide-expr hvx-sub-exprs value-bounds translation-history output-layout)
   (cond
@@ -105,95 +123,26 @@
        [else
         (unsat)])]))
 
-(define (lane-eq? oe se output-layout lane)
-  (define offset (quotient (hvx:num-elems se) 2))
-  (cond
-    [(eq? output-layout 'standard)
-      (cond
-        [(and (hvx:vec-pair? se) (< lane offset))
-         (hvx:set-curr-cn lane)
-         (assert (eq? (oe lane) (hvx:v0-elem se lane)))
-         (hvx:set-curr-cn (add1 lane))
-         (assert (eq? (oe (add1 lane)) (hvx:v0-elem se (add1 lane))))]
-        [(hvx:vec-pair? se)
-         (hvx:set-curr-cn lane)
-         (assert (eq? (oe lane) (hvx:v1-elem se (- lane offset))))
-         (hvx:set-curr-cn (add1 lane))
-         (assert (eq? (oe (add1 lane)) (hvx:v1-elem se (- (add1 lane) offset))))]
-        [else
-         (hvx:set-curr-cn lane)
-         (assert (eq? (oe lane) (hvx:elem se lane)))
-         (hvx:set-curr-cn (add1 lane))
-         (assert (eq? (oe (add1 lane)) (hvx:elem se (add1 lane))))])]
-    [(eq? output-layout 'deinterleaved)
-      (cond
-        [(and (hvx:vec-pair? se) (even? lane))
-         (hvx:set-curr-cn lane)
-         (assert (eq? (oe lane) (hvx:v0-elem se (quotient lane 2))))]
-        [(hvx:vec-pair? se)
-         (hvx:set-curr-cn lane)
-         (assert (eq? (oe lane) (hvx:v1-elem se (quotient lane 2))))]
-        [else
-         (hvx:set-curr-cn (* 2 lane))
-         (assert (eq? (oe (* 2 lane)) (hvx:elem se lane)))])]
-    [(eq? output-layout 'deinterleavedx2)
-      (cond
-        [(and (hvx:vec-pair? se) (< lane offset))
-         (hvx:set-curr-cn (* 4 lane))
-         (assert (eq? (oe (* 4 lane)) (hvx:v0-elem se lane)))]
-        [(hvx:vec-pair? se)
-         (hvx:set-curr-cn (+ 2 (* 4 (- lane offset))))
-         (assert (eq? (oe (+ 2 (* 4 (- lane offset)))) (hvx:v1-elem se (- lane offset))))]
-        [else
-         (hvx:set-curr-cn (* 4 lane))
-         (assert (eq? (oe (* 4 lane)) (hvx:elem se lane)))])]
-    [(eq? output-layout 'interleaved)
-      (cond
-        [(and (hvx:vec-pair? se) (< lane offset))
-         (hvx:set-curr-cn (* 4 lane))
-         (assert (eq? (oe (* 4 lane)) (hvx:v0-elem se lane)))]
-        [(hvx:vec-pair? se)
-         (hvx:set-curr-cn (+ 2 (* 4 (- lane offset))))
-         (assert (eq? (oe (+ 2 (* 4 (- lane offset)))) (hvx:v1-elem se (- lane offset))))]
-        [(even? lane)
-         (hvx:set-curr-cn (quotient lane 2))
-         (assert (eq? (oe (quotient lane 2)) (hvx:elem se lane)))]
-        [else
-         (hvx:set-curr-cn (+ (quotient lane 2) offset))
-         (assert (eq? (oe (+ (quotient lane 2) offset)) (hvx:elem se lane)))])]
-    [else
-     (error "NYI")]))
-
-;(define (verification-lanes type)
-;  (cond
-;    [(eq? type 'Qt8) '(0 1 63 64 65 127)]
-;    [(eq? type 'Qt16) '(0 1 31 32 33 63)]
-;    [(eq? type 'Qt32) '(0 1 15 16 17 31)]
-;    [(eq? type 'i8x128) '(0 1 63 64 65 127)]
-;    [(eq? type 'u8x128) '(0 1 63 64 65 127)]
-;    [(eq? type 'i16x64) '(0 1 31 32 33 63)]
-;    [(eq? type 'u16x64) '(0 1 31 32 33 63)]
-;    [(eq? type 'i32x32) '(0 1 15 16 17 31)]
-;    [(eq? type 'u32x32) '(0 1 15 16 17 31)]
-;    [(eq? type 'i8x128x2) '(0 1 63 64 127 128 129 191 192 255)]
-;    [(eq? type 'u8x128x2) '(0 1 63 64 127 128 129 191 192 255)]
-;    [(eq? type 'i16x64x2) '(0 1 31 32 63 64 65 95 96 127)]
-;    [(eq? type 'u16x64x2) '(0 1 31 32 63 64 65 95 96 127)]
-;    [(eq? type 'i32x32x2) '(0 1 15 16 31 32 33 47 48 63)]
-;    [(eq? type 'u32x32x2) '(0 1 15 16 31 32 33 47 48 63)]))
-
 ;(define (lane-eq? oe se output-layout lane)
 ;  (define offset (quotient (hvx:num-elems se) 2))
 ;  (cond
 ;    [(eq? output-layout 'standard)
-;      (hvx:set-curr-cn lane)
 ;      (cond
 ;        [(and (hvx:vec-pair? se) (< lane offset))
-;         (assert (eq? (oe lane) (hvx:v0-elem se lane)))]
+;         (hvx:set-curr-cn lane)
+;         (assert (eq? (oe lane) (hvx:v0-elem se lane)))
+;         (hvx:set-curr-cn (add1 lane))
+;         (assert (eq? (oe (add1 lane)) (hvx:v0-elem se (add1 lane))))]
 ;        [(hvx:vec-pair? se)
-;         (assert (eq? (oe lane) (hvx:v1-elem se (- lane offset))))]
+;         (hvx:set-curr-cn lane)
+;         (assert (eq? (oe lane) (hvx:v1-elem se (- lane offset))))
+;         (hvx:set-curr-cn (add1 lane))
+;         (assert (eq? (oe (add1 lane)) (hvx:v1-elem se (- (add1 lane) offset))))]
 ;        [else
-;         (assert (eq? (oe lane) (hvx:elem se lane)))])]
+;         (hvx:set-curr-cn lane)
+;         (assert (eq? (oe lane) (hvx:elem se lane)))
+;         (hvx:set-curr-cn (add1 lane))
+;         (assert (eq? (oe (add1 lane)) (hvx:elem se (add1 lane))))])]
 ;    [(eq? output-layout 'deinterleaved)
 ;      (cond
 ;        [(and (hvx:vec-pair? se) (even? lane))
@@ -232,6 +181,57 @@
 ;         (assert (eq? (oe (+ (quotient lane 2) offset)) (hvx:elem se lane)))])]
 ;    [else
 ;     (error "NYI")]))
+
+(define (lane-eq? oe se output-layout lane)
+  (define offset (quotient (hvx:num-elems se) 2))
+  (cond
+    [(eq? output-layout 'standard)
+      (hvx:set-curr-cn lane)
+      (cond
+        [(and (hvx:vec-pair? se) (< lane offset))
+         (assert (eq? (oe lane) (hvx:v0-elem se lane)))]
+        [(hvx:vec-pair? se)
+         (assert (eq? (oe lane) (hvx:v1-elem se (- lane offset))))]
+        [else
+         (assert (eq? (oe lane) (hvx:elem se lane)))])]
+    [(eq? output-layout 'deinterleaved)
+      (cond
+        [(and (hvx:vec-pair? se) (even? lane))
+         (hvx:set-curr-cn lane)
+         (assert (eq? (oe lane) (hvx:v0-elem se (quotient lane 2))))]
+        [(hvx:vec-pair? se)
+         (hvx:set-curr-cn lane)
+         (assert (eq? (oe lane) (hvx:v1-elem se (quotient lane 2))))]
+        [else
+         (hvx:set-curr-cn (* 2 lane))
+         (assert (eq? (oe (* 2 lane)) (hvx:elem se lane)))])]
+    [(eq? output-layout 'deinterleavedx2)
+      (cond
+        [(and (hvx:vec-pair? se) (< lane offset))
+         (hvx:set-curr-cn (* 4 lane))
+         (assert (eq? (oe (* 4 lane)) (hvx:v0-elem se lane)))]
+        [(hvx:vec-pair? se)
+         (hvx:set-curr-cn (+ 2 (* 4 (- lane offset))))
+         (assert (eq? (oe (+ 2 (* 4 (- lane offset)))) (hvx:v1-elem se (- lane offset))))]
+        [else
+         (hvx:set-curr-cn (* 4 lane))
+         (assert (eq? (oe (* 4 lane)) (hvx:elem se lane)))])]
+    [(eq? output-layout 'interleaved)
+      (cond
+        [(and (hvx:vec-pair? se) (< lane offset))
+         (hvx:set-curr-cn (* 4 lane))
+         (assert (eq? (oe (* 4 lane)) (hvx:v0-elem se lane)))]
+        [(hvx:vec-pair? se)
+         (hvx:set-curr-cn (+ 2 (* 4 (- lane offset))))
+         (assert (eq? (oe (+ 2 (* 4 (- lane offset)))) (hvx:v1-elem se (- lane offset))))]
+        [(even? lane)
+         (hvx:set-curr-cn (quotient lane 2))
+         (assert (eq? (oe (quotient lane 2)) (hvx:elem se lane)))]
+        [else
+         (hvx:set-curr-cn (+ (quotient lane 2) offset))
+         (assert (eq? (oe (+ (quotient lane 2) offset)) (hvx:elem se lane)))])]
+    [else
+     (error "NYI")]))
 
 ;(define (bounded-eq? oe se lanes)
 ;  (define offset (quotient (num-elems-hvx se) 2))

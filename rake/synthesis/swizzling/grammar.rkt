@@ -101,7 +101,7 @@
   ;(pretty-print grouped-base-exprs)
   
   (set! enumeration-database (make-hash))
-  (define candidate-swizzles (time (enumerate-hvx isa out-type grouped-base-exprs 2 (min swizzle-budget 5))))
+  (define candidate-swizzles (enumerate-hvx isa out-type grouped-base-exprs 2 (min swizzle-budget 5)))
 
   ;(println (length candidate-swizzles))
   
@@ -173,7 +173,7 @@
          [else (list (cons c cost))]))))
   (define sorted-candidates (sort candidates (lambda (v1 v2) (<= (cdr v1) (cdr v2)))))
 
-  (println (length sorted-candidates))
+  ;(println (length sorted-candidates))
   ;(pretty-print sorted-candidates)
   ;(exit)
   

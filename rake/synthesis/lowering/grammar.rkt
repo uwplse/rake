@@ -502,7 +502,7 @@
      ;; Desired output type
      (define spec-rad (length weights))
      (define desired-expr-types (enum-types output-type))
-     (define candidates (time (enumerate-hvx isa desired-expr-types grouped-sub-exprs 5 7 fma-keep? spec-rad)))
+     (define candidates (enumerate-hvx isa desired-expr-types grouped-sub-exprs 5 7 fma-keep? spec-rad))
      
      ;(println isa)
      ;(println desired-expr-types)
@@ -525,14 +525,14 @@
      ;(println spec-rad)
      
      ;; Filter out templates that read too much or too little data
-     (set! candidates (time (filter (lambda (c) (eq? (max-unique-inputs (car c)) spec-rad)) candidates)))
-     (set! candidates (time (filter (lambda (c) (equal? (live-buffers (car c)) lbs)) candidates)))
+     (set! candidates (filter (lambda (c) (eq? (max-unique-inputs (car c)) spec-rad)) candidates))
+     (set! candidates (filter (lambda (c) (equal? (live-buffers (car c)) lbs)) candidates))
      
      ;; Compute read counts
-     (set! candidates (time (map (lambda (c) (cons (car c) (cons (cdr c) (count-reads (car c))))) candidates)))
+     (set! candidates (map (lambda (c) (cons (car c) (cons (cdr c) (count-reads (car c))))) candidates))
      
      ;; Sort them (I am ashamed of this line below)
-     (set! candidates (time (sort candidates (lambda (v1 v2) (if (eq? (car (cdr v1)) (car (cdr v2))) (< (cdr (cdr v1)) (cdr (cdr v2))) (< (car (cdr v1)) (car (cdr v2))))))))
+     (set! candidates (sort candidates (lambda (v1 v2) (if (eq? (car (cdr v1)) (car (cdr v2))) (< (cdr (cdr v1)) (cdr (cdr v2))) (< (car (cdr v1)) (car (cdr v2)))))))
      
      ;(for ([c (take candidates (min 15 (length candidates)))])
       ; (println (count-reads (car c)))
