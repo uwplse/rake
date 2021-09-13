@@ -28,85 +28,91 @@
 (define trace (list))
 
 (define (synthesize-hvx-expr ir-expr ir-annotations ir-bounds lowering-algo swizzling-algo [sub-expr? #f] [output-layout 'standard])
-  
-  (define (gen-lowered-impl subexpr-layout)
-    ;; Push node to trace
-    (set! trace (append (list ir-expr) trace))
-        
-    ;; Generate HVX sub-expressions that produce output in selected layout
-    (define ir-sub-exprs (hvx-ir:get-subexprs ir-expr))
-
-    (define (lower-sub-exprs ir-sub-exprs)
-      (cond
-        [(empty? ir-sub-exprs) (values #t '())]
-        [else
-         ;; Lower current subexpr
-         (define ir-sub-expr (first ir-sub-exprs))
-         (define hvx-sub-expr-impls (synthesize-hvx-expr ir-sub-expr ir-annotations ir-bounds lowering-algo swizzling-algo (or sub-expr? (not (combine? ir-expr))) subexpr-layout))
-         (cond
-           [(empty? hvx-sub-expr-impls) (values #f '())]
-           [else
-            ;; Save bounds information
-            (when (hash-has-key? ir-bounds (ir-node-id ir-sub-expr))
-              (for ([impl hvx-sub-expr-impls])
-                (hash-set! value-bounds impl (hash-ref ir-bounds (ir-node-id ir-sub-expr)))))
-
-            ;; Lower remaining subexprs
-            (define-values (successful? lowered-exprs) (lower-sub-exprs (rest ir-sub-exprs)))
-            (cond
-              [successful? (values #t (flatten (append hvx-sub-expr-impls lowered-exprs)))]
-              [else (values #f '())])])]))
-
-    (define-values (successful? hvx-sub-exprs) (lower-sub-exprs ir-sub-exprs))
-
-    ;; Pop node from trace
-    (set! trace (rest trace))
-
-    (cond
-      ;; If we were able to lower the sub-exprs to the desired layout, lower the current expr using the subexprs
-      [successful?
-        ;; Lower the current uber-instruction using the lowered sub-expressions as leaves in the expression graph
-        ;; The lowered expression will produce output in the selected output-layout
-        (cond
-          [(and sub-expr? (combine? ir-expr)) hvx-sub-exprs]
-          [(hash-has-key? ir-annotations (ir-node-id ir-expr))
-           (define halide-spec (hash-ref ir-annotations (ir-node-id ir-expr)))
-           (define-values (successful? hvx-expr _)
-             (lower-to-optimal-hvx halide-spec ir-expr hvx-sub-exprs lowering-algo swizzling-algo sub-expr? output-layout))
-           (when successful? (hash-set! translation-history hvx-expr halide-spec))
-           (cond
-             [successful? hvx-expr]
-             [else #f])]
-          [(load-data? ir-expr)
-           (define parent-expr (first trace))
-           (define parent-spec (hash-ref ir-annotations (ir-node-id parent-expr)))
-           (define live-data (halide:extract-buffer-reads parent-spec))
-           (define live-buffers (set->list (halide:extract-live-buffers parent-spec)))
-           (define buf-elemTs (map buffer-elemT live-buffers))
-           (set->list (list->set (flatten
-            (map
-             (lambda (t)
-               (define lds
-                 (map
-                  (lambda (b)
-                    (define tbl (map (lambda (i) (define-symbolic* idx integer?) idx) (range 256)))
-                    (??load 1 live-data b tbl #f))  
-                  (filter (lambda (b) (eq? t (buffer-elemT b))) live-buffers)))
-               (list (??shuffle 0 lds #t)))
-             buf-elemTs))))])]
-      ;; Stop and try another layout
-      [else #f]))
-
-  ;; Reset the state of synthesis database, otherwise the synthesizer will ignore previously
-  ;; seen correct solutions
+  ;; Reset the state of synthesis database
   (lowering:synthesizer:reset-db)
-    
-  (define desired-subexpr-layouts (infer-ideal-subexpr-layout ir-expr output-layout))
 
-  (display (format "Preferred layout for op ~a is ~a\n\n" (object-name ir-expr) output-layout))
-  (display (format "Preferred subexpr layout for op ~a is ~a\n\n" (object-name ir-expr) desired-subexpr-layouts))
-  
-  (filter-map gen-lowered-impl (set->list desired-subexpr-layouts)))
+  ;; Analyze the expression to infer intermediate data-layouts after each uber-instruction
+  (define ideal-subexpr-layouts (infer-ideal-subexpr-layouts ir-expr output-layout))
+
+  ;(display (format "Preferred layout for op ~a is ~a\n\n" (object-name ir-expr) output-layout))
+  ;(display (format "Preferred subexpr layout for op ~a is ~a\n\n" (object-name ir-expr) ideal-subexpr-layouts))
+
+  ;; Generate a HVX implementation for each sub-expr layout
+  (filter-map (curry synthesize-lowered-impl ir-expr ir-annotations ir-bounds lowering-algo swizzling-algo sub-expr? output-layout) (set->list ideal-subexpr-layouts)))
+
+(define (synthesize-lowered-impl ir-expr ir-annotations ir-bounds lowering-algo swizzling-algo sub-expr? output-layout subexpr-layout)
+  ;; Push node to trace
+  (set! trace (append (list ir-expr) trace))
+        
+  ;; Generate HVX sub-expressions that produce output in subexpr-layout
+  (define-values (successful? hvx-sub-exprs) (lower-sub-exprs ir-expr (hvx-ir:get-subexprs ir-expr) ir-annotations ir-bounds lowering-algo swizzling-algo sub-expr? subexpr-layout))
+
+  ;; Pop node from trace
+  (set! trace (rest trace))
+
+  (cond
+    ;; If we were able to lower the sub-exprs, use them to construct the lowered expression
+    [successful? (lower-expr ir-expr ir-annotations lowering-algo swizzling-algo sub-expr? output-layout hvx-sub-exprs)]
+    [else #f]))
+
+(define (lower-expr ir-expr ir-annotations lowering-algo swizzling-algo sub-expr? output-layout hvx-sub-exprs)
+  (cond
+    ;; For combine nodes (data shuffle), unless we are the root node just pass the sub-expressions to the parent.
+    ;; If we are, however, the root node then we must synthesize the shuffles now.
+    [(and sub-expr? (combine? ir-expr)) hvx-sub-exprs]
+
+    ;; Does the annotation map contain the equivalent halide (sub-)expression?
+    [(hash-has-key? ir-annotations (ir-node-id ir-expr))
+     (define halide-spec (hash-ref ir-annotations (ir-node-id ir-expr)))
+     (define-values (successful? hvx-expr _)
+       (lower-to-optimal-hvx halide-spec ir-expr hvx-sub-exprs lowering-algo swizzling-algo sub-expr? output-layout))
+     (when successful? (hash-set! translation-history hvx-expr halide-spec))
+     (cond
+       [successful? hvx-expr]
+       [else #f])]
+
+    ;; If it does not, this is usually because the synthesized fused multiple Halide loads into a single one:
+    [(load-data? ir-expr)
+     (define parent-expr (first trace))
+     (define parent-spec (hash-ref ir-annotations (ir-node-id parent-expr)))
+     (define live-data (halide:extract-buffer-reads parent-spec))
+     (define live-buffers (set->list (halide:extract-live-buffers parent-spec)))
+     (define buf-elemTs (map buffer-elemT live-buffers))
+     (set->list (list->set (flatten
+                            (map
+                             (lambda (t)
+                               (define lds
+                                 (map
+                                  (lambda (b)
+                                    (define tbl (map (lambda (i) (define-symbolic* idx integer?) idx) (range 256)))
+                                    (??load 1 live-data b tbl #f))  
+                                  (filter (lambda (b) (eq? t (buffer-elemT b))) live-buffers)))
+                               (list (??shuffle 0 lds #t)))
+                             buf-elemTs))))]
+
+    [else
+     (error "Unexpected: Did not find Halide IR mapping for expression ~a" ir-expr)]))
+
+(define (lower-sub-exprs ir-expr ir-sub-exprs ir-annotations ir-bounds lowering-algo swizzling-algo sub-expr? subexpr-layout)
+    (cond
+      [(empty? ir-sub-exprs) (values #t '())]
+      [else
+       ;; Lower current subexpr
+       (define ir-sub-expr (first ir-sub-exprs))
+       (define hvx-sub-expr-impls (synthesize-hvx-expr ir-sub-expr ir-annotations ir-bounds lowering-algo swizzling-algo (or sub-expr? (not (combine? ir-expr))) subexpr-layout))
+       (cond
+         [(empty? hvx-sub-expr-impls) (values #f '())]
+         [else
+          ;; Save bounds information
+          (when (hash-has-key? ir-bounds (ir-node-id ir-sub-expr))
+            (for ([impl hvx-sub-expr-impls])
+              (hash-set! value-bounds impl (hash-ref ir-bounds (ir-node-id ir-sub-expr)))))
+
+          ;; Lower remaining subexprs
+          (define-values (successful? lowered-exprs) (lower-sub-exprs ir-expr (rest ir-sub-exprs) ir-annotations ir-bounds lowering-algo swizzling-algo sub-expr? subexpr-layout))
+          (cond
+            [successful? (values #t (flatten (append hvx-sub-expr-impls lowered-exprs)))]
+            [else (values #f '())])])]))
 
 (define (lower-to-optimal-hvx halide-expr ir-expr hvx-sub-exprs lowering-algo swizzling-algo sub-expr? output-layout [cost-ub 99999])
   (define-values (successful? hvx-expr expr-cost template-cost swizzle-cost)
@@ -115,7 +121,7 @@
   (cond
     [(and successful? (load-data? ir-expr)) (values #t hvx-expr 1)]
     [successful?
-      (display (format "Total Expression cost (template + swizzle): ~a\n\n" expr-cost))
+      (display (format "Total Expression cost (template + swizzle): ~a\n\n" (+ 0.01 expr-cost)))
       (cond
         [(or (<= template-cost 2) (>= swizzle-cost template-cost))
          (display "Searching for a more optimal implementation...\n\n")
@@ -273,7 +279,7 @@
       [_ node]))
   (hvx:visit hvx-template clone-swizzle-node))
 
-(define (infer-ideal-subexpr-layout ir-expr desired-output-layout)
+(define (infer-ideal-subexpr-layouts ir-expr desired-output-layout)
   (cond
     [(preserves-layout? ir-expr) (set desired-output-layout)]
     [else
