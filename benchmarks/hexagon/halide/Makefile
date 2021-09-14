@@ -1,12 +1,8 @@
 HALIDE_DIR ?= ../../../../rake-halide/distrib
 #HALIDE_DIR ?= ../../../../../Software/Halide-12.0.1/distrib
 
-HEXAGON_SIM ?= /home/maaz/Qualcomm/Hexagon_SDK/3.5.2/tools/HEXAGON_Tools/8.3.07/Tools/bin/hexagon-sim
-HEXAGON_CLANG ?= /home/maaz/Qualcomm/Hexagon_SDK/3.5.2/tools/HEXAGON_Tools/8.3.07/Tools/bin/hexagon-clang++
-
-#ifndef HALIDE_DIR
-#$(error HALIDE_DIR is not set)
-#endif
+HEXAGON_SIM ?= ../../../../../../software/Qualcomm/Hexagon_SDK/3.5.2/tools/HEXAGON_Tools/8.3.07/Tools/bin/hexagon-sim
+HEXAGON_CLANG ?= ../../../../../../software//Qualcomm/Hexagon_SDK/3.5.2/tools/HEXAGON_Tools/8.3.07/Tools/bin/hexagon-clang++
 
 benchmarks = simple \
 			 gaussian3x3 \
@@ -57,7 +53,7 @@ $(benchmarks): %: %/bin %/out %/profile
 		-g $@/src/$@_generator.cpp $(HALIDE_DIR)/tools/GenGen.cpp \
 		$(hannk) \
 		-o $@/bin/$@_generator \
-		-L $(HALIDE_DIR)/lib -lHalide -ldl -lpthread -lz -lrt -ltinfo
+		-L $(HALIDE_DIR)/lib -lHalide $(shell $(llvm-config) --system-libs --link-static)
 
 	export LD_LIBRARY_PATH=$(HALIDE_DIR)/lib; ./$@/bin/$@_generator \
 		-o $@/bin \
@@ -86,7 +82,7 @@ elementwise: %: %/bin %/out %/profile
 		-g $@/src/$@_generator.cpp $(HALIDE_DIR)/tools/GenGen.cpp \
 		$(hannk) \
 		-o $@/bin/$@_generator \
-		-L $(HALIDE_DIR)/lib -lHalide -ldl -lpthread -lz -lrt -ltinfo
+		-L $(HALIDE_DIR)/lib -lHalide $(shell $(llvm-config) --system-libs --link-static)
 
 	export LD_LIBRARY_PATH=$(HALIDE_DIR)/lib; ./$@/bin/$@_generator \
 		-o $@/bin \
@@ -102,7 +98,7 @@ fully_connected: %: %/bin %/out %/profile
 		-g $@/src/$@_generator.cpp $(HALIDE_DIR)/tools/GenGen.cpp \
 		$(hannk) \
 		-o $@/bin/$@_generator \
-		-L $(HALIDE_DIR)/lib -lHalide -ldl -lpthread -lz -lrt -ltinfo
+		-L $(HALIDE_DIR)/lib -lHalide $(shell $(llvm-config) --system-libs --link-static)
 
 	export LD_LIBRARY_PATH=$(HALIDE_DIR)/lib; ./$@/bin/$@_generator \
 		-o $@/bin \
