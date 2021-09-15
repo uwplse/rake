@@ -14,6 +14,7 @@ The first step is to use our Halide fork to generate *specification files* for R
 
 To generate the spec files without actually running the synthesizer, use the following commands:
 ```
+$ export LLVM_CONFIG=/path/to/llvm-config                # Make sure LLVM_CONFIG points to your LLVM build
 $ export HALIDE_RAKE_GENSPEC=1                           # Tell Halide to generate specs but not run Rake
 $ export HALIDE_DIR=/path/to/rake-halide/distrib         # Set path to the Halide installation (or edit the Makefile below)
 $ cd benchmarks/hexagon/halide                           # Go to benchmarks directory
