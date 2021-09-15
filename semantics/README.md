@@ -1,0 +1,1 @@
+The code inside this directory is heavily derived from [VEGEN](https://github.com/ychen306/vegen). We thank the authors of VEGEN for allowing us to build on their code.
