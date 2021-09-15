@@ -17,6 +17,7 @@
   rake/hvx/interpreter
   rake/hvx/cost-model
   rake/synthesis/bounds
+  rake/synthesis/layouts
   rake/synthesis/lowering/algorithm
   rake/synthesis/swizzling/algorithm
   rake/synthesis/lowering/synthesizer)
@@ -27,18 +28,75 @@
 (define value-bounds (make-hash))
 (define trace (list))
 
-(define (synthesize-hvx-expr ir-expr ir-annotations ir-bounds lowering-algo swizzling-algo [sub-expr? #f] [output-layout 'standard])
+(define (synthesize-hvx-expr ir-expr ir-annotations ir-bounds lowering-algo swizzling-algo [sub-expr? #f] [output-layout 'in-order])
   ;; Reset the state of synthesis database
   (lowering:synthesizer:reset-db)
 
+  (display "Inferring Data Layouts...\n")
+  (display "=========================\n\n")
+  (print-layout-map ir-expr output-layout)
+
+  (exit)
+  
   ;; Analyze the expression to infer intermediate data-layouts after each uber-instruction
-  (define ideal-subexpr-layouts (infer-ideal-subexpr-layouts ir-expr output-layout))
+  ;(define ideal-subexpr-layouts (infer-ideal-subexpr-layouts ir-expr output-layout))
 
   ;(display (format "Preferred layout for op ~a is ~a\n\n" (object-name ir-expr) output-layout))
   ;(display (format "Preferred subexpr layout for op ~a is ~a\n\n" (object-name ir-expr) ideal-subexpr-layouts))
 
   ;; Generate a HVX implementation for each sub-expr layout
-  (filter-map (curry synthesize-lowered-impl ir-expr ir-annotations ir-bounds lowering-algo swizzling-algo sub-expr? output-layout) (set->list ideal-subexpr-layouts)))
+  ;(filter-map (curry synthesize-lowered-impl ir-expr ir-annotations ir-bounds lowering-algo swizzling-algo sub-expr? output-layout) (set->list ideal-subexpr-layouts))
+
+  ;(synthesize-lowered-impl ir-expr ir-annotations ir-bounds lowering-algo swizzling-algo sub-expr? output-layout)
+  
+  ;; Push node to trace
+  (set! trace (append (list ir-expr) trace))
+        
+  ;; Lower sub-expressions to HVX
+  (define-values (successful? hvx-sub-exprs)
+    (lower-sub-exprs (hvx-ir:get-subexprs ir-expr) ir-expr ir-annotations ir-bounds lowering-algo swizzling-algo sub-expr? output-layout))
+
+  ;; Pop node from trace
+  (set! trace (rest trace))
+
+  (cond
+    ;; If we were able to lower the sub-exprs, use them to construct the lowered expression
+    [successful? (lower-expr ir-expr ir-annotations lowering-algo swizzling-algo sub-expr? output-layout hvx-sub-exprs)]
+    [else #f]))
+
+(define (lower-sub-exprs ir-sub-exprs ir-expr ir-annotations ir-bounds lowering-algo swizzling-algo sub-expr? output-layout)
+  (cond
+    [(empty? ir-sub-exprs) (values #t '())]
+    [else
+     ;; Get current subexpr
+     (define ir-sub-expr (first ir-sub-exprs))
+
+     ;; Infer ideal output-layouts for this sub-expr
+     (define ideal-subexpr-layouts (infer-ideal-subexpr-layouts ir-expr ir-sub-expr output-layout))
+
+     ;; Lower sub-expr for each data-layout
+     (define lowered-sub-expr-impls
+       (filter-map (curry synthesize-hvx-expr ir-sub-expr ir-annotations ir-bounds lowering-algo swizzling-algo sub-expr?) ideal-subexpr-layouts))
+     
+     (cond
+       [(empty? lowered-sub-expr-impls) (values #f lowered-sub-expr-impls)]
+       [else
+        ;; Save bounds information
+        (when (hash-has-key? ir-bounds (ir-node-id ir-sub-expr))
+          (for ([impl lowered-sub-expr-impls])
+            (hash-set! value-bounds impl (hash-ref ir-bounds (ir-node-id ir-sub-expr)))))
+
+        ;; Lower remaining subexprs
+        (define-values (successful? lowered-exprs)
+          (lower-sub-exprs (rest ir-sub-exprs) ir-expr ir-annotations ir-bounds lowering-algo swizzling-algo sub-expr?))
+        
+        (cond
+          [successful? (values #t (flatten (append lowered-sub-expr-impls lowered-exprs)))]
+          [else (values #f '())])])]))
+
+
+;;--------------------------
+
 
 (define (synthesize-lowered-impl ir-expr ir-annotations ir-bounds lowering-algo swizzling-algo sub-expr? output-layout subexpr-layout)
   ;; Push node to trace
@@ -93,26 +151,26 @@
     [else
      (error "Unexpected: Did not find Halide IR mapping for expression ~a" ir-expr)]))
 
-(define (lower-sub-exprs ir-expr ir-sub-exprs ir-annotations ir-bounds lowering-algo swizzling-algo sub-expr? subexpr-layout)
-    (cond
-      [(empty? ir-sub-exprs) (values #t '())]
-      [else
-       ;; Lower current subexpr
-       (define ir-sub-expr (first ir-sub-exprs))
-       (define hvx-sub-expr-impls (synthesize-hvx-expr ir-sub-expr ir-annotations ir-bounds lowering-algo swizzling-algo (or sub-expr? (not (combine? ir-expr))) subexpr-layout))
-       (cond
-         [(empty? hvx-sub-expr-impls) (values #f '())]
-         [else
-          ;; Save bounds information
-          (when (hash-has-key? ir-bounds (ir-node-id ir-sub-expr))
-            (for ([impl hvx-sub-expr-impls])
-              (hash-set! value-bounds impl (hash-ref ir-bounds (ir-node-id ir-sub-expr)))))
-
-          ;; Lower remaining subexprs
-          (define-values (successful? lowered-exprs) (lower-sub-exprs ir-expr (rest ir-sub-exprs) ir-annotations ir-bounds lowering-algo swizzling-algo sub-expr? subexpr-layout))
-          (cond
-            [successful? (values #t (flatten (append hvx-sub-expr-impls lowered-exprs)))]
-            [else (values #f '())])])]))
+;(define (lower-sub-exprs ir-expr ir-sub-exprs ir-annotations ir-bounds lowering-algo swizzling-algo sub-expr? subexpr-layout)
+;    (cond
+;      [(empty? ir-sub-exprs) (values #t '())]
+;      [else
+;       ;; Lower current subexpr
+;       (define ir-sub-expr (first ir-sub-exprs))
+;       (define hvx-sub-expr-impls (synthesize-hvx-expr ir-sub-expr ir-annotations ir-bounds lowering-algo swizzling-algo (or sub-expr? (not (combine? ir-expr))) subexpr-layout))
+;       (cond
+;         [(empty? hvx-sub-expr-impls) (values #f '())]
+;         [else
+;          ;; Save bounds information
+;          (when (hash-has-key? ir-bounds (ir-node-id ir-sub-expr))
+;            (for ([impl hvx-sub-expr-impls])
+;              (hash-set! value-bounds impl (hash-ref ir-bounds (ir-node-id ir-sub-expr)))))
+;
+;          ;; Lower remaining subexprs
+;          (define-values (successful? lowered-exprs) (lower-sub-exprs ir-expr (rest ir-sub-exprs) ir-annotations ir-bounds lowering-algo swizzling-algo sub-expr? subexpr-layout))
+;          (cond
+;            [successful? (values #t (flatten (append hvx-sub-expr-impls lowered-exprs)))]
+;            [else (values #f '())])])]))
 
 (define (lower-to-optimal-hvx halide-expr ir-expr hvx-sub-exprs lowering-algo swizzling-algo sub-expr? output-layout [cost-ub 99999])
   (define-values (successful? hvx-expr expr-cost template-cost swizzle-cost)
@@ -278,57 +336,3 @@
       [(??swizzle id live-data expr gather-tbl pair?) (??swizzle (get-sw-node-id) live-data expr gather-tbl pair?)]
       [_ node]))
   (hvx:visit hvx-template clone-swizzle-node))
-
-(define (infer-ideal-subexpr-layouts ir-expr desired-output-layout)
-  (cond
-    [(preserves-layout? ir-expr) (set desired-output-layout)]
-    [else
-     (define desired-input-layouts
-       (match* (ir-expr desired-output-layout)
-         ;; Interleaving instructions
-         [((saturate ir-sub-expr round? output-type) 'standard) (if round? (set 'deinterleaved) (set 'deinterleaved))]
-         [((saturate ir-sub-expr round? output-type) 'deinterleaved) (if round? (set 'deinterleavedx2) (set 'deinterleaved))]
-         [((saturate ir-sub-expr round? output-type) 'deinterleavedx2) (set)]
-         ;-----
-         [((vs-shift-right ir-sub-expr shift round? saturate? arithmetic? output-type) 'standard) (if (interleaves? ir-expr) (set 'standard) (set 'standard))]
-         [((vs-shift-right ir-sub-expr shift round? saturate? arithmetic? output-type) 'deinterleaved) (if (interleaves? ir-expr) (set 'deinterleavedx2) (set 'deinterleaved))]
-         [((vs-shift-right ir-sub-expr shift round? saturate? arithmetic? output-type) 'deinterleavedx2) (set)]
-         [((vs-shift-right ir-sub-expr shift round? saturate? arithmetic? output-type) 'interleaved) (set 'standard)]
-         ;; Disinterleaving instructions
-         [((vs-mpy-add ir-sub-expr weights output-type saturate?) 'standard) (if (deinterleaves? ir-expr) (set 'interleaved) (set 'standard))]
-         [((vs-mpy-add ir-sub-expr weights output-type saturate?) 'deinterleaved) (if (deinterleaves? ir-expr) (set 'standard) (set 'deinterleaved))]
-         [((vs-mpy-add ir-sub-expr weights output-type saturate?) 'deinterleavedx2) (if (deinterleaves? ir-expr) (set 'deinterleaved) (set 'deinterleavedx2))]
-         ;-----
-         [((vv-mpy-add ir-sub-expr width output-type saturate?) 'standard) (if (deinterleaves? ir-expr) (set 'interleaved) (set 'standard))]
-         [((vv-mpy-add ir-sub-expr width output-type saturate?) 'deinterleaved) (if (deinterleaves? ir-expr) (set 'standard) (set 'deinterleaved))]
-         [((vv-mpy-add ir-sub-expr width output-type saturate?) 'deinterleavedx2) (if (deinterleaves? ir-expr) (set 'deinterleaved) (set 'deinterleavedx2))]
-         ;-----
-         [(_ _) (set desired-output-layout)]))
-     desired-input-layouts]))
-
-(define (preserves-layout? ir-expr)
-  (define sub-exprs (hvx-ir:get-subexprs ir-expr))
-  (or
-   (empty? sub-exprs)
-   ;; All non-widening and non-narrowing intrinsics in HVX preserve layout
-   (eq? (cpp:type-bw (hvx-ir:elem-type ir-expr)) (cpp:type-bw (hvx-ir:elem-type (first (hvx-ir:get-subexprs ir-expr)))))))
-    
-(define (interleaves? ir-expr)
-  ;; All narrowing intrinsics in HVX deinterleave output (exception is plain type demotion or saturation)
-  (define ir-sub-expr (first (hvx-ir:get-subexprs ir-expr)))
-  (< (cpp:type-bw (hvx-ir:elem-type ir-expr)) (cpp:type-bw (hvx-ir:elem-type ir-sub-expr))))
-
-(define (deinterleaves? ir-expr)
-  ;; All widening intrinsics in HVX interleave output (exception is plain type promotion)
-  (define sub-expr-bw (foldr max -1 (map cpp:type-bw (map hvx-ir:elem-type (hvx-ir:get-subexprs ir-expr)))))
-  (define widening? (> (cpp:type-bw (hvx-ir:elem-type^ ir-expr)) sub-expr-bw))
-  (cond
-    ;; If reduction factor is too large, then its cheaper to swizzle the result. Despite the wider precision
-    ;; there is still fewer bits that need to be moved
-    [(vs-mpy-add? ir-expr) (and widening? (< (length (vs-mpy-add-weight-matrix ir-expr)) 3))]
-    [else widening?]))
-
-(define (reduction-factor ir-expr)
-  (cond
-    [(vs-mpy-add? ir-expr) (vs-mpy-add-weight-matrix ir-expr)]
-    [(vv-mpy-add? ir-expr) (vv-mpy-add-width ir-expr)]))
