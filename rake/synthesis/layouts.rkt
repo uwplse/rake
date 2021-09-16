@@ -26,10 +26,10 @@
         ;; Count the number of interleaving and deinterleaving ops in the subexpr
         (define i-ops (count-interleaving-ops ir-sub-expr))
         (define d-ops (count-deinterleaving-ops ir-sub-expr))
-        ;; If there is more deinterleaving ops, do an interleaving saturate. Otherwise
-        ;; do the permutation preserving saturate
         (cond
+          ;; There are more deinterleaving ops
           [(> d-ops i-ops)
+           ;; Perform an interleaving op
            (match desired-output-layout
              ['unknown 'unknown]
              ['interleavedx2 'interleaved]
@@ -37,11 +37,23 @@
              ['in-order 'deinterleaved]
              ['deinterleaved 'deinterleavedx2]
              ['deinterleavedx2 'unknown])]
-          [else
+          ;; There are more interleaving ops
+          [(< d-ops i-ops)
+           ;; Perform a non-interleaving op
            (match desired-output-layout
              ['unknown 'unknown]
              ['interleavedx2 'interleavedx2]
              ['interleaved 'interleaved]
+             ['in-order 'in-order]
+             ['deinterleaved 'deinterleaved]
+             ['deinterleavedx2 'deinterleavedx2])]
+          ;; There are equal number of interleaving and deinterleaving ops
+          [else
+           ;; Move towards in-order layout
+           (match desired-output-layout
+             ['unknown 'unknown]
+             ['interleavedx2 'interleaved]
+             ['interleaved 'in-order]
              ['in-order 'in-order]
              ['deinterleaved 'deinterleaved]
              ['deinterleavedx2 'deinterleavedx2])])]
@@ -57,7 +69,7 @@
      (cond
        ;; Special handling for reduction ops. We typically want to
        ;; do the shuffling AFTER the reduction.
-       [(> (reduction-factor ir-expr) 2)
+       [(> (reduction-factor ir-expr) 1)
         (define i-ops (count-interleaving-ops ir-sub-expr))
         (define d-ops (count-deinterleaving-ops ir-sub-expr))
         (define d-shuffs (- d-ops i-ops))
@@ -68,6 +80,43 @@
           ['in-order (if (>= d-shuffs 0) 'in-order 'interleaved)]
           ['deinterleaved 'in-order]
           ['deinterleavedx2 'deinterleaved])]
+       ;; Special handling for cast ops. Widening casts can be done
+       ;; either via zxt/sxt (deinterleaving) or unpack.
+       [(cast? ir-expr)
+        ;; Count the number of interleaving and deinterleaving ops in the subexpr
+        (define i-ops (count-interleaving-ops ir-sub-expr))
+        (define d-ops (count-deinterleaving-ops ir-sub-expr))
+        (cond
+          ;; There are more interleaving ops
+          [(> i-ops d-ops)
+           ;; Perform a deinterleaving op
+           (match desired-output-layout
+             ['unknown 'unknown]
+             ['interleavedx2 'unknown]
+             ['interleaved 'interleavedx2]
+             ['in-order 'interleaved]
+             ['deinterleaved 'in-order]
+             ['deinterleavedx2 'deinterleaved])]
+          ;; There are more deinterleaving ops
+          [(< i-ops d-ops)
+           ;; Perform a non-deinterleaving op
+           (match desired-output-layout
+             ['unknown 'unknown]
+             ['interleavedx2 'interleavedx2]
+             ['interleaved 'interleaved]
+             ['in-order 'in-order]
+             ['deinterleaved 'deinterleaved]
+             ['deinterleavedx2 'deinterleavedx2])]
+          ;; There are equal number of interleaving and deinterleaving ops
+          [else
+           ;; Move towards in-order layout
+           (match desired-output-layout
+             ['unknown 'unknown]
+             ['interleavedx2 'interleavedx2]
+             ['interleaved 'interleaved]
+             ['in-order 'in-order]
+             ['deinterleaved 'in-order]
+             ['deinterleavedx2 'deinterleaved])])]
        [else
         (match desired-output-layout
           ['unknown 'unknown]
