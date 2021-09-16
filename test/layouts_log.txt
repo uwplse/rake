@@ -1,0 +1,181 @@
+==============
+Add Benchmark:
+--------------
+
+maximum [in-order]
+├── minimum [in-order]
+|   ├── saturate [in-order]
+|   |   └── vs-mpy-add [deinterleaved]
+|   |       └── combine [deinterleaved]
+|   |           ├── vs-shift-right [deinterleaved]
+|   |           |   └── vs-mpy-add [deinterleavedx2]
+|   |           |       └── combine [deinterleaved]
+|   |           |           ├── vs-mpy-add [deinterleaved]
+|   |           |           |   └── combine [in-order]
+|   |           |           |       ├── load-data [in-order]
+|   |           |           |       └── broadcast [in-order]
+|   |           |           └── vs-mpy-add [deinterleaved]
+|   |           |               └── combine [in-order]
+|   |           |                   ├── load-data [in-order]
+|   |           |                   └── broadcast [in-order]
+|   |           └── broadcast [deinterleaved]
+|   └── broadcast [in-order]
+└── broadcast [in-order]
+
+-------------------------------------------------------------------------------
+
+==============
+Mul Benchmark:
+==============
+
+maximum [in-order]
+├── minimum [in-order]
+|   ├── saturate [in-order]
+|   |   └── vs-mpy-add [deinterleaved]
+|   |       └── combine [deinterleaved]
+|   |           ├── vs-shift-right [deinterleaved]
+|   |           |   └── vs-frac-mpy [deinterleavedx2]
+|   |           |       └── vv-mpy-add [deinterleavedx2]
+|   |           |           └── combine [deinterleaved]
+|   |           |               ├── vs-mpy-add [deinterleaved]
+|   |           |               |   └── combine [in-order]
+|   |           |               |       ├── load-data [in-order]
+|   |           |               |       └── broadcast [in-order]
+|   |           |               └── vs-mpy-add [deinterleaved]
+|   |           |                   └── combine [in-order]
+|   |           |                       ├── load-data [in-order]
+|   |           |                       └── broadcast [in-order]
+|   |           └── broadcast [deinterleaved]
+|   └── broadcast [in-order]
+└── broadcast [in-order]
+
+-------------------------------------------------------------------------------
+
+======================
+AveragePool Benchmark:
+======================
+
+vs-mpy-add [in-order]
+└── load-data [in-order]
+
+maximum [in-order]
+├── minimum [in-order]
+|   ├── saturate [in-order]
+|   |   └── vs-shift-right [in-order]
+|   |       └── vs-mpy-add [deinterleaved]
+|   |           └── load-data [in-order]
+|   └── broadcast [in-order]
+└── broadcast [in-order]
+
+-------------------------------------------------------------------------------
+
+==================
+MaxPool Benchmark:
+==================
+
+minimum [in-order]
+├── load-data [in-order]
+└── broadcast [in-order]
+
+-------------------------------------------------------------------------------
+
+=================
+L2Norm Benchmark:
+=================
+
+vs-mpy-add [in-order]
+└── combine [in-order]
+    ├── load-data [in-order]
+    └── broadcast [in-order]
+
+vv-mpy-add [in-order]
+└── load-data [interleaved]
+
+saturate [in-order]
+└── add-const [deinterleaved]
+    └── vs-shift-right [deinterleaved]
+        └── vs-mpy-add [deinterleavedx2]
+            └── vs-mpy-add [deinterleaved]
+                └── combine [in-order]
+                    ├── load-data [in-order]
+                    └── broadcast [in-order]
+
+-------------------------------------------------------------------------------
+
+==================
+Softmax Benchmark:
+==================
+
+vs-mpy-hh [in-order]
+└── vs-mpy-add [in-order]
+    └── combine [in-order]
+        ├── load-data [in-order]
+        └── broadcast [in-order]
+
+vs-shift-right [in-order]
+└── load-data [in-order]
+
+saturate [in-order]
+└── vv-shift-left [deinterleaved]
+    ├── cast [deinterleaved]
+    |   └── broadcast [in-order]
+    └── cast [deinterleaved]
+        └── add-const [in-order]
+            └── load-data [in-order]
+
+vv-shift-left [in-order]
+├── vs-mpy-add [in-order]
+|   └── combine [in-order]
+|       ├── load-data [in-order]
+|       └── vs-mpy-add [in-order]
+|           └── load-data [in-order]
+└── broadcast [in-order]
+
+vv-mpy-hh-rnd [in-order]
+└── load-data [in-order]
+
+cast [in-order]
+└── vs-mpy-add [in-order]
+    └── combine [in-order]
+        ├── load-data [in-order]
+        └── vv-mpy-hh-rnd [in-order]
+            └── combine [in-order]
+                ├── load-data [in-order]
+                └── vs-mpy-add [in-order]
+                    └── combine [in-order]
+                        ├── vs-mpy-hh [in-order]
+                        |   └── load-data [in-order]
+                        └── vs-mpy-add [in-order]
+                            └── combine [in-order]
+                                ├── vs-mpy-hh [in-order]
+                                |   └── load-data [in-order]
+                                └── vs-mpy-hh [in-order]
+                                    └── vv-mpy-hh-rnd [in-order]
+                                        └── load-data [in-order]
+
+saturate [in-order]
+└── vs-mpy-add [in-order]
+    └── combine [in-order]
+        ├── vs-shift-right [in-order]
+        |   └── vs-mpy-hh [in-order]
+        |       └── vs-mpy-hh [in-order]
+        |           └── vs-mpy-add [in-order]
+        |               └── combine [in-order]
+        |                   ├── load-data [in-order]
+        |                   └── vv-mpy-hh-rnd [in-order]
+        |                       └── combine [in-order]
+        |                           ├── load-data [in-order]
+        |                           └── vs-mpy-add [in-order]
+        |                               └── combine [in-order]
+        |                                   ├── vs-mpy-hh [in-order]
+        |                                   |   └── load-data [in-order]
+        |                                   └── vs-mpy-add [in-order]
+        |                                       └── combine [in-order]
+        |                                           ├── vs-mpy-hh [in-order]
+        |                                           |   └── load-data [in-order]
+        |                                           └── vs-mpy-hh [in-order]
+        |                                               └── vv-mpy-hh-rnd [in-order]
+        |                                                   └── load-data [in-order]
+        └── broadcast [in-order]
+
+-------------------------------------------------------------------------------
