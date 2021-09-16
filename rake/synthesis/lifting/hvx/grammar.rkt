@@ -99,7 +99,7 @@
       [(vs-mpy-hh sub-expr sca round?)
        (define mul-scalars (append (halide:extract-mul-scalars halide-expr) (list (int8_t (bv 1 8)))))
        (define f (apply choose* mul-scalars))
-       (define updated-sca (mk-cpp-expr (bvmul (cpp:eval (cpp:cast sca 'int32)) (cpp:eval (cpp:cast f 'int32))) 'int32))
+       (define updated-sca (sca-mul (int32x1 sca) (int32x1 f)))
        (list
         ;; Try folding by updating the multiplier
         (vs-mpy-hh (get-node-id) sub-expr updated-sca round?)
@@ -111,7 +111,7 @@
       [(vs-frac-mpy sub-expr sca round?)
        (define mul-scalars (append (halide:extract-mul-scalars halide-expr) (list (int8_t (bv 1 8)))))
        (define f (apply choose* mul-scalars))
-       (define updated-sca (mk-cpp-expr (bvmul (cpp:eval (cpp:cast sca 'int32)) (cpp:eval (cpp:cast f 'int32))) 'int32))
+       (define updated-sca (sca-mul (int32x1 sca) (int32x1 f)))
        (list
         ;; Try folding by updating the multiplier
         (vs-frac-mpy (get-node-id) sub-expr updated-sca round?)
