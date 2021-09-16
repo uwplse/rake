@@ -321,7 +321,8 @@
       [(int16_t v) (int16_t (bvshl (bv 1 16) v))]
       [(uint16_t v) (uint16_t (bvshl (bv 1 16) v))]
       [(int32_t v) (int32_t (bvshl (bv 1 32) v))]
-      [(uint32_t v) (uint32_t (bvshl (bv 1 32) v))])))
+      [(uint32_t v) (uint32_t (bvshl (bv 1 32) v))]
+      [_ (two^ (set (halide:interpret n)))])))
 
 (define (cast-op? expr)
   (destruct expr
