@@ -53,7 +53,7 @@ $(benchmarks): %: %/bin %/out %/profile
 		-g $@/src/$@_generator.cpp $(HALIDE_DIR)/tools/GenGen.cpp \
 		$(hannk) \
 		-o $@/bin/$@_generator \
-		-L $(HALIDE_DIR)/lib -lHalide $(shell $(llvm-config) --system-libs --link-static)
+		-L $(HALIDE_DIR)/lib -lHalide $(shell llvm-config --system-libs --link-static)
 
 	export LD_LIBRARY_PATH=$(HALIDE_DIR)/lib; ./$@/bin/$@_generator \
 		-o $@/bin \
