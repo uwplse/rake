@@ -332,3 +332,86 @@ simds = {
         "uint64x2_t vmovl_u32 (uint32x2_t a)",
         ]
     }
+
+padds = [
+    "int8x8_t    vpadd_s8(int8x8_t a, int8x8_t b);        // VPADD.I8 d0,d0,d0 ",
+    "int16x4_t   vpadd_s16(int16x4_t a, int16x4_t b);     // VPADD.I16 d0,d0,d0",
+    "int32x2_t   vpadd_s32(int32x2_t a, int32x2_t b);     // VPADD.I32 d0,d0,d0",
+    "uint8x8_t   vpadd_u8(uint8x8_t a, uint8x8_t b);      // VPADD.I8 d0,d0,d0 ",
+    "uint16x4_t  vpadd_u16(uint16x4_t a, uint16x4_t b);   // VPADD.I16 d0,d0,d0",
+    "uint32x2_t  vpadd_u32(uint32x2_t a, uint32x2_t b);   // VPADD.I32 d0,d0,d0",
+    "float32x2_t vpadd_f32(float32x2_t a, float32x2_t b); // VPADD.F32 d0,d0,d0",
+    "int16x4_t  vpaddl_s8(int8x8_t a);      // VPADDL.S8 d0,d0 ",
+    "int32x2_t  vpaddl_s16(int16x4_t a);    // VPADDL.S16 d0,d0",
+    "int64x1_t  vpaddl_s32(int32x2_t a);    // VPADDL.S32 d0,d0",
+    "uint16x4_t vpaddl_u8(uint8x8_t a);     // VPADDL.U8 d0,d0 ",
+    "uint32x2_t vpaddl_u16(uint16x4_t a);   // VPADDL.U16 d0,d0",
+    "uint64x1_t vpaddl_u32(uint32x2_t a);   // VPADDL.U32 d0,d0",
+    "int16x8_t  vpaddlq_s8(int8x16_t a);    // VPADDL.S8 q0,q0 ",
+    "int32x4_t  vpaddlq_s16(int16x8_t a);   // VPADDL.S16 q0,q0",
+    "int64x2_t  vpaddlq_s32(int32x4_t a);   // VPADDL.S32 q0,q0",
+    "uint16x8_t vpaddlq_u8(uint8x16_t a);   // VPADDL.U8 q0,q0 ",
+    "uint32x4_t vpaddlq_u16(uint16x8_t a);  // VPADDL.U16 q0,q0",
+    "uint64x2_t vpaddlq_u32(uint32x4_t a);  // VPADDL.U32 q0,q0",
+    "int8x16_t vpaddq_s8 (int8x16_t a, int8x16_t b)",
+    "int16x8_t vpaddq_s16 (int16x8_t a, int16x8_t b)",
+    "int32x4_t vpaddq_s32 (int32x4_t a, int32x4_t b)",
+    "int64x2_t vpaddq_s64 (int64x2_t a, int64x2_t b)",
+    "uint8x16_t vpaddq_u8 (uint8x16_t a, uint8x16_t b)",
+    "uint16x8_t vpaddq_u16 (uint16x8_t a, uint16x8_t b)",
+    "uint32x4_t vpaddq_u32 (uint32x4_t a, uint32x4_t b)",
+    "uint64x2_t vpaddq_u64 (uint64x2_t a, uint64x2_t b)",
+    "float32x4_t vpaddq_f32 (float32x4_t a, float32x4_t b)",
+    "float64x2_t vpaddq_f64 (float64x2_t a, float64x2_t b)",
+    ]
+
+# long pairwise add and accumulate
+adals = [
+    "int16x4_t  vpadal_s8(int16x4_t a, int8x8_t b);      // VPADAL.S8 d0,d0 ",
+    "int32x2_t  vpadal_s16(int32x2_t a, int16x4_t b);    // VPADAL.S16 d0,d0",
+    "int64x1_t  vpadal_s32(int64x1_t a, int32x2_t b);    // VPADAL.S32 d0,d0",
+    "uint16x4_t vpadal_u8(uint16x4_t a, uint8x8_t b);    // VPADAL.U8 d0,d0 ",
+    "uint32x2_t vpadal_u16(uint32x2_t a, uint16x4_t b);  // VPADAL.U16 d0,d0",
+    "uint64x1_t vpadal_u32(uint64x1_t a, uint32x2_t b);  // VPADAL.U32 d0,d0",
+    "int16x8_t  vpadalq_s8(int16x8_t a, int8x16_t b);    // VPADAL.S8 q0,q0 ",
+    "int32x4_t  vpadalq_s16(int32x4_t a, int16x8_t b);   // VPADAL.S16 q0,q0",
+    "int64x2_t  vpadalq_s32(int64x2_t a, int32x4_t b);   // VPADAL.S32 q0,q0",
+    "uint16x8_t vpadalq_u8(uint16x8_t a, uint8x16_t b);  // VPADAL.U8 q0,q0 ",
+    "uint32x4_t vpadalq_u16(uint32x4_t a, uint16x8_t b); // VPADAL.U16 q0,q0",
+    "uint64x2_t vpadalq_u32(uint64x2_t a, uint32x4_t b); // VPADAL.U32 q0,q0"
+    ]
+
+folding_maxs = [
+    "int8x8_t    vpmax_s8(int8x8_t a, int8x8_t b);        // VPMAX.S8 d0,d0,d0 ",
+    "int16x4_t   vpmax_s16(int16x4_t a, int16x4_t b);     // VPMAX.S16 d0,d0,d0",
+    "int32x2_t   vpmax_s32(int32x2_t a, int32x2_t b);     // VPMAX.S32 d0,d0,d0",
+    "uint8x8_t   vpmax_u8(uint8x8_t a, uint8x8_t b);      // VPMAX.U8 d0,d0,d0 ",
+    "uint16x4_t  vpmax_u16(uint16x4_t a, uint16x4_t b);   // VPMAX.U16 d0,d0,d0",
+    "uint32x2_t  vpmax_u32(uint32x2_t a, uint32x2_t b);   // VPMAX.U32 d0,d0,d0",
+    "float32x2_t vpmax_f32(float32x2_t a, float32x2_t b); // VPMAX.F32 d0,d0,d0",
+    ]
+
+folding_mins = [
+    "int8x8_t    vpmin_s8(int8x8_t a, int8x8_t b);        // VPMIN.S8 d0,d0,d0 ",
+    "int16x4_t   vpmin_s16(int16x4_t a, int16x4_t b);     // VPMIN.S16 d0,d0,d0",
+    "int32x2_t   vpmin_s32(int32x2_t a, int32x2_t b);     // VPMIN.S32 d0,d0,d0",
+    "uint8x8_t   vpmin_u8(uint8x8_t a, uint8x8_t b);      // VPMIN.U8 d0,d0,d0 ",
+    "uint16x4_t  vpmin_u16(uint16x4_t a, uint16x4_t b);   // VPMIN.U16 d0,d0,d0",
+    "uint32x2_t  vpmin_u32(uint32x2_t a, uint32x2_t b);   // VPMIN.U32 d0,d0,d0",
+    "float32x2_t vpmin_f32(float32x2_t a, float32x2_t b); // VPMIN.F32 d0,d0,d0",
+    ]
+
+dots = [
+    "uint32x2_t vdot_u32 (uint32x2_t r, uint8x8_t a, uint8x8_t b)",
+    "int32x2_t vdot_s32 (int32x2_t r, int8x8_t a, int8x8_t b)",
+    "uint32x4_t vdotq_u32 (uint32x4_t r, uint8x16_t a, uint8x16_t b)",
+    "int32x4_t vdotq_s32 (int32x4_t r, int8x16_t a, int8x16_t b)",
+    #"int32x2_t vusdot_s32 (int32x2_t r, uint8x8_t a, int8x8_t b)",
+    #"int32x4_t vusdotq_s32 (int32x4_t r, uint8x16_t a, int8x16_t b)",
+    ]
+
+matmuls = [
+    #    "int32x4_t vmmlaq_s32 (int32x4_t r, int8x16_t a, int8x16_t b)",
+    #    "uint32x4_t vmmlaq_u32 (uint32x4_t r, uint8x16_t a, uint8x16_t b)",
+    #    "int32x4_t vusmmlaq_s32 (int32x4_t r, uint8x16_t a, int8x16_t b)",
+    ]
