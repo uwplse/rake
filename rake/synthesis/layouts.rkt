@@ -17,7 +17,22 @@
   (define op-type (infer-implicit-shuffle ir-expr))
   
   (match op-type
-    ['iden desired-output-layout]
+    ['iden
+     (cond
+       ;; Special handling for reduction ops. We typically want to
+       ;; do the shuffling AFTER the reduction.
+       [(> (reduction-factor ir-expr) 1)
+        (define i-ops (count-interleaving-ops ir-sub-expr))
+        (define d-ops (count-deinterleaving-ops ir-sub-expr))
+        (match desired-output-layout
+          ['unknown 'unknown]
+          ['interleavedx2 'interleavedx2]
+          ['interleaved (if (> d-ops i-ops) 'unknown (if (< d-ops i-ops) 'interleaved 'in-order))]
+          ['in-order (if (> d-ops i-ops) 'deinterleaved (if (< d-ops i-ops) 'interleaved 'in-order))]
+          ['deinterleaved (if (> d-ops i-ops) 'deinterleaved (if (< d-ops i-ops) 'unknown 'in-order))]
+          ['deinterleavedx2 'deinterleavedx2])]
+       [else
+        desired-output-layout])]
     ['interleave
      (cond
        ;; Special handling for saturate ops. In HVX, saturation can be done either via
@@ -58,11 +73,13 @@
              ['deinterleaved 'deinterleaved]
              ['deinterleavedx2 'deinterleavedx2])])]
        [else
+        (define i-ops (count-interleaving-ops ir-sub-expr))
+        (define d-ops (count-deinterleaving-ops ir-sub-expr))
         (match desired-output-layout
           ['unknown 'unknown]
           ['interleavedx2 'interleaved]
           ['interleaved 'in-order]
-          ['in-order 'deinterleaved]
+          ['in-order (if (> i-ops d-ops) 'deinterleaved 'in-order)]
           ['deinterleaved 'deinterleavedx2]
           ['deinterleavedx2 'unknown])])]
     ['deinterleave
@@ -72,12 +89,11 @@
        [(> (reduction-factor ir-expr) 1)
         (define i-ops (count-interleaving-ops ir-sub-expr))
         (define d-ops (count-deinterleaving-ops ir-sub-expr))
-        (define d-shuffs (- d-ops i-ops))
         (match desired-output-layout
           ['unknown 'unknown]
           ['interleavedx2 'unknown]
           ['interleaved 'interleavedx2]
-          ['in-order (if (>= d-shuffs 0) 'in-order 'interleaved)]
+          ['in-order (if (> d-ops i-ops) 'in-order (if (< d-ops i-ops) 'interleaved 'in-order))]
           ['deinterleaved 'in-order]
           ['deinterleavedx2 'deinterleaved])]
        ;; Special handling for cast ops. Widening casts can be done
