@@ -179,3 +179,134 @@ saturate [in-order]
         └── broadcast [in-order]
 
 -------------------------------------------------------------------------------
+
+======================
+Gaussian3x3 Benchmark:
+======================
+
+vs-shift-right [in-order]
+└── vs-mpy-add [deinterleaved]
+    └── load-data [in-order]
+
+-------------------------------------------------------------------------------
+
+======================
+Gaussian5x5 Benchmark:
+======================
+
+vs-mpy-add [in-order]
+└── load-data [in-order]
+
+vs-shift-right [in-order]
+└── vs-mpy-add [in-order]
+    └── load-data [in-order]
+
+
+-------------------------------------------------------------------------------
+
+======================
+Gaussian7x7 Benchmark:
+======================
+
+vs-mpy-add [in-order]
+└── load-data [in-order]
+
+;; Todo: Break the cast into two casts
+saturate [in-order]
+└── vs-shift-right [in-order]
+    └── vs-mpy-add [in-order]
+        └── load-data [in-order]
+
+-------------------------------------------------------------------------------
+
+================
+Sobel Benchmark:
+================
+
+saturate [in-order]
+└── vs-mpy-add [deinterleaved]
+    └── combine [deinterleaved]
+        ├── abs-diff [deinterleaved]
+        |   ├── vs-mpy-add [deinterleaved]
+        |   |   └── load-data [in-order]
+        |   └── vs-mpy-add [deinterleaved]
+        |       └── load-data [in-order]
+        └── abs-diff [deinterleaved]
+            ├── vs-mpy-add [deinterleaved]
+            |   └── load-data [in-order]
+            └── vs-mpy-add [deinterleaved]
+                └── load-data [in-order]
+
+-------------------------------------------------------------------------------
+
+====================
+Dilate3x3 Benchmark:
+====================
+
+maximum [in-order]
+├── load-data [in-order]
+└── maximum [in-order]
+    ├── load-data [in-order]
+    └── maximum [in-order]
+        ├── load-data [in-order]
+        └── maximum [in-order]
+            ├── load-data [in-order]
+            └── maximum [in-order]
+                ├── load-data [in-order]
+                └── maximum [in-order]
+                    ├── load-data [in-order]
+                    └── maximum [in-order]
+                        ├── load-data [in-order]
+                        └── maximum [in-order]
+                            ├── load-data [in-order]
+                            └── load-data [in-order]
+
+-------------------------------------------------------------------------------
+
+====================
+Median3x3 Benchmark:
+====================
+
+minimum [in-order]
+├── maximum [in-order]
+|   ├── maximum [in-order]
+|   |   ├── load-data [in-order]
+|   |   └── load-data [in-order]
+|   └── load-data [in-order]
+└── minimum [in-order]
+    ├── maximum [in-order]
+    |   ├── maximum [in-order]
+    |   |   ├── load-data [in-order]
+    |   |   └── load-data [in-order]
+    |   └── load-data [in-order]
+    └── maximum [in-order]
+        ├── maximum [in-order]
+        |   ├── load-data [in-order]
+        |   └── load-data [in-order]
+        └── load-data [in-order]
+
+maximum [in-order]
+├── minimum [in-order]
+|   ├── maximum [in-order]
+|   |   ├── load-data [in-order]
+|   |   └── load-data [in-order]
+|   └── maximum [in-order]
+|       ├── minimum [in-order]
+|       |   ├── maximum [in-order]
+|       |   |   ├── load-data [in-order]
+|       |   |   └── load-data [in-order]
+|       |   └── maximum [in-order]
+|       |       ├── minimum [in-order]
+|       |       |   ├── maximum [in-order]
+|       |       |   |   ├── load-data [in-order]
+|       |       |   |   └── load-data [in-order]
+|       |       |   └── load-data [in-order]
+|       |       └── minimum [in-order]
+|       |           ├── load-data [in-order]
+|       |           └── load-data [in-order]
+|       └── minimum [in-order]
+|           ├── load-data [in-order]
+|           └── load-data [in-order]
+└── minimum [in-order]
+    ├── load-data [in-order]
+    └── load-data [in-order]
