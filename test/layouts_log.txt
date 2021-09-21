@@ -553,3 +553,136 @@ saturate [in-order]
         |                           └── load-data [in-order]
         └── load-data [deinterleaved]
 
+
+-------------------------------------------------------------------------------
+
+=====================
+Conv3x3a16 Benchmark:
+=====================
+
+vs-shift-right [in-order]
+└── vs-mpy-add [deinterleaved]
+    └── load-data [in-order]
+
+-------------------------------------------------------------------------------
+
+=====================
+Conv3x3a32 Benchmark:
+=====================
+
+saturate [in-order]
+└── vs-shift-right [deinterleaved]
+    └── vs-mpy-add [deinterleaved]
+        └── load-data [in-order]
+
+-------------------------------------------------------------------------------
+
+===============
+Mean Benchmark:
+===============
+
+vs-mpy-add [in-order]
+└── load-data [in-order]
+
+vs-divide [in-order]
+└── vs-mpy-add [in-order]
+    └── combine [in-order]
+        ├── load-data [in-order]
+        └── broadcast [in-order]
+
+-------------------------------------------------------------------------------
+
+=================
+ConvNN Benchmark:
+=================
+
+vs-mpy-add [in-order]
+└── load-data [in-order]
+
+vs-mpy-add [in-order]
+└── combine [in-order]
+    ├── vs-mpy-add [in-order]
+    |   └── combine [in-order]
+    |       ├── load-data [in-order]
+    |       └── broadcast [in-order]
+    └── load-data [in-order]
+
+vs-mpy-add [in-order]
+└── combine [in-order]
+    ├── load-data [in-order]
+    └── broadcast [in-order]
+
+maximum [in-order]
+├── minimum [in-order]
+|   ├── saturate [in-order]
+|   |   └── vs-mpy-add [in-order]
+|   |       └── combine [interleaved]
+|   |           ├── vs-shift-right [interleaved]
+|   |           |   └── vs-frac-mpy [in-order]
+|   |           |       └── load-data [in-order]
+|   |           └── broadcast [interleaved]
+|   └── broadcast [in-order]
+└── broadcast [in-order]
+
+maximum [in-order]
+├── minimum [in-order]
+|   ├── vs-mpy-add [in-order]
+|   |   └── combine [interleaved]
+|   |       ├── vs-shift-right [interleaved]
+|   |       |   └── vs-frac-mpy [in-order]
+|   |       |       └── load-data [in-order]
+|   |       └── broadcast [interleaved]
+|   └── broadcast [in-order]
+└── broadcast [in-order]
+
+maximum [in-order]
+├── minimum [in-order]
+|   ├── vs-shift-right [in-order]
+|   |   └── vs-frac-mpy [in-order]
+|   |       └── load-data [in-order]
+|   └── broadcast [in-order]
+└── broadcast [in-order]
+
+-------------------------------------------------------------------------------
+
+========================
+DepthwiseConv Benchmark:
+========================
+
+vs-mpy-add [in-order]
+└── combine [in-order]
+    ├── load-data [in-order]
+    └── broadcast [in-order]
+
+vs-mpy-add [in-order]
+└── load-data [in-order]
+
+vs-mpy-add [in-order]
+└── combine [in-order]
+    ├── load-data [in-order]
+    └── vs-mpy-add [in-order]
+        └── load-data [in-order]
+
+vs-mpy-add [in-order]
+└── combine [in-order]
+    ├── vs-divide [in-order]
+    |   └── build-vec [in-order]
+    └── broadcast [in-order]
+
+vs-mpy-add [in-order]
+└── combine [deinterleaved]
+    ├── vv-mpy-add [deinterleaved]
+    |   └── load-data [in-order]
+    └── load-data [deinterleaved]
+
+maximum [in-order]
+├── minimum [in-order]
+|   ├── saturate [in-order]
+|   |   └── vs-mpy-add [in-order]
+|   |       └── combine [interleaved]
+|   |           ├── vs-shift-right [interleaved]
+|   |           |   └── vs-frac-mpy [in-order]
+|   |           |       └── load-data [in-order]
+|   |           └── broadcast [interleaved]
+|   └── broadcast [in-order]
+└── broadcast [in-order]
