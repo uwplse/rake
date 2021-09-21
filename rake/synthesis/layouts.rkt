@@ -79,7 +79,7 @@
           ['unknown 'unknown]
           ['interleavedx2 'interleaved]
           ['interleaved 'in-order]
-          ['in-order (if (> i-ops d-ops) 'deinterleaved 'in-order)]
+          ['in-order (if (> d-ops i-ops) 'deinterleaved 'in-order)]
           ['deinterleaved 'deinterleavedx2]
           ['deinterleavedx2 'unknown])])]
     ['deinterleave
@@ -94,7 +94,7 @@
           ['interleavedx2 'unknown]
           ['interleaved 'interleavedx2]
           ['in-order (if (> d-ops i-ops) 'in-order (if (< d-ops i-ops) 'interleaved 'in-order))]
-          ['deinterleaved 'in-order]
+          ['deinterleaved (if (> d-ops i-ops) 'deinterleaved 'in-order)]
           ['deinterleavedx2 'deinterleaved])]
        ;; Special handling for cast ops. Widening casts can be done
        ;; either via zxt/sxt (deinterleaving) or unpack.
@@ -146,6 +146,7 @@
 (define (infer-implicit-shuffle ir-expr)
   (cond
     [(combine? ir-expr) 'iden]
+    [(select? ir-expr) 'iden]
     [(non-widening/narrowing? ir-expr) 'iden]
     [(widening? ir-expr) 'deinterleave]
     [(narrowing? ir-expr) 'interleave]))
