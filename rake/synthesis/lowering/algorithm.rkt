@@ -6,7 +6,7 @@
   rake/internal/error
   rake/hvx/ast/types
   rake/hvx/ir/instructions
-  rake/synthesis/lowering/grammar
+  rake/synthesis/lowering/grammar/hvx
   rake/synthesis/lowering/synthesizer)
 
 (require (only-in racket/base exit))
