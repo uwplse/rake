@@ -302,11 +302,7 @@
 (define (extend-grammar lifted-sub-exprs halide-expr)
   (destruct halide-expr
     ;; Broadcast nodes
-    [(x32 sca) (list (broadcast (get-node-id) sca))]
-    [(x64 sca) (list (broadcast (get-node-id) sca))]
-    [(x128 sca) (list (broadcast (get-node-id) sca))]
-    [(x256 sca) (list (broadcast (get-node-id) sca))]
-    [(x512 sca) (list (broadcast (get-node-id) sca))]
+    [(sca-broadcast sca lanes) (list (broadcast (get-node-id) sca))]
 
     ;; Data loads & shuffles
     [(ramp base stride len) (list (build-vec (get-load-id) base stride len))]
@@ -318,53 +314,7 @@
     [(dynamic_shuffle vec idxs st end) (list (mk-load-instr halide-expr))]
 
     ;; Casts
-    [(uint8x32 vec) (list (cast (get-node-id) (list-ref lifted-sub-exprs 0) 'uint8))]
-    [(uint8x64 vec) (list (cast (get-node-id) (list-ref lifted-sub-exprs 0) 'uint8))]
-    [(uint8x128 vec) (list (cast (get-node-id) (list-ref lifted-sub-exprs 0) 'uint8))]
-    [(uint8x256 vec) (list (cast (get-node-id) (list-ref lifted-sub-exprs 0) 'uint8))]
-    [(uint8x512 vec) (list (cast (get-node-id) (list-ref lifted-sub-exprs 0) 'uint8))]
-
-    [(uint16x32 vec) (list (cast (get-node-id) (list-ref lifted-sub-exprs 0) 'uint16))]
-    [(uint16x64 vec) (list (cast (get-node-id) (list-ref lifted-sub-exprs 0) 'uint16))]
-    [(uint16x128 vec) (list (cast (get-node-id) (list-ref lifted-sub-exprs 0) 'uint16))]
-    [(uint16x256 vec) (list (cast (get-node-id) (list-ref lifted-sub-exprs 0) 'uint16))]
-    [(uint16x512 vec) (list (cast (get-node-id) (list-ref lifted-sub-exprs 0) 'uint16))]
-
-    [(uint32x32 vec) (list (cast (get-node-id) (list-ref lifted-sub-exprs 0) 'uint32))]
-    [(uint32x64 vec) (list (cast (get-node-id) (list-ref lifted-sub-exprs 0) 'uint32))]
-    [(uint32x128 vec) (list (cast (get-node-id) (list-ref lifted-sub-exprs 0) 'uint32))]
-    [(uint32x256 vec) (list (cast (get-node-id) (list-ref lifted-sub-exprs 0) 'uint32))]
-    [(uint32x512 vec) (list (cast (get-node-id) (list-ref lifted-sub-exprs 0) 'uint32))]
-
-    [(uint64x32 vec) (list (cast (get-node-id) (list-ref lifted-sub-exprs 0) 'uint64))]
-    [(uint64x64 vec) (list (cast (get-node-id) (list-ref lifted-sub-exprs 0) 'uint64))]
-    [(uint64x128 vec) (list (cast (get-node-id) (list-ref lifted-sub-exprs 0) 'uint64))]
-    [(uint64x256 vec) (list (cast (get-node-id) (list-ref lifted-sub-exprs 0) 'uint64))]
-    [(uint64x512 vec) (list (cast (get-node-id) (list-ref lifted-sub-exprs 0) 'uint64))]
-
-    [(int8x32 vec) (list (cast (get-node-id) (list-ref lifted-sub-exprs 0) 'int8))]
-    [(int8x64 vec) (list (cast (get-node-id) (list-ref lifted-sub-exprs 0) 'int8))]
-    [(int8x128 vec) (list (cast (get-node-id) (list-ref lifted-sub-exprs 0) 'int8))]
-    [(int8x256 vec) (list (cast (get-node-id) (list-ref lifted-sub-exprs 0) 'int8))]
-    [(int8x512 vec) (list (cast (get-node-id) (list-ref lifted-sub-exprs 0) 'int8))]
-
-    [(int16x32 vec) (list (cast (get-node-id) (list-ref lifted-sub-exprs 0) 'int16))]
-    [(int16x64 vec) (list (cast (get-node-id) (list-ref lifted-sub-exprs 0) 'int16))]
-    [(int16x128 vec) (list (cast (get-node-id) (list-ref lifted-sub-exprs 0) 'int16))]
-    [(int16x256 vec) (list (cast (get-node-id) (list-ref lifted-sub-exprs 0) 'int16))]
-    [(int16x512 vec) (list (cast (get-node-id) (list-ref lifted-sub-exprs 0) 'int16))]
-
-    [(int32x32 vec) (list (cast (get-node-id) (list-ref lifted-sub-exprs 0) 'int32))]
-    [(int32x64 vec) (list (cast (get-node-id) (list-ref lifted-sub-exprs 0) 'int32))]
-    [(int32x128 vec) (list (cast (get-node-id) (list-ref lifted-sub-exprs 0) 'int32))]
-    [(int32x256 vec) (list (cast (get-node-id) (list-ref lifted-sub-exprs 0) 'int32))]
-    [(int32x512 vec) (list (cast (get-node-id) (list-ref lifted-sub-exprs 0) 'int32))]
-
-    [(int64x32 vec) (list (cast (get-node-id) (list-ref lifted-sub-exprs 0) 'int64))]
-    [(int64x64 vec) (list (cast (get-node-id) (list-ref lifted-sub-exprs 0) 'int64))]
-    [(int64x128 vec) (list (cast (get-node-id) (list-ref lifted-sub-exprs 0) 'int64))]
-    [(int64x256 vec) (list (cast (get-node-id) (list-ref lifted-sub-exprs 0) 'int64))]
-    [(int64x512 vec) (list (cast (get-node-id) (list-ref lifted-sub-exprs 0) 'int64))]
+    [(vec-cast vec type lanes) (list (cast (get-node-id) (list-ref lifted-sub-exprs 0) type))]
 
     [(vec-add v1 v2)
      (define add-scalars (halide:extract-add-scalars halide-expr))

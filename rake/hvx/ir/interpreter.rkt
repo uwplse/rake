@@ -39,16 +39,8 @@
 
     [(var-lookup var val) (interpret val)]
             
-    [(uint8x1 sca) (cpp:cast (interpret sca) 'uint8)]
-    [(uint16x1 sca) (cpp:cast (interpret sca) 'uint16)]    
-    [(uint32x1 sca) (cpp:cast (interpret sca) 'uint32)]
-    [(uint64x1 sca) (cpp:cast (interpret sca) 'uint64)]
+    [(sca-cast sca type) (cpp:cast (interpret sca) type)]
 
-    [(int8x1 sca) (cpp:cast (interpret sca) 'int8)]
-    [(int16x1 sca) (cpp:cast (interpret sca) 'int16)]
-    [(int32x1 sca) (cpp:cast (interpret sca) 'int32)]
-    [(int64x1 sca) (cpp:cast (interpret sca) 'int64)]
-            
     [(sca-add v1 v2) (halide:do-add (interpret v1) (interpret v2))]
     [(sca-sub v1 v2) (halide:do-sub (interpret v1) (interpret v2))]
     [(sca-mul v1 v2) (halide:do-mul (interpret v1) (interpret v2))]
