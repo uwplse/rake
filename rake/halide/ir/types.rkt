@@ -73,6 +73,8 @@
 (struct vec-eq (v1 v2) #:transparent)
 (struct vec-lt (v1 v2) #:transparent)
 (struct vec-le (v1 v2) #:transparent)
+(struct vec-gt (v1 v2) #:transparent)
+(struct vec-ge (v1 v2) #:transparent)
 
 (struct vec-abs (v1) #:transparent)
 (struct vec-clz (v1) #:transparent)

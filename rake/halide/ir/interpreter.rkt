@@ -40,6 +40,8 @@
     [(vec-eq v1 v2) (vec-len v1)]
     [(vec-lt v1 v2) (vec-len v1)]
     [(vec-le v1 v2) (vec-len v1)]
+    [(vec-gt v1 v2) (vec-len v1)]
+    [(vec-ge v1 v2) (vec-len v1)]
 
     [(vec-abs v1) (vec-len v1)]
     [(vec-clz v1) (vec-len v1)]
@@ -83,10 +85,13 @@
     [(vec-mod v1 v2) (list v1 v2)]
     [(vec-min v1 v2) (list v1 v2)]
     [(vec-max v1 v2) (list v1 v2)]
+
     [(vec-if v1 v2 v3) (list v1 v2 v3)]
     [(vec-eq v1 v2) (list v1 v2)]
     [(vec-lt v1 v2) (list v1 v2)]
     [(vec-le v1 v2) (list v1 v2)]
+    [(vec-gt v1 v2) (list v1 v2)]
+    [(vec-ge v1 v2) (list v1 v2)]
 
     [(vec-abs v1) (list v1)]
     [(vec-clz v1) (list v1)]
@@ -177,6 +182,8 @@
     [(vec-eq v1 v2) (lambda (i) (do-eq ((interpret v1) i) ((interpret v2) i)))]
     [(vec-lt v1 v2) (lambda (i) (do-lt ((interpret v1) i) ((interpret v2) i)))]
     [(vec-le v1 v2) (lambda (i) (do-le ((interpret v1) i) ((interpret v2) i)))]
+    [(vec-gt v1 v2) (lambda (i) (do-gt ((interpret v1) i) ((interpret v2) i)))]
+    [(vec-ge v1 v2) (lambda (i) (do-ge ((interpret v1) i) ((interpret v2) i)))]
 
     [(vec-abs v1) (lambda (i) (do-abs ((interpret v1) i)))]
     [(vec-shl v1 v2) (lambda (i) (do-shl ((interpret v1) i) ((interpret v2) i)))]
@@ -374,6 +381,24 @@
      (mk-cpp-expr (bvsle (cpp:eval lhs) (cpp:eval rhs)) 'uint1)]
     [else
      (mk-cpp-expr (bvule (cpp:eval lhs) (cpp:eval rhs)) 'uint1)]))
+
+(define (do-gt lhs rhs)
+  (cond
+    [(and (integer? lhs) (integer? rhs))
+     (> lhs rhs)]
+    [(cpp:signed-expr? lhs)
+     (mk-cpp-expr (bvsgt (cpp:eval lhs) (cpp:eval rhs)) 'uint1)]
+    [else
+     (mk-cpp-expr (bvugt (cpp:eval lhs) (cpp:eval rhs)) 'uint1)]))
+
+(define (do-ge lhs rhs)
+  (cond
+    [(and (integer? lhs) (integer? rhs))
+     (>= lhs rhs)]
+    [(cpp:signed-expr? lhs)
+     (mk-cpp-expr (bvsge (cpp:eval lhs) (cpp:eval rhs)) 'uint1)]
+    [else
+     (mk-cpp-expr (bvuge (cpp:eval lhs) (cpp:eval rhs)) 'uint1)]))
 
 (define (do-abs lhs)
   (define outT (infer-out-type lhs lhs))

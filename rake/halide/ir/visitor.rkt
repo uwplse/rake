@@ -35,10 +35,12 @@
     [(vec-abs v1) (handler (vec-abs (visit v1 handler)))]
     [(vec-clz v1) (handler (vec-clz (visit v1 handler)))]
 
-    [(vec-lt v1 v2) (handler (vec-lt (visit v1 handler) (visit v2 handler)))]
-    [(vec-eq v1 v2) (handler (vec-eq (visit v1 handler) (visit v2 handler)))]
-    [(vec-le v1 v2) (handler (vec-le (visit v1 handler) (visit v2 handler)))]
     [(vec-if v1 v2 v3) (handler (vec-if (visit v1 handler) (visit v2 handler) (visit v3 handler)))]
+    [(vec-eq v1 v2) (handler (vec-eq (visit v1 handler) (visit v2 handler)))]
+    [(vec-lt v1 v2) (handler (vec-lt (visit v1 handler) (visit v2 handler)))]
+    [(vec-le v1 v2) (handler (vec-le (visit v1 handler) (visit v2 handler)))]
+    [(vec-gt v1 v2) (handler (vec-gt (visit v1 handler) (visit v2 handler)))]
+    [(vec-ge v1 v2) (handler (vec-ge (visit v1 handler) (visit v2 handler)))]
 
     [(vec-bwand v1 v2) (handler (vec-bwand (visit v1 handler) (visit v2 handler)))]
 
