@@ -879,13 +879,8 @@
       [(int32_t val) (format "(int32 ~a)" (compile-scalar val))]
       [(uint32_t val) (format "(uint32 ~a)" (compile-scalar val))]
 
-      [(int8x1 val) (format "(int8 (int8x1 int8 (list ~a)))" (compile-scalar val))]
-      [(int16x1 val) (format "(int16 (int16x1 int16 (list ~a)))" (compile-scalar val))]
-      [(int32x1 val) (format "(int32 (int32x1 int32 (list ~a)))" (compile-scalar val))]
-      [(uint8x1 val) (format "(uint8 (uint8x1 uint8 (list ~a)))" (compile-scalar val))]
-      [(uint16x1 val) (format "(uint16 (uint16x1 uint16 (list ~a)))" (compile-scalar val))]
-      [(uint32x1 val) (format "(uint32 (uint32x1 uint32 (list ~a)))" (compile-scalar val))]
-
+      [(sca-cast val type) (format "(~a (~ax1 ~a (list ~a)))" type type type (compile-scalar val))]
+      
       [(sca-add a b) (format "(~a (+ ~a ~a))" (to-llvm-type Rt) (compile-scalar a) (compile-scalar b))]
       [(sca-sub a b) (format "(~a (- ~a ~a))" (to-llvm-type Rt) (compile-scalar a) (compile-scalar b))]
       [(sca-mul a b) (format "(~a (* ~a ~a))" (to-llvm-type Rt) (compile-scalar a) (compile-scalar b))]
@@ -979,9 +974,8 @@
 
 (define (strip-casts expr)
   (cond
-    [(uint8x1? expr) (uint8x1-sca expr)]
-    [(int8x1? expr) (int8x1-sca expr)]
-    [else (error "NYI")]))
+    [(sca-cast? expr) (strip-casts (sca-cast-sca expr))]
+    [else expr]))
 
 ;(define-symbolic-buffer input2 uint8_t)
 ;(define-symbolic-var input2_zero uint8_t)

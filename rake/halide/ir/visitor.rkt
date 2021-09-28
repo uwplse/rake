@@ -13,84 +13,14 @@
     [(abstr-halide-expr orig-expr abstr-vals) (handler (abstr-halide-expr orig-expr (visit abstr-vals handler)))]
     
     ;; Constructors
-    [(x32 sca) (handler (x32 (visit sca handler)))]
-    [(x64 sca) (handler (x64 (visit sca handler)))]
-    [(x128 sca) (handler (x128 (visit sca handler)))]
-    [(x256 sca) (handler (x256 (visit sca handler)))]
-    [(x512 sca) (handler (x512 (visit sca handler)))]
-
     [(ramp base stride len) (handler (ramp (visit base handler) (visit stride handler) (visit len handler)))]
     [(load buf idxs alignment) (handler (load (visit buf handler) (visit idxs handler) (visit alignment handler)))]
     [(load-sca buf idx) (handler (load-sca (visit buf handler) (visit idx handler)))]
-
-    ;; Type Casts
-    [(uint8x1 sca) (handler (uint8x1 (visit sca handler)))]
-    [(uint16x1 sca) (handler (uint16x1 (visit sca handler)))]
-    [(uint32x1 sca) (handler (uint32x1 (visit sca handler)))]
-    [(uint64x1 sca) (handler (uint64x1 (visit sca handler)))]
-    
-    [(int8x1 sca) (handler (int8x1 (visit sca handler)))]
-    [(int16x1 sca) (handler (int16x1 (visit sca handler)))]
-    [(int32x1 sca) (handler (int32x1 (visit sca handler)))]
-    [(int64x1 sca) (handler (int64x1 (visit sca handler)))]
-
-    [(uint1x32 vec) (handler (uint1x32 (visit vec handler)))]
-    [(uint1x64 vec) (handler (uint1x64 (visit vec handler)))]
-    [(uint1x128 vec) (handler (uint1x128 (visit vec handler)))]
-    [(uint1x256 vec) (handler (uint1x256 (visit vec handler)))]
-    [(uint1x512 vec) (handler (uint1x512 (visit vec handler)))]
-   
-    [(uint8x32 vec) (handler (uint8x32 (visit vec handler)))]
-    [(uint16x32 vec) (handler (uint16x32 (visit vec handler)))]
-    [(uint32x32 vec) (handler (uint32x32 (visit vec handler)))]
-    [(uint64x32 vec) (handler (uint64x32 (visit vec handler)))]
-    
-    [(int8x32 vec) (handler (int8x32 (visit vec handler)))]
-    [(int16x32 vec) (handler (int16x32 (visit vec handler)))]
-    [(int32x32 vec) (handler (int32x32 (visit vec handler)))]
-    [(int64x32 vec) (handler (int64x32 (visit vec handler)))]
-    
-    [(uint8x64 vec) (handler (uint8x64 (visit vec handler)))]
-    [(uint16x64 vec) (handler (uint16x64 (visit vec handler)))]
-    [(uint32x64 vec) (handler (uint32x64 (visit vec handler)))]
-    [(uint64x64 vec) (handler (uint64x64 (visit vec handler)))]
-    
-    [(int8x64 vec) (handler (int8x64 (visit vec handler)))]
-    [(int16x64 vec) (handler (int16x64 (visit vec handler)))]
-    [(int32x64 vec) (handler (int32x64 (visit vec handler)))]
-    [(int64x64 vec) (handler (int64x64 (visit vec handler)))]
-    
-    [(uint8x128 vec) (handler (uint8x128 (visit vec handler)))]
-    [(uint16x128 vec) (handler (uint16x128 (visit vec handler)))]
-    [(uint32x128 vec) (handler (uint32x128 (visit vec handler)))]
-    [(uint64x128 vec) (handler (uint64x128 (visit vec handler)))]
-    
-    [(int8x128 vec) (handler (int8x128 (visit vec handler)))]
-    [(int16x128 vec) (handler (int16x128 (visit vec handler)))]
-    [(int32x128 vec) (handler (int32x128 (visit vec handler)))]
-    [(int64x128 vec) (handler (int64x128 (visit vec handler)))]
-    
-    [(uint8x256 vec) (handler (uint8x256 (visit vec handler)))]
-    [(uint16x256 vec) (handler (uint16x256 (visit vec handler)))]
-    [(uint32x256 vec) (handler (uint32x256 (visit vec handler)))]
-    [(uint64x256 vec) (handler (uint64x256 (visit vec handler)))]
-
-    [(int8x256 vec) (handler (int8x256 (visit vec handler)))]
-    [(int16x256 vec) (handler (int16x256 (visit vec handler)))]
-    [(int32x256 vec) (handler (int32x256 (visit vec handler)))]
-    [(int64x256 vec) (handler (int64x256 (visit vec handler)))]
-
-    [(uint8x512 vec) (handler (uint8x512 (visit vec handler)))]
-    [(uint16x512 vec) (handler (uint16x512 (visit vec handler)))]
-    [(uint32x512 vec) (handler (uint32x512 (visit vec handler)))]
-    [(uint64x512 vec) (handler (uint64x512 (visit vec handler)))]
-
-    [(int8x512 vec) (handler (int8x512 (visit vec handler)))]
-    [(int16x512 vec) (handler (int16x512 (visit vec handler)))]
-    [(int32x512 vec) (handler (int32x512 (visit vec handler)))]
-    [(int64x512 vec) (handler (int64x512 (visit vec handler)))]
+    [(sca-broadcast sca lanes) (handler (sca-broadcast (visit sca handler) (visit lanes handler)))]
 
     ;; Operations
+    [(vec-cast vec type lanes) (handler (vec-cast (visit vec handler) type lanes))]
+    
     [(vec-add v1 v2) (handler (vec-add (visit v1 handler) (visit v2 handler)))]
     [(vec-sub v1 v2) (handler (vec-sub (visit v1 handler) (visit v2 handler)))]
     [(vec-mul v1 v2) (handler (vec-mul (visit v1 handler) (visit v2 handler)))]
@@ -105,12 +35,15 @@
     [(vec-abs v1) (handler (vec-abs (visit v1 handler)))]
     [(vec-clz v1) (handler (vec-clz (visit v1 handler)))]
 
-    [(vec-lt v1 v2) (handler (vec-lt (visit v1 handler) (visit v2 handler)))]
-    [(vec-eq v1 v2) (handler (vec-eq (visit v1 handler) (visit v2 handler)))]
-    [(vec-le v1 v2) (handler (vec-le (visit v1 handler) (visit v2 handler)))]
     [(vec-if v1 v2 v3) (handler (vec-if (visit v1 handler) (visit v2 handler) (visit v3 handler)))]
+    [(vec-eq v1 v2) (handler (vec-eq (visit v1 handler) (visit v2 handler)))]
+    [(vec-lt v1 v2) (handler (vec-lt (visit v1 handler) (visit v2 handler)))]
+    [(vec-le v1 v2) (handler (vec-le (visit v1 handler) (visit v2 handler)))]
+    [(vec-gt v1 v2) (handler (vec-gt (visit v1 handler) (visit v2 handler)))]
+    [(vec-ge v1 v2) (handler (vec-ge (visit v1 handler) (visit v2 handler)))]
 
     [(vec-bwand v1 v2) (handler (vec-bwand (visit v1 handler) (visit v2 handler)))]
+    [(vec-bwxor v1 v2) (handler (vec-bwxor (visit v1 handler) (visit v2 handler)))]
 
     [(vector_reduce op width vec) (handler (vector_reduce op width (visit vec handler)))]
 

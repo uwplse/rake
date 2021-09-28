@@ -1,11 +1,13 @@
 #lang rosette/safe
 
 (require
+  syntax/parse/define
   (for-syntax syntax/parse)
-  (only-in rake/halide/ir/types buffer buffer-data)
+  (only-in racket open-input-string [#%top racket:#%top])
+  (only-in rake/halide/ir/types buffer buffer-data sca-broadcast sca-cast vec-cast)
   rake/cpp)
 
-(provide define-symbolic-buffer define-symbolic-buffer* define-symbolic-var)
+(provide define-symbolic-buffer define-symbolic-buffer* define-symbolic-var #%top)
 
 (define-syntax (define-symbolic-buffer stx)
   (syntax-parse stx
@@ -68,3 +70,40 @@
      #'(define var ((lambda () (define-symbolic var (bitvector 16)) (uint16_t var))))]
     [(_ var:id uint32_t)
      #'(define var ((lambda () (define-symbolic var (bitvector 32)) (uint32_t var))))]))
+
+;; Scalar broadcasts
+(define-syntax (x2 stx) (syntax-case stx () [(_ val) #'(sca-broadcast val 2)]))
+(define-syntax (x4 stx) (syntax-case stx () [(_ val) #'(sca-broadcast val 4)]))
+(define-syntax (x8 stx) (syntax-case stx () [(_ val) #'(sca-broadcast val 8)]))
+(define-syntax (x16 stx) (syntax-case stx () [(_ val) #'(sca-broadcast val 16)]))
+(define-syntax (x32 stx) (syntax-case stx () [(_ val) #'(sca-broadcast val 32)]))
+(define-syntax (x64 stx) (syntax-case stx () [(_ val) #'(sca-broadcast val 64)]))
+(define-syntax (x128 stx) (syntax-case stx () [(_ val) #'(sca-broadcast val 128)]))
+(define-syntax (x256 stx) (syntax-case stx () [(_ val) #'(sca-broadcast val 256)]))
+(define-syntax (x512 stx) (syntax-case stx () [(_ val) #'(sca-broadcast val 512)]))
+
+(define (rewrite-halide-broadcast lanes)
+  (curryr sca-broadcast lanes))
+
+(define (rewrite-halide-cast type lanes)
+  (if (eq? lanes 1) (curryr sca-cast type) (curryr vec-cast type lanes)))
+
+;; Define new syntax
+(define-syntax-parser #%top
+  ;; Scalar broadcasts
+  [(_ . x:id)
+   #:do [(define str (symbol->string (syntax-e #'x)))
+         (define parsed (regexp-match #px"^x(\\d+)$" str))]
+   #:when parsed
+   #`(rewrite-halide-broadcast #,(string->number (second parsed)))]
+  
+  ;; Type Casts
+  [(_ . x:id)
+   #:do [(define str (symbol->string (syntax-e #'x)))
+         (define parsed (regexp-match #px"^(uint\\d+|int\\d+)x(\\d+)$" str))]
+   #:when parsed
+   #`(rewrite-halide-cast #,(read (open-input-string (format "'~a" (second parsed))))
+          #,(string->number (third parsed)))]
+
+  ;; Recurse to base parser for everything else
+  [(_ . x) #'(racket:#%top . x)])
