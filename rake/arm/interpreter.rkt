@@ -574,7 +574,7 @@
               v0
               v1)
              (vec-shr
-              (vec-bitwise_xor
+              (vec-bwxor
                v0
                v1)
               (x16 (uint8_t (bv 1 8)))))))]
@@ -586,7 +586,7 @@
               v0
               v1)
              (vec-shr
-              (vec-bitwise_xor
+              (vec-bwxor
                v0
                v1)
               (x8 (uint16_t (bv 1 16)))))))]
@@ -598,7 +598,7 @@
               v0
               v1)
              (vec-shr
-              (vec-bitwise_xor
+              (vec-bwxor
                v0
                v1)
               (x4 (uint32_t (bv 1 32)))))))]
@@ -1933,7 +1933,7 @@
               v0
               v1)
              (vec-shr
-              (vec-bitwise_xor
+              (vec-bwxor
                v0
                v1)
               (x16 (uint8_t (bv 1 8)))))))]
@@ -1945,7 +1945,7 @@
               v0
               v1)
              (vec-shr
-              (vec-bitwise_xor
+              (vec-bwxor
                v0
                v1)
               (x8 (uint16_t (bv 1 16)))))))]
@@ -1957,7 +1957,7 @@
               v0
               v1)
              (vec-shr
-              (vec-bitwise_xor
+              (vec-bwxor
                v0
                v1)
               (x4 (uint32_t (bv 1 32)))))))]

@@ -43,6 +43,7 @@
     [(vec-ge v1 v2) (handler (vec-ge (visit v1 handler) (visit v2 handler)))]
 
     [(vec-bwand v1 v2) (handler (vec-bwand (visit v1 handler) (visit v2 handler)))]
+    [(vec-bwxor v1 v2) (handler (vec-bwxor (visit v1 handler) (visit v2 handler)))]
 
     [(vector_reduce op width vec) (handler (vector_reduce op width (visit vec handler)))]
 
