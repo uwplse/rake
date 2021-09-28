@@ -7,7 +7,7 @@
   (only-in rake/halide/ir/types buffer buffer-data sca-broadcast sca-cast vec-cast)
   rake/cpp)
 
-(provide define-symbolic-buffer define-symbolic-buffer* define-symbolic-var)
+(provide define-symbolic-buffer define-symbolic-buffer* define-symbolic-var #%top)
 
 (define-syntax (define-symbolic-buffer stx)
   (syntax-parse stx
@@ -81,6 +81,9 @@
 (define-syntax (x128 stx) (syntax-case stx () [(_ val) #'(sca-broadcast val 128)]))
 (define-syntax (x256 stx) (syntax-case stx () [(_ val) #'(sca-broadcast val 256)]))
 (define-syntax (x512 stx) (syntax-case stx () [(_ val) #'(sca-broadcast val 512)]))
+
+(define (rewrite-halide-broadcast lanes)
+  (curryr sca-broadcast lanes))
 
 (define (rewrite-halide-cast type lanes)
   (if (eq? lanes 1) (curryr sca-cast type) (curryr vec-cast type lanes)))
