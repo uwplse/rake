@@ -20,8 +20,10 @@
 ;; instructions: uqxtn, sqxtn, sqxtun
 
 ;; TODO: figure out which instructions are helpful with these
-(struct vs-mpy-add (sub-expr weight-matrix output-type saturate?) #:super struct:ir-node #:transparent)
-;; useful: dot product
+(struct vs-mpy-add (sub-expr weight-matrix output-type widening? saturating? rounding? narrowing? halving?) #:super struct:ir-node #:transparent)
+;; useful: dot product,
+;;         uqadd, sqadd, uhadd, shadd, urhadd, srhadd, raddhn, addp, uaddlp, saddlp
+;;         uqsub, sqsub, uhsub, shsub, urhsub, srhsub, rsubhn, sqneg
 (struct vs-mpy-add-acc (acc-expr sub-expr weight-matrix output-type saturate?) #:super struct:ir-node #:transparent)
 (struct vv-mpy-add (sub-expr width output-type saturate?) #:super struct:ir-node #:transparent)
 (struct vv-mpy-add-acc (acc-expr sub-expr width output-type saturate?) #:super struct:ir-node #:transparent)
@@ -46,16 +48,6 @@
 ;; instructions: rshrn, uqrshrn, sqrshrn, sqrshrun, uqshrn, sqshrn, sqshrun
 ;; unsupported: SRSHR
 
-(struct vv-add (expr0 expr1 widening? saturating? rounding? narrowing? halving? pairwise?) #:super struct:ir-node #:transparent)
-;; instructions: uqadd, sqadd, uhadd, shadd, urhadd, srhadd, raddhn, addp, uaddlp, saddlp
-(struct vs-add (expr0 expr1 widening? saturating? rounding? narrowing? halving? pairwise?) #:super struct:ir-node #:transparent)
-;; instructions:
-
-(struct vv-sub (expr0 expr1 widening? saturating? rounding? narrowing? halving? pairwise?) #:super struct:ir-node #:transparent)
-;; instructions: uqsub, sqsub, uhsub, shsub, urhsub, srhsub, rsubhn
-(struct vs-sub (expr0 expr1 widening? saturating? rounding? narrowing? halving? pairwise?) #:super struct:ir-node #:transparent)
-;; instructions:
-
 (struct minimum (expr0 expr1 pairwise?) #:super struct:ir-node #:transparent)
 ;; instructions: umin, smin, umino, sminp
 (struct maximum (expr0 expr1 pairwise?) #:super struct:ir-node #:transparent)
@@ -64,9 +56,4 @@
 ;; these seem to be special
 (struct sat-double-mul (expr0 expr1 rounding?) #:super struct:ir-node #:transparent)
 ;; instructions: sqdmulh, sqrdmulh
-(struct dot-product (expr0 expr1 expr2) #:super struct:ir-node #:transparent)
-;; instructions: sdot.v2i32.v8i8, udot.v2i32.v8i8, sdot.v4i32.v16i8, udot.v4i32.v16i8
 
-;; TODO: can this be merged with something above? maybe vv-sub?
-(struct sat-negate (expr0) #:super struct:ir-node #:transparent)
-;; instructions: sqneg
