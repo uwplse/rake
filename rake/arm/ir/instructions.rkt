@@ -1,59 +1,47 @@
 #lang rosette/safe
 
-(require (only-in racket/struct make-constructor-style-printer))
+(provide (prefix-out arm-ir: (all-defined-out)))
 
-;; min / max should include pairwise possibilities. shifting, data movement, averaging, absd, saturate, widen, narrow
+(struct ast-node (id))
+(struct abstr-expr (orig-expr abstr-vals))
 
-;; some of this is copied from hvx/instructions.rkt...
+;; Constructors
+(struct load-data (live-data gather-tbl) #:super struct:ast-node)                            ;; Load vector from memory
+(struct broadcast (value) #:super struct:ast-node #:transparent)                             ;; Broadcast scalar to vector
+(struct build-vec (base stride len) #:super struct:ast-node #:transparent)                   ;; Equivalent to Halide ramp
 
-(provide (all-defined-out))
+;; Base instructions
+(struct cast (expr type saturating?) #:super struct:ast-node #:transparent)                  ;; Instructions: xtn, uxtl, sxtl, uqxtn, sqxtn, sqxtun
+(struct abs (expr saturate?) #:super struct:ast-node #:transparent)                          ;; Instructions: abs, sqabs
+(struct minimum (expr0 expr1) #:super struct:ast-node #:transparent)                         ;; Instructions: umin, smin, uminp, sminp, conditional
+(struct maximum (expr0 expr1) #:super struct:ast-node #:transparent)                         ;; Instructions: umax, smax, umaxp, smaxp, conditional
 
-(struct ir-node (id))
+;; Fused instructions
+(struct add-high-narrow (expr rounding?) #:super struct:ast-node #:transparent)              ;; Instructions: addhn, raddhn
+(struct sub-high-narrow (expr rounding?) #:super struct:ast-node #:transparent)              ;; Instructions: subhn, rsubhn
+(struct halving-add (expr0 expr1 rounding?) #:super struct:ast-node #:transparent)           ;; Instructions: shadd, srhadd, uhadd
+(struct halving-sub (expr0 expr1) #:super struct:ast-node #:transparent)                     ;; Instructions: shsub, urhadd, uhsub
 
-(struct abstr-ir-expr (orig-expr abstr-vals))
+(struct reduce (expr reduce-op widening?) #:super struct:ast-node #:transparent)             ;; Instructions: addv, saddlv, smaxv, sminv, uaddlv, uminv, umaxv
 
-(struct load-data (live-data gather-tbl) #:super struct:ir-node)
-(struct broadcast (value) #:super struct:ir-node #:transparent)
-(struct build-vec (base stride len) #:super struct:ir-node #:transparent)
+(struct vv-mpy-add (expr weights) #:super struct:ast-node #:transparent)                     ;; Instructions: add, addp, mla, mls, mul
+(struct vs-mpy-add (expr weights) #:super struct:ast-node #:transparent)                     ;; Instructions: add, addp, mla, mls, mul, shl, neg
 
-(struct cast (sub-expr type saturating?) #:super struct:ir-node #:transparent)
-;; instructions: uqxtn, sqxtn, sqxtun
+(struct vv-mpy-add-w (expr weights outT) #:super struct:ast-node #:transparent)              ;; Instructions: saddl, smull, saddw, saddlp, sadalp, smlal, smlsl, sdot, ssubl, sub, uadalp, uaddl, uaddlp, uaddw, umlal, umlsl, umull, usubl, usubw
+(struct vs-mpy-add-w (expr weights outT) #:super struct:ast-node #:transparent)              ;; Instructions: saddl, smull, saddw, saddlp, sadalp, smlal, smlsl, sdot, shll, ssubl, sub, uadalp, uaddl, uaddlp, uaddw, umlal, umlsl, umull, usubl, usubw
 
-;; TODO: figure out which instructions are helpful with these
-(struct vs-mpy-add (sub-expr weight-matrix output-type widening? saturating? rounding? narrowing? halving?) #:super struct:ir-node #:transparent)
-;; useful: dot product,
-;;         uqadd, sqadd, uhadd, shadd, urhadd, srhadd, raddhn, addp, uaddlp, saddlp
-;;         uqsub, sqsub, uhsub, shsub, urhsub, srhsub, rsubhn, sqneg
-(struct vs-mpy-add-acc (acc-expr sub-expr weight-matrix output-type saturate?) #:super struct:ir-node #:transparent)
-(struct vv-mpy-add (sub-expr width output-type saturate?) #:super struct:ir-node #:transparent)
-(struct vv-mpy-add-acc (acc-expr sub-expr width output-type saturate?) #:super struct:ir-node #:transparent)
+(struct vv-dmpy-add-sat (expr weights) #:super struct:ast-node #:transparent)                ;; Instructions: sqdmull, sqdmlal, sqdmlsl
+(struct vs-dmpy-add-sat (expr weights) #:super struct:ast-node #:transparent)                ;; Instructions: sqdmull, sqdmlal, sqdmlsl
 
+(struct vv-dmpy-add-hh-sat (expr weights round?) #:super struct:ast-node #:transparent)      ;; Instructions: sqdmulh, sqdmulh, sqrdmulh, sqrdmlah, sqrdmlsh
+(struct vs-dmpy-add-hh-sat (expr weights round?) #:super struct:ast-node #:transparent)      ;; Instructions: sqdmulh, sqdmulh, sqrdmulh, sqrdmlah, sqrdmlsh
 
-;; these are not copied:
+(struct neg-sat (expr0) #:super struct:ast-node #:transparent)                               ;; Instructions: sqneg
+(struct add-sat (expr0 expr1) #:super struct:ast-node #:transparent)                         ;; Instructions: sqadd, suqadd, usqadd, uqadd
+(struct sub-sat (expr0 expr1) #:super struct:ast-node #:transparent)                         ;; Instructions: sqsub, uqsub
 
-(struct abs (expr) #:super struct:ir-node #:transparent)
-;; instructions: abs
-(struct absd (expr0 expr1 widening?) #:super struct:ir-node #:transparent)
-;; instructions: uabd, sabd, vabdl_i8x8, vabdl_u8x8, vabdl_i16x4, vabdl_u16x4, vabdl_i32x2, vabdl_u32x2
+(struct shift-left (expr shift rounding? saturating? signed?) #:super struct:ast-node #:transparent)  ;; Instructions: sqrshl, sqshl, sqshlu, srshl, uqrshl, uqshl, urshl, sshl, sshll, ushl,sshl, sshll, ushl, ushll
+(struct shift-right (expr shift rounding? saturating? signed?) #:super struct:ast-node #:transparent) ;; Instructions: shrn, rshrn, sqrshrn, sqrshrun, sqshrn, sqshrun, srshr, sshr, ssra, uqrshrn, uqshrn, urshr, ursra, ushr, usra
 
-(struct vv-mul (expr0 expr1 widening? saturating? rounding? narrowing?)  #:super struct:ir-node #:transparent)
-;; instructions: umull, smull, uqrshl, sqrshl, uqshl, sqshlu, sqshl, urshl, srshl, ushl, sshl, 
-(struct vs-mul (expr0 expr1 widening? saturating? rounding? narrowing?)  #:super struct:ir-node #:transparent)
-;; instructions:
-;; unsupported: SSHLL
-
-(struct vv-div (expr0 expr1 widening? saturating? rounding? narrowing?)  #:super struct:ir-node #:transparent)
-;; instructions: 
-(struct vs-div (expr0 expr1 widening? saturating? rounding? narrowing?)  #:super struct:ir-node #:transparent)
-;; instructions: rshrn, uqrshrn, sqrshrn, sqrshrun, uqshrn, sqshrn, sqshrun
-;; unsupported: SRSHR
-
-(struct minimum (expr0 expr1 pairwise?) #:super struct:ir-node #:transparent)
-;; instructions: umin, smin, umino, sminp
-(struct maximum (expr0 expr1 pairwise?) #:super struct:ir-node #:transparent)
-;; instructions: umax, smax, umaxp, smaxp
-
-;; these seem to be special
-(struct sat-double-mul (expr0 expr1 rounding?) #:super struct:ir-node #:transparent)
-;; instructions: sqdmulh, sqrdmulh
-
+(struct abs-diff (expr0 expr1) #:super struct:ast-node #:transparent)                        ;; Instructions: sabd, sabdl, uabd, uabdl
+(struct abs-diff-acc (acc expr0 expr1 widening?) #:super struct:ast-node #:transparent)      ;; Instructions: saba, sabal, uaba, uabal
