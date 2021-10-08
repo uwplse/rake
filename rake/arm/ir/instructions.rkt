@@ -12,7 +12,7 @@
 
 ;; Base instructions
 (struct cast (expr type saturating?) #:super struct:ast-node #:transparent)                  ;; Instructions: xtn, uxtl, sxtl, uqxtn, sqxtn, sqxtun
-(struct abs (expr saturate?) #:super struct:ast-node #:transparent)                          ;; Instructions: abs, sqabs
+(struct abs (expr saturate? output-type) #:super struct:ast-node #:transparent)              ;; Instructions: abs, sqabs
 (struct minimum (expr0 expr1) #:super struct:ast-node #:transparent)                         ;; Instructions: umin, smin, uminp, sminp, conditional
 (struct maximum (expr0 expr1) #:super struct:ast-node #:transparent)                         ;; Instructions: umax, smax, umaxp, smaxp, conditional
 
@@ -20,7 +20,7 @@
 (struct add-high-narrow (expr rounding?) #:super struct:ast-node #:transparent)              ;; Instructions: addhn, raddhn
 (struct sub-high-narrow (expr rounding?) #:super struct:ast-node #:transparent)              ;; Instructions: subhn, rsubhn
 (struct halving-add (expr0 expr1 rounding?) #:super struct:ast-node #:transparent)           ;; Instructions: shadd, srhadd, uhadd
-(struct halving-sub (expr0 expr1) #:super struct:ast-node #:transparent)                     ;; Instructions: shsub, urhadd, uhsub
+(struct halving-sub (expr0 expr1 roudning?) #:super struct:ast-node #:transparent)           ;; Instructions: shsub, urhadd, uhsub
 
 (struct reduce (expr reduce-op widening?) #:super struct:ast-node #:transparent)             ;; Instructions: addv, saddlv, smaxv, sminv, uaddlv, uminv, umaxv
 
