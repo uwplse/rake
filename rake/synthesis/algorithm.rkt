@@ -10,7 +10,7 @@
   rake/synthesis/hvx
   rake/synthesis/verify)
 
-(provide synthesize-hvx)
+(provide synthesize-hvx synthesize-arm)
 
 (define (synthesize-hvx spec [lifting-algo 'greedy] [lowering-algo 'enumerative] [swizzling-algo 'enumerative])
   (cond
@@ -38,5 +38,37 @@
             (exit 1)])]
        
        [else (error (format "Could not lift Halide expression to HVX IR."))])]
+
+    [else (error (format "Input specification is provided in a language Rake currently does not support: '~a. Supported IRs: ['halide-ir]" spec-lang))]))
+
+(define (synthesize-arm spec [lifting-algo 'greedy] [lowering-algo 'enumerative] [swizzling-algo 'enumerative])
+  (cond
+    [(eq? (spec-lang spec) 'halide-ir)
+
+     ;; First lift the expression from Halide IR to our ARM IR of super-instructions
+     (define-values (lifting-success? ir-expr ir-annotations ir-bounds)
+       (synthesize-ir-expr spec 'arm-uberinstrs lifting-algo))
+
+;     (cond
+;       [lifting-success?
+;        ;; Lower the super-instructions to an expression template (in HVX ISA)
+;        (define hvx-expr (synthesize-hvx-expr ir-expr ir-annotations ir-bounds lowering-algo swizzling-algo))
+;
+;        ;; Full verification of the synthesized expression
+;        (define correct? (verify-equivalence (spec-expr spec) (first hvx-expr) (spec-axioms spec)))
+;
+;        (cond
+;          [correct?
+;            (pretty-print (first hvx-expr))
+;            (display "Synthesized solution is correct.\n\n")
+;            (first hvx-expr)]
+;          [else
+;            (display "Synthesized solution is incorrect.\n\n")
+;            (exit 1)])]
+;       
+;       [else (error (format "Could not lift Halide expression to HVX IR."))])
+
+     ;; For now, just return the lifted IR expression
+     ir-expr]
 
     [else (error (format "Input specification is provided in a language Rake currently does not support: '~a. Supported IRs: ['halide-ir]" spec-lang))]))
