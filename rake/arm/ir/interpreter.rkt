@@ -149,6 +149,108 @@
 (define (const-one type)
   (cpp:cast (int8_t (bv 1 8)) type))
 
+(define (half-add-impl-signed a b bits)
+  (bvadd (bvand a b) (bvashr (bvxor a b) (bv 1 bits))))
+
+(define (half-add-impl-unsigned a b bits)
+  (bvadd (bvand a b) (bvlshr (bvxor a b) (bv 1 bits))))
+
+(define (half-add-impl lhs rhs)
+  (destruct* (lhs rhs)
+    [((int8_t v0) (int8_t v1)) (int8_t (half-add-impl-signed v0 v1 8))]
+    [((uint8_t v0) (uint8_t v1)) (uint8_t (half-add-impl-unsigned v0 v1 8))]
+    [((int16_t v0) (int16_t v1)) (int16_t (half-add-impl-signed v0 v1 16))]
+    [((uint16_t v0) (uint16_t v1)) (uint16_t (half-add-impl-unsigned v0 v1 16))]
+    [((int32_t v0) (int32_t v1)) (int32_t (half-add-impl-signed v0 v1 32))]
+    [((uint32_t v0) (uint32_t v1)) (uint32_t (half-add-impl-unsigned v0 v1 32))]
+    [((int64_t v0) (int64_t v1)) (int64_t (half-add-impl-signed v0 v1 64))]
+    [((uint64_t v0) (uint64_t v1)) (uint64_t (half-add-impl-unsigned v0 v1 64))]))
+
+; (a >> 1) + (b >> 1) + (((a & 1) + (b & 1) + 1) >> 1)
+(define (rhalf-add-impl-signed a b bits)
+  (let ([one (bv 1 bits)])
+    (bvadd (bvashr a one) (bvashr b one) (bvashr (bvadd (bvand a one) (bvadd b one) one) one))))
+
+(define (rhalf-add-impl-unsigned a b bits)
+  (let ([one (bv 1 bits)])
+    (bvadd (bvlshr a one) (bvlshr b one) (bvlshr (bvadd (bvand a one) (bvadd b one) one) one))))
+
+(define (rhalf-add-impl lhs rhs)
+  (destruct* (lhs rhs)
+    [((int8_t v0) (int8_t v1)) (int8_t (rhalf-add-impl-signed v0 v1 8))]
+    [((uint8_t v0) (uint8_t v1)) (uint8_t (rhalf-add-impl-unsigned v0 v1 8))]
+    [((int16_t v0) (int16_t v1)) (int16_t (rhalf-add-impl-signed v0 v1 16))]
+    [((uint16_t v0) (uint16_t v1)) (uint16_t (rhalf-add-impl-unsigned v0 v1 16))]
+    [((int32_t v0) (int32_t v1)) (int32_t (rhalf-add-impl-signed v0 v1 32))]
+    [((uint32_t v0) (uint32_t v1)) (uint32_t (rhalf-add-impl-unsigned v0 v1 32))]
+    [((int64_t v0) (int64_t v1)) (int64_t (rhalf-add-impl-signed v0 v1 64))]
+    [((uint64_t v0) (uint64_t v1)) (uint64_t (rhalf-add-impl-unsigned v0 v1 64))]))
+
+; (a >> 1) - (b >> 1) - (((b & 1) - (a & 1) + 1) >> 1);
+(define (half-sub-impl-signed a b bits)
+  (let ([one (bv 1 bits)])
+    (bvsub (bvashr a one) (bvashr b one) (bvashr (bvadd (bvsub (bvand b one) (bvand a one)) one) one))))
+
+(define (half-sub-impl-unsigned a b bits)
+  (let ([one (bv 1 bits)])
+    (bvsub (bvlshr a one) (bvlshr b one) (bvlshr (bvadd (bvsub (bvand b one) (bvand a one)) one) one))))
+
+(define (half-sub-impl lhs rhs)
+  (destruct* (lhs rhs)
+    [((int8_t v0) (int8_t v1)) (int8_t (half-sub-impl-signed v0 v1 8))]
+    [((uint8_t v0) (uint8_t v1)) (uint8_t (half-sub-impl-unsigned v0 v1 8))]
+    [((int16_t v0) (int16_t v1)) (int16_t (half-sub-impl-signed v0 v1 16))]
+    [((uint16_t v0) (uint16_t v1)) (uint16_t (half-sub-impl-unsigned v0 v1 16))]
+    [((int32_t v0) (int32_t v1)) (int32_t (half-sub-impl-signed v0 v1 32))]
+    [((uint32_t v0) (uint32_t v1)) (uint32_t (half-sub-impl-unsigned v0 v1 32))]
+    [((int64_t v0) (int64_t v1)) (int64_t (half-sub-impl-signed v0 v1 64))]
+    [((uint64_t v0) (uint64_t v1)) (uint64_t (half-sub-impl-unsigned v0 v1 64))]))
+
+; (a >> 1) - (b >> 1) + (((a & 1) - (b & 1) + 1) >> 1);
+(define (rhalf-sub-impl-signed a b bits)
+  (let ([one (bv 1 bits)])
+    (bvadd (bvsub (bvashr a one) (bvashr b one)) (bvashr (bvadd (bvsub (bvand a one) (bvand b one)) one) one))))
+
+(define (rhalf-sub-impl-unsigned a b bits)
+  (let ([one (bv 1 bits)])
+    (bvadd (bvsub (bvlshr a one) (bvlshr b one)) (bvlshr (bvadd (bvsub (bvand a one) (bvand b one)) one) one))))
+
+; copied from the HVX interpreter
+; TODO: move to shared code
+(define (get-sat-fn type)
+  (cond
+    [(eq? type 'int8) cpp:sat8]
+    [(eq? type 'int16) cpp:sat16]
+    [(eq? type 'int32) cpp:sat32]
+    [(eq? type 'int64) cpp:sat64]
+    [(eq? type 'uint8) cpp:satu8]
+    [(eq? type 'uint16) cpp:satu16]
+    [(eq? type 'uint32) cpp:satu32]
+    [(eq? type 'uint64) cpp:satu64]))
+
+(define (get-cast-fn type)
+  (lambda (value)
+    (cpp:cast value type)))
+
+(define (rhalf-sub-impl lhs rhs)
+  (destruct* (lhs rhs)
+    [((int8_t v0) (int8_t v1)) (int8_t (rhalf-sub-impl-signed v0 v1 8))]
+    [((uint8_t v0) (uint8_t v1)) (uint8_t (rhalf-sub-impl-unsigned v0 v1 8))]
+    [((int16_t v0) (int16_t v1)) (int16_t (rhalf-sub-impl-signed v0 v1 16))]
+    [((uint16_t v0) (uint16_t v1)) (uint16_t (rhalf-sub-impl-unsigned v0 v1 16))]
+    [((int32_t v0) (int32_t v1)) (int32_t (rhalf-sub-impl-signed v0 v1 32))]
+    [((uint32_t v0) (uint32_t v1)) (uint32_t (rhalf-sub-impl-unsigned v0 v1 32))]
+    [((int64_t v0) (int64_t v1)) (int64_t (rhalf-sub-impl-signed v0 v1 64))]
+    [((uint64_t v0) (uint64_t v1)) (uint64_t (rhalf-sub-impl-unsigned v0 v1 64))]))
+
+
+
+(define (right-shift-impl lhs rhs shift-func sat-func)
+  (let* ([shifted (shift-func (cpp:eval lhs) (cpp:eval (cpp:cast rhs (cpp:type lhs))))]
+         [cpp-shifted (mk-cpp-expr shifted (cpp:type lhs))]
+         [saturated (sat-func cpp-shifted)])
+      saturated))
+
 (define (interpret p)
   (destruct p
 
@@ -198,8 +300,25 @@
 
     ; TODO: add-high-narrow
     ; TODO: sub-high-narrow
-    ; TODO: halving-add
-    ; TODO: halving-sub
+
+
+    [(arm-ir:halving-add expr0 expr1 rounding?)
+     (define input0 (interpret expr0))
+     (define input1 (interpret expr1))
+     (if rounding?
+         (lambda (i)
+            (rhalf-add-impl (input0 i) (input1 i)))
+         (lambda (i)
+            (half-add-impl (input0 i) (input1 i))))]
+
+    [(arm-ir:halving-sub expr0 expr1 rounding?)
+     (define input0 (interpret expr0))
+     (define input1 (interpret expr1))
+     (if rounding?
+         (lambda (i)
+            (rhalf-sub-impl (input0 i) (input1 i)))
+         (lambda (i)
+            (half-sub-impl (input0 i) (input1 i))))]
     ; TODO: reduce
     ; TODO: vv-mpy-add
     ; TODO: vs-mpy-add
@@ -214,13 +333,21 @@
     ; TODO: sub-sat
     ; TODO: shift-left
     ; TODO: shift-right
+    [(arm-ir:shift-right expr shift rounding? saturating? signed? outputT)
+     (define input (interpret expr))
+     ; n is a scalar
+     (define n (interpret shift))
+     (define shift-func (if signed? bvashr bvlshr))
+     (define sat-func (if saturating? (get-sat-fn outputT) (get-cast-fn outputT)))
+     (if rounding?
+      (error "AJ didn't do this yet")
+      (lambda (i)
+        (let ([value (input i)])
+          (right-shift-impl value n shift-func sat-func))))]
+
     ; TODO: abs-diff
     ; TODO: abs-diff-acc
 
 
     [_ (error "No way to interpret expr:" p)]))
-
-
-
-
 
