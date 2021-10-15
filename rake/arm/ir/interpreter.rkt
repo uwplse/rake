@@ -43,6 +43,17 @@
     [(eq? type 'uint32) (bv MAX_UINT 32)]
     [(eq? type 'uint64) (bv MAX_ULL 64)]))
 
+(define (min-representable type)
+  (cond
+    [(eq? type 'int8) (bv MIN_CHAR 8)]
+    [(eq? type 'int16) (bv MIN_SHORT 16)]
+    [(eq? type 'int32) (bv MIN_INT 32)]
+    [(eq? type 'int64) (bv MIN_LL 64)]
+    [(eq? type 'uint8) (bv MIN_UCHAR 8)]
+    [(eq? type 'uint16) (bv MIN_USHORT 16)]
+    [(eq? type 'uint32) (bv MIN_UINT 32)]
+    [(eq? type 'uint64) (bv MIN_ULL 64)]))
+
 ; TODO: should this be in cpp/cast.rkt?
 (define (saturating-cast expr type)
   (cond
@@ -243,13 +254,55 @@
     [((int64_t v0) (int64_t v1)) (int64_t (rhalf-sub-impl-signed v0 v1 64))]
     [((uint64_t v0) (uint64_t v1)) (uint64_t (rhalf-sub-impl-unsigned v0 v1 64))]))
 
-
+; Expr b_positive = select(b > 0, make_one(a.type()), make_zero(a.type()));
+; return simplify((a >> b) + (b_positive & (a >> (b - 1))));
+(define (rounding-right-shift-impl lhs rhs shift-func sat-func)
+  (let* ([type (cpp:type lhs)]
+         [one (cpp:eval (const-one type))]
+         [zero (cpp:eval (const-zero type))]
+         [shift (cpp:eval (cpp:cast rhs type))]
+         [gtcheck (if (cpp:signed-expr? lhs) bvsgt bvugt)]
+         [b_pos (if (gtcheck shift zero) one zero)]
+         [value (cpp:eval lhs)]
+         [rshifted0 (shift-func value shift)]
+         [rshifted1 (shift-func value (bvsub shift one))]
+         [rounded (bvand b_pos rshifted1)]
+         [result (bvadd rshifted0 rounded)]
+         [saturated (sat-func (mk-cpp-expr result type))])
+      saturated))
 
 (define (right-shift-impl lhs rhs shift-func sat-func)
   (let* ([shifted (shift-func (cpp:eval lhs) (cpp:eval (cpp:cast rhs (cpp:type lhs))))]
          [cpp-shifted (mk-cpp-expr shifted (cpp:type lhs))]
          [saturated (sat-func cpp-shifted)])
       saturated))
+
+
+(define (bvclamp a min max type)
+  (let* ([min-func (if (cpp:signed-type? type) bvsmin bvumin)]
+         [max-func (if (cpp:signed-type? type) bvsmax bvumax)]
+         [eval-min (min-func a max)]
+         [eval-max (max-func eval-min min)])
+    (mk-cpp-expr eval-max type)))
+
+
+; simplify(clamp(a, a.type().min() - min(b, 0), a.type().max() - max(b, 0))) + b
+(define (saturating-add-impl lhs rhs)
+  ; TODO: assert same type for debugging.
+  (let* ([type (cpp:type lhs)]
+         [min-val (cpp:eval (min-representable type))]
+         [max-val (cpp:eval (max-representable type))]
+         [min-func (if (cpp:signed-expr? lhs) bvsmin bvumin)]
+         [max-func (if (cpp:signed-expr? lhs) bvsmax bvumax)]
+         [a (cpp:eval lhs)]
+         [b (cpp:eval rhs)]
+         [zero (cpp:eval (const-zero type))]
+         [bottom (bvsub min-val (min-func b zero))]
+         [top (bvsub max-val (max-func b 0))]
+         [clamped (bvclamp a bottom top)]
+         [sum (bvadd clamped b)])
+    (mk-cpp-expr sum type)))
+
 
 (define (interpret p)
   (destruct p
@@ -329,10 +382,18 @@
     ; TODO: vv-dmpy-add-hh-sat
     ; TODO: vs-dmpy-add-hh-sat
     ; TODO: neg-sat
-    ; TODO: add-sat
+    [(arm-ir:add-sat expr0 expr1)
+     (define input0 (interpret expr0))
+     (define input1 (interpret expr1))
+     ; TODO: do we need a saturating cast? I don't think we do.
+     (lambda (i)
+        (let ([value0 (input0 i)]
+              [value1 (input1 i)])
+          (saturating-add-impl value0 value1)))]
+
     ; TODO: sub-sat
     ; TODO: shift-left
-    ; TODO: shift-right
+
     [(arm-ir:shift-right expr shift rounding? saturating? signed? outputT)
      (define input (interpret expr))
      ; n is a scalar
@@ -340,7 +401,9 @@
      (define shift-func (if signed? bvashr bvlshr))
      (define sat-func (if saturating? (get-sat-fn outputT) (get-cast-fn outputT)))
      (if rounding?
-      (error "AJ didn't do this yet")
+      (lambda (i)
+        (let ([value (input i)])
+          (rounding-right-shift-impl value n shift-func sat-func)))
       (lambda (i)
         (let ([value (input i)])
           (right-shift-impl value n shift-func sat-func))))]
