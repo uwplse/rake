@@ -320,6 +320,30 @@
          [diff (bvsub clamped b)])
     (mk-cpp-expr diff type)))
 
+(define (widen expr)
+  (destruct expr
+    [(int8_t v) (cpp:cast expr 'int16)]
+    [(uint8_t v) (cpp:cast expr 'uint16)]
+    [(int16_t v) (cpp:cast expr 'int32)]
+    [(uint16_t v) (cpp:cast expr 'uint32)]
+    [(int32_t v) (cpp:cast expr 'int64)]
+    [(uint32_t v) (cpp:cast expr 'uint64)]
+    [_ (error "Cannot widen expression: " expr)]))
+
+(define (absd-impl lhs rhs out-type)
+  ; TODO: assert lhs and rhs have the same type
+  (let* ([type (cpp:type lhs)]
+         [a (cpp:eval lhs)]
+         [b (cpp:eval rhs)]
+         [gtcheck (if (cpp:signed-expr? lhs) bvsgt bvugt)]
+         [bvalue (if (gtcheck a b) (bvsub a b) (bvsub b a))]
+         ; TODO: is this the right semantic for output type?
+         [obj (mk-cpp-expr bvalue type)])
+      (cpp:cast obj out-type)))
+
+(define (widening-absd-impl lhs rhs type)
+  (absd-impl (widen lhs) (widen rhs) type))
+
 (define (interpret p)
   (destruct p
 
@@ -441,6 +465,20 @@
           (right-shift-impl value n shift-func sat-func))))]
 
     ; TODO: abs-diff
+    [(arm-ir:abs-diff expr0 expr1 widening? outT)
+     (define input0 (interpret expr0))
+     (define input1 (interpret expr1))
+     ; TODO: do we need a saturating cast? I don't think we do.
+     (if widening?
+        (lambda (i)
+          (let ([value0 (input0 i)]
+                [value1 (input1 i)])
+            (widening-absd-impl value0 value1 outT)))
+        (lambda (i)
+          (let ([value0 (input0 i)]
+                [value1 (input1 i)])
+            (absd-impl value0 value1 outT))))]
+
     ; TODO: abs-diff-acc
 
 

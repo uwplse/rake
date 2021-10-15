@@ -45,5 +45,5 @@
 (struct shift-left (expr shift rounding? saturating? signed?) #:super struct:ast-node #:transparent)  ;; Instructions: sqrshl, sqshl, sqshlu, srshl, uqrshl, uqshl, urshl, sshl, sshll, ushl,sshl, sshll, ushl, ushll
 (struct shift-right (expr shift rounding? saturating? signed? outputT) #:super struct:ast-node #:transparent) ;; Instructions: shrn, rshrn, sqrshrn, sqrshrun, sqshrn, sqshrun, srshr, sshr, ssra, uqrshrn, uqshrn, urshr, ursra, ushr, usra
 
-(struct abs-diff (expr0 expr1) #:super struct:ast-node #:transparent)                        ;; Instructions: sabd, sabdl, uabd, uabdl
+(struct abs-diff (expr0 expr1 widening? outT) #:super struct:ast-node #:transparent)         ;; Instructions: sabd, sabdl, uabd, uabdl
 (struct abs-diff-acc (acc expr0 expr1 widening?) #:super struct:ast-node #:transparent)      ;; Instructions: saba, sabal, uaba, uabal
