@@ -9,15 +9,17 @@
   rake/hvx/ir/interpreter
   rake/synthesis/spec
   rake/synthesis/lifting/synthesizer
-  rake/synthesis/lifting/hvx/grammar)
+  rake/synthesis/lifting/grammar/hvx
+  rake/synthesis/lifting/grammar/arm
+  rake/synthesis/lifting/grammar/util)
 
 (provide synthesize-ir-expr-greedy)
 
 (define (synthesize-ir-expr-greedy ir-name spec)
   (cond
     [(eq? ir-name 'hvx-uberinstrs)
-      (display "Lifting input expression to IR...\n")
-      (display "=================================\n\n")
+      (display "Lifting input expression to HVX IR...\n")
+      (display "=====================================\n\n")
 
       ;; Init state
       (set! cache (make-hash))
@@ -27,6 +29,35 @@
       (define axioms (spec-axioms spec))
       (define context (symbolics halide-expr))
       (define uber-instrs hvx-uber-instructions)
+      
+      (define st (current-seconds))
+      (define res (build-ir-expr halide-expr axioms uber-instrs context))
+      (define runtime (- (current-seconds) st))
+
+      (hash-set! annotations (ir-node-id res) halide-expr)
+      
+      (if (eq? res (unsat))
+          (begin
+            (display "Failed to find an equivalent IR expression.\n\n")
+            (display (format "Synthesis time: ~a seconds\n\n" runtime))
+            (values (void) (void) (void)))
+          (begin
+            (display "\nSuccessfully found an equivalent IR expression.\n\n")
+            (pretty-print res)
+            (display (format "\nSynthesis time: ~a seconds\n\n" runtime))
+            (values res annotations (get-lifted-expr-bounds))))]
+    [(eq? ir-name 'arm-uberinstrs)
+      (display "Lifting input expression to ARM IR...\n")
+      (display "=====================================\n\n")
+
+      ;; Init state
+      (set! cache (make-hash))
+      (set! annotations (make-hash))
+      
+      (define halide-expr (spec-expr spec))
+      (define axioms (spec-axioms spec))
+      (define context (symbolics halide-expr))
+      (define uber-instrs arm-uber-instructions)
       
       (define st (current-seconds))
       (define res (build-ir-expr halide-expr axioms uber-instrs context))
@@ -78,11 +109,11 @@
      ;; Explore folding templates in increasing cost (cost is defined as the number if IR instructions)
      (define sorted-templates
        (sort (append fold-templates repl-templates) (lambda (t1 t2) (< (hvx-ir:instr-count t1) (hvx-ir:instr-count t2)))))
-
+     
      (define bounded-eq? (if (interleave? halide-expr) bounded-eq-1? bounded-eq-0?))
      (define-values (success? folded-ir-expr)
        (synthesize-translation sorted-templates halide-expr axioms context bounded-eq?))
-
+     
      (cond
        [success? (hash-set! cache halide-expr folded-ir-expr) folded-ir-expr]
        [else
@@ -90,7 +121,7 @@
         ;; computation is expressible in HVX, this should not fail.
         (define-values (success? extended-ir-expr)
           (extend-subexprs lifted-sub-exprs halide-expr axioms uber-instrs context))
-      
+        
         (cond
           [success? (hash-set! cache halide-expr extended-ir-expr) extended-ir-expr]
           [else (error "synthesis\\lifting\\greedy-ir-lifted.rkt: FOLD-REPLACE-EXTEND algorithm failed to lift the halide expression:" halide-expr)])])]))
