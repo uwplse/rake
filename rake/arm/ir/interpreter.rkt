@@ -283,26 +283,42 @@
          [max-func (if (cpp:signed-type? type) bvsmax bvumax)]
          [eval-min (min-func a max)]
          [eval-max (max-func eval-min min)])
-    (mk-cpp-expr eval-max type)))
+    eval-max))
 
 
 ; simplify(clamp(a, a.type().min() - min(b, 0), a.type().max() - max(b, 0))) + b
 (define (saturating-add-impl lhs rhs)
   ; TODO: assert same type for debugging.
   (let* ([type (cpp:type lhs)]
-         [min-val (cpp:eval (min-representable type))]
-         [max-val (cpp:eval (max-representable type))]
+         [min-val (min-representable type)]
+         [max-val (max-representable type)]
          [min-func (if (cpp:signed-expr? lhs) bvsmin bvumin)]
          [max-func (if (cpp:signed-expr? lhs) bvsmax bvumax)]
          [a (cpp:eval lhs)]
          [b (cpp:eval rhs)]
          [zero (cpp:eval (const-zero type))]
          [bottom (bvsub min-val (min-func b zero))]
-         [top (bvsub max-val (max-func b 0))]
-         [clamped (bvclamp a bottom top)]
+         [top (bvsub max-val (max-func b zero))]
+         [clamped (bvclamp a bottom top type)]
          [sum (bvadd clamped b)])
     (mk-cpp-expr sum type)))
 
+; simplify(clamp(a, a.type().min() + max(b, 0), a.type().max() + min(b, 0))) - b
+(define (saturating-sub-impl lhs rhs)
+  ; TODO: assert same type for debugging.
+  (let* ([type (cpp:type lhs)]
+         [min-val (min-representable type)]
+         [max-val (max-representable type)]
+         [min-func (if (cpp:signed-expr? lhs) bvsmin bvumin)]
+         [max-func (if (cpp:signed-expr? lhs) bvsmax bvumax)]
+         [a (cpp:eval lhs)]
+         [b (cpp:eval rhs)]
+         [zero (cpp:eval (const-zero type))]
+         [bottom (bvadd min-val (max-func b zero))]
+         [top (bvadd max-val (min-func b zero))]
+         [clamped (bvclamp a bottom top type)]
+         [diff (bvsub clamped b)])
+    (mk-cpp-expr diff type)))
 
 (define (interpret p)
   (destruct p
@@ -382,6 +398,15 @@
     ; TODO: vv-dmpy-add-hh-sat
     ; TODO: vs-dmpy-add-hh-sat
     ; TODO: neg-sat
+
+    [(arm-ir:neg-sat expr)
+     (define input (interpret expr))
+     ; TODO: do we need a saturating cast? I don't think we do.
+     (lambda (i)
+        (let* ([value (input i)]
+               [zero (const-zero (cpp:type value))])
+          (saturating-sub-impl zero value)))]
+
     [(arm-ir:add-sat expr0 expr1)
      (define input0 (interpret expr0))
      (define input1 (interpret expr1))
@@ -391,7 +416,14 @@
               [value1 (input1 i)])
           (saturating-add-impl value0 value1)))]
 
-    ; TODO: sub-sat
+    [(arm-ir:sub-sat expr0 expr1)
+     (define input0 (interpret expr0))
+     (define input1 (interpret expr1))
+     ; TODO: do we need a saturating cast? I don't think we do.
+     (lambda (i)
+        (let ([value0 (input0 i)]
+              [value1 (input1 i)])
+          (saturating-sub-impl value0 value1)))]
     ; TODO: shift-left
 
     [(arm-ir:shift-right expr shift rounding? saturating? signed? outputT)
