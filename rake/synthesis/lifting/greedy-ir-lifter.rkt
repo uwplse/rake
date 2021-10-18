@@ -5,10 +5,13 @@
   (only-in racket/base values error for/list make-hash hash-has-key? hash-ref hash-set!)
   rake/internal/debug
   rake/halide
+  rake/synthesis/spec
+  rake/arm/ir/instructions
+  rake/arm/ir/interpreter
   rake/hvx/ir/instructions
   rake/hvx/ir/interpreter
-  rake/synthesis/spec
-  rake/synthesis/lifting/synthesizer
+  rake/synthesis/lifting/synthesizer/arm
+  rake/synthesis/lifting/synthesizer/hvx
   rake/synthesis/lifting/grammar/hvx
   rake/synthesis/lifting/grammar/arm
   rake/synthesis/lifting/grammar/util)
@@ -29,9 +32,10 @@
       (define axioms (spec-axioms spec))
       (define context (symbolics halide-expr))
       (define uber-instrs hvx-uber-instructions)
+      (define synthesize-fn synthesize-hvx-translation)
       
       (define st (current-seconds))
-      (define res (build-ir-expr halide-expr axioms uber-instrs context))
+      (define res (build-ir-expr halide-expr axioms uber-instrs synthesize-fn ir-node-id context))
       (define runtime (- (current-seconds) st))
 
       (hash-set! annotations (ir-node-id res) halide-expr)
@@ -45,7 +49,7 @@
             (display "\nSuccessfully found an equivalent IR expression.\n\n")
             (pretty-print res)
             (display (format "\nSynthesis time: ~a seconds\n\n" runtime))
-            (values res annotations (get-lifted-expr-bounds))))]
+            (values res annotations (get-lifted-hvx-expr-bounds))))]
     [(eq? ir-name 'arm-uberinstrs)
       (display "Lifting input expression to ARM IR...\n")
       (display "=====================================\n\n")
@@ -58,12 +62,13 @@
       (define axioms (spec-axioms spec))
       (define context (symbolics halide-expr))
       (define uber-instrs arm-uber-instructions)
+      (define synthesize-fn synthesize-arm-translation)
       
       (define st (current-seconds))
-      (define res (build-ir-expr halide-expr axioms uber-instrs context))
+      (define res (build-ir-expr halide-expr axioms uber-instrs synthesize-fn arm-ir:ast-node-id context))
       (define runtime (- (current-seconds) st))
 
-      (hash-set! annotations (ir-node-id res) halide-expr)
+      (hash-set! annotations (arm-ir:ast-node-id res) halide-expr)
       
       (if (eq? res (unsat))
           (begin
@@ -74,14 +79,14 @@
             (display "\nSuccessfully found an equivalent IR expression.\n\n")
             (pretty-print res)
             (display (format "\nSynthesis time: ~a seconds\n\n" runtime))
-            (values res annotations (get-lifted-expr-bounds))))]
+            (values res annotations (get-lifted-arm-expr-bounds))))]
     [else
       (error (format "Unrecognized lifting target IR: '~a. Supported lifting IRs: ['hvx-uberinstr]" ir-name))]))
 
 (define cache (make-hash))
 (define annotations (make-hash))
 
-(define (build-ir-expr halide-expr axioms uber-instrs context)
+(define (build-ir-expr halide-expr axioms uber-instrs synthesize-translation get-node-id context)
   (define sub-exprs (halide:sub-exprs halide-expr))
 
   (cond
@@ -91,8 +96,8 @@
      ;; Lift each sub-expr recursively
      (define lifted-sub-exprs
        (for/list ([sub-expr sub-exprs])
-         (define ir-equiv (build-ir-expr sub-expr axioms uber-instrs context))
-         (hash-set! annotations (ir-node-id ir-equiv) sub-expr)
+         (define ir-equiv (build-ir-expr sub-expr axioms uber-instrs synthesize-translation get-node-id context))
+         (hash-set! annotations (get-node-id ir-equiv) sub-expr)
          ir-equiv))
 
      ;; Step 1: Folding.
@@ -120,7 +125,7 @@
         ;; Step 2: We extend the IR instruction sequence with a new instruction. As long as the
         ;; computation is expressible in HVX, this should not fail.
         (define-values (success? extended-ir-expr)
-          (extend-subexprs lifted-sub-exprs halide-expr axioms uber-instrs context))
+          (extend-subexprs lifted-sub-exprs halide-expr axioms uber-instrs synthesize-translation context))
         
         (cond
           [success? (hash-set! cache halide-expr extended-ir-expr) extended-ir-expr]
@@ -155,7 +160,7 @@
   templates)
 
 ;; Extending IR expressions
-(define (extend-subexprs lifted-sub-exprs halide-expr axioms uber-instrs context)
+(define (extend-subexprs lifted-sub-exprs halide-expr axioms uber-instrs synthesize-translation context)
   (define grm-generator (lifting-ir-extend-grammar uber-instrs))
   (define templates (grm-generator lifted-sub-exprs halide-expr))
   (define bounded-eq? bounded-eq-0?)
@@ -165,6 +170,7 @@
   (for-each
    (lambda (lane)
      (hvx-ir:set-cn lane)
+     (arm-ir:set-cn lane)
      (assert (eq? (oe lane) (se lane))))
    (list 0)))
 
@@ -172,5 +178,6 @@
   (for-each
    (lambda (lane)
      (hvx-ir:set-cn lane)
+     (arm-ir:set-cn lane)
      (assert (eq? (oe lane) (se lane))))
    (list 0 1)))
