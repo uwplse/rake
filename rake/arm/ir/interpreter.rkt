@@ -15,6 +15,10 @@
   (rename-out [get-subexprs arm-ir:get-subexprs])
   (rename-out [interpret arm-ir:interpret]))
 
+; TODO: I don't understand what these are used for.
+(define curr-cn 0)
+(define (set-cn v) (set! curr-cn v))
+
 ;; Model C++ Saturation
 (define MIN_CHAR -128)
 (define MAX_CHAR 127)
@@ -129,10 +133,6 @@
     [(int16_t v0) (saturating-cast (signed-sat-abs-helper v0 16 int16_t) type)]
     [(int32_t v0) (saturating-cast (signed-sat-abs-helper v0 32 int32_t) type)]
     [(int64_t v0) (saturating-cast (signed-sat-abs-helper v0 64 int64_t) type)]))
-
-; TODO: I don't understand what these are used for.
-(define curr-cn 0)
-(define (set-cn v) (set! curr-cn v))
 
 ; TODO: this should be re-used in the HVX interpreter as well..
 (define (min-impl lhs rhs)
@@ -521,7 +521,9 @@
     [(arm-ir:maximum expr0 expr1) (+ (instr-count expr0) (instr-count expr1) 1)]
     [(arm-ir:minimum expr0 expr1) (+ (instr-count expr0) (instr-count expr1) 1)]
 
-
+    [(arm-ir:add-high-narrow expr rounding?) (+ (instr-count expr) 1)]
+    [(arm-ir:sub-high-narrow expr rounding?) (+ (instr-count expr) 1)]
+    [(arm-ir:halving-add expr0 expr1 rounding?) (+ (instr-count expr0) (instr-count expr1) 1)]
 
     [_ (error "instr-count not implemented for ir-expr: " ir-expr)]))
 
@@ -569,4 +571,41 @@
 
 (define (get-subexprs ir-expr)
   (destruct ir-expr
-    [_ (error "Need to implement get-subexprs")]))
+    [(arm-ir:load-data live-data gather-tbl) '()]
+    [(arm-ir:broadcast value) '()]
+    [(arm-ir:build-vec base stride len) '()]
+
+    [(arm-ir:cast expr type saturating?) (list expr)]
+    [(arm-ir:abs expr saturate? output-type) (list expr)]
+    [(arm-ir:maximum expr0 expr1) (list expr0 expr1)]
+    [(arm-ir:minimum expr0 expr1) (list expr0 expr1)]
+
+    [(arm-ir:add-high-narrow expr rounding?) (list expr)]
+    [(arm-ir:sub-high-narrow expr rounding?) (list expr)]
+    [(arm-ir:halving-add expr0 expr1 rounding?) (list expr0 expr1)]
+    [(arm-ir:halving-sub expr0 expr1 rounding?) (list expr0 expr1)]
+
+    [(arm-ir:reduce expr reduce-op widening?) (list expr)]
+
+    [(arm-ir:vv-mpy-add expr weights) (list expr)]
+    [(arm-ir:vs-mpy-add expr weights outT) (list expr)]
+    [(arm-ir:vv-mpy-add-w expr weights outT) (list expr)]
+    [(arm-ir:vs-mpy-add-w expr weights outT) (list expr)]
+    [(arm-ir:vv-dmpy-add-sat expr weights) (list expr)]
+    [(arm-ir:vs-dmpy-add-sat expr weights) (list expr)]
+
+    [(arm-ir:vv-dmpy-add-hh-sat expr weights round?) (list expr)]
+    [(arm-ir:vs-dmpy-add-hh-sat expr weights round?) (list expr)]
+
+    [(arm-ir:neg-sat expr) (list expr)]
+    [(arm-ir:add-sat expr0 expr1) (list expr0 expr1)]
+    [(arm-ir:sub-sat expr0 expr1) (list expr0 expr1)]
+
+    ; TODO: is the shift a constant or an expr?
+    [(arm-ir:shift-left expr shift rounding? saturating? signed?) (expr shift)]
+    [(arm-ir:shift-right expr shift rounding? saturating? signed? outT) (expr shift)]
+
+    [(arm-ir:abs-diff expr0 expr1 widening? outT) (list expr0 expr1)]
+    [(arm-ir:abs-diff-acc acc expr0 expr1 widening?) (list acc expr0 expr1)]
+
+    [_ (error "Need to implement get-subexprs" ir-expr)]))
