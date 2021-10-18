@@ -55,7 +55,7 @@
       ;; Strip the cast and try to extend. Many instructions perform widening / narrowing casts
       [(arm-ir:cast sub-expr type saturating?) (extend-grammar (list sub-expr) halide-expr)]
               
-      [_ (error "NYI: Please define a (repl) grammar for IR Expr:" lifted-sub-expr)]))
+      [_ (error "NYI: Please define a (repl) grammar for IR Expr:" lifted-sub-expr halide-expr)]))
 
   ;(cond
     ;[(eq? depth 0) candidates]
@@ -86,6 +86,21 @@
     ;; Casts
     [(vec-cast vec type lanes) (list (arm-ir:cast (get-node-id) (list-ref lifted-sub-exprs 0) type #f))]
     
+    ;; Multiplication
+    [(vec-mul v1 v2)
+      ; TODO: understand these (ask Maaz)
+      (define mul-scalars (halide:extract-mul-scalars halide-expr))
+      (define live-reads (halide:extract-buffer-reads halide-expr))
+      (define gather-tbl (map (lambda (i) (define-symbolic* idx integer?) idx) (range 25)))
+      (define read-tbl (map (lambda (i) (define-symbolic* idx integer?) (define-symbolic* c boolean?) (cons idx c)) (range 25)))
+      (flatten
+        (list
+          ;; We can extend using either vector-scalar multiply-add
+          (mk-vs-mpy-add-instr (first lifted-sub-exprs) mul-scalars (halide:elem-type halide-expr))
+          (mk-vs-mpy-add-instr (arm-ir:load-data (get-load-id) live-reads gather-tbl) mul-scalars (halide:elem-type halide-expr))
+      ))]
+
+
     [_ (error "NYI: Please define a (extend) grammar for halide node:" halide-expr)]))
 
 (define arm-uber-instructions (lifting-ir fold-grammar repl-grammar extend-grammar))
@@ -104,3 +119,9 @@
   (define live-reads (halide:extract-buffer-reads spec-expr))
   (define gather-tbl (map (lambda (i) (define-symbolic* idx integer?) idx) (range 25)))
   (arm-ir:load-data (get-load-id) live-reads gather-tbl))
+
+(define (mk-vs-mpy-add-instr sub-expr mul-scalars output-type)
+  (cond
+    [(empty? mul-scalars) '()]
+    [else
+     (arm-ir:vs-mpy-add (get-node-id) sub-expr (list (apply choose* mul-scalars)) output-type)]))

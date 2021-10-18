@@ -8,15 +8,10 @@
   rake/halide
   rake/arm/ir/instructions)
 
+; TODO: do provides
 (provide
- (rename-out [set-cn arm-ir:set-cn])
- (rename-out [interpret arm-ir:interpret])
- ;(rename-out [visit hvx-ir:visit])
- ;(rename-out [instr-count hvx-ir:instr-count])
- (rename-out [get-subexprs arm-ir:get-subexprs])
- ;(rename-out [elem-type hvx-ir:elem-type])
- ;(rename-out [elem-type^ hvx-ir:elem-type^])
- )
+  (rename-out [instr-count arm-ir:instr-count])
+  (rename-out [visit arm-ir:visit]))
 
 ;; Model C++ Saturation
 (define MIN_CHAR -128)
@@ -509,14 +504,64 @@
 
     ; TODO: abs-diff-acc
 
-    [_ p]
-    ;[_ (error "No way to interpret expr:" p)]
 
-    ))
+    [_ (error "No way to interpret expr:" p)]))
 
-(define (get-subexprs ir-expr)
+
+(define (instr-count ir-expr)
   (destruct ir-expr
-    [(arm-ir:load-data live-data gather-tbl) '()]
-    [(arm-ir:broadcast value) '()]
-    [(arm-ir:cast expr type saturating?) (list expr)]
-    [_ (error "NYI: Extracing sub-expression for ARM IR Expr:" ir-expr)]))
+    [(load-data live-data gather-tbl) 0]
+    [(broadcast value) 1]
+    [(build-vec base stride len) 1]
+
+    [(cast expr type saturating?) (+ (instr-count expr) 1)]
+    [(abs expr saturating? outT) (+ (instr-count expr) 1)]
+    [(maximum expr0 expr1) (+ (instr-count expr0) (instr-count expr1) 1)]
+    [(minimum expr0 expr1) (+ (instr-count expr0) (instr-count expr1) 1)]
+
+
+
+    [_ (error "instr-count not implemented for ir-expr: " ir-expr)]))
+
+    ; [(vs-mpy-add sub-expr weight-matrix output-type saturate?) (+ (instr-count sub-expr) 1)]
+    ; [(vs-mpy-add-acc acc-expr sub-expr weight-matrix output-type saturate?) (+ (instr-count acc-expr) (instr-count sub-expr) 1)]
+    ; [(vv-mpy-add sub-expr width output-type saturate?) (+ (instr-count sub-expr) 1)]
+    ; [(vv-mpy-add-acc acc-expr sub-expr width output-type saturate?) (+ (instr-count acc-expr) (instr-count sub-expr) 1)]
+
+    ; [(vs-mpy-hh sub-expr sca round?) (+ (instr-count sub-expr) 1)]
+    ; [(vv-mpy-hh-rnd sub-expr) (+ (instr-count sub-expr) 1)]
+    
+    ; [(vs-frac-mpy sub-expr sca round?) (+ (instr-count sub-expr) 1)]
+    ; [(vv-frac-mpy sub-expr0 sub-expr1 round?) (+ (instr-count sub-expr0) (instr-count sub-expr1) 1)]
+
+    ; [(vs-shift-left sub-expr sca) (+ (instr-count sub-expr) 1)]
+    ; [(vv-shift-left sub-expr0 sub-expr1) (+ (instr-count sub-expr0) (instr-count sub-expr1) 1)]
+
+    ; [(add-const sub-expr const-val output-type saturate?) (+ (instr-count sub-expr) 1)]
+    
+    ; [(vs-shift-right sub-expr const-val round? saturate? arithmetic? output-type) (+ (instr-count sub-expr) 1)]
+    ; [(vv-shift-right sub-expr0 sub-expr1 round? arithmetic?) (+ (instr-count sub-expr0) (instr-count sub-expr1) 1)]
+    
+    ; [(divide-by-const sub-expr const-val) (+ (instr-count sub-expr) 1)]
+    ; [(vs-divide sub-expr scalar-val output-type) (+ (instr-count sub-expr) 1)]
+    ; [(average sub-expr round? output-type) (+ (instr-count sub-expr) 1)]
+    
+    ; [(modulo-by-const sub-expr const-val) (+ (instr-count sub-expr) 1)]
+    
+    ; [(maximum sub-expr0 sub-expr1) (+ (instr-count sub-expr0) (instr-count sub-expr1) 1)]
+    ; [(minimum sub-expr0 sub-expr1) (+ (instr-count sub-expr0) (instr-count sub-expr1) 1)]
+    ; [(saturate sub-expr round? output-type) (+ (instr-count sub-expr) 1)]
+
+    ; [(absolute sub-expr) (+ (instr-count sub-expr) 1)]
+    ; [(abs-diff sub-expr0 sub-expr1) (+ (instr-count sub-expr0) (instr-count sub-expr1) 1)]
+    
+    ; [(select sub-expr0 sub-expr1 sub-expr2) (+ (instr-count sub-expr0) (instr-count sub-expr1) (instr-count sub-expr2) 1)]
+    ; [(is-equal sub-expr0 sub-expr1) (+ (instr-count sub-expr0) (instr-count sub-expr1) 1)]
+    ; [(less-than sub-expr0 sub-expr1) (+ (instr-count sub-expr0) (instr-count sub-expr1) 1)]
+    ; [(less-than-eq sub-expr0 sub-expr1) (+ (instr-count sub-expr0) (instr-count sub-expr1) 1)]
+
+    ; [(bitwise-and sub-expr0 sub-expr1) (+ (instr-count sub-expr0) (instr-count sub-expr1) 1)]
+    ; [(count-leading-zeroes sub-expr) (+ (instr-count sub-expr) 1)]
+    
+    ; [_ (error "NYI: Extracing sub-expression for IR Expr:" ir-expr)]))
+

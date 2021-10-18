@@ -33,9 +33,10 @@
       (define context (symbolics halide-expr))
       (define uber-instrs hvx-uber-instructions)
       (define synthesize-fn synthesize-hvx-translation)
+      (define instr-counter hvx-ir:instr-count)
       
       (define st (current-seconds))
-      (define res (build-ir-expr halide-expr axioms uber-instrs synthesize-fn ir-node-id context))
+      (define res (build-ir-expr halide-expr axioms uber-instrs synthesize-fn instr-counter ir-node-id context))
       (define runtime (- (current-seconds) st))
 
       (hash-set! annotations (ir-node-id res) halide-expr)
@@ -63,9 +64,10 @@
       (define context (symbolics halide-expr))
       (define uber-instrs arm-uber-instructions)
       (define synthesize-fn synthesize-arm-translation)
+      (define instr-counter arm-ir:instr-count)
       
       (define st (current-seconds))
-      (define res (build-ir-expr halide-expr axioms uber-instrs synthesize-fn arm-ir:ast-node-id context))
+      (define res (build-ir-expr halide-expr axioms uber-instrs synthesize-fn instr-counter arm-ir:ast-node-id context))
       (define runtime (- (current-seconds) st))
 
       (hash-set! annotations (arm-ir:ast-node-id res) halide-expr)
@@ -86,7 +88,7 @@
 (define cache (make-hash))
 (define annotations (make-hash))
 
-(define (build-ir-expr halide-expr axioms uber-instrs synthesize-translation get-node-id context)
+(define (build-ir-expr halide-expr axioms uber-instrs synthesize-translation instr-counter get-node-id context)
   (define sub-exprs (halide:sub-exprs halide-expr))
 
   (cond
@@ -96,7 +98,7 @@
      ;; Lift each sub-expr recursively
      (define lifted-sub-exprs
        (for/list ([sub-expr sub-exprs])
-         (define ir-equiv (build-ir-expr sub-expr axioms uber-instrs synthesize-translation get-node-id context))
+         (define ir-equiv (build-ir-expr sub-expr axioms uber-instrs synthesize-translation instr-counter get-node-id context))
          (hash-set! annotations (get-node-id ir-equiv) sub-expr)
          ir-equiv))
 
@@ -113,7 +115,7 @@
 
      ;; Explore folding templates in increasing cost (cost is defined as the number if IR instructions)
      (define sorted-templates
-       (sort (append fold-templates repl-templates) (lambda (t1 t2) (< (hvx-ir:instr-count t1) (hvx-ir:instr-count t2)))))
+       (sort (append fold-templates repl-templates) (lambda (t1 t2) (< (instr-counter t1) (instr-counter t2)))))
      
      (define bounded-eq? (if (interleave? halide-expr) bounded-eq-1? bounded-eq-0?))
      (define-values (success? folded-ir-expr)
