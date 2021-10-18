@@ -6,12 +6,14 @@
          rake/internal/log
          rake/cpp
          rake/halide
-         rake/hvx/ir/instructions
-         rake/hvx/ir/interpreter
+         rake/arm/ir/instructions
+         rake/arm/ir/interpreter
          rake/synthesis/bounds
-         rake/synthesis/lifting/util)
+         rake/synthesis/lifting/synthesizer/util)
 
-(provide synthesize-translation get-lifted-expr-bounds)
+(provide
+ (rename-out [synthesize-translation synthesize-arm-translation])
+ (rename-out [get-lifted-expr-bounds get-lifted-arm-expr-bounds]))
 
 (define total-synthesis-time 0)
 
@@ -38,19 +40,16 @@
   ;(pretty-print halide-expr)
   ;(pretty-print template)
   
-  ;(println ((halide:interpret halide-expr) 0))
-  ;(hvx-ir:set-cn 0) (println ((hvx-ir:interpret template) 0))
-  
   (define-values (optimized-template optimized-halide-expr inferred-axioms abstr-value-bounds)
-    (optimize-query halide-expr template translation-history value-bounds))
-  
+    (optimize-arm-query halide-expr template translation-history value-bounds))
+
+  ;(pretty-print inferred-axioms)
   ;(pretty-print optimized-halide-expr)
   ;(pretty-print optimized-template)
-  ;(pretty-print inferred-axioms)
-  
-  ;(println ((halide:interpret optimized-halide-expr) 0))
-  ;(hvx-ir:set-cn 0) (println ((hvx-ir:interpret optimized-template) 0))
 
+  ;(pretty-print ((halide:interpret optimized-halide-expr) 0))
+  ;(pretty-print ((arm-ir:interpret optimized-template) 0))
+  
   (cond
     [(subset? (symbolics optimized-halide-expr) (symbolics optimized-template))
      (clear-vc!)
@@ -59,7 +58,7 @@
                              #:guarantee (begin
                                            (for-each (lambda (axiom) (assume axiom)) axioms)
                                            (for-each (lambda (axiom) (assume axiom)) inferred-axioms)
-                                           (equiv-fn (halide:interpret optimized-halide-expr) (hvx-ir:interpret optimized-template)))))
+                                           (equiv-fn (halide:interpret optimized-halide-expr) (arm-ir:interpret optimized-template)))))
      (define runtime (- (current-milliseconds) st))
   
      (display (format "Ran synthesizer for ~a ms\n" runtime))
@@ -68,14 +67,15 @@
      ;(println sol)
      
      (when (correct? sol)
-       ;(pretty-print (evaluate template sol))
+       (pretty-print (evaluate template sol))
 
        (define e (evaluate optimized-template sol))
-       (when (> (cpp:expr-bw ((hvx-ir:interpret e) 0)) 1)
+       (when (> (cpp:expr-bw ((arm-ir:interpret e) 0)) 1)
          (define-values (expr-lb expr-ub)
-           (infer-value-range-hvx-ir e axioms abstr-value-bounds))
-         (hash-set! value-bounds (ir-node-id template) (cons expr-lb expr-ub)))
-       (hash-set! translation-history (ir-node-id template) halide-expr))
+           (infer-value-range-arm-ir e axioms abstr-value-bounds))
+         (hash-set! value-bounds (arm-ir:ast-node-id template) (cons expr-lb expr-ub)))
+       (hash-set! translation-history (arm-ir:ast-node-id template) halide-expr)
+       )
      
      sol]
     [else (unsat)]))

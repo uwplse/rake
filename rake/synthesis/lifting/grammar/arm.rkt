@@ -1,7 +1,9 @@
 #lang rosette/safe
 
 (require
+  (only-in racket/list range)
   rosette/lib/destruct
+  rosette/lib/angelic
   rake/internal/error
   rake/cpp
   rake/halide
@@ -21,6 +23,14 @@
     (destruct lifted-sub-expr
 
       [(arm-ir:broadcast value) '()]
+
+      ;; Try folding by updating the set of datapoints
+      [(arm-ir:load-data live-data gather-tbl) (list (mk-load-instr halide-expr))]
+
+      ;; Try folding by changing the type we are casting to or the `saturating?` flag
+      [(arm-ir:cast sub-expr type saturating?)
+       (list
+        (arm-ir:cast (get-node-id) sub-expr (halide:elem-type halide-expr) (choose* #t #f)))]
     
       [_ (error "NYI: Please define a (fold) grammar for IR Expr:" lifted-sub-expr halide-expr)]))
 
@@ -40,6 +50,10 @@
     (destruct lifted-sub-expr
 
       [(arm-ir:broadcast value) '()]
+      [(arm-ir:load-data live-data gather-tbl) '()]
+
+      ;; Strip the cast and try to extend. Many instructions perform widening / narrowing casts
+      [(arm-ir:cast sub-expr type saturating?) (extend-grammar (list sub-expr) halide-expr)]
               
       [_ (error "NYI: Please define a (repl) grammar for IR Expr:" lifted-sub-expr)]))
 
@@ -59,6 +73,18 @@
     
     ;; Broadcast nodes
     [(sca-broadcast sca lanes) (list (arm-ir:broadcast (get-node-id) sca))]
+
+    ;; Data loads & shuffles
+    ;[(ramp base stride len) (list (build-vec (get-load-id) base stride len))]
+    
+    [(load buf idxs align) (list (mk-load-instr halide-expr))]
+    ;[(slice_vectors vec base stride len) (list (mk-load-instr halide-expr))]
+    ;[(concat_vectors v1 v2) (list (mk-load-instr halide-expr))]
+    ;[(interleave v1 v2) (list (mk-combine-instr lifted-sub-exprs))]
+    ;[(dynamic_shuffle vec idxs st end) (list (mk-load-instr halide-expr))]
+
+    ;; Casts
+    [(vec-cast vec type lanes) (list (arm-ir:cast (get-node-id) (list-ref lifted-sub-exprs 0) type #f))]
     
     [_ (error "NYI: Please define a (extend) grammar for halide node:" halide-expr)]))
 
@@ -71,3 +97,10 @@
 
 (define node-id 99)
 (define (get-node-id) (set! node-id (add1 node-id)) node-id)
+
+;; The load instruction can select and return from the set of data-points used in the
+;; original expression.
+(define (mk-load-instr spec-expr)
+  (define live-reads (halide:extract-buffer-reads spec-expr))
+  (define gather-tbl (map (lambda (i) (define-symbolic* idx integer?) idx) (range 25)))
+  (arm-ir:load-data (get-load-id) live-reads gather-tbl))
