@@ -27,7 +27,7 @@
 (struct reduce (expr reduce-op widening?) #:super struct:ast-node #:transparent)             ;; Instructions: addv, saddlv, smaxv, sminv, uaddlv, uminv, umaxv
 
 (struct vv-mpy-add (expr weights) #:super struct:ast-node #:transparent)                     ;; Instructions: add, addp, mla, mls, mul, smlal, umlal
-(struct vs-mpy-add (expr weights) #:super struct:ast-node #:transparent)                     ;; Instructions: add, addp, mla, mls, mul, shl, neg
+(struct vs-mpy-add (expr weights outT) #:super struct:ast-node #:transparent)                ;; Instructions: add, addp, mla, mls, mul, shl, neg
 
 (struct vv-mpy-add-w (expr weights outT) #:super struct:ast-node #:transparent)              ;; Instructions: saddl, smull, saddw, saddlp, sadalp, smlal, smlsl, sdot, ssubl, sub, uadalp, uaddl, uaddlp, uaddw, umlal, umlsl, umull, usubl, usubw
 (struct vs-mpy-add-w (expr weights outT) #:super struct:ast-node #:transparent)              ;; Instructions: saddl, smull, saddw, saddlp, sadalp, smlal, smlsl, sdot, shll, ssubl, sub, uadalp, uaddl, uaddlp, uaddw, umlal, umlsl, umull, usubl, usubw

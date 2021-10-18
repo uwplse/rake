@@ -344,6 +344,22 @@
 (define (widening-absd-impl lhs rhs type)
   (absd-impl (widen lhs) (widen rhs) type))
 
+(define (vs-mpy-add-helper input weights width interm-type xo xi)
+  (if (eq? width xi)
+      (list)
+      (let* ([loaded (cpp:eval (cpp:cast (input (+ xo xi)) interm-type))]
+             [weight (cpp:eval (cpp:cast (list-ref weights xi) interm-type))]
+             [value (bvmul loaded weight)]
+             [recurse (vs-mpy-add-helper input weights width interm-type xo (+ 1 xi))])
+        (append (list value) recurse))))
+
+(define (vs-mpy-add-impl input i weights interm-type)
+  (let* ([width (length weights)]
+         [parts (vs-mpy-add-helper input weights width interm-type (* i width) 0)])
+    (if (eq? width 1)
+        (list-ref parts 0)
+        (mk-cpp-expr (apply bvadd parts) interm-type))))
+
 (define (interpret p)
   (destruct p
 
@@ -414,14 +430,20 @@
             (half-sub-impl (input0 i) (input1 i))))]
     ; TODO: reduce
     ; TODO: vv-mpy-add
-    ; TODO: vs-mpy-add
+
+    [(arm-ir:vs-mpy-add expr weights outT)
+     (define input (interpret expr))
+     (define int-weights (map interpret weights))
+     (lambda (i)
+       ; TODO: HVX has a saturation flag, do we need that?
+       (vs-mpy-add-impl input i int-weights outT))]
+
     ; TODO: vv-mpy-add-w
     ; TODO: vs-mpy-add-w
     ; TODO: vv-dmpy-add-sat
     ; TODO: vs-dmpy-add-sat
     ; TODO: vv-dmpy-add-hh-sat
     ; TODO: vs-dmpy-add-hh-sat
-    ; TODO: neg-sat
 
     [(arm-ir:neg-sat expr)
      (define input (interpret expr))
@@ -464,7 +486,6 @@
         (let ([value (input i)])
           (right-shift-impl value n shift-func sat-func))))]
 
-    ; TODO: abs-diff
     [(arm-ir:abs-diff expr0 expr1 widening? outT)
      (define input0 (interpret expr0))
      (define input1 (interpret expr1))
@@ -483,4 +504,3 @@
 
 
     [_ (error "No way to interpret expr:" p)]))
-
