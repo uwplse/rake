@@ -11,7 +11,9 @@
 ; TODO: do provides
 (provide
   (rename-out [instr-count arm-ir:instr-count])
-  (rename-out [visit arm-ir:visit]))
+  (rename-out [set-cn arm-ir:set-cn])
+  (rename-out [get-subexprs arm-ir:get-subexprs])
+  (rename-out [interpret arm-ir:interpret]))
 
 ;; Model C++ Saturation
 (define MIN_CHAR -128)
@@ -510,14 +512,14 @@
 
 (define (instr-count ir-expr)
   (destruct ir-expr
-    [(load-data live-data gather-tbl) 0]
-    [(broadcast value) 1]
-    [(build-vec base stride len) 1]
+    [(arm-ir:load-data live-data gather-tbl) 0]
+    [(arm-ir:broadcast value) 1]
+    [(arm-ir:build-vec base stride len) 1]
 
-    [(cast expr type saturating?) (+ (instr-count expr) 1)]
-    [(abs expr saturating? outT) (+ (instr-count expr) 1)]
-    [(maximum expr0 expr1) (+ (instr-count expr0) (instr-count expr1) 1)]
-    [(minimum expr0 expr1) (+ (instr-count expr0) (instr-count expr1) 1)]
+    [(arm-ir:cast expr type saturating?) (+ (instr-count expr) 1)]
+    [(arm-ir:abs expr saturating? outT) (+ (instr-count expr) 1)]
+    [(arm-ir:maximum expr0 expr1) (+ (instr-count expr0) (instr-count expr1) 1)]
+    [(arm-ir:minimum expr0 expr1) (+ (instr-count expr0) (instr-count expr1) 1)]
 
 
 
@@ -565,3 +567,6 @@
     
     ; [_ (error "NYI: Extracing sub-expression for IR Expr:" ir-expr)]))
 
+(define (get-subexprs ir-expr)
+  (destruct ir-expr
+    [_ (error "Need to implement get-subexprs")]))
