@@ -8,8 +8,15 @@
   rake/halide
   rake/arm/ir/instructions)
 
-; TODO: do provides
-
+(provide
+ (rename-out [set-cn arm-ir:set-cn])
+ (rename-out [interpret arm-ir:interpret])
+ ;(rename-out [visit hvx-ir:visit])
+ ;(rename-out [instr-count hvx-ir:instr-count])
+ (rename-out [get-subexprs arm-ir:get-subexprs])
+ ;(rename-out [elem-type hvx-ir:elem-type])
+ ;(rename-out [elem-type^ hvx-ir:elem-type^])
+ )
 
 ;; Model C++ Saturation
 (define MIN_CHAR -128)
@@ -217,10 +224,16 @@
     ; TODO: abs-diff
     ; TODO: abs-diff-acc
 
+    [_ p]
 
-    [_ (error "No way to interpret expr:" p)]))
+    ;[_ (error "No way to interpret expr:" p)]
+    ))
 
+;;;;;;;;;;;;;;;;;;;;;;
 
-
-
-
+(define (get-subexprs ir-expr)
+  (destruct ir-expr
+    [(arm-ir:load-data live-data gather-tbl) '()]
+    [(arm-ir:broadcast value) '()]
+    [(arm-ir:cast expr type saturating?) (list expr)]
+    [_ (error "NYI: Extracing sub-expression for ARM IR Expr:" ir-expr)]))
