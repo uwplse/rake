@@ -8,9 +8,20 @@
          rake/cpp
          rake/hvx/ast/types
          rake/hvx/interpreter
-         rake/hvx/ir/interpreter)
+         rake/hvx/ir/interpreter
+         rake/arm/ir/interpreter)
 
-(provide infer-value-range-hvx infer-value-range-hvx-ir infer-value-range-expr)
+(provide infer-value-range-expr
+         infer-value-range-hvx
+         infer-value-range-hvx-ir
+         infer-value-range-arm-ir)
+
+;;;; ARM
+
+(define (infer-value-range-arm-ir expr axioms abstr-val-bounds)
+  (infer-value-range-expr ((arm-ir:interpret expr) 0) axioms abstr-val-bounds))
+
+;;;; HVX
 
 (define (infer-value-range-hvx expr axioms)
   (let ([x (hvx:interpret expr)])
