@@ -66,7 +66,6 @@
            [(rkt-equal? (unpack-abstr-exprs node) equiv-halide-subexpr) abstracted-halide-subexpr]
            [else node]))
        (set! updated-spec (halide:visit updated-spec abstract-subexpr-halide))
-
        ;; Replace arm-ir sub-expr with abstract node
        (define (abstract-subexpr-arm-ir node)
          (cond

@@ -368,6 +368,9 @@
 (define (interpret p)
   (destruct p
 
+    ; TODO: understand this
+    [(arm-ir:abstr-expr orig-expr abstr-vals) (lambda (i) (halide:buffer-ref abstr-vals i))]
+
     ; These first few are taken from the hvx uberIR interpreter
     [(arm-ir:load-data live-data gather-tbl)
      (lambda (i)
@@ -613,12 +616,12 @@
 
       [(arm-ir:reduce expr reduce-op widening?) (handler (arm-ir:reduce (arm-ir:ast-node-id ir-expr) (visit expr handler) reduce-op widening?))]
 
-      [(arm-ir:vv-mpy-add expr weights) (handler arm-ir:vv-mpy-add (arm-ir:ast-node-id ir-expr) (visit expr handler) weights)]
-      [(arm-ir:vs-mpy-add expr weights outT) (handler arm-ir:vs-mpy-add (arm-ir:ast-node-id ir-expr) (visit expr handler) weights outT)]
-      [(arm-ir:vv-mpy-add-w expr weights outT) (handler arm-ir:vv-mpy-add-w (arm-ir:ast-node-id ir-expr) (visit expr handler) weights outT)]
-      [(arm-ir:vs-mpy-add-w expr weights outT) (handler arm-ir:vs-mpy-add-w (arm-ir:ast-node-id ir-expr) (visit expr handler) weights outT)]
-      [(arm-ir:vv-dmpy-add-sat expr weights) (handler arm-ir:vv-dmpy-add-sat (arm-ir:ast-node-id ir-expr) (visit expr handler) weights)]
-      [(arm-ir:vs-dmpy-add-sat expr weights) (handler arm-ir:vs-dmpy-add-sat (arm-ir:ast-node-id ir-expr) (visit expr handler) weights)]
+      [(arm-ir:vv-mpy-add expr weights) (handler (arm-ir:vv-mpy-add (arm-ir:ast-node-id ir-expr) (visit expr handler) weights))]
+      [(arm-ir:vs-mpy-add expr weights outT) (handler (arm-ir:vs-mpy-add (arm-ir:ast-node-id ir-expr) (visit expr handler) weights outT))]
+      [(arm-ir:vv-mpy-add-w expr weights outT) (handler (arm-ir:vv-mpy-add-w (arm-ir:ast-node-id ir-expr) (visit expr handler) weights outT))]
+      [(arm-ir:vs-mpy-add-w expr weights outT) (handler (arm-ir:vs-mpy-add-w (arm-ir:ast-node-id ir-expr) (visit expr handler) weights outT))]
+      [(arm-ir:vv-dmpy-add-sat expr weights) (handler (arm-ir:vv-dmpy-add-sat (arm-ir:ast-node-id ir-expr) (visit expr handler) weights))]
+      [(arm-ir:vs-dmpy-add-sat expr weights) (handler (arm-ir:vs-dmpy-add-sat (arm-ir:ast-node-id ir-expr) (visit expr handler) weights))]
 
       [(arm-ir:vv-dmpy-add-hh-sat expr weights round?) (handler (arm-ir:vv-dmpy-add-hh-sat (arm-ir:ast-node-id ir-expr) (handler expr) weights round?))]
       [(arm-ir:vs-dmpy-add-hh-sat expr weights round?) (handler (arm-ir:vs-dmpy-add-hh-sat (arm-ir:ast-node-id ir-expr) (handler expr) weights round?))]

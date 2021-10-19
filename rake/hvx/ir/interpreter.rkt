@@ -67,7 +67,7 @@
     ;;;;;;;;;;;;;;
             
     [(abstr-ir-expr orig-expr abstr-vals) (lambda (i) (halide:buffer-ref abstr-vals i))]
-            
+
     [(broadcast value) (lambda (i) (interpret value))]
 
     [(build-vec base stride len)
