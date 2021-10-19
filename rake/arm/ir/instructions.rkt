@@ -11,16 +11,16 @@
 (struct build-vec (base stride len) #:super struct:ast-node #:transparent)                   ;; Equivalent to Halide ramp
 
 ;; Base instructions
-(struct cast (expr type saturating?) #:super struct:ast-node #:transparent)                  ;; Instructions: xtn, uxtl, sxtl, uqxtn, sqxtn, sqxtun
+(struct cast (expr type saturate?) #:super struct:ast-node #:transparent)                    ;; Instructions: xtn, uxtl, sxtl, uqxtn, sqxtn, sqxtun
 (struct abs (expr saturate? output-type) #:super struct:ast-node #:transparent)              ;; Instructions: abs, sqabs
 (struct minimum (expr0 expr1) #:super struct:ast-node #:transparent)                         ;; Instructions: umin, smin, uminp, sminp, conditional
 (struct maximum (expr0 expr1) #:super struct:ast-node #:transparent)                         ;; Instructions: umax, smax, umaxp, smaxp, conditional
 
 ;; Fused instructions
-(struct add-high-narrow (expr rounding?) #:super struct:ast-node #:transparent)              ;; Instructions: addhn, raddhn
-(struct sub-high-narrow (expr rounding?) #:super struct:ast-node #:transparent)              ;; Instructions: subhn, rsubhn
-(struct halving-add (expr0 expr1 rounding?) #:super struct:ast-node #:transparent)           ;; Instructions: shadd, srhadd, uhadd
-(struct halving-sub (expr0 expr1 rounding?) #:super struct:ast-node #:transparent)           ;; Instructions: shsub, urhadd, uhsub
+(struct add-high-narrow (expr round?) #:super struct:ast-node #:transparent)                 ;; Instructions: addhn, raddhn
+(struct sub-high-narrow (expr round?) #:super struct:ast-node #:transparent)                 ;; Instructions: subhn, rsubhn
+(struct halving-add (expr0 expr1 round?) #:super struct:ast-node #:transparent)              ;; Instructions: shadd, srhadd, uhadd
+(struct halving-sub (expr0 expr1 round?) #:super struct:ast-node #:transparent)              ;; Instructions: shsub, urhadd, uhsub
 
 ; TODO: halving-add and halving-sub should be merged
 
@@ -42,8 +42,8 @@
 (struct add-sat (expr0 expr1) #:super struct:ast-node #:transparent)                         ;; Instructions: sqadd, suqadd, usqadd, uqadd
 (struct sub-sat (expr0 expr1) #:super struct:ast-node #:transparent)                         ;; Instructions: sqsub, uqsub
 
-(struct shift-left (expr shift rounding? saturating? signed?) #:super struct:ast-node #:transparent)  ;; Instructions: sqrshl, sqshl, sqshlu, srshl, uqrshl, uqshl, urshl, sshl, sshll, ushl,sshl, sshll, ushl, ushll
-(struct shift-right (expr shift rounding? saturating? signed? outputT) #:super struct:ast-node #:transparent) ;; Instructions: shrn, rshrn, sqrshrn, sqrshrun, sqshrn, sqshrun, srshr, sshr, ssra, uqrshrn, uqshrn, urshr, ursra, ushr, usra
+(struct shift-left (expr shift round? saturate? signed?) #:super struct:ast-node #:transparent)  ;; Instructions: sqrshl, sqshl, sqshlu, srshl, uqrshl, uqshl, urshl, sshl, sshll, ushl,sshl, sshll, ushl, ushll
+(struct shift-right (expr shift round? saturate? signed? outputT) #:super struct:ast-node #:transparent) ;; Instructions: shrn, rshrn, sqrshrn, sqrshrun, sqshrn, sqshrun, srshr, sshr, ssra, uqrshrn, uqshrn, urshr, ursra, ushr, usra
 
 (struct abs-diff (expr0 expr1 widening? outT) #:super struct:ast-node #:transparent)         ;; Instructions: sabd, sabdl, uabd, uabdl
 (struct abs-diff-acc (acc expr0 expr1 widening?) #:super struct:ast-node #:transparent)      ;; Instructions: saba, sabal, uaba, uabal

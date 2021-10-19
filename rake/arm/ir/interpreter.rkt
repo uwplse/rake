@@ -13,6 +13,7 @@
   (rename-out [instr-count arm-ir:instr-count])
   (rename-out [set-cn arm-ir:set-cn])
   (rename-out [get-subexprs arm-ir:get-subexprs])
+  (rename-out [visit arm-ir:visit])
   (rename-out [interpret arm-ir:interpret]))
 
 ; TODO: I don't understand what these are used for.
@@ -372,7 +373,7 @@
      (lambda (i)
        (list-ref (list-ref live-data curr-cn) (list-ref gather-tbl i)))]
 
-    [(arm-ir:broadcast value) (lambda (i) (interpret value))]
+    [(arm-ir:broadcast value) (lambda (i) value)]
 
     [(arm-ir:build-vec base stride len)
      (define b (interpret base))
@@ -384,9 +385,9 @@
          (bvmul (cpp:eval s) (integer->bitvector i (bitvector (cpp:expr-bw s)))))
         (cpp:type b)))]
 
-    [(arm-ir:cast sub-expr type saturating?)
+    [(arm-ir:cast sub-expr type saturate?)
      (define input (interpret sub-expr))
-     (if saturating?
+     (if saturate?
       (lambda (i) (saturating-cast (input i) type))
       (lambda (i) (cpp:cast (input i) type)))]
 
@@ -415,19 +416,19 @@
     ; TODO: sub-high-narrow
 
 
-    [(arm-ir:halving-add expr0 expr1 rounding?)
+    [(arm-ir:halving-add expr0 expr1 round?)
      (define input0 (interpret expr0))
      (define input1 (interpret expr1))
-     (if rounding?
+     (if round?
          (lambda (i)
             (rhalf-add-impl (input0 i) (input1 i)))
          (lambda (i)
             (half-add-impl (input0 i) (input1 i))))]
 
-    [(arm-ir:halving-sub expr0 expr1 rounding?)
+    [(arm-ir:halving-sub expr0 expr1 round?)
      (define input0 (interpret expr0))
      (define input1 (interpret expr1))
-     (if rounding?
+     (if round?
          (lambda (i)
             (rhalf-sub-impl (input0 i) (input1 i)))
          (lambda (i)
@@ -476,13 +477,13 @@
           (saturating-sub-impl value0 value1)))]
     ; TODO: shift-left
 
-    [(arm-ir:shift-right expr shift rounding? saturating? signed? outputT)
+    [(arm-ir:shift-right expr shift round? saturate? signed? outputT)
      (define input (interpret expr))
      ; n is a scalar
      (define n (interpret shift))
      (define shift-func (if signed? bvashr bvlshr))
-     (define sat-func (if saturating? (get-sat-fn outputT) (get-cast-fn outputT)))
-     (if rounding?
+     (define sat-func (if saturate? (get-sat-fn outputT) (get-cast-fn outputT)))
+     (if round?
       (lambda (i)
         (let ([value (input i)])
           (rounding-right-shift-impl value n shift-func sat-func)))
@@ -506,7 +507,6 @@
 
     ; TODO: abs-diff-acc
 
-
     [_ (error "No way to interpret expr:" p)]))
 
 
@@ -516,14 +516,38 @@
     [(arm-ir:broadcast value) 1]
     [(arm-ir:build-vec base stride len) 1]
 
-    [(arm-ir:cast expr type saturating?) (+ (instr-count expr) 1)]
-    [(arm-ir:abs expr saturating? outT) (+ (instr-count expr) 1)]
+    [(arm-ir:cast expr type saturate?) (+ (instr-count expr) 1)]
+    [(arm-ir:abs expr saturate? outT) (+ (instr-count expr) 1)]
     [(arm-ir:maximum expr0 expr1) (+ (instr-count expr0) (instr-count expr1) 1)]
     [(arm-ir:minimum expr0 expr1) (+ (instr-count expr0) (instr-count expr1) 1)]
 
-    [(arm-ir:add-high-narrow expr rounding?) (+ (instr-count expr) 1)]
-    [(arm-ir:sub-high-narrow expr rounding?) (+ (instr-count expr) 1)]
-    [(arm-ir:halving-add expr0 expr1 rounding?) (+ (instr-count expr0) (instr-count expr1) 1)]
+    [(arm-ir:add-high-narrow expr round?) (+ (instr-count expr) 1)]
+    [(arm-ir:sub-high-narrow expr round?) (+ (instr-count expr) 1)]
+    [(arm-ir:halving-add expr0 expr1 round?) (+ (instr-count expr0) (instr-count expr1) 1)]
+
+    [(arm-ir:reduce expr reduce-op widening?) (+ (instr-count expr) 1)]
+
+    [(arm-ir:vv-mpy-add expr weights) (+ (instr-count expr) 1)]
+    [(arm-ir:vs-mpy-add expr weights outT) (+ (instr-count expr) 1)]
+
+    [(arm-ir:vv-mpy-add-w expr weights outT) (+ (instr-count expr) 1)]
+    [(arm-ir:vs-mpy-add-w expr weights outT) (+ (instr-count expr) 1)]
+
+    [(arm-ir:vv-dmpy-add-sat expr weights) (+ (instr-count expr) 1)]
+    [(arm-ir:vs-dmpy-add-sat expr weights) (+ (instr-count expr) 1)]
+
+    [(arm-ir:vv-dmpy-add-hh-sat expr weights round?) (+ (instr-count expr) 1)]
+    [(arm-ir:vs-dmpy-add-hh-sat expr weights round?) (+ (instr-count expr) 1)]
+
+    [(arm-ir:neg-sat expr) (+ (instr-count expr) 1)]
+    [(arm-ir:add-sat expr0 expr1) (+ (instr-count expr0) (instr-count expr1) 1)]
+    [(arm-ir:sub-sat expr0 expr1) (+ (instr-count expr0) (instr-count expr1) 1)]
+
+    [(arm-ir:shift-left expr shift round? saturate? signed?) (+ (instr-count expr) (instr-count shift) 1)]
+    [(arm-ir:shift-right expr shift round? saturate? signed? outputT) (+ (instr-count expr) (instr-count shift) 1)]
+
+    [(arm-ir:abs-diff expr0 expr1 widening? outT) (+ (instr-count expr0) (instr-count expr1) 1)]
+    [(arm-ir:abs-diff-acc acc expr0 expr1 widening?) (+ (instr-count acc) (instr-count expr0) (instr-count expr1) 1)]
 
     [_ (error "instr-count not implemented for ir-expr: " ir-expr)]))
 
@@ -569,21 +593,65 @@
     
     ; [_ (error "NYI: Extracing sub-expression for IR Expr:" ir-expr)]))
 
+(define (visit ir-expr handler)
+  ; (let ([id (ir-node-id ir-expr)])
+    (destruct ir-expr
+      [(arm-ir:load-data live-data gather-tbl) (handler ir-expr)]
+      [(arm-ir:broadcast value) (handler ir-expr)]
+      [(arm-ir:build-vec base stride len) (handler ir-expr)]
+
+      [(arm-ir:cast expr type saturate?) (handler (arm-ir:cast (arm-ir:ast-node-id ir-expr) (visit expr handler) type saturate?))]
+      [(arm-ir:abs expr saturate? output-type) (handler (arm-ir:abs (arm-ir:ast-node-id ir-expr) (visit expr handler) saturate? output-type))]
+      [(arm-ir:maximum expr0 expr1) (handler (arm-ir:maximum (arm-ir:ast-node-id ir-expr) (visit expr0 handler) (visit expr1 handler)))]
+      [(arm-ir:minimum expr0 expr1) (handler (arm-ir:minimum (arm-ir:ast-node-id ir-expr) (visit expr0 handler) (visit expr1 handler)))]
+
+      [(arm-ir:add-high-narrow expr round?) (handler (arm-ir:add-high-narrow (arm-ir:ast-node-id ir-expr) (visit expr handler) round?))]
+      [(arm-ir:sub-high-narrow expr round?) (handler (arm-ir:sub-high-narrow (arm-ir:ast-node-id ir-expr) (visit expr handler) round?))]
+
+      [(arm-ir:halving-add expr0 expr1 round?) (handler (arm-ir:halving-add (arm-ir:ast-node-id ir-expr) (visit expr0 handler) (visit expr1 handler) round?))]
+      [(arm-ir:halving-sub expr0 expr1 round?) (handler (arm-ir:halving-sub (arm-ir:ast-node-id ir-expr) (visit expr0 handler) (visit expr1 handler) round?))]
+
+      [(arm-ir:reduce expr reduce-op widening?) (handler (arm-ir:reduce (arm-ir:ast-node-id ir-expr) (visit expr handler) reduce-op widening?))]
+
+      [(arm-ir:vv-mpy-add expr weights) (handler arm-ir:vv-mpy-add (arm-ir:ast-node-id ir-expr) (visit expr handler) weights)]
+      [(arm-ir:vs-mpy-add expr weights outT) (handler arm-ir:vs-mpy-add (arm-ir:ast-node-id ir-expr) (visit expr handler) weights outT)]
+      [(arm-ir:vv-mpy-add-w expr weights outT) (handler arm-ir:vv-mpy-add-w (arm-ir:ast-node-id ir-expr) (visit expr handler) weights outT)]
+      [(arm-ir:vs-mpy-add-w expr weights outT) (handler arm-ir:vs-mpy-add-w (arm-ir:ast-node-id ir-expr) (visit expr handler) weights outT)]
+      [(arm-ir:vv-dmpy-add-sat expr weights) (handler arm-ir:vv-dmpy-add-sat (arm-ir:ast-node-id ir-expr) (visit expr handler) weights)]
+      [(arm-ir:vs-dmpy-add-sat expr weights) (handler arm-ir:vs-dmpy-add-sat (arm-ir:ast-node-id ir-expr) (visit expr handler) weights)]
+
+      [(arm-ir:vv-dmpy-add-hh-sat expr weights round?) (handler (arm-ir:vv-dmpy-add-hh-sat (arm-ir:ast-node-id ir-expr) (handler expr) weights round?))]
+      [(arm-ir:vs-dmpy-add-hh-sat expr weights round?) (handler (arm-ir:vs-dmpy-add-hh-sat (arm-ir:ast-node-id ir-expr) (handler expr) weights round?))]
+
+      [(arm-ir:neg-sat expr) (handler (arm-ir:neg-sat (arm-ir:ast-node-id ir-expr) (visit expr handler)))]
+      [(arm-ir:add-sat expr0 expr1) (handler (arm-ir:add-sat (arm-ir:ast-node-id ir-expr) (visit expr0 handler) (visit expr1 handler)))]
+      [(arm-ir:sub-sat expr0 expr1) (handler (arm-ir:sub-sat (arm-ir:ast-node-id ir-expr) (visit expr0 handler) (visit expr1 handler)))]
+
+      ; ; TODO: is the shift a constant or an expr?
+      [(arm-ir:shift-left expr shift round? saturate? signed?) (handler (arm-ir:shift-left (arm-ir:ast-node-id ir-expr) (visit expr handler) (visit shift handler) round? saturate? signed?))]
+      [(arm-ir:shift-right expr shift round? saturate? signed? outT) (handler (arm-ir:shift-right (arm-ir:ast-node-id ir-expr) (visit expr handler) (visit shift handler) round? saturate? signed? outT))]
+
+      [(arm-ir:abs-diff expr0 expr1 widening? outT) (handler (arm-ir:abs-diff (arm-ir:ast-node-id ir-expr) (visit expr0 handler) (visit expr1 handler) widening? outT))]
+      [(arm-ir:abs-diff-acc acc expr0 expr1 widening?) (handler (arm-ir:abs-diff-acc (arm-ir:ast-node-id ir-expr) (visit acc handler) (visit expr0 handler) (visit expr1 handler) widening?))]
+      ; [(arm-ir:abs-diff-acc acc expr0 expr1 widening?) (list acc expr0 expr1)]
+
+      [_ (error "Need to implement arm-ir:visit" ir-expr)]))
+
 (define (get-subexprs ir-expr)
   (destruct ir-expr
     [(arm-ir:load-data live-data gather-tbl) '()]
     [(arm-ir:broadcast value) '()]
     [(arm-ir:build-vec base stride len) '()]
 
-    [(arm-ir:cast expr type saturating?) (list expr)]
+    [(arm-ir:cast expr type saturate?) (list expr)]
     [(arm-ir:abs expr saturate? output-type) (list expr)]
     [(arm-ir:maximum expr0 expr1) (list expr0 expr1)]
     [(arm-ir:minimum expr0 expr1) (list expr0 expr1)]
 
-    [(arm-ir:add-high-narrow expr rounding?) (list expr)]
-    [(arm-ir:sub-high-narrow expr rounding?) (list expr)]
-    [(arm-ir:halving-add expr0 expr1 rounding?) (list expr0 expr1)]
-    [(arm-ir:halving-sub expr0 expr1 rounding?) (list expr0 expr1)]
+    [(arm-ir:add-high-narrow expr round?) (list expr)]
+    [(arm-ir:sub-high-narrow expr round?) (list expr)]
+    [(arm-ir:halving-add expr0 expr1 round?) (list expr0 expr1)]
+    [(arm-ir:halving-sub expr0 expr1 round?) (list expr0 expr1)]
 
     [(arm-ir:reduce expr reduce-op widening?) (list expr)]
 
@@ -602,8 +670,8 @@
     [(arm-ir:sub-sat expr0 expr1) (list expr0 expr1)]
 
     ; TODO: is the shift a constant or an expr?
-    [(arm-ir:shift-left expr shift rounding? saturating? signed?) (expr shift)]
-    [(arm-ir:shift-right expr shift rounding? saturating? signed? outT) (expr shift)]
+    [(arm-ir:shift-left expr shift round? saturate? signed?) (list expr shift)]
+    [(arm-ir:shift-right expr shift round? saturate? signed? outT) (list expr shift)]
 
     [(arm-ir:abs-diff expr0 expr1 widening? outT) (list expr0 expr1)]
     [(arm-ir:abs-diff-acc acc expr0 expr1 widening?) (list acc expr0 expr1)]
