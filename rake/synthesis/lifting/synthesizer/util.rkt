@@ -81,7 +81,7 @@
               (hash-set! abstr-buff-bounds (buffer-data abstr-expr-buffer) (cons (car bounds) (cdr bounds))))
             abstracted-arm-ir-subexpr]
            [else node]))
-       (set! updated-template (hvx-ir:visit updated-template abstract-subexpr-arm-ir))))
+       (set! updated-template (arm-ir:visit updated-template abstract-subexpr-arm-ir))))
    sub-exprs)
   (values updated-template updated-spec inferred-axioms abstr-buff-bounds))
 

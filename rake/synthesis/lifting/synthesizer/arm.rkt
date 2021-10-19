@@ -49,7 +49,7 @@
 
   ;(pretty-print ((halide:interpret optimized-halide-expr) 0))
   ;(pretty-print ((arm-ir:interpret optimized-template) 0))
-  
+
   (cond
     [(subset? (symbolics optimized-halide-expr) (symbolics optimized-template))
      (clear-vc!)

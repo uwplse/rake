@@ -12,10 +12,7 @@
   rake/hvx/ir/instructions
   rake/hvx/ir/interpreter)
 
-(provide lifting-ir-fold-grammar
-         lifting-ir-repl-grammar
-         lifting-ir-extend-grammar
-         hvx-uber-instructions)
+(provide hvx-uber-instructions)
 
 (struct lifting-ir (fold-grammar repl-grammar extend-grammar))
 

@@ -27,8 +27,8 @@
       ;; Try folding by updating the set of datapoints
       [(arm-ir:load-data live-data gather-tbl) (list (mk-load-instr halide-expr))]
 
-      ;; Try folding by changing the type we are casting to or the `saturating?` flag
-      [(arm-ir:cast sub-expr type saturating?)
+      ;; Try folding by changing the type we are casting to or the `saturate?` flag
+      [(arm-ir:cast sub-expr type saturate?)
        (list
         (arm-ir:cast (get-node-id) sub-expr (halide:elem-type halide-expr) (choose* #t #f)))]
     
@@ -53,7 +53,7 @@
       [(arm-ir:load-data live-data gather-tbl) '()]
 
       ;; Strip the cast and try to extend. Many instructions perform widening / narrowing casts
-      [(arm-ir:cast sub-expr type saturating?) (extend-grammar (list sub-expr) halide-expr)]
+      [(arm-ir:cast sub-expr type saturate?) (extend-grammar (list sub-expr) halide-expr)]
               
       [_ (error "NYI: Please define a (repl) grammar for IR Expr:" lifted-sub-expr halide-expr)]))
 
