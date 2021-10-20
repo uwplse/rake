@@ -14,11 +14,25 @@
   (rename-out [set-cn arm-ir:set-cn])
   (rename-out [get-subexprs arm-ir:get-subexprs])
   (rename-out [visit arm-ir:visit])
+  (rename-out [elem-type arm-ir:elem-type])
+  (rename-out [elem-type^ arm-ir:elem-type^])
   (rename-out [interpret arm-ir:interpret]))
 
 ; TODO: I don't understand what these are used for.
 (define curr-cn 0)
 (define (set-cn v) (set! curr-cn v))
+
+(define (elem-type expr)
+  (define e (interpret expr))
+  (define a (cpp:type (e 0)))
+  (define b (cpp:type (e 1)))
+  (if (< (cpp:type-bw a) (cpp:type-bw b)) a b))
+
+(define (elem-type^ expr)
+  (define e (interpret expr))
+  (define a (cpp:type (e 0)))
+  (define b (cpp:type (e 1)))
+  (if (< (cpp:type-bw a) (cpp:type-bw b)) b a))
 
 ;; Model C++ Saturation
 (define MIN_CHAR -128)
@@ -563,7 +577,7 @@
 
     [(arm-ir:reduce expr reduce-op widening?) (+ (instr-count expr) 1)]
 
-    [(arm-ir:vv-mpy-add expr weights) (+ (instr-count expr) 1)]
+    [(arm-ir:vv-mpy-add expr weights outT) (+ (instr-count expr) 1)]
     [(arm-ir:vs-mpy-add expr weights outT) (+ (instr-count expr) 1)]
 
     [(arm-ir:vv-mpy-add-w expr weights outT) (+ (instr-count expr) 1)]
@@ -649,7 +663,7 @@
 
       [(arm-ir:reduce expr reduce-op widening?) (handler (arm-ir:reduce (arm-ir:ast-node-id ir-expr) (visit expr handler) reduce-op widening?))]
 
-      [(arm-ir:vv-mpy-add expr weights) (handler (arm-ir:vv-mpy-add (arm-ir:ast-node-id ir-expr) (visit expr handler) weights))]
+      [(arm-ir:vv-mpy-add expr weights outT) (handler (arm-ir:vv-mpy-add (arm-ir:ast-node-id ir-expr) (visit expr handler) weights outT))]
       [(arm-ir:vs-mpy-add expr weights outT) (handler (arm-ir:vs-mpy-add (arm-ir:ast-node-id ir-expr) (visit expr handler) weights outT))]
       [(arm-ir:vv-mpy-add-w expr weights outT) (handler (arm-ir:vv-mpy-add-w (arm-ir:ast-node-id ir-expr) (visit expr handler) weights outT))]
       [(arm-ir:vs-mpy-add-w expr weights outT) (handler (arm-ir:vs-mpy-add-w (arm-ir:ast-node-id ir-expr) (visit expr handler) weights outT))]
@@ -691,7 +705,7 @@
 
     [(arm-ir:reduce expr reduce-op widening?) (list expr)]
 
-    [(arm-ir:vv-mpy-add expr weights) (list expr)]
+    [(arm-ir:vv-mpy-add expr weights outT) (list expr)]
     [(arm-ir:vs-mpy-add expr weights outT) (list expr)]
     [(arm-ir:vv-mpy-add-w expr weights outT) (list expr)]
     [(arm-ir:vs-mpy-add-w expr weights outT) (list expr)]

@@ -2,13 +2,14 @@
 
 (require
   (only-in racket/list range)
+  (rename-in racket/list [remove-duplicates remove-dups])
   rosette/lib/destruct
   rosette/lib/angelic
   rake/internal/error
   rake/cpp
   rake/halide
   rake/arm/ir/instructions
-  ;rake/arm/ir/interpreter
+  rake/arm/ir/interpreter
   rake/synthesis/lifting/grammar/util)
 
 (provide arm-uber-instructions)
@@ -37,8 +38,22 @@
        (define f (apply choose* mul-scalars))
 
        ;; TODO
-       
-       (error "NYI: Please define a (fold) grammar for IR Expr:" lifted-sub-expr halide-expr)
+       (cond
+         [(halide:cast-op? halide-expr)
+          ;; Try folding by updating the output type or the saturation flag saturate
+          (define e-type (halide:elem-type halide-expr))
+          (define in-type (arm-ir:elem-type^ sub-expr))
+          (define narrower-type (cpp:narrow-type e-type outT))
+          (define wider-type (cpp:wide-type in-type narrower-type))
+          (list (arm-ir:vs-mpy-add (get-node-id) sub-expr weights wider-type))
+         ]
+         [(vec-add? halide-expr)
+          ;; Try folding the add by expanding the weight-matrix
+          (define updated-sub-expr (update-input-data sub-expr halide-expr))
+          (list (arm-ir:vs-mpy-add (get-node-id) updated-sub-expr (append weights (list f)) (halide:elem-type halide-expr)))]
+         [else (error "Need more options for:\n" halide-expr)])
+
+      ;  (error "NYI: Please define a (fold) grammar for IR Expr:" lifted-sub-expr halide-expr)
        ]
     
       [_ (error "NYI: Please define a (fold) grammar for IR Expr:" lifted-sub-expr halide-expr)]))
@@ -67,6 +82,12 @@
 
       ; TODO: are there any ways to replace abs or abs-diff?
       [(arm-ir:abs expr saturate? outT) '()]
+
+      [(arm-ir:vs-mpy-add sub-expr weights outT)
+        (flatten
+          (list
+            ; TODO: add some good options.
+        ))]
 
 
       [_ (error "NYI: Please define a (repl) grammar for IR Expr:" lifted-sub-expr halide-expr)]))
@@ -110,10 +131,28 @@
       (flatten
         (list
           ;; We can extend using either vector-scalar multiply-add
-          (mk-vs-mpy-add-instr (first lifted-sub-exprs) mul-scalars (halide:elem-type halide-expr))
+          (mk-vs-mpy-add-instr (apply choose* lifted-sub-exprs) mul-scalars (halide:elem-type halide-expr))
           (mk-vs-mpy-add-instr (arm-ir:load-data (get-load-id) live-reads gather-tbl) mul-scalars (halide:elem-type halide-expr))
+          ;; or vector-vector multiply-add
+          (arm-ir:vv-mpy-add (get-node-id) (apply choose* lifted-sub-exprs) (list (int8_t (bv 1 8))) (halide:elem-type halide-expr))
+          (arm-ir:vv-mpy-add (get-node-id) (arm-ir:load-data (get-load-id) live-reads gather-tbl) (list (int8_t (bv 1 8))) (halide:elem-type halide-expr))
       ))]
 
+    ;; Addition
+    [(vec-add v1 v2)
+     (define add-scalars (halide:extract-add-scalars halide-expr))
+     (define add-consts (filter (lambda (scalar) (not (symbolic? scalar))) add-scalars))
+     (define mul-scalars (halide:extract-mul-scalars halide-expr))
+     (flatten
+      (list
+        ; Try to extend using vector-scalar-multiply-add
+        ; TODO: ask Maaz why we only use the first of the lifted-subexprs
+        (arm-ir:vs-mpy-add (get-node-id) (apply choose* lifted-sub-exprs) (list (int8_t (bv 1 8)) (int8_t (bv 1 8))) (halide:elem-type halide-expr))
+        (if (subexprs-are-loads? lifted-sub-exprs)
+          ; Then use a new load-data node as the sub-expr
+          (arm-ir:vs-mpy-add (get-node-id) (mk-load-instr halide-expr) (list (int8_t (bv 1 8)) (int8_t (bv 1 8))) (halide:elem-type halide-expr))
+          '())
+      ))]
 
     [_ (error "NYI: Please define a (extend) grammar for halide node:" halide-expr)]))
 
@@ -139,3 +178,29 @@
     [(empty? mul-scalars) '()]
     [else
      (arm-ir:vs-mpy-add (get-node-id) sub-expr (list (apply choose* mul-scalars)) output-type)]))
+
+
+
+;;;;;;;;;; Helper functions taken from hvx.rkt ;;;;;;;;;;;;;;
+
+(define (update-input-data sub-expr halide-expr)
+  (cond
+    [(arm-ir:load-data? sub-expr)
+     (define live-reads (merge-live-reads (arm-ir:load-data-live-data sub-expr) (halide:extract-buffer-reads halide-expr)))
+     (arm-ir:load-data (get-node-id) live-reads (arm-ir:load-data-gather-tbl sub-expr))]
+    [else sub-expr]))
+
+(define (merge-live-reads old-dataset new-dataset)
+  (define old-len (length old-dataset))
+  (define new-len (length new-dataset))
+  (cond
+    [(eq? old-len new-len) (map (lambda (l1 l2) (remove-dups (append l1 l2))) old-dataset new-dataset)]
+    [(> old-len new-len)
+     (define padding (map (lambda (i) '()) (range (- old-len new-len))))
+     (map (lambda (l1 l2) (remove-dups (append l1 l2))) old-dataset (append new-dataset padding))]
+    [(< old-len new-len)
+     (define padding (map (lambda (i) '()) (range (- new-len old-len))))
+     (map (lambda (l1 l2) (remove-dups (append l1 l2))) (append old-dataset padding) new-dataset)]))
+
+(define (subexprs-are-loads? lifted-sub-exprs)
+  (andmap arm-ir:load-data? lifted-sub-exprs))

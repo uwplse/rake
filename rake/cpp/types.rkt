@@ -199,3 +199,9 @@
     [(eq? t uint32_t) 32]
     [(eq? t uint64_t) 64]
     [else (error "Cannot infer bit-width from type: ~a" t)]))
+
+(define (cpp:wide-type a b)
+  (if (<= (cpp:type-bw a) (cpp:type-bw b)) b a))
+
+(define (cpp:narrow-type a b)
+  (if (<= (cpp:type-bw a) (cpp:type-bw b)) a b))
