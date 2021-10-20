@@ -51,10 +51,15 @@
 
       [(arm-ir:broadcast value) '()]
       [(arm-ir:load-data live-data gather-tbl) '()]
+      [(arm-ir:build-vec base stride len) '()]
 
       ;; Strip the cast and try to extend. Many instructions perform widening / narrowing casts
-      [(arm-ir:cast sub-expr type saturate?) (extend-grammar (list sub-expr) halide-expr)]
-              
+      [(arm-ir:cast expr type saturate?) (extend-grammar (list expr) halide-expr)]
+
+      ; TODO: are there any ways to replace abs or abs-diff?
+      [(arm-ir:abs expr saturate? outT) '()]
+
+
       [_ (error "NYI: Please define a (repl) grammar for IR Expr:" lifted-sub-expr halide-expr)]))
 
   ;(cond
@@ -78,10 +83,10 @@
     ;[(ramp base stride len) (list (build-vec (get-load-id) base stride len))]
     
     [(load buf idxs align) (list (mk-load-instr halide-expr))]
-    ;[(slice_vectors vec base stride len) (list (mk-load-instr halide-expr))]
-    ;[(concat_vectors v1 v2) (list (mk-load-instr halide-expr))]
+    [(slice_vectors vec base stride len) (list (mk-load-instr halide-expr))]
+    [(concat_vectors v1 v2) (list (mk-load-instr halide-expr))]
     ;[(interleave v1 v2) (list (mk-combine-instr lifted-sub-exprs))]
-    ;[(dynamic_shuffle vec idxs st end) (list (mk-load-instr halide-expr))]
+    [(dynamic_shuffle vec idxs st end) (list (mk-load-instr halide-expr))]
 
     ;; Casts
     [(vec-cast vec type lanes) (list (arm-ir:cast (get-node-id) (list-ref lifted-sub-exprs 0) type #f))]
