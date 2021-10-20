@@ -362,12 +362,43 @@
   (let* ([width (length weights)]
          [parts (vs-mpy-add-helper input weights width interm-type (* i width) 0)])
     (if (eq? width 1)
-        (list-ref parts 0)
+        (mk-cpp-expr (list-ref parts 0) interm-type)
         (mk-cpp-expr (apply bvadd parts) interm-type))))
 
 (define (interpret p)
   (destruct p
 
+    ;;;;;;;;;;;;;;;;;;;; Scalar Halide Expressions ;;;;;;;;;;;;;;;;;;;;;
+
+    [(var-lookup var val) (interpret val)]
+            
+    [(sca-cast sca type) (cpp:cast (interpret sca) type)]
+
+    [(sca-add v1 v2) (halide:do-add (interpret v1) (interpret v2))]
+    [(sca-sub v1 v2) (halide:do-sub (interpret v1) (interpret v2))]
+    [(sca-mul v1 v2) (halide:do-mul (interpret v1) (interpret v2))]
+    [(sca-div v1 v2) (halide:do-div (interpret v1) (interpret v2))]
+    [(sca-mod v1 v2) (halide:do-mod (interpret v1) (interpret v2))]
+    [(sca-min v1 v2) (halide:do-min (interpret v1) (interpret v2))]
+    [(sca-max v1 v2) (halide:do-max (interpret v1) (interpret v2))]
+
+    [(sca-if v1 v2 v3) (halide:do-if (interpret v1) (interpret v2) (interpret v3))]
+    [(sca-eq v1 v2) (halide:do-eq (interpret v1) (interpret v2))]
+    [(sca-lt v1 v2) (halide:do-lt (interpret v1) (interpret v2))]
+    [(sca-le v1 v2) (halide:do-le (interpret v1) (interpret v2))]
+
+    [(sca-abs v1) (halide:do-abs (interpret v1))]
+    [(sca-absd v1 v2) (halide:do-absd (interpret v1) (interpret v2))]
+    [(sca-shl v1 v2) (halide:do-shl (interpret v1) (interpret v2))]
+    [(sca-shr v1 v2) (halide:do-shr (interpret v1) (interpret v2))]
+    [(sca-clz v1) (halide:do-clz (interpret v1))]
+
+    [(sca-bwand v1 v2) (halide:do-bwand (interpret v1) (interpret v2))]
+
+    [(load-sca buf idx) (halide:buffer-ref (interpret buf) (interpret idx))]
+
+    ;;;;;;;;;;;;;;
+            
     ; TODO: understand this
     [(arm-ir:abstr-expr orig-expr abstr-vals) (lambda (i) (halide:buffer-ref abstr-vals i))]
 
@@ -376,7 +407,7 @@
      (lambda (i)
        (list-ref (list-ref live-data curr-cn) (list-ref gather-tbl i)))]
 
-    [(arm-ir:broadcast value) (lambda (i) value)]
+    [(arm-ir:broadcast value) (lambda (i) (interpret value))]
 
     [(arm-ir:build-vec base stride len)
      (define b (interpret base))
@@ -510,7 +541,9 @@
 
     ; TODO: abs-diff-acc
 
-    [_ (error "No way to interpret expr:" p)]))
+    [_ p]
+    ;[_ (error "No way to interpret expr:" p)]
+    ))
 
 
 (define (instr-count ir-expr)
