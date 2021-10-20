@@ -31,6 +31,15 @@
       [(arm-ir:cast sub-expr type saturate?)
        (list
         (arm-ir:cast (get-node-id) sub-expr (halide:elem-type halide-expr) (choose* #t #f)))]
+
+      [(arm-ir:vs-mpy-add sub-expr weights outT)
+       (define mul-scalars (append (halide:extract-mul-scalars halide-expr) (list (int8_t (bv 1 8)))))
+       (define f (apply choose* mul-scalars))
+
+       ;; TODO
+       
+       (error "NYI: Please define a (fold) grammar for IR Expr:" lifted-sub-expr halide-expr)
+       ]
     
       [_ (error "NYI: Please define a (fold) grammar for IR Expr:" lifted-sub-expr halide-expr)]))
 
