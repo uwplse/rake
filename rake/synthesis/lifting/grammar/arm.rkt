@@ -19,7 +19,7 @@
 ;; the current IR-expression. In these tempalates, we do not
 ;; change any uber-instruction in the IR expression, only their
 ;; inputs.
-(define (fold-grammar lifted-sub-expr halide-expr [depth 0])
+(define (fold-grammar lifted-sub-expr lifted-sibling-exprs halide-expr [depth 0])
   (define candidates
     (destruct lifted-sub-expr
 
@@ -51,7 +51,14 @@
          [(vec-add? halide-expr)
           ;; Try folding the add by expanding the weight-matrix
           (define updated-sub-expr (update-input-data expr halide-expr))
-          (list (arm-ir:vs-mpy-add (get-node-id) updated-sub-expr (append weights (list f)) (halide:elem-type halide-expr)))]
+          (list
+           (arm-ir:vs-mpy-add (get-node-id) updated-sub-expr (append weights (list f)) (halide:elem-type halide-expr))
+           ;; Fold sibling node into sub-exprs (combine them)
+           (arm-ir:vs-mpy-add
+            (get-node-id)
+            (arm-ir:combine updated-sub-expr (apply choose* lifted-sibling-exprs)
+            (append weights (list (int8_t (bv 1 8))))
+            (halide:elem-type halide-expr))))]
          [else (error "Need more options for:\n" halide-expr)])
 
       ;  (error "NYI: Please define a (fold) grammar for IR Expr:" lifted-sub-expr halide-expr)
@@ -148,7 +155,6 @@
      (flatten
       (list
         ; Try to extend using vector-scalar-multiply-add
-        ; TODO: ask Maaz why we only use the first of the lifted-subexprs
         (arm-ir:vs-mpy-add (get-node-id) (apply choose* lifted-sub-exprs) (list (int8_t (bv 1 8)) (int8_t (bv 1 8))) (halide:elem-type halide-expr))
         (if (subexprs-are-loads? lifted-sub-exprs)
           ; Then use a new load-data node as the sub-expr
