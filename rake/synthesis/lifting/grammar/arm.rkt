@@ -178,9 +178,7 @@
 (define (mk-vs-mpy-add-instr sub-expr mul-scalars output-type)
   (cond
     [(empty? mul-scalars) '()]
-    [else
-     (arm-ir:vs-mpy-add (get-node-id) sub-expr (list (apply choose* mul-scalars)) output-type)]))
-
+    [else (arm-ir:vs-mpy-add (get-node-id) sub-expr (list (apply choose* mul-scalars)) output-type)]))
 
 ;;;;;;;;;; Helper functions taken from hvx.rkt ;;;;;;;;;;;;;;
 
