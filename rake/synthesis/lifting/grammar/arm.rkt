@@ -24,6 +24,7 @@
     (destruct lifted-sub-expr
 
       [(arm-ir:broadcast value) '()]
+      [(arm-ir:build-vec base stride len) '()]
 
       ;; Try folding by updating the set of datapoints
       [(arm-ir:load-data live-data gather-tbl) (list (mk-load-instr halide-expr))]
@@ -33,7 +34,7 @@
        (list
         (arm-ir:cast (get-node-id) sub-expr (halide:elem-type halide-expr) (choose* #t #f)))]
 
-      [(arm-ir:vs-mpy-add sub-expr weights outT)
+      [(arm-ir:vs-mpy-add exprs weights outT)
        (define mul-scalars (append (halide:extract-mul-scalars halide-expr) (list (int8_t (bv 1 8)))))
        (define f (apply choose* mul-scalars))
 
@@ -42,15 +43,15 @@
          [(halide:cast-op? halide-expr)
           ;; Try folding by updating the output type or the saturation flag saturate
           (define e-type (halide:elem-type halide-expr))
-          (define in-type (arm-ir:elem-type^ sub-expr))
+          (define in-type (arm-ir:elem-type^ exprs))
           (define narrower-type (cpp:narrow-type e-type outT))
           (define wider-type (cpp:wide-type in-type narrower-type))
-          (list (arm-ir:vs-mpy-add (get-node-id) sub-expr weights wider-type))
+          (list (arm-ir:vs-mpy-add (get-node-id) exprs weights wider-type))
          ]
          [(vec-add? halide-expr)
           ;; Try folding the add by expanding the weight-matrix
-          (define updated-sub-expr (update-input-data sub-expr halide-expr))
-          (list (arm-ir:vs-mpy-add (get-node-id) updated-sub-expr (append weights (list f)) (halide:elem-type halide-expr)))]
+          (define updated-sub-exprs (map (lambda (expr) (update-input-data expr halide-expr)) exprs))
+          (list (arm-ir:vs-mpy-add (get-node-id) updated-sub-exprs (append weights (list f)) (halide:elem-type halide-expr)))]
          [else (error "Need more options for:\n" halide-expr)])
 
       ;  (error "NYI: Please define a (fold) grammar for IR Expr:" lifted-sub-expr halide-expr)
@@ -110,7 +111,7 @@
     [(sca-broadcast sca lanes) (list (arm-ir:broadcast (get-node-id) sca))]
 
     ;; Data loads & shuffles
-    ;[(ramp base stride len) (list (build-vec (get-load-id) base stride len))]
+    [(ramp base stride len) (list (arm-ir:build-vec (get-load-id) base stride len))]
     
     [(load buf idxs align) (list (mk-load-instr halide-expr))]
     [(slice_vectors vec base stride len) (list (mk-load-instr halide-expr))]
@@ -131,8 +132,9 @@
       (flatten
         (list
           ;; We can extend using either vector-scalar multiply-add
-          (mk-vs-mpy-add-instr (apply choose* lifted-sub-exprs) mul-scalars (halide:elem-type halide-expr))
-          (mk-vs-mpy-add-instr (arm-ir:load-data (get-load-id) live-reads gather-tbl) mul-scalars (halide:elem-type halide-expr))
+          (mk-vs-mpy-add-instr (list (apply choose* lifted-sub-exprs)) mul-scalars (halide:elem-type halide-expr))
+          (mk-vs-mpy-add-instr (list (arm-ir:load-data (get-load-id) live-reads gather-tbl)) mul-scalars (halide:elem-type halide-expr))
+          (mk-vs-mpy-add-instr lifted-sub-exprs mul-scalars (halide:elem-type halide-expr))
           ;; or vector-vector multiply-add
           (arm-ir:vv-mpy-add (get-node-id) (apply choose* lifted-sub-exprs) (list (int8_t (bv 1 8))) (halide:elem-type halide-expr))
           (arm-ir:vv-mpy-add (get-node-id) (arm-ir:load-data (get-load-id) live-reads gather-tbl) (list (int8_t (bv 1 8))) (halide:elem-type halide-expr))
@@ -147,10 +149,10 @@
       (list
         ; Try to extend using vector-scalar-multiply-add
         ; TODO: ask Maaz why we only use the first of the lifted-subexprs
-        (arm-ir:vs-mpy-add (get-node-id) (apply choose* lifted-sub-exprs) (list (int8_t (bv 1 8)) (int8_t (bv 1 8))) (halide:elem-type halide-expr))
+        (arm-ir:vs-mpy-add (get-node-id) (apply choose* lifted-sub-exprs) (list (int8_t (bv 1 8))) (halide:elem-type halide-expr))
         (if (subexprs-are-loads? lifted-sub-exprs)
           ; Then use a new load-data node as the sub-expr
-          (arm-ir:vs-mpy-add (get-node-id) (mk-load-instr halide-expr) (list (int8_t (bv 1 8)) (int8_t (bv 1 8))) (halide:elem-type halide-expr))
+          (arm-ir:vs-mpy-add (get-node-id) (list (mk-load-instr halide-expr) (mk-load-instr halide-expr)) (list (int8_t (bv 1 8)) (int8_t (bv 1 8))) (halide:elem-type halide-expr))
           '())
       ))]
 
@@ -174,10 +176,13 @@
   (arm-ir:load-data (get-load-id) live-reads gather-tbl))
 
 (define (mk-vs-mpy-add-instr sub-expr mul-scalars output-type)
+  (assert (list? sub-expr))
+  (assert (eq? (length sub-expr) (length mul-scalars)))
   (cond
     [(empty? mul-scalars) '()]
     [else
-     (arm-ir:vs-mpy-add (get-node-id) sub-expr (list (apply choose* mul-scalars)) output-type)]))
+     (define a (arm-ir:vs-mpy-add (get-node-id) sub-expr (list (apply choose* mul-scalars)) output-type))
+     (display "got here!\n") a]))
 
 
 

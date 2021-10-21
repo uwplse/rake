@@ -363,18 +363,18 @@
 (define (widening-absd-impl lhs rhs type)
   (absd-impl (widen lhs) (widen rhs) type))
 
-(define (vs-mpy-add-helper input weights width interm-type xo xi)
-  (if (eq? width xi)
+(define (vs-mpy-add-helper input weights width interm-type i j)
+  (if (eq? width j)
       (list)
-      (let* ([loaded (cpp:eval (cpp:cast (input (+ xo xi)) interm-type))]
-             [weight (cpp:eval (cpp:cast (list-ref weights xi) interm-type))]
+      (let* ([loaded (cpp:eval (cpp:cast ((list-ref input j) i) interm-type))]
+             [weight (cpp:eval (cpp:cast (list-ref weights j) interm-type))]
              [value (bvmul loaded weight)]
-             [recurse (vs-mpy-add-helper input weights width interm-type xo (+ 1 xi))])
+             [recurse (vs-mpy-add-helper input weights width interm-type i (+ 1 j))])
         (append (list value) recurse))))
 
 (define (vs-mpy-add-impl input i weights interm-type)
   (let* ([width (length weights)]
-         [parts (vs-mpy-add-helper input weights width interm-type (* i width) 0)])
+         [parts (vs-mpy-add-helper input weights width interm-type i 0)])
     (if (eq? width 1)
         (mk-cpp-expr (list-ref parts 0) interm-type)
         (mk-cpp-expr (apply bvadd parts) interm-type))))
@@ -484,12 +484,12 @@
     ; TODO: reduce
     ; TODO: vv-mpy-add
 
-    [(arm-ir:vs-mpy-add expr weights outT)
-     (define input (interpret expr))
+    [(arm-ir:vs-mpy-add exprs weights outT)
+     (define inputs (map interpret exprs))
      (define int-weights (map interpret weights))
      (lambda (i)
        ; TODO: HVX has a saturation flag, do we need that?
-       (vs-mpy-add-impl input i int-weights outT))]
+       (vs-mpy-add-impl inputs i int-weights outT))]
 
     ; TODO: vv-mpy-add-w
     ; TODO: vs-mpy-add-w
@@ -578,7 +578,7 @@
     [(arm-ir:reduce expr reduce-op widening?) (+ (instr-count expr) 1)]
 
     [(arm-ir:vv-mpy-add expr weights outT) (+ (instr-count expr) 1)]
-    [(arm-ir:vs-mpy-add expr weights outT) (+ (instr-count expr) 1)]
+    [(arm-ir:vs-mpy-add exprs weights outT) (begin (display exprs) (newline) (+ (apply + (map instr-count exprs)) 1))]
 
     [(arm-ir:vv-mpy-add-w expr weights outT) (+ (instr-count expr) 1)]
     [(arm-ir:vs-mpy-add-w expr weights outT) (+ (instr-count expr) 1)]
@@ -601,47 +601,6 @@
 
     [_ (error "instr-count not implemented for ir-expr: " ir-expr)]))
 
-    ; [(vs-mpy-add sub-expr weight-matrix output-type saturate?) (+ (instr-count sub-expr) 1)]
-    ; [(vs-mpy-add-acc acc-expr sub-expr weight-matrix output-type saturate?) (+ (instr-count acc-expr) (instr-count sub-expr) 1)]
-    ; [(vv-mpy-add sub-expr width output-type saturate?) (+ (instr-count sub-expr) 1)]
-    ; [(vv-mpy-add-acc acc-expr sub-expr width output-type saturate?) (+ (instr-count acc-expr) (instr-count sub-expr) 1)]
-
-    ; [(vs-mpy-hh sub-expr sca round?) (+ (instr-count sub-expr) 1)]
-    ; [(vv-mpy-hh-rnd sub-expr) (+ (instr-count sub-expr) 1)]
-    
-    ; [(vs-frac-mpy sub-expr sca round?) (+ (instr-count sub-expr) 1)]
-    ; [(vv-frac-mpy sub-expr0 sub-expr1 round?) (+ (instr-count sub-expr0) (instr-count sub-expr1) 1)]
-
-    ; [(vs-shift-left sub-expr sca) (+ (instr-count sub-expr) 1)]
-    ; [(vv-shift-left sub-expr0 sub-expr1) (+ (instr-count sub-expr0) (instr-count sub-expr1) 1)]
-
-    ; [(add-const sub-expr const-val output-type saturate?) (+ (instr-count sub-expr) 1)]
-    
-    ; [(vs-shift-right sub-expr const-val round? saturate? arithmetic? output-type) (+ (instr-count sub-expr) 1)]
-    ; [(vv-shift-right sub-expr0 sub-expr1 round? arithmetic?) (+ (instr-count sub-expr0) (instr-count sub-expr1) 1)]
-    
-    ; [(divide-by-const sub-expr const-val) (+ (instr-count sub-expr) 1)]
-    ; [(vs-divide sub-expr scalar-val output-type) (+ (instr-count sub-expr) 1)]
-    ; [(average sub-expr round? output-type) (+ (instr-count sub-expr) 1)]
-    
-    ; [(modulo-by-const sub-expr const-val) (+ (instr-count sub-expr) 1)]
-    
-    ; [(maximum sub-expr0 sub-expr1) (+ (instr-count sub-expr0) (instr-count sub-expr1) 1)]
-    ; [(minimum sub-expr0 sub-expr1) (+ (instr-count sub-expr0) (instr-count sub-expr1) 1)]
-    ; [(saturate sub-expr round? output-type) (+ (instr-count sub-expr) 1)]
-
-    ; [(absolute sub-expr) (+ (instr-count sub-expr) 1)]
-    ; [(abs-diff sub-expr0 sub-expr1) (+ (instr-count sub-expr0) (instr-count sub-expr1) 1)]
-    
-    ; [(select sub-expr0 sub-expr1 sub-expr2) (+ (instr-count sub-expr0) (instr-count sub-expr1) (instr-count sub-expr2) 1)]
-    ; [(is-equal sub-expr0 sub-expr1) (+ (instr-count sub-expr0) (instr-count sub-expr1) 1)]
-    ; [(less-than sub-expr0 sub-expr1) (+ (instr-count sub-expr0) (instr-count sub-expr1) 1)]
-    ; [(less-than-eq sub-expr0 sub-expr1) (+ (instr-count sub-expr0) (instr-count sub-expr1) 1)]
-
-    ; [(bitwise-and sub-expr0 sub-expr1) (+ (instr-count sub-expr0) (instr-count sub-expr1) 1)]
-    ; [(count-leading-zeroes sub-expr) (+ (instr-count sub-expr) 1)]
-    
-    ; [_ (error "NYI: Extracing sub-expression for IR Expr:" ir-expr)]))
 
 (define (visit ir-expr handler)
   ; (let ([id (ir-node-id ir-expr)])
@@ -664,7 +623,7 @@
       [(arm-ir:reduce expr reduce-op widening?) (handler (arm-ir:reduce (arm-ir:ast-node-id ir-expr) (visit expr handler) reduce-op widening?))]
 
       [(arm-ir:vv-mpy-add expr weights outT) (handler (arm-ir:vv-mpy-add (arm-ir:ast-node-id ir-expr) (visit expr handler) weights outT))]
-      [(arm-ir:vs-mpy-add expr weights outT) (handler (arm-ir:vs-mpy-add (arm-ir:ast-node-id ir-expr) (visit expr handler) weights outT))]
+      [(arm-ir:vs-mpy-add exprs weights outT) (handler (arm-ir:vs-mpy-add (arm-ir:ast-node-id ir-expr) (map (lambda (expr) visit expr handler) exprs) weights outT))]
       [(arm-ir:vv-mpy-add-w expr weights outT) (handler (arm-ir:vv-mpy-add-w (arm-ir:ast-node-id ir-expr) (visit expr handler) weights outT))]
       [(arm-ir:vs-mpy-add-w expr weights outT) (handler (arm-ir:vs-mpy-add-w (arm-ir:ast-node-id ir-expr) (visit expr handler) weights outT))]
       [(arm-ir:vv-dmpy-add-sat expr weights) (handler (arm-ir:vv-dmpy-add-sat (arm-ir:ast-node-id ir-expr) (visit expr handler) weights))]
@@ -706,7 +665,7 @@
     [(arm-ir:reduce expr reduce-op widening?) (list expr)]
 
     [(arm-ir:vv-mpy-add expr weights outT) (list expr)]
-    [(arm-ir:vs-mpy-add expr weights outT) (list expr)]
+    [(arm-ir:vs-mpy-add exprs weights outT) exprs]
     [(arm-ir:vv-mpy-add-w expr weights outT) (list expr)]
     [(arm-ir:vs-mpy-add-w expr weights outT) (list expr)]
     [(arm-ir:vv-dmpy-add-sat expr weights) (list expr)]
