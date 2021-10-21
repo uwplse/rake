@@ -578,7 +578,7 @@
     [(arm-ir:reduce expr reduce-op widening?) (+ (instr-count expr) 1)]
 
     [(arm-ir:vv-mpy-add expr weights outT) (+ (instr-count expr) 1)]
-    [(arm-ir:vs-mpy-add exprs weights outT) (begin (display exprs) (newline) (+ (apply + (map instr-count exprs)) 1))]
+    [(arm-ir:vs-mpy-add exprs weights outT) (+ (apply + (map instr-count exprs)) 1)]
 
     [(arm-ir:vv-mpy-add-w expr weights outT) (+ (instr-count expr) 1)]
     [(arm-ir:vs-mpy-add-w expr weights outT) (+ (instr-count expr) 1)]
