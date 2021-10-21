@@ -60,7 +60,7 @@
             ;(append weights (list (int8_t (bv 1 8))))
             ;(halide:elem-type halide-expr)))
            )]
-         [else (error "Need more options for:\n" halide-expr)])
+         [else (list)])
 
       ;  (error "NYI: Please define a (fold) grammar for IR Expr:" lifted-sub-expr halide-expr)
        ]
