@@ -651,7 +651,7 @@
 
       ; ; TODO: is the shift a constant or an expr?
       [(arm-ir:shift-left expr shift round? saturate? signed?) (handler (arm-ir:shift-left (arm-ir:ast-node-id ir-expr) (visit expr handler) (visit shift handler) round? saturate? signed?))]
-      [(arm-ir:vs-shift-right expr shift round? saturate? signed? outT) (handler (arm-ir:vs-shift-right (arm-ir:ast-node-id ir-expr) (visit expr handler) (visit shift handler) round? saturate? signed? outT))]
+      [(arm-ir:vs-shift-right expr shift round? saturate? signed? outT) (handler (arm-ir:vs-shift-right (arm-ir:ast-node-id ir-expr) (visit expr handler) shift round? saturate? signed? outT))]
 
       [(arm-ir:abs-diff expr0 expr1 widening? outT) (handler (arm-ir:abs-diff (arm-ir:ast-node-id ir-expr) (visit expr0 handler) (visit expr1 handler) widening? outT))]
       [(arm-ir:abs-diff-acc acc expr0 expr1 widening?) (handler (arm-ir:abs-diff-acc (arm-ir:ast-node-id ir-expr) (visit acc handler) (visit expr0 handler) (visit expr1 handler) widening?))]
@@ -694,7 +694,7 @@
 
     ; TODO: is the shift a constant or an expr?
     [(arm-ir:shift-left expr shift round? saturate? signed?) (list expr shift)]
-    [(arm-ir:vs-shift-right expr shift round? saturate? signed? outT) (list expr shift)]
+    [(arm-ir:vs-shift-right expr shift round? saturate? signed? outT) (list expr)]
 
     [(arm-ir:abs-diff expr0 expr1 widening? outT) (list expr0 expr1)]
     [(arm-ir:abs-diff-acc acc expr0 expr1 widening?) (list acc expr0 expr1)]

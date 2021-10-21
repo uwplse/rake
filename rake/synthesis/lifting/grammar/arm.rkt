@@ -60,7 +60,7 @@
             ;(append weights (list (int8_t (bv 1 8))))
             ;(halide:elem-type halide-expr)))
            )]
-      [else (list (arm-ir:vs-mpy-add (get-node-id) expr weights outT))])
+         [else (list (arm-ir:vs-mpy-add (get-node-id) expr weights outT))])
 
       ;  (error "NYI: Please define a (fold) grammar for IR Expr:" lifted-sub-expr halide-expr)
        ]
@@ -172,7 +172,7 @@
           (halide:elem-type halide-expr))
       ))]
 
-          [(vec-div v1 v2)
+    [(vec-div v1 v2)
      (define shr-scalars (halide:extract-shr-scalars halide-expr))
      (define div-scalars (halide:extract-div-scalars halide-expr))
      (define output-type (halide:elem-type halide-expr))
