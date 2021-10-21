@@ -60,10 +60,23 @@
             ;(append weights (list (int8_t (bv 1 8))))
             ;(halide:elem-type halide-expr)))
            )]
-         [else (list (arm-ir:vs-mpy-add (get-node-id) expr weights outT))])
+         [else '()])
 
       ;  (error "NYI: Please define a (fold) grammar for IR Expr:" lifted-sub-expr halide-expr)
        ]
+
+      [(arm-ir:vs-shift-right sub-expr shift round? saturate? signed? outT)
+       (define shr-scalars (halide:extract-shr-scalars halide-expr))
+       (define e-type (halide:elem-type halide-expr))
+       (define in-type (arm-ir:elem-type sub-expr))
+       (define narrower-type (cpp:narrow-type e-type outT))
+       (define wider-type (cpp:wide-type in-type narrower-type))
+       (list
+        ;; Try updating the shift value
+        (mk-shr-instr sub-expr shr-scalars round? saturate? signed? outT)
+        ;; Try updating the rounding flag / saturation flag / output-type
+        (arm-ir:vs-shift-right (get-node-id) sub-expr shift (choose* #t #f) (choose* #t #f) signed? wider-type))]
+
     
       [_ (error "NYI: Please define a (fold) grammar for IR Expr:" lifted-sub-expr halide-expr)]))
 
@@ -98,6 +111,7 @@
             ; TODO: add some good options.
         ))]
 
+      [(arm-ir:vs-shift-right sub-expr const-val round? saturate? signed? output-type) '()]
 
       [_ (error "NYI: Please define a (repl) grammar for IR Expr:" lifted-sub-expr halide-expr)]))
 

@@ -606,7 +606,7 @@
     [(arm-ir:sub-sat expr0 expr1) (+ (instr-count expr0) (instr-count expr1) 1)]
 
     [(arm-ir:shift-left expr shift round? saturate? signed?) (+ (instr-count expr) (instr-count shift) 1)]
-    [(arm-ir:vs-shift-right expr shift round? saturate? signed? outputT) (+ (instr-count expr) (instr-count shift) 1)]
+    [(arm-ir:vs-shift-right expr shift round? saturate? signed? outputT) (+ (instr-count expr) 1)]
 
     [(arm-ir:abs-diff expr0 expr1 widening? outT) (+ (instr-count expr0) (instr-count expr1) 1)]
     [(arm-ir:abs-diff-acc acc expr0 expr1 widening?) (+ (instr-count acc) (instr-count expr0) (instr-count expr1) 1)]
