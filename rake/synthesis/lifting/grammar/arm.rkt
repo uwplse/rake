@@ -60,7 +60,7 @@
             ;(append weights (list (int8_t (bv 1 8))))
             ;(halide:elem-type halide-expr)))
            )]
-         [else (list)])
+      [else (list (arm-ir:vs-mpy-add (get-node-id) expr weights outT))])
 
       ;  (error "NYI: Please define a (fold) grammar for IR Expr:" lifted-sub-expr halide-expr)
        ]
@@ -172,6 +172,23 @@
           (halide:elem-type halide-expr))
       ))]
 
+          [(vec-div v1 v2)
+     (define shr-scalars (halide:extract-shr-scalars halide-expr))
+     (define div-scalars (halide:extract-div-scalars halide-expr))
+     (define output-type (halide:elem-type halide-expr))
+     (flatten
+      (list
+       ;; We can extend using either a shift-right instruction
+       (mk-shr-instr (first lifted-sub-exprs) shr-scalars #f #f (cpp:signed-type? output-type) output-type)
+       ; TODO: allow for vector division
+      ;  (vv-shift-right (get-node-id) (first lifted-sub-exprs) (first lifted-sub-exprs) #f (cpp:signed-type? output-type))
+       ;; or using the divide instructions
+       ; TODO: allow for division by constants
+      ;  (mk-div-by-const-instr (first lifted-sub-exprs) div-scalars)
+       ; TODO: make ARM IR for vec-div
+      ;  (mk-vs-div-instr (first lifted-sub-exprs) div-scalars (halide:elem-type halide-expr))
+      ))]
+
     [_ (error "NYI: Please define a (extend) grammar for halide node:" halide-expr)]))
 
 (define arm-uber-instructions (lifting-ir fold-grammar repl-grammar extend-grammar))
@@ -250,3 +267,9 @@
       (define read-tbl (map (lambda (i) (define-symbolic* idx integer?) (define-symbolic* c boolean?) (cons idx c)) (range 25)))
       (arm-ir:combine (get-load-id) (first lifted-sub-exprs0) (first lifted-sub-exprs1) read-tbl)]
     [else '()]))
+
+(define (mk-shr-instr sub-expr shr-scalars round? saturate? signed? output-type)
+  (cond
+    [(empty? shr-scalars) '()]
+    [else (arm-ir:vs-shift-right (get-node-id) sub-expr (apply choose* shr-scalars) round? saturate? signed? output-type)]))
+
