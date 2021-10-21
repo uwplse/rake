@@ -421,6 +421,17 @@
      (lambda (i)
        (list-ref (list-ref live-data curr-cn) (list-ref gather-tbl i)))]
 
+    [(arm-ir:combine sub-expr0 sub-expr1 read-tbl)
+     (define input0 (interpret sub-expr0))
+     (define input1 (interpret sub-expr1))
+     (lambda (i)
+       (define idx (car (list-ref read-tbl i)))
+       (define c (cdr (list-ref read-tbl i)))
+       (assert (<= 0 idx i))
+       (define lhs (input0 idx))
+       (define rhs (input1 idx))
+       (if c lhs rhs))]
+
     [(arm-ir:broadcast value) (lambda (i) (interpret value))]
 
     [(arm-ir:build-vec base stride len)
@@ -565,6 +576,7 @@
     [(arm-ir:load-data live-data gather-tbl) 0]
     [(arm-ir:broadcast value) 1]
     [(arm-ir:build-vec base stride len) 1]
+    [(arm-ir:combine sub-expr0 sub-expr1 read-tbl) (+ (instr-count sub-expr0) (instr-count sub-expr1) 1)]
 
     [(arm-ir:cast expr type saturate?) (+ (instr-count expr) 1)]
     [(arm-ir:abs expr saturate? outT) (+ (instr-count expr) 1)]
@@ -608,6 +620,7 @@
       [(arm-ir:load-data live-data gather-tbl) (handler ir-expr)]
       [(arm-ir:broadcast value) (handler ir-expr)]
       [(arm-ir:build-vec base stride len) (handler ir-expr)]
+      [(arm-ir:combine sub-expr0 sub-expr1 read-tbl) (handler (arm-ir:combine (arm-ir:ast-node-id ir-expr) (visit sub-expr0 handler) (visit sub-expr1 handler) read-tbl))]
 
       [(arm-ir:cast expr type saturate?) (handler (arm-ir:cast (arm-ir:ast-node-id ir-expr) (visit expr handler) type saturate?))]
       [(arm-ir:abs expr saturate? output-type) (handler (arm-ir:abs (arm-ir:ast-node-id ir-expr) (visit expr handler) saturate? output-type))]
@@ -651,6 +664,7 @@
     [(arm-ir:load-data live-data gather-tbl) '()]
     [(arm-ir:broadcast value) '()]
     [(arm-ir:build-vec base stride len) '()]
+    [(arm-ir:combine sub-expr0 sub-expr1 read-tbl) (list sub-expr0 sub-expr1)]
 
     [(arm-ir:cast expr type saturate?) (list expr)]
     [(arm-ir:abs expr saturate? output-type) (list expr)]

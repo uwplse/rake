@@ -160,6 +160,14 @@
           ; Then use a new load-data node as the sub-expr
           (arm-ir:vs-mpy-add (get-node-id) (mk-load-instr halide-expr) (list (int8_t (bv 1 8)) (int8_t (bv 1 8))) (halide:elem-type halide-expr))
           '())
+        (mk-vs-mpy-add-combine-subsubexprs ;; Extend sub-sub-exprs (combine them)
+          lifted-sub-exprs
+          (list (int8_t (bv 1 8)) (int8_t (bv 1 8)))
+          (halide:elem-type halide-expr))
+        (mk-vs-mpy-add-combine-subexprs    ;; Extend both of the sub-exprs (combine them)
+          lifted-sub-exprs
+          (list (int8_t (bv 1 8)) (int8_t (bv 1 8)))
+          (halide:elem-type halide-expr))
       ))]
 
     [_ (error "NYI: Please define a (extend) grammar for halide node:" halide-expr)]))
@@ -209,3 +217,34 @@
 
 (define (subexprs-are-loads? lifted-sub-exprs)
   (andmap arm-ir:load-data? lifted-sub-exprs))
+
+(define (mk-vs-mpy-add-combine-subexprs lifted-sub-exprs weights output-type)
+  (cond
+    [(eq? (length lifted-sub-exprs) 2)
+     (arm-ir:vs-mpy-add (get-node-id) (mk-combine-instr lifted-sub-exprs) weights output-type)]
+    [else '()]))
+
+(define (mk-combine-instr lifted-sub-exprs)
+  (cond
+    [(eq? (length lifted-sub-exprs) 2)
+      (define read-tbl (map (lambda (i) (define-symbolic* idx integer?) (define-symbolic* c boolean?) (cons idx c)) (range 25)))
+      (arm-ir:combine (get-load-id) (list-ref lifted-sub-exprs 0) (list-ref lifted-sub-exprs 1) read-tbl)]
+    [else '()]))
+
+(define (mk-vs-mpy-add-combine-subsubexprs lifted-sub-exprs weights output-type)
+  (cond
+    [(eq? (length lifted-sub-exprs) 2)
+     (let ([sub-exprs0 (arm-ir:get-subexprs (list-ref lifted-sub-exprs 0))])
+       (let ([sub-exprs1 (arm-ir:get-subexprs (list-ref lifted-sub-exprs 1))])
+         (list
+          (arm-ir:vs-mpy-add (get-node-id) (mk-combine-instr2 sub-exprs0 sub-exprs1) weights output-type)
+          (arm-ir:vs-mpy-add (get-node-id) (mk-combine-instr2 sub-exprs0 (list (second lifted-sub-exprs))) weights output-type)
+          (arm-ir:vs-mpy-add (get-node-id) (mk-combine-instr2 (list (first lifted-sub-exprs)) sub-exprs1) weights output-type))))]
+    [else '()]))
+
+(define (mk-combine-instr2 lifted-sub-exprs0 lifted-sub-exprs1)
+  (cond
+    [(and (not (empty? lifted-sub-exprs0)) (not (empty? lifted-sub-exprs1)))
+      (define read-tbl (map (lambda (i) (define-symbolic* idx integer?) (define-symbolic* c boolean?) (cons idx c)) (range 25)))
+      (arm-ir:combine (get-load-id) (first lifted-sub-exprs0) (first lifted-sub-exprs1) read-tbl)]
+    [else '()]))
