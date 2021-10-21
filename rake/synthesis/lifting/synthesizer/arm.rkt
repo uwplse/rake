@@ -43,12 +43,12 @@
   (define-values (optimized-template optimized-halide-expr inferred-axioms abstr-value-bounds)
     (optimize-arm-query halide-expr template translation-history value-bounds))
 
-  (pretty-print inferred-axioms)
-  (pretty-print optimized-halide-expr)
-  (pretty-print optimized-template)
+  ;(pretty-print inferred-axioms)
+  ;(pretty-print optimized-halide-expr)
+  ;(pretty-print optimized-template)
 
-  (pretty-print ((halide:interpret optimized-halide-expr) 0))
-  (pretty-print ((arm-ir:interpret optimized-template) 0))
+  ;(pretty-print ((halide:interpret optimized-halide-expr) 0))
+  ;(pretty-print ((arm-ir:interpret optimized-template) 0))
 
   (cond
     [(subset? (symbolics optimized-halide-expr) (symbolics optimized-template))

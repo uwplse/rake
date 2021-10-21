@@ -2,7 +2,7 @@
 
 (require
   rake/internal/error
-  racket/base
+  (only-in racket/base values)
 )
 
 (provide (prefix-out arm-ir: (all-defined-out)))
