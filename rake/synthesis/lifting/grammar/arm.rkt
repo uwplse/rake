@@ -180,11 +180,7 @@
   (assert (eq? (length sub-expr) (length mul-scalars)))
   (cond
     [(empty? mul-scalars) '()]
-    [else
-     (define a (arm-ir:vs-mpy-add (get-node-id) sub-expr (list (apply choose* mul-scalars)) output-type))
-     (display "got here!\n") a]))
-
-
+    [else (arm-ir:vs-mpy-add (get-node-id) sub-expr (list (apply choose* mul-scalars)) output-type)]))
 
 ;;;;;;;;;; Helper functions taken from hvx.rkt ;;;;;;;;;;;;;;
 
