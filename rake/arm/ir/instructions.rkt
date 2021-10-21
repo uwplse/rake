@@ -2,8 +2,19 @@
 
 (provide (prefix-out arm-ir: (all-defined-out)))
 
+(require (only-in racket/struct make-constructor-style-printer))
+
 (struct ast-node (id))
 (struct abstr-expr (orig-expr abstr-vals))
+
+(struct combine (sub-expr0 sub-expr1 read-tbl)
+  #:super struct:ast-node
+  #:transparent
+  #:methods gen:custom-write
+  [(define write-proc
+     (make-constructor-style-printer
+      (lambda (obj) `combine)
+      (lambda (obj) (list (combine-sub-expr0 obj) (combine-sub-expr1 obj)))))])
 
 ;; Constructors
 (struct load-data (live-data gather-tbl) #:super struct:ast-node)                            ;; Load vector from memory
