@@ -116,7 +116,7 @@
      ;; Explore folding templates in increasing cost (cost is defined as the number if IR instructions)
      (define sorted-templates
        (sort (append fold-templates repl-templates) (lambda (t1 t2) (< (instr-counter t1) (instr-counter t2)))))
-     
+
      (define bounded-eq? (if (interleave? halide-expr) bounded-eq-1? bounded-eq-0?))
      (define-values (success? folded-ir-expr)
        (synthesize-translation sorted-templates halide-expr axioms context bounded-eq?))

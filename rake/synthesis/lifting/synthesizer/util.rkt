@@ -41,7 +41,8 @@
 ;;;;;;;;;;;;;;;;;;;; ARM ;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (define (useful-to-abstract? arm-expr)
-  (and (not (arm-ir:load-data? arm-expr)) (not (arm-ir:broadcast? arm-expr))))
+  (println arm-expr)
+  (not (or (union? arm-expr) (arm-ir:load-data? arm-expr) (arm-ir:broadcast? arm-expr))))
 
 (define (make-abstr-arm-ir-expr sub-expr abstracted-halide-subexpr)
   (arm-ir:abstr-expr sub-expr (abstr-halide-expr-abstr-vals abstracted-halide-subexpr)))

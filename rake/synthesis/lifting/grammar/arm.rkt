@@ -19,7 +19,7 @@
 ;; the current IR-expression. In these tempalates, we do not
 ;; change any uber-instruction in the IR expression, only their
 ;; inputs.
-(define (fold-grammar lifted-sub-expr lifted-sibling-exprs halide-expr [depth 0])
+(define (fold-grammar lifted-sub-expr halide-expr [depth 0])
   (define candidates
     (destruct lifted-sub-expr
 
@@ -54,11 +54,12 @@
           (list
            (arm-ir:vs-mpy-add (get-node-id) updated-sub-expr (append weights (list f)) (halide:elem-type halide-expr))
            ;; Fold sibling node into sub-exprs (combine them)
-           (arm-ir:vs-mpy-add
-            (get-node-id)
-            (arm-ir:combine updated-sub-expr (apply choose* lifted-sibling-exprs)
-            (append weights (list (int8_t (bv 1 8))))
-            (halide:elem-type halide-expr))))]
+           ;(arm-ir:vs-mpy-add
+            ;(get-node-id)
+            ;(arm-ir:combine updated-sub-expr (apply choose* lifted-sibling-exprs)
+            ;(append weights (list (int8_t (bv 1 8))))
+            ;(halide:elem-type halide-expr)))
+           )]
          [else (error "Need more options for:\n" halide-expr)])
 
       ;  (error "NYI: Please define a (fold) grammar for IR Expr:" lifted-sub-expr halide-expr)
@@ -160,11 +161,12 @@
           ; Then use a new load-data node as the sub-expr
           (arm-ir:vs-mpy-add (get-node-id) (mk-load-instr halide-expr) (list (int8_t (bv 1 8)) (int8_t (bv 1 8))) (halide:elem-type halide-expr))
           '())
-        (mk-vs-mpy-add-combine-subsubexprs ;; Extend sub-sub-exprs (combine them)
-          lifted-sub-exprs
-          (list (int8_t (bv 1 8)) (int8_t (bv 1 8)))
-          (halide:elem-type halide-expr))
-        (mk-vs-mpy-add-combine-subexprs    ;; Extend both of the sub-exprs (combine them)
+         ;; Disabling temporarily
+         ;(mk-vs-mpy-add-combine-subsubexprs ;; Extend sub-sub-exprs (combine them)
+          ;lifted-sub-exprs
+          ;(list (int8_t (bv 1 8)) (int8_t (bv 1 8)))
+          ;(halide:elem-type halide-expr))
+         (mk-vs-mpy-add-combine-subexprs    ;; Extend both of the sub-exprs (combine them)
           lifted-sub-exprs
           (list (int8_t (bv 1 8)) (int8_t (bv 1 8)))
           (halide:elem-type halide-expr))
