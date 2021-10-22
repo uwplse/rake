@@ -23,6 +23,8 @@
   (define candidates
     (destruct lifted-sub-expr
 
+      [(arm-ir:combine sub-expr0 sub-expr1 read-tbl) '()]
+              
       [(arm-ir:broadcast value) '()]
       [(arm-ir:build-vec base stride len) '()]
 
@@ -88,9 +90,9 @@
 
       [_ (error "NYI: Please define a (fold) grammar for IR Expr:" lifted-sub-expr halide-expr)]))
 
-  ;(cond
-    ;[(eq? depth 0) candidates]
-    ;[else (flatten (append (map (lambda (se) (fold-grammar se halide-expr (- depth 1))) (arm-ir:get-subexprs lifted-sub-expr)) candidates))])
+  (cond
+    [(eq? depth 0) candidates]
+    [else (flatten (append (map (lambda (se) (fold-grammar se lifted-sibling-exprs halide-expr (- depth 1))) (arm-ir:get-subexprs lifted-sub-expr)) candidates))])
 
   candidates)
 
@@ -204,7 +206,11 @@
         (if (subexprs-are-loads? lifted-sub-exprs)
           (arm-ir:vs-mpy-add (get-node-id) (mk-load-instr halide-expr) (list (int8_t (bv 1 8)) (int8_t (bv 1 8))) (halide:elem-type halide-expr))
           (arm-ir:vs-mpy-add (get-node-id) (apply choose* lifted-sub-exprs) (list (int8_t (bv 1 8)) (int8_t (bv 1 8))) (halide:elem-type halide-expr)))
-      ))]
+        ;; Extend both of the sub-exprs (combine them)
+        (mk-vs-mpy-add-combine-subexprs    
+          lifted-sub-exprs
+          (list (int8_t (bv 1 8)) (int8_t (bv 1 8)))
+          (halide:elem-type halide-expr))))]
 
     [(vec-div v1 v2)
      (define shr-scalars (halide:extract-shr-scalars halide-expr))
