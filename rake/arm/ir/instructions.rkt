@@ -59,5 +59,11 @@
 (struct abs-diff (expr0 expr1 widening? outT) #:super struct:ast-node #:transparent)         ;; Instructions: sabd, sabdl, uabd, uabdl
 (struct abs-diff-acc (acc expr0 expr1 widening?) #:super struct:ast-node #:transparent)      ;; Instructions: saba, sabal, uaba, uabal
 
-; Bitwise ops
-(struct bitwise-and (expr0 expr1) #:super struct:ast-node #:transparent)                     ;; Instructions: and
+;; =======================
+
+(struct select (expr0 expr1 expr2) #:super struct:ast-node #:transparent)
+(struct is-equal (expr0 expr1) #:super struct:ast-node #:transparent)
+(struct less-than (expr0 expr1) #:super struct:ast-node #:transparent)
+(struct less-than-eq (expr0 expr1) #:super struct:ast-node #:transparent)
+
+(struct bitwise-and (expr0 expr1) #:super struct:ast-node #:transparent)

@@ -428,9 +428,9 @@
      (lambda (i)
        (list-ref (list-ref live-data curr-cn) (list-ref gather-tbl i)))]
 
-    [(arm-ir:combine sub-expr0 sub-expr1 read-tbl)
-     (define input0 (interpret sub-expr0))
-     (define input1 (interpret sub-expr1))
+    [(arm-ir:combine expr0 expr1 read-tbl)
+     (define input0 (interpret expr0))
+     (define input1 (interpret expr1))
      (lambda (i)
        (define idx (car (list-ref read-tbl i)))
        (define c (cdr (list-ref read-tbl i)))
@@ -581,6 +581,54 @@
                 [value1 (input1 i)])
               (bitwise-and-impl value0 value1)))]
 
+    [(arm-ir:select expr0 expr1 expr2)
+     (define input0 (interpret expr0))
+     (define input1 (interpret expr1))
+     (define input2 (interpret expr2))
+     (lambda (i) (if (cpp:eval (input0 i)) (input1 i) (input2 i)))]
+    
+    [(arm-ir:less-than expr0 expr1)
+     (define input0 (interpret expr0))
+     (define input1 (interpret expr1))
+     (lambda (i)
+       (define lhs (input0 i))
+       (define rhs (input1 i))
+       (destruct* (lhs rhs)
+         [((uint8_t v0) (uint8_t v1)) (uint1_t (bvult v0 v1))]
+         [((uint16_t v0) (uint16_t v1)) (uint1_t (bvult v0 v1))]
+         [((uint32_t v0) (uint32_t v1)) (uint1_t (bvult v0 v1))]
+         [((int8_t v0) (int8_t v1)) (uint1_t (bvslt v0 v1))]
+         [((int16_t v0) (int16_t v1)) (uint1_t (bvslt v0 v1))]
+         [((int32_t v0) (int32_t v1)) (uint1_t (bvslt v0 v1))]))]
+
+    [(arm-ir:is-equal expr0 expr1)
+     (define input0 (interpret expr0))
+     (define input1 (interpret expr1))
+     (lambda (i)
+       (define lhs (input0 i))
+       (define rhs (input1 i))
+       (destruct* (lhs rhs)
+         [((uint8_t v0) (uint8_t v1)) (uint1_t (bveq v0 v1))]
+         [((uint16_t v0) (uint16_t v1)) (uint1_t (bveq v0 v1))]
+         [((uint32_t v0) (uint32_t v1)) (uint1_t (bveq v0 v1))]
+         [((int8_t v0) (int8_t v1)) (uint1_t (bveq v0 v1))]
+         [((int16_t v0) (int16_t v1)) (uint1_t (bveq v0 v1))]
+         [((int32_t v0) (int32_t v1)) (uint1_t (bveq v0 v1))]))]
+
+    [(arm-ir:less-than-eq expr0 expr1)
+     (define input0 (interpret expr0))
+     (define input1 (interpret expr1))
+     (lambda (i)
+       (define lhs (input0 i))
+       (define rhs (input1 i))
+       (destruct* (lhs rhs)
+         [((uint8_t v0) (uint8_t v1)) (uint1_t (bvule v0 v1))]
+         [((uint16_t v0) (uint16_t v1)) (uint1_t (bvule v0 v1))]
+         [((uint32_t v0) (uint32_t v1)) (uint1_t (bvule v0 v1))]
+         [((int8_t v0) (int8_t v1)) (uint1_t (bvsle v0 v1))]
+         [((int16_t v0) (int16_t v1)) (uint1_t (bvsle v0 v1))]
+         [((int32_t v0) (int32_t v1)) (uint1_t (bvsle v0 v1))]))]
+
     [_ p]
     ;[_ (error "No way to interpret expr:" p)]
     ))
@@ -591,7 +639,7 @@
     [(arm-ir:load-data live-data gather-tbl) 0]
     [(arm-ir:broadcast value) 1]
     [(arm-ir:build-vec base stride len) 1]
-    [(arm-ir:combine sub-expr0 sub-expr1 read-tbl) (+ (instr-count sub-expr0) (instr-count sub-expr1) 1)]
+    [(arm-ir:combine expr0 expr1 read-tbl) (+ (instr-count expr0) (instr-count expr1) 1)]
 
     [(arm-ir:cast expr type saturate?) (+ (instr-count expr) 1)]
     [(arm-ir:abs expr saturate? outT) (+ (instr-count expr) 1)]
@@ -637,7 +685,7 @@
       [(arm-ir:load-data live-data gather-tbl) (handler ir-expr)]
       [(arm-ir:broadcast value) (handler ir-expr)]
       [(arm-ir:build-vec base stride len) (handler ir-expr)]
-      [(arm-ir:combine sub-expr0 sub-expr1 read-tbl) (handler (arm-ir:combine (arm-ir:ast-node-id ir-expr) (visit sub-expr0 handler) (visit sub-expr1 handler) read-tbl))]
+      [(arm-ir:combine expr0 expr1 read-tbl) (handler (arm-ir:combine (arm-ir:ast-node-id ir-expr) (visit expr0 handler) (visit expr1 handler) read-tbl))]
 
       [(arm-ir:cast expr type saturate?) (handler (arm-ir:cast (arm-ir:ast-node-id ir-expr) (visit expr handler) type saturate?))]
       [(arm-ir:abs expr saturate? output-type) (handler (arm-ir:abs (arm-ir:ast-node-id ir-expr) (visit expr handler) saturate? output-type))]
@@ -675,6 +723,13 @@
 
       [(arm-ir:bitwise-and expr0 expr1) (handler (arm-ir:bitwise-and (arm-ir:ast-node-id ir-expr) (visit expr0 handler) (visit expr1 handler)))]
 
+      [(arm-ir:select expr0 expr1 expr2) (handler (arm-ir:select (arm-ir:ast-node-id ir-expr) (visit expr0 handler) (visit expr1 handler) (visit expr2 handler)))]
+      [(arm-ir:is-equal expr0 expr1) (handler (arm-ir:is-equal (arm-ir:ast-node-id ir-expr) (visit expr0 handler) (visit expr1 handler)))]
+      [(arm-ir:less-than expr0 expr1) (handler (arm-ir:less-than (arm-ir:ast-node-id ir-expr) (visit expr0 handler) (visit expr1 handler)))]
+      [(arm-ir:less-than-eq expr0 expr1) (handler (arm-ir:less-than-eq (arm-ir:ast-node-id ir-expr) (visit expr0 handler) (visit expr1 handler)))]
+
+      [(arm-ir:bitwise-and expr0 expr1) (handler (arm-ir:bitwise-and (arm-ir:ast-node-id ir-expr) (visit expr0 handler) (visit expr1 handler)))]
+      
       [_ (error "Need to implement arm-ir:visit" ir-expr)]))
 
 (define (get-subexprs ir-expr)
@@ -682,7 +737,7 @@
     [(arm-ir:load-data live-data gather-tbl) '()]
     [(arm-ir:broadcast value) '()]
     [(arm-ir:build-vec base stride len) '()]
-    [(arm-ir:combine sub-expr0 sub-expr1 read-tbl) (list sub-expr0 sub-expr1)]
+    [(arm-ir:combine expr0 expr1 read-tbl) (list expr0 expr1)]
 
     [(arm-ir:cast expr type saturate?) (list expr)]
     [(arm-ir:abs expr saturate? output-type) (list expr)]
@@ -716,6 +771,11 @@
 
     [(arm-ir:abs-diff expr0 expr1 widening? outT) (list expr0 expr1)]
     [(arm-ir:abs-diff-acc acc expr0 expr1 widening?) (list acc expr0 expr1)]
+
+    [(arm-ir:select expr0 expr1 expr2) (list expr0 expr1 expr2)]
+    [(arm-ir:is-equal expr0 expr1) (list expr0 expr1)]
+    [(arm-ir:less-than expr0 expr1) (list expr0 expr1)]
+    [(arm-ir:less-than-eq expr0 expr1) (list expr0 expr1)]
 
     [(arm-ir:bitwise-and expr0 expr1) (list expr0 expr1)]
 
