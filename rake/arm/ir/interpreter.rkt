@@ -379,6 +379,13 @@
         (mk-cpp-expr (list-ref parts 0) interm-type)
         (mk-cpp-expr (apply bvadd parts) interm-type))))
 
+(define (bitwise-and-impl lhs rhs)
+  (let* ([type (cpp:type lhs)]
+         [a (cpp:eval lhs)]
+         [b (cpp:eval rhs)]
+         [value (bvand a b)])
+      (mk-cpp-expr value type)))
+
 (define (interpret p)
   (destruct p
 
@@ -566,6 +573,14 @@
 
     ; TODO: abs-diff-acc
 
+    [(arm-ir:bitwise-and expr0 expr1)
+      (define input0 (interpret expr0))
+      (define input1 (interpret expr1))
+        (lambda (i)
+          (let ([value0 (input0 i)]
+                [value1 (input1 i)])
+              (bitwise-and-impl value0 value1)))]
+
     [_ p]
     ;[_ (error "No way to interpret expr:" p)]
     ))
@@ -611,6 +626,8 @@
     [(arm-ir:abs-diff expr0 expr1 widening? outT) (+ (instr-count expr0) (instr-count expr1) 1)]
     [(arm-ir:abs-diff-acc acc expr0 expr1 widening?) (+ (instr-count acc) (instr-count expr0) (instr-count expr1) 1)]
 
+    [(arm-ir:bitwise-and expr0 expr1) (+ (instr-count expr0) (instr-count expr1) 1)]
+
     [_ (error "instr-count not implemented for ir-expr: " ir-expr)]))
 
 
@@ -655,7 +672,8 @@
 
       [(arm-ir:abs-diff expr0 expr1 widening? outT) (handler (arm-ir:abs-diff (arm-ir:ast-node-id ir-expr) (visit expr0 handler) (visit expr1 handler) widening? outT))]
       [(arm-ir:abs-diff-acc acc expr0 expr1 widening?) (handler (arm-ir:abs-diff-acc (arm-ir:ast-node-id ir-expr) (visit acc handler) (visit expr0 handler) (visit expr1 handler) widening?))]
-      ; [(arm-ir:abs-diff-acc acc expr0 expr1 widening?) (list acc expr0 expr1)]
+
+      [(arm-ir:bitwise-and expr0 expr1) (handler (arm-ir:bitwise-and (arm-ir:ast-node-id ir-expr) (visit expr0 handler) (visit expr1 handler)))]
 
       [_ (error "Need to implement arm-ir:visit" ir-expr)]))
 
@@ -698,5 +716,7 @@
 
     [(arm-ir:abs-diff expr0 expr1 widening? outT) (list expr0 expr1)]
     [(arm-ir:abs-diff-acc acc expr0 expr1 widening?) (list acc expr0 expr1)]
+
+    [(arm-ir:bitwise-and expr0 expr1) (list expr0 expr1)]
 
     [_ (error "Need to implement get-subexprs" ir-expr)]))

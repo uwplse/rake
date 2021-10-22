@@ -62,7 +62,6 @@
            )]
          [else '()])
 
-      ;  (error "NYI: Please define a (fold) grammar for IR Expr:" lifted-sub-expr halide-expr)
        ]
 
       [(arm-ir:vs-shift-right sub-expr shift round? saturate? signed? outT)
@@ -77,7 +76,11 @@
         ;; Try updating the rounding flag / saturation flag / output-type
         (arm-ir:vs-shift-right (get-node-id) sub-expr shift (choose* #t #f) (choose* #t #f) signed? wider-type))]
 
+      [(arm-ir:bitwise-and expr0 expr1) '()]
     
+      [(arm-ir:maximum expr0 expr1) '()]
+      [(arm-ir:minimum expr0 expr1) '()]
+
       [_ (error "NYI: Please define a (fold) grammar for IR Expr:" lifted-sub-expr halide-expr)]))
 
   ;(cond
@@ -112,6 +115,24 @@
         ))]
 
       [(arm-ir:vs-shift-right sub-expr const-val round? saturate? signed? output-type) '()]
+
+      [(arm-ir:bitwise-and expr0 expr1) '()]
+
+      ; TODO: HVX also tries to replace with addition by a constant, should we do that here too?
+      [(arm-ir:maximum expr0 expr1)
+       (flatten
+        (list
+         ;; Replace with saturation
+         (mk-saturate-instr expr0 (halide:elem-type halide-expr))
+         (mk-saturate-instr expr1 (halide:elem-type halide-expr))))]
+
+      ; TODO: HVX also tries to replace with addition by a constant, should we do that here too?
+      [(arm-ir:minimum expr0 expr1)
+       (flatten
+        (list
+         ;; Replace with saturation
+         (mk-saturate-instr expr0 (halide:elem-type halide-expr))
+         (mk-saturate-instr expr1 (halide:elem-type halide-expr))))]
 
       [_ (error "NYI: Please define a (repl) grammar for IR Expr:" lifted-sub-expr halide-expr)]))
 
@@ -203,6 +224,11 @@
       ;  (mk-vs-div-instr (first lifted-sub-exprs) div-scalars (halide:elem-type halide-expr))
       ))]
 
+    [(vec-bwand v1 v2) (if (eq? (length lifted-sub-exprs) 2) (list (arm-ir:bitwise-and (get-node-id) (list-ref lifted-sub-exprs 0) (list-ref lifted-sub-exprs 1))) '())]
+
+    [(vec-min v1 v2) (if (eq? (length lifted-sub-exprs) 2) (list (arm-ir:minimum (get-node-id) (list-ref lifted-sub-exprs 0) (list-ref lifted-sub-exprs 1))) '())]
+    [(vec-max v1 v2) (if (eq? (length lifted-sub-exprs) 2) (list (arm-ir:maximum (get-node-id) (list-ref lifted-sub-exprs 0) (list-ref lifted-sub-exprs 1))) '())]
+
     [_ (error "NYI: Please define a (extend) grammar for halide node:" halide-expr)]))
 
 (define arm-uber-instructions (lifting-ir fold-grammar repl-grammar extend-grammar))
@@ -287,3 +313,5 @@
     [(empty? shr-scalars) '()]
     [else (arm-ir:vs-shift-right (get-node-id) sub-expr (apply choose* shr-scalars) round? saturate? signed? output-type)]))
 
+(define (mk-saturate-instr sub-expr out-type)
+  (arm-ir:cast (get-node-id) sub-expr out-type #t))
