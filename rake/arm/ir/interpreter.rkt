@@ -566,6 +566,70 @@
 
     ; TODO: abs-diff-acc
 
+    [(arm-ir:select sub-expr0 sub-expr1 sub-expr2)
+     (define input0 (interpret sub-expr0))
+     (define input1 (interpret sub-expr1))
+     (define input2 (interpret sub-expr2))
+     (lambda (i) (if (cpp:eval (input0 i)) (input1 i) (input2 i)))]
+    
+    [(arm-ir:less-than sub-expr0 sub-expr1)
+     (define input0 (interpret sub-expr0))
+     (define input1 (interpret sub-expr1))
+     (lambda (i)
+       (define lhs (input0 i))
+       (define rhs (input1 i))
+       (destruct* (lhs rhs)
+         [((uint8_t v0) (uint8_t v1)) (uint1_t (bvult v0 v1))]
+         [((uint16_t v0) (uint16_t v1)) (uint1_t (bvult v0 v1))]
+         [((uint32_t v0) (uint32_t v1)) (uint1_t (bvult v0 v1))]
+         [((int8_t v0) (int8_t v1)) (uint1_t (bvslt v0 v1))]
+         [((int16_t v0) (int16_t v1)) (uint1_t (bvslt v0 v1))]
+         [((int32_t v0) (int32_t v1)) (uint1_t (bvslt v0 v1))]))]
+
+    [(arm-ir:is-equal sub-expr0 sub-expr1)
+     (define input0 (interpret sub-expr0))
+     (define input1 (interpret sub-expr1))
+     (lambda (i)
+       (define lhs (input0 i))
+       (define rhs (input1 i))
+       (destruct* (lhs rhs)
+         [((uint8_t v0) (uint8_t v1)) (uint1_t (bveq v0 v1))]
+         [((uint16_t v0) (uint16_t v1)) (uint1_t (bveq v0 v1))]
+         [((uint32_t v0) (uint32_t v1)) (uint1_t (bveq v0 v1))]
+         [((int8_t v0) (int8_t v1)) (uint1_t (bveq v0 v1))]
+         [((int16_t v0) (int16_t v1)) (uint1_t (bveq v0 v1))]
+         [((int32_t v0) (int32_t v1)) (uint1_t (bveq v0 v1))]))]
+
+    [(arm-ir:less-than-eq sub-expr0 sub-expr1)
+     (define input0 (interpret sub-expr0))
+     (define input1 (interpret sub-expr1))
+     (lambda (i)
+       (define lhs (input0 i))
+       (define rhs (input1 i))
+       (destruct* (lhs rhs)
+         [((uint8_t v0) (uint8_t v1)) (uint1_t (bvule v0 v1))]
+         [((uint16_t v0) (uint16_t v1)) (uint1_t (bvule v0 v1))]
+         [((uint32_t v0) (uint32_t v1)) (uint1_t (bvule v0 v1))]
+         [((int8_t v0) (int8_t v1)) (uint1_t (bvsle v0 v1))]
+         [((int16_t v0) (int16_t v1)) (uint1_t (bvsle v0 v1))]
+         [((int32_t v0) (int32_t v1)) (uint1_t (bvsle v0 v1))]))]
+
+    [(arm-ir:bitwise-and sub-expr0 sub-expr1)
+     (define input0 (interpret sub-expr0))
+     (define input1 (interpret sub-expr1))
+     (lambda (i)
+       (define lhs (input0 i))
+       (define rhs (input1 i))
+       (destruct* (lhs rhs)
+         [((uint8_t v0) (uint8_t v1)) (uint8_t (bvand v0 v1))]
+         [((uint16_t v0) (uint16_t v1)) (uint16_t (bvand v0 v1))]
+         [((uint32_t v0) (uint32_t v1)) (uint32_t (bvand v0 v1))]
+         [((uint64_t v0) (uint64_t v1)) (uint64_t (bvand v0 v1))]
+         [((int8_t v0) (int8_t v1)) (int8_t (bvand v0 v1))]
+         [((int16_t v0) (int16_t v1)) (int16_t (bvand v0 v1))]
+         [((int32_t v0) (int32_t v1)) (int32_t (bvand v0 v1))]
+         [((int64_t v0) (int64_t v1)) (int64_t (bvand v0 v1))]))]
+    
     [_ p]
     ;[_ (error "No way to interpret expr:" p)]
     ))
@@ -657,6 +721,13 @@
       [(arm-ir:abs-diff-acc acc expr0 expr1 widening?) (handler (arm-ir:abs-diff-acc (arm-ir:ast-node-id ir-expr) (visit acc handler) (visit expr0 handler) (visit expr1 handler) widening?))]
       ; [(arm-ir:abs-diff-acc acc expr0 expr1 widening?) (list acc expr0 expr1)]
 
+      [(arm-ir:select sub-expr0 sub-expr1 sub-expr2) (handler (arm-ir:select (arm-ir:ast-node-id ir-expr) (visit sub-expr0 handler) (visit sub-expr1 handler) (visit sub-expr2 handler)))]
+      [(arm-ir:is-equal sub-expr0 sub-expr1) (handler (arm-ir:is-equal (arm-ir:ast-node-id ir-expr) (visit sub-expr0 handler) (visit sub-expr1 handler)))]
+      [(arm-ir:less-than sub-expr0 sub-expr1) (handler (arm-ir:less-than (arm-ir:ast-node-id ir-expr) (visit sub-expr0 handler) (visit sub-expr1 handler)))]
+      [(arm-ir:less-than-eq sub-expr0 sub-expr1) (handler (arm-ir:less-than-eq (arm-ir:ast-node-id ir-expr) (visit sub-expr0 handler) (visit sub-expr1 handler)))]
+
+      [(arm-ir:bitwise-and sub-expr0 sub-expr1) (handler (arm-ir:bitwise-and (arm-ir:ast-node-id ir-expr) (visit sub-expr0 handler) (visit sub-expr1 handler)))]
+      
       [_ (error "Need to implement arm-ir:visit" ir-expr)]))
 
 (define (get-subexprs ir-expr)
@@ -698,5 +769,12 @@
 
     [(arm-ir:abs-diff expr0 expr1 widening? outT) (list expr0 expr1)]
     [(arm-ir:abs-diff-acc acc expr0 expr1 widening?) (list acc expr0 expr1)]
+
+    [(arm-ir:select sub-expr0 sub-expr1 sub-expr2) (list sub-expr0 sub-expr1 sub-expr2)]
+    [(arm-ir:is-equal sub-expr0 sub-expr1) (list sub-expr0 sub-expr1)]
+    [(arm-ir:less-than sub-expr0 sub-expr1) (list sub-expr0 sub-expr1)]
+    [(arm-ir:less-than-eq sub-expr0 sub-expr1) (list sub-expr0 sub-expr1)]
+
+    [(arm-ir:bitwise-and sub-expr0 sub-expr1) (list sub-expr0 sub-expr1)]
 
     [_ (error "Need to implement get-subexprs" ir-expr)]))
