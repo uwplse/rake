@@ -104,7 +104,7 @@
 
      ;; Step 1: Folding.
      ;; Can we fold the new node into the **existing** sequence of IR instructions?
-     (define fold-templates (fold-into-subexprs lifted-sub-exprs halide-expr uber-instrs))
+     (define fold-templates (fold-into-subexprs lifted-sub-exprs lifted-sub-exprs halide-expr uber-instrs))
 
      ;; Can we fold the new node into a **modified** version of the existing IR
      ;; instruction sequence? We restrict modifications such that:
@@ -134,17 +134,17 @@
           [else (error "synthesis\\lifting\\greedy-ir-lifted.rkt: FOLD-REPLACE-EXTEND algorithm failed to lift the halide expression:" halide-expr)])])]))
 
 ;; Folding IR expressions
-(define (fold-into-subexprs lifted-sub-exprs halide-expr uber-instrs)
+(define (fold-into-subexprs lifted-sub-exprs lifted-sibling-exprs halide-expr uber-instrs)
   (cond
     [(empty? lifted-sub-exprs) '()]
     [else
      (append
-      (fold-into-subexpr (first lifted-sub-exprs) halide-expr uber-instrs)
-      (fold-into-subexprs (rest lifted-sub-exprs) halide-expr uber-instrs))]))
+      (fold-into-subexpr (first lifted-sub-exprs) lifted-sibling-exprs halide-expr uber-instrs)
+      (fold-into-subexprs (rest lifted-sub-exprs) lifted-sibling-exprs halide-expr uber-instrs))]))
 
-(define (fold-into-subexpr lifted-sub-expr halide-expr uber-instrs)
+(define (fold-into-subexpr lifted-sub-expr lifted-sibling-exprs halide-expr uber-instrs)
   (define grm-generator (lifting-ir-fold-grammar uber-instrs))
-  (define templates (grm-generator lifted-sub-expr halide-expr 2))
+  (define templates (grm-generator lifted-sub-expr lifted-sibling-exprs halide-expr 2))
   templates)
 
 ;; Updating IR expressions

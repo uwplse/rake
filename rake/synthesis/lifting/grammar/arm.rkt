@@ -19,7 +19,7 @@
 ;; the current IR-expression. In these tempalates, we do not
 ;; change any uber-instruction in the IR expression, only their
 ;; inputs.
-(define (fold-grammar lifted-sub-expr halide-expr [depth 0])
+(define (fold-grammar lifted-sub-expr lifted-sibling-exprs halide-expr [depth 0])
   (define candidates
     (destruct lifted-sub-expr
 
@@ -49,16 +49,16 @@
           (list (arm-ir:vs-mpy-add (get-node-id) expr weights wider-type))
          ]
          [(vec-add? halide-expr)
-          ;; Try folding the add by expanding the weight-matrix
           (define updated-sub-expr (update-input-data expr halide-expr))
           (list
+           ;; Try folding the add by expanding the weight-matrix
            (arm-ir:vs-mpy-add (get-node-id) updated-sub-expr (append weights (list f)) (halide:elem-type halide-expr))
            ;; Fold sibling node into sub-exprs (combine them)
-           ;(arm-ir:vs-mpy-add
-            ;(get-node-id)
-            ;(arm-ir:combine updated-sub-expr (apply choose* lifted-sibling-exprs)
-            ;(append weights (list (int8_t (bv 1 8))))
-            ;(halide:elem-type halide-expr)))
+           (arm-ir:vs-mpy-add
+            (get-node-id)
+            (mk-combine-instr (list updated-sub-expr (apply choose* lifted-sibling-exprs)))
+            (append weights (list (int8_t (bv 1 8))))
+            (halide:elem-type halide-expr))
            )]
          [else '()])
 
@@ -76,6 +76,16 @@
         (mk-shr-instr sub-expr shr-scalars round? saturate? signed? outT)
         ;; Try updating the rounding flag / saturation flag / output-type
         (arm-ir:vs-shift-right (get-node-id) sub-expr shift (choose* #t #f) (choose* #t #f) signed? wider-type))]
+
+      [(arm-ir:maximum sub-expr0 sub-expr1) '()]
+      [(arm-ir:minimum sub-expr0 sub-expr1) '()]
+      
+      [(arm-ir:select sub-expr0 sub-expr1 sub-expr2) '()]
+      [(arm-ir:is-equal sub-expr0 sub-expr1) '()]
+      [(arm-ir:less-than sub-expr0 sub-expr1) '()]
+      [(arm-ir:less-than-eq sub-expr0 sub-expr1) '()]
+      
+      [(arm-ir:bitwise-and v1 v2) '()]
 
     
       [_ (error "NYI: Please define a (fold) grammar for IR Expr:" lifted-sub-expr halide-expr)]))
@@ -112,6 +122,13 @@
         ))]
 
       [(arm-ir:vs-shift-right sub-expr const-val round? saturate? signed? output-type) '()]
+
+      [(arm-ir:select sub-expr0 sub-expr1 sub-expr2) '()]
+      [(arm-ir:is-equal sub-expr0 sub-expr1) (list (arm-ir:less-than-eq (get-node-id) sub-expr0 sub-expr1))]
+      [(arm-ir:less-than sub-expr0 sub-expr1) (list (arm-ir:less-than-eq (get-node-id) sub-expr0 sub-expr1))]
+      [(arm-ir:less-than-eq sub-expr0 sub-expr1) (list)]
+
+      [(arm-ir:bitwise-and v1 v2) '()]
 
       [_ (error "NYI: Please define a (repl) grammar for IR Expr:" lifted-sub-expr halide-expr)]))
 
@@ -169,21 +186,10 @@
      (define mul-scalars (halide:extract-mul-scalars halide-expr))
      (flatten
       (list
-        ; Try to extend using vector-scalar-multiply-add
-        (arm-ir:vs-mpy-add (get-node-id) (apply choose* lifted-sub-exprs) (list (int8_t (bv 1 8)) (int8_t (bv 1 8))) (halide:elem-type halide-expr))
+        ;; Try to extend using vector-scalar-multiply-add
         (if (subexprs-are-loads? lifted-sub-exprs)
-          ; Then use a new load-data node as the sub-expr
           (arm-ir:vs-mpy-add (get-node-id) (mk-load-instr halide-expr) (list (int8_t (bv 1 8)) (int8_t (bv 1 8))) (halide:elem-type halide-expr))
-          '())
-         ;; Disabling temporarily
-         ;(mk-vs-mpy-add-combine-subsubexprs ;; Extend sub-sub-exprs (combine them)
-          ;lifted-sub-exprs
-          ;(list (int8_t (bv 1 8)) (int8_t (bv 1 8)))
-          ;(halide:elem-type halide-expr))
-         (mk-vs-mpy-add-combine-subexprs    ;; Extend both of the sub-exprs (combine them)
-          lifted-sub-exprs
-          (list (int8_t (bv 1 8)) (int8_t (bv 1 8)))
-          (halide:elem-type halide-expr))
+          (arm-ir:vs-mpy-add (get-node-id) (apply choose* lifted-sub-exprs) (list (int8_t (bv 1 8)) (int8_t (bv 1 8))) (halide:elem-type halide-expr)))
       ))]
 
     [(vec-div v1 v2)
@@ -202,6 +208,12 @@
        ; TODO: make ARM IR for vec-div
       ;  (mk-vs-div-instr (first lifted-sub-exprs) div-scalars (halide:elem-type halide-expr))
       ))]
+
+    [(vec-min v1 v2) (if (eq? (length lifted-sub-exprs) 2) (list (arm-ir:minimum (get-node-id) (list-ref lifted-sub-exprs 0) (list-ref lifted-sub-exprs 1))) '())]
+    [(vec-max v1 v2) (if (eq? (length lifted-sub-exprs) 2) (list (arm-ir:maximum (get-node-id) (list-ref lifted-sub-exprs 0) (list-ref lifted-sub-exprs 1))) '())]
+    
+    [(vec-bwand v1 v2)
+     (if (eq? (length lifted-sub-exprs) 2) (list (arm-ir:bitwise-and (get-node-id) (list-ref lifted-sub-exprs 0) (list-ref lifted-sub-exprs 1))) '())]
 
     [_ (error "NYI: Please define a (extend) grammar for halide node:" halide-expr)]))
 
@@ -286,4 +298,3 @@
   (cond
     [(empty? shr-scalars) '()]
     [else (arm-ir:vs-shift-right (get-node-id) sub-expr (apply choose* shr-scalars) round? saturate? signed? output-type)]))
-
