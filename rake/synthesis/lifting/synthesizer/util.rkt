@@ -50,7 +50,7 @@
 (define (optimize-arm-query halide-expr template translation-history value-bounds)
   (define abstr-buff-bounds (make-hash))
   (define inferred-axioms (list))
-  (define sub-exprs (arm-ir:get-subexprs template))
+  (define sub-exprs (flatten (map (lambda (v) (if (arm-ir:combine? v) (list (arm-ir:combine-expr0 v) (arm-ir:combine-expr1 v)) v)) (arm-ir:get-subexprs template))))
   (define updated-spec halide-expr)
   (define updated-template template)
   (for-each
@@ -59,7 +59,6 @@
        (define equiv-halide-subexpr (hash-ref translation-history (arm-ir:ast-node-id sub-expr)))
        (define abstracted-halide-subexpr (make-abstr-halide-expr equiv-halide-subexpr))
        (define abstracted-arm-ir-subexpr (make-abstr-arm-ir-expr sub-expr abstracted-halide-subexpr))
-
        ;; Replace halide sub-expr with abstract node
        (define (abstract-subexpr-halide node)
          (cond

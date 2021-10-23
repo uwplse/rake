@@ -67,7 +67,7 @@
      ;(println sol)
      
      (when (correct? sol)
-       (pretty-print (evaluate template sol))
+       ;(pretty-print (evaluate template sol))
 
        (define e (evaluate optimized-template sol))
        (when (> (cpp:expr-bw ((arm-ir:interpret e) 0)) 1)
