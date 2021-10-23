@@ -4,6 +4,7 @@ HALIDE_DIR ?= ../../../rake-halide/distrib
 benchmarks = gaussian3x3 \
 			 gaussian5x5 \
 			 gaussian7x7 \
+			 conv3x3a16 \
 			 add
 
 bin_dirs = $(addsuffix /bin,$(benchmarks))
