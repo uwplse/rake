@@ -230,6 +230,28 @@
       ;  (mk-vs-div-instr (first lifted-sub-exprs) div-scalars (halide:elem-type halide-expr))
       ))]
 
+    [(vec-shl v1 v2)
+     (define mul-scalars (halide:extract-mul-scalars halide-expr))
+     (define shl-scalars (halide:extract-mul-scalars halide-expr))
+     (flatten
+      (list
+       ;; We can extend using either vector-scalar multiply-add
+       (mk-vs-mpy-add-instr (first lifted-sub-exprs) mul-scalars (halide:elem-type halide-expr))
+       ;; or shift-left
+       ;(mk-vs-shift-left-instr (first lifted-sub-exprs) shl-scalars)
+       ;(mk-vv-shift-left-instr lifted-sub-exprs)
+       ))]
+
+    [(vec-shr v1 v2)
+     (define shr-scalars (halide:extract-shr-scalars halide-expr))
+     (define output-type (halide:elem-type halide-expr))
+     (flatten
+      (list
+       ;; We can extend using a shift-right instruction
+       (mk-shr-instr (apply choose* lifted-sub-exprs) shr-scalars #f #f (cpp:signed-type? output-type) output-type)
+       ;(if (> (length lifted-sub-exprs) 1) (vv-shift-right (get-node-id) (first lifted-sub-exprs) (second lifted-sub-exprs) #f (cpp:signed-type? output-type)) '())
+       ))]
+
     [(vec-bwand v1 v2) (if (eq? (length lifted-sub-exprs) 2) (list (arm-ir:bitwise-and (get-node-id) (list-ref lifted-sub-exprs 0) (list-ref lifted-sub-exprs 1))) '())]
 
     [(vec-min v1 v2) (if (eq? (length lifted-sub-exprs) 2) (list (arm-ir:minimum (get-node-id) (list-ref lifted-sub-exprs 0) (list-ref lifted-sub-exprs 1))) '())]
