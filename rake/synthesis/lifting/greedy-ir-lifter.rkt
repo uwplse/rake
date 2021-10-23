@@ -2,7 +2,7 @@
 
 (require
   ;; This file uses these rosette unsafe ops, but they should be fine
-  (only-in racket/base values error for/list make-hash hash-has-key? hash-ref hash-set!)
+  (only-in racket/base values error sort for/list make-hash hash-has-key? hash-ref hash-set!)
   rake/internal/debug
   rake/halide
   rake/synthesis/spec
@@ -105,13 +105,15 @@
      ;; Step 1: Folding.
      ;; Can we fold the new node into the **existing** sequence of IR instructions?
      (define fold-templates (fold-into-subexprs lifted-sub-exprs lifted-sub-exprs halide-expr uber-instrs))
-
+     
      ;; Can we fold the new node into a **modified** version of the existing IR
      ;; instruction sequence? We restrict modifications such that:
      ;; - At most 1 IR instruction will  be changed.
      ;; - 0 or more IR instructions may be removed
      ;; - We only explore changing or removing the last N instructions in the sequence (N=3 atm)
      (define repl-templates (repl-subexprs lifted-sub-exprs halide-expr uber-instrs))
+
+     ;(pretty-print repl-templates)
 
      ;; Explore folding templates in increasing cost (cost is defined as the number if IR instructions)
      (define sorted-templates
