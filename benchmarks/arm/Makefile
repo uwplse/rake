@@ -1,7 +1,9 @@
-#HALIDE_DIR ?= ../../../rake-halide/distrib
-HALIDE_DIR ?= ../../../halide/distrib
+HALIDE_DIR ?= ../../../rake-halide/distrib
+#HALIDE_DIR ?= ../../../halide/distrib
 
-benchmarks = add
+benchmarks = gaussian3x3 \
+			 gaussian5x5 \
+			 add
 
 bin_dirs = $(addsuffix /bin,$(benchmarks))
 out_dirs = $(addsuffix /out,$(benchmarks))
