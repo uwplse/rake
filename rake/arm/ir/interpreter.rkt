@@ -729,6 +729,8 @@
       [(arm-ir:less-than-eq expr0 expr1) (handler (arm-ir:less-than-eq (arm-ir:ast-node-id ir-expr) (visit expr0 handler) (visit expr1 handler)))]
 
       [(arm-ir:bitwise-and expr0 expr1) (handler (arm-ir:bitwise-and (arm-ir:ast-node-id ir-expr) (visit expr0 handler) (visit expr1 handler)))]
+
+      [(arm-ir:abstr-expr orig-expr abstr-vals) (handler ir-expr)]
       
       [_ (error "Need to implement arm-ir:visit" ir-expr)]))
 
