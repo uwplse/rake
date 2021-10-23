@@ -45,11 +45,16 @@
        (cond
          [(halide:cast-op? halide-expr)
           ;; Try folding by updating the output type or the saturation flag saturate
-          (list
-           (arm-ir:vs-mpy-add (get-node-id) expr weights outT)
-           (if (arm-ir:combine? expr)
-               (arm-ir:add-sat (get-node-id) (arm-ir:combine-expr0 expr) (arm-ir:combine-expr1 expr))
-               (arm-ir:add-sat (get-node-id) expr expr)))]
+          (flatten
+            (list
+              (arm-ir:vs-mpy-add (get-node-id) expr weights outT)
+              (if (arm-ir:combine? expr)
+                (list
+                  (arm-ir:add-sat (get-node-id) (arm-ir:combine-expr0 expr) (arm-ir:combine-expr1 expr))
+                  (arm-ir:sub-sat (get-node-id) (arm-ir:combine-expr0 expr) (arm-ir:combine-expr1 expr)))
+                (list
+                  (arm-ir:add-sat (get-node-id) expr expr)
+                  (arm-ir:sub-sat (get-node-id) expr expr)))))]
          [(or (vec-mul? halide-expr) (vec-shl? halide-expr))
           ;; Try folding the mul by updating the weight-matrix
           (define castfn (match outT ['int8 int8x1] ['int16 int16x1] ['int32 int32x1] ['uint8 uint8x1] ['uint16 uint16x1] ['uint32 uint32x1]))
@@ -89,6 +94,9 @@
       [(arm-ir:less-than-eq expr0 expr1) '()]
       
       [(arm-ir:bitwise-and expr0 expr1) '()]
+
+      [(arm-ir:abs expr saturate? outT) '()]
+      [(arm-ir:abs-diff expr0 expr1 widening? outT) '()]
 
       [_ (error "NYI: Please define a (fold) grammar for IR Expr:" lifted-sub-expr halide-expr)]))
 
@@ -148,6 +156,9 @@
       [(arm-ir:is-equal expr0 expr1) (list (arm-ir:less-than-eq (get-node-id) expr0 expr1))]
       [(arm-ir:less-than expr0 expr1) (list (arm-ir:less-than-eq (get-node-id) expr0 expr1))]
       [(arm-ir:less-than-eq expr0 expr1) (list)]
+
+      [(arm-ir:abs expr saturate? outT) '()]
+      [(arm-ir:abs-diff expr0 expr1 widening? outT) '()]
 
       [_ (error "NYI: Please define a (repl) grammar for IR Expr:" lifted-sub-expr halide-expr)]))
 
@@ -256,6 +267,37 @@
 
     [(vec-min v1 v2) (if (eq? (length lifted-sub-exprs) 2) (list (arm-ir:minimum (get-node-id) (list-ref lifted-sub-exprs 0) (list-ref lifted-sub-exprs 1))) '())]
     [(vec-max v1 v2) (if (eq? (length lifted-sub-exprs) 2) (list (arm-ir:maximum (get-node-id) (list-ref lifted-sub-exprs 0) (list-ref lifted-sub-exprs 1))) '())]
+
+    [(vec-sub v1 v2)
+     (define live-reads (halide:extract-buffer-reads halide-expr))
+     (define gather-tbl (map (lambda (i) (define-symbolic* idx integer?) idx) (range 25)))
+     (define read-tbl (map (lambda (i) (define-symbolic* idx integer?) (define-symbolic* c boolean?) (cons idx c)) (range 25)))
+     (flatten
+      (list
+        ;; We can extend using vector-scalar multiply-add
+        (arm-ir:vs-mpy-add
+          (get-node-id)
+          (first lifted-sub-exprs)  ;; Extend one of the 2 subexprs
+          (list (int8_t (bv 1 8)) (int8_t (bv -1 8)))
+          (halide:elem-type halide-expr))
+        (if (subexprs-are-loads? lifted-sub-exprs)
+          (arm-ir:vs-mpy-add
+            (get-node-id)
+            (mk-load-instr halide-expr)       ;; Use a new load-data node as the sub-expr
+            (list (int8_t (bv 1 8)) (int8_t (bv -1 8)))
+            (halide:elem-type halide-expr))
+          '())
+        (mk-vs-mpy-add-combine-subsubexprs ;; Extend sub-sub-exprs (combine them)
+          lifted-sub-exprs
+          (list (int8_t (bv 1 8)) (int8_t (bv -1 8)))
+          (halide:elem-type halide-expr))
+        (mk-vs-mpy-add-combine-subexprs    ;; Extend both of the sub-exprs (combine them)
+          lifted-sub-exprs
+          (list (int8_t (bv 1 8)) (int8_t (bv -1 8)))
+          (halide:elem-type halide-expr))))]
+
+    [(vec-abs v1) (list (arm-ir:abs (get-node-id) (list-ref lifted-sub-exprs 0) (choose* #t #f) (halide:elem-type halide-expr)))]
+    [(vec-absd v1 v2) (if (eq? (length lifted-sub-exprs) 2) (list (arm-ir:abs-diff (get-node-id) (list-ref lifted-sub-exprs 0) (list-ref lifted-sub-exprs 1) (choose* #t #f) (halide:elem-type halide-expr))) '())]
 
     [_ (error "NYI: Please define a (extend) grammar for halide node:" halide-expr)]))
 
