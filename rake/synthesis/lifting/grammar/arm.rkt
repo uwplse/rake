@@ -5,6 +5,7 @@
   (rename-in racket/list [remove-duplicates remove-dups])
   rosette/lib/destruct
   rosette/lib/angelic
+  rosette/lib/match
   rake/internal/error
   rake/cpp
   rake/halide
@@ -44,12 +45,16 @@
        (cond
          [(halide:cast-op? halide-expr)
           ;; Try folding by updating the output type or the saturation flag saturate
-          (define e-type (halide:elem-type halide-expr))
-          (define in-type (arm-ir:elem-type^ expr))
-          (define narrower-type (cpp:narrow-type e-type outT))
-          (define wider-type (cpp:wide-type in-type narrower-type))
-          (list (arm-ir:vs-mpy-add (get-node-id) expr weights wider-type))
-         ]
+          (list
+           (arm-ir:vs-mpy-add (get-node-id) expr weights outT)
+           (if (arm-ir:combine? expr)
+               (arm-ir:add-sat (get-node-id) (arm-ir:combine-expr0 expr) (arm-ir:combine-expr1 expr))
+               (arm-ir:add-sat (get-node-id) expr expr)))]
+         [(or (vec-mul? halide-expr) (vec-shl? halide-expr))
+          ;; Try folding the mul by updating the weight-matrix
+          (define castfn (match outT ['int8 int8x1] ['int16 int16x1] ['int32 int32x1] ['uint8 uint8x1] ['uint16 uint16x1] ['uint32 uint32x1]))
+          (define updated-weights (map (lambda (w) (sca-mul (castfn w) (castfn f))) weights))
+          (list (arm-ir:vs-mpy-add (get-node-id) expr updated-weights outT))]
          [(vec-add? halide-expr)
           (define updated-sub-expr (update-input-data expr halide-expr))
           (list
@@ -62,21 +67,18 @@
             (append weights (list (int8_t (bv 1 8))))
             (halide:elem-type halide-expr))
            )]
-         [else '()])
+         [else '()])]
 
-       ]
+      [(arm-ir:add-sat expr0 expr1) '()]
 
       [(arm-ir:vs-shift-right sub-expr shift round? saturate? signed? outT)
        (define shr-scalars (halide:extract-shr-scalars halide-expr))
        (define e-type (halide:elem-type halide-expr))
-       (define in-type (arm-ir:elem-type sub-expr))
-       (define narrower-type (cpp:narrow-type e-type outT))
-       (define wider-type (cpp:wide-type in-type narrower-type))
        (list
         ;; Try updating the shift value
-        (mk-shr-instr sub-expr shr-scalars round? saturate? signed? outT)
+        (mk-shr-instr sub-expr shr-scalars round? saturate? signed? e-type)
         ;; Try updating the rounding flag / saturation flag / output-type
-        (arm-ir:vs-shift-right (get-node-id) sub-expr shift (choose* #t #f) (choose* #t #f) signed? wider-type))]
+        (arm-ir:vs-shift-right (get-node-id) sub-expr shift (choose* #t #f) (choose* #t #f) (choose* #t #f) e-type))]
 
       [(arm-ir:maximum expr0 expr1) '()]
       [(arm-ir:minimum expr0 expr1) '()]
@@ -91,10 +93,8 @@
       [_ (error "NYI: Please define a (fold) grammar for IR Expr:" lifted-sub-expr halide-expr)]))
 
   (cond
-    [(eq? depth 0) candidates]
-    [else (flatten (append (map (lambda (se) (fold-grammar se lifted-sibling-exprs halide-expr (- depth 1))) (arm-ir:get-subexprs lifted-sub-expr)) candidates))])
-
-  candidates)
+    [(<= depth 0) candidates]
+    [else (flatten (append (map (lambda (se) (fold-grammar se lifted-sibling-exprs halide-expr (- depth 1))) (arm-ir:get-subexprs lifted-sub-expr)) candidates))]))
 
 ;; This function returns the list of templates that the
 ;; synthesizer may use to fold the new Halide IR node into
@@ -108,6 +108,7 @@
       [(arm-ir:broadcast value) '()]
       [(arm-ir:load-data live-data gather-tbl) '()]
       [(arm-ir:build-vec base stride len) '()]
+      [(arm-ir:combine sub-expr0 sub-expr1 read-tbl) '()]
 
       ;; Strip the cast and try to extend. Many instructions perform widening / narrowing casts
       [(arm-ir:cast expr type saturate?) (extend-grammar (list expr) halide-expr)]
@@ -120,6 +121,8 @@
           (list
             ; TODO: add some good options.
         ))]
+
+      [(arm-ir:add-sat expr0 expr1) '()]
 
       [(arm-ir:vs-shift-right sub-expr const-val round? saturate? signed? output-type) '()]
 
@@ -148,11 +151,9 @@
 
       [_ (error "NYI: Please define a (repl) grammar for IR Expr:" lifted-sub-expr halide-expr)]))
 
-  ;(cond
-    ;[(eq? depth 0) candidates]
-    ;[else (flatten (append (map (lambda (se) (repl-grammar se halide-expr (- depth 1))) (hvx-ir:get-subexprs lifted-sub-expr)) candidates))])
-
-  candidates)
+  (cond
+    [(eq? depth 0) candidates]
+    [else (flatten (append (map (lambda (se) (repl-grammar se halide-expr (- depth 1))) (arm-ir:get-subexprs lifted-sub-expr)) candidates))]))
 
 ;; This function returns the list of uber-instructions that the
 ;; synthesizer may use to extend the IR-expression. We could blindly
@@ -285,7 +286,11 @@
 (define (mk-vs-mpy-add-combine-subexprs lifted-sub-exprs weights output-type)
   (cond
     [(eq? (length lifted-sub-exprs) 2)
-     (arm-ir:vs-mpy-add (get-node-id) (mk-combine-instr lifted-sub-exprs) weights output-type)]
+     (cond
+       [(and (arm-ir:cast? (list-ref lifted-sub-exprs 0)) (arm-ir:cast? (list-ref lifted-sub-exprs 1)))
+        (arm-ir:vs-mpy-add (get-node-id) (mk-combine-instr (map arm-ir:cast-expr lifted-sub-exprs)) weights output-type)]
+       [else
+        (arm-ir:vs-mpy-add (get-node-id) (mk-combine-instr lifted-sub-exprs) weights output-type)])]
     [else '()]))
 
 (define (mk-combine-instr lifted-sub-exprs)
