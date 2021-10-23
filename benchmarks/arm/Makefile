@@ -29,7 +29,7 @@ $(benchmarks): %: %/bin %/out %/profile
 		-o $@/bin/$@_generator \
 		-L $(HALIDE_DIR)/lib -lHalide $(shell llvm-config-12 --system-libs --link-static)
 
-	export LD_LIBRARY_PATH=$(HALIDE_DIR)/lib; ./$@/bin/$@_generator \
+	export LD_LIBRARY_PATH=$(HALIDE_DIR)/lib; export HL_RAKE_BENCHMARK_NAME=$@; ./$@/bin/$@_generator \
 		-o $@/bin \
 		-g $@ -e static_library,stmt,h,llvm_assembly,assembly \
 		-f $@_hvx128 target=arm-64-android-no_runtime-no_bounds_query-c_plus_plus_name_mangling-arm_dot_prod-armv81a
