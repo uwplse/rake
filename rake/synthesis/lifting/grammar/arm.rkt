@@ -202,8 +202,8 @@
           (mk-vs-mpy-add-instr (apply choose* lifted-sub-exprs) mul-scalars (halide:elem-type halide-expr))
           (mk-vs-mpy-add-instr (arm-ir:load-data (get-load-id) live-reads gather-tbl) mul-scalars (halide:elem-type halide-expr))
           ;; or vector-vector multiply-add
-          (arm-ir:vv-mpy-add (get-node-id) (apply choose* lifted-sub-exprs) (list (int8_t (bv 1 8))) (halide:elem-type halide-expr))
-          (arm-ir:vv-mpy-add (get-node-id) (arm-ir:load-data (get-load-id) live-reads gather-tbl) (list (int8_t (bv 1 8))) (halide:elem-type halide-expr))
+          (arm-ir:vv-mpy-add (get-node-id) (apply choose* lifted-sub-exprs) 1 (halide:elem-type halide-expr))
+          (arm-ir:vv-mpy-add (get-node-id) (arm-ir:load-data (get-load-id) live-reads gather-tbl) 1 (halide:elem-type halide-expr))
           ; TODO: add combine nodes
       ))]
 

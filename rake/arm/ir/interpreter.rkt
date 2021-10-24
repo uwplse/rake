@@ -379,6 +379,21 @@
         (mk-cpp-expr (list-ref parts 0) interm-type)
         (mk-cpp-expr (apply bvadd parts) interm-type))))
 
+(define (vv-mpy-add-helper input width interm-type xo xi)
+  (if (eq? width xi)
+      (list)
+      (let* ([a (cpp:eval (cpp:cast (input (+ xo xi)) interm-type))]
+             [b (cpp:eval (cpp:cast (input (+ xo xi 1)) interm-type))]
+             [value (bvmul a b)]
+             [recurse (vv-mpy-add-helper input width interm-type xo (+ 2 xi))])
+        (append (list value) recurse))))
+
+(define (vv-mpy-add-impl input i width interm-type)
+  (let ([parts (vv-mpy-add-helper input (* width 2) interm-type (* i width 2) 0)])
+    (if (eq? width 1)
+        (mk-cpp-expr (list-ref parts 0) interm-type)
+        (mk-cpp-expr (apply bvadd parts) interm-type))))
+
 (define (bitwise-and-impl lhs rhs)
   (let* ([type (cpp:type lhs)]
          [a (cpp:eval lhs)]
@@ -501,6 +516,12 @@
             (half-sub-impl (input0 i) (input1 i))))]
     ; TODO: reduce
     ; TODO: vv-mpy-add
+
+    [(arm-ir:vv-mpy-add expr width outT)
+     (define input (interpret expr))
+     (lambda (i)
+       ; TODO: HVX has a saturation flag, do we need that?
+       (vv-mpy-add-impl input i width outT))]
 
     [(arm-ir:vs-mpy-add expr weights outT)
      (define input (interpret expr))
@@ -652,7 +673,7 @@
 
     [(arm-ir:reduce expr reduce-op widening?) (+ (instr-count expr) 1)]
 
-    [(arm-ir:vv-mpy-add expr weights outT) (+ (instr-count expr) 1)]
+    [(arm-ir:vv-mpy-add expr width outT) (+ (instr-count expr) 1)]
     [(arm-ir:vs-mpy-add expr weights outT) (+ (instr-count expr) 1)]
 
     [(arm-ir:vv-mpy-add-w expr weights outT) (+ (instr-count expr) 1)]
@@ -700,7 +721,7 @@
 
       [(arm-ir:reduce expr reduce-op widening?) (handler (arm-ir:reduce (arm-ir:ast-node-id ir-expr) (visit expr handler) reduce-op widening?))]
 
-      [(arm-ir:vv-mpy-add expr weights outT) (handler (arm-ir:vv-mpy-add (arm-ir:ast-node-id ir-expr) (visit expr handler) weights outT))]
+      [(arm-ir:vv-mpy-add expr width outT) (handler (arm-ir:vv-mpy-add (arm-ir:ast-node-id ir-expr) (visit expr handler) width outT))]
       [(arm-ir:vs-mpy-add expr weights outT) (handler (arm-ir:vs-mpy-add (arm-ir:ast-node-id ir-expr) (visit expr handler) weights outT))]
       [(arm-ir:vv-mpy-add-w expr weights outT) (handler (arm-ir:vv-mpy-add-w (arm-ir:ast-node-id ir-expr) (visit expr handler) weights outT))]
       [(arm-ir:vs-mpy-add-w expr weights outT) (handler (arm-ir:vs-mpy-add-w (arm-ir:ast-node-id ir-expr) (visit expr handler) weights outT))]
@@ -753,7 +774,7 @@
 
     [(arm-ir:reduce expr reduce-op widening?) (list expr)]
 
-    [(arm-ir:vv-mpy-add expr weights outT) (list expr)]
+    [(arm-ir:vv-mpy-add expr width outT) (list expr)]
     [(arm-ir:vs-mpy-add expr weights outT) (list expr)]
     [(arm-ir:vv-mpy-add-w expr weights outT) (list expr)]
     [(arm-ir:vs-mpy-add-w expr weights outT) (list expr)]
