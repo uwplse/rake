@@ -15,6 +15,8 @@
 
 (provide arm-uber-instructions)
 
+(define SYMBOL_TBL_SIZE 25)
+
 ;; This function returns the list of templates that the
 ;; synthesizer may use to fold the new Halide IR node into
 ;; the current IR-expression. In these tempalates, we do not
@@ -74,6 +76,34 @@
            )]
          [else '()])]
 
+      [(arm-ir:vv-mpy-add expr width output-type)
+       (cond
+         [(halide:cast-op? halide-expr)
+          ;; Try folding by forcing saturation
+          (flatten
+            (list
+              (arm-ir:vv-mpy-add (get-node-id) expr width output-type)
+              (if (arm-ir:combine? expr)
+                (list
+                  (arm-ir:add-sat (get-node-id) (arm-ir:combine-expr0 expr) (arm-ir:combine-expr1 expr))
+                  (arm-ir:sub-sat (get-node-id) (arm-ir:combine-expr0 expr) (arm-ir:combine-expr1 expr)))
+                (list
+                  (arm-ir:add-sat (get-node-id) expr expr)
+                  (arm-ir:sub-sat (get-node-id) expr expr)))))]
+         [(vec-add? halide-expr)
+          ;; Try folding the add by increasing the width
+          (define updated-sub-expr (update-input-data expr halide-expr))
+          (list (arm-ir:vv-mpy-add (get-node-id) updated-sub-expr (add1 width) output-type))]
+         [(vector_reduce? halide-expr)
+          ;; Try folding the add by increasing the width
+          (define e-type (halide:elem-type halide-expr))
+          (define updated-sub-expr (update-input-data expr halide-expr))
+          (list (arm-ir:vv-mpy-add (get-node-id) updated-sub-expr (vector_reduce-width halide-expr) e-type))]
+         [else
+          ;; Check if the new node is an identity func. Ex: saturation where its not needed etc.
+          (list (arm-ir:vv-mpy-add (get-node-id) expr width output-type))])]
+
+
       [(arm-ir:add-sat expr0 expr1) '()]
 
       [(arm-ir:vs-shift-right sub-expr shift round? saturate? signed? outT)
@@ -97,6 +127,9 @@
 
       [(arm-ir:abs expr saturate? outT) '()]
       [(arm-ir:abs-diff expr0 expr1 widening? outT) '()]
+
+      ; TODO: can we fold reductions...?
+      [(arm-ir:reduce expr width reduce-op widening?) '()]
 
       [_ (error "NYI: Please define a (fold) grammar for IR Expr:" lifted-sub-expr halide-expr)]))
 
@@ -125,6 +158,12 @@
       [(arm-ir:abs expr saturate? outT) '()]
 
       [(arm-ir:vs-mpy-add sub-expr weights outT)
+        (flatten
+          (list
+            ; TODO: add some good options.
+        ))]
+
+      [(arm-ir:vv-mpy-add expr width outT)
         (flatten
           (list
             ; TODO: add some good options.
@@ -160,6 +199,9 @@
       [(arm-ir:abs expr saturate? outT) '()]
       [(arm-ir:abs-diff expr0 expr1 widening? outT) '()]
 
+      ; TODO: can we replace reductions...?
+      [(arm-ir:reduce expr width reduce-op widening?) '()]
+
       [_ (error "NYI: Please define a (repl) grammar for IR Expr:" lifted-sub-expr halide-expr)]))
 
   (cond
@@ -194,8 +236,8 @@
       ; TODO: understand these (ask Maaz)
       (define mul-scalars (halide:extract-mul-scalars halide-expr))
       (define live-reads (halide:extract-buffer-reads halide-expr))
-      (define gather-tbl (map (lambda (i) (define-symbolic* idx integer?) idx) (range 25)))
-      (define read-tbl (map (lambda (i) (define-symbolic* idx integer?) (define-symbolic* c boolean?) (cons idx c)) (range 25)))
+      (define gather-tbl (map (lambda (i) (define-symbolic* idx integer?) idx) (range SYMBOL_TBL_SIZE)))
+      (define read-tbl (map (lambda (i) (define-symbolic* idx integer?) (define-symbolic* c boolean?) (cons idx c)) (range SYMBOL_TBL_SIZE)))
       (flatten
         (list
           ;; We can extend using either vector-scalar multiply-add
@@ -270,8 +312,8 @@
 
     [(vec-sub v1 v2)
      (define live-reads (halide:extract-buffer-reads halide-expr))
-     (define gather-tbl (map (lambda (i) (define-symbolic* idx integer?) idx) (range 25)))
-     (define read-tbl (map (lambda (i) (define-symbolic* idx integer?) (define-symbolic* c boolean?) (cons idx c)) (range 25)))
+     (define gather-tbl (map (lambda (i) (define-symbolic* idx integer?) idx) (range SYMBOL_TBL_SIZE)))
+     (define read-tbl (map (lambda (i) (define-symbolic* idx integer?) (define-symbolic* c boolean?) (cons idx c)) (range SYMBOL_TBL_SIZE)))
      (flatten
       (list
         ;; We can extend using vector-scalar multiply-add
@@ -299,6 +341,11 @@
     [(vec-abs v1) (list (arm-ir:abs (get-node-id) (list-ref lifted-sub-exprs 0) (choose* #t #f) (halide:elem-type halide-expr)))]
     [(vec-absd v1 v2) (if (eq? (length lifted-sub-exprs) 2) (list (arm-ir:abs-diff (get-node-id) (list-ref lifted-sub-exprs 0) (list-ref lifted-sub-exprs 1) (choose* #t #f) (halide:elem-type halide-expr))) '())]
 
+    [(vector_reduce op width vec)
+      ; TODO: is there any other way to handle this?
+      ; TODO: what to do about output type?
+      (list (arm-ir:reduce (get-node-id) (list-ref lifted-sub-exprs 0) width op (choose* #f #t)))]
+
     [_ (error "NYI: Please define a (extend) grammar for halide node:" halide-expr)]))
 
 (define arm-uber-instructions (lifting-ir fold-grammar repl-grammar extend-grammar))
@@ -315,7 +362,7 @@
 ;; original expression.
 (define (mk-load-instr spec-expr)
   (define live-reads (halide:extract-buffer-reads spec-expr))
-  (define gather-tbl (map (lambda (i) (define-symbolic* idx integer?) idx) (range 25)))
+  (define gather-tbl (map (lambda (i) (define-symbolic* idx integer?) idx) (range SYMBOL_TBL_SIZE)))
   (arm-ir:load-data (get-load-id) live-reads gather-tbl))
 
 (define (mk-vs-mpy-add-instr sub-expr mul-scalars output-type)
@@ -360,7 +407,7 @@
 (define (mk-combine-instr lifted-sub-exprs)
   (cond
     [(eq? (length lifted-sub-exprs) 2)
-      (define read-tbl (map (lambda (i) (define-symbolic* idx integer?) (define-symbolic* c boolean?) (cons idx c)) (range 25)))
+      (define read-tbl (map (lambda (i) (define-symbolic* idx integer?) (define-symbolic* c boolean?) (cons idx c)) (range SYMBOL_TBL_SIZE)))
       (arm-ir:combine (get-load-id) (list-ref lifted-sub-exprs 0) (list-ref lifted-sub-exprs 1) read-tbl)]
     [else '()]))
 
@@ -369,18 +416,26 @@
     [(eq? (length lifted-sub-exprs) 2)
      (let ([sub-exprs0 (arm-ir:get-subexprs (list-ref lifted-sub-exprs 0))])
        (let ([sub-exprs1 (arm-ir:get-subexprs (list-ref lifted-sub-exprs 1))])
-         (list
-          (arm-ir:vs-mpy-add (get-node-id) (mk-combine-instr2 sub-exprs0 sub-exprs1) weights output-type)
-          (arm-ir:vs-mpy-add (get-node-id) (mk-combine-instr2 sub-exprs0 (list (second lifted-sub-exprs))) weights output-type)
-          (arm-ir:vs-mpy-add (get-node-id) (mk-combine-instr2 (list (first lifted-sub-exprs)) sub-exprs1) weights output-type))))]
+         (flatten (list
+          (mk-combine-expr2-list sub-exprs0 sub-exprs1 weights output-type)
+          (mk-combine-expr2-list sub-exprs0 (list (second lifted-sub-exprs)) weights output-type)
+          (mk-combine-expr2-list (list (first lifted-sub-exprs)) sub-exprs1 weights output-type)))))]
     [else '()]))
 
-(define (mk-combine-instr2 lifted-sub-exprs0 lifted-sub-exprs1)
-  (cond
-    [(and (not (empty? lifted-sub-exprs0)) (not (empty? lifted-sub-exprs1)))
-      (define read-tbl (map (lambda (i) (define-symbolic* idx integer?) (define-symbolic* c boolean?) (cons idx c)) (range 25)))
-      (arm-ir:combine (get-load-id) (first lifted-sub-exprs0) (first lifted-sub-exprs1) read-tbl)]
-    [else '()]))
+(define (mk-combine-expr2-list sub-exprs0 sub-exprs1 weights output-type)
+  (if (and (not (empty? sub-exprs0)) (not (empty? sub-exprs1)))
+    (begin
+      (define read-tbl (map (lambda (i) (define-symbolic* idx integer?) (define-symbolic* c boolean?) (cons idx c)) (range SYMBOL_TBL_SIZE)))
+      (list (arm-ir:vs-mpy-add (get-node-id) (arm-ir:combine (get-load-id) (first sub-exprs0) (first sub-exprs1) read-tbl) weights output-type)))
+    '()))
+
+; This was causing the generation of an arm-ir:vs-mpy-add with an empty list as an input
+; (define (mk-combine-instr2 lifted-sub-exprs0 lifted-sub-exprs1)
+;   (cond
+;     [(and (not (empty? lifted-sub-exprs0)) (not (empty? lifted-sub-exprs1)))
+;       (define read-tbl (map (lambda (i) (define-symbolic* idx integer?) (define-symbolic* c boolean?) (cons idx c)) (range SYMBOL_TBL_SIZE)))
+;       (arm-ir:combine (get-load-id) (first lifted-sub-exprs0) (first lifted-sub-exprs1) read-tbl)]
+;     [else '()]))
 
 (define (mk-shr-instr sub-expr shr-scalars round? saturate? signed? output-type)
   (cond

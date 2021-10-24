@@ -401,6 +401,36 @@
          [value (bvand a b)])
       (mk-cpp-expr value type)))
 
+(define (do-widening-add lhs rhs)
+  (halide:do-add (widen lhs) (widen rhs)))
+
+(define (do-widening-sadd lhs rhs)
+  (saturating-add-impl (widen lhs) (widen rhs)))
+
+(define (do-widening-mul lhs rhs)
+  (halide:do-mul (widen lhs) (widen rhs)))
+
+(define (do-widening-min lhs rhs)
+  (halide:do-min (widen lhs) (widen rhs)))
+
+(define (do-widening-max lhs rhs)
+  (halide:do-max (widen lhs) (widen rhs)))
+
+(define (reduce-helper input index width acc f)
+  (if (eq? index width)
+    acc
+    (reduce-helper input (+ index 1) width (f acc (input index)) f)))
+
+(define (reduce-impl input i width op widening?)
+  (let ([f
+          (cond
+            [(eq? op 'add) (if widening? do-widening-add halide:do-add)]
+            [(eq? op 'mul) (if widening? do-widening-mul halide:do-mul)]
+            [(eq? op 'min) (if widening? do-widening-min halide:do-min)]
+            [(eq? op 'max) (if widening? do-widening-max halide:do-max)]
+            [else (error "Do not recognize reduce-op type: ~a" op)])])
+    (reduce-helper input (+ i 1) width (input i) f)))
+
 (define (interpret p)
   (destruct p
 
@@ -514,7 +544,12 @@
             (rhalf-sub-impl (input0 i) (input1 i)))
          (lambda (i)
             (half-sub-impl (input0 i) (input1 i))))]
-    ; TODO: reduce
+
+    [(arm-ir:reduce expr width reduce-op widening?)
+     (define input (interpret expr))
+     (lambda (i)
+        (reduce-impl input (* i width) width reduce-op widening?))]
+
     ; TODO: vv-mpy-add
 
     [(arm-ir:vv-mpy-add expr width outT)
@@ -671,7 +706,7 @@
     [(arm-ir:sub-high-narrow expr round?) (+ (instr-count expr) 1)]
     [(arm-ir:halving-add expr0 expr1 round?) (+ (instr-count expr0) (instr-count expr1) 1)]
 
-    [(arm-ir:reduce expr reduce-op widening?) (+ (instr-count expr) 1)]
+    [(arm-ir:reduce expr width reduce-op widening?) (+ (instr-count expr) 1)]
 
     [(arm-ir:vv-mpy-add expr width outT) (+ (instr-count expr) 1)]
     [(arm-ir:vs-mpy-add expr weights outT) (+ (instr-count expr) 1)]
@@ -719,7 +754,7 @@
       [(arm-ir:halving-add expr0 expr1 round?) (handler (arm-ir:halving-add (arm-ir:ast-node-id ir-expr) (visit expr0 handler) (visit expr1 handler) round?))]
       [(arm-ir:halving-sub expr0 expr1 round?) (handler (arm-ir:halving-sub (arm-ir:ast-node-id ir-expr) (visit expr0 handler) (visit expr1 handler) round?))]
 
-      [(arm-ir:reduce expr reduce-op widening?) (handler (arm-ir:reduce (arm-ir:ast-node-id ir-expr) (visit expr handler) reduce-op widening?))]
+      [(arm-ir:reduce expr width reduce-op widening?) (handler (arm-ir:reduce (arm-ir:ast-node-id ir-expr) (visit expr handler) width reduce-op widening?))]
 
       [(arm-ir:vv-mpy-add expr width outT) (handler (arm-ir:vv-mpy-add (arm-ir:ast-node-id ir-expr) (visit expr handler) width outT))]
       [(arm-ir:vs-mpy-add expr weights outT) (handler (arm-ir:vs-mpy-add (arm-ir:ast-node-id ir-expr) (visit expr handler) weights outT))]
@@ -772,7 +807,7 @@
     [(arm-ir:halving-add expr0 expr1 round?) (list expr0 expr1)]
     [(arm-ir:halving-sub expr0 expr1 round?) (list expr0 expr1)]
 
-    [(arm-ir:reduce expr reduce-op widening?) (list expr)]
+    [(arm-ir:reduce expr width reduce-op widening?) (list expr)]
 
     [(arm-ir:vv-mpy-add expr width outT) (list expr)]
     [(arm-ir:vs-mpy-add expr weights outT) (list expr)]

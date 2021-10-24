@@ -37,18 +37,26 @@
         (synthesize-translation (rest templates) halide-expr axioms context equiv-fn)])]))
 
 (define (run-synthesizer template halide-expr axioms context equiv-fn)
-  ;(pretty-print halide-expr)
-  ;(pretty-print template)
+  ; (display "run-arm-synthesizer\n")
+  ; (display "halide-expr:\n  ")
+  ; (pretty-print halide-expr)
+  ; (display "template:\n  ")
+  ; (pretty-print template)
   
   (define-values (optimized-template optimized-halide-expr inferred-axioms abstr-value-bounds)
     (optimize-arm-query halide-expr template translation-history value-bounds))
 
-  ;(pretty-print inferred-axioms)
-  ;(pretty-print optimized-halide-expr)
-  ;(pretty-print optimized-template)
+  ; (display "axioms:\n  ")
+  ; (pretty-print inferred-axioms)
+  ; (display "optimized-halide-expr:\n  ")
+  ; (pretty-print optimized-halide-expr)
+  ; (display "optimized-template:\n  ")
+  ; (pretty-print optimized-template)
 
-  ;(pretty-print ((halide:interpret optimized-halide-expr) 0))
-  ;(pretty-print ((arm-ir:interpret optimized-template) 0))
+  ; (display "optimized Halide 0:\n  ")
+  ; (pretty-print ((halide:interpret optimized-halide-expr) 0))
+  ; (display "optimized Arm 0:\n  ")
+  ; (pretty-print ((arm-ir:interpret optimized-template) 0))
 
   (cond
     [(subset? (symbolics optimized-halide-expr) (symbolics optimized-template))
