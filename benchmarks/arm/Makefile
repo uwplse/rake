@@ -35,6 +35,20 @@ $(benchmarks): %: %/bin %/out %/profile
 		-g $@ -e static_library,stmt,h,llvm_assembly,assembly \
 		-f $@_hvx128 target=arm-64-android-no_runtime-no_bounds_query-c_plus_plus_name_mangling-arm_dot_prod-armv81a
 
+fully_connected: %: %/bin %/out %/profile
+	g++ --std=c++17 -fno-rtti -O3 -DLOG2VLEN=7 \
+		-I $(HALIDE_DIR)/include -I $(HALIDE_DIR)/tools \
+		-g $@/src/$@_generator.cpp $(HALIDE_DIR)/tools/GenGen.cpp \
+		$(hannk) \
+		-o $@/bin/$@_generator \
+		-L $(HALIDE_DIR)/lib -lHalide $(shell llvm-config-12 --system-libs --link-static)
+
+	export LD_LIBRARY_PATH=$(HALIDE_DIR)/lib; export HL_RAKE_BENCHMARK_NAME=$@; ./$@/bin/$@_generator \
+		-o $@/bin \
+		-g $@ -e static_library,stmt,h,llvm_assembly,assembly \
+		-g $@ output.type=uint8 \
+		-f $@_hvx128 target=arm-64-android-no_runtime-no_bounds_query-c_plus_plus_name_mangling-arm_dot_prod-armv81a
+
 $(prof_dirs) $(out_dirs) $(bin_dirs): %:
 	mkdir $@
 
