@@ -76,32 +76,33 @@
            )]
          [else '()])]
 
-      [(arm-ir:vv-mpy-add expr width output-type)
+      [(arm-ir:vv-mpy-add expr weights output-type)
        (cond
-         [(halide:cast-op? halide-expr)
-          ;; Try folding by forcing saturation
-          (flatten
-            (list
-              (arm-ir:vv-mpy-add (get-node-id) expr width output-type)
-              (if (arm-ir:combine? expr)
-                (list
-                  (arm-ir:add-sat (get-node-id) (arm-ir:combine-expr0 expr) (arm-ir:combine-expr1 expr))
-                  (arm-ir:sub-sat (get-node-id) (arm-ir:combine-expr0 expr) (arm-ir:combine-expr1 expr)))
-                (list
-                  (arm-ir:add-sat (get-node-id) expr expr)
-                  (arm-ir:sub-sat (get-node-id) expr expr)))))]
+;         [(halide:cast-op? halide-expr)
+;          ;; Try folding by forcing saturation
+;          (flatten
+;            (list
+;              (arm-ir:vv-mpy-add (get-node-id) expr width output-type)
+;              (if (arm-ir:combine? expr)
+;                (list
+;                  (arm-ir:add-sat (get-node-id) (arm-ir:combine-expr0 expr) (arm-ir:combine-expr1 expr))
+;                  (arm-ir:sub-sat (get-node-id) (arm-ir:combine-expr0 expr) (arm-ir:combine-expr1 expr)))
+;                (list
+;                  (arm-ir:add-sat (get-node-id) expr expr)
+;                  (arm-ir:sub-sat (get-node-id) expr expr)))))]
          [(vec-add? halide-expr)
           ;; Try folding the add by increasing the width
           (define updated-sub-expr (update-input-data expr halide-expr))
-          (list (arm-ir:vv-mpy-add (get-node-id) updated-sub-expr (add1 width) output-type))]
+          (list (arm-ir:vv-mpy-add (get-node-id) updated-sub-expr (append weights (list (choose* 0 1))) output-type))]
          [(vector_reduce? halide-expr)
           ;; Try folding the add by increasing the width
+          (define (build-list sz val) (if (< sz 1) '() (cons val (build-list (- sz 1) val))))
           (define e-type (halide:elem-type halide-expr))
           (define updated-sub-expr (update-input-data expr halide-expr))
-          (list (arm-ir:vv-mpy-add (get-node-id) updated-sub-expr (vector_reduce-width halide-expr) e-type))]
+          (list (arm-ir:vv-mpy-add (get-node-id) updated-sub-expr (build-list (vector_reduce-width halide-expr) 1) e-type))]
          [else
           ;; Check if the new node is an identity func. Ex: saturation where its not needed etc.
-          (list (arm-ir:vv-mpy-add (get-node-id) expr width output-type))])]
+          (list (arm-ir:vv-mpy-add (get-node-id) expr weights output-type))])]
 
 
       [(arm-ir:add-sat expr0 expr1) '()]
@@ -244,8 +245,8 @@
           (mk-vs-mpy-add-instr (apply choose* lifted-sub-exprs) mul-scalars (halide:elem-type halide-expr))
           (mk-vs-mpy-add-instr (arm-ir:load-data (get-load-id) live-reads gather-tbl) mul-scalars (halide:elem-type halide-expr))
           ;; or vector-vector multiply-add
-          (arm-ir:vv-mpy-add (get-node-id) (apply choose* lifted-sub-exprs) 1 (halide:elem-type halide-expr))
-          (arm-ir:vv-mpy-add (get-node-id) (arm-ir:load-data (get-load-id) live-reads gather-tbl) 1 (halide:elem-type halide-expr))
+          (arm-ir:vv-mpy-add (get-node-id) (apply choose* lifted-sub-exprs) (list 1) (halide:elem-type halide-expr))
+          (arm-ir:vv-mpy-add (get-node-id) (arm-ir:load-data (get-load-id) live-reads gather-tbl) (list 1) (halide:elem-type halide-expr))
           ; TODO: add combine nodes
       ))]
 
