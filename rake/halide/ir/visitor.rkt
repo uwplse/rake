@@ -45,6 +45,8 @@
     [(vec-bwand v1 v2) (handler (vec-bwand (visit v1 handler) (visit v2 handler)))]
     [(vec-bwxor v1 v2) (handler (vec-bwxor (visit v1 handler) (visit v2 handler)))]
 
+    [(vec-reinterpret v type lanes) (handler (vec-reinterpret (visit v handler) type lanes))]
+
     [(vector_reduce op width vec) (handler (vector_reduce op width (visit vec handler)))]
 
     ;; Shuffles

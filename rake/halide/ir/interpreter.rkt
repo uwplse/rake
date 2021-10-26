@@ -53,6 +53,7 @@
     [(vec-bwand v1 v2) (vec-len v1)]
     [(vec-bwxor v1 v2) (vec-len v1)]
 
+    [(vec-reinterpret v type lanes) lanes]
     [(vector_reduce op width vec) (quotient (vec-len vec) width)]
 
     ;; Shuffles
@@ -104,6 +105,7 @@
     [(vec-bwand v1 v2) (list v1 v2)]
     [(vec-bwxor v1 v2) (list v1 v2)]
 
+    [(vec-reinterpret v type lanes) (list v)]
     [(vector_reduce op width vec) (list vec)]
 
     ;; Shuffles
@@ -195,6 +197,8 @@
 
     [(vec-bwand v1 v2) (lambda (i) (do-bwand ((interpret v1) i) ((interpret v2) i)))]
     [(vec-bwxor v1 v2) (lambda (i) (do-bwxor ((interpret v1) i) ((interpret v2) i)))]
+
+    [(vec-reinterpret v type lanes) (lambda (i) (do-reinterpret (interpret v) i type lanes))]
 
     [(vector_reduce op width vec)
      (cond
@@ -437,6 +441,60 @@
     [else
      (define outT (infer-out-type lhs rhs))
      (mk-cpp-expr (bvxor (cpp:eval lhs) (cpp:eval rhs)) outT)]))
+
+
+(define (do-reinterpret-extract vec index type lanes)
+  (error "TODO: implement do-reinterpret-extract as needed\n"))
+
+(define (get-cast-type type)
+  (cond
+    [(eq? type 'int8) int8_t]
+    [(eq? type 'int16) int16_t]
+    [(eq? type 'int32) int32_t]
+    [(eq? type 'int64) int64_t]
+    [(eq? type 'uint8) uint8_t]
+    [(eq? type 'uint16) uint16_t]
+    [(eq? type 'uint32) uint32_t]
+    [(eq? type 'uint64) uint64_t]))
+
+(define (do-reinterpret-scalar value type)
+  (let ([new_type (get-cast-type type)])
+    (destruct value
+      [(int8_t v) (new_type v)]
+      [(int16_t v) (new_type v)]
+      [(int32_t v) (new_type v)]
+      [(int64_t v) (new_type v)]
+      [(uint1_t v) (new_type v)]
+      [(uint8_t v) (new_type v)]
+      [(uint16_t v) (new_type v)]
+      [(uint32_t v) (new_type v)]
+      [(uint64_t v) (new_type v)]
+      [_ (error "reinterpret doesn't know type: ~a" value)])))
+
+(define (do-reinterpret-concat-helper vec sb eb bi index)
+  (if (eq? sb eb)
+      (error "do-reinterpret-concat-helper received a bad input ~a ~a ~a ~a" vec sb eb bi index)
+      (cond
+        [(eq? (+ sb bi) eb) (cpp:eval (vec index))]
+        [(> (+ sb bi) eb) (error "reinterpret was not designed to know the endian...")]
+        [else (concat (cpp:eval (vec index)) (do-reinterpret-concat-helper vec (+ sb bi) eb bi (+ 1 index)))])))
+
+(define (do-reinterpret-concat vec index type lanes bi bo)
+  (let* ([input-lanes (quotient (* bo lanes) bi)]
+         [index-ratio (quotient input-lanes lanes)]
+         [input-index (* index index-ratio)]
+         [start-bit (input-index * bi)]
+         [end-bit (+ (input-index * bi) bo)]
+         [bits (do-reinterpret-concat-helper vec start-bit end-bit bi input-index)])
+    ((get-cast-type type) bits)))
+
+(define (do-reinterpret vec index type lanes)
+    (let ([input-bits (cpp:expr-bw (vec 0))]
+          [output-bits (cpp:type-bw type)])
+        (cond
+          [(eq? input-bits output-bits) (do-reinterpret-scalar (vec index) type)]
+          [(< input-bits output-bits) (do-reinterpret-concat vec index type lanes input-bits output-bits)]
+          [else (do-reinterpret-extract vec index type lanes)])))
 
 (define (do-reduce vec op base width)
   (define outT (cpp:type (vec 0)))
