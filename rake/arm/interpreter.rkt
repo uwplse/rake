@@ -122,14 +122,14 @@
 (struct ushll (Vn Vm) #:transparent)                        ;; unsigned_shift_left_long
 (struct usqadd (Vn Vm) #:transparent)                       ;; unsigned_saturating_acc_signed
 
-(struct ??shuffle (id lds pair?) #:transparent)
-(struct ??load (id live-data buffer gather-tbl pair?)
+(struct ??shuffle (id lds) #:transparent)
+(struct ??load (id live-data buffer gather-tbl)
   #:transparent
   #:methods gen:custom-write
   [(define write-proc
      (make-constructor-style-printer
       (lambda (obj) `??load)
-      (lambda (obj) (list (??load-id obj) (??load-buffer obj) (??load-pair? obj)))))] ; (filter concrete? (??load-gather-tbl obj))
+      (lambda (obj) (list (??load-id obj) (??load-buffer obj)))))] ; (filter concrete? (??load-gather-tbl obj))
   #:methods gen:equal+hash
   [(define (equal-proc a b equal?-recur)
      (and
