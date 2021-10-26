@@ -6,7 +6,7 @@
   rosette/lib/destruct
   rake/cpp/types)
 
-(provide (all-defined-out))
+(provide (prefix-out arm: (all-defined-out)))
 
 ;; ARM A64 vector types
 (struct i8x8 (Vn) #:transparent)
@@ -127,3 +127,19 @@
 (struct umlal (Vd Vn Vm) #:transparent)                     ;; unsigned_multiply_add_long
 (struct ushll (Vn Vm) #:transparent)                        ;; unsigned_shift_left_long
 (struct usqadd (Vn Vm) #:transparent)                       ;; unsigned_saturating_acc_signed
+
+(struct ??shuffle (id lds) #:transparent)
+(struct ??load (id live-data buffer gather-tbl)
+  #:transparent
+  #:methods gen:custom-write
+  [(define write-proc
+     (make-constructor-style-printer
+      (lambda (obj) `??load)
+      (lambda (obj) (list (??load-id obj) (??load-buffer obj)))))] ; (filter concrete? (??load-gather-tbl obj))
+  #:methods gen:equal+hash
+  [(define (equal-proc a b equal?-recur)
+     (and
+      (equal?-recur (??load-id a) (??load-id b))
+      (equal?-recur (??load-buffer a) (??load-buffer b))))
+   (define (hash-proc a hash-recur) (??load-id a))
+   (define (hash2-proc a hash2-recur) (??load-id a))])
