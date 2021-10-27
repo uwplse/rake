@@ -17,7 +17,6 @@
   [interpret arm:interpret]
   ; [set-curr-cn arm:set-curr-cn]
   ))
-
 ;; ARM A64 interpreter
 (define (interpret p)
   (destruct p
@@ -1387,6 +1386,80 @@
               (x4 (uint32_t (bv 1 32)))))))]
         [(_ _) (assert #f "infeasible")])]
 
+    [(arm:shl Vn)
+      (destruct* ((interpret Vn))
+        [((arm:i8x8 v0))
+          (arm:i8x8
+           (halide:interpret
+            (vec-shl
+             v0)))]
+        [((arm:i8x16 v0))
+          (arm:i8x16
+           (halide:interpret
+            (vec-shl
+             v0)))]
+        [((arm:i16x4 v0))
+          (arm:i16x4
+           (halide:interpret
+            (vec-shl
+             v0)))]
+        [((arm:i16x8 v0))
+          (arm:i16x8
+           (halide:interpret
+            (vec-shl
+             v0)))]
+        [((arm:i32x2 v0))
+          (arm:i32x2
+           (halide:interpret
+            (vec-shl
+             v0)))]
+        [((arm:i32x4 v0))
+          (arm:i32x4
+           (halide:interpret
+            (vec-shl
+             v0)))]
+        [((arm:i64x2 v0))
+          (arm:i64x2
+           (halide:interpret
+            (vec-shl
+             v0)))]
+        [((arm:u8x8 v0))
+          (arm:u8x8
+           (halide:interpret
+            (vec-shl
+             v0)))]
+        [((arm:u8x16 v0))
+          (arm:u8x16
+           (halide:interpret
+            (vec-shl
+             v0)))]
+        [((arm:u16x4 v0))
+          (arm:u16x4
+           (halide:interpret
+            (vec-shl
+             v0)))]
+        [((arm:u16x8 v0))
+          (arm:u16x8
+           (halide:interpret
+            (vec-shl
+             v0)))]
+        [((arm:u32x2 v0))
+          (arm:u32x2
+           (halide:interpret
+            (vec-shl
+             v0)))]
+        [((arm:u32x4 v0))
+          (arm:u32x4
+           (halide:interpret
+            (vec-shl
+             v0)))]
+        [((arm:u64x2 v0))
+          (arm:u64x2
+           (halide:interpret
+            (vec-shl
+             v0)))]
+        [(_) (assert #f "infeasible")])]
+
     [(arm:shll Vn)
       (destruct* ((interpret Vn))
         [((arm:i8x8 v0))
@@ -1805,6 +1878,100 @@
                v1)
               (int64x4
                v2)))))]
+        [(_ _ _) (assert #f "infeasible")])]
+
+    [(arm:smlsl Vd Vn Vm)
+      (destruct* ((interpret Vd) (interpret Vn) (interpret Vm))
+        [((arm:i32x4 v0) (arm:i16x4 v1) (int16_t v2))
+          (arm:i32x4
+           (halide:interpret
+            (vec-sub
+             v0
+             (vec-mul
+              (int32x4
+               v1)
+              (x4 (int32x1 v2))))))]
+        [((arm:i32x8 v0) (arm:i16x8 v1) (int16_t v2))
+          (arm:i32x8
+           (halide:interpret
+            (vec-sub
+             v0
+             (vec-mul
+              (int32x8
+               v1)
+              (x8 (int32x1 v2))))))]
+        [((arm:i64x2 v0) (arm:i32x2 v1) (int32_t v2))
+          (arm:i64x2
+           (halide:interpret
+            (vec-sub
+             v0
+             (vec-mul
+              (int64x2
+               v1)
+              (x2 (int64x1 v2))))))]
+        [((arm:i64x4 v0) (arm:i32x4 v1) (int32_t v2))
+          (arm:i64x4
+           (halide:interpret
+            (vec-sub
+             v0
+             (vec-mul
+              (int64x4
+               v1)
+              (x4 (int64x1 v2))))))]
+        [((arm:i16x8 v0) (arm:i8x8 v1) (int8_t v2))
+          (arm:i16x8
+           (halide:interpret
+            (vec-sub
+             v0
+             (vec-mul
+              (int16x8
+               v1)
+              (x8 (int16x1 v2))))))]
+        [((arm:i16x16 v0) (arm:i8x16 v1) (int8_t v2))
+          (arm:i16x16
+           (halide:interpret
+            (vec-sub
+             v0
+             (vec-mul
+              (int16x16
+               v1)
+              (x16 (int16x1 v2))))))]
+        [((arm:i32x4 v0) (arm:i16x4 v1) (int16_t v2))
+          (arm:i32x4
+           (halide:interpret
+            (vec-sub
+             v0
+             (vec-mul
+              (int32x4
+               v1)
+              (x4 (int32x1 v2))))))]
+        [((arm:i32x8 v0) (arm:i16x8 v1) (int16_t v2))
+          (arm:i32x8
+           (halide:interpret
+            (vec-sub
+             v0
+             (vec-mul
+              (int32x8
+               v1)
+              (x8 (int32x1 v2))))))]
+        [((arm:i64x2 v0) (arm:i32x2 v1) (int32_t v2))
+          (arm:i64x2
+           (halide:interpret
+            (vec-sub
+             v0
+             (vec-mul
+              (int64x2
+               v1)
+              (x2 (int64x1 v2))))))]
+        [((arm:i64x4 v0) (arm:i32x4 v1) (int32_t v2))
+          (arm:i64x4
+           (halide:interpret
+            (vec-sub
+             v0
+             (vec-mul
+              (int64x4
+               v1)
+              (x4 (int64x1 v2))))))]
         [(_ _ _) (assert #f "infeasible")])]
 
     [(arm:smull Vn Vm)
@@ -3278,6 +3445,76 @@
              (x4 (uint64x1 v1)))))]
         [(_ _) (assert #f "infeasible")])]
 
+    [(arm:ssubl Vn Vm)
+      (destruct* ((interpret Vn) (interpret Vm))
+        [((arm:i8x8 v0) (arm:i8x8 v1))
+          (arm:i16x8
+           (halide:interpret
+            (vec-sub
+             (int16x8
+              v0)
+             (int16x8
+              v1))))]
+        [((arm:i8x16 v0) (arm:i8x16 v1))
+          (arm:i16x16
+           (halide:interpret
+            (vec-sub
+             (int16x16
+              v0)
+             (int16x16
+              v1))))]
+        [((arm:i16x4 v0) (arm:i16x4 v1))
+          (arm:i32x4
+           (halide:interpret
+            (vec-sub
+             (int32x4
+              v0)
+             (int32x4
+              v1))))]
+        [((arm:i16x8 v0) (arm:i16x8 v1))
+          (arm:i32x8
+           (halide:interpret
+            (vec-sub
+             (int32x8
+              v0)
+             (int32x8
+              v1))))]
+        [((arm:i32x2 v0) (arm:i32x2 v1))
+          (arm:i64x2
+           (halide:interpret
+            (vec-sub
+             (int64x2
+              v0)
+             (int64x2
+              v1))))]
+        [((arm:i32x4 v0) (arm:i32x4 v1))
+          (arm:i64x4
+           (halide:interpret
+            (vec-sub
+             (int64x4
+              v0)
+             (int64x4
+              v1))))]
+        [(_ _) (assert #f "infeasible")])]
+
+    [(arm:ssubw Vn Vm)
+      (destruct* ((interpret Vn) (interpret Vm))
+        [((arm:i16x8 v0) (arm:i8x8 v1))
+          (arm:i16x8
+           (halide:interpret
+            (vec-sub
+             v0
+             (int16x8
+              v1))))]
+        [((arm:i16x16 v0) (arm:i8x16 v1))
+          (arm:i16x16
+           (halide:interpret
+            (vec-sub
+             v0
+             (int16x16
+              v1))))]
+        [(_ _) (assert #f "infeasible")])]
+
     [(arm:sub Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
         [((arm:u8x8 v0) (arm:u8x8 v1))
@@ -3492,6 +3729,108 @@
              v1)))]
         [(_ _) (assert #f "infeasible")])]
 
+    [(arm:uadalp Vn Vm)
+      (destruct* ((interpret Vn) (interpret Vm))
+        [((arm:u16x4 v0) (arm:u8x8 v1))
+          (arm:i16x4
+           (halide:interpret
+            (vec-add
+             v0
+             (vector_reduce 'add 2
+              (uint16x8
+               v1)))))]
+        [((arm:u16x8 v0) (arm:u8x16 v1))
+          (arm:i16x8
+           (halide:interpret
+            (vec-add
+             v0
+             (vector_reduce 'add 2
+              (uint16x16
+               v1)))))]
+        [((arm:u32x2 v0) (arm:u16x4 v1))
+          (arm:i32x2
+           (halide:interpret
+            (vec-add
+             v0
+             (vector_reduce 'add 2
+              (uint32x4
+               v1)))))]
+        [((arm:u32x4 v0) (arm:u16x8 v1))
+          (arm:i32x4
+           (halide:interpret
+            (vec-add
+             v0
+             (vector_reduce 'add 2
+              (uint32x8
+               v1)))))]
+        [((uint64_t v0) (arm:u32x2 v1))
+          (int64_t
+           (halide:interpret
+            (sca-add             v0             (vector_reduce 'add 2
+             (uint64x2
+              v1)))))]
+        [((arm:u64x2 v0) (arm:u32x4 v1))
+          (arm:i64x2
+           (halide:interpret
+            (vec-add
+             v0
+             (vector_reduce 'add 2
+              (uint64x4
+               v1)))))]
+        [(_ _) (assert #f "infeasible")])]
+
+    [(arm:uaddl Vn Vm)
+      (destruct* ((interpret Vn) (interpret Vm))
+        [((arm:u8x8 v0) (arm:u8x8 v1))
+          (arm:u16x8
+           (halide:interpret
+            (vec-add
+             (uint16x8
+              v0)
+             (uint16x8
+              v1))))]
+        [((arm:u8x16 v0) (arm:u8x16 v1))
+          (arm:u16x16
+           (halide:interpret
+            (vec-add
+             (uint16x16
+              v0)
+             (uint16x16
+              v1))))]
+        [((arm:u16x4 v0) (arm:u16x4 v1))
+          (arm:u32x4
+           (halide:interpret
+            (vec-add
+             (uint32x4
+              v0)
+             (uint32x4
+              v1))))]
+        [((arm:u16x8 v0) (arm:u16x8 v1))
+          (arm:u32x8
+           (halide:interpret
+            (vec-add
+             (uint32x8
+              v0)
+             (uint32x8
+              v1))))]
+        [((arm:u32x2 v0) (arm:u32x2 v1))
+          (arm:u64x2
+           (halide:interpret
+            (vec-add
+             (uint64x2
+              v0)
+             (uint64x2
+              v1))))]
+        [((arm:u32x4 v0) (arm:u32x4 v1))
+          (arm:u64x4
+           (halide:interpret
+            (vec-add
+             (uint64x4
+              v0)
+             (uint64x4
+              v1))))]
+        [(_ _) (assert #f "infeasible")])]
+
     [(arm:uaddlp Vn)
       (destruct* ((interpret Vn))
         [((arm:u8x16 v0))
@@ -3565,6 +3904,24 @@
              (uint64x4
               v0))))]
         [(_) (assert #f "infeasible")])]
+
+    [(arm:uaddw Vn Vm)
+      (destruct* ((interpret Vn) (interpret Vm))
+        [((arm:u16x8 v0) (arm:u8x8 v1))
+          (arm:u16x8
+           (halide:interpret
+            (vec-add
+             v0
+             (uint16x8
+              v1))))]
+        [((arm:u16x16 v0) (arm:u8x16 v1))
+          (arm:u16x16
+           (halide:interpret
+            (vec-add
+             v0
+             (uint16x16
+              v1))))]
+        [(_ _) (assert #f "infeasible")])]
 
     [(arm:udot.v2i32.v8i8 Vd Vn Vm)
       (destruct* ((interpret Vd) (interpret Vn) (interpret Vm))
@@ -3982,6 +4339,106 @@
           (arm:u64x4
            (halide:interpret
             (vec-add
+             v0
+             (vec-mul
+              (uint64x4
+               v1)
+              (uint64x4
+               v2)))))]
+        [(_ _ _) (assert #f "infeasible")])]
+
+    [(arm:umlsl Vd Vn Vm)
+      (destruct* ((interpret Vd) (interpret Vn) (interpret Vm))
+        [((arm:u32x4 v0) (arm:u16x4 v1) (uint16_t v2))
+          (arm:u32x4
+           (halide:interpret
+            (vec-sub
+             v0
+             (vec-mul
+              (uint32x4
+               v1)
+              (x4 (uint32x1 v2))))))]
+        [((arm:u32x8 v0) (arm:u16x8 v1) (uint16_t v2))
+          (arm:u32x8
+           (halide:interpret
+            (vec-sub
+             v0
+             (vec-mul
+              (uint32x8
+               v1)
+              (x8 (uint32x1 v2))))))]
+        [((arm:u64x2 v0) (arm:u32x2 v1) (uint32_t v2))
+          (arm:u64x2
+           (halide:interpret
+            (vec-sub
+             v0
+             (vec-mul
+              (uint64x2
+               v1)
+              (x2 (uint64x1 v2))))))]
+        [((arm:u64x4 v0) (arm:u32x4 v1) (uint32_t v2))
+          (arm:u64x4
+           (halide:interpret
+            (vec-sub
+             v0
+             (vec-mul
+              (uint64x4
+               v1)
+              (x4 (uint64x1 v2))))))]
+        [((arm:u16x8 v0) (arm:u8x8 v1) (arm:u8x8 v2))
+          (arm:u16x8
+           (halide:interpret
+            (vec-sub
+             v0
+             (vec-mul
+              (uint16x8
+               v1)
+              (uint16x8
+               v2)))))]
+        [((arm:u16x16 v0) (arm:u8x16 v1) (arm:u8x16 v2))
+          (arm:u16x16
+           (halide:interpret
+            (vec-sub
+             v0
+             (vec-mul
+              (uint16x16
+               v1)
+              (uint16x16
+               v2)))))]
+        [((arm:u32x4 v0) (arm:u16x4 v1) (arm:u16x4 v2))
+          (arm:u32x4
+           (halide:interpret
+            (vec-sub
+             v0
+             (vec-mul
+              (uint32x4
+               v1)
+              (uint32x4
+               v2)))))]
+        [((arm:u32x8 v0) (arm:u16x8 v1) (arm:u16x8 v2))
+          (arm:u32x8
+           (halide:interpret
+            (vec-sub
+             v0
+             (vec-mul
+              (uint32x8
+               v1)
+              (uint32x8
+               v2)))))]
+        [((arm:u64x2 v0) (arm:u32x2 v1) (arm:u32x2 v2))
+          (arm:u64x2
+           (halide:interpret
+            (vec-sub
+             v0
+             (vec-mul
+              (uint64x2
+               v1)
+              (uint64x2
+               v2)))))]
+        [((arm:u64x4 v0) (arm:u32x4 v1) (arm:u32x4 v2))
+          (arm:u64x4
+           (halide:interpret
+            (vec-sub
              v0
              (vec-mul
               (uint64x4
@@ -4780,6 +5237,76 @@
                v0)
               (int64x4
                v1)))))]
+        [(_ _) (assert #f "infeasible")])]
+
+    [(arm:usubl Vn Vm)
+      (destruct* ((interpret Vn) (interpret Vm))
+        [((arm:u8x8 v0) (arm:u8x8 v1))
+          (arm:u16x8
+           (halide:interpret
+            (vec-sub
+             (int16x8
+              v0)
+             (int16x8
+              v1))))]
+        [((arm:u8x16 v0) (arm:u8x16 v1))
+          (arm:u16x16
+           (halide:interpret
+            (vec-sub
+             (int16x16
+              v0)
+             (int16x16
+              v1))))]
+        [((arm:u16x4 v0) (arm:u16x4 v1))
+          (arm:u32x4
+           (halide:interpret
+            (vec-sub
+             (int32x4
+              v0)
+             (int32x4
+              v1))))]
+        [((arm:u16x8 v0) (arm:u16x8 v1))
+          (arm:u32x8
+           (halide:interpret
+            (vec-sub
+             (int32x8
+              v0)
+             (int32x8
+              v1))))]
+        [((arm:u32x2 v0) (arm:u32x2 v1))
+          (arm:u64x2
+           (halide:interpret
+            (vec-sub
+             (int64x2
+              v0)
+             (int64x2
+              v1))))]
+        [((arm:u32x4 v0) (arm:u32x4 v1))
+          (arm:u64x4
+           (halide:interpret
+            (vec-sub
+             (int64x4
+              v0)
+             (int64x4
+              v1))))]
+        [(_ _) (assert #f "infeasible")])]
+
+    [(arm:usubw Vn Vm)
+      (destruct* ((interpret Vn) (interpret Vm))
+        [((arm:u16x8 v0) (arm:u8x8 v1))
+          (arm:u16x8
+           (halide:interpret
+            (vec-sub
+             v0
+             (uint16x8
+              v1))))]
+        [((arm:u16x16 v0) (arm:u8x16 v1))
+          (arm:u16x16
+           (halide:interpret
+            (vec-sub
+             v0
+             (uint16x16
+              v1))))]
         [(_ _) (assert #f "infeasible")])]
 
     [(arm:vabdl_i16x4 Vn Vm)

@@ -110,25 +110,36 @@
 (struct saddl (Vn Vm) #:transparent)                        ;; signed_add_long
 (struct saddlv (Vn) #:transparent)                          ;; signed_add_long_across_vector
 (struct saddw (Vn Vm) #:transparent)                        ;; signed_add_wide
+(struct shl (Vn) #:transparent)                             ;; shift_left
 (struct shll (Vn) #:transparent)                            ;; shift_left_long
 (struct shrn (Vn Vm) #:transparent)                         ;; shift_right_narrow
 (struct smaxv (Vn) #:transparent)                           ;; signed_maximum_across_vector
 (struct sminv (Vn) #:transparent)                           ;; signed_minimum_across_vector
 (struct smlal (Vd Vn Vm) #:transparent)                     ;; signed_multiply_add_long
+(struct smlsl (Vd Vn Vm) #:transparent)                     ;; signed_multiply_sub_long
 (struct sqabs (Vn) #:transparent)                           ;; signed_saturating_abs
 (struct sqdmull (Vn Vm) #:transparent)                      ;; signed_saturating_doubling_mul_long
 (struct sshll (Vn Vm) #:transparent)                        ;; signed_shift_left_long
+(struct ssubl (Vn Vm) #:transparent)                        ;; signed_sub_long
+(struct ssubw (Vn Vm) #:transparent)                        ;; signed_sub_wide
 (struct sub (Vn Vm) #:transparent)                          ;; sub_vector
 (struct subhn (Vn Vm) #:transparent)                        ;; sub_high_narrow
 (struct suqadd (Vn Vm) #:transparent)                       ;; signed_saturating_acc_unsigned
+(struct uadalp (Vn Vm) #:transparent)                       ;; unsigned_add_acc_long_pairwise
+(struct uaddl (Vn Vm) #:transparent)                        ;; unsigned_add_long
 (struct uaddlv (Vn) #:transparent)                          ;; unsigned_add_long_across_vector
+(struct uaddw (Vn Vm) #:transparent)                        ;; unsigned_add_wide
 (struct umaxv (Vn) #:transparent)                           ;; unsigned_maximum_across_vector
 (struct uminv (Vn) #:transparent)                           ;; unsigned_minimum_across_vector
 (struct umlal (Vd Vn Vm) #:transparent)                     ;; unsigned_multiply_add_long
+(struct umlsl (Vd Vn Vm) #:transparent)                     ;; unsigned_multiply_sub_long
 (struct ushll (Vn Vm) #:transparent)                        ;; unsigned_shift_left_long
 (struct usqadd (Vn Vm) #:transparent)                       ;; unsigned_saturating_acc_signed
+(struct usubl (Vn Vm) #:transparent)                        ;; unsigned_sub_long
+(struct usubw (Vn Vm) #:transparent)                        ;; unsigned_sub_wide
 
 (struct ??shuffle (id lds) #:transparent)
+
 (struct ??load (id live-data buffer gather-tbl)
   #:transparent
   #:methods gen:custom-write
@@ -143,3 +154,140 @@
       (equal?-recur (??load-buffer a) (??load-buffer b))))
    (define (hash-proc a hash-recur) (??load-id a))
    (define (hash2-proc a hash2-recur) (??load-id a))])
+
+(struct ??abstr-load (id live-data buffer)
+  #:transparent
+  #:methods gen:custom-write
+  [(define write-proc
+     (make-constructor-style-printer
+      (lambda (obj) `??abstr-load)
+      (lambda (obj) (list (??abstr-load-buffer obj)))))])
+
+(struct ??swizzle (id live-data exprs gather-tbl)
+  #:transparent
+  #:methods gen:custom-write
+  [(define write-proc
+     (make-constructor-style-printer
+      (lambda (obj) `??swizzle)
+      (lambda (obj) (list (??swizzle-id obj) (length (??swizzle-exprs obj))))))]
+  #:methods gen:equal+hash
+  [(define (equal-proc a b equal?-recur)
+     (and
+      (equal?-recur (??swizzle-id a) (??swizzle-id b))
+      (equal?-recur (??swizzle-live-data a) (??swizzle-live-data b))
+      (equal?-recur (??swizzle-exprs a) (??swizzle-exprs b))))
+   (define (hash-proc a hash-recur) (??swizzle-id a))
+   (define (hash2-proc a hash2-recur) (??swizzle-id a))])
+
+;; Concat vectors (not an intrinsic but a useful construct)
+(struct concat-tiles (vecs) #:transparent)
+
+(define (elem-type expr)
+  (cond
+    [(eq? i8x8 expr) 'int8]
+    [(eq? i8x16 expr) 'int8]
+    [(eq? i8x32 expr) 'int8]
+    [(eq? i16x4 expr) 'int16]
+    [(eq? i16x8 expr) 'int16]
+    [(eq? i16x16 expr) 'int16]
+    [(eq? i32x2 expr) 'int32]
+    [(eq? i32x4 expr) 'int32]
+    [(eq? i32x8 expr) 'int32]
+    [(eq? i64x1 expr) 'int64]
+    [(eq? i64x2 expr) 'int64]
+    [(eq? i64x4 expr) 'int64]
+
+    [(eq? u8x8 expr) 'uint8]
+    [(eq? u8x16 expr) 'uint8]
+    [(eq? u8x32 expr) 'uint8]
+    [(eq? u16x4 expr) 'uint16]
+    [(eq? u16x8 expr) 'uint16]
+    [(eq? u16x16 expr) 'uint16]
+    [(eq? u32x2 expr) 'uint32]
+    [(eq? u32x4 expr) 'uint32]
+    [(eq? u32x8 expr) 'uint32]
+    [(eq? u64x1 expr) 'uint64]
+    [(eq? u64x2 expr) 'uint64]
+    [(eq? u64x4 expr) 'uint64]
+
+
+    [(i8x8? expr) 'int8]
+    [(i8x16? expr) 'int8]
+    [(i8x32? expr) 'int8]
+    [(i16x4? expr) 'int16]
+    [(i16x8? expr) 'int16]
+    [(i16x16? expr) 'int16]
+    [(i32x2? expr) 'int32]
+    [(i32x4? expr) 'int32]
+    [(i32x8? expr) 'int32]
+    [(i64x1? expr) 'int64]
+    [(i64x2? expr) 'int64]
+    [(i64x4? expr) 'int64]
+
+    [(u8x8? expr) 'uint8]
+    [(u8x16? expr) 'uint8]
+    [(u8x32? expr) 'uint8]
+    [(u16x4? expr) 'uint16]
+    [(u16x8? expr) 'uint16]
+    [(u16x16? expr) 'uint16]
+    [(u32x2? expr) 'uint32]
+    [(u32x4? expr) 'uint32]
+    [(u32x8? expr) 'uint32]
+    [(u64x1? expr) 'uint64]
+    [(u64x2? expr) 'uint64]
+    [(u64x4? expr) 'uint64]
+
+
+    [(eq? 'i8x8 expr) 'int8]
+    [(eq? 'i8x16 expr) 'int8]
+    [(eq? 'i8x32 expr) 'int8]
+    [(eq? 'i16x4 expr) 'int16]
+    [(eq? 'i16x8 expr) 'int16]
+    [(eq? 'i16x16 expr) 'int16]
+    [(eq? 'i32x2 expr) 'int32]
+    [(eq? 'i32x4 expr) 'int32]
+    [(eq? 'i32x8 expr) 'int32]
+    [(eq? 'i64x1 expr) 'int64]
+    [(eq? 'i64x2 expr) 'int64]
+    [(eq? 'i64x4 expr) 'int64]
+
+    [(eq? 'u8x8 expr) 'uint8]
+    [(eq? 'u8x16 expr) 'uint8]
+    [(eq? 'u8x32 expr) 'uint8]
+    [(eq? 'u16x4 expr) 'uint16]
+    [(eq? 'u16x8 expr) 'uint16]
+    [(eq? 'u16x16 expr) 'uint16]
+    [(eq? 'u32x2 expr) 'uint32]
+    [(eq? 'u32x4 expr) 'uint32]
+    [(eq? 'u32x8 expr) 'uint32]
+    [(eq? 'u64x1 expr) 'uint64]
+    [(eq? 'u64x2 expr) 'uint64]
+    [(eq? 'u64x4 expr) 'uint64]))
+
+(define (type expr)
+  (destruct expr
+    [(i8x8 data) 'i8x8]
+    [(i8x16 data) 'i8x16]
+    [(i8x32 data) 'i8x32]
+    [(i16x4 data) 'i16x4]
+    [(i16x8 data) 'i16x8]
+    [(i16x16 data) 'i16x16]
+    [(i32x2 data) 'i32x2]
+    [(i32x4 data) 'i32x4]
+    [(i32x8 data) 'i32x8]
+    [(i64x1 data) 'i64x1]
+    [(i64x2 data) 'i64x2]
+    [(i64x4 data) 'i64x4]
+
+    [(u8x8 data) 'u8x8]
+    [(u8x16 data) 'u8x16]
+    [(u8x32 data) 'u8x32]
+    [(u16x4 data) 'u16x4]
+    [(u16x8 data) 'u16x8]
+    [(u16x16 data) 'u16x16]
+    [(u32x2 data) 'u32x2]
+    [(u32x4 data) 'u32x4]
+    [(u32x8 data) 'u32x8]
+    [(u64x1 data) 'u64x1]
+    [(u64x2 data) 'u64x2]
+    [(u64x4 data) 'u64x4]))
