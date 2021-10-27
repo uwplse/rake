@@ -44,8 +44,8 @@ add, sadd, mul, min, max, and, or
 (struct vv-mpy-add (expr weights outT) #:super struct:ast-node #:transparent)                ;; Instructions: add, addp, mla, mls, mul, smlal, umlal
 (struct vs-mpy-add (expr weights outT) #:super struct:ast-node #:transparent)                ;; Instructions: add, addp, mla, mls, mul, shl, neg
 
-(struct vv-mpy-add-w (expr weights outT) #:super struct:ast-node #:transparent)              ;; Instructions: saddl, smull, saddw, saddlp, sadalp, smlal, smlsl, sdot, ssubl, sub, uadalp, uaddl, uaddlp, uaddw, umlal, umlsl, umull, usubl, usubw
-(struct vs-mpy-add-w (expr weights outT) #:super struct:ast-node #:transparent)              ;; Instructions: saddl, smull, saddw, saddlp, sadalp, smlal, smlsl, sdot, shll, ssubl, sub, uadalp, uaddl, uaddlp, uaddw, umlal, umlsl, umull, usubl, usubw
+;(struct vv-mpy-add-w (expr weights outT) #:super struct:ast-node #:transparent)              ;; Instructions: saddl, smull, saddw, saddlp, sadalp, smlal, smlsl, sdot, ssubl, sub, uadalp, uaddl, uaddlp, uaddw, umlal, umlsl, umull, usubl, usubw
+;(struct vs-mpy-add-w (expr weights outT) #:super struct:ast-node #:transparent)              ;; Instructions: saddl, smull, saddw, saddlp, sadalp, smlal, smlsl, sdot, shll, ssubl, sub, uadalp, uaddl, uaddlp, uaddw, umlal, umlsl, umull, usubl, usubw
 
 (struct vv-dmpy-add-sat (expr weights) #:super struct:ast-node #:transparent)                ;; Instructions: sqdmull, sqdmlal, sqdmlsl
 (struct vs-dmpy-add-sat (expr weights) #:super struct:ast-node #:transparent)                ;; Instructions: sqdmull, sqdmlal, sqdmlsl
@@ -71,3 +71,5 @@ add, sadd, mul, min, max, and, or
 (struct less-than-eq (expr0 expr1) #:super struct:ast-node #:transparent)
 
 (struct bitwise-and (expr0 expr1) #:super struct:ast-node #:transparent)
+
+(struct vs-divide (expr divisor) #:super struct:ast-node #:transparent)

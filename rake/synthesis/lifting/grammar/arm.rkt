@@ -321,8 +321,7 @@
        ;; or using the divide instructions
        ; TODO: allow for division by constants
       ;  (mk-div-by-const-instr (first lifted-sub-exprs) div-scalars)
-       ; TODO: make ARM IR for vec-div
-      ;  (mk-vs-div-instr (first lifted-sub-exprs) div-scalars (halide:elem-type halide-expr))
+       (mk-vs-div-instr (first lifted-sub-exprs) div-scalars)
       ))]
 
     [(vec-shl v1 v2)
@@ -458,6 +457,11 @@
   (cond
     [(empty? shr-scalars) '()]
     [else (arm-ir:vs-shift-right (get-node-id) sub-expr (apply choose* shr-scalars) round? saturate? signed? output-type)]))
+
+(define (mk-vs-div-instr sub-expr div-scalars)
+  (cond
+    [(empty? div-scalars) '()]
+    [else (arm-ir:vs-divide (get-node-id) sub-expr (apply choose* div-scalars))]))
 
 (define (mk-saturate-instr sub-expr out-type)
   (arm-ir:cast (get-node-id) sub-expr out-type #t))

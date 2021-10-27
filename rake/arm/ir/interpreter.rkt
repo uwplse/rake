@@ -598,6 +598,20 @@
         (let ([value (input i)])
           (right-shift-impl value n shift-func sat-func))))]
 
+
+    [(arm-ir:vs-divide expr divisor)
+     (define input (interpret expr))
+     (define den (interpret divisor))
+     (lambda (i)
+       (define v (input i))
+       (cond
+         [(int8_t? v) (cpp:euclidean-div v den 'int8)]
+         [(int16_t? v) (cpp:euclidean-div v den 'int16)]
+         [(int32_t? v) (cpp:euclidean-div v den 'int32)]
+         [(uint8_t? v) (cpp:euclidean-div v den 'uint8)]
+         [(uint16_t? v) (cpp:euclidean-div v den 'uint16)]
+         [(uint32_t? v) (cpp:euclidean-div v den 'uint32)]))]
+
     [(arm-ir:abs-diff expr0 expr1 widening? outT)
      (define input0 (interpret expr0))
      (define input1 (interpret expr1))
@@ -696,8 +710,8 @@
     [(arm-ir:vv-mpy-add expr weights outT) (+ (instr-count expr) 1)]
     [(arm-ir:vs-mpy-add expr weights outT) (+ (instr-count expr) 1)]
 
-    [(arm-ir:vv-mpy-add-w expr weights outT) (+ (instr-count expr) 1)]
-    [(arm-ir:vs-mpy-add-w expr weights outT) (+ (instr-count expr) 1)]
+    ;[(arm-ir:vv-mpy-add-w expr weights outT) (+ (instr-count expr) 1)]
+    ;[(arm-ir:vs-mpy-add-w expr weights outT) (+ (instr-count expr) 1)]
 
     [(arm-ir:vv-dmpy-add-sat expr weights) (+ (instr-count expr) 1)]
     [(arm-ir:vs-dmpy-add-sat expr weights) (+ (instr-count expr) 1)]
@@ -743,8 +757,8 @@
 
       [(arm-ir:vv-mpy-add expr weights outT) (handler (arm-ir:vv-mpy-add (arm-ir:ast-node-id ir-expr) (visit expr handler) weights outT))]
       [(arm-ir:vs-mpy-add expr weights outT) (handler (arm-ir:vs-mpy-add (arm-ir:ast-node-id ir-expr) (visit expr handler) weights outT))]
-      [(arm-ir:vv-mpy-add-w expr weights outT) (handler (arm-ir:vv-mpy-add-w (arm-ir:ast-node-id ir-expr) (visit expr handler) weights outT))]
-      [(arm-ir:vs-mpy-add-w expr weights outT) (handler (arm-ir:vs-mpy-add-w (arm-ir:ast-node-id ir-expr) (visit expr handler) weights outT))]
+      ;[(arm-ir:vv-mpy-add-w expr weights outT) (handler (arm-ir:vv-mpy-add-w (arm-ir:ast-node-id ir-expr) (visit expr handler) weights outT))]
+      ;[(arm-ir:vs-mpy-add-w expr weights outT) (handler (arm-ir:vs-mpy-add-w (arm-ir:ast-node-id ir-expr) (visit expr handler) weights outT))]
       [(arm-ir:vv-dmpy-add-sat expr weights) (handler (arm-ir:vv-dmpy-add-sat (arm-ir:ast-node-id ir-expr) (visit expr handler) weights))]
       [(arm-ir:vs-dmpy-add-sat expr weights) (handler (arm-ir:vs-dmpy-add-sat (arm-ir:ast-node-id ir-expr) (visit expr handler) weights))]
 
@@ -771,6 +785,8 @@
 
       [(arm-ir:bitwise-and expr0 expr1) (handler (arm-ir:bitwise-and (arm-ir:ast-node-id ir-expr) (visit expr0 handler) (visit expr1 handler)))]
 
+      [(arm-ir:vs-divide expr divisor) (handler (arm-ir:vs-divide (arm-ir:ast-node-id ir-expr) (visit expr handler) divisor))]
+
       [(arm-ir:abstr-expr orig-expr abstr-vals) (handler ir-expr)]
       
       [_ (error "Need to implement arm-ir:visit" ir-expr)]))
@@ -796,8 +812,8 @@
 
     [(arm-ir:vv-mpy-add expr weights outT) (list expr)]
     [(arm-ir:vs-mpy-add expr weights outT) (list expr)]
-    [(arm-ir:vv-mpy-add-w expr weights outT) (list expr)]
-    [(arm-ir:vs-mpy-add-w expr weights outT) (list expr)]
+    ;[(arm-ir:vv-mpy-add-w expr weights outT) (list expr)]
+    ;[(arm-ir:vs-mpy-add-w expr weights outT) (list expr)]
     [(arm-ir:vv-dmpy-add-sat expr weights) (list expr)]
     [(arm-ir:vs-dmpy-add-sat expr weights) (list expr)]
 
@@ -821,5 +837,7 @@
     [(arm-ir:less-than-eq expr0 expr1) (list expr0 expr1)]
 
     [(arm-ir:bitwise-and expr0 expr1) (list expr0 expr1)]
+
+    [(arm-ir:vs-divide expr divisor) (list expr)]
 
     [_ (error "Need to implement get-subexprs" ir-expr)]))
