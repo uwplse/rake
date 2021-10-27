@@ -92,17 +92,6 @@
 (define (signed-abs-helper v bits)
   (if (bvsge v (bv 0 bits)) v (bvmul v (bv -1 bits))))
 
-(define (get-cast-type type)
-  (cond
-    [(eq? type 'int8) int8_t]
-    [(eq? type 'int16) int16_t]
-    [(eq? type 'int32) int32_t]
-    [(eq? type 'int64) int64_t]
-    [(eq? type 'uint8) uint8_t]
-    [(eq? type 'uint16) uint16_t]
-    [(eq? type 'uint32) uint32_t]
-    [(eq? type 'uint64) uint64_t]))
-
 (define (abs-impl expr type)
   (destruct expr
     ; abs on unsigned is a no-op and cast
