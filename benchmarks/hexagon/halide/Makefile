@@ -55,7 +55,7 @@ $(benchmarks): %: %/bin %/out %/profile
 		-o $@/bin/$@_generator \
 		-L $(HALIDE_DIR)/lib -lHalide $(shell llvm-config --system-libs --link-static)
 
-	export LD_LIBRARY_PATH=$(HALIDE_DIR)/lib; ./$@/bin/$@_generator \
+	export LD_LIBRARY_PATH=$(HALIDE_DIR)/lib; export HL_RAKE_BENCHMARK_NAME=$@; ./$@/bin/$@_generator \
 		-o $@/bin \
 		-g $@ -e static_library,stmt,h,llvm_assembly,assembly \
 		-f $@_hvx128 target=hexagon-32-noos-no_bounds_query-no_asserts-hvx_128-hvx_v66
@@ -100,7 +100,7 @@ fully_connected: %: %/bin %/out %/profile
 		-o $@/bin/$@_generator \
 		-L $(HALIDE_DIR)/lib -lHalide $(shell $(llvm-config) --system-libs --link-static)
 
-	export LD_LIBRARY_PATH=$(HALIDE_DIR)/lib; ./$@/bin/$@_generator \
+	export LD_LIBRARY_PATH=$(HALIDE_DIR)/lib; export HL_RAKE_BENCHMARK_NAME=$@; ./$@/bin/$@_generator \
 		-o $@/bin \
 		-g $@ output.type=uint8 \
 		-e static_library,stmt,h,llvm_assembly,assembly \
