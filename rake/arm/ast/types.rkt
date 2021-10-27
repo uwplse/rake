@@ -291,3 +291,815 @@
     [(u64x1 data) 'u64x1]
     [(u64x2 data) 'u64x2]
     [(u64x4 data) 'u64x4]))
+
+(struct instr-sig (ret-val args) #:transparent)
+
+(define (instr-forms instr)
+  (cond
+    [(eq? abs instr) (list
+                         (instr-sig 'u8x8 (list 'i8x16))
+                         (instr-sig 'u16x4 (list 'i16x8))
+                         (instr-sig 'u32x2 (list 'i32x4))
+                         )]
+
+    [(eq? add instr) (list
+                         (instr-sig 'u8x8 (list 'u8x8 'u8x8))
+                         (instr-sig 'u16x4 (list 'u16x4 'u16x4))
+                         (instr-sig 'u32x2 (list 'u32x2 'u32x2))
+                         (instr-sig 'u8x16 (list 'u8x16 'u8x16))
+                         (instr-sig 'u16x8 (list 'u16x8 'u16x8))
+                         (instr-sig 'u32x2 (list 'u32x2 'u32x2))
+                         (instr-sig 'u32x4 (list 'u32x4 'u32x4))
+                         (instr-sig 'u64x2 (list 'u64x2 'u64x2))
+                         (instr-sig 'i8x8 (list 'i8x8 'i8x8))
+                         (instr-sig 'i16x4 (list 'i16x4 'i16x4))
+                         (instr-sig 'i32x2 (list 'i32x2 'i32x2))
+                         (instr-sig 'i8x16 (list 'i8x16 'i8x16))
+                         (instr-sig 'i16x8 (list 'i16x8 'i16x8))
+                         (instr-sig 'i32x2 (list 'i32x2 'i32x2))
+                         (instr-sig 'i32x4 (list 'i32x4 'i32x4))
+                         (instr-sig 'i64x2 (list 'i64x2 'i64x2))
+                         )]
+
+    [(eq? addhn instr) (list
+                         (instr-sig 'i16x8 (list 'i16x8 'i16x8))
+                         (instr-sig 'i32x4 (list 'i32x4 'i32x4))
+                         )]
+
+    [(eq? addp instr) (list
+                         (instr-sig 'i8x8 (list 'i8x16 'i8x16))
+                         (instr-sig 'u8x8 (list 'u8x16 'u8x16))
+                         (instr-sig 'i16x4 (list 'i16x8 'i16x8))
+                         (instr-sig 'u16x4 (list 'u16x8 'u16x8))
+                         (instr-sig 'i32x2 (list 'i32x4 'i32x4))
+                         (instr-sig 'u32x2 (list 'u32x4 'u32x4))
+                         )]
+
+    [(eq? addv instr) (list
+                         (instr-sig 'u8x8 (list 'u8x8))
+                         (instr-sig 'u16x4 (list 'u16x4))
+                         (instr-sig 'u8x16 (list 'u8x16))
+                         (instr-sig 'u16x8 (list 'u16x8))
+                         (instr-sig 'u32x4 (list 'u32x2))
+                         (instr-sig 'i8x8 (list 'i8x8))
+                         (instr-sig 'i16x4 (list 'i16x4))
+                         (instr-sig 'i8x16 (list 'i8x16))
+                         (instr-sig 'i16x8 (list 'i16x8))
+                         (instr-sig 'i32x4 (list 'i32x2))
+                         )]
+
+    [(eq? mla instr) (list
+                         (instr-sig 'u8x8 (list 'u8x8 'u8x8 'uint8_t))
+                         (instr-sig 'u8x16 (list 'u8x16 'u8x16 'uint8_t))
+                         (instr-sig 'u16x4 (list 'u16x4 'u16x4 'uint16_t))
+                         (instr-sig 'u16x8 (list 'u16x8 'u16x8 'uint16_t))
+                         (instr-sig 'u32x2 (list 'u32x2 'u32x2 'uint32_t))
+                         (instr-sig 'u32x4 (list 'u32x4 'u32x4 'uint32_t))
+                         (instr-sig 'u8x8 (list 'u8x8 'u8x8 'u8x8))
+                         (instr-sig 'u8x16 (list 'u8x16 'u8x16 'u8x16))
+                         (instr-sig 'u16x4 (list 'u16x4 'u16x4 'u16x4))
+                         (instr-sig 'u16x8 (list 'u16x8 'u16x8 'u16x8))
+                         (instr-sig 'u32x2 (list 'u32x2 'u32x2 'u32x2))
+                         (instr-sig 'u32x4 (list 'u32x4 'u32x4 'u32x4))
+                         )]
+
+    [(eq? mls instr) (list
+                         (instr-sig 'u8x8 (list 'u8x8 'u8x8 'uint8_t))
+                         (instr-sig 'u8x16 (list 'u8x16 'u8x16 'uint8_t))
+                         (instr-sig 'u16x4 (list 'u16x4 'u16x4 'uint16_t))
+                         (instr-sig 'u16x8 (list 'u16x8 'u16x8 'uint16_t))
+                         (instr-sig 'u32x2 (list 'u32x2 'u32x2 'uint32_t))
+                         (instr-sig 'u32x4 (list 'u32x4 'u32x4 'uint32_t))
+                         (instr-sig 'u8x8 (list 'u8x8 'u8x8 'u8x8))
+                         (instr-sig 'u8x16 (list 'u8x16 'u8x16 'u8x16))
+                         (instr-sig 'u16x4 (list 'u16x4 'u16x4 'u16x4))
+                         (instr-sig 'u16x8 (list 'u16x8 'u16x8 'u16x8))
+                         (instr-sig 'u32x2 (list 'u32x2 'u32x2 'u32x2))
+                         (instr-sig 'u32x4 (list 'u32x4 'u32x4 'u32x4))
+                         )]
+
+    [(eq? mul instr) (list
+                         (instr-sig 'u8x8 (list 'u8x8 'uint8_t))
+                         (instr-sig 'u8x16 (list 'u8x16 'uint8_t))
+                         (instr-sig 'u16x4 (list 'u16x4 'uint16_t))
+                         (instr-sig 'u16x8 (list 'u16x8 'uint16_t))
+                         (instr-sig 'u32x2 (list 'u32x2 'uint32_t))
+                         (instr-sig 'u32x4 (list 'u32x4 'uint32_t))
+                         (instr-sig 'i8x8 (list 'i8x8 'int8_t))
+                         (instr-sig 'i8x16 (list 'i8x16 'int8_t))
+                         (instr-sig 'i16x4 (list 'i16x4 'int16_t))
+                         (instr-sig 'i16x8 (list 'i16x8 'int16_t))
+                         (instr-sig 'i32x2 (list 'i32x2 'int32_t))
+                         (instr-sig 'i32x4 (list 'i32x4 'int32_t))
+                         (instr-sig 'u8x8 (list 'u8x8 'u8x8))
+                         (instr-sig 'u8x16 (list 'u8x16 'u8x16))
+                         (instr-sig 'u16x4 (list 'u16x4 'u16x4))
+                         (instr-sig 'u16x8 (list 'u16x8 'u16x8))
+                         (instr-sig 'u32x2 (list 'u32x2 'u32x2))
+                         (instr-sig 'u32x4 (list 'u32x4 'u32x4))
+                         (instr-sig 'i8x8 (list 'i8x8 'i8x8))
+                         (instr-sig 'i8x16 (list 'i8x16 'i8x16))
+                         (instr-sig 'i16x4 (list 'i16x4 'i16x4))
+                         (instr-sig 'i16x8 (list 'i16x8 'i16x8))
+                         (instr-sig 'i32x2 (list 'i32x2 'i32x2))
+                         (instr-sig 'i32x4 (list 'i32x4 'i32x4))
+                         )]
+
+    [(eq? neg instr) (list
+                         (instr-sig 'i8x8 (list 'i8x8))
+                         (instr-sig 'i8x16 (list 'i8x16))
+                         (instr-sig 'i16x4 (list 'i16x4))
+                         (instr-sig 'i16x8 (list 'i16x8))
+                         (instr-sig 'i32x2 (list 'i32x2))
+                         (instr-sig 'i32x4 (list 'i32x4))
+                         (instr-sig 'i64x2 (list 'i64x2))
+                         )]
+
+    [(eq? raddhn instr) (list
+                         (instr-sig 'i8x8 (list 'i16x8 'i16x8))
+                         (instr-sig 'u8x8 (list 'u16x8 'u16x8))
+                         (instr-sig 'i16x4 (list 'i32x4 'i32x4))
+                         (instr-sig 'u16x4 (list 'u32x4 'u32x4))
+                         (instr-sig 'i32x2 (list 'i64x2 'i64x2))
+                         (instr-sig 'u32x2 (list 'u64x2 'u64x2))
+                         )]
+
+    [(eq? rshrn instr) (list
+                         (instr-sig 'i8x8 (list 'i16x8 'uint32_t))
+                         (instr-sig 'u8x8 (list 'u16x8 'uint32_t))
+                         (instr-sig 'i16x4 (list 'i32x4 'uint32_t))
+                         (instr-sig 'u16x4 (list 'u32x4 'uint32_t))
+                         (instr-sig 'i32x2 (list 'i64x2 'uint32_t))
+                         (instr-sig 'u32x2 (list 'u64x2 'uint32_t))
+                         )]
+
+    [(eq? rsubhn instr) (list
+                         (instr-sig 'i8x8 (list 'i16x8 'i16x8))
+                         (instr-sig 'u8x8 (list 'u16x8 'u16x8))
+                         (instr-sig 'i16x4 (list 'i32x4 'i32x4))
+                         (instr-sig 'u16x4 (list 'u32x4 'u32x4))
+                         (instr-sig 'i32x2 (list 'i64x2 'i64x2))
+                         (instr-sig 'u32x2 (list 'u64x2 'u64x2))
+                         )]
+
+    [(eq? saba instr) (list
+                         (instr-sig 'i8x8 (list 'i8x8 'i8x8 'i8x8))
+                         (instr-sig 'i8x16 (list 'i8x16 'i8x16 'i8x16))
+                         (instr-sig 'i16x4 (list 'i16x4 'i16x4 'i16x4))
+                         (instr-sig 'i16x8 (list 'i16x8 'i16x8 'i16x8))
+                         (instr-sig 'i32x2 (list 'i32x2 'i32x2 'i32x2))
+                         (instr-sig 'i32x4 (list 'i32x4 'i32x4 'i32x4))
+                         )]
+
+    [(eq? sabal instr) (list
+                         (instr-sig 'i16x8 (list 'i16x8 'i8x8 'i8x8))
+                         (instr-sig 'i16x16 (list 'i16x16 'i8x16 'i8x16))
+                         (instr-sig 'i32x4 (list 'i32x4 'i16x4 'i16x4))
+                         (instr-sig 'i32x8 (list 'i32x8 'i16x8 'i16x8))
+                         (instr-sig 'i64x2 (list 'i64x2 'i32x2 'i32x2))
+                         (instr-sig 'i64x4 (list 'i64x4 'i32x4 'i32x4))
+                         )]
+
+    [(eq? sabd instr) (list
+                         (instr-sig 'u8x8 (list 'i8x16 'i8x16))
+                         (instr-sig 'u16x4 (list 'i16x8 'i16x8))
+                         (instr-sig 'u32x2 (list 'i32x4 'i32x4))
+                         )]
+
+    [(eq? sadalp instr) (list
+                         (instr-sig 'i16x4 (list 'i16x4 'i8x8))
+                         (instr-sig 'i16x8 (list 'i16x8 'i8x16))
+                         (instr-sig 'i32x2 (list 'i32x2 'i16x4))
+                         (instr-sig 'i32x4 (list 'i32x4 'i16x8))
+                         (instr-sig 'int64_t (list 'int64_t 'i32x2))
+                         (instr-sig 'i64x2 (list 'i64x2 'i32x4))
+                         )]
+
+    [(eq? saddl instr) (list
+                         (instr-sig 'i16x8 (list 'i8x8 'i8x8))
+                         (instr-sig 'i16x16 (list 'i8x16 'i8x16))
+                         (instr-sig 'i32x4 (list 'i16x4 'i16x4))
+                         (instr-sig 'i32x8 (list 'i16x8 'i16x8))
+                         (instr-sig 'i64x2 (list 'i32x2 'i32x2))
+                         (instr-sig 'i64x4 (list 'i32x4 'i32x4))
+                         )]
+
+    [(eq? saddlp instr) (list
+                         (instr-sig 'i16x4 (list 'i8x16))
+                         (instr-sig 'i32x2 (list 'i16x8))
+                         (instr-sig 'int64_t (list 'i32x4))
+                         )]
+
+    [(eq? saddlv instr) (list
+                         (instr-sig 'int16_t (list 'i8x8))
+                         (instr-sig 'int16_t (list 'i8x16))
+                         (instr-sig 'int32_t (list 'i16x4))
+                         (instr-sig 'int32_t (list 'i16x8))
+                         (instr-sig 'int64_t (list 'i32x4))
+                         )]
+
+    [(eq? saddw instr) (list
+                         (instr-sig 'i16x8 (list 'i16x8 'i8x8))
+                         (instr-sig 'i16x16 (list 'i16x16 'i8x16))
+                         )]
+
+    [(eq? sdot.v2i32.v8i8 instr) (list
+                         (instr-sig 'i32x2 (list 'i32x2 'i8x8 'i8x8))
+                         )]
+
+    [(eq? sdot.v4i32.v16i8 instr) (list
+                         (instr-sig 'i32x4 (list 'i32x4 'i8x16 'i8x16))
+                         )]
+
+    [(eq? shadd instr) (list
+                         (instr-sig 'i8x8 (list 'i8x16 'i8x16))
+                         (instr-sig 'i16x4 (list 'i16x8 'i16x8))
+                         (instr-sig 'i32x2 (list 'i32x4 'i32x4))
+                         )]
+
+    [(eq? shl instr) (list
+                         (instr-sig 'i8x8 (list 'i8x8))
+                         (instr-sig 'i8x16 (list 'i8x16))
+                         (instr-sig 'i16x4 (list 'i16x4))
+                         (instr-sig 'i16x8 (list 'i16x8))
+                         (instr-sig 'i32x2 (list 'i32x2))
+                         (instr-sig 'i32x4 (list 'i32x4))
+                         (instr-sig 'i64x2 (list 'i64x2))
+                         (instr-sig 'u8x8 (list 'u8x8))
+                         (instr-sig 'u8x16 (list 'u8x16))
+                         (instr-sig 'u16x4 (list 'u16x4))
+                         (instr-sig 'u16x8 (list 'u16x8))
+                         (instr-sig 'u32x2 (list 'u32x2))
+                         (instr-sig 'u32x4 (list 'u32x4))
+                         (instr-sig 'u64x2 (list 'u64x2))
+                         )]
+
+    [(eq? shll instr) (list
+                         (instr-sig 'i16x8 (list 'i8x8))
+                         (instr-sig 'i16x16 (list 'i8x16))
+                         (instr-sig 'i32x4 (list 'i16x4))
+                         (instr-sig 'i32x8 (list 'i16x8))
+                         (instr-sig 'i64x2 (list 'i32x2))
+                         (instr-sig 'i64x4 (list 'i32x4))
+                         )]
+
+    [(eq? shrn instr) (list
+                         (instr-sig 'i8x8 (list 'i16x8 'uint16_t))
+                         (instr-sig 'u8x8 (list 'u16x8 'uint16_t))
+                         (instr-sig 'i16x4 (list 'i32x4 'uint32_t))
+                         (instr-sig 'u16x4 (list 'u32x4 'uint32_t))
+                         (instr-sig 'u32x2 (list 'u64x2 'uint64_t))
+                         (instr-sig 'i32x2 (list 'i64x2 'uint64_t))
+                         )]
+
+    [(eq? shsub instr) (list
+                         (instr-sig 'i8x8 (list 'i8x16 'i8x16))
+                         (instr-sig 'i16x4 (list 'i16x8 'i16x8))
+                         (instr-sig 'i32x2 (list 'i32x4 'i32x4))
+                         )]
+
+    [(eq? smax instr) (list
+                         (instr-sig 'i8x8 (list 'i8x16 'i8x16))
+                         (instr-sig 'i16x4 (list 'i16x8 'i16x8))
+                         (instr-sig 'i32x2 (list 'i32x4 'i32x4))
+                         )]
+
+    [(eq? smaxp instr) (list
+                         (instr-sig 'i8x8 (list 'i8x16 'i8x16))
+                         (instr-sig 'i16x4 (list 'i16x8 'i16x8))
+                         (instr-sig 'i32x2 (list 'i32x4 'i32x4))
+                         )]
+
+    [(eq? smaxv instr) (list
+                         (instr-sig 'int8_t (list 'i8x8))
+                         (instr-sig 'int8_t (list 'i8x16))
+                         (instr-sig 'int16_t (list 'i16x4))
+                         (instr-sig 'int16_t (list 'i16x8))
+                         (instr-sig 'int32_t (list 'i32x4))
+                         )]
+
+    [(eq? smin instr) (list
+                         (instr-sig 'i8x8 (list 'i8x16 'i8x16))
+                         (instr-sig 'i16x4 (list 'i16x8 'i16x8))
+                         (instr-sig 'i32x2 (list 'i32x4 'i32x4))
+                         )]
+
+    [(eq? sminp instr) (list
+                         (instr-sig 'i8x8 (list 'i8x16 'i8x16))
+                         (instr-sig 'i16x4 (list 'i16x8 'i16x8))
+                         (instr-sig 'i32x2 (list 'i32x4 'i32x4))
+                         )]
+
+    [(eq? sminv instr) (list
+                         (instr-sig 'int8_t (list 'i8x8))
+                         (instr-sig 'int8_t (list 'i8x16))
+                         (instr-sig 'int16_t (list 'i16x4))
+                         (instr-sig 'int16_t (list 'i16x8))
+                         (instr-sig 'int32_t (list 'i32x4))
+                         )]
+
+    [(eq? smlal instr) (list
+                         (instr-sig 'i32x4 (list 'i32x4 'i16x4 'int16_t))
+                         (instr-sig 'i32x8 (list 'i32x8 'i16x8 'int16_t))
+                         (instr-sig 'i64x2 (list 'i64x2 'i32x2 'int32_t))
+                         (instr-sig 'i64x4 (list 'i64x4 'i32x4 'int32_t))
+                         (instr-sig 'i16x8 (list 'i16x8 'i8x8 'i8x8))
+                         (instr-sig 'i16x16 (list 'i16x16 'i8x16 'i8x16))
+                         (instr-sig 'i32x4 (list 'i32x4 'i16x4 'i16x4))
+                         (instr-sig 'i32x8 (list 'i32x8 'i16x8 'i16x8))
+                         (instr-sig 'i64x2 (list 'i64x2 'i32x2 'i32x2))
+                         (instr-sig 'i64x4 (list 'i64x4 'i32x4 'i32x4))
+                         )]
+
+    [(eq? smlsl instr) (list
+                         (instr-sig 'i32x4 (list 'i32x4 'i16x4 'int16_t))
+                         (instr-sig 'i32x8 (list 'i32x8 'i16x8 'int16_t))
+                         (instr-sig 'i64x2 (list 'i64x2 'i32x2 'int32_t))
+                         (instr-sig 'i64x4 (list 'i64x4 'i32x4 'int32_t))
+                         (instr-sig 'i16x8 (list 'i16x8 'i8x8 'int8_t))
+                         (instr-sig 'i16x16 (list 'i16x16 'i8x16 'int8_t))
+                         (instr-sig 'i32x4 (list 'i32x4 'i16x4 'int16_t))
+                         (instr-sig 'i32x8 (list 'i32x8 'i16x8 'int16_t))
+                         (instr-sig 'i64x2 (list 'i64x2 'i32x2 'int32_t))
+                         (instr-sig 'i64x4 (list 'i64x4 'i32x4 'int32_t))
+                         )]
+
+    [(eq? smull instr) (list
+                         (instr-sig 'i16x8 (list 'i8x8 'i8x8))
+                         (instr-sig 'i32x4 (list 'i16x4 'i16x4))
+                         (instr-sig 'i64x2 (list 'i32x2 'i32x2))
+                         )]
+
+    [(eq? sqabs instr) (list
+                         (instr-sig 'i8x8 (list 'i8x8))
+                         (instr-sig 'i8x16 (list 'i8x16))
+                         (instr-sig 'i16x4 (list 'i16x4))
+                         (instr-sig 'i16x8 (list 'i16x8))
+                         (instr-sig 'i32x2 (list 'i32x2))
+                         (instr-sig 'i32x4 (list 'i32x4))
+                         (instr-sig 'i64x2 (list 'i64x2))
+                         )]
+
+    [(eq? sqadd instr) (list
+                         (instr-sig 'i8x8 (list 'i8x16 'i8x16))
+                         (instr-sig 'i16x4 (list 'i16x8 'i16x8))
+                         (instr-sig 'i32x2 (list 'i32x4 'i32x4))
+                         )]
+
+    [(eq? sqdmulh instr) (list
+                         (instr-sig 'i16x4 (list 'i16x8 'i16x8))
+                         (instr-sig 'i32x2 (list 'i32x4 'i32x4))
+                         )]
+
+    [(eq? sqdmull instr) (list
+                         (instr-sig 'i32x4 (list 'i16x4 'int16_t))
+                         (instr-sig 'i32x8 (list 'i16x8 'int16_t))
+                         (instr-sig 'i64x2 (list 'i32x2 'int32_t))
+                         (instr-sig 'i64x4 (list 'i32x4 'int32_t))
+                         (instr-sig 'i32x4 (list 'i16x4 'i16x4))
+                         (instr-sig 'i32x8 (list 'i16x8 'i16x8))
+                         (instr-sig 'i64x2 (list 'i32x2 'i32x2))
+                         (instr-sig 'i64x4 (list 'i32x4 'i32x4))
+                         )]
+
+    [(eq? sqneg instr) (list
+                         (instr-sig 'i8x8 (list 'i8x16))
+                         (instr-sig 'i16x4 (list 'i16x8))
+                         (instr-sig 'i32x2 (list 'i32x4))
+                         (instr-sig 'i64x2 (list 'i64x2))
+                         )]
+
+    [(eq? sqrdmulh instr) (list
+                         (instr-sig 'i16x4 (list 'i16x8 'i16x8))
+                         (instr-sig 'i32x2 (list 'i32x4 'i32x4))
+                         )]
+
+    [(eq? sqrshl instr) (list
+                         (instr-sig 'i8x8 (list 'i8x16 'i8x16))
+                         (instr-sig 'i16x4 (list 'i16x8 'i16x8))
+                         (instr-sig 'i32x2 (list 'i32x4 'i32x4))
+                         (instr-sig 'i64x2 (list 'i64x2 'i64x2))
+                         )]
+
+    [(eq? sqrshrn instr) (list
+                         (instr-sig 'i8x8 (list 'i16x8 'uint32_t))
+                         (instr-sig 'i16x4 (list 'i32x4 'uint32_t))
+                         (instr-sig 'i32x2 (list 'i64x2 'uint32_t))
+                         )]
+
+    [(eq? sqrshrun instr) (list
+                         (instr-sig 'u8x8 (list 'i16x8 'uint32_t))
+                         (instr-sig 'u16x4 (list 'i32x4 'uint32_t))
+                         (instr-sig 'u32x2 (list 'i64x2 'uint32_t))
+                         )]
+
+    [(eq? sqshl instr) (list
+                         (instr-sig 'i8x8 (list 'i8x16 'i8x16))
+                         (instr-sig 'i8x8 (list 'i8x16 'u8x16))
+                         (instr-sig 'i16x4 (list 'i16x8 'i16x8))
+                         (instr-sig 'i16x4 (list 'i16x8 'u16x8))
+                         (instr-sig 'i32x2 (list 'i32x4 'i32x4))
+                         (instr-sig 'i32x2 (list 'i32x4 'u32x4))
+                         (instr-sig 'i64x2 (list 'i64x2 'i64x2))
+                         (instr-sig 'i64x2 (list 'i64x2 'u64x2))
+                         )]
+
+    [(eq? sqshlu instr) (list
+                         (instr-sig 'u8x8 (list 'i8x16 'i8x16))
+                         (instr-sig 'u8x8 (list 'i8x16 'u8x16))
+                         (instr-sig 'u16x4 (list 'i16x8 'i16x8))
+                         (instr-sig 'u16x4 (list 'i16x8 'u16x8))
+                         (instr-sig 'u32x2 (list 'i32x4 'i32x4))
+                         (instr-sig 'u32x2 (list 'i32x4 'u32x4))
+                         (instr-sig 'u64x2 (list 'i64x2 'i64x2))
+                         (instr-sig 'u64x2 (list 'i64x2 'u64x2))
+                         )]
+
+    [(eq? sqshrn instr) (list
+                         (instr-sig 'i8x8 (list 'i16x8 'uint32_t))
+                         (instr-sig 'i16x4 (list 'i32x4 'uint32_t))
+                         (instr-sig 'i32x2 (list 'i64x2 'uint32_t))
+                         )]
+
+    [(eq? sqshrun instr) (list
+                         (instr-sig 'u8x8 (list 'i16x8 'uint32_t))
+                         (instr-sig 'u16x4 (list 'i32x4 'uint32_t))
+                         (instr-sig 'u32x2 (list 'i64x2 'uint32_t))
+                         )]
+
+    [(eq? sqsub instr) (list
+                         (instr-sig 'i8x8 (list 'i8x16 'i8x16))
+                         (instr-sig 'i16x4 (list 'i16x8 'i16x8))
+                         (instr-sig 'i32x2 (list 'i32x4 'i32x4))
+                         )]
+
+    [(eq? sqxtn instr) (list
+                         (instr-sig 'i8x8 (list 'i16x8))
+                         (instr-sig 'i16x4 (list 'i32x4))
+                         (instr-sig 'i32x2 (list 'i64x2))
+                         )]
+
+    [(eq? sqxtun instr) (list
+                         (instr-sig 'u8x8 (list 'i16x8))
+                         (instr-sig 'u16x4 (list 'i32x4))
+                         (instr-sig 'u32x2 (list 'i64x2))
+                         )]
+
+    [(eq? srhadd instr) (list
+                         (instr-sig 'i8x8 (list 'i8x16 'i8x16))
+                         (instr-sig 'i16x4 (list 'i16x8 'i16x8))
+                         (instr-sig 'i32x2 (list 'i32x4 'i32x4))
+                         )]
+
+    [(eq? srhsub instr) (list
+                         (instr-sig 'i8x8 (list 'i8x16 'i8x16))
+                         (instr-sig 'i16x4 (list 'i16x8 'i16x8))
+                         (instr-sig 'i32x2 (list 'i32x4 'i32x4))
+                         )]
+
+    [(eq? srshl instr) (list
+                         (instr-sig 'i8x8 (list 'i8x16 'i8x16))
+                         (instr-sig 'i16x4 (list 'i16x8 'i16x8))
+                         (instr-sig 'i32x2 (list 'i32x4 'i32x4))
+                         (instr-sig 'i64x2 (list 'i64x2 'i64x2))
+                         )]
+
+    [(eq? sshl instr) (list
+                         (instr-sig 'i8x8 (list 'i8x16 'i8x16))
+                         (instr-sig 'i16x4 (list 'i16x8 'i16x8))
+                         (instr-sig 'i32x2 (list 'i32x4 'i32x4))
+                         (instr-sig 'i64x2 (list 'i64x2 'i64x2))
+                         )]
+
+    [(eq? sshll instr) (list
+                         (instr-sig 'i16x8 (list 'i8x8 'uint8_t))
+                         (instr-sig 'i16x16 (list 'i8x16 'uint8_t))
+                         (instr-sig 'i32x4 (list 'i16x4 'uint16_t))
+                         (instr-sig 'i32x8 (list 'i16x8 'uint16_t))
+                         (instr-sig 'i64x2 (list 'i32x2 'uint32_t))
+                         (instr-sig 'i64x4 (list 'i32x4 'uint32_t))
+                         )]
+
+    [(eq? ssubl instr) (list
+                         (instr-sig 'i16x8 (list 'i8x8 'i8x8))
+                         (instr-sig 'i16x16 (list 'i8x16 'i8x16))
+                         (instr-sig 'i32x4 (list 'i16x4 'i16x4))
+                         (instr-sig 'i32x8 (list 'i16x8 'i16x8))
+                         (instr-sig 'i64x2 (list 'i32x2 'i32x2))
+                         (instr-sig 'i64x4 (list 'i32x4 'i32x4))
+                         )]
+
+    [(eq? ssubw instr) (list
+                         (instr-sig 'i16x8 (list 'i16x8 'i8x8))
+                         (instr-sig 'i16x16 (list 'i16x16 'i8x16))
+                         )]
+
+    [(eq? sub instr) (list
+                         (instr-sig 'u8x8 (list 'u8x8 'u8x8))
+                         (instr-sig 'u16x4 (list 'u16x4 'u16x4))
+                         (instr-sig 'u32x2 (list 'u32x2 'u32x2))
+                         (instr-sig 'u8x16 (list 'u8x16 'u8x16))
+                         (instr-sig 'u16x8 (list 'u16x8 'u16x8))
+                         (instr-sig 'u32x2 (list 'u32x2 'u32x2))
+                         (instr-sig 'u32x4 (list 'u32x4 'u32x4))
+                         (instr-sig 'u64x2 (list 'u64x2 'u64x2))
+                         (instr-sig 'i8x8 (list 'i8x8 'i8x8))
+                         (instr-sig 'i16x4 (list 'i16x4 'i16x4))
+                         (instr-sig 'i32x2 (list 'i32x2 'i32x2))
+                         (instr-sig 'i8x16 (list 'i8x16 'i8x16))
+                         (instr-sig 'i16x8 (list 'i16x8 'i16x8))
+                         (instr-sig 'i32x2 (list 'i32x2 'i32x2))
+                         (instr-sig 'i32x4 (list 'i32x4 'i32x4))
+                         (instr-sig 'i64x2 (list 'i64x2 'i64x2))
+                         )]
+
+    [(eq? subhn instr) (list
+                         (instr-sig 'i16x4 (list 'i16x4 'i16x4))
+                         (instr-sig 'i32x4 (list 'i32x4 'i32x4))
+                         )]
+
+    [(eq? suqadd instr) (list
+                         (instr-sig 'i8x8 (list 'i8x8 'u8x8))
+                         (instr-sig 'i8x16 (list 'i8x16 'u8x16))
+                         (instr-sig 'i16x4 (list 'i16x4 'u16x4))
+                         (instr-sig 'i16x8 (list 'i16x8 'u16x8))
+                         (instr-sig 'i32x2 (list 'i32x2 'u32x2))
+                         (instr-sig 'i32x4 (list 'i32x4 'u32x4))
+                         )]
+
+    [(eq? uabd instr) (list
+                         (instr-sig 'u8x8 (list 'u8x16 'u8x16))
+                         (instr-sig 'u16x4 (list 'u16x8 'u16x8))
+                         (instr-sig 'u32x2 (list 'u32x4 'u32x4))
+                         )]
+
+    [(eq? uadalp instr) (list
+                         (instr-sig 'i16x4 (list 'u16x4 'u8x8))
+                         (instr-sig 'i16x8 (list 'u16x8 'u8x16))
+                         (instr-sig 'i32x2 (list 'u32x2 'u16x4))
+                         (instr-sig 'i32x4 (list 'u32x4 'u16x8))
+                         (instr-sig 'int64_t (list 'uint64_t 'u32x2))
+                         (instr-sig 'i64x2 (list 'u64x2 'u32x4))
+                         )]
+
+    [(eq? uaddl instr) (list
+                         (instr-sig 'u16x8 (list 'u8x8 'u8x8))
+                         (instr-sig 'u16x16 (list 'u8x16 'u8x16))
+                         (instr-sig 'u32x4 (list 'u16x4 'u16x4))
+                         (instr-sig 'u32x8 (list 'u16x8 'u16x8))
+                         (instr-sig 'u64x2 (list 'u32x2 'u32x2))
+                         (instr-sig 'u64x4 (list 'u32x4 'u32x4))
+                         )]
+
+    [(eq? uaddlp instr) (list
+                         (instr-sig 'u16x4 (list 'u8x16))
+                         (instr-sig 'i16x4 (list 'u8x16))
+                         (instr-sig 'u32x2 (list 'u16x8))
+                         (instr-sig 'i32x2 (list 'u16x8))
+                         (instr-sig 'uint64_t (list 'u32x4))
+                         (instr-sig 'int64_t (list 'u32x4))
+                         )]
+
+    [(eq? uaddlv instr) (list
+                         (instr-sig 'uint16_t (list 'u8x8))
+                         (instr-sig 'uint16_t (list 'u8x16))
+                         (instr-sig 'uint32_t (list 'u16x4))
+                         (instr-sig 'uint32_t (list 'u16x8))
+                         (instr-sig 'uint64_t (list 'u32x4))
+                         )]
+
+    [(eq? uaddw instr) (list
+                         (instr-sig 'u16x8 (list 'u16x8 'u8x8))
+                         (instr-sig 'u16x16 (list 'u16x16 'u8x16))
+                         )]
+
+    [(eq? udot.v2i32.v8i8 instr) (list
+                         (instr-sig 'i32x2 (list 'i32x2 'u8x8 'u8x8))
+                         (instr-sig 'u32x2 (list 'u32x2 'u8x8 'u8x8))
+                         )]
+
+    [(eq? udot.v4i32.v16i8 instr) (list
+                         (instr-sig 'i32x4 (list 'i32x4 'u8x16 'u8x16))
+                         (instr-sig 'u32x4 (list 'u32x4 'u8x16 'u8x16))
+                         )]
+
+    [(eq? uhadd instr) (list
+                         (instr-sig 'u8x8 (list 'u8x16 'u8x16))
+                         (instr-sig 'u16x4 (list 'u16x8 'u16x8))
+                         (instr-sig 'u32x2 (list 'u32x4 'u32x4))
+                         )]
+
+    [(eq? uhsub instr) (list
+                         (instr-sig 'u8x8 (list 'u8x16 'u8x16))
+                         (instr-sig 'u16x4 (list 'u16x8 'u16x8))
+                         (instr-sig 'u32x2 (list 'u32x4 'u32x4))
+                         )]
+
+    [(eq? umax instr) (list
+                         (instr-sig 'u8x8 (list 'u8x16 'u8x16))
+                         (instr-sig 'u16x4 (list 'u16x8 'u16x8))
+                         (instr-sig 'u32x2 (list 'u32x4 'u32x4))
+                         )]
+
+    [(eq? umaxp instr) (list
+                         (instr-sig 'u8x8 (list 'u8x16 'u8x16))
+                         (instr-sig 'u16x4 (list 'u16x8 'u16x8))
+                         (instr-sig 'u32x2 (list 'u32x4 'u32x4))
+                         )]
+
+    [(eq? umaxv instr) (list
+                         (instr-sig 'uint8_t (list 'u8x8))
+                         (instr-sig 'uint8_t (list 'u8x16))
+                         (instr-sig 'uint16_t (list 'u16x4))
+                         (instr-sig 'uint16_t (list 'u16x8))
+                         (instr-sig 'uint32_t (list 'u32x4))
+                         )]
+
+    [(eq? umin instr) (list
+                         (instr-sig 'u8x8 (list 'u8x16 'u8x16))
+                         (instr-sig 'u16x4 (list 'u16x8 'u16x8))
+                         (instr-sig 'u32x2 (list 'u32x4 'u32x4))
+                         )]
+
+    [(eq? uminp instr) (list
+                         (instr-sig 'u8x8 (list 'u8x16 'u8x16))
+                         (instr-sig 'u16x4 (list 'u16x8 'u16x8))
+                         (instr-sig 'u32x2 (list 'u32x4 'u32x4))
+                         )]
+
+    [(eq? uminv instr) (list
+                         (instr-sig 'uint8_t (list 'u8x8))
+                         (instr-sig 'uint8_t (list 'u8x16))
+                         (instr-sig 'uint16_t (list 'u16x4))
+                         (instr-sig 'uint16_t (list 'u16x8))
+                         (instr-sig 'uint32_t (list 'u32x4))
+                         )]
+
+    [(eq? umlal instr) (list
+                         (instr-sig 'u32x4 (list 'u32x4 'u16x4 'uint16_t))
+                         (instr-sig 'u32x8 (list 'u32x8 'u16x8 'uint16_t))
+                         (instr-sig 'u64x2 (list 'u64x2 'u32x2 'uint32_t))
+                         (instr-sig 'u64x4 (list 'u64x4 'u32x4 'uint32_t))
+                         (instr-sig 'u16x8 (list 'u16x8 'u8x8 'u8x8))
+                         (instr-sig 'u16x16 (list 'u16x16 'u8x16 'u8x16))
+                         (instr-sig 'u32x4 (list 'u32x4 'u16x4 'u16x4))
+                         (instr-sig 'u32x8 (list 'u32x8 'u16x8 'u16x8))
+                         (instr-sig 'u64x2 (list 'u64x2 'u32x2 'u32x2))
+                         (instr-sig 'u64x4 (list 'u64x4 'u32x4 'u32x4))
+                         )]
+
+    [(eq? umlsl instr) (list
+                         (instr-sig 'u32x4 (list 'u32x4 'u16x4 'uint16_t))
+                         (instr-sig 'u32x8 (list 'u32x8 'u16x8 'uint16_t))
+                         (instr-sig 'u64x2 (list 'u64x2 'u32x2 'uint32_t))
+                         (instr-sig 'u64x4 (list 'u64x4 'u32x4 'uint32_t))
+                         (instr-sig 'u16x8 (list 'u16x8 'u8x8 'u8x8))
+                         (instr-sig 'u16x16 (list 'u16x16 'u8x16 'u8x16))
+                         (instr-sig 'u32x4 (list 'u32x4 'u16x4 'u16x4))
+                         (instr-sig 'u32x8 (list 'u32x8 'u16x8 'u16x8))
+                         (instr-sig 'u64x2 (list 'u64x2 'u32x2 'u32x2))
+                         (instr-sig 'u64x4 (list 'u64x4 'u32x4 'u32x4))
+                         )]
+
+    [(eq? umull instr) (list
+                         (instr-sig 'u16x8 (list 'u8x8 'u8x8))
+                         (instr-sig 'u32x4 (list 'u16x4 'u16x4))
+                         (instr-sig 'u64x2 (list 'u32x2 'u32x2))
+                         )]
+
+    [(eq? uqadd instr) (list
+                         (instr-sig 'u8x8 (list 'u8x16 'u8x16))
+                         (instr-sig 'u16x4 (list 'u16x8 'u16x8))
+                         (instr-sig 'u32x2 (list 'u32x4 'u32x4))
+                         )]
+
+    [(eq? uqrshl instr) (list
+                         (instr-sig 'u8x8 (list 'u8x16 'i8x16))
+                         (instr-sig 'u16x4 (list 'u16x8 'i16x8))
+                         (instr-sig 'u32x2 (list 'u32x4 'i32x4))
+                         (instr-sig 'u64x2 (list 'u64x2 'i64x2))
+                         )]
+
+    [(eq? uqrshrn instr) (list
+                         (instr-sig 'u8x8 (list 'u16x8 'uint32_t))
+                         (instr-sig 'u16x4 (list 'u32x4 'uint32_t))
+                         (instr-sig 'u32x2 (list 'u64x2 'uint32_t))
+                         )]
+
+    [(eq? uqshl instr) (list
+                         (instr-sig 'u8x8 (list 'u8x16 'i8x16))
+                         (instr-sig 'u8x8 (list 'u8x16 'u8x16))
+                         (instr-sig 'u16x4 (list 'u16x8 'i16x8))
+                         (instr-sig 'u16x4 (list 'u16x8 'u16x8))
+                         (instr-sig 'u32x2 (list 'u32x4 'i32x4))
+                         (instr-sig 'u32x2 (list 'u32x4 'u32x4))
+                         (instr-sig 'u64x2 (list 'u64x2 'i64x2))
+                         (instr-sig 'u64x2 (list 'u64x2 'u64x2))
+                         )]
+
+    [(eq? uqshrn instr) (list
+                         (instr-sig 'u8x8 (list 'u16x8 'uint32_t))
+                         (instr-sig 'u16x4 (list 'u32x4 'uint32_t))
+                         (instr-sig 'u32x2 (list 'u64x2 'uint32_t))
+                         )]
+
+    [(eq? uqsub instr) (list
+                         (instr-sig 'u8x8 (list 'u8x16 'u8x16))
+                         (instr-sig 'u16x4 (list 'u16x8 'u16x8))
+                         (instr-sig 'u32x2 (list 'u32x4 'u32x4))
+                         )]
+
+    [(eq? uqxtn instr) (list
+                         (instr-sig 'u8x8 (list 'u16x8))
+                         (instr-sig 'u16x4 (list 'u32x4))
+                         (instr-sig 'u32x2 (list 'u64x2))
+                         )]
+
+    [(eq? urhadd instr) (list
+                         (instr-sig 'u8x8 (list 'u8x16 'u8x16))
+                         (instr-sig 'u16x4 (list 'u16x8 'u16x8))
+                         (instr-sig 'u32x2 (list 'u32x4 'u32x4))
+                         )]
+
+    [(eq? urhsub instr) (list
+                         (instr-sig 'u8x8 (list 'u8x16 'u8x16))
+                         (instr-sig 'u16x4 (list 'u16x8 'u16x8))
+                         (instr-sig 'u32x2 (list 'u32x4 'u32x4))
+                         )]
+
+    [(eq? urshl instr) (list
+                         (instr-sig 'u8x8 (list 'u8x16 'i8x16))
+                         (instr-sig 'u16x4 (list 'u16x8 'i16x8))
+                         (instr-sig 'u32x2 (list 'u32x4 'i32x4))
+                         (instr-sig 'u64x2 (list 'u64x2 'i64x2))
+                         )]
+
+    [(eq? ushl instr) (list
+                         (instr-sig 'u8x8 (list 'u8x16 'i8x16))
+                         (instr-sig 'u16x4 (list 'u16x8 'i16x8))
+                         (instr-sig 'u32x2 (list 'u32x4 'i32x4))
+                         (instr-sig 'u64x2 (list 'u64x2 'i64x2))
+                         )]
+
+    [(eq? ushll instr) (list
+                         (instr-sig 'u16x8 (list 'u8x8 'uint8_t))
+                         (instr-sig 'u16x16 (list 'u8x16 'uint8_t))
+                         (instr-sig 'u32x4 (list 'u16x4 'uint16_t))
+                         (instr-sig 'u32x8 (list 'u16x8 'uint16_t))
+                         (instr-sig 'u64x2 (list 'u32x2 'uint32_t))
+                         (instr-sig 'u64x4 (list 'u32x4 'uint32_t))
+                         )]
+
+    [(eq? usqadd instr) (list
+                         (instr-sig 'u8x8 (list 'u8x8 'i8x8))
+                         (instr-sig 'u8x16 (list 'u8x16 'i8x16))
+                         (instr-sig 'u16x4 (list 'u16x4 'i16x4))
+                         (instr-sig 'u16x8 (list 'u16x8 'i16x8))
+                         (instr-sig 'u32x2 (list 'u32x2 'i32x2))
+                         (instr-sig 'u32x4 (list 'u32x4 'i32x4))
+                         )]
+
+    [(eq? usubl instr) (list
+                         (instr-sig 'u16x8 (list 'u8x8 'u8x8))
+                         (instr-sig 'u16x16 (list 'u8x16 'u8x16))
+                         (instr-sig 'u32x4 (list 'u16x4 'u16x4))
+                         (instr-sig 'u32x8 (list 'u16x8 'u16x8))
+                         (instr-sig 'u64x2 (list 'u32x2 'u32x2))
+                         (instr-sig 'u64x4 (list 'u32x4 'u32x4))
+                         )]
+
+    [(eq? usubw instr) (list
+                         (instr-sig 'u16x8 (list 'u16x8 'u8x8))
+                         (instr-sig 'u16x16 (list 'u16x16 'u8x16))
+                         )]
+
+    [(eq? vabdl_i16x4 instr) (list
+                         (instr-sig 'i32x4 (list 'i16x4 'i16x4))
+                         (instr-sig 'u32x4 (list 'i16x4 'i16x4))
+                         )]
+
+    [(eq? vabdl_i32x2 instr) (list
+                         (instr-sig 'i64x2 (list 'i32x2 'i32x2))
+                         (instr-sig 'u64x2 (list 'i32x2 'i32x2))
+                         )]
+
+    [(eq? vabdl_i8x8 instr) (list
+                         (instr-sig 'i16x8 (list 'i8x8 'i8x8))
+                         (instr-sig 'u16x8 (list 'i8x8 'i8x8))
+                         )]
+
+    [(eq? vabdl_u16x4 instr) (list
+                         (instr-sig 'u32x4 (list 'u16x4 'u16x4))
+                         )]
+
+    [(eq? vabdl_u32x2 instr) (list
+                         (instr-sig 'u64x2 (list 'u32x2 'u32x2))
+                         )]
+
+    [(eq? vabdl_u8x8 instr) (list
+                         (instr-sig 'u16x8 (list 'u8x8 'u8x8))
+                         )]
+
+
+    [else (error "Unknown instruction:" instr)]))
+
