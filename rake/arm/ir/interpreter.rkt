@@ -422,20 +422,10 @@
 (define (do-widening-max lhs rhs)
   (halide:do-max (widen lhs) (widen rhs)))
 
-(define (reduce-helper input index width acc f)
+(define (reduce-impl input index width acc outT)
   (if (eq? index width)
     acc
-    (reduce-helper input (+ index 1) width (f acc (input index)) f)))
-
-(define (reduce-impl input i width op widening?)
-  (let ([f
-          (cond
-            [(eq? op 'add) (if widening? do-widening-add halide:do-add)]
-            [(eq? op 'mul) (if widening? do-widening-mul halide:do-mul)]
-            [(eq? op 'min) (if widening? do-widening-min halide:do-min)]
-            [(eq? op 'max) (if widening? do-widening-max halide:do-max)]
-            [else (error "Do not recognize reduce-op type: ~a" op)])])
-    (reduce-helper input (+ i 1) width (input i) f)))
+    (reduce-impl input (+ index 1) width (halide:do-add (cpp:cast acc outT) (cpp:cast (input index) outT)) outT)))
 
 (define (interpret p)
   (destruct p
@@ -551,10 +541,10 @@
          (lambda (i)
             (half-sub-impl (input0 i) (input1 i))))]
 
-    [(arm-ir:reduce expr width reduce-op widening?)
+    [(arm-ir:reduce expr width reduce-op outT)
      (define input (interpret expr))
      (lambda (i)
-        (reduce-impl input (* i width) width reduce-op widening?))]
+       (reduce-impl input (+ i 1) width (input i) outT))]
 
     ; TODO: vv-mpy-add
 

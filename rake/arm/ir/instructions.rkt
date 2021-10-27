@@ -39,7 +39,7 @@
 Acceptable values of reduce-op:
 add, sadd, mul, min, max, and, or
 |#
-(struct reduce (expr width reduce-op widening?) #:super struct:ast-node #:transparent)       ;; Instructions: addv, saddlv, smaxv, sminv, uaddlv, uminv, umaxv
+(struct reduce (expr width reduce-op outT) #:super struct:ast-node #:transparent)            ;; Instructions: addv, saddlv, smaxv, sminv, uaddlv, uminv, umaxv
 
 (struct vv-mpy-add (expr weights outT) #:super struct:ast-node #:transparent)                ;; Instructions: add, addp, mla, mls, mul, smlal, umlal
 (struct vs-mpy-add (expr weights outT) #:super struct:ast-node #:transparent)                ;; Instructions: add, addp, mla, mls, mul, shl, neg
