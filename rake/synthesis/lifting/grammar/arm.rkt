@@ -74,6 +74,20 @@
             (append weights (list (int8_t (bv 1 8))))
             (halide:elem-type halide-expr))
            )]
+         [(vec-sub? halide-expr)
+          (define castfn (match outT ['int8 int8x1] ['int16 int16x1] ['int32 int32x1] ['uint8 uint8x1] ['uint16 uint16x1] ['uint32 uint32x1]))
+          (define updated-weights (map (lambda (w) (sca-mul (castfn w) (castfn (int8_t (bv -1 8))))) weights))
+          (define updated-sub-expr (update-input-data expr halide-expr))
+          (list
+           ;; Try folding the add by expanding the weight-matrix
+           (arm-ir:vs-mpy-add (get-node-id) updated-sub-expr (append weights (list (int8_t (bv -1 8)))) (halide:elem-type halide-expr))
+           (arm-ir:vs-mpy-add (get-node-id) updated-sub-expr (append updated-weights (list (int8_t (bv 1 8)))) (halide:elem-type halide-expr))
+           ;; Fold sibling node into sub-exprs (combine them)
+           (arm-ir:vs-mpy-add
+            (get-node-id)
+            (mk-combine-instr (list updated-sub-expr (apply choose* lifted-sibling-exprs)))
+            (append weights (list (int8_t (bv -1 8))))
+            (halide:elem-type halide-expr)))]
          [else '()])]
 
       [(arm-ir:vv-mpy-add expr weights output-type)
@@ -102,7 +116,7 @@
           (list (arm-ir:vv-mpy-add (get-node-id) updated-sub-expr (build-list (vector_reduce-width halide-expr) 1) e-type))]
          [else
           ;; Check if the new node is an identity func. Ex: saturation where its not needed etc.
-          (list (arm-ir:vv-mpy-add (get-node-id) expr weights output-type))])]
+          (list lifted-sub-expr)])]
 
 
       [(arm-ir:add-sat expr0 expr1) '()]
@@ -130,7 +144,18 @@
       [(arm-ir:abs-diff expr0 expr1 widening? outT) '()]
 
       ; TODO: can we fold reductions...?
-      [(arm-ir:reduce expr width reduce-op widening?) '()]
+      [(arm-ir:reduce expr width reduce-op outT)
+       (cond
+         [(halide:cast-op? halide-expr)
+          ;; Try folding by flipping the widening flag
+          (list (arm-ir:reduce (get-node-id) expr width reduce-op (halide:elem-type halide-expr)))]
+         [(vec-add? halide-expr)
+          ;; Try folding the add by increasing the width
+          (define updated-sub-expr (update-input-data expr halide-expr))
+          (list (arm-ir:reduce (get-node-id) updated-sub-expr (add1 width) reduce-op outT))]
+         [else
+          ;; Check if the new node is an identity func. Ex: saturation where its not needed etc.
+          (list lifted-sub-expr)])]
 
       [_ (error "NYI: Please define a (fold) grammar for IR Expr:" lifted-sub-expr halide-expr)]))
 
@@ -201,7 +226,7 @@
       [(arm-ir:abs-diff expr0 expr1 widening? outT) '()]
 
       ; TODO: can we replace reductions...?
-      [(arm-ir:reduce expr width reduce-op widening?) '()]
+      [(arm-ir:reduce expr width reduce-op outT) '()]
 
       [_ (error "NYI: Please define a (repl) grammar for IR Expr:" lifted-sub-expr halide-expr)]))
 
@@ -267,6 +292,22 @@
           (list (int8_t (bv 1 8)) (int8_t (bv 1 8)))
           (halide:elem-type halide-expr))))]
 
+    [(vec-sub v1 v2)
+     (define live-reads (halide:extract-buffer-reads halide-expr))
+     (define gather-tbl (map (lambda (i) (define-symbolic* idx integer?) idx) (range SYMBOL_TBL_SIZE)))
+     (define read-tbl (map (lambda (i) (define-symbolic* idx integer?) (define-symbolic* c boolean?) (cons idx c)) (range SYMBOL_TBL_SIZE)))
+     (flatten
+      (list
+        ;; Try to extend using vector-scalar-multiply-add
+        (if (subexprs-are-loads? lifted-sub-exprs)
+          (arm-ir:vs-mpy-add (get-node-id) (mk-load-instr halide-expr) (list (int8_t (bv 1 8)) (int8_t (bv -1 8))) (halide:elem-type halide-expr))
+          (arm-ir:vs-mpy-add (get-node-id) (apply choose* lifted-sub-exprs) (list (int8_t (bv 1 8)) (int8_t (bv -1 8))) (halide:elem-type halide-expr)))
+        ;; Extend both of the sub-exprs (combine them)
+        (mk-vs-mpy-add-combine-subexprs    
+          lifted-sub-exprs
+          (list (int8_t (bv 1 8)) (int8_t (bv -1 8)))
+          (halide:elem-type halide-expr))))]
+
     [(vec-div v1 v2)
      (define shr-scalars (halide:extract-shr-scalars halide-expr))
      (define div-scalars (halide:extract-div-scalars halide-expr))
@@ -311,41 +352,16 @@
     [(vec-min v1 v2) (if (eq? (length lifted-sub-exprs) 2) (list (arm-ir:minimum (get-node-id) (list-ref lifted-sub-exprs 0) (list-ref lifted-sub-exprs 1))) '())]
     [(vec-max v1 v2) (if (eq? (length lifted-sub-exprs) 2) (list (arm-ir:maximum (get-node-id) (list-ref lifted-sub-exprs 0) (list-ref lifted-sub-exprs 1))) '())]
 
-    [(vec-sub v1 v2)
-     (define live-reads (halide:extract-buffer-reads halide-expr))
-     (define gather-tbl (map (lambda (i) (define-symbolic* idx integer?) idx) (range SYMBOL_TBL_SIZE)))
-     (define read-tbl (map (lambda (i) (define-symbolic* idx integer?) (define-symbolic* c boolean?) (cons idx c)) (range SYMBOL_TBL_SIZE)))
-     (flatten
-      (list
-        ;; We can extend using vector-scalar multiply-add
-        (arm-ir:vs-mpy-add
-          (get-node-id)
-          (first lifted-sub-exprs)  ;; Extend one of the 2 subexprs
-          (list (int8_t (bv 1 8)) (int8_t (bv -1 8)))
-          (halide:elem-type halide-expr))
-        (if (subexprs-are-loads? lifted-sub-exprs)
-          (arm-ir:vs-mpy-add
-            (get-node-id)
-            (mk-load-instr halide-expr)       ;; Use a new load-data node as the sub-expr
-            (list (int8_t (bv 1 8)) (int8_t (bv -1 8)))
-            (halide:elem-type halide-expr))
-          '())
-        (mk-vs-mpy-add-combine-subsubexprs ;; Extend sub-sub-exprs (combine them)
-          lifted-sub-exprs
-          (list (int8_t (bv 1 8)) (int8_t (bv -1 8)))
-          (halide:elem-type halide-expr))
-        (mk-vs-mpy-add-combine-subexprs    ;; Extend both of the sub-exprs (combine them)
-          lifted-sub-exprs
-          (list (int8_t (bv 1 8)) (int8_t (bv -1 8)))
-          (halide:elem-type halide-expr))))]
-
     [(vec-abs v1) (list (arm-ir:abs (get-node-id) (list-ref lifted-sub-exprs 0) (choose* #t #f) (halide:elem-type halide-expr)))]
     [(vec-absd v1 v2) (if (eq? (length lifted-sub-exprs) 2) (list (arm-ir:abs-diff (get-node-id) (list-ref lifted-sub-exprs 0) (list-ref lifted-sub-exprs 1) (choose* #t #f) (halide:elem-type halide-expr))) '())]
 
     [(vector_reduce op width vec)
       ; TODO: is there any other way to handle this?
       ; TODO: what to do about output type?
-      (list (arm-ir:reduce (get-node-id) (list-ref lifted-sub-exprs 0) width op (choose* #f #t)))]
+      (list
+       (if (subexprs-are-loads? lifted-sub-exprs)
+           (arm-ir:reduce (get-node-id) (mk-load-instr halide-expr) width op (halide:elem-type halide-expr))
+           (arm-ir:reduce (get-node-id) (apply choose* lifted-sub-exprs) width op (halide:elem-type halide-expr))))]
 
     [_ (error "NYI: Please define a (extend) grammar for halide node:" halide-expr)]))
 
