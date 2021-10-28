@@ -10,12 +10,12 @@
   rosette/lib/angelic
   rake/cpp
   rake/halide
-  rake/hvx/ast/types)
+  rake/hvx/ast/types
+  rake/internal/counter)
 
 (provide
  (rename-out
-  [interpret hvx:interpret]
-  [set-curr-cn hvx:set-curr-cn]))
+  [interpret hvx:interpret]))
 
 ;vsub-w                                    ;; Addition and subtraction
 ;vmpy vmpy-acc                                               ;; Multiplication
@@ -1698,10 +1698,7 @@
 ;      (outType (lambda (i) ((choose* Vu Vv) (idx-tbl1 i))) (lambda (i) ((choose* Vu Vv) (idx-tbl2 i))))
 ;      (outType (lambda (i) (Vu (idx-tbl1 i))))))
 ;
-;;; The curr-cn flag is used to restrict the set of values a gather returns when the expression is being evaluated for
-;;; any particular channel
-(define curr-cn 0)
-(define (set-curr-cn v) (set! curr-cn v))
+
 ;
 ;;; Since gather and swizzle constructs abstract away data-movement, their implementation must be synthesized as a hash-table.
 ;;; Ideally this definition should be in the grammar file but that would cause a circular dependency, so here we are.
