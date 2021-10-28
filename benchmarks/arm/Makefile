@@ -9,6 +9,7 @@ benchmarks = gaussian3x3 \
 			 dilate3x3 \
 			 median3x3 \
 			 sobel3x3 \
+			 blur3x3 \
 			 add
 
 bin_dirs = $(addsuffix /bin,$(benchmarks))
