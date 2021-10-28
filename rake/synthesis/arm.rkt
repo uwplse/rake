@@ -105,7 +105,7 @@
                                     (define tbl (map (lambda (i) (define-symbolic* idx integer?) idx) (range 256)))
                                     (arm:??load 1 live-data b tbl (buffer-elemT b)))
                                   (filter (lambda (b) (eq? t (buffer-elemT b))) live-buffers)))
-                               (list (arm:??shuffle 0 lds)))
+                               (arm:make-shuffles-list lds t))
                              buf-elemTypes)))))]
 
     [else

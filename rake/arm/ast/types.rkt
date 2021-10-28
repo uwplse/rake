@@ -138,7 +138,7 @@
 (struct usubl (Vn Vm) #:transparent)                        ;; unsigned_sub_long
 (struct usubw (Vn Vm) #:transparent)                        ;; unsigned_sub_wide
 
-(struct ??shuffle (id lds) #:transparent)
+(struct ??shuffle (id lds output-type) #:transparent)
 
 (struct ??load (id live-data buffer gather-tbl output-type)
   #:transparent
@@ -1103,4 +1103,19 @@
 
 
     [else (error "Unknown instruction:" instr)]))
+
+(define (get-vector-types type)
+  (cond
+    [(eq? type 'int8) (list 'i8x8 'i8x16 'i8x32)]
+    [(eq? type 'int16) (list 'i16x4 'i16x8 'i16x16)]
+    [(eq? type 'int32) (list 'i32x2 'i32x4 'i32x8)]
+    [(eq? type 'int64) (list 'i64x1 'i64x2 'i64x4)]
+    [(eq? type 'uint8) (list 'u8x8 'u8x16 'u8x32)]
+    [(eq? type 'uint16) (list 'u16x4 'u16x8 'u16x16)]
+    [(eq? type 'uint32) (list 'u32x2 'u32x4 'u32x8)]
+    [(eq? type 'uint64) (list 'u64x1 'u64x2 'u64x4)]
+    [else (error "Unrecognized type ~a" type)]))
+
+(define (make-shuffles-list loads type)
+  (map (lambda (t) (??shuffle 0 loads t)) (get-vector-types type)))
 
