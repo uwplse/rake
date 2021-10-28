@@ -10,7 +10,8 @@ benchmarks = gaussian3x3 \
 			 median3x3 \
 			 sobel3x3 \
 			 blur3x3 \
-			 add
+			 add \
+			 matmul
 
 bin_dirs = $(addsuffix /bin,$(benchmarks))
 out_dirs = $(addsuffix /out,$(benchmarks))
