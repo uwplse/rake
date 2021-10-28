@@ -10,13 +10,13 @@
   rosette/lib/angelic
   rake/cpp
   rake/halide
-  rake/arm/ast/types)
+  rake/arm/ast/types
+  rake/internal/counter)
 
 (provide
  (rename-out
-  [interpret arm:interpret]
-  ; [set-curr-cn arm:set-curr-cn]
-  ))
+  [interpret arm:interpret]))
+
 ;; ARM A64 interpreter
 (define (interpret p)
   (destruct p
@@ -5403,6 +5403,28 @@
           (apply choose* (filter (lambda (r) (not (void? r)) (map (curryr arm:get-element i) interpreted-loads)))))
         (vecType shuffle-body))]
 
+    [(arm:??load id live-data buffer idx-tbl output-type)
+      (let ([data (buffer-data buffer)]
+            [vecType (arm:get-type-struct output-type)])
+        ; TODO: understand what the heck this is doing...
+        (define (is-of-buffer? read)
+          (rs-match (cpp:eval read)
+            [(expression (== @app) xs ...) (equal? (list-ref xs 0) data)]
+            [_ #f]))
 
+        (define (filter-reads reads)
+          (filter is-of-buffer? reads))
+
+        (define filtered-reads (map filter-reads live-data))
+
+        (define read-history (make-hash))
+
+        (define (load-body i)
+          (let ([data (list-ref filtered-reads curr-cn)])
+            (if (empty? data)
+              (void)
+              (hash-ref! read-history i (apply choose* data)))))
+
+      (vecType load-body))]
 
     [_ (error "No interpreter for ~a" p)]))
