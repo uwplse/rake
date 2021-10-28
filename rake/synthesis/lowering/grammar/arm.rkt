@@ -172,11 +172,245 @@
     (map (curry build-ast instr sig) sig-exprs)))
 
 
-(define (get-arg-opts args-types instr instr-set base-exprs depth max-cost read-count arg-pos)
-  (error "AJ needs to implement get-arg-opts\n"))
+; TODO: understand which values should be here...
+(define (basic-type? value)
+  (match value
+    [#t #t]
+    [#f #t]
+    ['bool #t]
+    ['int8 #t]
+    ['uint8 #t]
+    ['int16 #t]
+    ['uint16 #t]
+    ['int32 #t]
+    ['uint32 #t]
+    ['int8x2 #t]
+    ['uint8x2 #t]
+    ['int16x2 #t]
+    ['uint16x2 #t]
+    ['int8x4 #t]
+    ['uint8x4 #t]
+    [_ #f]))
+
+(define (get-arg-opts arg-types instr instr-set base-exprs depth max-cost read-count arg-pos)
+  (if (empty? arg-types)
+      '()
+      (let* ([arg (first arg-types)]
+             [opts (if (basic-type? arg)
+                      (list (cons arg 0))
+                      (enumerate-arm instr-set (set arg) base-exprs (sub1 depth) max-cost read-count arg-pos))])
+          (append (list opts) (get-arg-opts (rest arg-types) instr instr-set base-exprs depth max-cost read-count (add1 arg-pos))))))
 
 (define (max-unique-inputs expr)
   (destruct expr
+
+    [(arm:??load _ _ _ _ ) 1]
+    [(arm:??shuffle _ _) 1]
+    [(arm:??swizzle _ _ _ _) 1]
+
+    [(arm:abs Vn) (max-unique-inputs Vn)]
+
+    [(arm:uabd Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
+
+    [(arm:sabd Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
+
+    [(arm:umull Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
+
+    [(arm:smull Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
+
+    [(arm:uqadd Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
+
+    [(arm:sqadd Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
+
+    [(arm:uqsub Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
+
+    [(arm:sqsub Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
+
+    [(arm:uhadd Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
+
+    [(arm:shadd Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
+
+    [(arm:uhsub Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
+
+    [(arm:shsub Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
+
+    [(arm:urhadd Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
+
+    [(arm:srhadd Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
+
+    [(arm:urhsub Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
+
+    [(arm:srhsub Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
+
+    [(arm:umin Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
+
+    [(arm:smin Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
+
+    [(arm:umax Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
+
+    [(arm:smax Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
+
+    [(arm:sqneg Vn) (max-unique-inputs Vn)]
+
+    [(arm:uqxtn Vn) (max-unique-inputs Vn)]
+
+    [(arm:sqxtn Vn) (max-unique-inputs Vn)]
+
+    [(arm:sqxtun Vn) (max-unique-inputs Vn)]
+
+    [(arm:rshrn Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
+
+    [(arm:uqrshl Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
+
+    [(arm:sqrshl Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
+
+    [(arm:uqrshrn Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
+
+    [(arm:sqrshrn Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
+
+    [(arm:sqrshrun Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
+
+    [(arm:uqshl Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
+
+    [(arm:sqshlu Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
+
+    [(arm:sqshl Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
+
+    [(arm:uqshrn Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
+
+    [(arm:sqshrn Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
+
+    [(arm:sqshrun Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
+
+    [(arm:urshl Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
+
+    [(arm:srshl Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
+
+    [(arm:ushl Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
+
+    [(arm:sshl Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
+
+    [(arm:raddhn Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
+
+    [(arm:rsubhn Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
+
+    [(arm:sqdmulh Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
+
+    [(arm:sqrdmulh Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
+
+    [(arm:addp Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
+
+    [(arm:uaddlp Vn) (max-unique-inputs Vn)]
+
+    [(arm:saddlp Vn) (max-unique-inputs Vn)]
+
+    [(arm:umaxp Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
+
+    [(arm:smaxp Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
+
+    [(arm:uminp Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
+
+    [(arm:sminp Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
+
+    [(arm:sdot.v2i32.v8i8 Vd Vn Vm) (+ (max-unique-inputs Vd) (max-unique-inputs Vn) (max-unique-inputs Vm))]
+
+    [(arm:udot.v2i32.v8i8 Vd Vn Vm) (+ (max-unique-inputs Vd) (max-unique-inputs Vn) (max-unique-inputs Vm))]
+
+    [(arm:sdot.v4i32.v16i8 Vd Vn Vm) (+ (max-unique-inputs Vd) (max-unique-inputs Vn) (max-unique-inputs Vm))]
+
+    [(arm:udot.v4i32.v16i8 Vd Vn Vm) (+ (max-unique-inputs Vd) (max-unique-inputs Vn) (max-unique-inputs Vm))]
+
+    [(arm:vabdl_i8x8 Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
+
+    [(arm:vabdl_u8x8 Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
+
+    [(arm:vabdl_i16x4 Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
+
+    [(arm:vabdl_u16x4 Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
+
+    [(arm:vabdl_i32x2 Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
+
+    [(arm:vabdl_u32x2 Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
+
+    [(arm:add Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
+
+    [(arm:addhn Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
+
+    [(arm:addv Vn) (max-unique-inputs Vn)]
+
+    [(arm:mla Vd Vn Vm) (+ (max-unique-inputs Vd) (max-unique-inputs Vn) (max-unique-inputs Vm))]
+
+    [(arm:mls Vd Vn Vm) (+ (max-unique-inputs Vd) (max-unique-inputs Vn) (max-unique-inputs Vm))]
+
+    [(arm:mul Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
+
+    [(arm:neg Vn) (max-unique-inputs Vn)]
+
+    [(arm:saba Vd Vn Vm) (+ (max-unique-inputs Vd) (max-unique-inputs Vn) (max-unique-inputs Vm))]
+
+    [(arm:sabal Vd Vn Vm) (+ (max-unique-inputs Vd) (max-unique-inputs Vn) (max-unique-inputs Vm))]
+
+    [(arm:sadalp Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
+
+    [(arm:saddl Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
+
+    [(arm:saddlv Vn) (max-unique-inputs Vn)]
+
+    [(arm:saddw Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
+
+    [(arm:shl Vn) (max-unique-inputs Vn)]
+
+    [(arm:shll Vn) (max-unique-inputs Vn)]
+
+    [(arm:shrn Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
+
+    [(arm:smaxv Vn) (max-unique-inputs Vn)]
+
+    [(arm:sminv Vn) (max-unique-inputs Vn)]
+
+    [(arm:smlal Vd Vn Vm) (+ (max-unique-inputs Vd) (max-unique-inputs Vn) (max-unique-inputs Vm))]
+
+    [(arm:smlsl Vd Vn Vm) (+ (max-unique-inputs Vd) (max-unique-inputs Vn) (max-unique-inputs Vm))]
+
+    [(arm:sqabs Vn) (max-unique-inputs Vn)]
+
+    [(arm:sqdmull Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
+
+    [(arm:sshll Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
+
+    [(arm:ssubl Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
+
+    [(arm:ssubw Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
+
+    [(arm:sub Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
+
+    [(arm:subhn Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
+
+    [(arm:suqadd Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
+
+    [(arm:uadalp Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
+
+    [(arm:uaddl Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
+
+    [(arm:uaddlv Vn) (max-unique-inputs Vn)]
+
+    [(arm:uaddw Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
+
+    [(arm:umaxv Vn) (max-unique-inputs Vn)]
+
+    [(arm:uminv Vn) (max-unique-inputs Vn)]
+
+    [(arm:umlal Vd Vn Vm) (+ (max-unique-inputs Vd) (max-unique-inputs Vn) (max-unique-inputs Vm))]
+
+    [(arm:umlsl Vd Vn Vm) (+ (max-unique-inputs Vd) (max-unique-inputs Vn) (max-unique-inputs Vm))]
+
+    [(arm:ushll Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
+
+    [(arm:usqadd Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
+
+    [(arm:usubl Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
+
+    [(arm:usubw Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
 
     [_ (error (format "AJ needs to implement max-unique-inputs ~a" expr))]))
 
