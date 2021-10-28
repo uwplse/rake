@@ -202,18 +202,9 @@
 
 ; Filter based in output type
 (define (build-instr-exprs instr instr-set output-types base-exprs depth max-cost read-count)
-  (let* ([curried-build (curry build-sig-exprs instr-set base-exprs depth max-cost read-count)]
+  (let* ([curried-build (curryr build-sig-exprs instr-set base-exprs depth max-cost read-count instr)]
          [filtered (filter (curry out-member? output-types) (arm:instr-forms instr))]
          [built (map curried-build filtered)])
-    (display "curried-build:\n")
-    (display curried-build)
-    (newline)
-    (display "filtered:\n")
-    (display filtered)
-    (newline)
-    (display "built:\n")
-    (display built)
-    (newline)
     (foldr append '() built)))
 
 (define (out-member? output-types sig)
