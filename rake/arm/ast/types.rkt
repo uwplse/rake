@@ -1119,3 +1119,59 @@
 (define (make-shuffles-list loads type)
   (map (lambda (t) (??shuffle 0 loads t)) (get-vector-types type)))
 
+(define (get-type-struct type)
+  (cond
+    [(eq? type 'i8x8) i8x8]
+    [(eq? type 'i8x16) i8x16]
+    [(eq? type 'i8x32) i8x32]
+    [(eq? type 'u8x8) u8x8]
+    [(eq? type 'u8x16) u8x16]
+    [(eq? type 'u8x32) u8x32]
+
+    [(eq? type 'i16x4) i16x4]
+    [(eq? type 'i16x8) i16x8]
+    [(eq? type 'i16x16) i16x16]
+    [(eq? type 'u16x4) u16x4]
+    [(eq? type 'u16x8) u16x8]
+    [(eq? type 'u16x16) u16x16]
+
+    [(eq? type 'i32x2) i32x2]
+    [(eq? type 'i32x4) i32x4]
+    [(eq? type 'i32x8) i32x8]
+    [(eq? type 'u32x2) u32x2]
+    [(eq? type 'u32x4) u32x4]
+    [(eq? type 'u32x8) u32x8]
+
+    [(eq? type 'i64x1) i64x1]
+    [(eq? type 'i64x2) i64x2]
+    [(eq? type 'i64x4) i64x4]
+    [else (error "Unrecognized type ~a" type)]))
+
+(define (get-element expr index)
+  (destruct expr
+    [(i8x8 data) (data index)]
+    [(i8x16 data) (data index)]
+    [(i8x32 data) (data index)]
+    [(i16x4 data) (data index)]
+    [(i16x8 data) (data index)]
+    [(i16x16 data) (data index)]
+    [(i32x2 data) (data index)]
+    [(i32x4 data) (data index)]
+    [(i32x8 data) (data index)]
+    [(i64x1 data) (data index)]
+    [(i64x2 data) (data index)]
+    [(i64x4 data) (data index)]
+
+    [(u8x8 data) (data index)]
+    [(u8x16 data) (data index)]
+    [(u8x32 data) (data index)]
+    [(u16x4 data) (data index)]
+    [(u16x8 data) (data index)]
+    [(u16x16 data) (data index)]
+    [(u32x2 data) (data index)]
+    [(u32x4 data) (data index)]
+    [(u32x8 data) (data index)]
+    [(u64x1 data) (data index)]
+    [(u64x2 data) (data index)]
+    [(u64x4 data) (data index)]
+    [_ (error "Unrecognized type ~a at index ~a" expr index)]))

@@ -5396,4 +5396,13 @@
               v1))))]
         [(_ _) (assert #f "infeasible")])]
 
+    [(arm:??shuffle id loads output-type)
+      (let ([vecType (arm:get-type-struct output-type)]
+            [interpreted-loads (interpret loads)])
+        (define (shuffle-body i)
+          (apply choose* (filter (lambda (r) (not (void? r)) (map (curryr arm:get-element i) interpreted-loads)))))
+        (vecType shuffle-body))]
+
+
+
     [_ (error "No interpreter for ~a" p)]))
