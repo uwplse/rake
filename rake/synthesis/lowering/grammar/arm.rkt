@@ -491,7 +491,7 @@
         (map
          (lambda (ld)
            (define tbl (map (lambda (i) (define-symbolic* idx integer?) idx) (range 256)))
-           (arm:??load (get-sw-node-id) (arm:??load-live-data ld) (arm:??load-buffer ld) tbl (arm:??load-output-type ld))) lds))
-        output-type]
+           (arm:??load (get-sw-node-id) (arm:??load-live-data ld) (arm:??load-buffer ld) tbl (arm:??load-output-type ld))) lds)
+        output-type)]
       [_ node]))
   (arm:visit arm-template clone-swizzle-node))
