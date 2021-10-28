@@ -139,7 +139,7 @@
          (define live-data (arm:??abstr-load-live-data arm-sub-expr))
          (define buffer (arm:??abstr-load-buffer arm-sub-expr))
          (define tbl (map (lambda (i) (define-symbolic* idx integer?) idx) (range 256)))
-         (define base-load-expr (arm:??load swizzle-node-id live-data buffer tbl (buffer-elemT buffer)))
+         (define base-load-expr (arm:??load swizzle-node-id live-data buffer tbl out-type))
          (define exprs (hash-ref! grouped-sub-exprs out-type (set)))
          (hash-set! grouped-sub-exprs out-type (set-add exprs base-load-expr)))]
       [(arm:??shuffle? arm-sub-expr)
@@ -202,14 +202,25 @@
 
 ; Filter based in output type
 (define (build-instr-exprs instr instr-set output-types base-exprs depth max-cost read-count)
-  (let ([curried-build (curryr build-sig-exprs instr-set base-exprs depth max-cost read-count)])
-    (foldr append '() (map curried-build (filter (curry out-member? output-types) (arm:instr-forms instr))))))
+  (let* ([curried-build (curry build-sig-exprs instr-set base-exprs depth max-cost read-count)]
+         [filtered (filter (curry out-member? output-types) (arm:instr-forms instr))]
+         [built (map curried-build filtered)])
+    (display "curried-build:\n")
+    (display curried-build)
+    (newline)
+    (display "filtered:\n")
+    (display filtered)
+    (newline)
+    (display "built:\n")
+    (display built)
+    (newline)
+    (foldr append '() built)))
 
 (define (out-member? output-types sig)
   (set-member? output-types (arm:instr-sig-ret-val sig)))
 
 ; I do not quite understand what this one is doing
-(define (build-sig-exprs instr sig instr-set base-exprs depth max-cost read-count)
+(define (build-sig-exprs sig instr-set base-exprs depth max-cost read-count instr)
   (let ([sig-exprs
     (let ([arg-opts (get-arg-opts (arm:instr-sig-args sig) instr instr-set base-exprs depth max-cost read-count 0)])
       (apply cartesian-product arg-opts))])
@@ -228,12 +239,8 @@
     ['uint16 #t]
     ['int32 #t]
     ['uint32 #t]
-    ['int8x2 #t]
-    ['uint8x2 #t]
-    ['int16x2 #t]
-    ['uint16x2 #t]
-    ['int8x4 #t]
-    ['uint8x4 #t]
+    ['int64 #t]
+    ['uint64 #t]
     [_ #f]))
 
 (define (get-arg-opts arg-types instr instr-set base-exprs depth max-cost read-count arg-pos)

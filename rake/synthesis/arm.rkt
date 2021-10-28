@@ -100,11 +100,11 @@
                             (map
                              (lambda (t)
                                (define lds
-                                 (map
+                                 (flatten (map
                                   (lambda (b)
                                     (define tbl (map (lambda (i) (define-symbolic* idx integer?) idx) (range 256)))
-                                    (arm:??load 1 live-data b tbl (buffer-elemT b)))
-                                  (filter (lambda (b) (eq? t (buffer-elemT b))) live-buffers)))
+                                    (map (lambda (type) (arm:??load 1 live-data b tbl type)) (arm:get-vector-types t)))
+                                  (filter (lambda (b) (eq? t (buffer-elemT b))) live-buffers))))
                                (arm:make-shuffles-list lds t))
                              buf-elemTypes)))))]
 
