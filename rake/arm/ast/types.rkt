@@ -1116,8 +1116,24 @@
     [(eq? type 'uint64) (list 'u64x1 'u64x2 'u64x4)]
     [else (error "Unrecognized type (get-vector-types) ~a" type)]))
 
+(define (simplify-shuffle shuffle)
+  (let ([type (??shuffle-output-type shuffle)]
+        [loads (??shuffle-lds shuffle)]
+        [id (??shuffle-id shuffle)])
+    (define (bad-load load)
+      (and (??load? load) (not (eq? (??load-output-type load) type))))
+    (define filtered-loads (filter bad-load loads))
+    (cond
+      [(eq? 0 (length filtered-loads)) (error "simplify-shuffle removed all loads ~a" shuffle)]
+      ; Just make a load if not actually shuffling anything
+      [(eq? 1 (length filtered-loads)) (list-ref loads 0)]
+      ; We didn't filter anything
+      [(eq? (length loads) (length filtered-loads)) shuffle]
+      ; We filtered some stuff
+      [else (??shuffle id filtered-loads type)])))
+
 (define (make-shuffles-list loads type)
-  (map (lambda (t) (??shuffle 0 loads t)) (get-vector-types type)))
+  (map (lambda (t) (simplify-shuffle (??shuffle 0 loads t))) (get-vector-types type)))
 
 (define (get-type-struct type)
   (cond
