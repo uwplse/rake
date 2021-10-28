@@ -12,7 +12,7 @@
   rake/arm/ast/types
   rake/arm/ast/interpreter
   rake/arm/ast/visitor
-  ; rake/arm/cost-model
+  rake/arm/ast/cost-model
   )
 
 (provide get-arm-grammar)
@@ -33,18 +33,67 @@
         (if (< (cpp:type-bw t0) (cpp:type-bw t1)) t0 t1))
       (arm-ir:elem-type expr)))
 
-(define (handle-vs-mpy-add expr weights output-type arm-sub-exprs)
+(define (handle-vs-mpy-add expr weights output-type arm-sub-exprs halide-expr)
   (let* ([input-type (get-input-type expr)]
          [widening? (eq? (cpp:type-bw output-type) (* 2 (cpp:type-bw input-type)))]
          ; TODO: better pruning and more isa options
          [isa (if widening?
                   (list arm:addv arm:saddlv arm:uaddlv arm:saddl arm:smull arm:saddw arm:saddlp arm:sadalp arm:smlal arm:smlsl arm:sdot.v2i32.v8i8 arm:udot.v2i32.v8i8 arm:sdot.v4i32.v16i8 arm:udot.v4i32.v16i8 arm:shll arm:ssubl arm:sub arm:uadalp arm:uaddl arm:uaddlp arm:uaddw arm:umlal arm:umlsl arm:umull arm:usubl arm:usubw)
                   (list arm:add arm:sub arm:addp arm:mla arm:mls arm:mul arm:shl arm:neg))]
-         [grouped-sub-exprs (prepare-sub-exprs arm-sub-exprs)])
+         [grouped-sub-exprs (prepare-sub-exprs arm-sub-exprs)]
+         [number-reads (length weights)]
+         [desired-types (enum-types output-type)]
          ; Enumerate those with the correct output type
+         ; TODO: do the pruning somehow...
+         [candidates (enumerate-arm isa desired-types grouped-sub-exprs 5 7 number-reads)]
+         [load-buffers (halide:extract-live-buffers halide-expr)]
+         [live-buffers (lambda (expr)
+                         (let* ([live-bufs (mutable-set)]
+                               [extract-buffer (lambda (node [pos -1])
+                                                  (destruct node
+                                                    [(buffer data elemT) (set-add! live-bufs node) node]
+                                                    [_ node]))])
+                            (arm:visit expr extract-buffer)
+                            live-bufs))])
 
+    ;; Filter out templates that read too much or too little data
+    (set! candidates (filter (lambda (c) (eq? (max-unique-inputs (car c)) number-reads)) candidates))
+    (set! candidates (filter (lambda (c) (equal? (live-buffers (car c)) load-buffers)) candidates))
 
-    (error "AJ hasn't finished this yet!\n")))
+    ;; Compute read counts
+    (set! candidates (map (lambda (c) (cons (car c) (cons (cdr c) (count-reads (car c))))) candidates))
+
+    ;; Sort them (I am ashamed of this line below)
+    (set! candidates (sort candidates (lambda (v1 v2) (if (eq? (car (cdr v1)) (car (cdr v2))) (< (cdr (cdr v1)) (cdr (cdr v2))) (< (car (cdr v1)) (car (cdr v2)))))))
+
+    (let* ([add-scalars (halide:extract-add-scalars halide-expr)]
+           [int-consts (set->list (list->set (append weights add-scalars)))])
+      (define (bool-const) (define-symbolic* b boolean?) b)
+      (define (int8-const) (int8x1 (apply choose* int-consts)))
+      (define (uint8-const) (uint8x1 (apply choose* int-consts)))
+      (define (int16-const) (int16x1 (apply choose* int-consts)))
+      (define (uint16-const) (uint16x1 (apply choose* int-consts)))
+      (define (int32-const) (int32x1 (apply choose* int-consts)))
+      (define (uint32-const) (uint32x1 (apply choose* int-consts)))
+      (define (int64-const) (int64x1 (apply choose* int-consts)))
+      (define (uint64-const) (uint64x1 (apply choose* int-consts)))
+      (define (fill-arg-grammars node [pos -1])
+       (match node
+         [#t #t]
+         [#f #f]
+         ['bool (bool-const)]
+         ['int8 (int8-const)]
+         ['uint8 (uint8-const)]
+         ['int16 (int16-const)]
+         ['uint16 (uint16-const)]
+         ['int32 (int32-const)]
+         ['uint32 (uint32-const)]
+         ['int64 (int64-const)]
+         ['uint64 (uint64-const)]
+         ; TODO: HVX has some weird types here, for scalar registers?
+         [_ node]))
+
+      (for/list ([candidate candidates]) (cons (uniquify-swizzles (arm:visit (car candidate) fill-arg-grammars)) (car (cdr candidate)))))))
 
 
 
@@ -61,7 +110,7 @@
 
 
     [(arm-ir:vs-mpy-add expr weights output-type)
-      (handle-vs-mpy-add expr weights output-type arm-sub-exprs)]
+      (handle-vs-mpy-add expr weights output-type arm-sub-exprs halide-expr)]
 
     [_ (error "Not implemented yet ~a" ir-expr)]))
 
@@ -412,8 +461,43 @@
 
     [(arm:usubw Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
 
-    [_ (error (format "AJ needs to implement max-unique-inputs ~a" expr))]))
+    [_ (error (format "max-unique-inputs failed to recognize ~a" expr))]))
 
 ; TODO: we need arm:instr-cost to work for this
 (define (build-ast instr sig sig-expr)
-  (error "AJ needs to implement build-ast"))
+  (let ([cost (foldr + (arm:instr-cost instr sig) (map cdr sig-expr))]
+        [expr (apply instr (map car sig-expr))])
+    (cons expr cost)))
+
+(define (count-reads expr)
+  (define cnt 0)
+  (define (incr-read-cntr node [pos -1])
+    (destruct node
+      [(arm:??load _ _ _ _) (set! cnt (+ cnt 1)) node]
+      [(arm:??shuffle _ _) (set! cnt (+ cnt 1)) node]
+      [else node]))
+  (arm:visit expr incr-read-cntr)
+  cnt)
+
+(define (uniquify-swizzles arm-template)
+  (define swizzle-node-id -1)
+  (define (get-sw-node-id) (set! swizzle-node-id (add1 swizzle-node-id)) swizzle-node-id)
+  (define (clone-swizzle-node node [pos -1])
+    (destruct node
+      [(arm:??swizzle id live-data expr gather-tbl)
+       (define tbl (map (lambda (i) (define-symbolic* idx integer?) idx) (range 256)))
+       (arm:??swizzle (get-sw-node-id) live-data expr tbl)]
+      [(arm:??load id live-data buffer tbl)
+       (define tbl (map (lambda (i) (define-symbolic* idx integer?) idx) (range 256)))
+       (arm:??load (get-sw-node-id) live-data buffer tbl)]
+      [(arm:??abstr-load id live-data buffer)
+       (arm:??abstr-load (get-sw-node-id) live-data buffer)]
+      [(arm:??shuffle id lds)
+       (arm:??shuffle
+        (get-sw-node-id)
+        (map
+         (lambda (ld)
+           (define tbl (map (lambda (i) (define-symbolic* idx integer?) idx) (range 256)))
+           (arm:??load (get-sw-node-id) (arm:??load-live-data ld) (arm:??load-buffer ld) tbl #f)) lds))]
+      [_ node]))
+  (arm:visit arm-template clone-swizzle-node))
