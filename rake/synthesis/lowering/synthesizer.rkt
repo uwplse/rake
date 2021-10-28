@@ -8,7 +8,8 @@
   rake/halide
   rake/hvx/ast/types
   rake/hvx/interpreter
-  rake/synthesis/lowering/util)
+  rake/synthesis/lowering/util
+  rake/internal/counter)
 
 (provide synthesize-translation lowering:synthesizer:reset-db)
 
@@ -87,7 +88,7 @@
 ;     (display (format "Verifying lane: ~a\n" curr-lane))
 ;     (println inferred-axioms)
 ;     (println ((halide:interpret optimized-halide-expr) curr-lane))
-;     (hvx:set-curr-cn curr-lane)
+;     (set-curr-cn! curr-lane)
 ;     (println (let ([x (hvx:interpret optimized-template)]) (let ([offset (quotient (hvx:num-elems x) 2)]) (if (hvx:vec-pair? x) (if (< curr-lane offset) (hvx:v0-elem x curr-lane) (hvx:v1-elem x (- curr-lane offset))) (hvx:elem x curr-lane)))))
 
      (define st (current-milliseconds))
@@ -119,19 +120,19 @@
   (define offset (quotient (hvx:num-elems se) 2))
   (cond
     [(and (hvx:vec-pair? se) (< lane offset))
-     (hvx:set-curr-cn lane)
+     (set-curr-cn! lane)
      (assert (eq? (oe lane) (hvx:v0-elem se lane)))]
     [(hvx:vec-pair? se)
-     (hvx:set-curr-cn lane)
+     (set-curr-cn! lane)
      (assert (eq? (oe lane) (hvx:v1-elem se (- lane offset))))]
     [else
-     (hvx:set-curr-cn lane)
+     (set-curr-cn! lane)
      (assert (eq? (oe lane) (hvx:elem se lane)))]))
 
 ;[(hvx:vec-pair? se)
-; (hvx:set-curr-cn (* 2 lane))
+; (set-curr-cn! (* 2 lane))
 ; (assert (eq? (oe (* 2 lane)) (hvx:v0-elem se lane)))
-; (hvx:set-curr-cn (+ 1 (* 2 lane)))
+; (set-curr-cn! (+ 1 (* 2 lane)))
 ; (assert (eq? (oe (+ 1 (* 2 lane))) (hvx:v1-elem se lane)))]
 ;
 ;(define (verification-lanes type)

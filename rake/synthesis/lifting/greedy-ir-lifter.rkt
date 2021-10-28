@@ -14,7 +14,8 @@
   rake/synthesis/lifting/synthesizer/hvx
   rake/synthesis/lifting/grammar/hvx
   rake/synthesis/lifting/grammar/arm
-  rake/synthesis/lifting/grammar/util)
+  rake/synthesis/lifting/grammar/util
+  rake/internal/counter)
 
 (provide synthesize-ir-expr-greedy)
 
@@ -173,15 +174,13 @@
 (define (bounded-eq-0? oe se)
   (for-each
    (lambda (lane)
-     (hvx-ir:set-cn lane)
-     (arm-ir:set-cn lane)
+     (set-curr-cn! lane)
      (assert (eq? (oe lane) (se lane))))
    (list 0)))
 
 (define (bounded-eq-1? oe se)
   (for-each
    (lambda (lane)
-     (hvx-ir:set-cn lane)
-     (arm-ir:set-cn lane)
+     (set-curr-cn! lane)
      (assert (eq? (oe lane) (se lane))))
    (list 0 1)))

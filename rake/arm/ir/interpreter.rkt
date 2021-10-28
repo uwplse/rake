@@ -6,21 +6,17 @@
   rosette/lib/angelic
   rake/cpp
   rake/halide
-  rake/arm/ir/instructions)
+  rake/arm/ir/instructions
+  rake/internal/counter)
 
 ; TODO: do provides
 (provide
   (rename-out [instr-count arm-ir:instr-count])
-  (rename-out [set-cn arm-ir:set-cn])
   (rename-out [get-subexprs arm-ir:get-subexprs])
   (rename-out [visit arm-ir:visit])
   (rename-out [elem-type arm-ir:elem-type])
   (rename-out [elem-type^ arm-ir:elem-type^])
   (rename-out [interpret arm-ir:interpret]))
-
-; TODO: I don't understand what these are used for.
-(define curr-cn 0)
-(define (set-cn v) (set! curr-cn v))
 
 (define (elem-type expr)
   (define e (interpret expr))

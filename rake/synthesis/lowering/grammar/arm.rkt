@@ -42,7 +42,7 @@
                   (list arm:add arm:sub arm:addp arm:mla arm:mls arm:mul arm:shl arm:neg))]
          [grouped-sub-exprs (prepare-sub-exprs arm-sub-exprs)]
          [number-reads (length weights)]
-         [desired-types (enum-types output-type)]
+         [desired-types (arm:get-vector-types output-type)]
          ; Enumerate those with the correct output type
          ; TODO: do the pruning somehow...
          [candidates (enumerate-arm isa desired-types grouped-sub-exprs 5 7 number-reads)]
@@ -105,8 +105,16 @@
     [(arm-ir:load-data live-data gather-tbl)
      (define buffers (set->list (halide:extract-live-buffers halide-expr)))
      (define candidates (for/list ([buffer buffers]) (cons (arm:??abstr-load 0 live-data buffer) 1)))
-      (list
-       (cons (arm:??shuffle 0 (map (lambda (b) (define tbl (map (lambda (i) (define-symbolic* idx integer?) idx) (range 256))) (arm:??load 1 live-data b tbl)) buffers)) 2))]
+     (define buf-elemTypes (map buffer-elemT buffers))
+     (define (label-cost shufffle)
+        (cons shuffle 2))
+     (define (generate-shuffles type)
+        (define (construct-loads b)
+          (define tbl (map (lambda (i) (define-symbolic* idx integer?) idx) (range 256)))
+          (arm:??load 1 live-data b tbl (buffer-elemT b)))
+        (define actual-loads (map construct-loads buffers))
+        (arm:make-shuffles-list actual-loads type))
+     (map label-cost (flatten (map generate-shuffles buf-elemTypes)))]
 
 
     [(arm-ir:vs-mpy-add expr weights output-type)
@@ -126,19 +134,19 @@
     (cond
       [(arm:??abstr-load? arm-sub-expr)
        (define elemT (arm:elem-type (arm:interpret arm-sub-expr)))
-       (for ([out-type (enum-types elemT)])
+       (for ([out-type (arm:get-vector-types elemT)])
          (set! swizzle-node-id (add1 swizzle-node-id))
          (define live-data (arm:??abstr-load-live-data arm-sub-expr))
          (define buffer (arm:??abstr-load-buffer arm-sub-expr))
          (define tbl (map (lambda (i) (define-symbolic* idx integer?) idx) (range 256)))
-         (define base-load-expr (arm:??load swizzle-node-id live-data buffer tbl))
+         (define base-load-expr (arm:??load swizzle-node-id live-data buffer tbl out-type))
          (define exprs (hash-ref! grouped-sub-exprs out-type (set)))
          (hash-set! grouped-sub-exprs out-type (set-add exprs base-load-expr)))]
       [(arm:??shuffle? arm-sub-expr)
        (define elemT (arm:elem-type (arm:interpret arm-sub-expr)))
-       (for ([out-type (enum-types elemT)])
+       (for ([out-type (arm:get-vector-types elemT)])
          (set! swizzle-node-id (add1 swizzle-node-id))
-         (define base-load-expr (arm:??shuffle swizzle-node-id (arm:??shuffle-lds arm-sub-expr)))
+         (define base-load-expr (arm:??shuffle swizzle-node-id (arm:??shuffle-lds arm-sub-expr) out-type))
          (define exprs (hash-ref! grouped-sub-exprs out-type (set)))
          (hash-set! grouped-sub-exprs out-type (set-add exprs base-load-expr)))]
       ; TODO: ask Maaz about the vspalt cond here from the HVX code
@@ -163,19 +171,6 @@
     (hash-set! grouped-merged-sub-exprs output-type merged-candidates))
   
   grouped-merged-sub-exprs)
-
-;; Enuemration fns (move these elsewhere)
-
-(define (enum-types type)
-  (cond
-    [(eq? type 'int8) (set 'i8x8 'i8x16 'i8x32)]
-    [(eq? type 'int16) (set 'i16x4 'i16x8 'i16x16)]
-    [(eq? type 'int32) (set 'i32x2 'i32x4 'i32x8)]
-    [(eq? type 'int64) (set 'i64x1 'i64x2 'i64x4)]
-    [(eq? type 'uint8) (set 'u8x8 'u8x16 'u8x32)]
-    [(eq? type 'uint16) (set 'u16x4 'u16x8 'u16x16)]
-    [(eq? type 'uint32) (set 'u32x2 'u32x4 'u32x8)]
-    [(eq? type 'uint64) (set 'u64x1 'u64x2 'u64x4)]))
 
 (define (is-load? expr)
   (or
@@ -207,14 +202,16 @@
 
 ; Filter based in output type
 (define (build-instr-exprs instr instr-set output-types base-exprs depth max-cost read-count)
-  (let ([curried-build (curryr build-sig-exprs instr-set base-exprs depth max-cost read-count)])
-    (foldr append '() (map curried-build (filter (curry out-member? output-types) (arm:instr-forms instr))))))
+  (let* ([curried-build (curryr build-sig-exprs instr-set base-exprs depth max-cost read-count instr)]
+         [filtered (filter (curry out-member? output-types) (arm:instr-forms instr))]
+         [built (map curried-build filtered)])
+    (foldr append '() built)))
 
 (define (out-member? output-types sig)
   (set-member? output-types (arm:instr-sig-ret-val sig)))
 
 ; I do not quite understand what this one is doing
-(define (build-sig-exprs instr sig instr-set base-exprs depth max-cost read-count)
+(define (build-sig-exprs sig instr-set base-exprs depth max-cost read-count instr)
   (let ([sig-exprs
     (let ([arg-opts (get-arg-opts (arm:instr-sig-args sig) instr instr-set base-exprs depth max-cost read-count 0)])
       (apply cartesian-product arg-opts))])
@@ -233,12 +230,8 @@
     ['uint16 #t]
     ['int32 #t]
     ['uint32 #t]
-    ['int8x2 #t]
-    ['uint8x2 #t]
-    ['int16x2 #t]
-    ['uint16x2 #t]
-    ['int8x4 #t]
-    ['uint8x4 #t]
+    ['int64 #t]
+    ['uint64 #t]
     [_ #f]))
 
 (define (get-arg-opts arg-types instr instr-set base-exprs depth max-cost read-count arg-pos)
@@ -253,8 +246,8 @@
 (define (max-unique-inputs expr)
   (destruct expr
 
-    [(arm:??load _ _ _ _ ) 1]
-    [(arm:??shuffle _ _) 1]
+    [(arm:??load _ _ _ _ _) 1]
+    [(arm:??shuffle _ _ _) 1]
     [(arm:??swizzle _ _ _ _) 1]
 
     [(arm:abs Vn) (max-unique-inputs Vn)]
@@ -473,8 +466,8 @@
   (define cnt 0)
   (define (incr-read-cntr node [pos -1])
     (destruct node
-      [(arm:??load _ _ _ _) (set! cnt (+ cnt 1)) node]
-      [(arm:??shuffle _ _) (set! cnt (+ cnt 1)) node]
+      [(arm:??load _ _ _ _ _) (set! cnt (+ cnt 1)) node]
+      [(arm:??shuffle _ _ _) (set! cnt (+ cnt 1)) node]
       [else node]))
   (arm:visit expr incr-read-cntr)
   cnt)
@@ -487,17 +480,18 @@
       [(arm:??swizzle id live-data expr gather-tbl)
        (define tbl (map (lambda (i) (define-symbolic* idx integer?) idx) (range 256)))
        (arm:??swizzle (get-sw-node-id) live-data expr tbl)]
-      [(arm:??load id live-data buffer tbl)
+      [(arm:??load id live-data buffer tbl output-type)
        (define tbl (map (lambda (i) (define-symbolic* idx integer?) idx) (range 256)))
-       (arm:??load (get-sw-node-id) live-data buffer tbl)]
+       (arm:??load (get-sw-node-id) live-data buffer tbl output-type)]
       [(arm:??abstr-load id live-data buffer)
        (arm:??abstr-load (get-sw-node-id) live-data buffer)]
-      [(arm:??shuffle id lds)
+      [(arm:??shuffle id lds output-type)
        (arm:??shuffle
         (get-sw-node-id)
         (map
          (lambda (ld)
            (define tbl (map (lambda (i) (define-symbolic* idx integer?) idx) (range 256)))
-           (arm:??load (get-sw-node-id) (arm:??load-live-data ld) (arm:??load-buffer ld) tbl #f)) lds))]
+           (arm:??load (get-sw-node-id) (arm:??load-live-data ld) (arm:??load-buffer ld) tbl (arm:??load-output-type ld))) lds))
+        output-type]
       [_ node]))
   (arm:visit arm-template clone-swizzle-node))

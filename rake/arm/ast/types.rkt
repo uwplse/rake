@@ -138,20 +138,21 @@
 (struct usubl (Vn Vm) #:transparent)                        ;; unsigned_sub_long
 (struct usubw (Vn Vm) #:transparent)                        ;; unsigned_sub_wide
 
-(struct ??shuffle (id lds) #:transparent)
+(struct ??shuffle (id lds output-type) #:transparent)
 
-(struct ??load (id live-data buffer gather-tbl)
+(struct ??load (id live-data buffer gather-tbl output-type)
   #:transparent
   #:methods gen:custom-write
   [(define write-proc
      (make-constructor-style-printer
       (lambda (obj) `??load)
-      (lambda (obj) (list (??load-id obj) (??load-buffer obj)))))] ; (filter concrete? (??load-gather-tbl obj))
+      (lambda (obj) (list (??load-id obj) (??load-buffer obj) (??load-output-type obj)))))] ; (filter concrete? (??load-gather-tbl obj))
   #:methods gen:equal+hash
   [(define (equal-proc a b equal?-recur)
      (and
       (equal?-recur (??load-id a) (??load-id b))
-      (equal?-recur (??load-buffer a) (??load-buffer b))))
+      (equal?-recur (??load-buffer a) (??load-buffer b))
+      (equal?-recur (??load-output-type a) (??load-output-type b))))
    (define (hash-proc a hash-recur) (??load-id a))
    (define (hash2-proc a hash2-recur) (??load-id a))])
 
@@ -1103,3 +1104,74 @@
 
     [else (error "Unknown instruction:" instr)]))
 
+(define (get-vector-types type)
+  (cond
+    [(eq? type 'int8) (list 'i8x8 'i8x16 'i8x32)]
+    [(eq? type 'int16) (list 'i16x4 'i16x8 'i16x16)]
+    [(eq? type 'int32) (list 'i32x2 'i32x4 'i32x8)]
+    [(eq? type 'int64) (list 'i64x1 'i64x2 'i64x4)]
+    [(eq? type 'uint8) (list 'u8x8 'u8x16 'u8x32)]
+    [(eq? type 'uint16) (list 'u16x4 'u16x8 'u16x16)]
+    [(eq? type 'uint32) (list 'u32x2 'u32x4 'u32x8)]
+    [(eq? type 'uint64) (list 'u64x1 'u64x2 'u64x4)]
+    [else (error "Unrecognized type (get-vector-types) ~a" type)]))
+
+(define (make-shuffles-list loads type)
+  (map (lambda (t) (??shuffle 0 loads t)) (get-vector-types type)))
+
+(define (get-type-struct type)
+  (cond
+    [(eq? type 'i8x8) i8x8]
+    [(eq? type 'i8x16) i8x16]
+    [(eq? type 'i8x32) i8x32]
+    [(eq? type 'u8x8) u8x8]
+    [(eq? type 'u8x16) u8x16]
+    [(eq? type 'u8x32) u8x32]
+
+    [(eq? type 'i16x4) i16x4]
+    [(eq? type 'i16x8) i16x8]
+    [(eq? type 'i16x16) i16x16]
+    [(eq? type 'u16x4) u16x4]
+    [(eq? type 'u16x8) u16x8]
+    [(eq? type 'u16x16) u16x16]
+
+    [(eq? type 'i32x2) i32x2]
+    [(eq? type 'i32x4) i32x4]
+    [(eq? type 'i32x8) i32x8]
+    [(eq? type 'u32x2) u32x2]
+    [(eq? type 'u32x4) u32x4]
+    [(eq? type 'u32x8) u32x8]
+
+    [(eq? type 'i64x1) i64x1]
+    [(eq? type 'i64x2) i64x2]
+    [(eq? type 'i64x4) i64x4]
+    [else (error "Unrecognized type (get-type-struct) ~a" type)]))
+
+(define (get-element expr index)
+  (destruct expr
+    [(i8x8 data) (data index)]
+    [(i8x16 data) (data index)]
+    [(i8x32 data) (data index)]
+    [(i16x4 data) (data index)]
+    [(i16x8 data) (data index)]
+    [(i16x16 data) (data index)]
+    [(i32x2 data) (data index)]
+    [(i32x4 data) (data index)]
+    [(i32x8 data) (data index)]
+    [(i64x1 data) (data index)]
+    [(i64x2 data) (data index)]
+    [(i64x4 data) (data index)]
+
+    [(u8x8 data) (data index)]
+    [(u8x16 data) (data index)]
+    [(u8x32 data) (data index)]
+    [(u16x4 data) (data index)]
+    [(u16x8 data) (data index)]
+    [(u16x16 data) (data index)]
+    [(u32x2 data) (data index)]
+    [(u32x4 data) (data index)]
+    [(u32x8 data) (data index)]
+    [(u64x1 data) (data index)]
+    [(u64x2 data) (data index)]
+    [(u64x4 data) (data index)]
+    [_ (error "Unrecognized type (get-element) ~a at index ~a" expr index)]))
