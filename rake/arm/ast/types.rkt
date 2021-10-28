@@ -1121,7 +1121,7 @@
         [loads (??shuffle-lds shuffle)]
         [id (??shuffle-id shuffle)])
     (define (bad-load load)
-      (and (??load? load) (not (eq? (??load-output-type load) type))))
+      (not (and (??load? load) (not (eq? (??load-output-type load) type)))))
     (define filtered-loads (filter bad-load loads))
     (cond
       [(eq? 0 (length filtered-loads)) (error "simplify-shuffle removed all loads ~a" shuffle)]
