@@ -140,18 +140,19 @@
 
 (struct ??shuffle (id lds) #:transparent)
 
-(struct ??load (id live-data buffer gather-tbl)
+(struct ??load (id live-data buffer gather-tbl output-type)
   #:transparent
   #:methods gen:custom-write
   [(define write-proc
      (make-constructor-style-printer
       (lambda (obj) `??load)
-      (lambda (obj) (list (??load-id obj) (??load-buffer obj)))))] ; (filter concrete? (??load-gather-tbl obj))
+      (lambda (obj) (list (??load-id obj) (??load-buffer obj) (??load-output-type obj)))))] ; (filter concrete? (??load-gather-tbl obj))
   #:methods gen:equal+hash
   [(define (equal-proc a b equal?-recur)
      (and
       (equal?-recur (??load-id a) (??load-id b))
-      (equal?-recur (??load-buffer a) (??load-buffer b))))
+      (equal?-recur (??load-buffer a) (??load-buffer b))
+      (equal?-recur (??load-output-type a) (??load-output-type b))))
    (define (hash-proc a hash-recur) (??load-id a))
    (define (hash2-proc a hash2-recur) (??load-id a))])
 

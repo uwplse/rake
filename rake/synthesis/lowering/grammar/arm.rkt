@@ -106,7 +106,7 @@
      (define buffers (set->list (halide:extract-live-buffers halide-expr)))
      (define candidates (for/list ([buffer buffers]) (cons (arm:??abstr-load 0 live-data buffer) 1)))
       (list
-       (cons (arm:??shuffle 0 (map (lambda (b) (define tbl (map (lambda (i) (define-symbolic* idx integer?) idx) (range 256))) (arm:??load 1 live-data b tbl)) buffers)) 2))]
+       (cons (arm:??shuffle 0 (map (lambda (b) (define tbl (map (lambda (i) (define-symbolic* idx integer?) idx) (range 256))) (arm:??load 1 live-data b tbl (buffer-elemT b))) buffers)) 2))]
 
 
     [(arm-ir:vs-mpy-add expr weights output-type)
@@ -131,7 +131,7 @@
          (define live-data (arm:??abstr-load-live-data arm-sub-expr))
          (define buffer (arm:??abstr-load-buffer arm-sub-expr))
          (define tbl (map (lambda (i) (define-symbolic* idx integer?) idx) (range 256)))
-         (define base-load-expr (arm:??load swizzle-node-id live-data buffer tbl))
+         (define base-load-expr (arm:??load swizzle-node-id live-data buffer tbl (buffer-elemT buffer)))
          (define exprs (hash-ref! grouped-sub-exprs out-type (set)))
          (hash-set! grouped-sub-exprs out-type (set-add exprs base-load-expr)))]
       [(arm:??shuffle? arm-sub-expr)
@@ -253,7 +253,7 @@
 (define (max-unique-inputs expr)
   (destruct expr
 
-    [(arm:??load _ _ _ _ ) 1]
+    [(arm:??load _ _ _ _ _) 1]
     [(arm:??shuffle _ _) 1]
     [(arm:??swizzle _ _ _ _) 1]
 
@@ -473,7 +473,7 @@
   (define cnt 0)
   (define (incr-read-cntr node [pos -1])
     (destruct node
-      [(arm:??load _ _ _ _) (set! cnt (+ cnt 1)) node]
+      [(arm:??load _ _ _ _ _) (set! cnt (+ cnt 1)) node]
       [(arm:??shuffle _ _) (set! cnt (+ cnt 1)) node]
       [else node]))
   (arm:visit expr incr-read-cntr)
@@ -487,9 +487,9 @@
       [(arm:??swizzle id live-data expr gather-tbl)
        (define tbl (map (lambda (i) (define-symbolic* idx integer?) idx) (range 256)))
        (arm:??swizzle (get-sw-node-id) live-data expr tbl)]
-      [(arm:??load id live-data buffer tbl)
+      [(arm:??load id live-data buffer tbl output-type)
        (define tbl (map (lambda (i) (define-symbolic* idx integer?) idx) (range 256)))
-       (arm:??load (get-sw-node-id) live-data buffer tbl)]
+       (arm:??load (get-sw-node-id) live-data buffer tbl output-type)]
       [(arm:??abstr-load id live-data buffer)
        (arm:??abstr-load (get-sw-node-id) live-data buffer)]
       [(arm:??shuffle id lds)
@@ -498,6 +498,6 @@
         (map
          (lambda (ld)
            (define tbl (map (lambda (i) (define-symbolic* idx integer?) idx) (range 256)))
-           (arm:??load (get-sw-node-id) (arm:??load-live-data ld) (arm:??load-buffer ld) tbl #f)) lds))]
+           (arm:??load (get-sw-node-id) (arm:??load-live-data ld) (arm:??load-buffer ld) tbl (arm:??load-output-type ld))) lds))]
       [_ node]))
   (arm:visit arm-template clone-swizzle-node))
