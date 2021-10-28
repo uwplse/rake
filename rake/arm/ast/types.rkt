@@ -1114,7 +1114,7 @@
     [(eq? type 'uint16) (list 'u16x4 'u16x8 'u16x16)]
     [(eq? type 'uint32) (list 'u32x2 'u32x4 'u32x8)]
     [(eq? type 'uint64) (list 'u64x1 'u64x2 'u64x4)]
-    [else (error "Unrecognized type ~a" type)]))
+    [else (error "Unrecognized type (get-vector-types) ~a" type)]))
 
 (define (make-shuffles-list loads type)
   (map (lambda (t) (??shuffle 0 loads t)) (get-vector-types type)))
@@ -1145,7 +1145,7 @@
     [(eq? type 'i64x1) i64x1]
     [(eq? type 'i64x2) i64x2]
     [(eq? type 'i64x4) i64x4]
-    [else (error "Unrecognized type ~a" type)]))
+    [else (error "Unrecognized type (get-type-struct) ~a" type)]))
 
 (define (get-element expr index)
   (destruct expr
@@ -1174,4 +1174,4 @@
     [(u64x1 data) (data index)]
     [(u64x2 data) (data index)]
     [(u64x4 data) (data index)]
-    [_ (error "Unrecognized type ~a at index ~a" expr index)]))
+    [_ (error "Unrecognized type (get-element) ~a at index ~a" expr index)]))
