@@ -100,9 +100,12 @@
 (struct add (Vn Vm) #:transparent)                          ;; add_vector
 (struct addhn (Vn Vm) #:transparent)                        ;; add_high_narrow
 (struct addv (Vn) #:transparent)                            ;; add_across_vector
-(struct mla (Vd Vn Vm) #:transparent)                       ;; multiply_add_acc
-(struct mls (Vd Vn Vm) #:transparent)                       ;; multiply_sub_acc
-(struct mul (Vn Vm) #:transparent)                          ;; multiply_vector
+(struct mla-vs (Vd Vn Vm) #:transparent)                    ;; multiply_add_acc_scalar
+(struct mla-vv (Vd Vn Vm) #:transparent)                    ;; multiply_add_acc_vector
+(struct mls-vs (Vd Vn Vm) #:transparent)                    ;; multiply_sub_acc_scalar
+(struct mls-vv (Vd Vn Vm) #:transparent)                    ;; multiply_sub_acc_vector
+(struct mul-vs (Vn Vm) #:transparent)                       ;; multiply_vector_scalar
+(struct mul-vv (Vn Vm) #:transparent)                       ;; multiply_vector_vector
 (struct neg (Vn) #:transparent)                             ;; negate_vector
 (struct saba (Vd Vn Vm) #:transparent)                      ;; signed_absd_acc
 (struct sabal (Vd Vn Vm) #:transparent)                     ;; signed_absd_acc_long
@@ -115,10 +118,13 @@
 (struct shrn (Vn Vm) #:transparent)                         ;; shift_right_narrow
 (struct smaxv (Vn) #:transparent)                           ;; signed_maximum_across_vector
 (struct sminv (Vn) #:transparent)                           ;; signed_minimum_across_vector
-(struct smlal (Vd Vn Vm) #:transparent)                     ;; signed_multiply_add_long
-(struct smlsl (Vd Vn Vm) #:transparent)                     ;; signed_multiply_sub_long
+(struct smlal-vs (Vd Vn Vm) #:transparent)                  ;; signed_multiply_add_long_scalar
+(struct smlal-vv (Vd Vn Vm) #:transparent)                  ;; signed_multiply_add_long_vector
+(struct smlsl-vs (Vd Vn Vm) #:transparent)                  ;; signed_multiply_sub_long_scalar
+(struct smlsl-vv (Vd Vn Vm) #:transparent)                  ;; signed_multiply_sub_long_vector
 (struct sqabs (Vn) #:transparent)                           ;; signed_saturating_abs
-(struct sqdmull (Vn Vm) #:transparent)                      ;; signed_saturating_doubling_mul_long
+(struct sqdmull-vs (Vn Vm) #:transparent)                   ;; signed_saturating_doubling_mul_long_scalar
+(struct sqdmull-vv (Vn Vm) #:transparent)                   ;; signed_saturating_doubling_mul_long_vector
 (struct sshll (Vn Vm) #:transparent)                        ;; signed_shift_left_long
 (struct ssubl (Vn Vm) #:transparent)                        ;; signed_sub_long
 (struct ssubw (Vn Vm) #:transparent)                        ;; signed_sub_wide
@@ -131,15 +137,17 @@
 (struct uaddw (Vn Vm) #:transparent)                        ;; unsigned_add_wide
 (struct umaxv (Vn) #:transparent)                           ;; unsigned_maximum_across_vector
 (struct uminv (Vn) #:transparent)                           ;; unsigned_minimum_across_vector
-(struct umlal (Vd Vn Vm) #:transparent)                     ;; unsigned_multiply_add_long
-(struct umlsl (Vd Vn Vm) #:transparent)                     ;; unsigned_multiply_sub_long
+(struct umlal-vs (Vd Vn Vm) #:transparent)                  ;; unsigned_multiply_add_long_scalar
+(struct umlal-vv (Vd Vn Vm) #:transparent)                  ;; unsigned_multiply_add_long_vector
+(struct umlsl-vs (Vd Vn Vm) #:transparent)                  ;; unsigned_multiply_sub_long_scalar
+(struct umlsl-vv (Vd Vn Vm) #:transparent)                  ;; unsigned_multiply_sub_long_scalar
 (struct ushll (Vn Vm) #:transparent)                        ;; unsigned_shift_left_long
 (struct usqadd (Vn Vm) #:transparent)                       ;; unsigned_saturating_acc_signed
 (struct usubl (Vn Vm) #:transparent)                        ;; unsigned_sub_long
 (struct usubw (Vn Vm) #:transparent)                        ;; unsigned_sub_wide
 
 ;; Special added instructions
-(struct reinterpret (Vu) #:transparent)
+(struct reinterpret (Vd) #:transparent)
 (struct ??shuffle (id lds output-type) #:transparent)
 
 (struct ??load (id live-data buffer gather-tbl output-type)
@@ -351,13 +359,16 @@
                          (instr-sig 'i32x4 (list 'i32x2))
                          )]
 
-    [(eq? mla instr) (list
+    [(eq? mla-vs instr) (list
                          (instr-sig 'u8x8 (list 'u8x8 'u8x8 'uint8_t))
                          (instr-sig 'u8x16 (list 'u8x16 'u8x16 'uint8_t))
                          (instr-sig 'u16x4 (list 'u16x4 'u16x4 'uint16_t))
                          (instr-sig 'u16x8 (list 'u16x8 'u16x8 'uint16_t))
                          (instr-sig 'u32x2 (list 'u32x2 'u32x2 'uint32_t))
                          (instr-sig 'u32x4 (list 'u32x4 'u32x4 'uint32_t))
+                         )]
+
+    [(eq? mla-vv instr) (list
                          (instr-sig 'u8x8 (list 'u8x8 'u8x8 'u8x8))
                          (instr-sig 'u8x16 (list 'u8x16 'u8x16 'u8x16))
                          (instr-sig 'u16x4 (list 'u16x4 'u16x4 'u16x4))
@@ -366,13 +377,16 @@
                          (instr-sig 'u32x4 (list 'u32x4 'u32x4 'u32x4))
                          )]
 
-    [(eq? mls instr) (list
+    [(eq? mls-vs instr) (list
                          (instr-sig 'u8x8 (list 'u8x8 'u8x8 'uint8_t))
                          (instr-sig 'u8x16 (list 'u8x16 'u8x16 'uint8_t))
                          (instr-sig 'u16x4 (list 'u16x4 'u16x4 'uint16_t))
                          (instr-sig 'u16x8 (list 'u16x8 'u16x8 'uint16_t))
                          (instr-sig 'u32x2 (list 'u32x2 'u32x2 'uint32_t))
                          (instr-sig 'u32x4 (list 'u32x4 'u32x4 'uint32_t))
+                         )]
+
+    [(eq? mls-vv instr) (list
                          (instr-sig 'u8x8 (list 'u8x8 'u8x8 'u8x8))
                          (instr-sig 'u8x16 (list 'u8x16 'u8x16 'u8x16))
                          (instr-sig 'u16x4 (list 'u16x4 'u16x4 'u16x4))
@@ -381,7 +395,7 @@
                          (instr-sig 'u32x4 (list 'u32x4 'u32x4 'u32x4))
                          )]
 
-    [(eq? mul instr) (list
+    [(eq? mul-vs instr) (list
                          (instr-sig 'u8x8 (list 'u8x8 'uint8_t))
                          (instr-sig 'u8x16 (list 'u8x16 'uint8_t))
                          (instr-sig 'u16x4 (list 'u16x4 'uint16_t))
@@ -394,6 +408,9 @@
                          (instr-sig 'i16x8 (list 'i16x8 'int16_t))
                          (instr-sig 'i32x2 (list 'i32x2 'int32_t))
                          (instr-sig 'i32x4 (list 'i32x4 'int32_t))
+                         )]
+
+    [(eq? mul-vv instr) (list
                          (instr-sig 'u8x8 (list 'u8x8 'u8x8))
                          (instr-sig 'u8x16 (list 'u8x16 'u8x16))
                          (instr-sig 'u16x4 (list 'u16x4 'u16x4))
@@ -601,11 +618,14 @@
                          (instr-sig 'int32_t (list 'i32x4))
                          )]
 
-    [(eq? smlal instr) (list
+    [(eq? smlal-vs instr) (list
                          (instr-sig 'i32x4 (list 'i32x4 'i16x4 'int16_t))
                          (instr-sig 'i32x8 (list 'i32x8 'i16x8 'int16_t))
                          (instr-sig 'i64x2 (list 'i64x2 'i32x2 'int32_t))
                          (instr-sig 'i64x4 (list 'i64x4 'i32x4 'int32_t))
+                         )]
+
+    [(eq? smlal-vv instr) (list
                          (instr-sig 'i16x8 (list 'i16x8 'i8x8 'i8x8))
                          (instr-sig 'i16x16 (list 'i16x16 'i8x16 'i8x16))
                          (instr-sig 'i32x4 (list 'i32x4 'i16x4 'i16x4))
@@ -614,17 +634,20 @@
                          (instr-sig 'i64x4 (list 'i64x4 'i32x4 'i32x4))
                          )]
 
-    [(eq? smlsl instr) (list
+    [(eq? smlsl-vs instr) (list
                          (instr-sig 'i32x4 (list 'i32x4 'i16x4 'int16_t))
                          (instr-sig 'i32x8 (list 'i32x8 'i16x8 'int16_t))
                          (instr-sig 'i64x2 (list 'i64x2 'i32x2 'int32_t))
                          (instr-sig 'i64x4 (list 'i64x4 'i32x4 'int32_t))
-                         (instr-sig 'i16x8 (list 'i16x8 'i8x8 'int8_t))
-                         (instr-sig 'i16x16 (list 'i16x16 'i8x16 'int8_t))
-                         (instr-sig 'i32x4 (list 'i32x4 'i16x4 'int16_t))
-                         (instr-sig 'i32x8 (list 'i32x8 'i16x8 'int16_t))
-                         (instr-sig 'i64x2 (list 'i64x2 'i32x2 'int32_t))
-                         (instr-sig 'i64x4 (list 'i64x4 'i32x4 'int32_t))
+                         )]
+
+    [(eq? smlsl-vv instr) (list
+                         (instr-sig 'i16x8 (list 'i16x8 'i8x8 'i8x8))
+                         (instr-sig 'i16x16 (list 'i16x16 'i8x16 'i8x16))
+                         (instr-sig 'i32x4 (list 'i32x4 'i16x4 'i16x4))
+                         (instr-sig 'i32x8 (list 'i32x8 'i16x8 'i16x8))
+                         (instr-sig 'i64x2 (list 'i64x2 'i32x2 'i32x2))
+                         (instr-sig 'i64x4 (list 'i64x4 'i32x4 'i32x4))
                          )]
 
     [(eq? smull instr) (list
@@ -654,11 +677,14 @@
                          (instr-sig 'i32x2 (list 'i32x4 'i32x4))
                          )]
 
-    [(eq? sqdmull instr) (list
+    [(eq? sqdmull-vs instr) (list
                          (instr-sig 'i32x4 (list 'i16x4 'int16_t))
                          (instr-sig 'i32x8 (list 'i16x8 'int16_t))
                          (instr-sig 'i64x2 (list 'i32x2 'int32_t))
                          (instr-sig 'i64x4 (list 'i32x4 'int32_t))
+                         )]
+
+    [(eq? sqdmull-vv instr) (list
                          (instr-sig 'i32x4 (list 'i16x4 'i16x4))
                          (instr-sig 'i32x8 (list 'i16x8 'i16x8))
                          (instr-sig 'i64x2 (list 'i32x2 'i32x2))
@@ -938,11 +964,14 @@
                          (instr-sig 'uint32_t (list 'u32x4))
                          )]
 
-    [(eq? umlal instr) (list
+    [(eq? umlal-vs instr) (list
                          (instr-sig 'u32x4 (list 'u32x4 'u16x4 'uint16_t))
                          (instr-sig 'u32x8 (list 'u32x8 'u16x8 'uint16_t))
                          (instr-sig 'u64x2 (list 'u64x2 'u32x2 'uint32_t))
                          (instr-sig 'u64x4 (list 'u64x4 'u32x4 'uint32_t))
+                         )]
+
+    [(eq? umlal-vv instr) (list
                          (instr-sig 'u16x8 (list 'u16x8 'u8x8 'u8x8))
                          (instr-sig 'u16x16 (list 'u16x16 'u8x16 'u8x16))
                          (instr-sig 'u32x4 (list 'u32x4 'u16x4 'u16x4))
@@ -951,11 +980,14 @@
                          (instr-sig 'u64x4 (list 'u64x4 'u32x4 'u32x4))
                          )]
 
-    [(eq? umlsl instr) (list
+    [(eq? umlsl-vs instr) (list
                          (instr-sig 'u32x4 (list 'u32x4 'u16x4 'uint16_t))
                          (instr-sig 'u32x8 (list 'u32x8 'u16x8 'uint16_t))
                          (instr-sig 'u64x2 (list 'u64x2 'u32x2 'uint32_t))
                          (instr-sig 'u64x4 (list 'u64x4 'u32x4 'uint32_t))
+                         )]
+
+    [(eq? umlsl-vv instr) (list
                          (instr-sig 'u16x8 (list 'u16x8 'u8x8 'u8x8))
                          (instr-sig 'u16x16 (list 'u16x16 'u8x16 'u8x16))
                          (instr-sig 'u32x4 (list 'u32x4 'u16x4 'u16x4))

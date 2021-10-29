@@ -40,8 +40,8 @@
          [widening? (eq? (cpp:type-bw output-type) (* 2 (cpp:type-bw input-type)))]
          ; TODO: better pruning and more isa options
          [isa (if widening?
-                  (list arm:reinterpret arm:addv arm:saddlv arm:uaddlv arm:saddl arm:smull arm:saddw arm:saddlp arm:sadalp arm:smlal arm:smlsl arm:sdot.v2i32.v8i8 arm:udot.v2i32.v8i8 arm:sdot.v4i32.v16i8 arm:udot.v4i32.v16i8 arm:shll arm:ssubl arm:sub arm:uadalp arm:uaddl arm:uaddlp arm:uaddw arm:umlal arm:umlsl arm:umull arm:usubl arm:usubw)
-                  (list arm:reinterpret arm:add arm:sub arm:addp arm:mla arm:mls arm:mul arm:shl arm:neg))]
+                  (list arm:reinterpret arm:addv arm:saddlv arm:uaddlv arm:saddl arm:smull arm:saddw arm:saddlp arm:sadalp arm:smlal-vs arm:smlsl-vs arm:sdot.v2i32.v8i8 arm:udot.v2i32.v8i8 arm:sdot.v4i32.v16i8 arm:udot.v4i32.v16i8 arm:shll arm:ssubl arm:sub arm:uadalp arm:uaddl arm:uaddlp arm:uaddw arm:umlal-vs arm:umlsl-vs arm:umull arm:usubl arm:usubw)
+                  (list arm:reinterpret arm:add arm:sub arm:addp arm:mla-vs arm:mls-vs arm:mul-vs arm:shl arm:neg))]
          [grouped-sub-exprs (prepare-sub-exprs arm-sub-exprs)]
          [number-reads (length weights)]
          [desired-types (arm:get-vector-types output-type)]
@@ -394,11 +394,17 @@
 
     [(arm:addv Vn) (max-unique-inputs Vn)]
 
-    [(arm:mla Vd Vn Vm) (+ (max-unique-inputs Vd) (max-unique-inputs Vn) (max-unique-inputs Vm))]
+    [(arm:mla-vv Vd Vn Vm) (+ (max-unique-inputs Vd) (max-unique-inputs Vn) (max-unique-inputs Vm))]
 
-    [(arm:mls Vd Vn Vm) (+ (max-unique-inputs Vd) (max-unique-inputs Vn) (max-unique-inputs Vm))]
+    [(arm:mla-vs Vd Vn Vm) (+ (max-unique-inputs Vd) (max-unique-inputs Vn) (max-unique-inputs Vm))]
 
-    [(arm:mul Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
+    [(arm:mls-vv Vd Vn Vm) (+ (max-unique-inputs Vd) (max-unique-inputs Vn) (max-unique-inputs Vm))]
+
+    [(arm:mls-vs Vd Vn Vm) (+ (max-unique-inputs Vd) (max-unique-inputs Vn) (max-unique-inputs Vm))]
+
+    [(arm:mul-vv Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
+
+    [(arm:mul-vs Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
 
     [(arm:neg Vn) (max-unique-inputs Vn)]
 
@@ -424,13 +430,19 @@
 
     [(arm:sminv Vn) (max-unique-inputs Vn)]
 
-    [(arm:smlal Vd Vn Vm) (+ (max-unique-inputs Vd) (max-unique-inputs Vn) (max-unique-inputs Vm))]
+    [(arm:smlal-vv Vd Vn Vm) (+ (max-unique-inputs Vd) (max-unique-inputs Vn) (max-unique-inputs Vm))]
 
-    [(arm:smlsl Vd Vn Vm) (+ (max-unique-inputs Vd) (max-unique-inputs Vn) (max-unique-inputs Vm))]
+    [(arm:smlal-vs Vd Vn Vm) (+ (max-unique-inputs Vd) (max-unique-inputs Vn) (max-unique-inputs Vm))]
+
+    [(arm:smlsl-vv Vd Vn Vm) (+ (max-unique-inputs Vd) (max-unique-inputs Vn) (max-unique-inputs Vm))]
+
+    [(arm:smlsl-vs Vd Vn Vm) (+ (max-unique-inputs Vd) (max-unique-inputs Vn) (max-unique-inputs Vm))]
 
     [(arm:sqabs Vn) (max-unique-inputs Vn)]
 
-    [(arm:sqdmull Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
+    [(arm:sqdmull-vv Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
+
+    [(arm:sqdmull-vs Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
 
     [(arm:sshll Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
 
@@ -456,9 +468,13 @@
 
     [(arm:uminv Vn) (max-unique-inputs Vn)]
 
-    [(arm:umlal Vd Vn Vm) (+ (max-unique-inputs Vd) (max-unique-inputs Vn) (max-unique-inputs Vm))]
+    [(arm:umlal-vv Vd Vn Vm) (+ (max-unique-inputs Vd) (max-unique-inputs Vn) (max-unique-inputs Vm))]
 
-    [(arm:umlsl Vd Vn Vm) (+ (max-unique-inputs Vd) (max-unique-inputs Vn) (max-unique-inputs Vm))]
+    [(arm:umlal-vs Vd Vn Vm) (+ (max-unique-inputs Vd) (max-unique-inputs Vn) (max-unique-inputs Vm))]
+
+    [(arm:umlsl-vv Vd Vn Vm) (+ (max-unique-inputs Vd) (max-unique-inputs Vn) (max-unique-inputs Vm))]
+
+    [(arm:umlsl-vs Vd Vn Vm) (+ (max-unique-inputs Vd) (max-unique-inputs Vn) (max-unique-inputs Vm))]
 
     [(arm:ushll Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
 

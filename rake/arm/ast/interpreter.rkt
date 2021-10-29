@@ -280,7 +280,7 @@
              v0)))]
         [(_) (assert #f "infeasible")])]
 
-    [(arm:mla Vd Vn Vm)
+    [(arm:mla-vs Vd Vn Vm)
       (destruct* ((interpret Vd) (interpret Vn) (interpret Vm))
         [((arm:u8x8 v0) (arm:u8x8 v1) (uint8_t v2))
           (arm:u8x8
@@ -330,6 +330,10 @@
              (vec-mul
               v1
               (x4 v2)))))]
+        [(_ _ _) (assert #f "infeasible")])]
+
+    [(arm:mla-vv Vd Vn Vm)
+      (destruct* ((interpret Vd) (interpret Vn) (interpret Vm))
         [((arm:u8x8 v0) (arm:u8x8 v1) (arm:u8x8 v2))
           (arm:u8x8
            (halide:interpret
@@ -380,7 +384,7 @@
               v2))))]
         [(_ _ _) (assert #f "infeasible")])]
 
-    [(arm:mls Vd Vn Vm)
+    [(arm:mls-vs Vd Vn Vm)
       (destruct* ((interpret Vd) (interpret Vn) (interpret Vm))
         [((arm:u8x8 v0) (arm:u8x8 v1) (uint8_t v2))
           (arm:u8x8
@@ -430,6 +434,10 @@
              (vec-mul
               v1
               (x4 v2)))))]
+        [(_ _ _) (assert #f "infeasible")])]
+
+    [(arm:mls-vv Vd Vn Vm)
+      (destruct* ((interpret Vd) (interpret Vn) (interpret Vm))
         [((arm:u8x8 v0) (arm:u8x8 v1) (arm:u8x8 v2))
           (arm:u8x8
            (halide:interpret
@@ -480,7 +488,7 @@
               v2))))]
         [(_ _ _) (assert #f "infeasible")])]
 
-    [(arm:mul Vn Vm)
+    [(arm:mul-vs Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
         [((arm:u8x8 v0) (uint8_t v1))
           (arm:u8x8
@@ -554,6 +562,10 @@
             (vec-mul
              v0
              (x4 v1))))]
+        [(_ _) (assert #f "infeasible")])]
+
+    [(arm:mul-vv Vn Vm)
+      (destruct* ((interpret Vn) (interpret Vm))
         [((arm:u8x8 v0) (arm:u8x8 v1))
           (arm:u8x8
            (halide:interpret
@@ -1780,7 +1792,7 @@
              v0)))]
         [(_) (assert #f "infeasible")])]
 
-    [(arm:smlal Vd Vn Vm)
+    [(arm:smlal-vs Vd Vn Vm)
       (destruct* ((interpret Vd) (interpret Vn) (interpret Vm))
         [((arm:i32x4 v0) (arm:i16x4 v1) (int16_t v2))
           (arm:i32x4
@@ -1818,6 +1830,10 @@
               (int64x4
                v1)
               (x4 (int64x1 v2))))))]
+        [(_ _ _) (assert #f "infeasible")])]
+
+    [(arm:smlal-vv Vd Vn Vm)
+      (destruct* ((interpret Vd) (interpret Vn) (interpret Vm))
         [((arm:i16x8 v0) (arm:i8x8 v1) (arm:i8x8 v2))
           (arm:i16x8
            (halide:interpret
@@ -1880,7 +1896,7 @@
                v2)))))]
         [(_ _ _) (assert #f "infeasible")])]
 
-    [(arm:smlsl Vd Vn Vm)
+    [(arm:smlsl-vs Vd Vn Vm)
       (destruct* ((interpret Vd) (interpret Vn) (interpret Vm))
         [((arm:i32x4 v0) (arm:i16x4 v1) (int16_t v2))
           (arm:i32x4
@@ -1918,7 +1934,11 @@
               (int64x4
                v1)
               (x4 (int64x1 v2))))))]
-        [((arm:i16x8 v0) (arm:i8x8 v1) (int8_t v2))
+        [(_ _ _) (assert #f "infeasible")])]
+
+    [(arm:smlsl-vv Vd Vn Vm)
+      (destruct* ((interpret Vd) (interpret Vn) (interpret Vm))
+        [((arm:i16x8 v0) (arm:i8x8 v1) (arm:i8x8 v2))
           (arm:i16x8
            (halide:interpret
             (vec-sub
@@ -1926,8 +1946,9 @@
              (vec-mul
               (int16x8
                v1)
-              (x8 (int16x1 v2))))))]
-        [((arm:i16x16 v0) (arm:i8x16 v1) (int8_t v2))
+              (int16x8
+               v2)))))]
+        [((arm:i16x16 v0) (arm:i8x16 v1) (arm:i8x16 v2))
           (arm:i16x16
            (halide:interpret
             (vec-sub
@@ -1935,8 +1956,9 @@
              (vec-mul
               (int16x16
                v1)
-              (x16 (int16x1 v2))))))]
-        [((arm:i32x4 v0) (arm:i16x4 v1) (int16_t v2))
+              (int16x16
+               v2)))))]
+        [((arm:i32x4 v0) (arm:i16x4 v1) (arm:i16x4 v2))
           (arm:i32x4
            (halide:interpret
             (vec-sub
@@ -1944,8 +1966,9 @@
              (vec-mul
               (int32x4
                v1)
-              (x4 (int32x1 v2))))))]
-        [((arm:i32x8 v0) (arm:i16x8 v1) (int16_t v2))
+              (int32x4
+               v2)))))]
+        [((arm:i32x8 v0) (arm:i16x8 v1) (arm:i16x8 v2))
           (arm:i32x8
            (halide:interpret
             (vec-sub
@@ -1953,8 +1976,9 @@
              (vec-mul
               (int32x8
                v1)
-              (x8 (int32x1 v2))))))]
-        [((arm:i64x2 v0) (arm:i32x2 v1) (int32_t v2))
+              (int32x8
+               v2)))))]
+        [((arm:i64x2 v0) (arm:i32x2 v1) (arm:i32x2 v2))
           (arm:i64x2
            (halide:interpret
             (vec-sub
@@ -1962,8 +1986,9 @@
              (vec-mul
               (int64x2
                v1)
-              (x2 (int64x1 v2))))))]
-        [((arm:i64x4 v0) (arm:i32x4 v1) (int32_t v2))
+              (int64x2
+               v2)))))]
+        [((arm:i64x4 v0) (arm:i32x4 v1) (arm:i32x4 v2))
           (arm:i64x4
            (halide:interpret
             (vec-sub
@@ -1971,7 +1996,8 @@
              (vec-mul
               (int64x4
                v1)
-              (x4 (int64x1 v2))))))]
+              (int64x4
+               v2)))))]
         [(_ _ _) (assert #f "infeasible")])]
 
     [(arm:smull Vn Vm)
@@ -2189,7 +2215,7 @@
               (x4 (int64_t (bv -2147483648 64)))))))]
         [(_ _) (assert #f "infeasible")])]
 
-    [(arm:sqdmull Vn Vm)
+    [(arm:sqdmull-vs Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
         [((arm:i16x4 v0) (int16_t v1))
           (arm:i32x4
@@ -2275,6 +2301,10 @@
                 (x4 (int64_t (bv 2 64)))))
               (x4 (int64_t (bv -4611686018427387904 64))))
              (x4 (int64_t (bv 2 64))))))]
+        [(_ _) (assert #f "infeasible")])]
+
+    [(arm:sqdmull-vv Vn Vm)
+      (destruct* ((interpret Vn) (interpret Vm))
         [((arm:i16x4 v0) (arm:i16x4 v1))
           (arm:i32x4
            (halide:interpret
@@ -4247,7 +4277,7 @@
              v0)))]
         [(_) (assert #f "infeasible")])]
 
-    [(arm:umlal Vd Vn Vm)
+    [(arm:umlal-vs Vd Vn Vm)
       (destruct* ((interpret Vd) (interpret Vn) (interpret Vm))
         [((arm:u32x4 v0) (arm:u16x4 v1) (uint16_t v2))
           (arm:u32x4
@@ -4285,6 +4315,10 @@
               (uint64x4
                v1)
               (x4 (uint64x1 v2))))))]
+        [(_ _ _) (assert #f "infeasible")])]
+
+    [(arm:umlal-vv Vd Vn Vm)
+      (destruct* ((interpret Vd) (interpret Vn) (interpret Vm))
         [((arm:u16x8 v0) (arm:u8x8 v1) (arm:u8x8 v2))
           (arm:u16x8
            (halide:interpret
@@ -4347,7 +4381,7 @@
                v2)))))]
         [(_ _ _) (assert #f "infeasible")])]
 
-    [(arm:umlsl Vd Vn Vm)
+    [(arm:umlsl-vs Vd Vn Vm)
       (destruct* ((interpret Vd) (interpret Vn) (interpret Vm))
         [((arm:u32x4 v0) (arm:u16x4 v1) (uint16_t v2))
           (arm:u32x4
@@ -4385,6 +4419,10 @@
               (uint64x4
                v1)
               (x4 (uint64x1 v2))))))]
+        [(_ _ _) (assert #f "infeasible")])]
+
+    [(arm:umlsl-vv Vd Vn Vm)
+      (destruct* ((interpret Vd) (interpret Vn) (interpret Vm))
         [((arm:u16x8 v0) (arm:u8x8 v1) (arm:u8x8 v2))
           (arm:u16x8
            (halide:interpret
