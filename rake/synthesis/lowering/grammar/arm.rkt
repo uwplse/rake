@@ -47,7 +47,7 @@
          [desired-types (arm:get-vector-types output-type)]
          ; Enumerate those with the correct output type
          ; TODO: do the pruning somehow...
-         [candidates (enumerate-arm isa desired-types grouped-sub-exprs 5 7 number-reads)]
+         [candidates (enumerate-arm isa desired-types grouped-sub-exprs 4 7 number-reads)]
          [load-buffers (halide:extract-live-buffers halide-expr)]
          [live-buffers (lambda (expr)
                          (let* ([live-bufs (mutable-set)]
