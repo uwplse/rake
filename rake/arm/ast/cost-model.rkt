@@ -9,4 +9,6 @@
 
 ; TODO: I have no clue how to make this accurate
 (define (instr-cost instr sig)
-  1)
+  (if (arm:reinterpret? instr)
+    0
+    1))

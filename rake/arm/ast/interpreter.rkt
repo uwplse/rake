@@ -5427,4 +5427,32 @@
 
       (vecType load-body))]
 
+    [(arm:reinterpret Vn)
+      (destruct (interpret Vn)
+        [(arm:i8x8 v0) (arm:u8x8 (lambda (i) (uint8_t (cpp:eval (v0 i)))))]
+        [(arm:i16x4 v0) (arm:u16x4 (lambda (i) (uint16_t (cpp:eval (v0 i)))))]
+        [(arm:i32x2 v0) (arm:u32x2 (lambda (i) (uint32_t (cpp:eval (v0 i)))))]
+        [(arm:i64x1 v0) (arm:u64x1 (lambda (i) (uint64_t (cpp:eval (v0 i)))))]
+        [(arm:i8x16 v0) (arm:u8x16 (lambda (i) (uint8_t (cpp:eval (v0 i)))))]
+        [(arm:i16x8 v0) (arm:u16x8 (lambda (i) (uint16_t (cpp:eval (v0 i)))))]
+        [(arm:i32x4 v0) (arm:u32x4 (lambda (i) (uint32_t (cpp:eval (v0 i)))))]
+        [(arm:i64x2 v0) (arm:u64x2 (lambda (i) (uint64_t (cpp:eval (v0 i)))))]
+        [(arm:i8x32 v0) (arm:u8x32 (lambda (i) (uint8_t (cpp:eval (v0 i)))))]
+        [(arm:i16x16 v0) (arm:u16x16 (lambda (i) (uint16_t (cpp:eval (v0 i)))))]
+        [(arm:i32x8 v0) (arm:u32x8 (lambda (i) (uint32_t (cpp:eval (v0 i)))))]
+        [(arm:i64x4 v0) (arm:u64x4 (lambda (i) (uint64_t (cpp:eval (v0 i)))))]
+
+        [(arm:u8x8 v0) (arm:i8x8 (lambda (i) (int8_t (cpp:eval (v0 i)))))]
+        [(arm:u16x4 v0) (arm:i16x4 (lambda (i) (int16_t (cpp:eval (v0 i)))))]
+        [(arm:u32x2 v0) (arm:i32x2 (lambda (i) (int32_t (cpp:eval (v0 i)))))]
+        [(arm:u64x1 v0) (arm:i64x1 (lambda (i) (int64_t (cpp:eval (v0 i)))))]
+        [(arm:u8x16 v0) (arm:i8x16 (lambda (i) (int8_t (cpp:eval (v0 i)))))]
+        [(arm:u16x8 v0) (arm:i16x8 (lambda (i) (int16_t (cpp:eval (v0 i)))))]
+        [(arm:u32x4 v0) (arm:i32x4 (lambda (i) (int32_t (cpp:eval (v0 i)))))]
+        [(arm:u64x2 v0) (arm:i64x2 (lambda (i) (int64_t (cpp:eval (v0 i)))))]
+        [(arm:u8x32 v0) (arm:i8x32 (lambda (i) (int8_t (cpp:eval (v0 i)))))]
+        [(arm:u16x16 v0) (arm:i16x16 (lambda (i) (int16_t (cpp:eval (v0 i)))))]
+        [(arm:u32x8 v0) (arm:i32x8 (lambda (i) (int32_t (cpp:eval (v0 i)))))]
+        [(arm:u64x4 v0) (arm:i64x4 (lambda (i) (int64_t (cpp:eval (v0 i)))))])]
+
     [_ (error "No interpreter for ~a" p)]))

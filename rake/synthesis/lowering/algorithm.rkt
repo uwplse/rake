@@ -44,9 +44,12 @@
       (display "====================\n\n")
       (display (format "IR Operation: \n\n~a\n\n" (pretty-format ir-expr)))
 
+      (define start-time (current-seconds))
       (define candidates (get-arm-grammar halide-expr ir-expr arm-sub-exprs cost-ub))
+      (define runtime (- (current-seconds) start-time))
 
-      (println candidates)
+      (println (length candidates))
+      (display (format "Grammar generation time: ~a seconds\n\n" runtime))
       (exit)
       
       (define-values (successful? arm-template)

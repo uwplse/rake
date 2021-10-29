@@ -138,6 +138,8 @@
 (struct usubl (Vn Vm) #:transparent)                        ;; unsigned_sub_long
 (struct usubw (Vn Vm) #:transparent)                        ;; unsigned_sub_wide
 
+;; Special added instructions
+(struct reinterpret (Vu) #:transparent)
 (struct ??shuffle (id lds output-type) #:transparent)
 
 (struct ??load (id live-data buffer gather-tbl output-type)
@@ -1101,6 +1103,32 @@
                          (instr-sig 'u16x8 (list 'u8x8 'u8x8))
                          )]
 
+    [(eq? reinterpret instr) (list
+                         (instr-sig 'i8x8 (list 'u8x8))
+                         (instr-sig 'i16x4 (list 'u16x4))
+                         (instr-sig 'i32x2 (list 'u32x2))
+                         (instr-sig 'i64x1 (list 'u64x1))
+                         (instr-sig 'i8x16 (list 'u8x16))
+                         (instr-sig 'i16x8 (list 'u16x8))
+                         (instr-sig 'i32x4 (list 'u32x4))
+                         (instr-sig 'i64x2 (list 'u64x2))
+                         (instr-sig 'i8x32 (list 'u8x32))
+                         (instr-sig 'i16x16 (list 'u16x16))
+                         (instr-sig 'i32x8 (list 'u32x8))
+                         (instr-sig 'i64x4 (list 'u64x4))
+                         (instr-sig 'u8x8 (list 'i8x8))
+                         (instr-sig 'u16x4 (list 'i16x4))
+                         (instr-sig 'u32x2 (list 'i32x2))
+                         (instr-sig 'u64x1 (list 'i64x1))
+                         (instr-sig 'u8x16 (list 'i8x16))
+                         (instr-sig 'u16x8 (list 'i16x8))
+                         (instr-sig 'u32x4 (list 'i32x4))
+                         (instr-sig 'u64x2 (list 'i64x2))
+                         (instr-sig 'u8x32 (list 'i8x32))
+                         (instr-sig 'u16x16 (list 'i16x16))
+                         (instr-sig 'u32x8 (list 'i32x8))
+                         (instr-sig 'u64x4 (list 'i64x4))
+                         )]
 
     [else (error "Unknown instruction:" instr)]))
 
