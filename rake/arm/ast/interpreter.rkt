@@ -3737,6 +3737,40 @@
                v1)))))]
         [(_ _) (assert #f "infeasible")])]
 
+    [(arm:sxtl Vn)
+      (destruct* ((interpret Vn))
+        [((arm:i8x8 v0))
+          (arm:i16x8
+           (halide:interpret
+            (int16x8
+             v0)))]
+        [((arm:i8x16 v0))
+          (arm:i16x16
+           (halide:interpret
+            (int16x16
+             v0)))]
+        [((arm:i16x4 v0))
+          (arm:i32x4
+           (halide:interpret
+            (int32x4
+             v0)))]
+        [((arm:i16x8 v0))
+          (arm:i32x8
+           (halide:interpret
+            (int32x8
+             v0)))]
+        [((arm:i32x2 v0))
+          (arm:i64x2
+           (halide:interpret
+            (int64x2
+             v0)))]
+        [((arm:i32x4 v0))
+          (arm:i64x4
+           (halide:interpret
+            (int64x4
+             v0)))]
+        [(_) (assert #f "infeasible")])]
+
     [(arm:uabd Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
         [((arm:u8x16 v0) (arm:u8x16 v1))
@@ -5347,6 +5381,40 @@
               v1))))]
         [(_ _) (assert #f "infeasible")])]
 
+    [(arm:uxtl Vn)
+      (destruct* ((interpret Vn))
+        [((arm:u8x8 v0))
+          (arm:u16x8
+           (halide:interpret
+            (uint16x8
+             v0)))]
+        [((arm:u8x16 v0))
+          (arm:u16x16
+           (halide:interpret
+            (uint16x16
+             v0)))]
+        [((arm:u16x4 v0))
+          (arm:u32x4
+           (halide:interpret
+            (uint32x4
+             v0)))]
+        [((arm:u16x8 v0))
+          (arm:u32x8
+           (halide:interpret
+            (uint32x8
+             v0)))]
+        [((arm:u32x2 v0))
+          (arm:u64x2
+           (halide:interpret
+            (uint64x2
+             v0)))]
+        [((arm:u32x4 v0))
+          (arm:u64x4
+           (halide:interpret
+            (uint64x4
+             v0)))]
+        [(_) (assert #f "infeasible")])]
+
     [(arm:vabdl_i16x4 Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
         [((arm:i16x4 v0) (arm:i16x4 v1))
@@ -5433,6 +5501,40 @@
               v0
               v1))))]
         [(_ _) (assert #f "infeasible")])]
+
+    [(arm:xtn Vn)
+      (destruct* ((interpret Vn))
+        [((arm:u16x8 v0))
+          (arm:u8x8
+           (halide:interpret
+            (uint8x8
+             v0)))]
+        [((arm:u32x4 v0))
+          (arm:u16x4
+           (halide:interpret
+            (uint16x4
+             v0)))]
+        [((arm:u64x2 v0))
+          (arm:u32x2
+           (halide:interpret
+            (uint32x2
+             v0)))]
+        [((arm:i16x8 v0))
+          (arm:i8x8
+           (halide:interpret
+            (int8x8
+             v0)))]
+        [((arm:i32x4 v0))
+          (arm:i16x4
+           (halide:interpret
+            (int16x4
+             v0)))]
+        [((arm:i64x2 v0))
+          (arm:i32x2
+           (halide:interpret
+            (int32x2
+             v0)))]
+        [(_) (assert #f "infeasible")])]
 
     [(arm:??shuffle id loads output-type)
       (let ([vecType (arm:get-type-struct output-type)]

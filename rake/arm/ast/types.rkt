@@ -131,6 +131,7 @@
 (struct sub (Vn Vm) #:transparent)                          ;; sub_vector
 (struct subhn (Vn Vm) #:transparent)                        ;; sub_high_narrow
 (struct suqadd (Vn Vm) #:transparent)                       ;; signed_saturating_acc_unsigned
+(struct sxtl (Vn) #:transparent)                            ;; signed_extend_long
 (struct uadalp (Vn Vm) #:transparent)                       ;; unsigned_add_acc_long_pairwise
 (struct uaddl (Vn Vm) #:transparent)                        ;; unsigned_add_long
 (struct uaddlv (Vn) #:transparent)                          ;; unsigned_add_long_across_vector
@@ -145,6 +146,8 @@
 (struct usqadd (Vn Vm) #:transparent)                       ;; unsigned_saturating_acc_signed
 (struct usubl (Vn Vm) #:transparent)                        ;; unsigned_sub_long
 (struct usubw (Vn Vm) #:transparent)                        ;; unsigned_sub_wide
+(struct uxtl (Vn) #:transparent)                            ;; unsigned_extend_long
+(struct xtn (Vn) #:transparent)                             ;; extract_narrow
 
 ;; Special added instructions
 (struct reinterpret (Vd) #:transparent)
@@ -856,6 +859,15 @@
                          (instr-sig 'i32x4 (list 'i32x4 'u32x4))
                          )]
 
+    [(eq? sxtl instr) (list
+                         (instr-sig 'i16x8 (list 'i8x8))
+                         (instr-sig 'i16x16 (list 'i8x16))
+                         (instr-sig 'i32x4 (list 'i16x4))
+                         (instr-sig 'i32x8 (list 'i16x8))
+                         (instr-sig 'i64x2 (list 'i32x2))
+                         (instr-sig 'i64x4 (list 'i32x4))
+                         )]
+
     [(eq? uabd instr) (list
                          (instr-sig 'u8x8 (list 'u8x16 'u8x16))
                          (instr-sig 'u16x4 (list 'u16x8 'u16x8))
@@ -1108,6 +1120,15 @@
                          (instr-sig 'u16x16 (list 'u16x16 'u8x16))
                          )]
 
+    [(eq? uxtl instr) (list
+                         (instr-sig 'u16x8 (list 'u8x8))
+                         (instr-sig 'u16x16 (list 'u8x16))
+                         (instr-sig 'u32x4 (list 'u16x4))
+                         (instr-sig 'u32x8 (list 'u16x8))
+                         (instr-sig 'u64x2 (list 'u32x2))
+                         (instr-sig 'u64x4 (list 'u32x4))
+                         )]
+
     [(eq? vabdl_i16x4 instr) (list
                          (instr-sig 'i32x4 (list 'i16x4 'i16x4))
                          (instr-sig 'u32x4 (list 'i16x4 'i16x4))
@@ -1133,6 +1154,15 @@
 
     [(eq? vabdl_u8x8 instr) (list
                          (instr-sig 'u16x8 (list 'u8x8 'u8x8))
+                         )]
+
+    [(eq? xtn instr) (list
+                         (instr-sig 'u8x8 (list 'u16x8))
+                         (instr-sig 'u16x4 (list 'u32x4))
+                         (instr-sig 'u32x2 (list 'u64x2))
+                         (instr-sig 'i8x8 (list 'i16x8))
+                         (instr-sig 'i16x4 (list 'i32x4))
+                         (instr-sig 'i32x2 (list 'i64x2))
                          )]
 
     [(eq? reinterpret instr) (list
