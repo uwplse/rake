@@ -70,7 +70,7 @@
            ;; Fold sibling node into sub-exprs (combine them)
            (arm-ir:vs-mpy-add
             (get-node-id)
-            (mk-combine-instr (list updated-sub-expr (apply choose* lifted-sibling-exprs)))
+            (mk-combine-instr (list lifted-sub-expr (apply choose* lifted-sibling-exprs)))
             (append weights (list (int8_t (bv 1 8))))
             (halide:elem-type halide-expr))
            )]
@@ -85,7 +85,7 @@
            ;; Fold sibling node into sub-exprs (combine them)
            (arm-ir:vs-mpy-add
             (get-node-id)
-            (mk-combine-instr (list updated-sub-expr (apply choose* lifted-sibling-exprs)))
+            (mk-combine-instr (list lifted-sub-expr (apply choose* lifted-sibling-exprs)))
             (append weights (list (int8_t (bv -1 8))))
             (halide:elem-type halide-expr)))]
          [else '()])]
