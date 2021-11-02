@@ -190,8 +190,9 @@
      (define (generate-shuffles type)
         (define (construct-loads b)
           (define tbl (map (lambda (i) (define-symbolic* idx integer?) idx) (range 256)))
-          (arm:??load 1 live-data b tbl (buffer-elemT b)))
-        (define actual-loads (map construct-loads buffers))
+          (define (make-load type) (arm:??load 1 live-data b tbl type))
+          (map make-load (arm:get-vector-types (buffer-elemT b))))
+        (define actual-loads (flatten (map construct-loads buffers)))
         (arm:make-shuffles-list actual-loads type))
      (map label-cost (flatten (map generate-shuffles buf-elemTypes)))]
 
