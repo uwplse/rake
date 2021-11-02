@@ -152,6 +152,30 @@
          [candidates (enumerate-arm isa desired-types grouped-sub-exprs 2 2)])
     (sort-and-uniquify candidates)))
 
+(define (handle-vv-mpy-add expr weights output-type arm-sub-exprs halide-expr)
+  (let* ([input-type (get-input-type expr)]
+         [widening? (eq? (cpp:type-bw output-type) (* 2 (cpp:type-bw input-type)))]
+         [isa (if widening?
+                  (list arm:reinterpret arm:smlal-vv arm:umlal-vv arm:smlsl-vv arm:umlsl-vv)
+                  (list arm:reinterpret arm:addv arm:addp arm:mla-vv arm:mls-vv arm:mul-vv arm:sub))]
+         [grouped-sub-exprs (prepare-sub-exprs arm-sub-exprs)]
+         [desired-types (arm:get-vector-types output-type)]
+         ; TODO: why is this the number of reads? formula taken from hvx.rkt
+         [width (length weights)]
+         [number-reads (- (* width 2) (if (eq? width 5) 1 0))]
+         [candidates (enumerate-arm isa desired-types grouped-sub-exprs 4 8 number-reads)])
+    (sort-and-uniquify candidates)))
+
+(define (handle-abs-diff expr0 expr1 widening? output-type arm-sub-exprs halide-expr)
+  (let* ([isa (if widening?
+                  (list arm:vabdl_i8x8 arm:vabdl_u8x8 arm:vabdl_i16x4 arm:vabdl_u16x4 arm:vabdl_i32x2 arm:vabdl_u32x2)
+                  (list arm:sabd arm:uabd))]
+         [grouped-sub-exprs (prepare-sub-exprs arm-sub-exprs)]
+         [desired-types (arm:get-vector-types output-type)]
+         ; TODO: is this a good depth / cost??
+         [candidates (enumerate-arm isa desired-types grouped-sub-exprs 2 2)])
+    (sort-and-uniquify candidates)))
+
 (define (get-arm-grammar-helper halide-expr ir-expr arm-sub-exprs)
   ; TODO: what is the enumeration-database?
   (destruct ir-expr
@@ -185,6 +209,22 @@
 
     [(arm-ir:maximum expr0 expr1)
       (handle-maximum expr0 expr1 arm-sub-exprs halide-expr)]
+
+    ; TODO: add-high-narrow, sub-high-narrow, halving-add, halving-sub
+
+    ; TODO: reduce
+
+    [(arm-ir:vv-mpy-add expr weights output-type)
+      (handle-vv-mpy-add expr weights output-type arm-sub-exprs halide-expr)]
+
+    ; TODO: vv-dmpy-add-sat, vs-dmpy-add-sat, vv-dmpy-add-hh-sat, vs-dmpy-add-hh-sat
+
+    ; TODO: neg-sat, add-sat, sub-sat
+
+    ; TODO: shift-left, vs-shift-left
+
+    [(arm-ir:abs-diff expr0 expr1 widening? output-type)
+      (handle-abs-diff expr0 expr1 widening? arm-sub-exprs halide-expr)]
 
     [_ (error "Not implemented yet ~a" ir-expr)]))
 
