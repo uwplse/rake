@@ -34,6 +34,12 @@
         (if (< (cpp:type-bw t0) (cpp:type-bw t1)) t0 t1))
       (arm-ir:elem-type expr)))
 
+(define (sort-and-uniquify candidates)
+  ;; Sort them
+  (set! candidates (sort candidates (lambda (v1 v2) (<= (cdr v1) (cdr v2)))))
+
+  ;; Fill in param grammars
+  (for/list ([candidate candidates]) (cons (uniquify-swizzles candidate) (cdr candidate))))
 
 
 (define (handle-vs-mpy-add expr weights output-type arm-sub-exprs halide-expr)
@@ -114,11 +120,37 @@
          ; TODO: should this be the depth and the cost?
          [candidates (enumerate-arm isa desired-types grouped-sub-exprs 3 7)])
 
-     ;; Sort them
-     (set! candidates (sort candidates (lambda (v1 v2) (<= (cdr v1) (cdr v2)))))
+     (sort-and-uniquify candidates)))
 
-     ;; Fill in param grammars
-     (for/list ([candidate candidates]) (cons (uniquify-swizzles (car candidate)) (cdr candidate)))))
+(define (handle-abs expr saturate? output-type arm-sub-exprs halide-expr)
+  (let ([isa (list arm:abs arm:sqabs arm:reinterpret)]
+        [grouped-sub-exprs (prepare-sub-exprs arm-sub-exprs)]
+        [desired-types (arm:get-vector-types output-type)])
+    ; TODO: is this a good depth / cost??
+    (define candidates (enumerate-arm isa desired-types grouped-sub-exprs 2 2))
+    (sort-and-uniquify candidates)))
+
+(define (handle-minimum a b arm-sub-exprs halide-expr)
+  (let* ([output-type (halide:elem-type halide-expr)]
+         ; TODO: what does Maaz mean by `conditional` in arm/ir/instructions.rkt?
+         ; TODO: do we need `reinterpret`?
+         [isa (list arm:umin arm:smin arm:uminp arm:sminp)]
+         [grouped-sub-exprs (prepare-sub-exprs arm-sub-exprs)]
+         [desired-types (arm:get-vector-types output-type)]
+         ; TODO: is this a good depth / cost??
+         [candidates (enumerate-arm isa desired-types grouped-sub-exprs 2 2)])
+    (sort-and-uniquify candidates)))
+
+(define (handle-maximum a b arm-sub-exprs halide-expr)
+  (let* ([output-type (halide:elem-type halide-expr)]
+         ; TODO: what does Maaz mean by `conditional` in arm/ir/instructions.rkt?
+         ; TODO: do we need `reinterpret`?
+         [isa (list arm:umax arm:smax arm:umaxp arm:smaxp)]
+         [grouped-sub-exprs (prepare-sub-exprs arm-sub-exprs)]
+         [desired-types (arm:get-vector-types output-type)]
+         ; TODO: is this a good depth / cost??
+         [candidates (enumerate-arm isa desired-types grouped-sub-exprs 2 2)])
+    (sort-and-uniquify candidates)))
 
 (define (get-arm-grammar-helper halide-expr ir-expr arm-sub-exprs)
   ; TODO: what is the enumeration-database?
@@ -144,6 +176,15 @@
 
     [(arm-ir:vs-mpy-add expr weights output-type)
       (handle-vs-mpy-add expr weights output-type arm-sub-exprs halide-expr)]
+
+    [(arm-ir:abs expr saturate? output-type)
+      (handle-abs expr saturate? output-type arm-sub-exprs halide-expr)]
+
+    [(arm-ir:minimum expr0 expr1)
+      (handle-minimum expr0 expr1 arm-sub-exprs halide-expr)]
+
+    [(arm-ir:maximum expr0 expr1)
+      (handle-maximum expr0 expr1 arm-sub-exprs halide-expr)]
 
     [_ (error "Not implemented yet ~a" ir-expr)]))
 
