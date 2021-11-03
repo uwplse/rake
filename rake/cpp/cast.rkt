@@ -16,80 +16,96 @@
        [(eq? type 'int16) (int16_t (sign-extend val (bitvector 16)))]
        [(eq? type 'int32) (int32_t (sign-extend val (bitvector 32)))]
        [(eq? type 'int64) (int64_t (sign-extend val (bitvector 64)))]
+       [(eq? type 'int128) (int128_t (sign-extend val (bitvector 128)))]
        [(eq? type 'uint8) (uint8_t val)]
        [(eq? type 'uint16) (uint16_t (sign-extend val (bitvector 16)))]
        [(eq? type 'uint32) (uint32_t (sign-extend val (bitvector 32)))]
-       [(eq? type 'uint64) (uint64_t (sign-extend val (bitvector 64)))])]
+       [(eq? type 'uint64) (uint64_t (sign-extend val (bitvector 64)))]
+       [(eq? type 'uint128) (uint128_t (sign-extend val (bitvector 128)))])]
     [(uint8_t val)
      (cond
        [(eq? type 'int8) (int8_t val)]
        [(eq? type 'int16) (int16_t (zero-extend val (bitvector 16)))]
        [(eq? type 'int32) (int32_t (zero-extend val (bitvector 32)))]
        [(eq? type 'int64) (int64_t (zero-extend val (bitvector 64)))]
+       [(eq? type 'int128) (int128_t (zero-extend val (bitvector 128)))]
        [(eq? type 'uint8) v]
        [(eq? type 'uint16) (uint16_t (zero-extend val (bitvector 16)))]
        [(eq? type 'uint32) (uint32_t (zero-extend val (bitvector 32)))]
-       [(eq? type 'uint64) (uint64_t (zero-extend val (bitvector 64)))])]
+       [(eq? type 'uint64) (uint64_t (zero-extend val (bitvector 64)))]
+       [(eq? type 'uint128) (uint128_t (zero-extend val (bitvector 128)))])]
     [(int16_t val)
      (cond
        [(eq? type 'int8) (int8_t (extract 7 0 val))]
        [(eq? type 'int16) v]
        [(eq? type 'int32) (int32_t (sign-extend val (bitvector 32)))]
        [(eq? type 'int64) (int64_t (sign-extend val (bitvector 64)))]
+       [(eq? type 'int128) (int128_t (sign-extend val (bitvector 128)))]
        [(eq? type 'uint8) (uint8_t (extract 7 0 val))]
        [(eq? type 'uint16) (uint16_t val)]
        [(eq? type 'uint32) (uint32_t (sign-extend val (bitvector 32)))]
-       [(eq? type 'uint64) (uint64_t (sign-extend val (bitvector 64)))])]
+       [(eq? type 'uint64) (uint64_t (sign-extend val (bitvector 64)))]
+       [(eq? type 'uint128) (uint128_t (sign-extend val (bitvector 128)))])]
     [(uint16_t val)
      (cond
        [(eq? type 'int8) (int8_t (extract 7 0 val))]
        [(eq? type 'int16) (int16_t val)]
        [(eq? type 'int32) (int32_t (zero-extend val (bitvector 32)))]
        [(eq? type 'int64) (int64_t (zero-extend val (bitvector 64)))]
+       [(eq? type 'int128) (int128_t (zero-extend val (bitvector 128)))]
        [(eq? type 'uint8) (uint8_t (extract 7 0 val))]
        [(eq? type 'uint16) v]
        [(eq? type 'uint32) (uint32_t (zero-extend val (bitvector 32)))]
-       [(eq? type 'uint64) (uint64_t (zero-extend val (bitvector 64)))])]
+       [(eq? type 'uint64) (uint64_t (zero-extend val (bitvector 64)))]
+       [(eq? type 'uint128) (uint128_t (zero-extend val (bitvector 128)))])]
     [(int32_t val)
      (cond
        [(eq? type 'int8) (int8_t (extract 7 0 val))]
        [(eq? type 'int16) (int16_t (extract 15 0 val))]
        [(eq? type 'int32) v]
        [(eq? type 'int64) (int64_t (sign-extend val (bitvector 64)))]
+       [(eq? type 'int128) (int128_t (sign-extend val (bitvector 128)))]
        [(eq? type 'uint8) (uint8_t (extract 7 0 val))]
        [(eq? type 'uint16) (uint16_t (extract 15 0 val))]
        [(eq? type 'uint32) (uint32_t val)]
-       [(eq? type 'uint64) (uint64_t (sign-extend val (bitvector 64)))])]
+       [(eq? type 'uint64) (uint64_t (sign-extend val (bitvector 64)))]
+       [(eq? type 'uint128) (uint128_t (sign-extend val (bitvector 128)))])]
     [(uint32_t val)
      (cond
        [(eq? type 'int8) (int8_t (extract 7 0 val))]
        [(eq? type 'int16) (int16_t (extract 15 0 val))]
        [(eq? type 'int32) (int32_t val)]
        [(eq? type 'int64) (int64_t (zero-extend val (bitvector 64)))]
+       [(eq? type 'int128) (int128_t (zero-extend val (bitvector 128)))]
        [(eq? type 'uint8) (uint8_t (extract 7 0 val))]
        [(eq? type 'uint16) (uint16_t (extract 15 0 val))]
        [(eq? type 'uint32) v]
-       [(eq? type 'uint64) (int64_t (zero-extend val (bitvector 64)))])]
+       [(eq? type 'uint64) (int64_t (zero-extend val (bitvector 64)))]
+       [(eq? type 'uint128) (int128_t (zero-extend val (bitvector 128)))])]
     [(int64_t val)
      (cond 
        [(eq? type 'int8) (int8_t (extract 7 0 val))]
        [(eq? type 'int16) (int16_t (extract 15 0 val))]
        [(eq? type 'int32) (int32_t (extract 31 0 val))]
        [(eq? type 'int64) v]
+       [(eq? type 'int128) (int128_t (sign-extend val (bitvector 128)))]
        [(eq? type 'uint8) (uint8_t (extract 7 0 val))]
        [(eq? type 'uint16) (uint16_t (extract 15 0 val))]
        [(eq? type 'uint32) (uint32_t (extract 31 0 val))]
-       [(eq? type 'uint64) (uint64_t (extract 63 0 val))])]
+       [(eq? type 'uint64) (uint64_t (extract 63 0 val))]
+       [(eq? type 'uint128) (uint128_t (sign-extend val (bitvector 128)))])]
     [(uint64_t val)
      (cond 
        [(eq? type 'int8) (int8_t (extract 7 0 val))]
        [(eq? type 'int16) (int16_t (extract 15 0 val))]
        [(eq? type 'int32) (int32_t (extract 31 0 val))]
        [(eq? type 'int64) (int64_t val)]
+       [(eq? type 'int128) (int128_t (zero-extend val (bitvector 128)))]
        [(eq? type 'uint8) (uint8_t (extract 7 0 val))]
        [(eq? type 'uint16) (uint16_t (extract 15 0 val))]
        [(eq? type 'uint32) (uint32_t (extract 31 0 val))]
-       [(eq? type 'uint64) v])]
+       [(eq? type 'uint64) v]
+       [(eq? type 'uint128) (uint128_t (zero-extend val (bitvector 128)))])]
 
     ;; Casts on indexing variables (modelled as ints not bvs) are currently assumed to never change value
     [_ (if (integer? v) v (error "NYI: Casting from type ~a" v))]))
@@ -130,10 +146,15 @@
                      [(bvslt val (bv MIN_CHAR 64)) (int8_t (bv MIN_CHAR 8))]
                      [(bvsgt val (bv MAX_CHAR 64)) (int8_t (bv MAX_CHAR 8))]
                      [else (int8_t (extract 7 0 val))])]
+    [(int128_t val) (cond
+                      [(bvslt val (bv MIN_CHAR 128)) (int8_t (bv MIN_CHAR 8))]
+                      [(bvsgt val (bv MAX_CHAR 128)) (int8_t (bv MAX_CHAR 8))]
+                      [else (int8_t (extract 7 0 val))])]
     [(uint8_t val) (if (bvugt val (bv MAX_CHAR 8)) (int8_t (bv MAX_CHAR 8)) (int8_t val))]
     [(uint16_t val) (if (bvugt val (bv MAX_CHAR 16)) (int8_t (bv MAX_CHAR 8)) (int8_t (extract 7 0 val)))]
     [(uint32_t val) (if (bvugt val (bv MAX_CHAR 32)) (int8_t (bv MAX_CHAR 8)) (int8_t (extract 7 0 val)))]
-    [(uint64_t val) (if (bvugt val (bv MAX_CHAR 64)) (int8_t (bv MAX_CHAR 8)) (int8_t (extract 7 0 val)))]))
+    [(uint64_t val) (if (bvugt val (bv MAX_CHAR 64)) (int8_t (bv MAX_CHAR 8)) (int8_t (extract 7 0 val)))]
+    [(uint128_t val) (if (bvugt val (bv MAX_CHAR 128)) (int8_t (bv MAX_CHAR 8)) (int8_t (extract 7 0 val)))]))
 
 (define (sat16 e)
   (destruct e
@@ -147,10 +168,15 @@
                      [(bvslt val (bv MIN_SHORT 64)) (int16_t (bv MIN_SHORT 16))]
                      [(bvsgt val (bv MAX_SHORT 64)) (int16_t (bv MAX_SHORT 16))]
                      [else (int16_t (extract 15 0 val))])]
+    [(int128_t val) (cond
+                      [(bvslt val (bv MIN_SHORT 128)) (int16_t (bv MIN_SHORT 16))]
+                      [(bvsgt val (bv MAX_SHORT 128)) (int16_t (bv MAX_SHORT 16))]
+                      [else (int16_t (extract 15 0 val))])]
     [(uint8_t val) (int16_t (zero-extend val (bitvector 16)))]
     [(uint16_t val) (if (bvugt val (bv MAX_SHORT 16)) (int16_t (bv MAX_SHORT 16)) (int16_t val))]
     [(uint32_t val) (if (bvugt val (bv MAX_SHORT 32)) (int16_t (bv MAX_SHORT 16)) (int16_t (extract 15 0 val)))]
-    [(uint64_t val) (if (bvugt val (bv MAX_SHORT 64)) (int16_t (bv MAX_SHORT 16)) (int16_t (extract 15 0 val)))]))
+    [(uint64_t val) (if (bvugt val (bv MAX_SHORT 64)) (int16_t (bv MAX_SHORT 16)) (int16_t (extract 15 0 val)))]
+    [(uint128_t val) (if (bvugt val (bv MAX_SHORT 128)) (int16_t (bv MAX_SHORT 16)) (int16_t (extract 15 0 val)))]))
 
 (define (sat32 e)
   (destruct e
@@ -161,10 +187,15 @@
                      [(bvslt val (bv MIN_INT 64)) (int32_t (bv MIN_INT 32))]
                      [(bvsgt val (bv MAX_INT 64)) (int32_t (bv MAX_INT 32))]
                      [else (int32_t (extract 31 0 val))])]
+    [(int128_t val) (cond
+                      [(bvslt val (bv MIN_INT 128)) (int32_t (bv MIN_INT 32))]
+                      [(bvsgt val (bv MAX_INT 128)) (int32_t (bv MAX_INT 32))]
+                      [else (int32_t (extract 31 0 val))])]
     [(uint8_t val) (int32_t (zero-extend val (bitvector 32)))]
     [(uint16_t val) (int32_t (zero-extend val (bitvector 32)))]
     [(uint32_t val) (if (bvugt val (bv MAX_INT 32)) (int32_t (bv MAX_INT 32)) (int32_t val))]
-    [(uint64_t val) (if (bvugt val (bv MAX_INT 64)) (int32_t (bv MAX_INT 32)) (int32_t (extract 31 0 val)))]))
+    [(uint64_t val) (if (bvugt val (bv MAX_INT 64)) (int32_t (bv MAX_INT 32)) (int32_t (extract 31 0 val)))]
+    [(uint128_t val) (if (bvugt val (bv MAX_INT 128)) (int32_t (bv MAX_INT 32)) (int32_t (extract 31 0 val)))]))
 
 (define (sat64 e)
   (destruct e
@@ -172,10 +203,15 @@
     [(int16_t val) (int64_t (sign-extend val (bitvector 64)))]
     [(int32_t val) (int64_t (sign-extend val (bitvector 64)))]
     [(int64_t val) e]
+    [(int128_t val) (cond
+                      [(bvslt val (bv MIN_LL 128)) (int32_t (bv MIN_LL 64))]
+                      [(bvsgt val (bv MAX_LL 128)) (int32_t (bv MAX_LL 64))]
+                      [else (int64_t (extract 63 0 val))])]
     [(uint8_t val) (int64_t (zero-extend val (bitvector 64)))]
     [(uint16_t val) (int64_t (zero-extend val (bitvector 64)))]
     [(uint32_t val) (int64_t (zero-extend val (bitvector 64)))]
-    [(uint64_t val) (if (bvugt val (bv MAX_LL 64)) (int64_t (bv MAX_LL 64)) (int64_t val))]))
+    [(uint64_t val) (if (bvugt val (bv MAX_LL 64)) (int64_t (bv MAX_LL 64)) (int64_t val))]
+    [(uint128_t val) (if (bvugt val (bv MAX_LL 128)) (int64_t (bv MAX_LL 64)) (int64_t (extract 63 0 val)))]))
 
 (define (satu8 e)
   (destruct e
@@ -192,10 +228,15 @@
                      [(bvslt val (bv MIN_UCHAR 64)) (uint8_t (bv MIN_UCHAR 8))]
                      [(bvsgt val (bv MAX_UCHAR 64)) (uint8_t (bv MAX_UCHAR 8))]
                      [else (uint8_t (extract 7 0 val))])]
+    [(int128_t val) (cond
+                      [(bvslt val (bv MIN_UCHAR 128)) (uint8_t (bv MIN_UCHAR 8))]
+                      [(bvsgt val (bv MAX_UCHAR 128)) (uint8_t (bv MAX_UCHAR 8))]
+                      [else (uint8_t (extract 7 0 val))])]
     [(uint8_t val) e]
     [(uint16_t val) (if (bvugt val (bv MAX_UCHAR 16)) (uint8_t (bv MAX_UCHAR 8)) (uint8_t (extract 7 0 val)))]
     [(uint32_t val) (if (bvugt val (bv MAX_UCHAR 32)) (uint8_t (bv MAX_UCHAR 8)) (uint8_t (extract 7 0 val)))]
-    [(uint64_t val) (if (bvugt val (bv MAX_UCHAR 64)) (uint8_t (bv MAX_UCHAR 8)) (uint8_t (extract 7 0 val)))]))
+    [(uint64_t val) (if (bvugt val (bv MAX_UCHAR 64)) (uint8_t (bv MAX_UCHAR 8)) (uint8_t (extract 7 0 val)))]
+    [(uint128_t val) (if (bvugt val (bv MAX_UCHAR 128)) (uint8_t (bv MAX_UCHAR 8)) (uint8_t (extract 7 0 val)))]))
 
 (define (satu16 e)
   (destruct e
@@ -209,10 +250,15 @@
                      [(bvslt val (bv MIN_USHORT 64)) (uint16_t (bv MIN_USHORT 16))]
                      [(bvsgt val (bv MAX_USHORT 64)) (uint16_t (bv MAX_USHORT 16))]
                      [else (uint16_t (extract 15 0 val))])]
+    [(int128_t val) (cond
+                      [(bvslt val (bv MIN_USHORT 128)) (uint16_t (bv MIN_USHORT 16))]
+                      [(bvsgt val (bv MAX_USHORT 128)) (uint16_t (bv MAX_USHORT 16))]
+                      [else (uint16_t (extract 15 0 val))])]
     [(uint8_t val) (uint16_t (zero-extend val (bitvector 16)))]
     [(uint16_t val) e]
     [(uint32_t val) (if (bvugt val (bv MAX_USHORT 32)) (uint16_t (bv MAX_USHORT 16)) (uint16_t (extract 15 0 val)))]
-    [(uint64_t val) (if (bvugt val (bv MAX_USHORT 64)) (uint16_t (bv MAX_USHORT 16)) (uint16_t (extract 15 0 val)))]))
+    [(uint64_t val) (if (bvugt val (bv MAX_USHORT 64)) (uint16_t (bv MAX_USHORT 16)) (uint16_t (extract 15 0 val)))]
+    [(uint128_t val) (if (bvugt val (bv MAX_USHORT 128)) (uint16_t (bv MAX_USHORT 16)) (uint16_t (extract 15 0 val)))]))
 
 (define (satu32 e)
   (destruct e
@@ -223,10 +269,15 @@
                      [(bvslt val (bv MIN_UINT 64)) (uint32_t (bv MIN_UINT 32))]
                      [(bvsgt val (bv MAX_UINT 64)) (uint32_t (bv MAX_UINT 32))]
                      [else (uint32_t (extract 31 0 val))])]
+    [(int128_t val) (cond
+                      [(bvslt val (bv MIN_UINT 128)) (uint32_t (bv MIN_UINT 32))]
+                      [(bvsgt val (bv MAX_UINT 128)) (uint32_t (bv MAX_UINT 32))]
+                      [else (uint32_t (extract 31 0 val))])]
     [(uint8_t val) (uint32_t (zero-extend val (bitvector 32)))]
     [(uint16_t val) (uint32_t (zero-extend val (bitvector 32)))]
     [(uint32_t val) e]
-    [(uint64_t val) (if (bvugt val (bv MAX_UINT 64)) (uint32_t (bv MAX_UINT 32)) (uint32_t (extract 31 0 val)))]))
+    [(uint64_t val) (if (bvugt val (bv MAX_UINT 64)) (uint32_t (bv MAX_UINT 32)) (uint32_t (extract 31 0 val)))]
+    [(uint128_t val) (if (bvugt val (bv MAX_UINT 128)) (uint32_t (bv MAX_UINT 32)) (uint32_t (extract 31 0 val)))]))
 
 (define (satu64 e)
   (destruct e
@@ -234,7 +285,9 @@
     [(int16_t val) (if (bvslt val (bv MIN_ULL 16)) (uint64_t (bv MIN_ULL 64)) (uint64_t (zero-extend val (bitvector 64))))]
     [(int32_t val) (if (bvslt val (bv MIN_ULL 32)) (uint64_t (bv MIN_ULL 64)) (uint64_t (zero-extend val (bitvector 64))))]
     [(int64_t val) (if (bvslt val (bv MIN_ULL 64)) (uint64_t (bv MIN_ULL 64)) (uint64_t val))]
+    [(int128_t val) (if (bvslt val (bv MIN_ULL 128)) (uint64_t (bv MIN_ULL 64)) (uint64_t val))]
     [(uint8_t val) (uint64_t (zero-extend val (bitvector 64)))]
     [(uint16_t val) (uint64_t (zero-extend val (bitvector 64)))]
     [(uint32_t val) (uint64_t (zero-extend val (bitvector 64)))]
-    [(uint64_t val) e]))
+    [(uint64_t val) e]
+    [(uint128_t val) (if (bvugt val (bv MAX_ULL 128)) (uint64_t (bv MAX_ULL 64)) (uint64_t (extract 63 0 val)))]))
