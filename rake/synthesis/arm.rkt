@@ -61,8 +61,9 @@
      (cond
        [successful?
         ;; Save bounds information
-        (when (hash-has-key? ir-bounds (arm-ir:ast-node-id ir-sub-expr))
-          (hash-set! value-bounds arm-subexpr-impl (hash-ref ir-bounds (arm-ir:ast-node-id ir-sub-expr))))
+        (define key (arm-ir:ast-node-id ir-sub-expr))
+        (when (hash-has-key? ir-bounds key)
+          (hash-set! value-bounds arm-subexpr-impl (hash-ref ir-bounds key)))
 
         ;; Lower remaining subexprs
         (define-values (successful? lowered-exprs)

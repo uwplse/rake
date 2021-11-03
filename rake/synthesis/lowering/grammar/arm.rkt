@@ -13,6 +13,7 @@
   rake/arm/ast/interpreter
   rake/arm/ast/visitor
   rake/arm/ast/cost-model
+  rake/arm/ast/analysis
   )
 
 (provide get-arm-grammar)
@@ -41,6 +42,12 @@
         (if (< (cpp:type-bw t0) (cpp:type-bw t1)) t0 t1))
       (arm-ir:elem-type expr)))
 
+(define (sort-and-uniquify candidates)
+  ;; Sort them
+  (set! candidates (sort candidates (lambda (v1 v2) (<= (cdr v1) (cdr v2)))))
+
+  ;; Fill in param grammars
+  (for/list ([candidate candidates]) (cons (uniquify-swizzles candidate) (cdr candidate))))
 
 
 (define (handle-vs-mpy-add expr weights output-type arm-sub-exprs halide-expr)
@@ -48,8 +55,8 @@
          [widening? (eq? (cpp:type-bw output-type) (* 2 (cpp:type-bw input-type)))]
          ; TODO: better pruning and more isa options
          [isa (if widening?
-                  (list arm:reinterpret arm:addv arm:saddlv arm:uaddlv arm:saddl arm:uaddl arm:smull arm:saddw arm:saddlp arm:sadalp arm:smlal arm:smlsl arm:sdot.v2i32.v8i8 arm:udot.v2i32.v8i8 arm:sdot.v4i32.v16i8 arm:udot.v4i32.v16i8 arm:shll arm:ssubl arm:sub arm:uadalp arm:uaddl arm:uaddlp arm:uaddw arm:umlal arm:umlsl arm:umull arm:usubl arm:usubw)
-                  (list arm:reinterpret arm:add arm:sub arm:addp arm:mla arm:mls arm:mul arm:shl arm:neg))]
+                (list arm:reinterpret arm:addv arm:saddlv arm:uaddlv arm:saddl arm:smull arm:saddw arm:saddlp arm:sadalp arm:smlal-vs arm:smlsl-vs arm:sdot.v2i32.v8i8 arm:udot.v2i32.v8i8 arm:sdot.v4i32.v16i8 arm:udot.v4i32.v16i8 arm:shll arm:ssubl arm:sub arm:uadalp arm:uaddl arm:uaddlp arm:uaddw arm:umlal-vs arm:umlsl-vs arm:umull arm:usubl arm:usubw)
+                (list arm:reinterpret arm:add arm:sub arm:addp arm:mla-vs arm:mls-vs arm:mul-vs arm:shl arm:neg))]
          [grouped-sub-exprs (prepare-sub-exprs arm-sub-exprs)]
          [number-reads (length weights)]
          [desired-types (arm:get-vector-types output-type)]
@@ -69,7 +76,7 @@
     (println (length candidates))
     
     ;; Filter out templates that read too much or too little data
-    (set! candidates (time (filter (lambda (c) (eq? (max-unique-inputs (car c)) number-reads)) candidates)))
+    (set! candidates (time (filter (lambda (c) (eq? (arm:max-unique-inputs (car c)) number-reads)) candidates)))
     (set! candidates (time (filter (lambda (c) (equal? (live-buffers (car c)) load-buffers)) candidates)))
 
     (pretty-print (take candidates 50))
@@ -110,7 +117,77 @@
 
       (time (for/list ([candidate candidates]) (cons (uniquify-swizzles (arm:visit (car candidate) fill-arg-grammars)) (car (cdr candidate))))))))
 
+(define (handle-cast expr output-type saturate? arm-sub-exprs halide-expr)
+  (let* ([input-type (get-input-type expr)]
+         [narrowing? (< (cpp:type-bw output-type) (cpp:type-bw input-type))]
+         [widening? (> (cpp:type-bw output-type) (cpp:type-bw input-type))]
+         ; TODO: should we just do the selection here?
+         [isa (cond
+                [narrowing? (list arm:xtn arm:uqxtn arm:sqxtn arm:sqxtun)]
+                [widening? (list arm:uxtl arm:sxtl)]
+                ; TODO: what if it's just a saturate call?
+                [else (list arm:reinterpret)])]
+         [grouped-sub-exprs (prepare-sub-exprs arm-sub-exprs)]
+         [desired-types (arm:get-vector-types output-type)]
+         ; TODO: do the pruning somehow...
+         ; TODO: should this be the depth and the cost?
+         [candidates (enumerate-arm isa desired-types grouped-sub-exprs 3 7)])
 
+     (sort-and-uniquify candidates)))
+
+(define (handle-abs expr saturate? output-type arm-sub-exprs halide-expr)
+  (let ([isa (list arm:abs arm:sqabs arm:reinterpret)]
+        [grouped-sub-exprs (prepare-sub-exprs arm-sub-exprs)]
+        [desired-types (arm:get-vector-types output-type)])
+    ; TODO: is this a good depth / cost??
+    (define candidates (enumerate-arm isa desired-types grouped-sub-exprs 2 2))
+    (sort-and-uniquify candidates)))
+
+(define (handle-minimum a b arm-sub-exprs halide-expr)
+  (let* ([output-type (halide:elem-type halide-expr)]
+         ; TODO: what does Maaz mean by `conditional` in arm/ir/instructions.rkt?
+         ; TODO: do we need `reinterpret`?
+         [isa (list arm:umin arm:smin arm:uminp arm:sminp)]
+         [grouped-sub-exprs (prepare-sub-exprs arm-sub-exprs)]
+         [desired-types (arm:get-vector-types output-type)]
+         ; TODO: is this a good depth / cost??
+         [candidates (enumerate-arm isa desired-types grouped-sub-exprs 2 2)])
+    (sort-and-uniquify candidates)))
+
+(define (handle-maximum a b arm-sub-exprs halide-expr)
+  (let* ([output-type (halide:elem-type halide-expr)]
+         ; TODO: what does Maaz mean by `conditional` in arm/ir/instructions.rkt?
+         ; TODO: do we need `reinterpret`?
+         [isa (list arm:umax arm:smax arm:umaxp arm:smaxp)]
+         [grouped-sub-exprs (prepare-sub-exprs arm-sub-exprs)]
+         [desired-types (arm:get-vector-types output-type)]
+         ; TODO: is this a good depth / cost??
+         [candidates (enumerate-arm isa desired-types grouped-sub-exprs 2 2)])
+    (sort-and-uniquify candidates)))
+
+(define (handle-vv-mpy-add expr weights output-type arm-sub-exprs halide-expr)
+  (let* ([input-type (get-input-type expr)]
+         [widening? (eq? (cpp:type-bw output-type) (* 2 (cpp:type-bw input-type)))]
+         [isa (if widening?
+                  (list arm:reinterpret arm:smlal-vv arm:umlal-vv arm:smlsl-vv arm:umlsl-vv)
+                  (list arm:reinterpret arm:addv arm:addp arm:mla-vv arm:mls-vv arm:mul-vv arm:sub))]
+         [grouped-sub-exprs (prepare-sub-exprs arm-sub-exprs)]
+         [desired-types (arm:get-vector-types output-type)]
+         ; TODO: why is this the number of reads? formula taken from hvx.rkt
+         [width (length weights)]
+         [number-reads (- (* width 2) (if (eq? width 5) 1 0))]
+         [candidates (enumerate-arm isa desired-types grouped-sub-exprs 4 8 number-reads)])
+    (sort-and-uniquify candidates)))
+
+(define (handle-abs-diff expr0 expr1 widening? output-type arm-sub-exprs halide-expr)
+  (let* ([isa (if widening?
+                  (list arm:vabdl_i8x8 arm:vabdl_u8x8 arm:vabdl_i16x4 arm:vabdl_u16x4 arm:vabdl_i32x2 arm:vabdl_u32x2)
+                  (list arm:sabd arm:uabd))]
+         [grouped-sub-exprs (prepare-sub-exprs arm-sub-exprs)]
+         [desired-types (arm:get-vector-types output-type)]
+         ; TODO: is this a good depth / cost??
+         [candidates (enumerate-arm isa desired-types grouped-sub-exprs 2 2)])
+    (sort-and-uniquify candidates)))
 
 (define (get-arm-grammar-helper halide-expr ir-expr arm-sub-exprs)
   ; TODO: what is the enumeration-database?
@@ -121,19 +198,47 @@
      (define buffers (set->list (halide:extract-live-buffers halide-expr)))
      (define candidates (for/list ([buffer buffers]) (cons (arm:??abstr-load 0 live-data buffer) 1)))
      (define buf-elemTypes (map buffer-elemT buffers))
-     (define (label-cost shufffle)
-        (cons shuffle 2))
+     (define (label-cost value)
+        (cons value 2))
      (define (generate-shuffles type)
         (define (construct-loads b)
           (define tbl (map (lambda (i) (define-symbolic* idx integer?) idx) (range 256)))
-          (arm:??load 1 live-data b tbl (buffer-elemT b)))
-        (define actual-loads (map construct-loads buffers))
+          (define (make-load type) (arm:??load 1 live-data b tbl type))
+          (map make-load (arm:get-vector-types (buffer-elemT b))))
+        (define actual-loads (flatten (map construct-loads buffers)))
         (arm:make-shuffles-list actual-loads type))
      (map label-cost (flatten (map generate-shuffles buf-elemTypes)))]
 
+    [(arm-ir:cast expr type saturate?)
+      (handle-cast expr type saturate? arm-sub-exprs halide-expr)]
 
     [(arm-ir:vs-mpy-add expr weights output-type)
       (handle-vs-mpy-add expr weights output-type arm-sub-exprs halide-expr)]
+
+    [(arm-ir:abs expr saturate? output-type)
+      (handle-abs expr saturate? output-type arm-sub-exprs halide-expr)]
+
+    [(arm-ir:minimum expr0 expr1)
+      (handle-minimum expr0 expr1 arm-sub-exprs halide-expr)]
+
+    [(arm-ir:maximum expr0 expr1)
+      (handle-maximum expr0 expr1 arm-sub-exprs halide-expr)]
+
+    ; TODO: add-high-narrow, sub-high-narrow, halving-add, halving-sub
+
+    ; TODO: reduce
+
+    [(arm-ir:vv-mpy-add expr weights output-type)
+      (handle-vv-mpy-add expr weights output-type arm-sub-exprs halide-expr)]
+
+    ; TODO: vv-dmpy-add-sat, vs-dmpy-add-sat, vv-dmpy-add-hh-sat, vs-dmpy-add-hh-sat
+
+    ; TODO: neg-sat, add-sat, sub-sat
+
+    ; TODO: shift-left, vs-shift-left
+
+    [(arm-ir:abs-diff expr0 expr1 widening? output-type)
+      (handle-abs-diff expr0 expr1 widening? arm-sub-exprs halide-expr)]
 
     [_ (error "Not implemented yet ~a" ir-expr)]))
 
@@ -220,7 +325,7 @@
                [kept-instrs (filter (curry remove-dbl-reinterpret parent-instr) instr-set)]
                [candidates (foldr append sub-candidates (map curried-builder kept-instrs))]
                [candidates-cost (filter (lambda (expr) (<= (cdr expr) max-cost)) candidates)]
-               [candidates-read (if (eq? read-count -1) candidates-cost (filter (lambda (expr) (<= (max-unique-inputs (car expr)) read-count)) candidates-cost))]
+               [candidates-read (if (eq? read-count -1) candidates-cost (filter (lambda (expr) (<= (arm:max-unique-inputs (car expr)) read-count)) candidates-cost))]
                [candidates-unique (set->list (list->set candidates-read))])
           ;(println candidates-unique)
           ;(pretty-print base-exprs)
@@ -274,219 +379,6 @@
           ;(println (enumerate-arm instr-set (set arg) base-exprs (sub1 depth) max-cost read-count arg-pos))
           (append (list opts) (get-arg-opts (rest arg-types) instr instr-set base-exprs depth max-cost read-count (add1 arg-pos))))))
 
-(define (max-unique-inputs expr)
-  (destruct expr
-
-    [(arm:??load _ _ _ _ _) 1]
-    [(arm:??shuffle _ _ _) 1]
-    [(arm:??swizzle _ _ _ _) 1]
-    [(arm:reinterpret Vn) (max-unique-inputs Vn)]
-
-    [(arm:abs Vn) (max-unique-inputs Vn)]
-
-    [(arm:uabd Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
-
-    [(arm:sabd Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
-
-    [(arm:umull Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
-
-    [(arm:smull Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
-
-    [(arm:uqadd Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
-
-    [(arm:sqadd Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
-
-    [(arm:uqsub Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
-
-    [(arm:sqsub Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
-
-    [(arm:uhadd Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
-
-    [(arm:shadd Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
-
-    [(arm:uhsub Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
-
-    [(arm:shsub Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
-
-    [(arm:urhadd Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
-
-    [(arm:srhadd Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
-
-    [(arm:urhsub Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
-
-    [(arm:srhsub Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
-
-    [(arm:umin Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
-
-    [(arm:smin Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
-
-    [(arm:umax Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
-
-    [(arm:smax Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
-
-    [(arm:sqneg Vn) (max-unique-inputs Vn)]
-
-    [(arm:uqxtn Vn) (max-unique-inputs Vn)]
-
-    [(arm:sqxtn Vn) (max-unique-inputs Vn)]
-
-    [(arm:sqxtun Vn) (max-unique-inputs Vn)]
-
-    [(arm:rshrn Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
-
-    [(arm:uqrshl Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
-
-    [(arm:sqrshl Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
-
-    [(arm:uqrshrn Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
-
-    [(arm:sqrshrn Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
-
-    [(arm:sqrshrun Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
-
-    [(arm:uqshl Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
-
-    [(arm:sqshlu Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
-
-    [(arm:sqshl Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
-
-    [(arm:uqshrn Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
-
-    [(arm:sqshrn Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
-
-    [(arm:sqshrun Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
-
-    [(arm:urshl Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
-
-    [(arm:srshl Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
-
-    [(arm:ushl Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
-
-    [(arm:sshl Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
-
-    [(arm:raddhn Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
-
-    [(arm:rsubhn Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
-
-    [(arm:sqdmulh Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
-
-    [(arm:sqrdmulh Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
-
-    [(arm:addp Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
-
-    [(arm:uaddlp Vn) (max-unique-inputs Vn)]
-
-    [(arm:saddlp Vn) (max-unique-inputs Vn)]
-
-    [(arm:umaxp Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
-
-    [(arm:smaxp Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
-
-    [(arm:uminp Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
-
-    [(arm:sminp Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
-
-    [(arm:sdot.v2i32.v8i8 Vd Vn Vm) (+ (max-unique-inputs Vd) (max-unique-inputs Vn) (max-unique-inputs Vm))]
-
-    [(arm:udot.v2i32.v8i8 Vd Vn Vm) (+ (max-unique-inputs Vd) (max-unique-inputs Vn) (max-unique-inputs Vm))]
-
-    [(arm:sdot.v4i32.v16i8 Vd Vn Vm) (+ (max-unique-inputs Vd) (max-unique-inputs Vn) (max-unique-inputs Vm))]
-
-    [(arm:udot.v4i32.v16i8 Vd Vn Vm) (+ (max-unique-inputs Vd) (max-unique-inputs Vn) (max-unique-inputs Vm))]
-
-    [(arm:vabdl_i8x8 Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
-
-    [(arm:vabdl_u8x8 Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
-
-    [(arm:vabdl_i16x4 Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
-
-    [(arm:vabdl_u16x4 Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
-
-    [(arm:vabdl_i32x2 Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
-
-    [(arm:vabdl_u32x2 Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
-
-    [(arm:add Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
-
-    [(arm:addhn Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
-
-    [(arm:addv Vn) (max-unique-inputs Vn)]
-
-    [(arm:mla Vd Vn Vm) (+ (max-unique-inputs Vd) (max-unique-inputs Vn) (max-unique-inputs Vm))]
-
-    [(arm:mls Vd Vn Vm) (+ (max-unique-inputs Vd) (max-unique-inputs Vn) (max-unique-inputs Vm))]
-
-    [(arm:mul Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
-
-    [(arm:neg Vn) (max-unique-inputs Vn)]
-
-    [(arm:saba Vd Vn Vm) (+ (max-unique-inputs Vd) (max-unique-inputs Vn) (max-unique-inputs Vm))]
-
-    [(arm:sabal Vd Vn Vm) (+ (max-unique-inputs Vd) (max-unique-inputs Vn) (max-unique-inputs Vm))]
-
-    [(arm:sadalp Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
-
-    [(arm:saddl Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
-
-    [(arm:saddlv Vn) (max-unique-inputs Vn)]
-
-    [(arm:saddw Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
-
-    [(arm:shl Vn) (max-unique-inputs Vn)]
-
-    [(arm:shll Vn) (max-unique-inputs Vn)]
-
-    [(arm:shrn Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
-
-    [(arm:smaxv Vn) (max-unique-inputs Vn)]
-
-    [(arm:sminv Vn) (max-unique-inputs Vn)]
-
-    [(arm:smlal Vd Vn Vm) (+ (max-unique-inputs Vd) (max-unique-inputs Vn) (max-unique-inputs Vm))]
-
-    [(arm:smlsl Vd Vn Vm) (+ (max-unique-inputs Vd) (max-unique-inputs Vn) (max-unique-inputs Vm))]
-
-    [(arm:sqabs Vn) (max-unique-inputs Vn)]
-
-    [(arm:sqdmull Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
-
-    [(arm:sshll Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
-
-    [(arm:ssubl Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
-
-    [(arm:ssubw Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
-
-    [(arm:sub Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
-
-    [(arm:subhn Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
-
-    [(arm:suqadd Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
-
-    [(arm:uadalp Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
-
-    [(arm:uaddl Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
-
-    [(arm:uaddlv Vn) (max-unique-inputs Vn)]
-
-    [(arm:uaddw Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
-
-    [(arm:umaxv Vn) (max-unique-inputs Vn)]
-
-    [(arm:uminv Vn) (max-unique-inputs Vn)]
-
-    [(arm:umlal Vd Vn Vm) (+ (max-unique-inputs Vd) (max-unique-inputs Vn) (max-unique-inputs Vm))]
-
-    [(arm:umlsl Vd Vn Vm) (+ (max-unique-inputs Vd) (max-unique-inputs Vn) (max-unique-inputs Vm))]
-
-    [(arm:ushll Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
-
-    [(arm:usqadd Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
-
-    [(arm:usubl Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
-
-    [(arm:usubw Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
-
-    [_ (error (format "max-unique-inputs failed to recognize ~a" expr))]))
 
 ; TODO: we need arm:instr-cost to work for this
 (define (build-ast instr sig sig-expr)
