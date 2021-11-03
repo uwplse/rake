@@ -385,6 +385,50 @@
         (mk-cpp-expr (list-ref parts 0) interm-type)
         (mk-cpp-expr (apply bvadd parts) interm-type))))
 
+(define (vs-dmpy-add-sat-impl input i multiplier outT)
+  (let* ([satFn (get-sat-fn outT)]
+         [v0 (cpp:cast (input i) 'int128)]
+         [v1 (cpp:cast multiplier 'int128)]
+         [mpy (bvmul (cpp:eval v0) (cpp:eval v1))]
+         [dbl (bvmul (bv 2 128) mpy)])
+    (satFn (int128_t dbl))))
+
+(define (vs-dmpy-add-sat-acc-impl input i multiplier outT)
+  (let* ([satFn (get-sat-fn outT)]
+         [v0 (cpp:cast (input (* i 2)) 'int128)]
+         [v1 (cpp:cast (input (+ (* i 2) 1)) 'int128)]
+         [v2 (cpp:cast multiplier 'int128)]
+         [mpy (bvmul (cpp:eval v1) (cpp:eval v2))]
+         [dbl (bvmul (bv 2 128) mpy)]
+         [acc (bvadd (cpp:eval v0) dbl)])
+    (satFn (int128_t dbl))))
+
+(define (vs-dmpy-add-hh-sat-acc-impl input i multiplier round? outT)
+  (let* ([satFn (get-sat-fn outT)]
+         [shift (if (eq? (cpp:type-bw outT) 16) (bv 16 65) (bv 32 65))]
+         [rnd-c (if (eq? (cpp:type-bw outT) 16) (bv #x8000 65) (bv #x80000000 65))]
+         [v0 (cpp:cast (input (* i 2)) 'int64)]
+         [v1 (cpp:cast (input (+ (* i 2) 1)) 'int64)]
+         [v2 (cpp:cast multiplier 'int64)]
+         [mpy (sign-extend (bvmul (cpp:eval v1) (cpp:eval v2)) (bitvector 65))]
+         [dbl (bvmul (bv 2 65) mpy)]
+         [rnd (if round? (bvadd dbl rnd-c) dbl)]
+         [hh (extract 63 0 (bvashr rnd shift))]
+         [acc (bvadd (cpp:eval v0) hh)])
+    (satFn (int64_t acc))))
+
+(define (vs-dmpy-add-hh-sat-impl input i multiplier round? outT)
+  (let* ([satFn (get-sat-fn outT)]
+         [shift (if (eq? (cpp:type-bw outT) 16) (bv 16 65) (bv 32 65))]
+         [rnd-c (if (eq? (cpp:type-bw outT) 16) (bv #x8000 65) (bv #x80000000 65))]
+         [v1 (cpp:cast (input i) 'int64)]
+         [v2 (cpp:cast multiplier 'int64)]
+         [mpy (sign-extend (bvmul (cpp:eval v1) (cpp:eval v2)) (bitvector 65))]
+         [dbl (bvmul (bv 2 65) mpy)]
+         [rnd (if round? (bvadd dbl rnd-c) dbl)]
+         [hh (extract 63 0 (bvashr rnd shift))])
+    (satFn (int64_t hh))))
+
 (define (bitwise-and-impl lhs rhs)
   (let* ([type (cpp:type lhs)]
          [a (cpp:eval lhs)]
@@ -546,12 +590,19 @@
        ; TODO: HVX has a saturation flag, do we need that?
        (vs-mpy-add-impl input i int-weights outT))]
 
-    ; TODO: vv-mpy-add-w
-    ; TODO: vs-mpy-add-w
-    ; TODO: vv-dmpy-add-sat
-    ; TODO: vs-dmpy-add-sat
-    ; TODO: vv-dmpy-add-hh-sat
-    ; TODO: vs-dmpy-add-hh-sat
+    [(arm-ir:vs-dmpy-add-sat expr weight accumulate? outT)
+     (define input (interpret expr))
+     (define multiplier (interpret weight))
+     (cond
+       [accumulate? (lambda (i) (vs-dmpy-add-sat-acc-impl input i multiplier outT))]
+       [else (lambda (i) (vs-dmpy-add-sat-impl input i multiplier outT))])]
+
+    [(arm-ir:vs-dmpy-add-hh-sat expr weight round? accumulate? outT)
+     (define input (interpret expr))
+     (define multiplier (interpret weight))
+     (cond
+       [accumulate? (lambda (i) (vs-dmpy-add-hh-sat-acc-impl input i multiplier round? outT))]
+       [else (lambda (i) (vs-dmpy-add-hh-sat-impl input i multiplier round? outT))])]
 
     [(arm-ir:neg-sat expr)
      (define input (interpret expr))
@@ -709,11 +760,11 @@
     ;[(arm-ir:vv-mpy-add-w expr weights outT) (+ (instr-count expr) 1)]
     ;[(arm-ir:vs-mpy-add-w expr weights outT) (+ (instr-count expr) 1)]
 
-    [(arm-ir:vv-dmpy-add-sat expr weights) (+ (instr-count expr) 1)]
-    [(arm-ir:vs-dmpy-add-sat expr weights) (+ (instr-count expr) 1)]
+    [(arm-ir:vv-dmpy-add-sat expr weights accumulate? outT) (+ (instr-count expr) 1)]
+    [(arm-ir:vs-dmpy-add-sat expr weights accumulate? outT) (+ (instr-count expr) 1)]
 
-    [(arm-ir:vv-dmpy-add-hh-sat expr weights round?) (+ (instr-count expr) 1)]
-    [(arm-ir:vs-dmpy-add-hh-sat expr weights round?) (+ (instr-count expr) 1)]
+    [(arm-ir:vv-dmpy-add-hh-sat expr weight round? accumulate? outT) (+ (instr-count expr) 1)]
+    [(arm-ir:vs-dmpy-add-hh-sat expr weight round? accumulate? outT) (+ (instr-count expr) 1)]
 
     [(arm-ir:neg-sat expr) (+ (instr-count expr) 1)]
     [(arm-ir:add-sat expr0 expr1) (+ (instr-count expr0) (instr-count expr1) 1)]
@@ -726,6 +777,8 @@
     [(arm-ir:abs-diff-acc acc expr0 expr1 widening?) (+ (instr-count acc) (instr-count expr0) (instr-count expr1) 1)]
 
     [(arm-ir:bitwise-and expr0 expr1) (+ (instr-count expr0) (instr-count expr1) 1)]
+
+    [(arm-ir:vs-divide expr divisor) (+ (instr-count expr) 1)]
 
     [_ (error "instr-count not implemented for ir-expr: " ir-expr)]))
 
@@ -755,11 +808,11 @@
       [(arm-ir:vs-mpy-add expr weights outT) (handler (arm-ir:vs-mpy-add (arm-ir:ast-node-id ir-expr) (visit expr handler) weights outT))]
       ;[(arm-ir:vv-mpy-add-w expr weights outT) (handler (arm-ir:vv-mpy-add-w (arm-ir:ast-node-id ir-expr) (visit expr handler) weights outT))]
       ;[(arm-ir:vs-mpy-add-w expr weights outT) (handler (arm-ir:vs-mpy-add-w (arm-ir:ast-node-id ir-expr) (visit expr handler) weights outT))]
-      [(arm-ir:vv-dmpy-add-sat expr weights) (handler (arm-ir:vv-dmpy-add-sat (arm-ir:ast-node-id ir-expr) (visit expr handler) weights))]
-      [(arm-ir:vs-dmpy-add-sat expr weights) (handler (arm-ir:vs-dmpy-add-sat (arm-ir:ast-node-id ir-expr) (visit expr handler) weights))]
+      [(arm-ir:vv-dmpy-add-sat expr weight accumulate? outT) (handler (arm-ir:vv-dmpy-add-sat (arm-ir:ast-node-id ir-expr) (visit expr handler) weight accumulate? outT))]
+      [(arm-ir:vs-dmpy-add-sat expr weight accumulate? outT) (handler (arm-ir:vs-dmpy-add-sat (arm-ir:ast-node-id ir-expr) (visit expr handler) weight accumulate? outT))]
 
-      [(arm-ir:vv-dmpy-add-hh-sat expr weights round?) (handler (arm-ir:vv-dmpy-add-hh-sat (arm-ir:ast-node-id ir-expr) (handler expr) weights round?))]
-      [(arm-ir:vs-dmpy-add-hh-sat expr weights round?) (handler (arm-ir:vs-dmpy-add-hh-sat (arm-ir:ast-node-id ir-expr) (handler expr) weights round?))]
+      [(arm-ir:vv-dmpy-add-hh-sat expr weight round? accumulate? outT) (handler (arm-ir:vv-dmpy-add-hh-sat (arm-ir:ast-node-id ir-expr) (handler expr) weight round? accumulate? outT))]
+      [(arm-ir:vs-dmpy-add-hh-sat expr weight round? accumulate? outT) (handler (arm-ir:vs-dmpy-add-hh-sat (arm-ir:ast-node-id ir-expr) (handler expr) weight round? accumulate? outT))]
 
       [(arm-ir:neg-sat expr) (handler (arm-ir:neg-sat (arm-ir:ast-node-id ir-expr) (visit expr handler)))]
       [(arm-ir:add-sat expr0 expr1) (handler (arm-ir:add-sat (arm-ir:ast-node-id ir-expr) (visit expr0 handler) (visit expr1 handler)))]
@@ -810,11 +863,11 @@
     [(arm-ir:vs-mpy-add expr weights outT) (list expr)]
     ;[(arm-ir:vv-mpy-add-w expr weights outT) (list expr)]
     ;[(arm-ir:vs-mpy-add-w expr weights outT) (list expr)]
-    [(arm-ir:vv-dmpy-add-sat expr weights) (list expr)]
-    [(arm-ir:vs-dmpy-add-sat expr weights) (list expr)]
+    [(arm-ir:vv-dmpy-add-sat expr weight accumulate? outT) (list expr)]
+    [(arm-ir:vs-dmpy-add-sat expr weight accumulate? outT) (list expr)]
 
-    [(arm-ir:vv-dmpy-add-hh-sat expr weights round?) (list expr)]
-    [(arm-ir:vs-dmpy-add-hh-sat expr weights round?) (list expr)]
+    [(arm-ir:vv-dmpy-add-hh-sat expr weight round? accumulate? outT) (list expr)]
+    [(arm-ir:vs-dmpy-add-hh-sat expr weight round? accumulate? outT) (list expr)]
 
     [(arm-ir:neg-sat expr) (list expr)]
     [(arm-ir:add-sat expr0 expr1) (list expr0 expr1)]
