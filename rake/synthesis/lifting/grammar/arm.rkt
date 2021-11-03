@@ -118,6 +118,8 @@
           ;; Check if the new node is an identity func. Ex: saturation where its not needed etc.
           (list lifted-sub-expr)])]
 
+      [(arm-ir:vs-dmpy-add-hh-sat expr weight round? accumulate? outT)
+       (list (arm-ir:vs-dmpy-add-hh-sat (get-node-id) expr weight (choose* #t #f) (choose* #t #f) (halide:elem-type halide-expr)))]
 
       [(arm-ir:add-sat expr0 expr1) '()]
 
@@ -186,7 +188,12 @@
       [(arm-ir:vs-mpy-add sub-expr weights outT)
         (flatten
           (list
-            ; TODO: add some good options.
+            (if (<= (length weights) 2)
+                (arm-ir:vs-dmpy-add-sat (get-node-id) sub-expr (apply choose* weights) (choose* #t #f) (halide:elem-type halide-expr))
+                '())
+            (if (<= (length weights) 2)
+                (arm-ir:vs-dmpy-add-hh-sat (get-node-id) sub-expr (apply choose* weights) (choose* #t #f) (choose* #t #f) (halide:elem-type halide-expr))
+                '())
         ))]
 
       [(arm-ir:vv-mpy-add expr width outT)
@@ -194,6 +201,8 @@
           (list
             ; TODO: add some good options.
         ))]
+
+      [(arm-ir:vs-dmpy-add-hh-sat expr weight round? accumulate? outT) '()]
 
       [(arm-ir:add-sat expr0 expr1) '()]
 
@@ -362,6 +371,10 @@
            (arm-ir:reduce (get-node-id) (mk-load-instr halide-expr) width op (halide:elem-type halide-expr))
            (arm-ir:reduce (get-node-id) (apply choose* lifted-sub-exprs) width op (halide:elem-type halide-expr))))]
 
+    [(vec-if v1 v2 v3)
+     (if (eq? (length lifted-sub-exprs) 3)
+         (list (arm-ir:select (get-node-id) (list-ref lifted-sub-exprs 0) (list-ref lifted-sub-exprs 1) (list-ref lifted-sub-exprs 2))) '())]
+    
     [_ (error "NYI: Please define a (extend) grammar for halide node:" halide-expr)]))
 
 (define arm-uber-instructions (lifting-ir fold-grammar repl-grammar extend-grammar))

@@ -75,6 +75,7 @@
      ;(println sol)
      
      (when (correct? sol)
+       ;(pretty-print optimized-halide-expr) 
        ;(pretty-print (evaluate template sol))
 
        (define e (evaluate optimized-template sol))
