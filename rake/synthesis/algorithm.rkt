@@ -53,11 +53,11 @@
      (cond
        [lifting-success?
         ;; Lower the super-instructions to an expression template (in HVX ISA)
-        (define-values (lowering-success? arm-expr)
-          (synthesize-arm-expr ir-expr ir-annotations ir-bounds lowering-algo swizzling-algo))
+        ;(define-values (lowering-success? arm-expr)
+          ;(synthesize-arm-expr ir-expr ir-annotations ir-bounds lowering-algo swizzling-algo))
 
         ;; For now, just return the lowered ARM template
-        arm-expr]
+        ir-expr]
         ;; Full verification of the synthesized expression
 ;        (define correct? (verify-equivalence (spec-expr spec) (first hvx-expr) (spec-axioms spec)))
 ;

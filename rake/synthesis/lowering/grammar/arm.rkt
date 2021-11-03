@@ -23,6 +23,14 @@
   (let* ([key (cons (arm-ir:ast-node-id ir-expr) arm-sub-exprs)]
          [check-cache (and (not (arm-ir:load-data? ir-expr)) (hash-has-key? grammar-cache key))]
          [candidates (if check-cache (hash-ref grammar-cache key) (get-arm-grammar-helper halide-expr ir-expr arm-sub-exprs))])
+    ;(println cost-ub)
+    ;(println key)
+    ;(println grammar-cache)
+    ;(println check-cache)
+    ;(println (get-arm-grammar-helper halide-expr ir-expr arm-sub-exprs))
+    ;(println (if check-cache (hash-ref grammar-cache key) (get-arm-grammar-helper halide-expr ir-expr arm-sub-exprs)))
+    ;(println candidates)
+    ;(println (filter (lambda (c) (<= (cdr c) cost-ub)) candidates))
       (filter (lambda (c) (<= (cdr c) cost-ub)) candidates)))
 
 (define (get-input-type expr)
@@ -40,14 +48,14 @@
          [widening? (eq? (cpp:type-bw output-type) (* 2 (cpp:type-bw input-type)))]
          ; TODO: better pruning and more isa options
          [isa (if widening?
-                  (list arm:reinterpret arm:addv arm:saddlv arm:uaddlv arm:saddl arm:smull arm:saddw arm:saddlp arm:sadalp arm:smlal arm:smlsl arm:sdot.v2i32.v8i8 arm:udot.v2i32.v8i8 arm:sdot.v4i32.v16i8 arm:udot.v4i32.v16i8 arm:shll arm:ssubl arm:sub arm:uadalp arm:uaddl arm:uaddlp arm:uaddw arm:umlal arm:umlsl arm:umull arm:usubl arm:usubw)
+                  (list arm:reinterpret arm:addv arm:saddlv arm:uaddlv arm:saddl arm:uaddl arm:smull arm:saddw arm:saddlp arm:sadalp arm:smlal arm:smlsl arm:sdot.v2i32.v8i8 arm:udot.v2i32.v8i8 arm:sdot.v4i32.v16i8 arm:udot.v4i32.v16i8 arm:shll arm:ssubl arm:sub arm:uadalp arm:uaddl arm:uaddlp arm:uaddw arm:umlal arm:umlsl arm:umull arm:usubl arm:usubw)
                   (list arm:reinterpret arm:add arm:sub arm:addp arm:mla arm:mls arm:mul arm:shl arm:neg))]
          [grouped-sub-exprs (prepare-sub-exprs arm-sub-exprs)]
          [number-reads (length weights)]
          [desired-types (arm:get-vector-types output-type)]
          ; Enumerate those with the correct output type
          ; TODO: do the pruning somehow...
-         [candidates (enumerate-arm isa desired-types grouped-sub-exprs 5 7 number-reads)]
+         [candidates (time (enumerate-arm isa desired-types grouped-sub-exprs 4 7 number-reads))]
          [load-buffers (halide:extract-live-buffers halide-expr)]
          [live-buffers (lambda (expr)
                          (let* ([live-bufs (mutable-set)]
@@ -58,15 +66,20 @@
                             (arm:visit expr extract-buffer)
                             live-bufs))])
 
+    (println (length candidates))
+    
     ;; Filter out templates that read too much or too little data
-    (set! candidates (filter (lambda (c) (eq? (max-unique-inputs (car c)) number-reads)) candidates))
-    (set! candidates (filter (lambda (c) (equal? (live-buffers (car c)) load-buffers)) candidates))
+    (set! candidates (time (filter (lambda (c) (eq? (max-unique-inputs (car c)) number-reads)) candidates)))
+    (set! candidates (time (filter (lambda (c) (equal? (live-buffers (car c)) load-buffers)) candidates)))
+
+    (pretty-print (take candidates 50))
+    (println (length candidates))
 
     ;; Compute read counts
-    (set! candidates (map (lambda (c) (cons (car c) (cons (cdr c) (count-reads (car c))))) candidates))
+    (set! candidates (time (map (lambda (c) (cons (car c) (cons (cdr c) (count-reads (car c))))) candidates)))
 
     ;; Sort them (I am ashamed of this line below)
-    (set! candidates (sort candidates (lambda (v1 v2) (if (eq? (car (cdr v1)) (car (cdr v2))) (< (cdr (cdr v1)) (cdr (cdr v2))) (< (car (cdr v1)) (car (cdr v2)))))))
+    (set! candidates (time (sort candidates (lambda (v1 v2) (if (eq? (car (cdr v1)) (car (cdr v2))) (< (cdr (cdr v1)) (cdr (cdr v2))) (< (car (cdr v1)) (car (cdr v2))))))))
 
     (let* ([add-scalars (halide:extract-add-scalars halide-expr)]
            [int-consts (set->list (list->set (append weights add-scalars)))])
@@ -95,7 +108,7 @@
          ; TODO: HVX has some weird types here, for scalar registers?
          [_ node]))
 
-      (for/list ([candidate candidates]) (cons (uniquify-swizzles (arm:visit (car candidate) fill-arg-grammars)) (car (cdr candidate)))))))
+      (time (for/list ([candidate candidates]) (cons (uniquify-swizzles (arm:visit (car candidate) fill-arg-grammars)) (car (cdr candidate))))))))
 
 
 
@@ -197,11 +210,10 @@
 
       ; Inductive step
       [else
-        ; (display (format "depth: ~a\n" depth))
-        ; (display (format "output-types: ~a\n" output-types))
-        ; (display "base-exprs: \n")
-        ; (display base-exprs)
-        ; (newline)
+        ;(display (format "depth: ~a\n" depth))
+        ;(display (format "output-types: ~a\n" output-types))
+        ;(display "base-exprs: \n")
+        ;(pretty-print base-exprs)
         (let* ([sub-candidates (enumerate-arm instr-set output-types base-exprs (- depth 1) max-cost read-count parent-instr arg-pos)]
                [curried-builder (curryr build-instr-exprs instr-set output-types base-exprs depth max-cost read-count)]
                ; TODO: HVX does more filtering here, we do not for now.
@@ -210,11 +222,14 @@
                [candidates-cost (filter (lambda (expr) (<= (cdr expr) max-cost)) candidates)]
                [candidates-read (if (eq? read-count -1) candidates-cost (filter (lambda (expr) (<= (max-unique-inputs (car expr)) read-count)) candidates-cost))]
                [candidates-unique (set->list (list->set candidates-read))])
+          ;(println candidates-unique)
+          ;(pretty-print base-exprs)
           (hash-set! enumeration-cache key candidates-unique)
           candidates-unique)])))
 
 ; Filter based in output type
 (define (build-instr-exprs instr instr-set output-types base-exprs depth max-cost read-count)
+  ;(display (format "instr: ~a\n" instr))
   (let* ([curried-build (curryr build-sig-exprs instr-set base-exprs depth max-cost read-count instr)]
          [filtered (filter (curry out-member? output-types) (arm:instr-forms instr))]
          [built (map curried-build filtered)])
@@ -225,11 +240,12 @@
 
 ; I do not quite understand what this one is doing
 (define (build-sig-exprs sig instr-set base-exprs depth max-cost read-count instr)
+  ;(display (format "sig: ~a\n" sig))
   (let ([sig-exprs
     (let ([arg-opts (get-arg-opts (arm:instr-sig-args sig) instr instr-set base-exprs depth max-cost read-count 0)])
+      ;(println arg-opts)
       (apply cartesian-product arg-opts))])
     (map (curry build-ast instr sig) sig-exprs)))
-
 
 ; TODO: understand which values should be here...
 (define (basic-type? value)
@@ -254,6 +270,8 @@
              [opts (if (basic-type? arg)
                       (list (cons arg 0))
                       (enumerate-arm instr-set (set arg) base-exprs (sub1 depth) max-cost read-count instr arg-pos))])
+          ;(println arg)
+          ;(println (enumerate-arm instr-set (set arg) base-exprs (sub1 depth) max-cost read-count arg-pos))
           (append (list opts) (get-arg-opts (rest arg-types) instr instr-set base-exprs depth max-cost read-count (add1 arg-pos))))))
 
 (define (max-unique-inputs expr)
@@ -505,7 +523,7 @@
         (map
          (lambda (ld)
            (define tbl (map (lambda (i) (define-symbolic* idx integer?) idx) (range 256)))
-           (arm:??load (get-sw-node-id) (arm:??load-live-data ld) (arm:??load-buffer ld) tbl (arm:??load-output-type ld))) lds)
-        output-type)]
+           (arm:??load (get-sw-node-id) (arm:??load-live-data ld) (arm:??load-buffer ld) tbl (arm:??load-output-type ld))) lds))
+        output-type]
       [_ node]))
   (arm:visit arm-template clone-swizzle-node))
