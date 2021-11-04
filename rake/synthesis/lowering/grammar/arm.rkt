@@ -73,14 +73,14 @@
                             (arm:visit expr extract-buffer)
                             live-bufs))])
 
-    (println (length candidates))
+    ;(println (length candidates))
     
     ;; Filter out templates that read too much or too little data
     (set! candidates (time (filter (lambda (c) (eq? (arm:max-unique-inputs (car c)) number-reads)) candidates)))
     (set! candidates (time (filter (lambda (c) (equal? (live-buffers (car c)) load-buffers)) candidates)))
 
-    (pretty-print (take candidates 50))
-    (println (length candidates))
+    ;(pretty-print (take candidates 50))
+    ;(println (length candidates))
 
     ;; Compute read counts
     (set! candidates (time (map (lambda (c) (cons (car c) (cons (cdr c) (count-reads (car c))))) candidates)))
