@@ -151,8 +151,8 @@
 (struct zip (Vn Vm) #:transparent)                          ;; zip_vectors
 (struct uzip1 (Vn Vm) #:transparent)                        ;; unzip_even_vectors
 (struct uzip2 (Vn Vm) #:transparent)                        ;; unzip_odd_vectors
-(struct movi (Vn) #:transparent)                            ;; move_immediate_vector
-(struct moviw (Vn) #:transparent)                           ;; move_immediate_vector_wide
+(struct dup (Vn) #:transparent)                             ;; duplicate_value
+(struct dupw (Vn) #:transparent)                            ;; duplicate_value_wide
 
 ;; Special added instructions
 (struct reinterpret (Vd) #:transparent)
@@ -376,6 +376,26 @@
                          (instr-sig 'i32x4 (list 'i32x2))
                          )]
 
+    [(eq? dup instr) (list
+                         (instr-sig 'i8x8 (list 'int8_t))
+                         (instr-sig 'i16x4 (list 'int16_t))
+                         (instr-sig 'i32x2 (list 'int32_t))
+                         (instr-sig 'i64x2 (list 'int64_t))
+                         (instr-sig 'u8x8 (list 'uint8_t))
+                         (instr-sig 'u16x4 (list 'uint16_t))
+                         (instr-sig 'u32x2 (list 'uint32_t))
+                         (instr-sig 'u64x2 (list 'uint64_t))
+                         )]
+
+    [(eq? dupw instr) (list
+                         (instr-sig 'i8x16 (list 'int8_t))
+                         (instr-sig 'i16x8 (list 'int16_t))
+                         (instr-sig 'i32x4 (list 'int32_t))
+                         (instr-sig 'u8x16 (list 'uint8_t))
+                         (instr-sig 'u16x8 (list 'uint16_t))
+                         (instr-sig 'u32x4 (list 'uint32_t))
+                         )]
+
     [(eq? mla-vs instr) (list
                          (instr-sig 'u8x8 (list 'u8x8 'u8x8 'uint8_t))
                          (instr-sig 'u8x16 (list 'u8x16 'u8x16 'uint8_t))
@@ -410,26 +430,6 @@
                          (instr-sig 'u16x8 (list 'u16x8 'u16x8 'u16x8))
                          (instr-sig 'u32x2 (list 'u32x2 'u32x2 'u32x2))
                          (instr-sig 'u32x4 (list 'u32x4 'u32x4 'u32x4))
-                         )]
-
-    [(eq? movi instr) (list
-                         (instr-sig 'i8x8 (list 'int8_t))
-                         (instr-sig 'i16x4 (list 'int16_t))
-                         (instr-sig 'i32x2 (list 'int32_t))
-                         (instr-sig 'i64x2 (list 'int64_t))
-                         (instr-sig 'u8x8 (list 'uint8_t))
-                         (instr-sig 'u16x4 (list 'uint16_t))
-                         (instr-sig 'u32x2 (list 'uint32_t))
-                         (instr-sig 'u64x2 (list 'uint64_t))
-                         )]
-
-    [(eq? moviw instr) (list
-                         (instr-sig 'i8x16 (list 'int8_t))
-                         (instr-sig 'i16x8 (list 'int16_t))
-                         (instr-sig 'i32x4 (list 'int32_t))
-                         (instr-sig 'u8x16 (list 'uint8_t))
-                         (instr-sig 'u16x8 (list 'uint16_t))
-                         (instr-sig 'u32x4 (list 'uint32_t))
                          )]
 
     [(eq? mul-vs instr) (list

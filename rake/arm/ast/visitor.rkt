@@ -22,6 +22,10 @@
 
     [(arm:addv Vn) (transform (arm:addv (visit Vn transform)))]
 
+    [(arm:dup Vn) (transform (arm:dup (visit Vn transform)))]
+
+    [(arm:dupw Vn) (transform (arm:dupw (visit Vn transform)))]
+
     [(arm:mla-vs Vd Vn Vm) (transform (arm:mla-vs (visit Vd transform) (visit Vn transform) (visit Vm transform)))]
 
     [(arm:mla-vv Vd Vn Vm) (transform (arm:mla-vv (visit Vd transform) (visit Vn transform) (visit Vm transform)))]
@@ -29,10 +33,6 @@
     [(arm:mls-vs Vd Vn Vm) (transform (arm:mls-vs (visit Vd transform) (visit Vn transform) (visit Vm transform)))]
 
     [(arm:mls-vv Vd Vn Vm) (transform (arm:mls-vv (visit Vd transform) (visit Vn transform) (visit Vm transform)))]
-
-    [(arm:movi Vn) (transform (arm:movi (visit Vn transform)))]
-
-    [(arm:moviw Vn) (transform (arm:moviw (visit Vn transform)))]
 
     [(arm:mul-vs Vn Vm) (transform (arm:mul-vs (visit Vn transform) (visit Vm transform)))]
 

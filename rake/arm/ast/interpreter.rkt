@@ -280,6 +280,70 @@
              v0)))]
         [(_) (assert #f "infeasible")])]
 
+    [(arm:dup Vn)
+      (destruct* ((interpret Vn))
+        [((int8_t v0))
+          (arm:i8x8
+           (halide:interpret
+            (x8 v0)))]
+        [((int16_t v0))
+          (arm:i16x4
+           (halide:interpret
+            (x4 v0)))]
+        [((int32_t v0))
+          (arm:i32x2
+           (halide:interpret
+            (x2 v0)))]
+        [((int64_t v0))
+          (arm:i64x2
+           (halide:interpret
+            (x2 v0)))]
+        [((uint8_t v0))
+          (arm:u8x8
+           (halide:interpret
+            (x8 v0)))]
+        [((uint16_t v0))
+          (arm:u16x4
+           (halide:interpret
+            (x4 v0)))]
+        [((uint32_t v0))
+          (arm:u32x2
+           (halide:interpret
+            (x2 v0)))]
+        [((uint64_t v0))
+          (arm:u64x2
+           (halide:interpret
+            (x2 v0)))]
+        [(_) (assert #f "infeasible")])]
+
+    [(arm:dupw Vn)
+      (destruct* ((interpret Vn))
+        [((int8_t v0))
+          (arm:i8x16
+           (halide:interpret
+            (x16 v0)))]
+        [((int16_t v0))
+          (arm:i16x8
+           (halide:interpret
+            (x8 v0)))]
+        [((int32_t v0))
+          (arm:i32x4
+           (halide:interpret
+            (x4 v0)))]
+        [((uint8_t v0))
+          (arm:u8x16
+           (halide:interpret
+            (x16 v0)))]
+        [((uint16_t v0))
+          (arm:u16x8
+           (halide:interpret
+            (x8 v0)))]
+        [((uint32_t v0))
+          (arm:u32x4
+           (halide:interpret
+            (x4 v0)))]
+        [(_) (assert #f "infeasible")])]
+
     [(arm:mla-vs Vd Vn Vm)
       (destruct* ((interpret Vd) (interpret Vn) (interpret Vm))
         [((arm:u8x8 v0) (arm:u8x8 v1) (uint8_t v2))
@@ -487,70 +551,6 @@
               v1
               v2))))]
         [(_ _ _) (assert #f "infeasible")])]
-
-    [(arm:movi Vn)
-      (destruct* ((interpret Vn))
-        [((int8_t v0))
-          (arm:i8x8
-           (halide:interpret
-            (x8 v0)))]
-        [((int16_t v0))
-          (arm:i16x4
-           (halide:interpret
-            (x4 v0)))]
-        [((int32_t v0))
-          (arm:i32x2
-           (halide:interpret
-            (x2 v0)))]
-        [((int64_t v0))
-          (arm:i64x2
-           (halide:interpret
-            (x2 v0)))]
-        [((uint8_t v0))
-          (arm:u8x8
-           (halide:interpret
-            (x8 v0)))]
-        [((uint16_t v0))
-          (arm:u16x4
-           (halide:interpret
-            (x4 v0)))]
-        [((uint32_t v0))
-          (arm:u32x2
-           (halide:interpret
-            (x2 v0)))]
-        [((uint64_t v0))
-          (arm:u64x2
-           (halide:interpret
-            (x2 v0)))]
-        [(_) (assert #f "infeasible")])]
-
-    [(arm:moviw Vn)
-      (destruct* ((interpret Vn))
-        [((int8_t v0))
-          (arm:i8x16
-           (halide:interpret
-            (x16 v0)))]
-        [((int16_t v0))
-          (arm:i16x8
-           (halide:interpret
-            (x8 v0)))]
-        [((int32_t v0))
-          (arm:i32x4
-           (halide:interpret
-            (x4 v0)))]
-        [((uint8_t v0))
-          (arm:u8x16
-           (halide:interpret
-            (x16 v0)))]
-        [((uint16_t v0))
-          (arm:u16x8
-           (halide:interpret
-            (x8 v0)))]
-        [((uint32_t v0))
-          (arm:u32x4
-           (halide:interpret
-            (x4 v0)))]
-        [(_) (assert #f "infeasible")])]
 
     [(arm:mul-vs Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
