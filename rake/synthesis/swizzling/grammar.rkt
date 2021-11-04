@@ -10,7 +10,8 @@
   rake/hvx/interpreter
   rake/hvx/ast/types
   rake/hvx/ast/visitor
-  rake/synthesis/lowering/util)
+  rake/synthesis/lowering/utils/hvx
+)
 
 (provide get-hvx-swizzle-grammar)
 
@@ -198,7 +199,7 @@
          pair?)]
       [(??swizzle id live-data exprs gather-tbl pair?)
         ;; Abstract out common sub-expressions
-        (define-values (abstr-halide-expr abstr-template _) (optimize-query halide-expr node hvx-sub-exprs (make-hash) translation-history))
+        (define-values (abstr-halide-expr abstr-template _) (hvx:optimize-query halide-expr node hvx-sub-exprs (make-hash) translation-history))
         ;; Extract the reads from this expression, essentially representing each "read" from the sub-expressions as a symbolic constant
         (define new-data (halide:extract-buffer-reads abstr-halide-expr))
         ;; Now we replace the symbolic constants with the original expressions they represent. This gives us the set of sub-expression accesses

@@ -8,7 +8,8 @@
   rake/hvx/ir/instructions
   rake/synthesis/lowering/grammar/hvx
   rake/synthesis/lowering/grammar/arm
-  rake/synthesis/lowering/synthesizer)
+  rake/synthesis/lowering/synthesizer/hvx
+  rake/synthesis/lowering/synthesizer/arm)
 
 (require (only-in racket/base exit))
 
@@ -24,7 +25,7 @@
       (define candidates (get-hvx-grammar halide-expr ir-expr hvx-sub-exprs cost-ub))
       
       (define-values (successful? hvx-template)
-        (synthesize-translation candidates halide-expr hvx-sub-exprs value-bounds translation-history))
+        (hvx:synthesize-translation candidates halide-expr hvx-sub-exprs value-bounds translation-history))
       
       (cond
         [successful?
@@ -50,10 +51,9 @@
 
       (println (length candidates))
       (display (format "Grammar generation time: ~a seconds\n\n" runtime))
-      (exit)
       
       (define-values (successful? arm-template)
-        (synthesize-translation candidates halide-expr arm-sub-exprs value-bounds translation-history))
+        (arm:synthesize-translation candidates halide-expr arm-sub-exprs value-bounds translation-history))
       
       (cond
         [successful?

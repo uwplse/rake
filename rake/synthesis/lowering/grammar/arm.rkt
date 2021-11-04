@@ -209,6 +209,11 @@
         (arm:make-shuffles-list actual-loads type))
      (map label-cost (flatten (map generate-shuffles buf-elemTypes)))]
 
+    ;; Data broadcasting
+    [(arm-ir:broadcast scalar-expr)
+      ; TODO: do type pruning
+      (list (cons (arm:movi scalar-expr) 1) (cons (arm:moviw scalar-expr) 1))]
+
     [(arm-ir:cast expr type saturate?)
       (handle-cast expr type saturate? arm-sub-exprs halide-expr)]
 

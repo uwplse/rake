@@ -14,14 +14,13 @@
   rake/halide
   rake/arm/ir/instructions
   rake/arm/ir/interpreter
-  ;rake/hvx/ast/types
   ;rake/hvx/ast/visitor
   rake/arm/ast/types
   ;rake/hvx/cost-model
   ;rake/synthesis/bounds
   rake/synthesis/lowering/algorithm
   ;rake/synthesis/swizzling/algorithm
-  rake/synthesis/lowering/synthesizer
+  rake/synthesis/lowering/synthesizer/arm
   )
 
 (provide synthesize-arm-expr)
@@ -32,11 +31,11 @@
 
 (define (synthesize-arm-expr ir-expr ir-annotations ir-bounds lowering-algo swizzling-algo [sub-expr? #f])
   ;; Reset the state of synthesis database
-  (lowering:synthesizer:reset-db)
+  (arm:lowering:synthesizer:reset-db)
 
   ;; Push node to trace
   (set! trace (append (list ir-expr) trace))
-        
+
   ;; Lower sub-expressions first
   (define-values (successful? arm-sub-exprs)
     (lower-sub-exprs ir-expr (arm-ir:get-subexprs ir-expr) ir-annotations ir-bounds lowering-algo swizzling-algo sub-expr?))
@@ -74,14 +73,15 @@
        [else (values #f '())])]))
 
 (define (lower-expr ir-expr ir-annotations lowering-algo swizzling-algo sub-expr? arm-sub-exprs)
+  (define key (arm-ir:ast-node-id ir-expr))
   (cond
     ;; For combine nodes (data shuffle), unless we are the root node just pass the sub-expressions to the parent.
     ;; If we are, however, the root node then we must synthesize the shuffles now.
     [(and sub-expr? (arm-ir:combine? ir-expr)) arm-sub-exprs]
 
     ;; Does the annotation map contain the equivalent halide (sub-)expression?
-    [(hash-has-key? ir-annotations (arm-ir:ast-node-id ir-expr))
-     (define halide-spec (hash-ref ir-annotations (arm-ir:ast-node-id ir-expr)))
+    [(hash-has-key? ir-annotations key)
+     (define halide-spec (hash-ref ir-annotations key))
      (define-values (successful? arm-expr _)
        (lower-to-optimal-arm halide-spec ir-expr arm-sub-exprs lowering-algo swizzling-algo sub-expr?))
      (when successful? (hash-set! translation-history arm-expr halide-spec))

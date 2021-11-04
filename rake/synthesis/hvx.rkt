@@ -19,7 +19,7 @@
   rake/synthesis/bounds
   rake/synthesis/lowering/algorithm
   rake/synthesis/swizzling/algorithm
-  rake/synthesis/lowering/synthesizer)
+  rake/synthesis/lowering/synthesizer/hvx)
 
 (provide synthesize-hvx-expr)
 
@@ -29,7 +29,7 @@
 
 (define (synthesize-hvx-expr ir-expr ir-annotations ir-bounds lowering-algo swizzling-algo [sub-expr? #f] [output-layout 'standard])
   ;; Reset the state of synthesis database
-  (lowering:synthesizer:reset-db)
+  (hvx:lowering:synthesizer:reset-db)
 
   ;; Analyze the expression to infer intermediate data-layouts after each uber-instruction
   (define ideal-subexpr-layouts (infer-ideal-subexpr-layouts ir-expr output-layout))

@@ -9,7 +9,7 @@
   rake/halide
   rake/hvx/ast/types
   rake/hvx/interpreter
-  rake/synthesis/lowering/util
+  rake/synthesis/lowering/utils/hvx
   rake/internal/counter)
 
 (provide synthesize-translation)

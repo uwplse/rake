@@ -8,10 +8,13 @@
   rake/halide
   rake/hvx/ast/types
   rake/hvx/interpreter
-  rake/synthesis/lowering/util
+  rake/synthesis/lowering/utils/hvx
   rake/internal/counter)
 
-(provide synthesize-translation lowering:synthesizer:reset-db)
+(provide (rename-out
+          [synthesize-translation hvx:synthesize-translation]
+          [lowering:synthesizer:reset-db hvx:lowering:synthesizer:reset-db]
+        ))
 
 (define (incorrect? sol)
   (or (unsat? sol) (unknown? sol)))
@@ -70,7 +73,7 @@
   ;(pretty-print hvx-sub-exprs)
 
   (define-values (optimized-halide-expr optimized-template inferred-axioms)
-    (optimize-query halide-expr template hvx-sub-exprs value-bounds translation-history))
+    (hvx:optimize-query halide-expr template hvx-sub-exprs value-bounds translation-history))
 
   ;(pretty-print optimized-halide-expr)
   ;(pretty-print optimized-template)
