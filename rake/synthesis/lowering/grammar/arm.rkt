@@ -212,7 +212,7 @@
     ;; Data broadcasting
     [(arm-ir:broadcast scalar-expr)
       ; TODO: do type pruning
-      (list (cons (arm:movi scalar-expr) 1) (cons (arm:moviw scalar-expr) 1))]
+      (list (cons (arm:dup scalar-expr) 1) (cons (arm:dupw scalar-expr) 1))]
 
     [(arm-ir:cast expr type saturate?)
       (handle-cast expr type saturate? arm-sub-exprs halide-expr)]
