@@ -148,6 +148,11 @@
 (struct usubw (Vn Vm) #:transparent)                        ;; unsigned_sub_wide
 (struct uxtl (Vn) #:transparent)                            ;; unsigned_extend_long
 (struct xtn (Vn) #:transparent)                             ;; extract_narrow
+(struct zip (Vn Vm) #:transparent)                          ;; zip_vectors
+(struct uzip1 (Vn Vm) #:transparent)                        ;; unzip_even_vectors
+(struct uzip2 (Vn Vm) #:transparent)                        ;; unzip_odd_vectors
+(struct movi (Vn) #:transparent)                            ;; move_immediate_vector
+(struct moviw (Vn) #:transparent)                           ;; move_immediate_vector_wide
 
 ;; Special added instructions
 (struct reinterpret (Vd) #:transparent)
@@ -192,6 +197,15 @@
       (equal?-recur (??swizzle-exprs a) (??swizzle-exprs b))))
    (define (hash-proc a hash-recur) (??swizzle-id a))
    (define (hash2-proc a hash2-recur) (??swizzle-id a))])
+
+;; New types to represent abstract computation (these types should never appear in output code)
+(struct abstr-expr (orig-expr abstr-vals offset)
+  #:transparent
+  #:methods gen:custom-write
+  [(define write-proc
+     (make-constructor-style-printer
+      (lambda (obj) `arm:abstr-expr)
+      (lambda (obj) (list ))))])
 
 ;; Concat vectors (not an intrinsic but a useful construct)
 (struct concat-tiles (vecs) #:transparent)
@@ -396,6 +410,26 @@
                          (instr-sig 'u16x8 (list 'u16x8 'u16x8 'u16x8))
                          (instr-sig 'u32x2 (list 'u32x2 'u32x2 'u32x2))
                          (instr-sig 'u32x4 (list 'u32x4 'u32x4 'u32x4))
+                         )]
+
+    [(eq? movi instr) (list
+                         (instr-sig 'i8x8 (list 'int8_t))
+                         (instr-sig 'i16x4 (list 'int16_t))
+                         (instr-sig 'i32x2 (list 'int32_t))
+                         (instr-sig 'i64x2 (list 'int64_t))
+                         (instr-sig 'u8x8 (list 'uint8_t))
+                         (instr-sig 'u16x4 (list 'uint16_t))
+                         (instr-sig 'u32x2 (list 'uint32_t))
+                         (instr-sig 'u64x2 (list 'uint64_t))
+                         )]
+
+    [(eq? moviw instr) (list
+                         (instr-sig 'i8x16 (list 'int8_t))
+                         (instr-sig 'i16x8 (list 'int16_t))
+                         (instr-sig 'i32x4 (list 'int32_t))
+                         (instr-sig 'u8x16 (list 'uint8_t))
+                         (instr-sig 'u16x8 (list 'uint16_t))
+                         (instr-sig 'u32x4 (list 'uint32_t))
                          )]
 
     [(eq? mul-vs instr) (list
@@ -1129,6 +1163,40 @@
                          (instr-sig 'u64x4 (list 'u32x4))
                          )]
 
+    [(eq? uzip1 instr) (list
+                         (instr-sig 'i8x8 (list 'i8x8 'i8x8))
+                         (instr-sig 'i8x16 (list 'i8x16 'i8x16))
+                         (instr-sig 'i16x4 (list 'i16x4 'i16x4))
+                         (instr-sig 'i16x8 (list 'i16x8 'i16x8))
+                         (instr-sig 'i32x2 (list 'i32x2 'i32x2))
+                         (instr-sig 'i32x4 (list 'i32x4 'i32x4))
+                         (instr-sig 'i64x2 (list 'i64x2 'i64x2))
+                         (instr-sig 'u8x8 (list 'u8x8 'u8x8))
+                         (instr-sig 'u8x16 (list 'u8x16 'u8x16))
+                         (instr-sig 'u16x4 (list 'u16x4 'u16x4))
+                         (instr-sig 'u16x8 (list 'u16x8 'u16x8))
+                         (instr-sig 'u32x2 (list 'u32x2 'u32x2))
+                         (instr-sig 'u32x4 (list 'u32x4 'u32x4))
+                         (instr-sig 'u64x2 (list 'u64x2 'u64x2))
+                         )]
+
+    [(eq? uzip2 instr) (list
+                         (instr-sig 'i8x8 (list 'i8x8 'i8x8))
+                         (instr-sig 'i8x16 (list 'i8x16 'i8x16))
+                         (instr-sig 'i16x4 (list 'i16x4 'i16x4))
+                         (instr-sig 'i16x8 (list 'i16x8 'i16x8))
+                         (instr-sig 'i32x2 (list 'i32x2 'i32x2))
+                         (instr-sig 'i32x4 (list 'i32x4 'i32x4))
+                         (instr-sig 'i64x2 (list 'i64x2 'i64x2))
+                         (instr-sig 'u8x8 (list 'u8x8 'u8x8))
+                         (instr-sig 'u8x16 (list 'u8x16 'u8x16))
+                         (instr-sig 'u16x4 (list 'u16x4 'u16x4))
+                         (instr-sig 'u16x8 (list 'u16x8 'u16x8))
+                         (instr-sig 'u32x2 (list 'u32x2 'u32x2))
+                         (instr-sig 'u32x4 (list 'u32x4 'u32x4))
+                         (instr-sig 'u64x2 (list 'u64x2 'u64x2))
+                         )]
+
     [(eq? vabdl_i16x4 instr) (list
                          (instr-sig 'i32x4 (list 'i16x4 'i16x4))
                          (instr-sig 'u32x4 (list 'i16x4 'i16x4))
@@ -1163,6 +1231,23 @@
                          (instr-sig 'i8x8 (list 'i16x8))
                          (instr-sig 'i16x4 (list 'i32x4))
                          (instr-sig 'i32x2 (list 'i64x2))
+                         )]
+
+    [(eq? zip instr) (list
+                         (instr-sig 'i8x16 (list 'i8x8 'i8x8))
+                         (instr-sig 'i8x32 (list 'i8x16 'i8x16))
+                         (instr-sig 'i16x8 (list 'i16x4 'i16x4))
+                         (instr-sig 'i16x16 (list 'i16x8 'i16x8))
+                         (instr-sig 'i32x4 (list 'i32x2 'i32x2))
+                         (instr-sig 'i32x8 (list 'i32x4 'i32x4))
+                         (instr-sig 'i64x4 (list 'i64x2 'i64x2))
+                         (instr-sig 'u8x16 (list 'u8x8 'u8x8))
+                         (instr-sig 'u8x32 (list 'u8x16 'u8x16))
+                         (instr-sig 'u16x8 (list 'u16x4 'u16x4))
+                         (instr-sig 'u16x16 (list 'u16x8 'u16x8))
+                         (instr-sig 'u32x4 (list 'u32x2 'u32x2))
+                         (instr-sig 'u32x8 (list 'u32x4 'u32x4))
+                         (instr-sig 'u64x4 (list 'u64x2 'u64x2))
                          )]
 
     [(eq? reinterpret instr) (list

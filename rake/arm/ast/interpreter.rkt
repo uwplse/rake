@@ -488,6 +488,70 @@
               v2))))]
         [(_ _ _) (assert #f "infeasible")])]
 
+    [(arm:movi Vn)
+      (destruct* ((interpret Vn))
+        [((int8_t v0))
+          (arm:i8x8
+           (halide:interpret
+            (x8 v0)))]
+        [((int16_t v0))
+          (arm:i16x4
+           (halide:interpret
+            (x4 v0)))]
+        [((int32_t v0))
+          (arm:i32x2
+           (halide:interpret
+            (x2 v0)))]
+        [((int64_t v0))
+          (arm:i64x2
+           (halide:interpret
+            (x2 v0)))]
+        [((uint8_t v0))
+          (arm:u8x8
+           (halide:interpret
+            (x8 v0)))]
+        [((uint16_t v0))
+          (arm:u16x4
+           (halide:interpret
+            (x4 v0)))]
+        [((uint32_t v0))
+          (arm:u32x2
+           (halide:interpret
+            (x2 v0)))]
+        [((uint64_t v0))
+          (arm:u64x2
+           (halide:interpret
+            (x2 v0)))]
+        [(_) (assert #f "infeasible")])]
+
+    [(arm:moviw Vn)
+      (destruct* ((interpret Vn))
+        [((int8_t v0))
+          (arm:i8x16
+           (halide:interpret
+            (x16 v0)))]
+        [((int16_t v0))
+          (arm:i16x8
+           (halide:interpret
+            (x8 v0)))]
+        [((int32_t v0))
+          (arm:i32x4
+           (halide:interpret
+            (x4 v0)))]
+        [((uint8_t v0))
+          (arm:u8x16
+           (halide:interpret
+            (x16 v0)))]
+        [((uint16_t v0))
+          (arm:u16x8
+           (halide:interpret
+            (x8 v0)))]
+        [((uint32_t v0))
+          (arm:u32x4
+           (halide:interpret
+            (x4 v0)))]
+        [(_) (assert #f "infeasible")])]
+
     [(arm:mul-vs Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
         [((arm:u8x8 v0) (uint8_t v1))
@@ -5415,6 +5479,238 @@
              v0)))]
         [(_) (assert #f "infeasible")])]
 
+    [(arm:uzip1 Vn Vm)
+      (destruct* ((interpret Vn) (interpret Vm))
+        [((arm:i8x8 v0) (arm:i8x8 v1))
+          (arm:i8x8
+           (halide:interpret
+            (concat_vectors
+             (slice_vectors
+              v0 0 2 4)
+             (slice_vectors
+              v1 0 2 4))))]
+        [((arm:i8x16 v0) (arm:i8x16 v1))
+          (arm:i8x16
+           (halide:interpret
+            (concat_vectors
+             (slice_vectors
+              v0 0 2 8)
+             (slice_vectors
+              v1 0 2 8))))]
+        [((arm:i16x4 v0) (arm:i16x4 v1))
+          (arm:i16x4
+           (halide:interpret
+            (concat_vectors
+             (slice_vectors
+              v0 0 2 2)
+             (slice_vectors
+              v1 0 2 2))))]
+        [((arm:i16x8 v0) (arm:i16x8 v1))
+          (arm:i16x8
+           (halide:interpret
+            (concat_vectors
+             (slice_vectors
+              v0 0 2 4)
+             (slice_vectors
+              v1 0 2 4))))]
+        [((arm:i32x2 v0) (arm:i32x2 v1))
+          (arm:i32x2
+           (halide:interpret
+            (concat_vectors
+             (slice_vectors
+              v0 0 1 1)
+             (slice_vectors
+              v1 0 1 1))))]
+        [((arm:i32x4 v0) (arm:i32x4 v1))
+          (arm:i32x4
+           (halide:interpret
+            (concat_vectors
+             (slice_vectors
+              v0 0 2 2)
+             (slice_vectors
+              v1 0 2 2))))]
+        [((arm:i64x2 v0) (arm:i64x2 v1))
+          (arm:i64x2
+           (halide:interpret
+            (concat_vectors
+             (slice_vectors
+              v0 0 1 1)
+             (slice_vectors
+              v1 0 1 1))))]
+        [((arm:u8x8 v0) (arm:u8x8 v1))
+          (arm:u8x8
+           (halide:interpret
+            (concat_vectors
+             (slice_vectors
+              v0 0 2 4)
+             (slice_vectors
+              v1 0 2 4))))]
+        [((arm:u8x16 v0) (arm:u8x16 v1))
+          (arm:u8x16
+           (halide:interpret
+            (concat_vectors
+             (slice_vectors
+              v0 0 2 8)
+             (slice_vectors
+              v1 0 2 8))))]
+        [((arm:u16x4 v0) (arm:u16x4 v1))
+          (arm:u16x4
+           (halide:interpret
+            (concat_vectors
+             (slice_vectors
+              v0 0 2 2)
+             (slice_vectors
+              v1 0 2 2))))]
+        [((arm:u16x8 v0) (arm:u16x8 v1))
+          (arm:u16x8
+           (halide:interpret
+            (concat_vectors
+             (slice_vectors
+              v0 0 2 4)
+             (slice_vectors
+              v1 0 2 4))))]
+        [((arm:u32x2 v0) (arm:u32x2 v1))
+          (arm:u32x2
+           (halide:interpret
+            (concat_vectors
+             (slice_vectors
+              v0 0 1 1)
+             (slice_vectors
+              v1 0 1 1))))]
+        [((arm:u32x4 v0) (arm:u32x4 v1))
+          (arm:u32x4
+           (halide:interpret
+            (concat_vectors
+             (slice_vectors
+              v0 0 2 2)
+             (slice_vectors
+              v1 0 2 2))))]
+        [((arm:u64x2 v0) (arm:u64x2 v1))
+          (arm:u64x2
+           (halide:interpret
+            (concat_vectors
+             (slice_vectors
+              v0 0 1 1)
+             (slice_vectors
+              v1 0 1 1))))]
+        [(_ _) (assert #f "infeasible")])]
+
+    [(arm:uzip2 Vn Vm)
+      (destruct* ((interpret Vn) (interpret Vm))
+        [((arm:i8x8 v0) (arm:i8x8 v1))
+          (arm:i8x8
+           (halide:interpret
+            (concat_vectors
+             (slice_vectors
+              v0 1 2 4)
+             (slice_vectors
+              v1 1 2 4))))]
+        [((arm:i8x16 v0) (arm:i8x16 v1))
+          (arm:i8x16
+           (halide:interpret
+            (concat_vectors
+             (slice_vectors
+              v0 1 2 8)
+             (slice_vectors
+              v1 1 2 8))))]
+        [((arm:i16x4 v0) (arm:i16x4 v1))
+          (arm:i16x4
+           (halide:interpret
+            (concat_vectors
+             (slice_vectors
+              v0 1 2 2)
+             (slice_vectors
+              v1 1 2 2))))]
+        [((arm:i16x8 v0) (arm:i16x8 v1))
+          (arm:i16x8
+           (halide:interpret
+            (concat_vectors
+             (slice_vectors
+              v0 1 2 4)
+             (slice_vectors
+              v1 1 2 4))))]
+        [((arm:i32x2 v0) (arm:i32x2 v1))
+          (arm:i32x2
+           (halide:interpret
+            (concat_vectors
+             (slice_vectors
+              v0 1 1 1)
+             (slice_vectors
+              v1 1 1 1))))]
+        [((arm:i32x4 v0) (arm:i32x4 v1))
+          (arm:i32x4
+           (halide:interpret
+            (concat_vectors
+             (slice_vectors
+              v0 1 2 2)
+             (slice_vectors
+              v1 1 2 2))))]
+        [((arm:i64x2 v0) (arm:i64x2 v1))
+          (arm:i64x2
+           (halide:interpret
+            (concat_vectors
+             (slice_vectors
+              v0 1 1 1)
+             (slice_vectors
+              v1 1 1 1))))]
+        [((arm:u8x8 v0) (arm:u8x8 v1))
+          (arm:u8x8
+           (halide:interpret
+            (concat_vectors
+             (slice_vectors
+              v0 1 2 4)
+             (slice_vectors
+              v1 1 2 4))))]
+        [((arm:u8x16 v0) (arm:u8x16 v1))
+          (arm:u8x16
+           (halide:interpret
+            (concat_vectors
+             (slice_vectors
+              v0 1 2 8)
+             (slice_vectors
+              v1 1 2 8))))]
+        [((arm:u16x4 v0) (arm:u16x4 v1))
+          (arm:u16x4
+           (halide:interpret
+            (concat_vectors
+             (slice_vectors
+              v0 1 2 2)
+             (slice_vectors
+              v1 1 2 2))))]
+        [((arm:u16x8 v0) (arm:u16x8 v1))
+          (arm:u16x8
+           (halide:interpret
+            (concat_vectors
+             (slice_vectors
+              v0 1 2 4)
+             (slice_vectors
+              v1 1 2 4))))]
+        [((arm:u32x2 v0) (arm:u32x2 v1))
+          (arm:u32x2
+           (halide:interpret
+            (concat_vectors
+             (slice_vectors
+              v0 1 1 1)
+             (slice_vectors
+              v1 1 1 1))))]
+        [((arm:u32x4 v0) (arm:u32x4 v1))
+          (arm:u32x4
+           (halide:interpret
+            (concat_vectors
+             (slice_vectors
+              v0 1 2 2)
+             (slice_vectors
+              v1 1 2 2))))]
+        [((arm:u64x2 v0) (arm:u64x2 v1))
+          (arm:u64x2
+           (halide:interpret
+            (concat_vectors
+             (slice_vectors
+              v0 1 1 1)
+             (slice_vectors
+              v1 1 1 1))))]
+        [(_ _) (assert #f "infeasible")])]
+
     [(arm:vabdl_i16x4 Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
         [((arm:i16x4 v0) (arm:i16x4 v1))
@@ -5535,6 +5831,94 @@
             (int32x2
              v0)))]
         [(_) (assert #f "infeasible")])]
+
+    [(arm:zip Vn Vm)
+      (destruct* ((interpret Vn) (interpret Vm))
+        [((arm:i8x8 v0) (arm:i8x8 v1))
+          (arm:i8x16
+           (halide:interpret
+            (interleave
+             v0
+             v1)))]
+        [((arm:i8x16 v0) (arm:i8x16 v1))
+          (arm:i8x32
+           (halide:interpret
+            (interleave
+             v0
+             v1)))]
+        [((arm:i16x4 v0) (arm:i16x4 v1))
+          (arm:i16x8
+           (halide:interpret
+            (interleave
+             v0
+             v1)))]
+        [((arm:i16x8 v0) (arm:i16x8 v1))
+          (arm:i16x16
+           (halide:interpret
+            (interleave
+             v0
+             v1)))]
+        [((arm:i32x2 v0) (arm:i32x2 v1))
+          (arm:i32x4
+           (halide:interpret
+            (interleave
+             v0
+             v1)))]
+        [((arm:i32x4 v0) (arm:i32x4 v1))
+          (arm:i32x8
+           (halide:interpret
+            (interleave
+             v0
+             v1)))]
+        [((arm:i64x2 v0) (arm:i64x2 v1))
+          (arm:i64x4
+           (halide:interpret
+            (interleave
+             v0
+             v1)))]
+        [((arm:u8x8 v0) (arm:u8x8 v1))
+          (arm:u8x16
+           (halide:interpret
+            (interleave
+             v0
+             v1)))]
+        [((arm:u8x16 v0) (arm:u8x16 v1))
+          (arm:u8x32
+           (halide:interpret
+            (interleave
+             v0
+             v1)))]
+        [((arm:u16x4 v0) (arm:u16x4 v1))
+          (arm:u16x8
+           (halide:interpret
+            (interleave
+             v0
+             v1)))]
+        [((arm:u16x8 v0) (arm:u16x8 v1))
+          (arm:u16x16
+           (halide:interpret
+            (interleave
+             v0
+             v1)))]
+        [((arm:u32x2 v0) (arm:u32x2 v1))
+          (arm:u32x4
+           (halide:interpret
+            (interleave
+             v0
+             v1)))]
+        [((arm:u32x4 v0) (arm:u32x4 v1))
+          (arm:u32x8
+           (halide:interpret
+            (interleave
+             v0
+             v1)))]
+        [((arm:u64x2 v0) (arm:u64x2 v1))
+          (arm:u64x4
+           (halide:interpret
+            (interleave
+             v0
+             v1)))]
+        [(_ _) (assert #f "infeasible")])]
 
     [(arm:??shuffle id loads output-type)
       (let ([vecType (arm:get-type-struct output-type)]
