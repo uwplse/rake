@@ -28,6 +28,50 @@
 
     [(arm:dupw Vn) (transform (arm:dupw (visit Vn transform)))]
 
+    [(arm:ext16i1 Vn Vm) (transform (arm:ext16i1 (visit Vn transform) (visit Vm transform)))]
+
+    [(arm:ext16i10 Vn Vm) (transform (arm:ext16i10 (visit Vn transform) (visit Vm transform)))]
+
+    [(arm:ext16i11 Vn Vm) (transform (arm:ext16i11 (visit Vn transform) (visit Vm transform)))]
+
+    [(arm:ext16i12 Vn Vm) (transform (arm:ext16i12 (visit Vn transform) (visit Vm transform)))]
+
+    [(arm:ext16i13 Vn Vm) (transform (arm:ext16i13 (visit Vn transform) (visit Vm transform)))]
+
+    [(arm:ext16i14 Vn Vm) (transform (arm:ext16i14 (visit Vn transform) (visit Vm transform)))]
+
+    [(arm:ext16i15 Vn Vm) (transform (arm:ext16i15 (visit Vn transform) (visit Vm transform)))]
+
+    [(arm:ext16i2 Vn Vm) (transform (arm:ext16i2 (visit Vn transform) (visit Vm transform)))]
+
+    [(arm:ext16i3 Vn Vm) (transform (arm:ext16i3 (visit Vn transform) (visit Vm transform)))]
+
+    [(arm:ext16i4 Vn Vm) (transform (arm:ext16i4 (visit Vn transform) (visit Vm transform)))]
+
+    [(arm:ext16i5 Vn Vm) (transform (arm:ext16i5 (visit Vn transform) (visit Vm transform)))]
+
+    [(arm:ext16i6 Vn Vm) (transform (arm:ext16i6 (visit Vn transform) (visit Vm transform)))]
+
+    [(arm:ext16i7 Vn Vm) (transform (arm:ext16i7 (visit Vn transform) (visit Vm transform)))]
+
+    [(arm:ext16i8 Vn Vm) (transform (arm:ext16i8 (visit Vn transform) (visit Vm transform)))]
+
+    [(arm:ext16i9 Vn Vm) (transform (arm:ext16i9 (visit Vn transform) (visit Vm transform)))]
+
+    [(arm:ext8i1 Vn Vm) (transform (arm:ext8i1 (visit Vn transform) (visit Vm transform)))]
+
+    [(arm:ext8i2 Vn Vm) (transform (arm:ext8i2 (visit Vn transform) (visit Vm transform)))]
+
+    [(arm:ext8i3 Vn Vm) (transform (arm:ext8i3 (visit Vn transform) (visit Vm transform)))]
+
+    [(arm:ext8i4 Vn Vm) (transform (arm:ext8i4 (visit Vn transform) (visit Vm transform)))]
+
+    [(arm:ext8i5 Vn Vm) (transform (arm:ext8i5 (visit Vn transform) (visit Vm transform)))]
+
+    [(arm:ext8i6 Vn Vm) (transform (arm:ext8i6 (visit Vn transform) (visit Vm transform)))]
+
+    [(arm:ext8i7 Vn Vm) (transform (arm:ext8i7 (visit Vn transform) (visit Vm transform)))]
+
     [(arm:mla-vs Vd Vn Vm) (transform (arm:mla-vs (visit Vd transform) (visit Vn transform) (visit Vm transform)))]
 
     [(arm:mla-vv Vd Vn Vm) (transform (arm:mla-vv (visit Vd transform) (visit Vn transform) (visit Vm transform)))]
@@ -159,6 +203,10 @@
     [(arm:suqadd Vn Vm) (transform (arm:suqadd (visit Vn transform) (visit Vm transform)))]
 
     [(arm:sxtl Vn) (transform (arm:sxtl (visit Vn transform)))]
+
+    [(arm:trn1 Vn Vm) (transform (arm:trn1 (visit Vn transform) (visit Vm transform)))]
+
+    [(arm:trn2 Vn Vm) (transform (arm:trn2 (visit Vn transform) (visit Vm transform)))]
 
     [(arm:uabd Vn Vm) (transform (arm:uabd (visit Vn transform) (visit Vm transform)))]
 
