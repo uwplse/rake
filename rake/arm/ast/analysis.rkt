@@ -15,6 +15,10 @@
     [(arm:??shuffle _ _ _) 1]
     [(arm:??swizzle _ _ _ _) 1]
     [(arm:reinterpret Vn) (max-unique-inputs Vn)]
+    [(arm:ld1 _) 1]
+    [(arm:ld2 _ _) 1]
+    [(arm:ld3 _ _) 1]
+    [(arm:ld4 _ _) 1]
 
     [(arm:abs Vn) (max-unique-inputs Vn)]
     [(arm:add Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]

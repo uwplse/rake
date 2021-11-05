@@ -6775,4 +6775,9 @@
         [(arm:u32x8 v0) (arm:i32x8 (lambda (i) (int32_t (cpp:eval (v0 i)))))]
         [(arm:u64x4 v0) (arm:i64x4 (lambda (i) (int64_t (cpp:eval (v0 i)))))])]
 
+    [(arm:ld1 data) (interpret data)]
+    [(arm:ld2 data index) (let ([read (interpret data)]) (lambda (i) (read (+ (i * 2) index))))]
+    [(arm:ld3 data index) (let ([read (interpret data)]) (lambda (i) (read (+ (i * 3) index))))]
+    [(arm:ld4 data index) (let ([read (interpret data)]) (lambda (i) (read (+ (i * 4) index))))]
+
     [_ (error "No interpreter for ~a" p)]))

@@ -311,4 +311,9 @@
     [(arm:??swizzle id live-data exprs idx-tbl) (transform (arm:??swizzle id live-data (for/list ([expr exprs]) (visit expr transform)) idx-tbl))]
     [(arm:reinterpret Vn) (transform (arm:reinterpret (visit Vn transform)))]
 
+    [(arm:ld1 data) (transform (arm:ld1 (visit data transform)))]
+    [(arm:ld2 data index) (transform (arm:ld2 (visit data transform) index))]
+    [(arm:ld3 data index) (transform (arm:ld3 (visit data transform) index))]
+    [(arm:ld4 data index) (transform (arm:ld4 (visit data transform) index))]
+
     [_ (transform expr)]))

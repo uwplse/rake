@@ -242,6 +242,12 @@
 ;; Concat vectors (not an intrinsic but a useful construct)
 (struct concat-tiles (vecs) #:transparent)
 
+;; ARM interleaving loads
+(struct ld1 (data) #:transparent)
+(struct ld2 (data index) #:transparent)       ; index \in {0, 1}
+(struct ld3 (data index) #:transparent)       ; index \in {0, 1, 2}
+(struct ld4 (data index) #:transparent)       ; index \in {0, 1, 2, 3}
+
 (define (elem-type expr)
   (cond
     [(eq? i8x8 expr) 'int8]
