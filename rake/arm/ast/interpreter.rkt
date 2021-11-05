@@ -316,6 +316,18 @@
             (x2 v0)))]
         [(_) (assert #f "infeasible")])]
 
+    [(arm:dupn Vn)
+      (destruct* ((interpret Vn))
+        [((int8_t v0))
+          (arm:i8x4
+           (halide:interpret
+            (x4 v0)))]
+        [((uint8_t v0))
+          (arm:u8x4
+           (halide:interpret
+            (x4 v0)))]
+        [(_) (assert #f "infeasible")])]
+
     [(arm:dupw Vn)
       (destruct* ((interpret Vn))
         [((int8_t v0))
@@ -1390,6 +1402,24 @@
               v1))))]
         [(_ _) (assert #f "infeasible")])]
 
+    [(arm:sdot.v2i32.v8i4 Vd Vn Vm)
+      (destruct* ((interpret Vd) (interpret Vn) (interpret Vm))
+        [((arm:i32x2 v0) (arm:i8x8 v1) (arm:i8x4 v2))
+          (arm:i32x2
+           (halide:interpret
+            (vec-add
+             v0
+             (vector_reduce 'add 4
+              (int32x8
+               (vec-mul
+                (int16x8
+                 v1)
+                (int16x8
+                 (concat_vectors
+                  v2
+                  v2))))))))]
+        [(_ _ _) (assert #f "infeasible")])]
+
     [(arm:sdot.v2i32.v8i8 Vd Vn Vm)
       (destruct* ((interpret Vd) (interpret Vn) (interpret Vm))
         [((arm:i32x2 v0) (arm:i8x8 v1) (arm:i8x8 v2))
@@ -1404,6 +1434,28 @@
                  v1)
                 (int16x8
                  v2)))))))]
+        [(_ _ _) (assert #f "infeasible")])]
+
+    [(arm:sdot.v4i32.v16i4 Vd Vn Vm)
+      (destruct* ((interpret Vd) (interpret Vn) (interpret Vm))
+        [((arm:i32x4 v0) (arm:i8x16 v1) (arm:i8x4 v2))
+          (arm:i32x4
+           (halide:interpret
+            (vec-add
+             v0
+             (vector_reduce 'add 4
+              (int32x16
+               (vec-mul
+                (int16x16
+                 v1)
+                (int16x16
+                 (concat_vectors
+                  (concat_vectors
+                   v2
+                   v2)
+                  (concat_vectors
+                   v2
+                   v2)))))))))]
         [(_ _ _) (assert #f "infeasible")])]
 
     [(arm:sdot.v4i32.v16i8 Vd Vn Vm)
@@ -4051,6 +4103,38 @@
               v1))))]
         [(_ _) (assert #f "infeasible")])]
 
+    [(arm:udot.v2i32.v8i4 Vd Vn Vm)
+      (destruct* ((interpret Vd) (interpret Vn) (interpret Vm))
+        [((arm:i32x2 v0) (arm:u8x8 v1) (arm:u8x4 v2))
+          (arm:i32x2
+           (halide:interpret
+            (vec-add
+             v0
+             (vector_reduce 'add 4
+              (int32x8
+               (vec-mul
+                (uint16x8
+                 v1)
+                (uint16x8
+                 (concat_vectors
+                  v2
+                  v2))))))))]
+        [((arm:u32x2 v0) (arm:u8x8 v1) (arm:u8x4 v2))
+          (arm:u32x2
+           (halide:interpret
+            (vec-add
+             v0
+             (vector_reduce 'add 4
+              (uint32x8
+               (vec-mul
+                (uint16x8
+                 v1)
+                (uint16x8
+                 (concat_vectors
+                  v2
+                  v2))))))))]
+        [(_ _ _) (assert #f "infeasible")])]
+
     [(arm:udot.v2i32.v8i8 Vd Vn Vm)
       (destruct* ((interpret Vd) (interpret Vn) (interpret Vm))
         [((arm:i32x2 v0) (arm:u8x8 v1) (arm:u8x8 v2))
@@ -4077,6 +4161,46 @@
                  v1)
                 (uint16x8
                  v2)))))))]
+        [(_ _ _) (assert #f "infeasible")])]
+
+    [(arm:udot.v4i32.v16i4 Vd Vn Vm)
+      (destruct* ((interpret Vd) (interpret Vn) (interpret Vm))
+        [((arm:i32x4 v0) (arm:u8x16 v1) (arm:u8x4 v2))
+          (arm:i32x4
+           (halide:interpret
+            (vec-add
+             v0
+             (vector_reduce 'add 4
+              (int32x16
+               (vec-mul
+                (uint16x16
+                 v1)
+                (uint16x16
+                 (concat_vectors
+                  (concat_vectors
+                   v2
+                   v2)
+                  (concat_vectors
+                   v2
+                   v2)))))))))]
+        [((arm:u32x4 v0) (arm:u8x16 v1) (arm:u8x4 v2))
+          (arm:u32x4
+           (halide:interpret
+            (vec-add
+             v0
+             (vector_reduce 'add 4
+              (uint32x16
+               (vec-mul
+                (uint16x16
+                 v1)
+                (uint16x16
+                 (concat_vectors
+                  (concat_vectors
+                   v2
+                   v2)
+                  (concat_vectors
+                   v2
+                   v2)))))))))]
         [(_ _ _) (assert #f "infeasible")])]
 
     [(arm:udot.v4i32.v16i8 Vd Vn Vm)

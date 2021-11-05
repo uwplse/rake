@@ -21,6 +21,7 @@
 (struct i16x16 (Vn) #:transparent)
 (struct i32x8 (Vn) #:transparent)
 (struct i64x4 (Vn) #:transparent)
+(struct i8x4 (Vn) #:transparent)
 (struct u8x8 (Vn) #:transparent)
 (struct u16x4 (Vn) #:transparent)
 (struct u32x2 (Vn) #:transparent)
@@ -33,6 +34,7 @@
 (struct u16x16 (Vn) #:transparent)
 (struct u32x8 (Vn) #:transparent)
 (struct u64x4 (Vn) #:transparent)
+(struct u8x4 (Vn) #:transparent)
 
 ;; ARM A64 vector intrinsics
 (struct abs (Vn) #:transparent)                             ;; abs
@@ -91,6 +93,10 @@
 (struct udot.v2i32.v8i8 (Vd Vn Vm) #:transparent)           ;; dot_product
 (struct sdot.v4i32.v16i8 (Vd Vn Vm) #:transparent)          ;; dot_product
 (struct udot.v4i32.v16i8 (Vd Vn Vm) #:transparent)          ;; dot_product
+(struct sdot.v2i32.v8i4 (Vd Vn Vm) #:transparent)           ;; sca_dot_product
+(struct udot.v2i32.v8i4 (Vd Vn Vm) #:transparent)           ;; sca_dot_product
+(struct sdot.v4i32.v16i4 (Vd Vn Vm) #:transparent)          ;; sca_dot_product
+(struct udot.v4i32.v16i4 (Vd Vn Vm) #:transparent)          ;; sca_dot_product
 (struct vabdl_i8x8 (Vn Vm) #:transparent)                   ;; widening_absd
 (struct vabdl_u8x8 (Vn Vm) #:transparent)                   ;; widening_absd
 (struct vabdl_i16x4 (Vn Vm) #:transparent)                  ;; widening_absd
@@ -153,6 +159,8 @@
 (struct uzip2 (Vn Vm) #:transparent)                        ;; unzip_odd_vectors
 (struct dup (Vn) #:transparent)                             ;; duplicate_value
 (struct dupw (Vn) #:transparent)                            ;; duplicate_value_wide
+(struct dupn (Vn) #:transparent)                            ;; duplicate_value_narrow
+
 
 ;; Special added instructions
 (struct reinterpret (Vd) #:transparent)
@@ -387,6 +395,11 @@
                          (instr-sig 'u64x2 (list 'uint64_t))
                          )]
 
+    [(eq? dupn instr) (list
+                         (instr-sig 'i8x4 (list 'int8_t))
+                         (instr-sig 'u8x4 (list 'uint8_t))
+                         )]
+
     [(eq? dupw instr) (list
                          (instr-sig 'i8x16 (list 'int8_t))
                          (instr-sig 'i16x8 (list 'int16_t))
@@ -560,8 +573,16 @@
                          (instr-sig 'i16x16 (list 'i16x16 'i8x16))
                          )]
 
+    [(eq? sdot.v2i32.v8i4 instr) (list
+                         (instr-sig 'i32x2 (list 'i32x2 'i8x8 'i8x4))
+                         )]
+
     [(eq? sdot.v2i32.v8i8 instr) (list
                          (instr-sig 'i32x2 (list 'i32x2 'i8x8 'i8x8))
+                         )]
+
+    [(eq? sdot.v4i32.v16i4 instr) (list
+                         (instr-sig 'i32x4 (list 'i32x4 'i8x16 'i8x4))
                          )]
 
     [(eq? sdot.v4i32.v16i8 instr) (list
@@ -948,9 +969,19 @@
                          (instr-sig 'u16x16 (list 'u16x16 'u8x16))
                          )]
 
+    [(eq? udot.v2i32.v8i4 instr) (list
+                         (instr-sig 'i32x2 (list 'i32x2 'u8x8 'u8x4))
+                         (instr-sig 'u32x2 (list 'u32x2 'u8x8 'u8x4))
+                         )]
+
     [(eq? udot.v2i32.v8i8 instr) (list
                          (instr-sig 'i32x2 (list 'i32x2 'u8x8 'u8x8))
                          (instr-sig 'u32x2 (list 'u32x2 'u8x8 'u8x8))
+                         )]
+
+    [(eq? udot.v4i32.v16i4 instr) (list
+                         (instr-sig 'i32x4 (list 'i32x4 'u8x16 'u8x4))
+                         (instr-sig 'u32x4 (list 'u32x4 'u8x16 'u8x4))
                          )]
 
     [(eq? udot.v4i32.v16i8 instr) (list

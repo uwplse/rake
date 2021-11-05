@@ -24,6 +24,8 @@
 
     [(arm:dup Vn) (transform (arm:dup (visit Vn transform)))]
 
+    [(arm:dupn Vn) (transform (arm:dupn (visit Vn transform)))]
+
     [(arm:dupw Vn) (transform (arm:dupw (visit Vn transform)))]
 
     [(arm:mla-vs Vd Vn Vm) (transform (arm:mla-vs (visit Vd transform) (visit Vn transform) (visit Vm transform)))]
@@ -62,7 +64,11 @@
 
     [(arm:saddw Vn Vm) (transform (arm:saddw (visit Vn transform) (visit Vm transform)))]
 
+    [(arm:sdot.v2i32.v8i4 Vd Vn Vm) (transform (arm:sdot.v2i32.v8i4 (visit Vd transform) (visit Vn transform) (visit Vm transform)))]
+
     [(arm:sdot.v2i32.v8i8 Vd Vn Vm) (transform (arm:sdot.v2i32.v8i8 (visit Vd transform) (visit Vn transform) (visit Vm transform)))]
+
+    [(arm:sdot.v4i32.v16i4 Vd Vn Vm) (transform (arm:sdot.v4i32.v16i4 (visit Vd transform) (visit Vn transform) (visit Vm transform)))]
 
     [(arm:sdot.v4i32.v16i8 Vd Vn Vm) (transform (arm:sdot.v4i32.v16i8 (visit Vd transform) (visit Vn transform) (visit Vm transform)))]
 
@@ -166,7 +172,11 @@
 
     [(arm:uaddw Vn Vm) (transform (arm:uaddw (visit Vn transform) (visit Vm transform)))]
 
+    [(arm:udot.v2i32.v8i4 Vd Vn Vm) (transform (arm:udot.v2i32.v8i4 (visit Vd transform) (visit Vn transform) (visit Vm transform)))]
+
     [(arm:udot.v2i32.v8i8 Vd Vn Vm) (transform (arm:udot.v2i32.v8i8 (visit Vd transform) (visit Vn transform) (visit Vm transform)))]
+
+    [(arm:udot.v4i32.v16i4 Vd Vn Vm) (transform (arm:udot.v4i32.v16i4 (visit Vd transform) (visit Vn transform) (visit Vm transform)))]
 
     [(arm:udot.v4i32.v16i8 Vd Vn Vm) (transform (arm:udot.v4i32.v16i8 (visit Vd transform) (visit Vn transform) (visit Vm transform)))]
 
