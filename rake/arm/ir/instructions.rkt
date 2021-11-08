@@ -57,7 +57,8 @@ add, sadd, mul, min, max, and, or
 (struct add-sat (expr0 expr1) #:super struct:ast-node #:transparent)                         ;; Instructions: sqadd, suqadd, usqadd, uqadd
 (struct sub-sat (expr0 expr1) #:super struct:ast-node #:transparent)                         ;; Instructions: sqsub, uqsub
 
-(struct shift-left (expr shift round? saturate? signed?) #:super struct:ast-node #:transparent)  ;; Instructions: sqrshl, sqshl, sqshlu, srshl, uqrshl, uqshl, urshl, sshl, sshll, ushl,sshl, sshll, ushl, ushll
+(struct vs-shift-left (expr shift round? saturate? signed?) #:super struct:ast-node #:transparent)  ;; Instructions: sqrshl, sqshl, sqshlu, srshl, uqrshl, uqshl, urshl, sshll, ushll
+(struct vv-shift-left (expr0 expr1 round? saturate? signed?) #:super struct:ast-node #:transparent)  ;; Instructions: sshl, ushl
 (struct vs-shift-right (expr shift round? saturate? signed? outputT) #:super struct:ast-node #:transparent) ;; Instructions: shrn, rshrn, sqrshrn, sqrshrun, sqshrn, sqshrun, srshr, sshr, ssra, uqrshrn, uqshrn, urshr, ursra, ushr, usra
 
 (struct abs-diff (expr0 expr1 widening? outT) #:super struct:ast-node #:transparent)         ;; Instructions: sabd, sabdl, uabd, uabdl

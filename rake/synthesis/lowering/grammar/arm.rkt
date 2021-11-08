@@ -179,6 +179,49 @@
          [candidates (enumerate-arm isa desired-types grouped-sub-exprs 4 8 number-reads)])
     (sort-and-uniquify candidates)))
 
+(define (handle-vs-shift-left expr shift round? saturate? signed? arm-sub-exprs halide-expr)
+  (let* ([input-type (arm-ir:elem-type expr)]
+         [output-type (halide:elem-type halide-expr)]
+         [widening? (> (cpp:type-bw output-type) (cpp:type-bw input-type))]
+         [desired-expr-types (arm:get-vector-types output-type)]
+         [grouped-sub-exprs (prepare-sub-exprs arm-sub-exprs)]
+         [isa (if widening?
+                ; TODO: use saturating / rounding / signedness information
+                ; TODO: are there more widening versions?
+                (list arm:sshll arm:ushll)
+                (list arm:sqrshl arm:uqrshl arm:sqshl arm:uqshl arm:sqshlu arm:srshl arm:urshl))]
+         ; TODO: how to decide depth/cost
+         [candidates (enumerate-arm isa desired-expr-types grouped-sub-exprs 1 2)])
+    (sort-and-uniquify candidates)))
+
+(define (handle-vv-shift-left expr0 expr1 round? saturate? signed? arm-sub-exprs halide-expr)
+  (let* ([input-type (arm-ir:elem-type expr0)]
+         [output-type (halide:elem-type halide-expr)]
+         [widening? (> (cpp:type-bw output-type) (cpp:type-bw input-type))]
+         [desired-expr-types (arm:get-vector-types output-type)]
+         [grouped-sub-exprs (prepare-sub-exprs arm-sub-exprs)]
+         [isa (if widening?
+                ; TODO: can we even use saturating / rounding / signedness information?
+                (error "vv-shift-left has no widening asm instructions\n")
+                (list arm:sshl arm:ushl))]
+         ; TODO: how to decide depth/cost
+         [candidates (enumerate-arm isa desired-expr-types grouped-sub-exprs 1 2)])
+    (sort-and-uniquify candidates)))
+
+(define (handle-vs-shift-right expr shift round? saturate? signed? output-type arm-sub-exprs halide-expr)
+  (let* ([input-type (arm-ir:elem-type expr)]
+         [narrowing? (< (cpp:type-bw output-type) (cpp:type-bw input-type))]
+         [desired-expr-types (arm:get-vector-types output-type)]
+         [grouped-sub-exprs (prepare-sub-exprs arm-sub-exprs)]
+         [isa (if narrowing?
+                ; TODO: use saturating / rounding / signedness information
+                ; TODO: need srshr, sshr, ssra, urshr, ursra, ushr, usra
+                (list arm:shrn arm:rshrn arm:sqrshrn arm:sqrshrun arm:sqshrn arm:sqshrun arm:uqrshrn arm:uqshrn)
+                (error "AJ needs to implement srshr, sshr, ssra, urshr, ursra, ushr, usra\n"))]
+         ; TODO: how to decide depth/cost
+         [candidates (enumerate-arm isa desired-expr-types grouped-sub-exprs 1 2)])
+    (sort-and-uniquify candidates)))
+
 (define (handle-abs-diff expr0 expr1 widening? output-type arm-sub-exprs halide-expr)
   (let* ([isa (if widening?
                   (list arm:vabdl_i8x8 arm:vabdl_u8x8 arm:vabdl_i16x4 arm:vabdl_u16x4 arm:vabdl_i32x2 arm:vabdl_u32x2)
@@ -239,11 +282,25 @@
     ; TODO: vv-dmpy-add-sat, vs-dmpy-add-sat, vv-dmpy-add-hh-sat, vs-dmpy-add-hh-sat
 
     ; TODO: neg-sat, add-sat, sub-sat
+; (struct neg-sat (expr0) #:super struct:ast-node #:transparent)                               ;; Instructions: sqneg
+; (struct add-sat (expr0 expr1) #:super struct:ast-node #:transparent)                         ;; Instructions: sqadd, suqadd, usqadd, uqadd
+; (struct sub-sat (expr0 expr1) #:super struct:ast-node #:transparent)                         ;; Instructions: sqsub, uqsub
 
-    ; TODO: shift-left, vs-shift-left
+    [(arm-ir:vs-shift-left expr shift round? saturate? signed?)
+      (handle-vs-shift-left expr shift round? saturate? signed? arm-sub-exprs halide-expr)]
+
+    [(arm-ir:vv-shift-left expr0 expr1 round? saturate? signed?)
+      (handle-vv-shift-left expr0 expr1 round? saturate? signed? arm-sub-exprs halide-expr)]
+
+    [(arm-ir:vs-shift-right expr shift round? saturate? signed? outputT)
+      (handle-vs-shift-right expr shift round? saturate? signed? outputT arm-sub-exprs halide-expr)]
 
     [(arm-ir:abs-diff expr0 expr1 widening? output-type)
       (handle-abs-diff expr0 expr1 widening? arm-sub-exprs halide-expr)]
+
+; (struct abs-diff-acc (acc expr0 expr1 widening?) #:super struct:ast-node #:transparent)      ;; Instructions: saba, sabal, uaba, uabal
+
+    ; TODO: abs-diff-acc, select, is-equal, less-than, less-than-eq, bitwise-and, vs-divide
 
     [_ (error "Not implemented yet ~a" ir-expr)]))
 
