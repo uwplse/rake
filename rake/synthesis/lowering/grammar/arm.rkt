@@ -179,6 +179,33 @@
          [candidates (enumerate-arm isa desired-types grouped-sub-exprs 4 8 number-reads)])
     (sort-and-uniquify candidates)))
 
+(define (handle-neg-sat expr arm-sub-exprs halide-expr)
+  (let* ([isa (list arm:sqneg)]
+         [grouped-sub-exprs (prepare-sub-exprs arm-sub-exprs)]
+         [output-type (halide:elem-type halide-expr)]
+         [desired-types (arm:get-vector-types output-type)]
+         ; TODO: how to decide depth/cost
+         [candidates (enumerate-arm isa desired-types grouped-sub-exprs 1 2)])
+    (sort-and-uniquify candidates)))
+
+(define (handle-add-sat expr0 expr1 arm-sub-exprs halide-expr)
+  (let* ([isa (list arm:sqadd arm:suqadd arm:usqadd arm:uqadd)]
+         [grouped-sub-exprs (prepare-sub-exprs arm-sub-exprs)]
+         [output-type (halide:elem-type halide-expr)]
+         [desired-types (arm:get-vector-types output-type)]
+         ; TODO: how to decide depth/cost
+         [candidates (enumerate-arm isa desired-types grouped-sub-exprs 1 2)])
+    (sort-and-uniquify candidates)))
+
+(define (handle-sub-sat expr0 expr1 arm-sub-exprs halide-expr)
+  (let* ([isa (list arm:sqsub arm:uqsub)]
+         [grouped-sub-exprs (prepare-sub-exprs arm-sub-exprs)]
+         [output-type (halide:elem-type halide-expr)]
+         [desired-types (arm:get-vector-types output-type)]
+         ; TODO: how to decide depth/cost
+         [candidates (enumerate-arm isa desired-types grouped-sub-exprs 1 2)])
+    (sort-and-uniquify candidates)))
+
 (define (handle-vs-shift-left expr shift round? saturate? signed? arm-sub-exprs halide-expr)
   (let* ([input-type (arm-ir:elem-type expr)]
          [output-type (halide:elem-type halide-expr)]
@@ -281,10 +308,14 @@
 
     ; TODO: vv-dmpy-add-sat, vs-dmpy-add-sat, vv-dmpy-add-hh-sat, vs-dmpy-add-hh-sat
 
-    ; TODO: neg-sat, add-sat, sub-sat
-; (struct neg-sat (expr0) #:super struct:ast-node #:transparent)                               ;; Instructions: sqneg
-; (struct add-sat (expr0 expr1) #:super struct:ast-node #:transparent)                         ;; Instructions: sqadd, suqadd, usqadd, uqadd
-; (struct sub-sat (expr0 expr1) #:super struct:ast-node #:transparent)                         ;; Instructions: sqsub, uqsub
+    [(arm-ir:neg-sat expr)
+      (handle-neg-sat expr arm-sub-exprs halide-expr)]
+
+    [(arm-ir:add-sat expr0 expr1)
+      (handle-add-sat expr0 expr1 arm-sub-exprs halide-expr)]
+
+    [(arm-ir:sub-sat expr0 expr1)
+      (handle-sub-sat expr0 expr1 arm-sub-exprs halide-expr)]
 
     [(arm-ir:vs-shift-left expr shift round? saturate? signed?)
       (handle-vs-shift-left expr shift round? saturate? signed? arm-sub-exprs halide-expr)]
@@ -298,7 +329,7 @@
     [(arm-ir:abs-diff expr0 expr1 widening? output-type)
       (handle-abs-diff expr0 expr1 widening? arm-sub-exprs halide-expr)]
 
-; (struct abs-diff-acc (acc expr0 expr1 widening?) #:super struct:ast-node #:transparent)      ;; Instructions: saba, sabal, uaba, uabal
+    ; (struct abs-diff-acc (acc expr0 expr1 widening?) #:super struct:ast-node #:transparent)      ;; Instructions: saba, sabal, uaba, uabal
 
     ; TODO: abs-diff-acc, select, is-equal, less-than, less-than-eq, bitwise-and, vs-divide
 
