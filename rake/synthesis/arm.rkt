@@ -85,6 +85,9 @@
      (define-values (successful? arm-expr _)
        (lower-to-optimal-arm halide-spec ir-expr arm-sub-exprs lowering-algo swizzling-algo sub-expr?))
      (when successful? (hash-set! translation-history arm-expr halide-spec))
+     (display "optimal successful?\n")
+     (display successful?)
+     (newline)
      (cond
        [successful? (values #t arm-expr)]
        [else (values #f (void))])]
@@ -116,36 +119,62 @@
   (define-values (successful? arm-expr expr-cost template-cost swizzle-cost)
     (lower-to-arm halide-expr ir-expr arm-sub-exprs lowering-algo swizzling-algo sub-expr? cost-ub))
 
-  (println 11111)
-  (error "stop here")
-;  (cond
-;    [(and successful? (arm-ir:load-data? ir-expr)) (values #t arm-expr 1)]
-;    [successful?
-;      (display (format "Total Expression cost (template + swizzle): ~a\n\n" (+ 0.01 expr-cost)))
-;      (cond
-;        [(or (<= template-cost 2) (>= swizzle-cost template-cost))
-;         (display "Searching for a more optimal implementation...\n\n")
-;         (define-values (successful? better-arm-expr new-cost)
-;           (lower-to-optimal-arm halide-expr ir-expr arm-sub-exprs lowering-algo swizzling-algo sub-expr? expr-cost))
-;         (cond
-;           [successful? (values #t better-arm-expr new-cost)]
-;           [else (values #t arm-expr expr-cost)])]
-;        [else
-;         (values #t arm-expr expr-cost)])]
-;    [(eq? cost-ub 99999)
-;     (values #f (void) 0)]
-;    [else
-;     (values #f (void) 0)])
+  (display "successful?\n")
+  (display successful?)
+  (newline)
+  (pretty-print arm-expr)
 
-  )
+  (cond
+    [(and successful? (arm-ir:load-data? ir-expr)) (values #t arm-expr 1)]
+    [successful?
+      (display (format "Total Expression cost (template + swizzle): ~a\n\n" (+ 0.01 expr-cost)))
+      (cond
+        [(or (<= template-cost 2) (>= swizzle-cost template-cost))
+         (display "Searching for a more optimal implementation...\n\n")
+         (define-values (successful? better-arm-expr new-cost)
+           (lower-to-optimal-arm halide-expr ir-expr arm-sub-exprs lowering-algo swizzling-algo sub-expr? expr-cost))
+        (display "recursive successful?\n")
+        (display successful?)
+        (newline)
+         (cond
+           [successful? (values #t better-arm-expr new-cost)]
+           [else (values #t arm-expr expr-cost)])]
+        [else
+         (values #t arm-expr expr-cost)])]
+    ; [(eq? cost-ub 99999)
+    ;  (values #f (void) 0)]
+    [else
+     (values #f (void) 0)]))
+
+(define (swizzle-only? arm-template)
+  (or (arm:??load? arm-template) (arm:??abstr-load? arm-template) (arm:??shuffle? arm-template)))
 
 (define (lower-to-arm halide-expr ir-expr arm-sub-exprs lowering-algo swizzling-algo sub-expr? cost-ub)
   ;; Synthesize equivalent ARM template (compute instructions)
   (define-values (successful? arm-template template-cost)
     (synthesize-arm-template halide-expr ir-expr arm-sub-exprs value-bounds translation-history lowering-algo cost-ub))
 
-  (println 11111)
-  (error "we done")
+  (display "here\n")
+  (pretty-print arm-template)
+  (pretty-print halide-expr)
+  (display (swizzle-only? arm-template))
+  (newline)
+
+  (if successful?
+      ; If this is a subexpr and just a swizzle, return it
+      (if (and sub-expr? (swizzle-only? arm-template))
+          ; TODO: why return template-cost twice?
+          (values #t arm-template template-cost template-cost 0)
+          (begin
+              ; TODO: do we need the incremental swizzling stuff?
+              (pretty-print arm-template)
+              (pretty-print halide-expr)
+              (error "we done")
+          ))
+      (values #f (void) 0 0 0))
+
+  ; (println 11111)
+  ; (error "we done")
 ;  (cond
 ;    [successful?
 ;     (cond
