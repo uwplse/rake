@@ -55,7 +55,7 @@
          [widening? (eq? (cpp:type-bw output-type) (* 2 (cpp:type-bw input-type)))]
          ; TODO: better pruning and more isa options
          [isa (if widening?
-                (list arm:reinterpret arm:addv arm:saddlv arm:uaddlv arm:saddl arm:smull arm:saddw arm:saddlp arm:sadalp arm:smlal-vs arm:smlsl-vs arm:sdot.v2i32.v8i8 arm:udot.v2i32.v8i8 arm:sdot.v4i32.v16i8 arm:udot.v4i32.v16i8 arm:shll arm:ssubl arm:sub arm:uadalp arm:uaddl arm:uaddlp arm:uaddw arm:umlal-vs arm:umlsl-vs arm:umull arm:usubl arm:usubw)
+                (list arm:reinterpret arm:addv arm:saddlv arm:uaddlv arm:saddl arm:saddw arm:saddlp arm:sadalp arm:smlal-vs arm:smlsl-vs arm:sdot.v2i32.v8i8 arm:udot.v2i32.v8i8 arm:sdot.v4i32.v16i8 arm:udot.v4i32.v16i8 arm:shll arm:ssubl arm:sub arm:uadalp arm:uaddl arm:uaddlp arm:uaddw arm:umlal-vs arm:umlsl-vs arm:usubl arm:usubw)
                 (list arm:reinterpret arm:add arm:sub arm:addp arm:mla-vs arm:mls-vs arm:mul-vs arm:shl arm:neg))]
          [grouped-sub-exprs (prepare-sub-exprs arm-sub-exprs)]
          [number-reads (length weights)]
@@ -169,7 +169,7 @@
   (let* ([input-type (get-input-type expr)]
          [widening? (eq? (cpp:type-bw output-type) (* 2 (cpp:type-bw input-type)))]
          [isa (if widening?
-                  (list arm:reinterpret arm:smlal-vv arm:umlal-vv arm:smlsl-vv arm:umlsl-vv)
+                  (list arm:reinterpret arm:smlal-vv arm:umlal-vv arm:smlsl-vv arm:umlsl-vv arm:smull arm:umull)
                   (list arm:reinterpret arm:addv arm:addp arm:mla-vv arm:mls-vv arm:mul-vv arm:sub))]
          [grouped-sub-exprs (prepare-sub-exprs arm-sub-exprs)]
          [desired-types (arm:get-vector-types output-type)]
