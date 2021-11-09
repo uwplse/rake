@@ -146,7 +146,9 @@
 
     [(arm:smlsl-vv Vd Vn Vm) (transform (arm:smlsl-vv (visit Vd transform) (visit Vn transform) (visit Vm transform)))]
 
-    [(arm:smull Vn Vm) (transform (arm:smull (visit Vn transform) (visit Vm transform)))]
+    [(arm:smull-vs Vn Vm) (transform (arm:smull-vs (visit Vn transform) (visit Vm transform)))]
+
+    [(arm:smull-vv Vn Vm) (transform (arm:smull-vv (visit Vn transform) (visit Vm transform)))]
 
     [(arm:sqabs Vn) (transform (arm:sqabs (visit Vn transform)))]
 
@@ -252,7 +254,9 @@
 
     [(arm:umlsl-vv Vd Vn Vm) (transform (arm:umlsl-vv (visit Vd transform) (visit Vn transform) (visit Vm transform)))]
 
-    [(arm:umull Vn Vm) (transform (arm:umull (visit Vn transform) (visit Vm transform)))]
+    [(arm:umull-vs Vn Vm) (transform (arm:umull-vs (visit Vn transform) (visit Vm transform)))]
+
+    [(arm:umull-vv Vn Vm) (transform (arm:umull-vv (visit Vn transform) (visit Vm transform)))]
 
     [(arm:uqadd Vn Vm) (transform (arm:uqadd (visit Vn transform) (visit Vm transform)))]
 

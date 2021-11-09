@@ -40,8 +40,10 @@
 (struct abs (Vn) #:transparent)                             ;; abs
 (struct uabd (Vn Vm) #:transparent)                         ;; absd
 (struct sabd (Vn Vm) #:transparent)                         ;; absd
-(struct umull (Vn Vm) #:transparent)                        ;; widening_mul
-(struct smull (Vn Vm) #:transparent)                        ;; widening_mul
+(struct umull-vv (Vn Vm) #:transparent)                     ;; widening_mul
+(struct smull-vv (Vn Vm) #:transparent)                     ;; widening_mul
+(struct umull-vs (Vn Vm) #:transparent)                     ;; widening_mul
+(struct smull-vs (Vn Vm) #:transparent)                     ;; widening_mul
 (struct uqadd (Vn Vm) #:transparent)                        ;; saturating_add
 (struct sqadd (Vn Vm) #:transparent)                        ;; saturating_add
 (struct uqsub (Vn Vm) #:transparent)                        ;; saturating_sub
@@ -842,7 +844,13 @@
                          (instr-sig 'i64x4 (list 'i64x4 'i32x4 'i32x4))
                          )]
 
-    [(eq? smull instr) (list
+    [(eq? smull-vs instr) (list
+                         (instr-sig 'i16x8 (list 'i8x8 'int8_t))
+                         (instr-sig 'i32x4 (list 'i16x4 'int16_t))
+                         (instr-sig 'i64x2 (list 'i32x2 'int32_t))
+                         )]
+
+    [(eq? smull-vv instr) (list
                          (instr-sig 'i16x8 (list 'i8x8 'i8x8))
                          (instr-sig 'i32x4 (list 'i16x4 'i16x4))
                          (instr-sig 'i64x2 (list 'i32x2 'i32x2))
@@ -1241,7 +1249,13 @@
                          (instr-sig 'u64x4 (list 'u64x4 'u32x4 'u32x4))
                          )]
 
-    [(eq? umull instr) (list
+    [(eq? umull-vs instr) (list
+                         (instr-sig 'u16x8 (list 'u8x8 'uint8_t))
+                         (instr-sig 'u32x4 (list 'u16x4 'uint16_t))
+                         (instr-sig 'u64x2 (list 'u32x2 'uint32_t))
+                         )]
+
+    [(eq? umull-vv instr) (list
                          (instr-sig 'u16x8 (list 'u8x8 'u8x8))
                          (instr-sig 'u32x4 (list 'u16x4 'u16x4))
                          (instr-sig 'u64x2 (list 'u32x2 'u32x2))
