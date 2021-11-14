@@ -89,11 +89,11 @@
   ;(pretty-print optimized-template)
 
   ;; Incrementally checks the template for more and more lanes
-  (display "interpreting for lane verification\n")
-  (pretty-print optimized-template)
-  (pretty-print template)
-  (display (arm:??shuffle? template))
-  (newline)
+  ;(display "interpreting for lane verification\n")
+  ;(pretty-print optimized-template)
+  ;(pretty-print template)
+  ;(display (arm:??shuffle? template))
+  ;(newline)
   (define lanes-to-verify (verification-lanes (arm:type (arm:interpret optimized-template))))
   (synthesize-incremental optimized-halide-expr optimized-template inferred-axioms lanes-to-verify '()))
 
@@ -103,18 +103,18 @@
     [else
      (define curr-lane (first lanes-to-verify))
 
-;     (display (format "Verifying lane: ~a\n" curr-lane))
-;     (println inferred-axioms)
-;     (println ((halide:interpret optimized-halide-expr) curr-lane))
-;     (set-curr-cn! curr-lane)
-    ; (println (let ([x (arm:interpret optimized-template)]) (let ([offset (quotient (arm:num-elems x) 2)]) (if (arm:vec-pair? x) (if (< curr-lane offset) (arm:v0-elem x curr-lane) (arm:v1-elem x (- curr-lane offset))) (arm:elem x curr-lane)))))
+     ;(display (format "Verifying lane: ~a\n" curr-lane))
+     ;(println inferred-axioms)
+     ;(println ((halide:interpret optimized-halide-expr) curr-lane))
+     ;(set-curr-cn! curr-lane)
+     ;(println (arm:get-element (arm:interpret optimized-template) curr-lane))
 
      (define st (current-milliseconds))
      (clear-vc!)
      (for-each (lambda (axiom) (assume axiom)) inferred-axioms)
-     (display "interpreting for synthesis\n")
-     (display "Halide Expr: ")
-     (pretty-print optimized-halide-expr)
+     ;(display "interpreting for synthesis\n")
+     ;(display "Halide Expr: ")
+     ;(pretty-print optimized-halide-expr)
      (define sol (synthesize #:forall (symbolics optimized-halide-expr)
                              #:guarantee (begin
                                            (assert (not (ormap (lambda (discarded-sol) (equal? optimized-template discarded-sol)) discarded-sols)))
