@@ -119,10 +119,10 @@
   (define-values (successful? arm-expr expr-cost template-cost swizzle-cost)
     (lower-to-arm halide-expr ir-expr arm-sub-exprs lowering-algo swizzling-algo sub-expr? cost-ub))
 
-  (display "successful?\n")
-  (display successful?)
-  (newline)
-  (pretty-print arm-expr)
+  ;(display "successful?\n")
+  ;(display successful?)
+  ;(newline)
+  ;(pretty-print arm-expr)
 
   (cond
     [(and successful? (arm-ir:load-data? ir-expr)) (values #t arm-expr 1)]
@@ -154,11 +154,11 @@
   (define-values (successful? arm-template template-cost)
     (synthesize-arm-template halide-expr ir-expr arm-sub-exprs value-bounds translation-history lowering-algo cost-ub))
 
-  (display "here\n")
-  (pretty-print arm-template)
-  (pretty-print halide-expr)
-  (display (swizzle-only? arm-template))
-  (newline)
+  ;(display "here\n")
+  ;(pretty-print arm-template)
+  ;(pretty-print halide-expr)
+  ;(display (swizzle-only? arm-template))
+  ;(newline)
 
   (if successful?
       ; If this is a subexpr and just a swizzle, return it

@@ -49,8 +49,8 @@
       (define candidates (get-arm-grammar halide-expr ir-expr arm-sub-exprs cost-ub))
       (define runtime (- (current-seconds) start-time))
 
-      (println (length candidates))
-      (display (format "Grammar generation time: ~a seconds\n\n" runtime))
+      (display (format "Template candidates: ~a\n" runtime))
+      (display (format "Template enumeration time: ~a seconds\n\n" runtime))
       
       (define-values (successful? arm-template)
         (arm:synthesize-translation candidates halide-expr arm-sub-exprs value-bounds translation-history))
