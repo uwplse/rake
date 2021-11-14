@@ -36,7 +36,7 @@
 (define (abstr-equiv-subexprs spec template arm-sub-expr halide-sub-expr abstracted-halide-subexpr offset [sub-expr-bounds (void)])
   (cond
     ;; Don't bother if the sub-expr is just a load or a broadcast (leaf nodes anyways)
-    [(arm:??abstr-load? arm-sub-expr) (values spec template)]
+    [(arm:??load? arm-sub-expr) (values spec template)]
     [(arm:??shuffle? arm-sub-expr) (values spec template)]
     [else
       (define abstracted-arm-subexpr (make-arm-abstr-sub-expr arm-sub-expr abstracted-halide-subexpr offset sub-expr-bounds))
