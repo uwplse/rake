@@ -21,6 +21,37 @@
 (define (interpret p)
   (destruct p
 
+    ;;;;;;;;;;;;;;;;;;;; Scalar Halide Expressions ;;;;;;;;;;;;;;;;;;;;;
+
+    [(var-lookup var val) (interpret val)]
+            
+    [(sca-cast sca type) (cpp:cast (interpret sca) type)]
+
+    [(sca-add v1 v2) (halide:do-add (interpret v1) (interpret v2))]
+    [(sca-sub v1 v2) (halide:do-sub (interpret v1) (interpret v2))]
+    [(sca-mul v1 v2) (halide:do-mul (interpret v1) (interpret v2))]
+    [(sca-div v1 v2) (halide:do-div (interpret v1) (interpret v2))]
+    [(sca-mod v1 v2) (halide:do-mod (interpret v1) (interpret v2))]
+    [(sca-min v1 v2) (halide:do-min (interpret v1) (interpret v2))]
+    [(sca-max v1 v2) (halide:do-max (interpret v1) (interpret v2))]
+
+    [(sca-if v1 v2 v3) (halide:do-if (interpret v1) (interpret v2) (interpret v3))]
+    [(sca-eq v1 v2) (halide:do-eq (interpret v1) (interpret v2))]
+    [(sca-lt v1 v2) (halide:do-lt (interpret v1) (interpret v2))]
+    [(sca-le v1 v2) (halide:do-le (interpret v1) (interpret v2))]
+
+    [(sca-abs v1) (halide:do-abs (interpret v1))]
+    [(sca-absd v1 v2) (halide:do-absd (interpret v1) (interpret v2))]
+    [(sca-shl v1 v2) (halide:do-shl (interpret v1) (interpret v2))]
+    [(sca-shr v1 v2) (halide:do-shr (interpret v1) (interpret v2))]
+    [(sca-clz v1) (halide:do-clz (interpret v1))]
+
+    [(sca-bwand v1 v2) (halide:do-bwand (interpret v1) (interpret v2))]
+
+    [(load-sca buf idx) (halide:buffer-ref (interpret buf) (interpret idx))]
+
+    ;;;;;;;;;;;;;;
+            
     [(arm:abs Vn)
       (destruct* ((interpret Vn))
         [((arm:i8x16 v0))
@@ -2564,7 +2595,7 @@
             (vec-mul
              (int16x8
               v0)
-             (x8 (int16x1 v1)))))]
+             (x8 (int16x1 Vm)))))]
         [((arm:i16x4 v0) (int16_t v1))
           (arm:i32x4
            (halide:interpret
@@ -5198,6 +5229,26 @@
 
     [(arm:umlal-vs Vd Vn Vm)
       (destruct* ((interpret Vd) (interpret Vn) (interpret Vm))
+         [((arm:u16x8 v0) (arm:u8x8 v1) (uint8_t v2))
+          (arm:u16x8
+           (halide:interpret
+            (vec-add
+             v0
+             (vec-mul
+              (uint16x8
+               v1)
+              (x8
+               (sca-cast Vm 'uint16))))))]
+        [((arm:u16x16 v0) (arm:u8x16 v1) (uint8_t v2))
+          (arm:u16x16
+           (halide:interpret
+            (vec-add
+             v0
+             (vec-mul
+              (uint16x16
+               v1)
+              (x16
+               (sca-cast Vm 'uint16))))))]
         [((arm:u32x4 v0) (arm:u16x4 v1) (uint16_t v2))
           (arm:u32x4
            (halide:interpret
@@ -5412,7 +5463,7 @@
             (vec-mul
              (uint16x8
               v0)
-             (x8 (uint16x1 v1)))))]
+             (x8 (uint16x1 Vm)))))]
         [((arm:u16x4 v0) (uint16_t v1))
           (arm:u32x4
            (halide:interpret
@@ -6825,4 +6876,7 @@
         [(arm:u32x8 v0) (arm:i32x8 (lambda (i) (int32_t (cpp:eval (v0 i)))))]
         [(arm:u64x4 v0) (arm:i64x4 (lambda (i) (int64_t (cpp:eval (v0 i)))))])]
 
-    [_ (error "No interpreter for ~a" p)]))
+    [_ p]
+    ;[_ (error "No interpreter for ~a" p)]
+
+    ))
