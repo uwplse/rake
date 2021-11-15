@@ -24,7 +24,7 @@
     ;;;;;;;;;;;;;;;;;;;; Scalar Halide Expressions ;;;;;;;;;;;;;;;;;;;;;
 
     [(var-lookup var val) (interpret val)]
-            
+
     [(sca-cast sca type) (cpp:cast (interpret sca) type)]
 
     [(sca-add v1 v2) (halide:do-add (interpret v1) (interpret v2))]
@@ -51,6 +51,7 @@
     [(load-sca buf idx) (halide:buffer-ref (interpret buf) (interpret idx))]
 
     ;;;;;;;;;;;;;;
+
 
     [(arm:abs Vn)
       (destruct* ((interpret Vn))
@@ -6960,7 +6961,6 @@
              v0
              v1)))]
         [(_ _) (assert #f "infeasible")])]
-
     [(arm:??shuffle id loads output-type)
       (let ([vecType (arm:get-type-struct output-type)]
             [interpreted-loads (map interpret loads)])
@@ -7020,7 +7020,5 @@
         [(arm:u32x8 v0) (arm:i32x8 (lambda (i) (int32_t (cpp:eval (v0 i)))))]
         [(arm:u64x4 v0) (arm:i64x4 (lambda (i) (int64_t (cpp:eval (v0 i)))))])]
 
-    [_ p]
-    ;[_ (error "No interpreter for ~a" p)]
 
-    ))
+    [_ p]))
