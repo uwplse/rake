@@ -97,6 +97,6 @@
   (define new-reads (halide:extract-buffer-reads spec))
   (define (fix-reads node [pos -1])
     (match node
-      [(arm:??swizzle id live-data exprs gather-tbl) (arm:??swizzle id new-reads exprs gather-tbl)]
+      [(arm:??swizzle id live-data exprs gather-tbl output-type) (arm:??swizzle id new-reads exprs gather-tbl output-type)]
       [_ node]))
   (arm:visit template fix-reads))

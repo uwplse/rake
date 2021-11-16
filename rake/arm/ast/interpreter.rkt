@@ -6992,6 +6992,12 @@
 
       (vecType load-body))]
 
+    [(arm:??swizzle id live-data exprs idx-tbl output-type)
+      (let ([vecType (arm:get-type-struct output-type)])
+        ;; TODO: it is probably much more complicated than this...
+        (vecType
+          (lambda (i) (list-ref (list-ref live-data curr-cn) (list-ref idx-tbl i)))))]
+
     [(arm:reinterpret Vn)
       (destruct (interpret Vn)
         [(arm:i8x8 v0) (arm:u8x8 (lambda (i) (uint8_t (cpp:eval (v0 i)))))]

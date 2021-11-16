@@ -312,7 +312,7 @@
 
     [(arm:??load id live-data buffer idx-tbl output-type) (transform (arm:??load id live-data (visit buffer transform) idx-tbl output-type) arg-pos)]
     [(arm:??shuffle id lds output-type) (transform (arm:??shuffle id (for/list ([ld lds]) (visit ld transform)) output-type))]
-    [(arm:??swizzle id live-data exprs idx-tbl) (transform (arm:??swizzle id live-data (for/list ([expr exprs]) (visit expr transform)) idx-tbl))]
+    [(arm:??swizzle id live-data exprs idx-tbl output-type) (transform (arm:??swizzle id live-data (for/list ([expr exprs]) (visit expr transform)) idx-tbl output-type))]
     [(arm:reinterpret Vn) (transform (arm:reinterpret (visit Vn transform)))]
 
     [_ (transform expr)]))

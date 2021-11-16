@@ -216,16 +216,17 @@
       (lambda (obj) `??abstr-load)
       (lambda (obj) (list (??abstr-load-buffer obj)))))])
 
-(struct ??swizzle (id live-data exprs gather-tbl)
+(struct ??swizzle (id live-data exprs gather-tbl output-type)
   #:transparent
   #:methods gen:custom-write
   [(define write-proc
      (make-constructor-style-printer
       (lambda (obj) `??swizzle)
-      (lambda (obj) (list (??swizzle-id obj) (length (??swizzle-exprs obj))))))]
+      (lambda (obj) (list (??swizzle-id obj) (length (??swizzle-exprs obj)) (??swizzle-output-type obj)))))]
   #:methods gen:equal+hash
   [(define (equal-proc a b equal?-recur)
      (and
+      (equal?-recur (??swizzle-output-type a) (??swizzle-output-type b))
       (equal?-recur (??swizzle-id a) (??swizzle-id b))
       (equal?-recur (??swizzle-live-data a) (??swizzle-live-data b))
       (equal?-recur (??swizzle-exprs a) (??swizzle-exprs b))))

@@ -258,6 +258,17 @@
          [candidates (enumerate-arm isa desired-types grouped-sub-exprs 2 2)])
     (sort-and-uniquify candidates)))
 
+(define (handle-build-vec base stride len arm-sub-exprs halide-expr)
+  (cond
+    ;; TODO: handle arbitrary logical vector lengths.
+    [(and (int32_t? stride) (eq? len 16))
+      (let ([output-type 'i32x8]
+            [exprs (list (ramp base stride 8) (ramp (sca-add base (int32_t (bv 8 32))) stride 8))]
+            [ihal (halide:interpret halide-expr)]
+            [tbl (map (lambda (i) (define-symbolic* idx integer?) idx) (range 256))])
+        (list (cons (arm:??swizzle 0 (for/list ([i (range 8)]) (list (ihal i))) exprs tbl output-type) 1)))]
+    [else (error "Unimplemented: handle-build-vec base stride len arm-sub-exprs halide-expr")]))
+
 (define (get-arm-grammar-helper halide-expr ir-expr arm-sub-exprs)
   ; TODO: what is the enumeration-database?
   (destruct ir-expr
@@ -332,6 +343,9 @@
 
     ; TODO: abs-diff-acc, select, is-equal, less-than, less-than-eq, bitwise-and, vs-divide
 
+    [(arm-ir:build-vec base stride len)
+      (handle-build-vec base stride len arm-sub-exprs halide-expr)]
+
     [_ (error "Not implemented yet ~a" ir-expr)]))
 
 
@@ -379,7 +393,7 @@
          (cond
            [(empty? c) '()]
            [else
-            (list (cons (arm:??swizzle swizzle-node-id '() c (void)) 0))]))))
+            (list (cons (arm:??swizzle swizzle-node-id '() c (void) output-type) 0))]))))
     (hash-set! grouped-merged-sub-exprs output-type merged-candidates))
   
   grouped-merged-sub-exprs)
@@ -493,9 +507,9 @@
   (define (get-sw-node-id) (set! swizzle-node-id (add1 swizzle-node-id)) swizzle-node-id)
   (define (clone-swizzle-node node [pos -1])
     (destruct node
-      [(arm:??swizzle id live-data expr gather-tbl)
+      [(arm:??swizzle id live-data expr gather-tbl output-type)
        (define tbl (map (lambda (i) (define-symbolic* idx integer?) idx) (range 256)))
-       (arm:??swizzle (get-sw-node-id) live-data expr tbl)]
+       (arm:??swizzle (get-sw-node-id) live-data expr tbl output-type)]
       [(arm:??load id live-data buffer tbl output-type)
        (define tbl (map (lambda (i) (define-symbolic* idx integer?) idx) (range 256)))
        (arm:??load (get-sw-node-id) live-data buffer tbl output-type)]
