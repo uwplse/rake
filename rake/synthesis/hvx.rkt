@@ -32,19 +32,27 @@
   ;; Reset the state of synthesis database
   (lowering:synthesizer:reset-db)
 
-  (display "Inferring Data Layouts...\n")
-  (display "=========================\n\n")
-  (print-layout-map ir-expr output-layout)
-
-  (exit)
+  (when (not sub-expr?)
+    (display "Inferring Data Layouts...\n")
+    (display "=========================\n\n")
+    (print-layout-map ir-expr output-layout)
+    (newline))
   
-  ;; Analyze the expression to infer intermediate data-layouts after each uber-instruction
-  ;(define ideal-subexpr-layouts (infer-ideal-subexpr-layouts ir-expr output-layout))
-
-  ;(display (format "Preferred layout for op ~a is ~a\n\n" (object-name ir-expr) output-layout))
-  ;(display (format "Preferred subexpr layout for op ~a is ~a\n\n" (object-name ir-expr) ideal-subexpr-layouts))
-
   ;; Generate a HVX implementation for each sub-expr layout
+  (define ir-subexprs (hvx-ir:get-subexprs ir-expr))
+  (define ir-subexprcnt (length ir-subexprs))
+  
+  ;(for ([ir-subexpr ir-subexprs])
+    ;; Infer candidate sub-expr layouts
+    ;(define ideal-subexpr-layouts (infer-ideal-subexpr-layouts ir-expr ir-subexpr output-layout))
+
+    ;; Print sub-tree
+    ;(println ir-subexpr)
+    ;(println ideal-subexpr-layouts)
+
+    ;(synthesize-lowered-impl ir-expr ir-annotations ir-bounds lowering-algo swizzling-algo sub-expr? output-layout ideal-subexpr-layouts)
+    ;(exit))
+
   ;(filter-map (curry synthesize-lowered-impl ir-expr ir-annotations ir-bounds lowering-algo swizzling-algo sub-expr? output-layout) (set->list ideal-subexpr-layouts))
 
   ;(synthesize-lowered-impl ir-expr ir-annotations ir-bounds lowering-algo swizzling-algo sub-expr? output-layout)
@@ -54,7 +62,7 @@
         
   ;; Lower sub-expressions to HVX
   (define-values (successful? hvx-sub-exprs)
-    (lower-sub-exprs (hvx-ir:get-subexprs ir-expr) ir-expr ir-annotations ir-bounds lowering-algo swizzling-algo sub-expr? output-layout))
+    (lower-sub-exprs (hvx-ir:get-subexprs ir-expr) ir-expr ir-annotations ir-bounds lowering-algo swizzling-algo #t output-layout))
 
   ;; Pop node from trace
   (set! trace (rest trace))
@@ -72,46 +80,26 @@
      (define ir-sub-expr (first ir-sub-exprs))
 
      ;; Infer ideal output-layouts for this sub-expr
-     (define ideal-subexpr-layouts (infer-ideal-subexpr-layouts ir-expr ir-sub-expr output-layout))
+     (define ideal-subexpr-layout (infer-ideal-subexpr-layouts ir-expr ir-sub-expr output-layout))
 
      ;; Lower sub-expr for each data-layout
-     (define lowered-sub-expr-impls
-       (filter-map (curry synthesize-hvx-expr ir-sub-expr ir-annotations ir-bounds lowering-algo swizzling-algo sub-expr?) ideal-subexpr-layouts))
+     (define lowered-sub-expr-impl
+       (synthesize-hvx-expr ir-sub-expr ir-annotations ir-bounds lowering-algo swizzling-algo sub-expr? ideal-subexpr-layout))
      
      (cond
-       [(empty? lowered-sub-expr-impls) (values #f lowered-sub-expr-impls)]
+       [(empty? lowered-sub-expr-impl) (values #f lowered-sub-expr-impl)]
        [else
         ;; Save bounds information
         (when (hash-has-key? ir-bounds (ir-node-id ir-sub-expr))
-          (for ([impl lowered-sub-expr-impls])
-            (hash-set! value-bounds impl (hash-ref ir-bounds (ir-node-id ir-sub-expr)))))
+          (hash-set! value-bounds lowered-sub-expr-impl (hash-ref ir-bounds (ir-node-id ir-sub-expr))))
 
         ;; Lower remaining subexprs
         (define-values (successful? lowered-exprs)
-          (lower-sub-exprs (rest ir-sub-exprs) ir-expr ir-annotations ir-bounds lowering-algo swizzling-algo sub-expr?))
+          (lower-sub-exprs (rest ir-sub-exprs) ir-expr ir-annotations ir-bounds lowering-algo swizzling-algo sub-expr? output-layout))
         
         (cond
-          [successful? (values #t (flatten (append lowered-sub-expr-impls lowered-exprs)))]
+          [successful? (values #t (flatten (append (list lowered-sub-expr-impl) lowered-exprs)))]
           [else (values #f '())])])]))
-
-
-;;--------------------------
-
-
-(define (synthesize-lowered-impl ir-expr ir-annotations ir-bounds lowering-algo swizzling-algo sub-expr? output-layout subexpr-layout)
-  ;; Push node to trace
-  (set! trace (append (list ir-expr) trace))
-        
-  ;; Generate HVX sub-expressions that produce output in subexpr-layout
-  (define-values (successful? hvx-sub-exprs) (lower-sub-exprs ir-expr (hvx-ir:get-subexprs ir-expr) ir-annotations ir-bounds lowering-algo swizzling-algo sub-expr? subexpr-layout))
-
-  ;; Pop node from trace
-  (set! trace (rest trace))
-
-  (cond
-    ;; If we were able to lower the sub-exprs, use them to construct the lowered expression
-    [successful? (lower-expr ir-expr ir-annotations lowering-algo swizzling-algo sub-expr? output-layout hvx-sub-exprs)]
-    [else #f]))
 
 (define (lower-expr ir-expr ir-annotations lowering-algo swizzling-algo sub-expr? output-layout hvx-sub-exprs)
   (cond
@@ -151,27 +139,6 @@
     [else
      (error "Unexpected: Did not find Halide IR mapping for expression ~a" ir-expr)]))
 
-;(define (lower-sub-exprs ir-expr ir-sub-exprs ir-annotations ir-bounds lowering-algo swizzling-algo sub-expr? subexpr-layout)
-;    (cond
-;      [(empty? ir-sub-exprs) (values #t '())]
-;      [else
-;       ;; Lower current subexpr
-;       (define ir-sub-expr (first ir-sub-exprs))
-;       (define hvx-sub-expr-impls (synthesize-hvx-expr ir-sub-expr ir-annotations ir-bounds lowering-algo swizzling-algo (or sub-expr? (not (combine? ir-expr))) subexpr-layout))
-;       (cond
-;         [(empty? hvx-sub-expr-impls) (values #f '())]
-;         [else
-;          ;; Save bounds information
-;          (when (hash-has-key? ir-bounds (ir-node-id ir-sub-expr))
-;            (for ([impl hvx-sub-expr-impls])
-;              (hash-set! value-bounds impl (hash-ref ir-bounds (ir-node-id ir-sub-expr)))))
-;
-;          ;; Lower remaining subexprs
-;          (define-values (successful? lowered-exprs) (lower-sub-exprs ir-expr (rest ir-sub-exprs) ir-annotations ir-bounds lowering-algo swizzling-algo sub-expr? subexpr-layout))
-;          (cond
-;            [successful? (values #t (flatten (append hvx-sub-expr-impls lowered-exprs)))]
-;            [else (values #f '())])])]))
-
 (define (lower-to-optimal-hvx halide-expr ir-expr hvx-sub-exprs lowering-algo swizzling-algo sub-expr? output-layout [cost-ub 99999])
   (define-values (successful? hvx-expr expr-cost template-cost swizzle-cost)
     (lower-to-hvx halide-expr ir-expr hvx-sub-exprs lowering-algo swizzling-algo sub-expr? output-layout cost-ub))
@@ -207,65 +174,7 @@
        [else
         (define swizzle-budget (- cost-ub template-cost 0.01))
         
-        (define hvx-tile-size (if (hvx:vec-pair? (hvx:interpret hvx-template)) 2048 1024))
-
-        (define halide-tile-elem-cnt (halide:vec-len halide-expr))
-        (define halide-tile-elem-bits (cpp:type-bw (halide:elem-type halide-expr)))
-        (define halide-tile-size (* halide-tile-elem-cnt halide-tile-elem-bits))
-        (define elems-per-hvx-tile (quotient hvx-tile-size halide-tile-elem-bits))
-  
-        (define (break-to-standard-tiles expr tile-size st)
-          (cond
-            [(> (- halide-tile-elem-cnt st) tile-size) (cons (slice_vectors expr st 1 tile-size) (break-to-standard-tiles halide-expr tile-size (+ st tile-size)))]
-            [(eq? st 0) (list halide-expr)]
-            [else (list (slice_vectors expr st 1 tile-size))]))
-
-        (define (break-to-deinterleaved-tiles expr tile-size st)
-          (cond
-            [(> (- halide-tile-elem-cnt st) tile-size)
-             (append
-              (list
-               (slice_vectors expr st 1 tile-size)
-               (slice_vectors expr (+ st 1) 1 tile-size))
-              (break-to-deinterleaved-tiles halide-expr tile-size (+ st tile-size)))]
-            [else
-             (list
-              (slice_vectors expr st 1 tile-size)
-              (slice_vectors expr (+ st 1) 1 tile-size))]))
-      
-        (define (break-to-deinterleavedx2-tiles expr tile-size st)
-          (cond
-            [(> (- halide-tile-elem-cnt st) tile-size)
-             (append
-              (list
-               (slice_vectors expr st 1 tile-size)
-               (slice_vectors expr (+ st 1) 1 tile-size)
-               (slice_vectors expr (+ st 2) 1 tile-size)
-               (slice_vectors expr (+ st 3) 1 tile-size))
-              (break-to-deinterleavedx2-tiles halide-expr tile-size (+ st tile-size)))]
-            [else
-             (list
-              (slice_vectors expr st 1 tile-size)
-              (slice_vectors expr (+ st 1) 1 tile-size)
-              (slice_vectors expr (+ st 2) 1 tile-size)
-              (slice_vectors expr (+ st 3) 1 tile-size))]))
-        
-        (define halide-expr-tiles
-          (cond
-            [(eq? output-layout 'standard) (break-to-standard-tiles halide-expr elems-per-hvx-tile 0)]
-            [(and (eq? output-layout 'deinterleaved) (eq? hvx-tile-size 1024))
-             (break-to-deinterleaved-tiles halide-expr (* 2 elems-per-hvx-tile) 0)]
-            [(and (eq? output-layout 'deinterleaved) (eq? hvx-tile-size 2048))
-             (break-to-standard-tiles halide-expr elems-per-hvx-tile 0)]
-            [(and (eq? output-layout 'deinterleavedx2) (eq? hvx-tile-size 1024))
-             (break-to-deinterleavedx2-tiles halide-expr (* 4 elems-per-hvx-tile) 0)]
-            [(and (eq? output-layout 'deinterleavedx2) (eq? hvx-tile-size 2048))
-             (break-to-deinterleaved-tiles halide-expr (* 2 elems-per-hvx-tile) 0)]
-            [(and (eq? output-layout 'interleaved) (eq? hvx-tile-size 1024))
-             (break-to-standard-tiles halide-expr elems-per-hvx-tile 0)]
-            [(and (eq? output-layout 'interleaved) (eq? hvx-tile-size 2048))
-             (break-to-standard-tiles halide-expr (* 2 elems-per-hvx-tile) 0)]
-            [else (error "NYI")]))
+        (define halide-expr-tiles (generate-halide-tiles halide-expr hvx-template output-layout))
       
         (cond
           [(> (length halide-expr-tiles) 1)
@@ -316,6 +225,106 @@
               (lower-to-hvx halide-expr ir-expr hvx-sub-exprs lowering-algo swizzling-algo sub-expr? output-layout cost-ub)])])])]
     [else
       (values #f (void) 0 0 0)]))
+
+(define (generate-halide-tiles halide-expr hvx-template output-layout)
+  (define hvx-tile-size (if (hvx:vec-pair? (hvx:interpret hvx-template)) 2048 1024))
+
+  (define halide-tile-elem-cnt (halide:vec-len halide-expr))
+  (define halide-tile-elem-bits (cpp:type-bw (halide:elem-type halide-expr)))
+  (define halide-tile-size (* halide-tile-elem-cnt halide-tile-elem-bits))
+  (define elems-per-hvx-tile (quotient hvx-tile-size halide-tile-elem-bits))
+  
+  (define (break-to-standard-tiles expr tile-size st)
+    (cond
+      [(> (- halide-tile-elem-cnt st) tile-size) (cons (slice_vectors expr st 1 tile-size) (break-to-standard-tiles halide-expr tile-size (+ st tile-size)))]
+      [(eq? st 0) (list halide-expr)]
+      [else (list (slice_vectors expr st 1 tile-size))]))
+
+  (define (break-to-deinterleaved-tiles expr tile-size st)
+    (cond
+      [(> (- halide-tile-elem-cnt st) tile-size)
+       (append
+        (list
+         (slice_vectors expr st 1 tile-size)
+         (slice_vectors expr (+ st 1) 1 tile-size))
+        (break-to-deinterleaved-tiles halide-expr tile-size (+ st tile-size)))]
+      [else
+       (list
+        (slice_vectors expr st 1 tile-size)
+        (slice_vectors expr (+ st 1) 1 tile-size))]))
+      
+  (define (break-to-deinterleavedx2-tiles expr tile-size st)
+    (cond
+      [(> (- halide-tile-elem-cnt st) tile-size)
+       (append
+        (list
+         (slice_vectors expr st 1 tile-size)
+         (slice_vectors expr (+ st 1) 1 tile-size)
+         (slice_vectors expr (+ st 2) 1 tile-size)
+         (slice_vectors expr (+ st 3) 1 tile-size))
+        (break-to-deinterleavedx2-tiles halide-expr tile-size (+ st tile-size)))]
+      [else
+       (list
+        (slice_vectors expr st 1 tile-size)
+        (slice_vectors expr (+ st 1) 1 tile-size)
+        (slice_vectors expr (+ st 2) 1 tile-size)
+        (slice_vectors expr (+ st 3) 1 tile-size))]))
+        
+  (cond
+    [(eq? output-layout 'in-order) (break-to-standard-tiles halide-expr elems-per-hvx-tile 0)]
+    [(and (eq? output-layout 'deinterleaved) (eq? hvx-tile-size 1024))
+     (break-to-deinterleaved-tiles halide-expr (* 2 elems-per-hvx-tile) 0)]
+    [(and (eq? output-layout 'deinterleaved) (eq? hvx-tile-size 2048))
+     (break-to-standard-tiles halide-expr elems-per-hvx-tile 0)]
+    [(and (eq? output-layout 'deinterleavedx2) (eq? hvx-tile-size 1024))
+     (break-to-deinterleavedx2-tiles halide-expr (* 4 elems-per-hvx-tile) 0)]
+    [(and (eq? output-layout 'deinterleavedx2) (eq? hvx-tile-size 2048))
+     (break-to-deinterleaved-tiles halide-expr (* 2 elems-per-hvx-tile) 0)]
+    [(and (eq? output-layout 'interleaved) (eq? hvx-tile-size 1024))
+     (break-to-standard-tiles halide-expr elems-per-hvx-tile 0)]
+    [(and (eq? output-layout 'interleaved) (eq? hvx-tile-size 2048))
+     (break-to-standard-tiles halide-expr (* 2 elems-per-hvx-tile) 0)]
+    [else (error "NYI")]))
+
+;;--------------------------
+
+
+(define (synthesize-lowered-impl ir-expr ir-annotations ir-bounds lowering-algo swizzling-algo sub-expr? output-layout subexpr-layout)
+  ;; Push node to trace
+  (set! trace (append (list ir-expr) trace))
+        
+  ;; Generate HVX sub-expressions that produce output in subexpr-layout
+  (define-values (successful? hvx-sub-exprs) (lower-sub-exprs ir-expr (hvx-ir:get-subexprs ir-expr) ir-annotations ir-bounds lowering-algo swizzling-algo sub-expr? subexpr-layout))
+
+  ;; Pop node from trace
+  (set! trace (rest trace))
+
+  (cond
+    ;; If we were able to lower the sub-exprs, use them to construct the lowered expression
+    [successful? (lower-expr ir-expr ir-annotations lowering-algo swizzling-algo sub-expr? output-layout hvx-sub-exprs)]
+    [else #f]))
+
+;(define (lower-sub-exprs ir-expr ir-sub-exprs ir-annotations ir-bounds lowering-algo swizzling-algo sub-expr? subexpr-layout)
+;    (cond
+;      [(empty? ir-sub-exprs) (values #t '())]
+;      [else
+;       ;; Lower current subexpr
+;       (define ir-sub-expr (first ir-sub-exprs))
+;       (define hvx-sub-expr-impls (synthesize-hvx-expr ir-sub-expr ir-annotations ir-bounds lowering-algo swizzling-algo (or sub-expr? (not (combine? ir-expr))) subexpr-layout))
+;       (cond
+;         [(empty? hvx-sub-expr-impls) (values #f '())]
+;         [else
+;          ;; Save bounds information
+;          (when (hash-has-key? ir-bounds (ir-node-id ir-sub-expr))
+;            (for ([impl hvx-sub-expr-impls])
+;              (hash-set! value-bounds impl (hash-ref ir-bounds (ir-node-id ir-sub-expr)))))
+;
+;          ;; Lower remaining subexprs
+;          (define-values (successful? lowered-exprs) (lower-sub-exprs ir-expr (rest ir-sub-exprs) ir-annotations ir-bounds lowering-algo swizzling-algo sub-expr? subexpr-layout))
+;          (cond
+;            [successful? (values #t (flatten (append hvx-sub-expr-impls lowered-exprs)))]
+;            [else (values #f '())])])]))
+
 
 (define (swizzle-only? hvx-template)
   (or (??load? hvx-template) (??abstr-load? hvx-template) (??shuffle? hvx-template)))

@@ -185,7 +185,7 @@
 (define (lane-eq? oe se output-layout lane)
   (define offset (quotient (hvx:num-elems se) 2))
   (cond
-    [(eq? output-layout 'standard)
+    [(eq? output-layout 'in-order)
       (hvx:set-curr-cn lane)
       (cond
         [(and (hvx:vec-pair? se) (< lane offset))

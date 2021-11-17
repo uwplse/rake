@@ -26,13 +26,13 @@
         (define hvx-expr (synthesize-hvx-expr ir-expr ir-annotations ir-bounds lowering-algo swizzling-algo))
 
         ;; Full verification of the synthesized expression
-        (define correct? (verify-equivalence (spec-expr spec) (first hvx-expr) (spec-axioms spec)))
+        (define correct? (verify-equivalence (spec-expr spec) hvx-expr (spec-axioms spec)))
 
         (cond
           [correct?
-            (pretty-print (first hvx-expr))
+            (pretty-print hvx-expr)
             (display "Synthesized solution is correct.\n\n")
-            (first hvx-expr)]
+            hvx-expr]
           [else
             (display "Synthesized solution is incorrect.\n\n")
             (exit 1)])]

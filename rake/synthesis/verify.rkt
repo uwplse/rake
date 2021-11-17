@@ -24,7 +24,8 @@
 
 (define (verify-equivalence halide-expr hvx-expr axioms)
   (display "Verifying expression equivalence over full-length vectors...\n")
-  (display "============================================================\n")
+  (display "============================================================\n\n")
+  (display "Progress: [")
 
   (define elem-count-hal (halide:vec-len halide-expr))
   (define elem-count-hvx (hvx-vec-len (if (concat-tiles? hvx-expr) (concat-tiles-vecs hvx-expr) (list hvx-expr))))
@@ -45,7 +46,7 @@
         (verify-equiv halide-output hvx-output (verification-lanes (hvx:type hvx-output)) (symbolics halide-expr) axioms is-hvx-pair? offset)]))
 
   (define runtime (- (current-milliseconds) st))
-  (display (format "Verification time: ~a ms\n\n" runtime))
+  (display (format "]\n\nVerification time: ~a ms\n\n" runtime))
   
   correct?)
 
@@ -71,7 +72,7 @@
     [(empty? lanes) #t]
     [else
      (define lane (first lanes))
-     (display (format "Lane: ~a\n" lane))
+     (display "=")
      (define sol (verify-lane halide-output hvx-output lane ctx axioms is-hvx-pair? offset))
      (cond
        [(or (unsat? sol) (unknown? sol)) #f]
