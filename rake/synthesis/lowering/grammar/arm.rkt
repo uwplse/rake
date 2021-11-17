@@ -52,7 +52,7 @@
 
 (define (handle-vs-mpy-add expr weights output-type arm-sub-exprs halide-expr)
   (let* ([input-type (get-input-type expr)]
-         [widening? (eq? (cpp:type-bw output-type) (* 2 (cpp:type-bw input-type)))]
+         [widening? (>= (cpp:type-bw output-type) (* 2 (cpp:type-bw input-type)))]
          ; TODO: better pruning and more isa options
          [isa (if widening?
                 (list arm:reinterpret arm:add arm:addv arm:saddlv arm:uaddlv arm:saddl arm:saddw arm:saddlp arm:sadalp arm:smlal-vs arm:smlsl-vs arm:sdot.v2i32.v8i8 arm:udot.v2i32.v8i8 arm:sdot.v4i32.v16i8 arm:udot.v4i32.v16i8 arm:shll arm:ssubl arm:sub arm:uadalp arm:uaddl arm:uaddlp arm:uaddw arm:umlal-vs arm:umlsl-vs arm:usubl arm:usubw arm:smull-vs arm:umull-vs)
@@ -73,6 +73,12 @@
                                                     [_ node]))])
                             (arm:visit expr extract-buffer)
                             live-bufs))])
+
+    (display "Hey there!\n")
+    ; (pretty-print candidates)
+    ; (display (format "~a ~a ~a\n" isa desired-types grouped-sub-exprs))
+    ; (pretty-print grouped-sub-exprs)
+    ; (display (format "Types; ~a ~a ~a\n" input-type output-type widening?))
 
     ;; Filter out templates that read too much or too little data
     (set! candidates (time (filter (lambda (c) (eq? (arm:max-unique-inputs (car c)) number-reads)) candidates)))
@@ -421,10 +427,6 @@
 
       ; Inductive step
       [else
-        ;(display (format "depth: ~a\n" depth))
-        ;(display (format "output-types: ~a\n" output-types))
-        ;(display "base-exprs: \n")
-        ;(pretty-print base-exprs)
         (let* ([sub-candidates (enumerate-arm instr-set output-types base-exprs (- depth 1) max-cost read-count parent-instr arg-pos)]
                [curried-builder (curryr build-instr-exprs instr-set output-types base-exprs depth max-cost read-count)]
                ; TODO: HVX does more filtering here, we do not for now.
@@ -433,7 +435,16 @@
                [candidates-cost (filter (lambda (expr) (<= (cdr expr) max-cost)) candidates)]
                [candidates-read (if (eq? read-count -1) candidates-cost (filter (lambda (expr) (<= (arm:max-unique-inputs (car expr)) read-count)) candidates-cost))]
                [candidates-unique (set->list (list->set candidates-read))])
-          ;(println candidates-unique)
+          ; (display (format "depth: ~a\n" depth))
+          ; (display (format "output-types: ~a\n" output-types))
+          ; (display "base-exprs: \n")
+          ; (pretty-print base-exprs)
+          ; (display "candidates: \n")
+          ; (println candidates)
+          ; (display "candidates-unique: \n")
+          ; (println candidates-unique)
+          ; (display "parent-instr: \n")
+          ; (println parent-instr)
           ;(pretty-print base-exprs)
           (hash-set! enumeration-cache key candidates-unique)
           candidates-unique)])))
