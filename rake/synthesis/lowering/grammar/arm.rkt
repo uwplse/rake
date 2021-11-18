@@ -74,7 +74,7 @@
                             (arm:visit expr extract-buffer)
                             live-bufs))])
 
-    (display "Hey there!\n")
+    ; (display "Hey there!\n")
     ; (pretty-print candidates)
     ; (display (format "~a ~a ~a\n" isa desired-types grouped-sub-exprs))
     ; (pretty-print grouped-sub-exprs)
