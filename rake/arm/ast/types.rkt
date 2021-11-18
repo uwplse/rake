@@ -187,6 +187,9 @@
 (struct ext16i14 (Vn Vm) #:transparent)                     ;; extract_vectors_16i14
 (struct ext16i15 (Vn Vm) #:transparent)                     ;; extract_vectors_16i15
 
+;; ARM instructions for vector creation
+(struct ld (buf loc align output-type) #:transparent)
+;; TODO: add the rest of the options
 
 ;; Special added instructions
 (struct reinterpret (Vd) #:transparent)
@@ -241,6 +244,16 @@
      (make-constructor-style-printer
       (lambda (obj) `arm:abstr-expr)
       (lambda (obj) (list ))))])
+
+(struct ??sub-expr (exprs c)
+  #:transparent
+  #:methods gen:custom-write
+  [(define write-proc
+     (make-constructor-style-printer
+      (lambda (obj) `??sub-expr)
+      (lambda (obj) (if (concrete? (??sub-expr-c obj))
+                        (list (list-ref (??sub-expr-exprs obj) (??sub-expr-c obj)))
+                        (list (length (??sub-expr-exprs obj)) (??sub-expr-c obj))))))])
 
 ;; Concat vectors (not an intrinsic but a useful construct)
 (struct concat-tiles (vecs) #:transparent)

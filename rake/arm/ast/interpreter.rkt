@@ -7026,5 +7026,9 @@
         [(arm:u32x8 v0) (arm:i32x8 (lambda (i) (int32_t (cpp:eval (v0 i)))))]
         [(arm:u64x4 v0) (arm:i64x4 (lambda (i) (int64_t (cpp:eval (v0 i)))))])]
 
+    [(arm:ld buf loc align output-type)
+      (let ([vecType (arm:get-type-struct output-type)])
+        (vecType
+          (lambda (i) (halide:buffer-ref buf (+ (interpret loc) i)))))]
 
     [_ p]))
