@@ -10,7 +10,7 @@
   ;rosette/lib/match
   ;rosette/lib/destruct
   rake/internal/error
-  ;rake/cpp
+  rake/cpp
   rake/halide
   rake/arm/ir/instructions
   rake/arm/ir/interpreter
@@ -19,7 +19,7 @@
   ;rake/hvx/cost-model
   ;rake/synthesis/bounds
   rake/synthesis/lowering/algorithm
-  ;rake/synthesis/swizzling/algorithm
+  rake/synthesis/swizzling/arm
   rake/synthesis/lowering/synthesizer/arm
   )
 
@@ -149,6 +149,68 @@
 (define (swizzle-only? arm-template)
   (or (arm:??load? arm-template) (arm:??abstr-load? arm-template) (arm:??shuffle? arm-template)))
 
+(define (construct-incremental-swizzle-helper arm-template swizzle-budget swizzling-algo arm-sub-exprs num-tiles)
+  (define (incremental-swizzle-helper tiles tile-id)
+    (if (empty? tiles)
+      (values #t '() 0)
+      (let ([tile (first tiles)])
+        (define-values (successful? arm-expr swizzle-cost)
+          (synthesize-arm-swizzles tile arm-template swizzle-budget swizzling-algo arm-sub-exprs value-bounds translation-history tile-id num-tiles))
+
+        (if successful?
+          (begin
+            (define-values (successful? rem-tiles swizzle-cost-rest)
+              (incremental-swizzle-helper (rest tiles) (add1 tile-id)))
+          
+            (if successful?
+              ; TODO: the HVX version doesn't add the cost...?
+              (values #t (append (list arm-expr) rem-tiles) swizzle-cost)
+              (values #f '() 0)))
+          (values #f '() 0)))))
+  incremental-swizzle-helper)
+        
+(define (incremental-swizzle halide-expr arm-template arm-sub-exprs swizzling-algo template-cost cost-ub)
+  (let* ([swizzle-budget (- cost-ub template-cost 0.01)]
+         ; TODO: how the heck do we do this calculation?
+         [arm-tile-size 128]
+         [halide-tile-elem-count (halide:vec-len halide-expr)]
+         [halide-tile-elem-bits (cpp:type-bw (halide:elem-type halide-expr))]
+         [halide-tile-size (* halide-tile-elem-count halide-tile-elem-bits)]
+         [elems-per-arm-tile (quotient arm-tile-size halide-tile-elem-bits)])
+      
+    (define (break-to-tiles expr tile-size st)
+      (cond
+        [(< tile-size (- halide-tile-elem-count st)) (cons (slice_vectors expr st 1 tile-size) (break-to-tiles halide-expr tile-size (+ st tile-size)))]
+        [(eq? st 0) (list halide-expr)]
+        [else (list (slice_vectors expr st 1 tile-size))]))
+    
+    (define halide-expr-tiles (break-to-tiles halide-expr elems-per-arm-tile 0))
+
+    (display "Made it this far\n")
+    (pretty-print halide-expr-tiles)
+
+    (if (< 1 (length halide-expr-tiles))
+      (let ([incremental-swizzler (construct-incremental-swizzle-helper arm-template swizzle-budget swizzling-algo arm-sub-exprs (length halide-expr-tiles))])
+        (define-values (successful? arm-tiles swizzle-cost)
+          (incremental-swizzler halide-expr-tiles 1))
+
+        (display (format "Template Cost: ~a\n" template-cost))
+        (display (format "Swizzle Cost: ~a\n\n" swizzle-cost))
+
+        (if successful?
+          (values #t (arm:concat-tiles arm-tiles) (+ template-cost swizzle-cost -0.01) template-cost swizzle-cost)
+          (error "Why does this recurse??")))
+      (begin
+        (define-values (successful? arm-expr swizzle-cost)
+          (synthesize-arm-swizzles halide-expr arm-template swizzle-budget swizzling-algo arm-sub-exprs value-bounds translation-history))
+
+        (display (format "Template Cost: ~a\n" template-cost))
+        (display (format "Swizzle Cost: ~a\n\n" swizzle-cost))
+
+        (if successful?
+          (values #t arm-expr (+ template-cost swizzle-cost -0.01) template-cost swizzle-cost)
+          (error "Why does this recurse??"))))))
+
 (define (lower-to-arm halide-expr ir-expr arm-sub-exprs lowering-algo swizzling-algo sub-expr? cost-ub)
   ;; Synthesize equivalent ARM template (compute instructions)
   (define-values (successful? arm-template template-cost)
@@ -169,6 +231,7 @@
               ; TODO: do we need the incremental swizzling stuff?
               (pretty-print arm-template)
               (pretty-print halide-expr)
+              (incremental-swizzle halide-expr arm-template arm-sub-exprs swizzling-algo template-cost cost-ub)
               (error "we done")
           ))
       (values #f (void) 0 0 0))

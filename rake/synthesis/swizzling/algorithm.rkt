@@ -20,7 +20,7 @@
 
       (display (format "Target output layout: ~a\n\n" output-layout))
       
-      (define starting-vecs (halide:extract-loads halide-expr))
+      (define starting-vecs (halide:extract-hvx-loads halide-expr))
       
       ;; Extract set of swizzle nodes to be synthesized
       (define swizzle-nodes (list))
