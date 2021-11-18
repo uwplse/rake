@@ -17,7 +17,8 @@
 (provide
  (prefix-out halide: extract-live-buffers)
  (prefix-out halide: extract-buffer-reads)
- (prefix-out halide: extract-loads)
+ (prefix-out halide: extract-hvx-loads)
+ (prefix-out halide: extract-arm-loads)
  (prefix-out halide: extract-add-scalars)
  (prefix-out halide: extract-sub-scalars)
  (prefix-out halide: extract-mul-scalars)
@@ -193,7 +194,7 @@
   (set->list minmax-scalars))
 
 ;; Extract vectors
-(define (extract-loads expr)
+(define (extract-hvx-loads expr)
   (define loads (mutable-set))
   (define (extract-load-ops node)
     (destruct node
@@ -228,6 +229,51 @@
                  (list buf (sca-add base (quotient 5120 elem-bw)) align)
                  (list buf (sca-add base (quotient 6144 elem-bw)) align)
                  (list buf (sca-add base (quotient 7168 elem-bw)) align))]
+               [else
+                (error "NYI: Extracting vec from:" expr)]))
+           (set-union! loads lds)]
+        [_ (error "NYI: Extracting vec from:" expr)])]
+      ;; Ignore everything else
+      [_ node]))
+  (halide:visit expr extract-load-ops)
+  (set->list loads))
+
+;; Extract vectors
+(define (extract-arm-loads expr)
+  (define loads (mutable-set))
+  (define (extract-load-ops node)
+    (destruct node
+      [(load buf idxs align)
+        (destruct idxs
+          [(ramp base stride len)
+           (define elem-bw (cpp:type-bw (buffer-elemT buf)))
+           (define tile-w (* len stride elem-bw))
+           (define lds
+             (cond
+               [(< tile-w 128)
+                (error "ARM load too small ~a" expr)]
+               [(eq? tile-w 128)
+                (set (list buf base align))]
+               [(eq? tile-w 256)
+                (set
+                 (list buf base align)
+                 (list buf (sca-add base (quotient 128 elem-bw)) align))]
+               [(eq? tile-w 512)
+                (set
+                 (list buf base align)
+                 (list buf (sca-add base (quotient 128 elem-bw)) align)
+                 (list buf (sca-add base (quotient 256 elem-bw)) align)
+                 (list buf (sca-add base (quotient 384 elem-bw)) align))]
+               [(eq? tile-w 1024)
+                (set
+                 (list buf base align)
+                 (list buf (sca-add base (quotient 128 elem-bw)) align)
+                 (list buf (sca-add base (quotient 256 elem-bw)) align)
+                 (list buf (sca-add base (quotient 384 elem-bw)) align)
+                 (list buf (sca-add base (quotient 512 elem-bw)) align)
+                 (list buf (sca-add base (quotient 640 elem-bw)) align)
+                 (list buf (sca-add base (quotient 768 elem-bw)) align)
+                 (list buf (sca-add base (quotient 896 elem-bw)) align))]
                [else
                 (error "NYI: Extracting vec from:" expr)]))
            (set-union! loads lds)]
