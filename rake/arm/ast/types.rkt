@@ -372,6 +372,10 @@
 
 (define (instr-forms instr)
   (cond
+    [(eq? ld instr) (list
+                         (instr-sig 'u8x8 (list 'bufu8))
+                         )]
+
     [(eq? abs instr) (list
                          (instr-sig 'u8x8 (list 'i8x16))
                          (instr-sig 'u16x4 (list 'i16x8))

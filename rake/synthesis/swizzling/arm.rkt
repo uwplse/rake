@@ -132,8 +132,9 @@
         (synthesize-arm-translation (rest templates) halide-expr arm-sub-exprs value-bounds translation-history)])]))
 
 (define (run-synthesizer template halide-expr arm-sub-exprs value-bounds translation-history)
-  ;(println halide-expr)
-  ;(pretty-print template)
+  (display "run-synthesizer\n")
+  (println halide-expr)
+  (pretty-print template)
 
   ;(define-values (optimized-halide-expr optimized-template inferred-axioms)
     ;(optimize-query halide-expr template arm-sub-exprs value-bounds translation-history))
@@ -142,8 +143,14 @@
   ;(pretty-print optimized-template)
   
   ;; Incrementally checks the template for more and more lanes
+  (display "\n\ngot here 0\n\n")
   (define sym-consts (set->list (set-subtract (list->set (symbolics template)) (list->set (symbolics halide-expr)))))
+  (display "\n\ngot here 1\n\n")
+  (pretty-print sym-consts)
+  (pretty-print (arm:interpret template))
   (define lanes-to-verify (verification-lanes (arm:type (arm:interpret template))))
+  (pretty-print lanes-to-verify)
+  (display "\n\ngot here 2\n\n")
   (synthesize-incremental halide-expr template sym-consts lanes-to-verify '()))
 
 (define grammar-lib (make-hash))
@@ -154,6 +161,7 @@
       (hash-ref grammar-lib (list halide-expr arm-template swizzle-node starting-vecs arm-sub-exprs))]
     [else
       (define candidates (get-arm-swizzle-grammar-gen halide-expr arm-template swizzle-budget swizzle-node starting-vecs arm-sub-exprs translation-history))
+      (display (format "Got this far: ~a\n\n" (length candidates)))
       (hash-set! grammar-lib (list halide-expr arm-template swizzle-node starting-vecs arm-sub-exprs) candidates)
       candidates]))
 
@@ -272,15 +280,16 @@
     [(eq? type 'u64x4) (range 4)]))
 
 (define (synthesize-incremental halide-expr template sym-consts lanes-to-verify discarded-sols)
+  (display "\n\nsynthesize-incremental\n\n")
   (cond
     [(empty? lanes-to-verify) (model)]
     [else
      (define curr-lane (first lanes-to-verify))
      
-     ;(display (format "Verifying lane: ~a\n" curr-lane))
-     ;(set-curr-cn! curr-lane)
-     ;(println ((halide:interpret halide-expr) curr-lane))
-     ;(println (let ([x (arm:interpret template)]) (arm:elem x curr-lane)))
+     (display (format "Verifying lane: ~a\n" curr-lane))
+     (set-curr-cn! curr-lane)
+     (println ((halide:interpret halide-expr) curr-lane))
+     (println (arm:get-element (arm:interpret template) curr-lane))
      
      (define st (current-milliseconds))
      (clear-vc!)

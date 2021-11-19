@@ -169,7 +169,7 @@
           (values #f '() 0)))))
   incremental-swizzle-helper)
         
-(define (incremental-swizzle halide-expr arm-template arm-sub-exprs swizzling-algo template-cost cost-ub)
+(define (incremental-swizzle halide-expr ir-expr arm-template arm-sub-exprs lowering-algo swizzling-algo template-cost cost-ub sub-expr?)
   (let* ([swizzle-budget (- cost-ub template-cost 0.01)]
          ; TODO: how the heck do we do this calculation?
          [arm-tile-size 128]
@@ -199,7 +199,8 @@
 
         (if successful?
           (values #t (arm:concat-tiles arm-tiles) (+ template-cost swizzle-cost -0.01) template-cost swizzle-cost)
-          (error "Why does this recurse??")))
+          (lower-to-arm halide-expr ir-expr arm-sub-exprs lowering-algo swizzling-algo sub-expr? cost-ub)))
+          ; (error "Why does incremental-swizzle plural recurse??")))
       (begin
         (define-values (successful? arm-expr swizzle-cost)
           (synthesize-arm-swizzles halide-expr arm-template swizzle-budget swizzling-algo arm-sub-exprs value-bounds translation-history))
@@ -209,7 +210,8 @@
 
         (if successful?
           (values #t arm-expr (+ template-cost swizzle-cost -0.01) template-cost swizzle-cost)
-          (error "Why does this recurse??"))))))
+          ; (error "Why does incremental-swizzle single recurse??"))))))
+          (lower-to-arm halide-expr ir-expr arm-sub-exprs lowering-algo swizzling-algo sub-expr? cost-ub))))))
 
 (define (lower-to-arm halide-expr ir-expr arm-sub-exprs lowering-algo swizzling-algo sub-expr? cost-ub)
   ;; Synthesize equivalent ARM template (compute instructions)
@@ -231,7 +233,7 @@
               ; TODO: do we need the incremental swizzling stuff?
               (pretty-print arm-template)
               (pretty-print halide-expr)
-              (incremental-swizzle halide-expr arm-template arm-sub-exprs swizzling-algo template-cost cost-ub)
+              (incremental-swizzle halide-expr ir-expr arm-template arm-sub-exprs lowering-algo swizzling-algo template-cost cost-ub sub-expr?)
               (error "we done")
           ))
       (values #f (void) 0 0 0))

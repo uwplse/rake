@@ -7031,4 +7031,6 @@
         (vecType
           (lambda (i) (halide:buffer-ref buf (+ (interpret loc) i)))))]
 
+    [(arm:??sub-expr exprs c) (interpret (list-ref exprs c))]
+
     [_ p]))
