@@ -365,7 +365,7 @@
   (for ([arm-sub-expr arm-sub-exprs-untiled])
     (cond
       [(arm:??abstr-load? arm-sub-expr)
-       (define elemT (arm:elem-type (arm:interpret arm-sub-expr)))
+       (define elemT (arm:get-interpreted-elem-type arm-sub-expr))
        (for ([out-type (arm:get-vector-types elemT)])
          (set! swizzle-node-id (add1 swizzle-node-id))
          (define live-data (arm:??abstr-load-live-data arm-sub-expr))
@@ -375,7 +375,7 @@
          (define exprs (hash-ref! grouped-sub-exprs out-type (set)))
          (hash-set! grouped-sub-exprs out-type (set-add exprs base-load-expr)))]
       [(arm:??shuffle? arm-sub-expr)
-       (define elemT (arm:elem-type (arm:interpret arm-sub-expr)))
+       (define elemT (arm:get-interpreted-elem-type arm-sub-expr))
        (for ([out-type (arm:get-vector-types elemT)])
          (set! swizzle-node-id (add1 swizzle-node-id))
          (define base-load-expr (arm:??shuffle swizzle-node-id (arm:??shuffle-lds arm-sub-expr) out-type))
@@ -383,7 +383,7 @@
          (hash-set! grouped-sub-exprs out-type (set-add exprs base-load-expr)))]
       ; TODO: ask Maaz about the vspalt cond here from the HVX code
       [else
-       (define sub-expr-type (arm:type (arm:interpret arm-sub-expr)))
+       (define sub-expr-type (arm:get-interpreted-type arm-sub-expr))
        (define exprs (hash-ref! grouped-sub-exprs sub-expr-type (set)))
        (hash-set! grouped-sub-exprs sub-expr-type (set-add exprs arm-sub-expr))]))
 

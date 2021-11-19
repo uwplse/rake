@@ -36,10 +36,12 @@
   ;; Push node to trace
   (set! trace (append (list ir-expr) trace))
 
+  (display "here 1\n")
   ;; Lower sub-expressions first
   (define-values (successful? arm-sub-exprs)
     (lower-sub-exprs ir-expr (arm-ir:get-subexprs ir-expr) ir-annotations ir-bounds lowering-algo swizzling-algo sub-expr?))
 
+  (display "here 2\n")
   ;; Pop node from trace
   (set! trace (rest trace))
 
@@ -77,7 +79,7 @@
   (cond
     ;; For combine nodes (data shuffle), unless we are the root node just pass the sub-expressions to the parent.
     ;; If we are, however, the root node then we must synthesize the shuffles now.
-    [(and sub-expr? (arm-ir:combine? ir-expr)) arm-sub-exprs]
+    [(and sub-expr? (arm-ir:combine? ir-expr)) (values #t arm-sub-exprs)]
 
     ;; Does the annotation map contain the equivalent halide (sub-)expression?
     [(hash-has-key? ir-annotations key)
@@ -218,7 +220,7 @@
   (define-values (successful? arm-template template-cost)
     (synthesize-arm-template halide-expr ir-expr arm-sub-exprs value-bounds translation-history lowering-algo cost-ub))
 
-  ;(display "here\n")
+  (display "here\n")
   ;(pretty-print arm-template)
   ;(pretty-print halide-expr)
   ;(display (swizzle-only? arm-template))
@@ -234,7 +236,6 @@
               (pretty-print arm-template)
               (pretty-print halide-expr)
               (incremental-swizzle halide-expr ir-expr arm-template arm-sub-exprs lowering-algo swizzling-algo template-cost cost-ub sub-expr?)
-              (error "we done")
           ))
       (values #f (void) 0 0 0))
 

@@ -253,7 +253,11 @@
                [(< tile-w 128)
                 (error "ARM load too small ~a" expr)]
                [(eq? tile-w 128)
-                (set (list buf base align))]
+                (set
+                  (list buf base align)
+                  (list buf (sca-add base (quotient 32 elem-bw)) align)
+                  (list buf (sca-add base (quotient 64 elem-bw)) align)
+                )]
                [(eq? tile-w 256)
                 (set
                  (list buf base align)

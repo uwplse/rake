@@ -16,6 +16,7 @@
   rake/arm/ast/types
   rake/arm/ast/visitor
   rake/arm/ast/interpreter
+  rake/arm/ast/analysis
   rake/internal/counter
 )
 
@@ -30,8 +31,10 @@
       ; (display (format "Target output layout: ~a\n\n"))
       
       (define starting-vecs (halide:extract-arm-loads halide-expr))
-      ; (display (format "Halide Expr: ~a\n\n" halide-expr))
-      ; (display (format "with loads: ~a\n\n" starting-vecs))
+      (display (format "Halide Expr: ~a\n\n" halide-expr))
+      (display "with loads:\n")
+      (pretty-print starting-vecs)
+      (display "\n\n\n\n")
 
       ;; Extract set of swizzle nodes to be synthesized
       (define swizzle-nodes (list))
@@ -42,8 +45,7 @@
           [(arm:??load id live-data buffer gather-tbl pair?) (set! swizzle-nodes (append (list node) swizzle-nodes)) node]
           [(arm:??swizzle id live-data expr gather-tbl pair?) (set! swizzle-nodes (append (list node) swizzle-nodes)) node]
           [_ node]))
-      ; TODO: I think this should be visit-shallow
-      (arm:visit arm-template register-gather-node)
+      (arm:visit-shallow arm-template register-gather-node)
       
       ;; Synthesize an implementation for each swizzle node incrementally
       (synthesize-swizzle-nodes (reverse swizzle-nodes) starting-vecs arm-template swizzle-budget halide-expr arm-sub-exprs value-bounds translation-history)]
@@ -88,17 +90,19 @@
   ;; Get swizzle grammar
   (define candidates (get-arm-swizzle-grammar halide-expr arm-template swizzle-budget swizzle-node starting-vecs arm-sub-exprs translation-history))
 
+  (display "Candidates\n")
+  (pretty-print candidates)
   ;; Run synthesizer
   (define-values (successful? updated-template) (synthesize-arm-translation candidates halide-expr arm-sub-exprs value-bounds translation-history))
   
   (cond
     [successful?
      ;; Inline sub-expr nodes
-    ;  (define (inline-subexprs node [pos -1])
-    ;    (destruct node
-    ;      [(arm:??sub-expr exprs c) (list-ref exprs (if (concrete? c) c (evaluate c (complete-solution (sat) (list c)))))]
-    ;      [_ node]))
-    ;  (set! updated-template (cons (arm:visit (car updated-template) inline-subexprs) (cdr updated-template)))
+     (define (inline-subexprs node [pos -1])
+       (destruct node
+         [(arm:??sub-expr exprs c) (list-ref exprs (if (concrete? c) c (evaluate c (complete-solution (sat) (list c)))))]
+         [_ node]))
+     (set! updated-template (cons (arm:visit (car updated-template) inline-subexprs) (cdr updated-template)))
      
      (display "\nSuccessfully found a swizzle implementation.\n\n")
      (display (format "~a\n\n" (pretty-format (car updated-template))))
@@ -132,9 +136,9 @@
         (synthesize-arm-translation (rest templates) halide-expr arm-sub-exprs value-bounds translation-history)])]))
 
 (define (run-synthesizer template halide-expr arm-sub-exprs value-bounds translation-history)
-  (display "run-synthesizer\n")
-  (println halide-expr)
-  (pretty-print template)
+  ; (display "run-synthesizer\n")
+  ; (println halide-expr)
+  ; (pretty-print template)
 
   ;(define-values (optimized-halide-expr optimized-template inferred-axioms)
     ;(optimize-query halide-expr template arm-sub-exprs value-bounds translation-history))
@@ -143,14 +147,11 @@
   ;(pretty-print optimized-template)
   
   ;; Incrementally checks the template for more and more lanes
-  (display "\n\ngot here 0\n\n")
   (define sym-consts (set->list (set-subtract (list->set (symbolics template)) (list->set (symbolics halide-expr)))))
-  (display "\n\ngot here 1\n\n")
-  (pretty-print sym-consts)
-  (pretty-print (arm:interpret template))
-  (define lanes-to-verify (verification-lanes (arm:type (arm:interpret template))))
-  (pretty-print lanes-to-verify)
-  (display "\n\ngot here 2\n\n")
+  ; (display "\n\nrunning synthesizer on...\n\n")
+  ; (pretty-print (arm:interpret template))
+  ; (pretty-print halide-expr)
+  (define lanes-to-verify (verification-lanes (arm:get-interpreted-type template)))
   (synthesize-incremental halide-expr template sym-consts lanes-to-verify '()))
 
 (define grammar-lib (make-hash))
@@ -173,9 +174,11 @@
   ; (display "hello?\n")
   (define-values (target-node-id base-exprs)
     (extract-swizzle-information swizzle-node starting-vecs))
-  ; (display (format "extracted information ~a ~a\n\n" target-node-id base-exprs))
+  (display (format "\n\nextracted information ~a\n" target-node-id))
+  (pretty-print base-exprs)
   ; (display "here?\n\n")
-  ; (pretty-print starting-vecs)
+  (pretty-print starting-vecs)
+  (display "\nEnd information extraction\n\n")
   (let* ([intr-expr (arm:interpret swizzle-node)]
          [elem-type (arm:elem-type intr-expr)]
          [output-type (get-output-type swizzle-node)]
@@ -183,7 +186,7 @@
          [isa (list arm:zip arm:uzip1 arm:uzip2 arm:dup arm:dupw arm:dupn arm:trn1 arm:trn2)]
          [grouped-base-exprs (make-hash)])
     (for ([base base-exprs])
-      (let ([base-type (arm:type (arm:interpret base))])
+      (let ([base-type (arm:get-interpreted-type base)])
         (hash-set! grouped-base-exprs base-type (append (hash-ref! grouped-base-exprs base-type '()) (list base)))))
     (for ([(t base) grouped-base-exprs])
       (define-symbolic* c integer?)
@@ -199,7 +202,7 @@
   ;; TODO: there is a bunch of updating that I do not understand in the hvx version (grammar.rkt)
   (define updated-template arm-template)
 
-  (define tmpl-type (arm:type (arm:interpret arm-template)))
+  (define tmpl-type (arm:get-interpreted-type arm-template))
   (define tmpl-elem-type (arm:elem-type tmpl-type))
   (define candidates (construct-candidates updated-template candidate-swizzles target-node-id))
   (define sorted-candidates (sort candidates (lambda (v1 v2) (<= (cdr v1) (cdr v2)))))
@@ -229,8 +232,7 @@
           [(arm:??swizzle id live-data expr gather-tbl pair?) (if (equal? id target-node-id) (arm:visit (car candidate-swizzle) uniquify-sub-exprs) node)]
           [_ node]))
 
-      ; TODO: I think this should be visit-shallow
-      (define updated-candidate (arm:visit updated-template repl-swizzle-node-with-candidate))
+      (define updated-candidate (arm:visit-shallow updated-template repl-swizzle-node-with-candidate))
       (define cost (cdr candidate-swizzle))
       (list (cons updated-candidate cost)))))
 
@@ -280,16 +282,16 @@
     [(eq? type 'u64x4) (range 4)]))
 
 (define (synthesize-incremental halide-expr template sym-consts lanes-to-verify discarded-sols)
-  (display "\n\nsynthesize-incremental\n\n")
+  ; (display "\n\nsynthesize-incremental\n\n")
   (cond
     [(empty? lanes-to-verify) (model)]
     [else
      (define curr-lane (first lanes-to-verify))
      
-     (display (format "Verifying lane: ~a\n" curr-lane))
-     (set-curr-cn! curr-lane)
-     (println ((halide:interpret halide-expr) curr-lane))
-     (println (arm:get-element (arm:interpret template) curr-lane))
+    ;  (display (format "Verifying lane: ~a\n" curr-lane))
+    ;  (set-curr-cn! curr-lane)
+    ;  (println ((halide:interpret halide-expr) curr-lane))
+    ;  (println (arm:get-element (arm:interpret template) curr-lane))
      
      (define st (current-milliseconds))
      (clear-vc!)
@@ -387,7 +389,11 @@
 
 ;; TODO: prune bad swizzle combinations
 (define (keep? parent-instr child-instr)
-  #t)
+  (not
+   (or
+    ; (eq? parent-instr child-instr)
+    (and (eq? parent-instr arm:reinterpret) (eq? child-instr arm:reinterpret))
+   )))
   ; (not
   ;  (or
   ;   (eq? parent-instr child-instr)

@@ -8,6 +8,7 @@
   rake/halide
   rake/arm/ast/types
   rake/arm/ast/interpreter
+  rake/arm/ast/analysis
   rake/synthesis/lowering/utils/arm
   rake/internal/counter)
 
@@ -94,7 +95,7 @@
   ;(pretty-print template)
   ;(display (arm:??shuffle? template))
   ;(newline)
-  (define lanes-to-verify (verification-lanes (arm:type (arm:interpret optimized-template))))
+  (define lanes-to-verify (verification-lanes (arm:get-interpreted-type optimized-template)))
   (synthesize-incremental optimized-halide-expr optimized-template inferred-axioms lanes-to-verify '()))
 
 (define (synthesize-incremental optimized-halide-expr optimized-template inferred-axioms lanes-to-verify discarded-sols)

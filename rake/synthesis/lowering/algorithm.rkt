@@ -63,5 +63,5 @@
           (values #t (car arm-template) (cdr arm-template))]
         [else
           (display "Failed to synthesize template.\n\n")
-          (values #f (void) 0 )])]
+          (values #f (void) 0)])]
     [else (error (format "Unrecognized lowering algorithm specified: '~a. Supported algorithms: ['enumerative]" lowering-algo))]))

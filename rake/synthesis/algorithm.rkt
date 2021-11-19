@@ -56,10 +56,12 @@
         (define-values (lowering-success? arm-expr)
           (synthesize-arm-expr ir-expr ir-annotations ir-bounds lowering-algo swizzling-algo))
 
-        (display "synthesize-arm success!\n")
+        (display "synthesize-arm output:\n")
         (pretty-print arm-expr)
         (display lowering-success?)
         (newline)
+
+        (error "here")
 
         ;; For now, just return the lowered ARM template
         ir-expr]

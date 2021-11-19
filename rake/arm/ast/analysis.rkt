@@ -1,10 +1,12 @@
 #lang rosette/safe
 
 (require
-  (only-in racket/base error)
+  (only-in racket/base error for)
   rosette/lib/destruct
   rosette/lib/angelic
-  rake/arm/ast/types)
+  rake/arm/ast/types
+  rake/arm/ast/interpreter
+)
 
 (provide (prefix-out arm: (all-defined-out)))
 
@@ -178,3 +180,19 @@
         [(eq? 'uint64 expr) 0]
         [(eq? 'int64 expr) 0]
         [else (error (format "max-unique-inputs failed to recognize ~a" expr))])]))
+
+(define (get-interpreted-type arm-expr)
+  (destruct arm-expr
+    [(arm:concat-tiles exprs)
+      (let ([types (map get-interpreted-type exprs)])
+        (cond
+          ; TODO: this is very jank and needs to be fixed
+          [(and (eq? (length types) 2) (eq? 'i16x8 (list-ref types 0)) (eq? 'i16x8 (list-ref types 1))) 'i16x16]
+          [(and (eq? (length types) 2) (eq? 'i16x4 (list-ref types 0)) (eq? 'i16x4 (list-ref types 1))) 'i16x8]
+          [else (error "get-interpreted-type on concat-tiles\n\t~a\n\t~a" types arm-expr)]))]
+    [_ (arm:type (arm:interpret arm-expr))]))
+
+(define (get-interpreted-elem-type arm-expr)
+  (destruct arm-expr
+    [(arm:concat-tiles exprs) (error "Fail on get-interpreted-elem-type for concat-tiles ~a\n" arm-expr)]
+    [_ (arm:elem-type (arm:interpret arm-expr))]))
