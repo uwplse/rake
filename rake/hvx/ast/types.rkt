@@ -125,6 +125,7 @@
 (struct vmpyi-acc (Vd Vu Rt) #:transparent)
 (struct vmpye-acc (Vd Vu Rt) #:transparent)
 (struct vmpy-frac (Vu Vv rnd?) #:transparent)
+(struct vmpy-hh (Vu Vv rnd?) #:transparent)
 (struct vmpa (Vuu Rt) #:transparent)
 (struct vmpa-acc (Vdd Vuu Rt) #:transparent)
 (struct vdmpy (Vu Rt) #:transparent)
@@ -194,7 +195,8 @@
   [(define (equal-proc a b equal?-recur)
      (and
       (equal?-recur (??load-id a) (??load-id b))
-      (equal?-recur (??load-buffer a) (??load-buffer b))))
+      (equal?-recur (??load-buffer a) (??load-buffer b))
+      (equal?-recur (??load-live-data a) (??load-live-data b))))
    (define (hash-proc a hash-recur) (??load-id a))
    (define (hash2-proc a hash2-recur) (??load-id a))])
 (struct ??swizzle (id live-data exprs gather-tbl pair?)
@@ -608,6 +610,9 @@
 
     [(eq? vmpy-frac instr) (list
                             (instr-sig 'i32x32 (list 'i32x32 'i32x32 'bool)))]
+
+    [(eq? vmpy-hh instr) (list
+                          (instr-sig 'i16x64 (list 'i16x64 'int16 'bool)))]
 
     [(eq? vmpa instr) (list
                        (instr-sig 'i16x64x2 (list 'u8x128x2 'int8x2))
