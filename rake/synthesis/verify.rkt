@@ -1,6 +1,8 @@
 #lang rosette
 
 (require
+  (only-in rosette/solver/smt/smtlib2 enable-custom-tactics disable-custom-tactics)
+  rosette/solver/smt/z3
   rake/internal/log
   rake/cpp
   rake/halide
@@ -32,6 +34,14 @@
 
   (define st (current-milliseconds))
 
+  ;; Save default solver
+  (define z3-base (current-solver))
+  
+  ;; Set solver timeout of 5 eseconds
+  (define z3-with-timeout (z3 #:options (hash-set (solver-options (current-solver)) ':timeout 5000)))
+  (current-solver z3-with-timeout)
+  (disable-custom-tactics)
+  
   (define correct?
     (cond
       [(not (eq? elem-count-hal elem-count-hvx))
@@ -47,6 +57,10 @@
 
   (define runtime (- (current-milliseconds) st))
   (display (format "]\n\nVerification time: ~a ms\n\n" runtime))
+
+  ;; Reset tactics and solver
+  (enable-custom-tactics)
+  (current-solver z3-base)
   
   correct?)
 
@@ -75,25 +89,24 @@
      (display "=")
      (define sol (verify-lane halide-output hvx-output lane ctx axioms is-hvx-pair? offset))
      (cond
-       [(or (unsat? sol) (unknown? sol)) #f]
-       [else (verify-equiv halide-output hvx-output (rest lanes) ctx axioms is-hvx-pair? offset)])]))
+       [(or (unsat? sol) (unknown? sol)) (verify-equiv halide-output hvx-output (rest lanes) ctx axioms is-hvx-pair? offset)]
+       [else #f])]))
 
 (define (verify-lane halide-output hvx-output lane ctx axioms is-hvx-pair? offset)
   (clear-vc!)
   (for-each (lambda (axiom) (assume axiom)) axioms)
   (define st (current-milliseconds))
   (define sol
-    (synthesize #:forall ctx
-                #:guarantee (cond
-                              [is-hvx-pair?
-                               (assert
-                                (eq?
-                                 (halide-output lane)
-                                 (if (< lane offset)
-                                     (hvx:v0-elem hvx-output lane)
-                                     (hvx:v1-elem hvx-output (- lane offset)))))]
-                              [else
-                               (assert (eq? (halide-output lane) (hvx:elem hvx-output lane)))])))
+    (verify (cond
+              [is-hvx-pair?
+               (assert
+                (eq?
+                 (halide-output lane)
+                 (if (< lane offset)
+                     (hvx:v0-elem hvx-output lane)
+                     (hvx:v1-elem hvx-output (- lane offset)))))]
+              [else
+               (assert (eq? (halide-output lane) (hvx:elem hvx-output lane)))])))
   (define runtime (- (current-milliseconds) st))
   (log (format "Verification query: ~a ms\n" runtime))
   sol)
