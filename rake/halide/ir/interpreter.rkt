@@ -456,7 +456,7 @@
 (define (do-mul lhs rhs)
   (cond
     [(and (integer? lhs) (integer? rhs))
-     (- lhs rhs)]
+     (* lhs rhs)]
     [else
      (define outT (infer-out-type lhs rhs))
      (mk-cpp-expr (bvmul (cpp:eval lhs) (cpp:eval rhs)) outT)]))
