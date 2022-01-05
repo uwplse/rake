@@ -890,6 +890,20 @@
           (define rnd (if rnd? (add (int64_t (bv #x40000000 64)) mpy 'int64) mpy))
           (define shift (int64_t (bvashr (cpp:eval rnd) (bv 31 64))))
           (cpp:sat32 shift)))])]
+
+    ;; 16x16 multiply keep high-half with optional rounding
+    [(vmpy-hh Vu Rt rnd?)
+     (destruct* ((interpret Vu) (interpret Rt))
+      [((i16x64 v0) (int16_t v1))
+       (i16x64
+        (lambda (i)
+          (define a (cpp:cast (v0 i) 'int64))
+          (define b (cpp:cast Rt 'int64))
+          (define mpy (bvmul (cpp:eval a) (cpp:eval b)))
+          (define dbl (bvshl mpy (bv 1 64)))
+          (define rnd (if rnd? (bvashr (bvadd dbl (bv #x8000 64)) (bv 16 64)) dbl))
+          (define res (cpp:sat32 (int64_t rnd)))
+          (cpp:sat16 res)))])]
     
     ;; Vector-scalar multiplication (widening) with accumulation
     [(vmpy-acc Vdd Vu Rt)
