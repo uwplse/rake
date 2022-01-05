@@ -10,18 +10,19 @@
   rake/hvx/interpreter
   rake/hvx/ast/types
   rake/hvx/ast/visitor
+  rake/synthesis/layouts
   rake/synthesis/lowering/util)
 
 (provide get-hvx-swizzle-grammar)
 
 (define grammar-lib (make-hash))
 
-(define (get-hvx-swizzle-grammar halide-expr hvx-template output-layout swizzle-budget swizzle-node starting-vecs hvx-sub-exprs translation-history)
+(define (get-hvx-swizzle-grammar ir-expr halide-expr hvx-template output-layout swizzle-budget swizzle-node starting-vecs hvx-sub-exprs translation-history)
   (cond
     [(hash-has-key? grammar-lib (list halide-expr hvx-template swizzle-node output-layout starting-vecs hvx-sub-exprs))
       (hash-ref grammar-lib (list halide-expr hvx-template swizzle-node output-layout starting-vecs hvx-sub-exprs))]
     [else
-      (define candidates (get-hvx-swizzle-grammar-gen halide-expr hvx-template swizzle-budget swizzle-node starting-vecs hvx-sub-exprs translation-history))
+      (define candidates (get-hvx-swizzle-grammar-gen ir-expr halide-expr hvx-template swizzle-budget swizzle-node starting-vecs hvx-sub-exprs translation-history))
       (hash-set! grammar-lib (list halide-expr hvx-template swizzle-node output-layout starting-vecs hvx-sub-exprs) candidates)
       candidates]))
 
@@ -35,7 +36,7 @@
     [(eq? elemT 'uint16) (if pair? 'u16x64x2 'u16x64)]
     [(eq? elemT 'uint32) (if pair? 'u32x32x2 'u32x32)]))
 
-(define (get-hvx-swizzle-grammar-gen halide-expr hvx-template swizzle-budget swizzle-node starting-vecs hvx-sub-exprs translation-history)
+(define (get-hvx-swizzle-grammar-gen ir-expr halide-expr hvx-template swizzle-budget swizzle-node starting-vecs hvx-sub-exprs translation-history)
   ;(pretty-print starting-vecs)
   
   (define-values (target-node-id base-exprs pair?)
@@ -164,19 +165,13 @@
             [(??swizzle id live-data expr gather-tbl pair?) (if (equal? id target-node-id) (hvx:visit (car candidate-swizzle) uniquify-sub-exprs) node)]
             [_ node]))
        (define c (hvx:visit-shallow updated-template repl-swizzle-node-wth-candidate))
-       ;(for/list ([e (enumerate-hvx (list vinterleave vdeal) tmpl-type (list c) 1 5)])
-         ;(cons (car e) (+ (cdr e) (cdr candidate-swizzle) -1)))
        (define cost (cdr candidate-swizzle))
        (cond
-         ;[(hvx:vec-pair? tmpl-type) (list (cons c cost) (cons (vinterleave c) (+ 1 cost)))]
-         ;[(and (< (cpp:type-bw tmpl-etype) 32) (> (cpp:type-bw tmpl-etype) 1)) (list (cons c cost) (cons (vdeal c) (+ 0.5 cost)))]
+         [(and (hvx:vec-pair? tmpl-type) (< 1 (reduction-factor ir-expr))) (list (cons c cost) (cons (vinterleave c) (+ 0.1 cost)))]
+         [(and (< (cpp:type-bw tmpl-etype) 32) (> (cpp:type-bw tmpl-etype) 1) (< 1 (reduction-factor ir-expr))) (list (cons c cost) (cons (vdeal c) (+ 0.1 cost)))]
          [else (list (cons c cost))]))))
   (define sorted-candidates (sort candidates (lambda (v1 v2) (<= (cdr v1) (cdr v2)))))
 
-  ;(println (length sorted-candidates))
-  ;(pretty-print sorted-candidates)
-  ;(exit)
-  
   (define (fill-arg-grammars node [pos -1])
     (match node
       ['const (define-symbolic* c integer?) c]

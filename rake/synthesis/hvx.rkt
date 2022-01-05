@@ -187,7 +187,7 @@
                 (define tile (first tiles))
                 ;; Synthesize data-movement to complete the template
                 (define-values (successful? hvx-expr swizzle-cost)
-                  (synthesize-hvx-swizzles tile hvx-template output-layout swizzle-budget swizzling-algo hvx-sub-exprs value-bounds translation-history tile-id num-tiles))
+                  (synthesize-hvx-swizzles ir-expr tile hvx-template output-layout swizzle-budget swizzling-algo hvx-sub-exprs value-bounds translation-history tile-id num-tiles))
 
                 (cond
                   [successful?
@@ -214,7 +214,7 @@
           [else
            ;; Synthesize data-movement to complete the template
            (define-values (successful? hvx-expr swizzle-cost)
-             (synthesize-hvx-swizzles halide-expr hvx-template output-layout swizzle-budget swizzling-algo hvx-sub-exprs value-bounds translation-history))
+             (synthesize-hvx-swizzles ir-expr halide-expr hvx-template output-layout swizzle-budget swizzling-algo hvx-sub-exprs value-bounds translation-history))
 
            (display (format "Template Cost: ~a\n" template-cost))
            (display (format "Swizzle Cost: ~a\n\n" swizzle-cost))

@@ -7,7 +7,7 @@
   rake/hvx/ir/instructions
   rake/hvx/ir/interpreter)
 
-(provide print-layout-map infer-ideal-subexpr-layouts)
+(provide print-layout-map infer-ideal-subexpr-layouts reduction-factor)
 
 ;; Determine the intermediate layouts for each uber-instruction's output
 (define (infer-ideal-subexpr-layouts ir-expr ir-sub-expr desired-output-layout)

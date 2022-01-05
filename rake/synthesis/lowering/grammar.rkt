@@ -273,7 +273,7 @@
 
      ;; Desired output type
      (define desired-expr-types (enum-types outT))
-     (define candidates (enumerate-hvx isa desired-expr-types grouped-sub-exprs 4 10))
+     (define candidates (enumerate-hvx isa desired-expr-types grouped-sub-exprs 4 10 dbc-keep?))
 
      ;; Sort them
      (set! candidates (sort candidates (lambda (v1 v2) (<= (cdr v1) (cdr v2)))))
@@ -442,6 +442,30 @@
        (match node
          ['bool (bool-const)]
          ['int32 (int32-const)]
+         [_ node]))
+     (for/list ([candidate candidates]) (cons (uniquify-swizzles (hvx:visit (car candidate) fill-arg-grammars)) (cdr candidate)))]
+
+    ;; Vector-scalar multiply return high-half
+    [(vs-mpy-hh sub-expr sca round?)
+     (define isa (list vmpy-hh))
+     (define grouped-sub-exprs (prepare-sub-exprs hvx-sub-exprs))
+     (define desired-expr-types (set 'i16x64))
+     
+     (define candidates (enumerate-hvx isa desired-expr-types grouped-sub-exprs 1 2))
+
+     ;(println (length candidates))
+
+     ;; Sort them
+     (set! candidates (sort candidates (lambda (v1 v2) (< (cdr v1) (cdr v2)))))
+     
+     ;; Fill in param grammars
+     (define int-consts (list sca))
+     (define (bool-const) (define-symbolic* b boolean?) b)
+     (define (int16-const) (cpp:cast (apply choose* int-consts) 'int16))
+     (define (fill-arg-grammars node [pos -1])
+       (match node
+         ['bool (bool-const)]
+         ['int16 (int16-const)]
          [_ node]))
      (for/list ([candidate candidates]) (cons (uniquify-swizzles (hvx:visit (car candidate) fill-arg-grammars)) (cdr candidate)))]
     
@@ -896,6 +920,12 @@
 
     [(eq? instr vmpyi-acc) 1]
     [else 0]))
+
+(define (dbc-keep? parent-instr arg-pos child-instr)
+  (not
+   (or
+    (and (eq? parent-instr vshuffo-n) (eq? child-instr lo) (eq? arg-pos 0))
+    (and (eq? parent-instr vasr-n) (eq? child-instr lo) (eq? arg-pos 0)))))
 
 (define (reg-keep? parent-instr arg-pos child-instr)
   (not
