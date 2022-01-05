@@ -402,9 +402,9 @@
        (define v2 (cpp:cast multiplier 'int64))
        (define mpy (bvmul (cpp:eval v1) (cpp:eval v2)))
        (define dbl (bvshl mpy (bv 1 64)))
-       (define rnd (if round? (bvadd dbl (bv #x8000 64)) dbl))
+       (define rnd (if round? (bvashr (bvadd dbl (bv #x8000 64)) (bv 16 64)) dbl))
        (define res (cpp:sat32 (int64_t rnd)))
-       (int16_t (extract 31 16 (cpp:eval res))))]
+       (cpp:sat16 res))]
 
     [(vv-mpy-hh-rnd sub-expr)
      (define input (interpret sub-expr))
