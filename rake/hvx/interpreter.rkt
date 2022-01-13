@@ -919,13 +919,13 @@
          (lambda (i) (add (acc-v1 i) (multiply (lhs (+ (* i 2) 1)) rhs 'int16) 'uint16)))]
        [((u32x32x2 acc-v0 acc-v1) (u16x64 lhs) (uint16_t v))
         (u32x32x2
-         (lambda (i) (add (acc-v0 i) (multiply (lhs (* i 2)) rhs 'int16) 'uint32))
-         (lambda (i) (add (acc-v1 i) (multiply (lhs (+ (* i 2) 1)) rhs 'int16) 'uint32)))]
+         (lambda (i) (add (acc-v0 i) (multiply (lhs (* i 2)) rhs 'int32) 'uint32))
+         (lambda (i) (add (acc-v1 i) (multiply (lhs (+ (* i 2) 1)) rhs 'int32) 'uint32)))]
        [((i32x32x2 acc-v0 acc-v1) (i16x64 lhs) (int16_t v))
         (i32x32x2
          (lambda (i) (add (acc-v0 i) (multiply (lhs (* i 2)) rhs 'int32) 'int32))
          (lambda (i) (add (acc-v1 i) (multiply (lhs (+ (* i 2) 1)) rhs 'int32) 'int32)))])]
-    
+
     ;;;;;;;;;;;;;;;;;;;;;;; Fused Multiply Adds ;;;;;;;;;;;;;;;;;;;;;;
 
     ;; Sum to vector-scalar multiplies
@@ -1024,10 +1024,10 @@
         (i16x64x2
          (lambda (i)
            (assert (contiguous-reads? (data-v0 (* i 2)) (data-v0 (+ (* i 2) 1)) (data-v1 (* i 2))))
-           (multiply-add-acc (data-v0 (* i 2)) w1 (data-v0 (+ (* i 2) 1)) w2 (data-v1 (* i 2)) 'int16))
+           (multiply-add-acc (data-v0 (* i 2)) w2 (data-v0 (+ (* i 2) 1)) w1 (data-v1 (* i 2)) 'int16))
          (lambda (i)
            (assert (contiguous-reads? (data-v0 (+ (* i 2) 1)) (data-v1 (* i 2)) (data-v1 (+ (* i 2) 1))))
-           (multiply-add-acc (data-v0 (+ (* i 2) 1)) w1 (data-v1 (* i 2)) w2 (data-v1 (+ (* i 2) 1)) 'int16)))]
+           (multiply-add-acc (data-v0 (+ (* i 2) 1)) w2 (data-v1 (* i 2)) w1 (data-v1 (+ (* i 2) 1)) 'int16)))]
        [((i16x64x2 data-v0 data-v1) (Rt2.b w1 w2))
         (i32x32x2
          (lambda (i)
@@ -1053,10 +1053,10 @@
         (i16x64x2
          (lambda (i)
            (assert (contiguous-reads? (data-v0 (* i 2)) (data-v0 (+ (* i 2) 1)) (data-v1 (* i 2))))
-           (int16_t (bvadd (cpp:eval (acc-v0 i)) (cpp:eval (multiply-add-acc (data-v0 (* i 2)) w1 (data-v0 (+ (* i 2) 1)) w2 (data-v1 (* i 2)) 'int16)))))
+           (int16_t (bvadd (cpp:eval (acc-v0 i)) (cpp:eval (multiply-add-acc (data-v0 (* i 2)) w2 (data-v0 (+ (* i 2) 1)) w1 (data-v1 (* i 2)) 'int16)))))
          (lambda (i)
            (assert (contiguous-reads? (data-v0 (+ (* i 2) 1)) (data-v1 (* i 2)) (data-v1 (+ (* i 2) 1))))
-           (int16_t (bvadd (cpp:eval (acc-v1 i)) (cpp:eval (multiply-add-acc (data-v0 (+ (* i 2) 1)) w1 (data-v1 (* i 2)) w2 (data-v1 (+ (* i 2) 1)) 'int16))))))]
+           (int16_t (bvadd (cpp:eval (acc-v1 i)) (cpp:eval (multiply-add-acc (data-v0 (+ (* i 2) 1)) w2 (data-v1 (* i 2)) w1 (data-v1 (+ (* i 2) 1)) 'int16))))))]
        [(list (i32x32x2 acc-v0 acc-v1) (i16x64x2 data-v0 data-v1) (Rt2.b w1 w2))
         (i32x32x2
          (lambda (i)
