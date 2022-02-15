@@ -37,8 +37,8 @@
   ;; Save default solver
   (define z3-base (current-solver))
   
-  ;; Set solver timeout of 5 eseconds
-  (define z3-with-timeout (z3 #:options (hash-set (solver-options (current-solver)) ':timeout 5000)))
+  ;; Set solver timeout of 1 second
+  (define z3-with-timeout (z3 #:options (hash-set (solver-options (current-solver)) ':timeout 1000)))
   (current-solver z3-with-timeout)
   (disable-custom-tactics)
   
