@@ -12,23 +12,24 @@
   rake/hvx/ast/types
   rake/hvx/ast/visitor
   rake/hvx/cost-model
-  rake/hvx/interpreter)
+  rake/hvx/interpreter
+  rake/synthesis/layouts)
 
 (provide get-hvx-grammar)
 
 (define grammar-lib (make-hash))
 
-(define (get-hvx-grammar halide-expr ir-expr hvx-sub-exprs cost-ub)
+(define (get-hvx-grammar halide-expr ir-expr hvx-sub-exprs output-layout cost-ub)
   (cond
     [(and (hash-has-key? grammar-lib (cons (ir-node-id ir-expr) hvx-sub-exprs)) (not (load-data? ir-expr)))
       (let ([candidates (hash-ref grammar-lib (cons (ir-node-id ir-expr) hvx-sub-exprs))])
         (filter (lambda (c) (<= (cdr c) cost-ub)) candidates))]
     [else
-      (define candidates (get-hvx-grammar-gen halide-expr ir-expr hvx-sub-exprs))
+      (define candidates (get-hvx-grammar-gen halide-expr ir-expr hvx-sub-exprs output-layout))
       (hash-set! grammar-lib (cons (ir-node-id ir-expr) hvx-sub-exprs) candidates)
       candidates]))
 
-(define (get-hvx-grammar-gen halide-expr ir-expr hvx-sub-exprs)
+(define (get-hvx-grammar-gen halide-expr ir-expr hvx-sub-exprs output-layout)
   (set! enumeration-database (make-hash))
   (destruct ir-expr
             
@@ -372,8 +373,15 @@
     ;; Saturation
     [(saturate ir-sub-expr round? output-type)
      (define input-type (hvx-ir:elem-type ir-sub-expr))
+
+     ;; Infer ideal output-layouts for this sub-expr
+     (define ideal-subexpr-layout (infer-ideal-subexpr-layouts ir-expr ir-sub-expr output-layout))
+     
      ;; Todo: we can optimize by specializing grammar based on flags
-     (define isa (list vmin vmax vsplat vsat vshuffe-n)) ;vpacke-n vpack
+     (define isa
+       (cond
+         [(eq? output-layout ideal-subexpr-layout) (list vmin vmax vsplat vpacke-n vpack)]
+         [else (list vmin vmax vsplat vsat vshuffe-n)]))
 
      ;; Sub-expr types
      (define consts

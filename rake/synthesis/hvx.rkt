@@ -42,21 +42,6 @@
   (define ir-subexprs (hvx-ir:get-subexprs ir-expr))
   (define ir-subexprcnt (length ir-subexprs))
   
-  ;(for ([ir-subexpr ir-subexprs])
-    ;; Infer candidate sub-expr layouts
-    ;(define ideal-subexpr-layouts (infer-ideal-subexpr-layouts ir-expr ir-subexpr output-layout))
-
-    ;; Print sub-tree
-    ;(println ir-subexpr)
-    ;(println ideal-subexpr-layouts)
-
-    ;(synthesize-lowered-impl ir-expr ir-annotations ir-bounds lowering-algo swizzling-algo sub-expr? output-layout ideal-subexpr-layouts)
-    ;(exit))
-
-  ;(filter-map (curry synthesize-lowered-impl ir-expr ir-annotations ir-bounds lowering-algo swizzling-algo sub-expr? output-layout) (set->list ideal-subexpr-layouts))
-
-  ;(synthesize-lowered-impl ir-expr ir-annotations ir-bounds lowering-algo swizzling-algo sub-expr? output-layout)
-  
   ;; Push node to trace
   (set! trace (append (list ir-expr) trace))
         
@@ -165,7 +150,7 @@
 (define (lower-to-hvx halide-expr ir-expr hvx-sub-exprs lowering-algo swizzling-algo sub-expr? output-layout cost-ub)
   ;; Synthesize equivalent HVX template (compute instructions)
   (define-values (successful? hvx-template template-cost)
-    (synthesize-hvx-template halide-expr ir-expr hvx-sub-exprs value-bounds translation-history lowering-algo cost-ub))
+    (synthesize-hvx-template halide-expr ir-expr hvx-sub-exprs output-layout value-bounds translation-history lowering-algo cost-ub))
   
   (cond
     [successful?

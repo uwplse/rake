@@ -13,14 +13,14 @@
 
 (provide synthesize-hvx-template)
 
-(define (synthesize-hvx-template halide-expr ir-expr hvx-sub-exprs value-bounds translation-history lowering-algo cost-ub)
+(define (synthesize-hvx-template halide-expr ir-expr hvx-sub-exprs output-layout value-bounds translation-history lowering-algo cost-ub)
   (cond
     [(eq? lowering-algo 'enumerative)
       (display "Lowering IR to HVX...\n")
       (display "====================\n\n")
       (display (format "IR Operation: \n\n~a\n\n" (pretty-format ir-expr)))
 
-      (define candidates (get-hvx-grammar halide-expr ir-expr hvx-sub-exprs cost-ub))
+      (define candidates (get-hvx-grammar halide-expr ir-expr hvx-sub-exprs output-layout cost-ub))
       
       (define-values (successful? hvx-template)
         (synthesize-translation candidates halide-expr hvx-sub-exprs value-bounds translation-history))

@@ -919,8 +919,8 @@
          (lambda (i) (add (acc-v1 i) (multiply (lhs (+ (* i 2) 1)) rhs 'int16) 'uint16)))]
        [((u32x32x2 acc-v0 acc-v1) (u16x64 lhs) (uint16_t v))
         (u32x32x2
-         (lambda (i) (add (acc-v0 i) (multiply (lhs (* i 2)) rhs 'int32) 'uint32))
-         (lambda (i) (add (acc-v1 i) (multiply (lhs (+ (* i 2) 1)) rhs 'int32) 'uint32)))]
+         (lambda (i) (add (acc-v0 i) (multiply (lhs (* i 2)) rhs 'uint32) 'uint32))
+         (lambda (i) (add (acc-v1 i) (multiply (lhs (+ (* i 2) 1)) rhs 'uint32) 'uint32)))]
        [((i32x32x2 acc-v0 acc-v1) (i16x64 lhs) (int16_t v))
         (i32x32x2
          (lambda (i) (add (acc-v0 i) (multiply (lhs (* i 2)) rhs 'int32) 'int32))
