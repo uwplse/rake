@@ -111,7 +111,7 @@
       [(vrmpy-sw-acc Vdd Vuu Rt u1) (transform (vrmpy-sw-acc (visit Vdd transform) (visit Vuu transform) (visit Rt transform) (visit u1 transform)))]
       [(vavg Vu Vv rnd?) (transform (vavg (visit Vu transform) (visit Vv transform) (visit rnd? transform)))]
       ;[(vnavg Vu Vv)
-      ;[(vasl Vu Rt)
+      [(vasl Vu Vv) (transform (vasl (visit Vu transform) (visit Vv transform)))]
       [(vrsr Vu Vv) (transform (vrsr (visit Vu transform) (visit Vv transform)))]
       [(vlsr Vu Rt) (transform (vlsr (visit Vu transform) (visit Rt transform)))]
       [(vasr Vu Rt) (transform (vasr (visit Vu transform) (visit Rt transform)))]
@@ -240,7 +240,7 @@
       [(vrmpy-sw-acc Vdd Vuu Rt u1) (transform (vrmpy-sw-acc (visit-shallow Vdd transform) (visit-shallow Vuu transform) (visit-shallow Rt transform) (visit-shallow u1 transform)))]
       [(vavg Vu Vv rnd?) (transform (vavg (visit-shallow Vu transform) (visit-shallow Vv transform) (visit-shallow rnd? transform)))]
       ;[(vnavg Vu Vv)
-      ;[(vasl Vu Rt)
+      [(vasl Vu Vv) (transform (vasl (visit-shallow Vu transform) (visit-shallow Vv transform)))]
       [(vrsr Vu Vv) (transform (vrsr (visit-shallow Vu transform) (visit-shallow Vv transform)))]
       [(vlsr Vu Rt) (transform (vlsr (visit-shallow Vu transform) (visit-shallow Rt transform)))]
       [(vasr Vu Rt) (transform (vasr (visit-shallow Vu transform) (visit-shallow Rt transform)))]

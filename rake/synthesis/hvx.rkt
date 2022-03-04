@@ -103,7 +103,7 @@
        [else #f])]
 
     ;; If it does not, this is usually because the synthesized fused multiple Halide loads into a single one:
-    [(load-data? ir-expr)
+     [(load-data? ir-expr)
      (define parent-expr (first trace))
      (define parent-spec (hash-ref ir-annotations (ir-node-id parent-expr)))
      (define live-data (halide:extract-buffer-reads parent-spec))

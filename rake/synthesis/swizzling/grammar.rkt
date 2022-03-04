@@ -285,6 +285,7 @@
 
 (define (instr-cost instr)
   (cond
+    [(eq? instr reinterpret) 0.01]
     [(eq? instr lo) 0.01]
     [(eq? instr hi) 0.01]
     [(eq? instr vcombine) 0.2]

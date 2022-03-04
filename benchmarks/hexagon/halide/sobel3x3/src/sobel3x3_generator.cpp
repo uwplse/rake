@@ -47,8 +47,8 @@ public:
             output
                 .hexagon()
                 .tile(x, y, xi, yi, vector_size, 4, TailStrategy::RoundUp)
-                .vectorize(xi)
-                .unroll(yi);
+                .vectorize(xi);
+            
             if (use_prefetch_sched) {
                 output.prefetch(input, y, 2);
             }

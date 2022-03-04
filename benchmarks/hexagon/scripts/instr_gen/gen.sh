@@ -1,1 +1,0 @@
-/home/maaz/Qualcomm/Hexagon_SDK/3.5.2/tools/HEXAGON_Tools/8.3.07/Tools/bin/hexagon-clang -O3 -mv66 -mhvx -mhvx-length=128B -DLOG2VLEN=7 -I /home/maaz/Qualcomm/Hexagon_SDK/3.5.2/tools/HEXAGON_Tools/8.3.07/Examples/HVX/common/include -DQDSP6SS_PUB_BASE=0xFE200000 -c -S -emit-llvm code.c -o code.ll

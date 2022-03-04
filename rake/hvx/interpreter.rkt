@@ -611,7 +611,7 @@
             (u16x64 (lambda (i) (if (even? i) (lo-u16 (v1 (quotient i 2))) (lo-u16 (v0 (quotient i 2)))))))])]
     
     [(vsxt Vu)
-     (let ([sxt16 (lambda (val) (sign-extend (cpp:eval val) (bitvector 16)))] [sxt32 (lambda (val) (zero-extend (cpp:eval val) (bitvector 32)))])
+     (let ([sxt16 (lambda (val) (sign-extend (cpp:eval val) (bitvector 16)))] [sxt32 (lambda (val) (sign-extend (cpp:eval val) (bitvector 32)))])
        (destruct (interpret Vu)
          [(i8x128 v0) (i16x64x2 (lambda (i) (int16_t (sxt16 (v0 (* i 2))))) (lambda (i) (int16_t (sxt16 (v0 (+ (* i 2) 1))))))]
          [(i16x64 v0) (i32x32x2 (lambda (i) (int32_t (sxt32 (v0 (* i 2))))) (lambda (i) (int32_t (sxt32 (v0 (+ (* i 2) 1))))))]))]
@@ -805,16 +805,18 @@
        [((i32x32 acc) (i32x32 lhs) (uint8_t v)) (i32x32 (lambda (i) (int32_t (bvadd (cpp:eval (acc i)) (cpp:eval (multiply (lhs i) rhs 'int32))))))]
        [((i32x32 acc) (i32x32 lhs) (int16_t v)) (i32x32 (lambda (i) (int32_t (bvadd (cpp:eval (acc i)) (cpp:eval (multiply (lhs i) rhs 'int32))))))])]
 
-    ;; Shift-left (all elems left-shifted by the same value)
+    ;; Shift-left
     [(vasl Vu Rt)
      (destruct* ((interpret Vu) (interpret Rt))
-       [((i16x64 data) (int8_t n)) (i16x64 (lambda (i) (int16_t (bvshl (cpp:eval (data i)) n))))]
-       [((i32x32 data) (int8_t n)) (i32x32 (lambda (i) (int32_t (bvshl (cpp:eval (data i)) n))))])]
+       [((i16x64 data) (int16_t n)) (i16x64 (lambda (i) (asl (data i) (int16_t n))))]
+       [((i32x32 data) (int32_t n)) (i32x32 (lambda (i) (asl (data i) (int32_t n))))]
+       [((i16x64 lhs) (i16x64 rhs)) (i16x64 (lambda (i) (asl (lhs i) (rhs i))))]
+       [((i32x32 lhs) (i32x32 rhs)) (i32x32 (lambda (i) (asl (lhs i) (rhs i))))])]
 
     [(vasl-acc Vd Vu Rt)
      (destruct* ((interpret Vd) (interpret Vu) (interpret Rt))
        [((i16x64 acc) (i16x64 data) (int8_t n)) (i16x64 (lambda (i) (int16_t (bvadd (cpp:eval (acc i)) (bvshl (cpp:eval (data i)) n)))))]
-       [((i32x32 acc) (i16x64 data) (int8_t n)) (i32x32 (lambda (i) (int32_t (bvadd (cpp:eval (acc i)) (bvshl (cpp:eval (data i)) n)))))])]
+       [((i32x32 acc) (i32x32 data) (int8_t n)) (i32x32 (lambda (i) (int32_t (bvadd (cpp:eval (acc i)) (bvshl (cpp:eval (data i)) n)))))])]
     
     ;; Vector-scalar multiplication (widening)
     [(vmpy Vu Rt)
@@ -925,7 +927,7 @@
         (i32x32x2
          (lambda (i) (add (acc-v0 i) (multiply (lhs (* i 2)) rhs 'int32) 'int32))
          (lambda (i) (add (acc-v1 i) (multiply (lhs (+ (* i 2) 1)) rhs 'int32) 'int32)))])]
-
+    
     ;;;;;;;;;;;;;;;;;;;;;;; Fused Multiply Adds ;;;;;;;;;;;;;;;;;;;;;;
 
     ;; Sum to vector-scalar multiplies
@@ -1236,10 +1238,10 @@
     ;; Arithmetic shift-right (all elems right-shifted by the same value)
     [(vasr Vu Rt)
      (destruct* ((interpret Vu) (interpret Rt))
-       [((i16x64 data) (int8_t n)) (i16x64 (lambda (i) (int16_t (bvashr (cpp:eval (data i)) (cpp:eval (cpp:cast Rt 'int16))))))]
-       [((u16x64 data) (int8_t n)) (u16x64 (lambda (i) (int16_t (bvashr (cpp:eval (data i)) (cpp:eval (cpp:cast Rt 'int16))))))]
-       [((i32x32 data) (int8_t n)) (i32x32 (lambda (i) (int32_t (bvashr (cpp:eval (data i)) (cpp:eval (cpp:cast Rt 'int32))))))]
-       [((u32x32 data) (int8_t n)) (u32x32 (lambda (i) (int32_t (bvashr (cpp:eval (data i)) (cpp:eval (cpp:cast Rt 'int32))))))])]
+       [((i16x64 data) (int16_t n)) (i16x64 (lambda (i) (int16_t (bvashr (cpp:eval (data i)) n))))]
+       [((u16x64 data) (int16_t n)) (u16x64 (lambda (i) (int16_t (bvashr (cpp:eval (data i)) n))))]
+       [((i32x32 data) (int32_t n)) (i32x32 (lambda (i) (int32_t (bvashr (cpp:eval (data i)) n))))]
+       [((u32x32 data) (int32_t n)) (u32x32 (lambda (i) (int32_t (bvashr (cpp:eval (data i)) n))))])]
     
     ;; Rounding
     [(vround Vu Vv signed?)
@@ -1540,7 +1542,12 @@
 ;    [(eq? outT 'int8) (mk-typed-expr (bvashr (bvsub (cpp:eval lhs) (cpp:eval rhs)) (bv 1 8)) outT)]
 ;    [(eq? outT 'int16) (mk-typed-expr (bvashr (bvsub (cpp:eval lhs) (cpp:eval rhs)) (bv 1 16)) outT)]
 ;    [(eq? outT 'int32) (mk-typed-expr (bvashr (bvsub (cpp:eval lhs) (cpp:eval rhs)) (bv 1 32)) outT)]))
-;
+
+(define (asl lhs rhs)
+  (destruct lhs
+    [(int16_t v) (int16_t (bvshl v (cpp:eval rhs)))]
+    [(int32_t v) (int32_t (bvshl v (cpp:eval rhs)))]))
+
 (define (round v)
   (destruct v
     [(int16_t val) (int32_t (bvashr (bvadd (cpp:eval (cpp:cast v 'int32)) (bv #x80 32)) (bv 8 32)))]

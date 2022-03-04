@@ -428,9 +428,15 @@
          [((uint8_t v0) (uint8_t v1)) (uint8_t (bvshl v0 v1))]
          [((uint16_t v0) (uint16_t v1)) (uint16_t (bvshl v0 v1))]
          [((uint32_t v0) (uint32_t v1)) (uint32_t (bvshl v0 v1))]
+         [((uint8_t v0) (int8_t v1)) (uint8_t (bvshl v0 v1))]
+         [((uint16_t v0) (int16_t v1)) (uint16_t (bvshl v0 v1))]
+         [((uint32_t v0) (int32_t v1)) (uint32_t (bvshl v0 v1))]
          [((int8_t v0) (int8_t v1)) (int8_t (bvshl v0 v1))]
          [((int16_t v0) (int16_t v1)) (int16_t (bvshl v0 v1))]
-         [((int32_t v0) (int32_t v1)) (int32_t (bvshl v0 v1))]))]
+         [((int32_t v0) (int32_t v1)) (int32_t (bvshl v0 v1))]
+         [((int8_t v0) (uint8_t v1)) (int8_t (bvshl v0 v1))]
+         [((int16_t v0) (uint16_t v1)) (int16_t (bvshl v0 v1))]
+         [((int32_t v0) (uint32_t v1)) (int32_t (bvshl v0 v1))]))]
     
     [(vv-shift-left sub-expr0 sub-expr1)
      (define input0 (interpret sub-expr0))

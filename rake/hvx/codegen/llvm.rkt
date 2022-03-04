@@ -444,6 +444,14 @@
      (destruct (hvx:interpret Vu)
       [(i16x64 v0) (generate `vmpyiowh (to-llvm-type hvx-expr) `(list ,(input-arg (vsplat Rt)) ,(input-arg Vu)))]
       [(u16x64 v0) (generate `vmpyiowh (to-llvm-type hvx-expr) `(list ,(input-arg (vsplat Rt)) ,(input-arg Vu)))])]
+
+    ;; 16x16 doubling saturating multiply optional rounding
+    [(vmpy-hh Vu Rt rnd?)
+     (destruct* ((hvx:interpret Vu) (hvx:interpret Rt))
+      [((i16x64 v0) (int16_t v1))
+       (if rnd?
+           (generate `vmpyhsrs (to-llvm-type hvx-expr) `(list ,(input-arg Vu) (,t_i32 ,(compile-scalar (Rt.h Rt)))))
+           (generate `vmpyhss (to-llvm-type hvx-expr) `(list ,(input-arg Vu) (,t_i32 ,(compile-scalar (Rt.h Rt))))))])]
     
     ;;;;;;;;;;;;;;;;;;;;;;; Fused Multiply Adds ;;;;;;;;;;;;;;;;;;;;;;
     
@@ -549,16 +557,16 @@
 
     [(vasr Vu Rt)
      (destruct (hvx:interpret Vu)
-       [(i16x64 v0) (generate `vasrh (to-llvm-type hvx-expr) `(list ,(input-arg Vu) (,t_i32 ,(compile-scalar (cpp:eval Rt)))))]
-       [(u16x64 v0) (generate `vasrh (to-llvm-type hvx-expr) `(list ,(input-arg Vu) (,t_i32 ,(compile-scalar (cpp:eval Rt)))))]
-       [(i32x32 v0) (generate `vasrw (to-llvm-type hvx-expr) `(list ,(input-arg Vu) (,t_i32 ,(compile-scalar (cpp:eval Rt)))))]
-       [(u32x32 v0) (generate `vasrw (to-llvm-type hvx-expr) `(list ,(input-arg Vu) (,t_i32 ,(compile-scalar (cpp:eval Rt)))))])]
+       [(i16x64 v0) (generate `vasrh (to-llvm-type hvx-expr) `(list ,(input-arg Vu) (,t_i32 ,(compile-scalar (cpp:eval (hvx:interpret Rt))))))]
+       [(u16x64 v0) (generate `vasrh (to-llvm-type hvx-expr) `(list ,(input-arg Vu) (,t_i32 ,(compile-scalar (cpp:eval (hvx:interpret Rt))))))]
+       [(i32x32 v0) (generate `vasrw (to-llvm-type hvx-expr) `(list ,(input-arg Vu) (,t_i32 ,(compile-scalar (cpp:eval (hvx:interpret Rt))))))]
+       [(u32x32 v0) (generate `vasrw (to-llvm-type hvx-expr) `(list ,(input-arg Vu) (,t_i32 ,(compile-scalar (cpp:eval (hvx:interpret Rt))))))])]
     
     [(vlsr Vu Rt)
      (destruct (hvx:interpret Vu)
-       [(u8x128 v0) (generate `vlsrb (to-llvm-type hvx-expr) `(list ,(input-arg Vu) (,t_i32 ,(compile-scalar (cpp:eval Rt)))))]
-       [(u16x64 v0) (generate `vlsrh (to-llvm-type hvx-expr) `(list ,(input-arg Vu) (,t_i32 ,(compile-scalar (cpp:eval Rt)))))]
-       [(u32x32 v0) (generate `vlsrw (to-llvm-type hvx-expr) `(list ,(input-arg Vu) (,t_i32 ,(compile-scalar (cpp:eval Rt)))))])]
+       [(u8x128 v0) (generate `vlsrb (to-llvm-type hvx-expr) `(list ,(input-arg Vu) (,t_i32 ,(compile-scalar (cpp:eval (hvx:interpret Rt))))))]
+       [(u16x64 v0) (generate `vlsrh (to-llvm-type hvx-expr) `(list ,(input-arg Vu) (,t_i32 ,(compile-scalar (cpp:eval (hvx:interpret Rt))))))]
+       [(u32x32 v0) (generate `vlsrw (to-llvm-type hvx-expr) `(list ,(input-arg Vu) (,t_i32 ,(compile-scalar (cpp:eval (hvx:interpret Rt))))))])]
     
     [(vshuffo-n Vu Vv signed?)
      (destruct* ((hvx:interpret Vu) (hvx:interpret Vv))

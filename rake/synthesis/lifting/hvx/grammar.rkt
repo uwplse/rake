@@ -33,7 +33,11 @@
         ;; Try folding by updating the set of datapoints
         (mk-load-instr halide-expr))]
 
-      [(broadcast value) '()]
+      [(broadcast value)
+       (define output-type (halide:elem-type halide-expr))
+       (define castfn (match output-type ['int8 int8x1] ['int16 int16x1] ['int32 int32x1] ['uint8 uint8x1] ['uint16 uint16x1] ['uint32 uint32x1]))
+       (list (broadcast (get-node-id) (castfn value)))]
+      
       [(build-vec base stride len) '()]
       [(combine sub-expr0 sub-expr1 read-tbl) '()]
       
@@ -450,7 +454,7 @@
 
     [(vec-shl v1 v2)
      (define mul-scalars (halide:extract-mul-scalars halide-expr))
-     (define shl-scalars (halide:extract-mul-scalars halide-expr))
+     (define shl-scalars (halide:extract-shl-scalars halide-expr))
      (flatten
       (list
        ;; We can extend using either vector-scalar multiply-add
@@ -658,7 +662,7 @@
 (define (mk-vs-shift-left-instr sub-expr shl-scalars)
   (cond
     [(empty? shl-scalars) '()]
-    [else (vs-shift-left (get-node-id) sub-expr (list (apply choose* shl-scalars)))]))
+    [else (vs-shift-left (get-node-id) sub-expr (apply choose* shl-scalars))]))
 
 (define (mk-vv-shift-left-instr lifted-sub-exprs)
   (cond

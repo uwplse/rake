@@ -23,7 +23,7 @@
  (prefix-out halide: extract-mul-scalars)
  (prefix-out halide: extract-div-scalars)
  (prefix-out halide: extract-shr-scalars)
- (prefix-out halide: extract-shr-scalars)
+ (prefix-out halide: extract-shl-scalars)
  (prefix-out halide: extract-mod-scalars)
  (prefix-out halide: extract-minmax-scalars)
  (prefix-out halide: cast-op?))
@@ -135,6 +135,17 @@
       [_ node]))
   (halide:visit expr extract-mul-const)
   (set->list mul-scalars))
+
+(define (extract-shl-scalars expr)
+  (define shl-scalars (mutable-set))
+  (define (extract-shl-const node)
+    (destruct node
+      ;; We only need to examing shift-right and divide
+      [(vec-shl v1 v2) (set-union! shl-scalars (extract-scalars v2))]
+      ;; Ignore everything else
+      [_ node]))
+  (halide:visit expr extract-shl-const)
+  (set->list shl-scalars))
 
 (define (extract-shr-scalars expr)
   (define shr-scalars (mutable-set))
@@ -314,7 +325,7 @@
     [_ expr]))
 
 (define (two^ scalars)
-  (for/set ([n scalars])
+  (for/set ([n (list->set (filter concrete? (set->list scalars)))])
     (match n
       [(int8_t v) (int8_t (bvshl (bv 1 8) v))]
       [(uint8_t v) (uint8_t (bvshl (bv 1 8) v))]

@@ -114,17 +114,21 @@
     [(cast ir-sub-expr output-type)
      (define input-type (hvx-ir:elem-type ir-sub-expr))
      (define narrowing? (< (cpp:type-bw output-type) (cpp:type-bw input-type)))
-     (define widening (> (cpp:type-bw output-type) (cpp:type-bw input-type)))
+     (define widening? (> (cpp:type-bw output-type) (cpp:type-bw input-type)))
 
+     ;; Infer ideal output-layouts for this sub-expr
+     (define ideal-subexpr-layout (infer-ideal-subexpr-layouts ir-expr ir-sub-expr output-layout))
+     
+     ;; Todo: we can optimize by specializing grammar based on flags
      (define isa
        (cond
-         [narrowing? (list vpacke-n )] ;vshuffe-n
-         [widening (list ??lo/hi vunpack vzxt vsxt)]
+         [(and narrowing? (eq? output-layout ideal-subexpr-layout)) (list vpacke-n reinterpret)]
+         [(and widening? (eq? output-layout ideal-subexpr-layout)) (list ??lo/hi vunpack reinterpret)]
+         [narrowing? (list vshuffe-n reinterpret)]
+         [widening? (list ??lo/hi vzxt vsxt reinterpret)]
          [else (list reinterpret)]))
 
      (define grouped-sub-exprs (prepare-sub-exprs hvx-sub-exprs))
-
-     (pretty-print grouped-sub-exprs)
      
      ;; Desired output type
      (define desired-expr-types (enum-types output-type))
@@ -342,31 +346,85 @@
      ;; Desired output type
      (define desired-expr-types (enum-types output-type))
 
-     (define isa (list vrsr vpack)) ; vpacko-n vround vasr vlsr vsat
-     (define grouped-sub-exprs (prepare-sub-exprs (append (list (vsplat shift)) hvx-sub-exprs)))
-     (define candidates (enumerate-hvx isa desired-expr-types grouped-sub-exprs 2 10))
+     ;; Infer ideal output-layouts for this sub-expr
+     (define ideal-subexpr-layout (infer-ideal-subexpr-layouts ir-expr ir-sub-expr output-layout))
 
-     (set! isa (list vasr-n vround vasr vpacko-n)) ; vlsr
-     (set! grouped-sub-exprs (prepare-sub-exprs hvx-sub-exprs))
+     (define grouped-sub-exprs (prepare-sub-exprs (append (list (vsplat shift)) hvx-sub-exprs)))
      
-     (set! candidates (append candidates (enumerate-hvx isa desired-expr-types grouped-sub-exprs 1 2)))
+     (define candidates
+       (cond
+         [(and narrowing? (eq? output-layout ideal-subexpr-layout))
+           (define isa (list vrsr vasr vlsr vpack vpacko-n))
+           (enumerate-hvx isa desired-expr-types grouped-sub-exprs 2 10)]
+         [narrowing?
+           (define isa (list vrsr vasr vlsr vsat vround vasr-n))
+           (enumerate-hvx isa desired-expr-types grouped-sub-exprs 2 10)]
+         [else
+           (define isa (list vrsr vasr vlsr))
+           (enumerate-hvx isa desired-expr-types grouped-sub-exprs 1 10)]))
 
      ;; Sort them
      (set! candidates (sort candidates (lambda (v1 v2) (<= (cdr v1) (cdr v2)))))
-
-     ;(pretty-print candidates)
-     ;(exit)
      
      ;; Fill in param grammars
      (define int-consts (list shift))
      (define (bool-const) (define-symbolic* b boolean?) b)
-     (define (int8-const) (int8x1  (apply choose* int-consts)))
+     (define (int8-const) (int8x1 (apply choose* int-consts)))
+     (define (int16-const) (int16x1 (apply choose* int-consts)))
      (define (fill-arg-grammars node [pos -1])
        (match node
          [#t #t]
          [#f #f]
          ['bool (bool-const)]
          ['int8 (int8-const)]
+         ['int16 (int16-const)]
+         [_ node]))
+     (for/list ([candidate candidates]) (cons (uniquify-swizzles (hvx:visit (car candidate) fill-arg-grammars)) (cdr candidate)))]
+
+    ;; Vector-vector shift left
+    [(vv-shift-left ir-sub-expr0 ir-sub-expr1)
+     (define outT (hvx-ir:elem-type ir-expr))
+     
+     ;; Generate candidates
+     (define isa (list vasl))
+     (define desired-expr-types (enum-types outT))
+     (define grouped-sub-exprs (prepare-sub-exprs hvx-sub-exprs))
+     (define candidates (enumerate-hvx isa desired-expr-types grouped-sub-exprs 1 10))
+
+     ;; Sort them
+     (set! candidates (sort candidates (lambda (v1 v2) (<= (cdr v1) (cdr v2)))))
+     
+     ;; Fill in param grammars
+     (define int-consts (list (int8_t (bv 0 8))))
+     (define (int16-const) (int16x1 (apply choose* int-consts)))
+     (define (int32-const) (int32x1 (apply choose* int-consts)))
+     (define (fill-arg-grammars node [pos -1])
+       (match node
+         ['int16 (int16-const)]
+         ['int32 (int32-const)]
+         [_ node]))
+     (for/list ([candidate candidates]) (cons (uniquify-swizzles (hvx:visit (car candidate) fill-arg-grammars)) (cdr candidate)))]
+
+    [(vs-shift-left ir-sub-expr0 shift-val)
+     (define outT (hvx-ir:elem-type ir-expr))
+     
+     ;; Generate candidates
+     (define isa (list vasl))
+     (define desired-expr-types (enum-types outT))
+     (define grouped-sub-exprs (prepare-sub-exprs hvx-sub-exprs))
+     (define candidates (enumerate-hvx isa desired-expr-types grouped-sub-exprs 1 10))
+
+     ;; Sort them
+     (set! candidates (sort candidates (lambda (v1 v2) (<= (cdr v1) (cdr v2)))))
+     
+     ;; Fill in param grammars
+     (define int-consts (list shift-val))
+     (define (int16-const) (int16x1 (apply choose* int-consts)))
+     (define (int32-const) (int32x1 (apply choose* int-consts)))
+     (define (fill-arg-grammars node [pos -1])
+       (match node
+         ['int16 (int16-const)]
+         ['int32 (int32-const)]
          [_ node]))
      (for/list ([candidate candidates]) (cons (uniquify-swizzles (hvx:visit (car candidate) fill-arg-grammars)) (cdr candidate)))]
     
@@ -452,7 +510,7 @@
          ['int32 (int32-const)]
          [_ node]))
      (for/list ([candidate candidates]) (cons (uniquify-swizzles (hvx:visit (car candidate) fill-arg-grammars)) (cdr candidate)))]
-
+    
     ;; Vector-scalar multiply return high-half
     [(vs-mpy-hh sub-expr sca round?)
      (define isa (list vmpy-hh))
@@ -476,7 +534,7 @@
          ['int16 (int16-const)]
          [_ node]))
      (for/list ([candidate candidates]) (cons (uniquify-swizzles (hvx:visit (car candidate) fill-arg-grammars)) (cdr candidate)))]
-    
+
     ;; Vector-scalar multiply adds
     [(vs-mpy-add ir-sub-expr weights output-type saturate?)
      (define input-type
