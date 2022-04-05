@@ -18,6 +18,7 @@
  (prefix-out halide: extract-live-buffers)
  (prefix-out halide: extract-buffer-reads)
  (prefix-out halide: extract-loads)
+ (prefix-out halide: extract-arm-loads)
  (prefix-out halide: extract-add-scalars)
  (prefix-out halide: extract-sub-scalars)
  (prefix-out halide: extract-mul-scalars)
@@ -248,6 +249,55 @@
   (halide:visit expr extract-load-ops)
   (set->list loads))
 
+;; Extract vectors
+(define (extract-arm-loads expr)
+  (define loads (mutable-set))
+  (define (extract-load-ops node)
+    (destruct node
+      [(load buf idxs align)
+        (destruct idxs
+          [(ramp base stride len)
+           (define elem-bw (cpp:type-bw (buffer-elemT buf)))
+           (define tile-w (* len stride elem-bw))
+           (define lds
+             (cond
+               [(< tile-w 128)
+                (error "ARM load too small ~a" expr)]
+               [(eq? tile-w 128)
+                (set
+                  (list buf base align)
+                  (list buf (sca-add base (quotient 32 elem-bw)) align)
+                  (list buf (sca-add base (quotient 64 elem-bw)) align)
+                )]
+               [(eq? tile-w 256)
+                (set
+                 (list buf base align)
+                 (list buf (sca-add base (quotient 128 elem-bw)) align))]
+               [(eq? tile-w 512)
+                (set
+                 (list buf base align)
+                 (list buf (sca-add base (quotient 128 elem-bw)) align)
+                 (list buf (sca-add base (quotient 256 elem-bw)) align)
+                 (list buf (sca-add base (quotient 384 elem-bw)) align))]
+               [(eq? tile-w 1024)
+                (set
+                 (list buf base align)
+                 (list buf (sca-add base (quotient 128 elem-bw)) align)
+                 (list buf (sca-add base (quotient 256 elem-bw)) align)
+                 (list buf (sca-add base (quotient 384 elem-bw)) align)
+                 (list buf (sca-add base (quotient 512 elem-bw)) align)
+                 (list buf (sca-add base (quotient 640 elem-bw)) align)
+                 (list buf (sca-add base (quotient 768 elem-bw)) align)
+                 (list buf (sca-add base (quotient 896 elem-bw)) align))]
+               [else
+                (error "NYI: Extracting vec from:" expr)]))
+           (set-union! loads lds)]
+        [_ (error "NYI: Extracting vec from:" expr)])]
+      ;; Ignore everything else
+      [_ node]))
+  (halide:visit expr extract-load-ops)
+  (set->list loads))
+
 ;;;;;;;;;;;;;;;;;; Some helper functions ;;;;;;;;;;;;;;;;;;;;;;
 
 (define (is-power-of-2? val)
@@ -263,65 +313,12 @@
 (define (extract-scalars vec)
   (define v (strip-casts vec))
   (match v
-    [(x32 sca) (set (x32-sca v))]
-    [(x64 sca) (set (x64-sca v))]
-    [(x128 sca) (set (x128-sca v))]
-    [(x256 sca) (set (x256-sca v))]
-    [(x512 sca) (set (x512-sca v))]
+    [(sca-broadcast sca lanes) (set sca)]
     [_ (set)]))
 
 (define (strip-casts expr)
   (destruct expr
-    [(uint8x32 vec) (strip-casts vec)]
-    [(uint16x32 vec) (strip-casts vec)]
-    [(uint32x32 vec) (strip-casts vec)]
-    [(uint64x32 vec) (strip-casts vec)]
-    
-    [(int8x32 vec) (strip-casts vec)]
-    [(int16x32 vec) (strip-casts vec)]
-    [(int32x32 vec) (strip-casts vec)]
-    [(int64x32 vec) (strip-casts vec)]
-    
-    [(uint8x64 vec) (strip-casts vec)]
-    [(uint16x64 vec) (strip-casts vec)]
-    [(uint32x64 vec) (strip-casts vec)]
-    [(uint64x64 vec) (strip-casts vec)]
-    
-    [(int8x64 vec) (strip-casts vec)]
-    [(int16x64 vec) (strip-casts vec)]
-    [(int32x64 vec) (strip-casts vec)]
-    [(int64x64 vec) (strip-casts vec)]
-    
-    [(uint8x128 vec) (strip-casts vec)]
-    [(uint16x128 vec) (strip-casts vec)]
-    [(uint32x128 vec) (strip-casts vec)]
-    [(uint64x128 vec) (strip-casts vec)]
-    
-    [(int8x128 vec) (strip-casts vec)]
-    [(int16x128 vec) (strip-casts vec)]
-    [(int32x128 vec) (strip-casts vec)]
-    [(int64x128 vec) (strip-casts vec)]
-    
-    [(uint8x256 vec) (strip-casts vec)]
-    [(uint16x256 vec) (strip-casts vec)]
-    [(uint32x256 vec) (strip-casts vec)]
-    [(uint64x256 vec) (strip-casts vec)]
-
-    [(int8x256 vec) (strip-casts vec)]
-    [(int16x256 vec) (strip-casts vec)]
-    [(int32x256 vec) (strip-casts vec)]
-    [(int64x256 vec) (strip-casts vec)]
-
-    [(uint8x512 vec) (strip-casts vec)]
-    [(uint16x512 vec) (strip-casts vec)]
-    [(uint32x512 vec) (strip-casts vec)]
-    [(uint64x512 vec) (strip-casts vec)]
-
-    [(int8x512 vec) (strip-casts vec)]
-    [(int16x512 vec) (strip-casts vec)]
-    [(int32x512 vec) (strip-casts vec)]
-    [(int64x512 vec) (strip-casts vec)]
-    
+    [(vec-cast vec type lanes) (strip-casts vec)]
     [_ expr]))
 
 (define (two^ scalars)
@@ -337,54 +334,5 @@
 
 (define (cast-op? expr)
   (destruct expr
-    [(uint8x32 vec) #t]
-    [(uint16x32 vec) #t]
-    [(uint32x32 vec) #t]
-    [(uint64x32 vec) #t]
-    
-    [(int8x32 vec) #t]
-    [(int16x32 vec) #t]
-    [(int32x32 vec) #t]
-    [(int64x32 vec) #t]
-    
-    [(uint8x64 vec) #t]
-    [(uint16x64 vec) #t]
-    [(uint32x64 vec) #t]
-    [(uint64x64 vec) #t]
-    
-    [(int8x64 vec) #t]
-    [(int16x64 vec) #t]
-    [(int32x64 vec) #t]
-    [(int64x64 vec) #t]
-    
-    [(uint8x128 vec) #t]
-    [(uint16x128 vec) #t]
-    [(uint32x128 vec) #t]
-    [(uint64x128 vec) #t]
-    
-    [(int8x128 vec) #t]
-    [(int16x128 vec) #t]
-    [(int32x128 vec) #t]
-    [(int64x128 vec) #t]
-    
-    [(uint8x256 vec) #t]
-    [(uint16x256 vec) #t]
-    [(uint32x256 vec) #t]
-    [(uint64x256 vec) #t]
-
-    [(int8x256 vec) #t]
-    [(int16x256 vec) #t]
-    [(int32x256 vec) #t]
-    [(int64x256 vec) #t]
-
-    [(uint8x512 vec) #t]
-    [(uint16x512 vec) #t]
-    [(uint32x512 vec) #t]
-    [(uint64x512 vec) #t]
-
-    [(int8x512 vec) #t]
-    [(int16x512 vec) #t]
-    [(int32x512 vec) #t]
-    [(int64x512 vec) #t]
-    
+    [(vec-cast vec type lanes) #t]
     [_ #f]))

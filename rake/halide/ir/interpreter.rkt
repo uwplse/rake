@@ -1,7 +1,7 @@
 #lang rosette/safe
 
 (require
-  (only-in racket/base error bitwise-and)
+  (only-in racket/base error bitwise-and bitwise-xor)
   rosette/lib/destruct
   rake/cpp
   rake/halide/ir/types)
@@ -20,84 +20,14 @@
     [(abstr-halide-expr orig-expr abstr-vals) (vec-len orig-expr)]
     
     ;; Constructors
-    [(x32 sca) 32]
-    [(x64 sca) 64]
-    [(x128 sca) 128]
-    [(x256 sca) 256]
-    [(x512 sca) 512]
-
     [(ramp base stride len) len]
     [(load buf idxs alignment) (vec-len idxs)]
     [(load-sca buf idx) 1]
+    [(sca-broadcast sca len) len]
 
-    ;; Type Casts
-    [(uint8x1 sca) 1]
-    [(uint16x1 sca) 1]
-    [(uint32x1 sca) 1]
-    [(uint64x1 sca) 1]
+    ;; Vector Operations
+    [(vec-cast vec type len) len]
     
-    [(int8x1 sca) 1]
-    [(int16x1 sca) 1]
-    [(int32x1 sca) 1]
-    [(int64x1 sca) 1]
-
-    [(uint1x32 vec) 32]
-    [(uint1x64 vec) 64]
-    [(uint1x128 vec) 128]
-    [(uint1x256 vec) 256]
-    [(uint1x512 vec) 512]
-   
-    [(uint8x32 vec) 32]
-    [(uint16x32 vec) 32]
-    [(uint32x32 vec) 32]
-    [(uint64x32 vec) 32]
-    
-    [(int8x32 vec) 32]
-    [(int16x32 vec) 32]
-    [(int32x32 vec) 32]
-    [(int64x32 vec) 32]
-    
-    [(uint8x64 vec) 64]
-    [(uint16x64 vec) 64]
-    [(uint32x64 vec) 64]
-    [(uint64x64 vec) 64]
-    
-    [(int8x64 vec) 64]
-    [(int16x64 vec) 64]
-    [(int32x64 vec) 64]
-    [(int64x64 vec) 64]
-    
-    [(uint8x128 vec) 128]
-    [(uint16x128 vec) 128]
-    [(uint32x128 vec) 128]
-    [(uint64x128 vec) 128]
-    
-    [(int8x128 vec) 128]
-    [(int16x128 vec) 128]
-    [(int32x128 vec) 128]
-    [(int64x128 vec) 128]
-    
-    [(uint8x256 vec) 256]
-    [(uint16x256 vec) 256]
-    [(uint32x256 vec) 256]
-    [(uint64x256 vec) 256]
-
-    [(int8x256 vec) 256]
-    [(int16x256 vec) 256]
-    [(int32x256 vec) 256]
-    [(int64x256 vec) 256]
-
-    [(uint8x512 vec) 512]
-    [(uint16x512 vec) 512]
-    [(uint32x512 vec) 512]
-    [(uint64x512 vec) 512]
-
-    [(int8x512 vec) 512]
-    [(int16x512 vec) 512]
-    [(int32x512 vec) 512]
-    [(int64x512 vec) 512]
-
-    ;; Operations
     [(vec-add v1 v2) (vec-len v1)]
     [(vec-sub v1 v2) (vec-len v1)]
     [(vec-mul v1 v2) (vec-len v1)]
@@ -110,6 +40,8 @@
     [(vec-eq v1 v2) (vec-len v1)]
     [(vec-lt v1 v2) (vec-len v1)]
     [(vec-le v1 v2) (vec-len v1)]
+    [(vec-gt v1 v2) (vec-len v1)]
+    [(vec-ge v1 v2) (vec-len v1)]
 
     [(vec-abs v1) (vec-len v1)]
     [(vec-clz v1) (vec-len v1)]
@@ -119,7 +51,9 @@
     [(vec-shr v1 v2) (vec-len v1)]
 
     [(vec-bwand v1 v2) (vec-len v1)]
+    [(vec-bwxor v1 v2) (vec-len v1)]
 
+    [(vec-reinterpret v type lanes) lanes]
     [(vector_reduce op width vec) (quotient (vec-len vec) width)]
 
     ;; Shuffles
@@ -138,84 +72,14 @@
 (define (sub-exprs expr)
   (destruct expr
     ;; Constructors
-    [(x32 sca) (list)]
-    [(x64 sca) (list)]
-    [(x128 sca) (list)]
-    [(x256 sca) (list)]
-    [(x512 sca) (list)]
-
     [(ramp base stride len) (list)]
     [(load buf idxs alignment) (list)]
     [(load-sca buf idx) (list)]
+    [(sca-broadcast sca len) (list)]
 
-    ;; Type Casts
-    [(uint8x1 sca) (list)]
-    [(uint16x1 sca) (list)]
-    [(uint32x1 sca) (list)]
-    [(uint64x1 sca) (list)]
+    ;; Vector Operations
+    [(vec-cast vec type len) (list vec)]
     
-    [(int8x1 sca) (list)]
-    [(int16x1 sca) (list)]
-    [(int32x1 sca) (list)]
-    [(int64x1 sca) (list)]
-
-    [(uint1x32 vec) (list vec)]
-    [(uint1x64 vec) (list vec)]
-    [(uint1x128 vec) (list vec)]
-    [(uint1x256 vec) (list vec)]
-    [(uint1x512 vec) (list vec)]
-   
-    [(uint8x32 vec) (list vec)]
-    [(uint16x32 vec) (list vec)]
-    [(uint32x32 vec) (list vec)]
-    [(uint64x32 vec) (list vec)]
-    
-    [(int8x32 vec) (list vec)]
-    [(int16x32 vec) (list vec)]
-    [(int32x32 vec) (list vec)]
-    [(int64x32 vec) (list vec)]
-    
-    [(uint8x64 vec) (list vec)]
-    [(uint16x64 vec) (list vec)]
-    [(uint32x64 vec) (list vec)]
-    [(uint64x64 vec) (list vec)]
-    
-    [(int8x64 vec) (list vec)]
-    [(int16x64 vec) (list vec)]
-    [(int32x64 vec) (list vec)]
-    [(int64x64 vec) (list vec)]
-    
-    [(uint8x128 vec) (list vec)]
-    [(uint16x128 vec) (list vec)]
-    [(uint32x128 vec) (list vec)]
-    [(uint64x128 vec) (list vec)]
-    
-    [(int8x128 vec) (list vec)]
-    [(int16x128 vec) (list vec)]
-    [(int32x128 vec) (list vec)]
-    [(int64x128 vec) (list vec)]
-    
-    [(uint8x256 vec) (list vec)]
-    [(uint16x256 vec) (list vec)]
-    [(uint32x256 vec) (list vec)]
-    [(uint64x256 vec) (list vec)]
-
-    [(int8x256 vec) (list vec)]
-    [(int16x256 vec) (list vec)]
-    [(int32x256 vec) (list vec)]
-    [(int64x256 vec) (list vec)]
-
-    [(uint8x512 vec) (list vec)]
-    [(uint16x512 vec) (list vec)]
-    [(uint32x512 vec) (list vec)]
-    [(uint64x512 vec) (list vec)]
-
-    [(int8x512 vec) (list vec)]
-    [(int16x512 vec) (list vec)]
-    [(int32x512 vec) (list vec)]
-    [(int64x512 vec) (list vec)]
-
-    ;; Operations
     [(vec-add v1 v2) (list v1 v2)]
     [(vec-sub v1 v2) (list v1 v2)]
     [(vec-mul v1 v2) (list v1 v2)]
@@ -223,10 +87,13 @@
     [(vec-mod v1 v2) (list v1 v2)]
     [(vec-min v1 v2) (list v1 v2)]
     [(vec-max v1 v2) (list v1 v2)]
+    
     [(vec-if v1 v2 v3) (list v1 v2 v3)]
     [(vec-eq v1 v2) (list v1 v2)]
     [(vec-lt v1 v2) (list v1 v2)]
     [(vec-le v1 v2) (list v1 v2)]
+    [(vec-gt v1 v2) (list v1 v2)]
+    [(vec-ge v1 v2) (list v1 v2)]
 
     [(vec-abs v1) (list v1)]
     [(vec-clz v1) (list v1)]
@@ -236,7 +103,9 @@
     [(vec-shr v1 v2) (list v1 v2)]
 
     [(vec-bwand v1 v2) (list v1 v2)]
+    [(vec-bwxor v1 v2) (list v1 v2)]
 
+    [(vec-reinterpret v type lanes) (list v)]
     [(vector_reduce op width vec) (list vec)]
 
     ;; Shuffles
@@ -259,12 +128,6 @@
     [(var-lookup var val) (interpret val)]
     
     ;; Constructors
-    [(x32 sca) (lambda (i) (interpret sca))]
-    [(x64 sca) (lambda (i) (interpret sca))]
-    [(x128 sca) (lambda (i) (interpret sca))]
-    [(x256 sca) (lambda (i) (interpret sca))]
-    [(x512 sca) (lambda (i) (interpret sca))]
-
     [(ramp base stride len)
      (define intr-base (interpret base))
      (define intr-stride (interpret stride))
@@ -283,72 +146,11 @@
 
     [(load buf idxs alignment) (lambda (i) (buffer-ref (interpret buf) ((interpret idxs) i)))]
     [(load-sca buf idx) (buffer-ref (interpret buf) (interpret idx))]
+    [(sca-broadcast sca lanes) (lambda (i) (interpret sca))]
 
-    ;; Type Casts
-    [(uint8x1 sca) (cpp:cast (interpret sca) 'uint8)]
-    [(uint16x1 sca) (cpp:cast (interpret sca) 'uint16)]    
-    [(uint32x1 sca) (cpp:cast (interpret sca) 'uint32)]
-    [(uint64x1 sca) (cpp:cast (interpret sca) 'uint64)]
-
-    [(int8x1 sca) (cpp:cast (interpret sca) 'int8)]
-    [(int16x1 sca) (cpp:cast (interpret sca) 'int16)]
-    [(int32x1 sca) (cpp:cast (interpret sca) 'int32)]
-    [(int64x1 sca) (cpp:cast (interpret sca) 'int64)]
-
-    ;[(uint1x32 vec) NYI: Not sure what would be casted into uint1?]
-    ;[(uint1x64 vec) NYI: Not sure what would be casted into uint1?]
-    ;[(uint1x128 vec) NYI: Not sure what would be casted into uint1?]
-    ;[(uint1x256 vec) NYI: Not sure what would be casted into uint1?]    
-
-    [(uint8x32 vec) (lambda (i) (cpp:cast ((interpret vec) i) 'uint8))]
-    [(uint8x64 vec) (lambda (i) (cpp:cast ((interpret vec) i) 'uint8))]
-    [(uint8x128 vec) (lambda (i) (cpp:cast ((interpret vec) i) 'uint8))]
-    [(uint8x256 vec) (lambda (i) (cpp:cast ((interpret vec) i) 'uint8))]
-    [(uint8x512 vec) (lambda (i) (cpp:cast ((interpret vec) i) 'uint8))]
-
-    [(int8x32 vec) (lambda (i) (cpp:cast ((interpret vec) i) 'int8))]
-    [(int8x64 vec) (lambda (i) (cpp:cast ((interpret vec) i) 'int8))]
-    [(int8x128 vec) (lambda (i) (cpp:cast ((interpret vec) i) 'int8))]
-    [(int8x256 vec) (lambda (i) (cpp:cast ((interpret vec) i) 'int8))]
-    [(int8x512 vec) (lambda (i) (cpp:cast ((interpret vec) i) 'int8))]
-
-    [(uint16x32 vec) (lambda (i) (cpp:cast ((interpret vec) i) 'uint16))]
-    [(uint16x64 vec) (lambda (i) (cpp:cast ((interpret vec) i) 'uint16))]
-    [(uint16x128 vec) (lambda (i) (cpp:cast ((interpret vec) i) 'uint16))]
-    [(uint16x256 vec) (lambda (i) (cpp:cast ((interpret vec) i) 'uint16))]
-    [(uint16x512 vec) (lambda (i) (cpp:cast ((interpret vec) i) 'uint16))]
-
-    [(int16x32 vec) (lambda (i) (cpp:cast ((interpret vec) i) 'int16))]
-    [(int16x64 vec) (lambda (i) (cpp:cast ((interpret vec) i) 'int16))]
-    [(int16x128 vec) (lambda (i) (cpp:cast ((interpret vec) i) 'int16))]
-    [(int16x256 vec) (lambda (i) (cpp:cast ((interpret vec) i) 'int16))]
-    [(int16x512 vec) (lambda (i) (cpp:cast ((interpret vec) i) 'int16))]
+    ;; Scalar Operations
+    [(sca-cast v type) (cpp:cast (interpret v) type)]
     
-    [(uint32x32 vec) (lambda (i) (cpp:cast ((interpret vec) i) 'uint32))]
-    [(uint32x64 vec) (lambda (i) (cpp:cast ((interpret vec) i) 'uint32))]
-    [(uint32x128 vec) (lambda (i) (cpp:cast ((interpret vec) i) 'uint32))]
-    [(uint32x256 vec) (lambda (i) (cpp:cast ((interpret vec) i) 'uint32))]
-    [(uint32x512 vec) (lambda (i) (cpp:cast ((interpret vec) i) 'uint32))]
-
-    [(int32x32 vec) (lambda (i) (cpp:cast ((interpret vec) i) 'int32))]
-    [(int32x64 vec) (lambda (i) (cpp:cast ((interpret vec) i) 'int32))]
-    [(int32x128 vec) (lambda (i) (cpp:cast ((interpret vec) i) 'int32))]
-    [(int32x256 vec) (lambda (i) (cpp:cast ((interpret vec) i) 'int32))]
-    [(int32x512 vec) (lambda (i) (cpp:cast ((interpret vec) i) 'int32))]
-    
-    [(uint64x32 vec) (lambda (i) (cpp:cast ((interpret vec) i) 'uint64))]
-    [(uint64x64 vec) (lambda (i) (cpp:cast ((interpret vec) i) 'uint64))]
-    [(uint64x128 vec) (lambda (i) (cpp:cast ((interpret vec) i) 'uint64))]
-    [(uint64x256 vec) (lambda (i) (cpp:cast ((interpret vec) i) 'uint64))]
-    [(uint64x512 vec) (lambda (i) (cpp:cast ((interpret vec) i) 'uint64))]
-
-    [(int64x32 vec) (lambda (i) (cpp:cast ((interpret vec) i) 'int64))]
-    [(int64x64 vec) (lambda (i) (cpp:cast ((interpret vec) i) 'int64))]
-    [(int64x128 vec) (lambda (i) (cpp:cast ((interpret vec) i) 'int64))]
-    [(int64x256 vec) (lambda (i) (cpp:cast ((interpret vec) i) 'int64))]
-    [(int64x512 vec) (lambda (i) (cpp:cast ((interpret vec) i) 'int64))]
-    
-    ;; Operations
     [(sca-add v1 v2) (do-add (interpret v1) (interpret v2))]
     [(sca-sub v1 v2) (do-sub (interpret v1) (interpret v2))]
     [(sca-mul v1 v2) (do-mul (interpret v1) (interpret v2))]
@@ -369,6 +171,9 @@
     [(sca-clz v1) (do-clz (interpret v1))]
 
     [(sca-bwand v1 v2) (do-bwand (interpret v1) (interpret v2))]
+
+    ;; Vector Operations
+    [(vec-cast vec type len) (lambda (i) (cpp:cast ((interpret vec) i) type))]
     
     [(vec-add v1 v2) (lambda (i) (do-add ((interpret v1) i) ((interpret v2) i)))]
     [(vec-sub v1 v2) (lambda (i) (do-sub ((interpret v1) i) ((interpret v2) i)))]
@@ -382,6 +187,8 @@
     [(vec-eq v1 v2) (lambda (i) (do-eq ((interpret v1) i) ((interpret v2) i)))]
     [(vec-lt v1 v2) (lambda (i) (do-lt ((interpret v1) i) ((interpret v2) i)))]
     [(vec-le v1 v2) (lambda (i) (do-le ((interpret v1) i) ((interpret v2) i)))]
+    [(vec-gt v1 v2) (lambda (i) (do-gt ((interpret v1) i) ((interpret v2) i)))]
+    [(vec-ge v1 v2) (lambda (i) (do-ge ((interpret v1) i) ((interpret v2) i)))]
 
     [(vec-abs v1) (lambda (i) (do-abs ((interpret v1) i)))]
     [(vec-shl v1 v2) (lambda (i) (do-shl ((interpret v1) i) ((interpret v2) i)))]
@@ -390,6 +197,9 @@
     [(vec-clz v1) (lambda (i) (do-clz ((interpret v1) i)))]
 
     [(vec-bwand v1 v2) (lambda (i) (do-bwand ((interpret v1) i) ((interpret v2) i)))]
+    [(vec-bwxor v1 v2) (lambda (i) (do-bwxor ((interpret v1) i) ((interpret v2) i)))]
+
+    [(vec-reinterpret v type lanes) (lambda (i) (do-reinterpret (interpret v) i type lanes))]
 
     [(vector_reduce op width vec)
      (cond
@@ -580,6 +390,24 @@
     [else
      (mk-cpp-expr (bvule (cpp:eval lhs) (cpp:eval rhs)) 'uint1)]))
 
+(define (do-gt lhs rhs)
+  (cond
+    [(and (integer? lhs) (integer? rhs))
+     (> lhs rhs)]
+    [(cpp:signed-expr? lhs)
+     (mk-cpp-expr (bvsgt (cpp:eval lhs) (cpp:eval rhs)) 'uint1)]
+    [else
+     (mk-cpp-expr (bvugt (cpp:eval lhs) (cpp:eval rhs)) 'uint1)]))
+
+(define (do-ge lhs rhs)
+  (cond
+    [(and (integer? lhs) (integer? rhs))
+     (>= lhs rhs)]
+    [(cpp:signed-expr? lhs)
+     (mk-cpp-expr (bvsge (cpp:eval lhs) (cpp:eval rhs)) 'uint1)]
+    [else
+     (mk-cpp-expr (bvuge (cpp:eval lhs) (cpp:eval rhs)) 'uint1)]))
+
 (define (do-abs lhs)
   (define outT (infer-out-type lhs lhs))
   (define zero (cpp:cast (int8_t (bv 1 8)) (cpp:type-str outT)))
@@ -606,6 +434,67 @@
     [else
      (define outT (infer-out-type lhs rhs))
      (mk-cpp-expr (bvand (cpp:eval lhs) (cpp:eval rhs)) outT)]))
+
+(define (do-bwxor lhs rhs)
+  (cond
+    [(and (integer? lhs) (integer? rhs))
+     (bitwise-xor lhs rhs)]
+    [else
+     (define outT (infer-out-type lhs rhs))
+     (mk-cpp-expr (bvxor (cpp:eval lhs) (cpp:eval rhs)) outT)]))
+
+(define (do-reinterpret-extract vec index type lanes)
+  (error "TODO: implement do-reinterpret-extract as needed\n"))
+
+(define (get-cast-type type)
+  (cond
+    [(eq? type 'int8) int8_t]
+    [(eq? type 'int16) int16_t]
+    [(eq? type 'int32) int32_t]
+    [(eq? type 'int64) int64_t]
+    [(eq? type 'uint8) uint8_t]
+    [(eq? type 'uint16) uint16_t]
+    [(eq? type 'uint32) uint32_t]
+    [(eq? type 'uint64) uint64_t]))
+
+(define (do-reinterpret-scalar value type)
+  (let ([new_type (get-cast-type type)])
+    (destruct value
+      [(int8_t v) (new_type v)]
+      [(int16_t v) (new_type v)]
+      [(int32_t v) (new_type v)]
+      [(int64_t v) (new_type v)]
+      [(uint1_t v) (new_type v)]
+      [(uint8_t v) (new_type v)]
+      [(uint16_t v) (new_type v)]
+      [(uint32_t v) (new_type v)]
+      [(uint64_t v) (new_type v)]
+      [_ (error "reinterpret doesn't know type: ~a" value)])))
+
+(define (do-reinterpret-concat-helper vec sb eb bi index)
+  (if (eq? sb eb)
+      (error "do-reinterpret-concat-helper received a bad input ~a ~a ~a ~a" vec sb eb bi index)
+      (cond
+        [(eq? (+ sb bi) eb) (cpp:eval (vec index))]
+        [(> (+ sb bi) eb) (error "reinterpret was not designed to know the endian...")]
+        [else (concat (cpp:eval (vec index)) (do-reinterpret-concat-helper vec (+ sb bi) eb bi (+ 1 index)))])))
+
+(define (do-reinterpret-concat vec index type lanes bi bo)
+  (let* ([input-lanes (quotient (* bo lanes) bi)]
+         [index-ratio (quotient input-lanes lanes)]
+         [input-index (* index index-ratio)]
+         [start-bit (input-index * bi)]
+         [end-bit (+ (input-index * bi) bo)]
+         [bits (do-reinterpret-concat-helper vec start-bit end-bit bi input-index)])
+    ((get-cast-type type) bits)))
+
+(define (do-reinterpret vec index type lanes)
+    (let ([input-bits (cpp:expr-bw (vec 0))]
+          [output-bits (cpp:type-bw type)])
+        (cond
+          [(eq? input-bits output-bits) (do-reinterpret-scalar (vec index) type)]
+          [(< input-bits output-bits) (do-reinterpret-concat vec index type lanes input-bits output-bits)]
+          [else (do-reinterpret-extract vec index type lanes)])))
 
 (define (do-reduce vec op base width)
   (define outT (cpp:type (vec 0)))
