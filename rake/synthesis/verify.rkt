@@ -89,8 +89,8 @@
      (display "=")
      (define sol (verify-lane halide-output hvx-output lane ctx axioms is-hvx-pair? offset))
      (cond
-       [(or (unsat? sol) (unknown? sol)) (verify-equiv halide-output hvx-output (rest lanes) ctx axioms is-hvx-pair? offset)]
-       [else #f])]))
+       [(or (unsat? sol) (unknown? sol)) #f]
+       [else (verify-equiv halide-output hvx-output (rest lanes) ctx axioms is-hvx-pair? offset)])]))
 
 (define (verify-lane halide-output hvx-output lane ctx axioms is-hvx-pair? offset)
   (clear-vc!)
