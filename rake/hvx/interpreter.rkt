@@ -15,13 +15,12 @@
 (provide
  (rename-out
   [interpret hvx:interpret]
-  [set-curr-cn hvx:set-curr-cn]))
+  [set-curr-cn hvx:set-cn]))
 
-;vsub-w                                    ;; Addition and subtraction
-;vmpy vmpy-acc                                               ;; Multiplication
-;vmpa vmpa-acc vdmpy vdmpy-acc         ;; 2 fused multiply-add
-;vtmpy vtmpy-acc                                             ;; 3 fused multiply-add
-;vrmpy vrmpy-acc vrmpy-sw vrmpy-sw-acc
+;; The curr-cn flag is used to restrict the set of values a gather returns when the expression is being evaluated for
+;; any particular channel
+(define curr-cn 0)
+(define (set-curr-cn v) (set! curr-cn v))
 
 (define (interpret p)
   (destruct p
@@ -30,16 +29,8 @@
             
     [(var-lookup var val) (interpret val)]
     
-    [(uint8x1 sca) (cpp:cast (interpret sca) 'uint8)]
-    [(uint16x1 sca) (cpp:cast (interpret sca) 'uint16)]    
-    [(uint32x1 sca) (cpp:cast (interpret sca) 'uint32)]
-    [(uint64x1 sca) (cpp:cast (interpret sca) 'uint64)]
+    [(sca-cast sca type) (cpp:cast (interpret sca) type)]
 
-    [(int8x1 sca) (cpp:cast (interpret sca) 'int8)]
-    [(int16x1 sca) (cpp:cast (interpret sca) 'int16)]
-    [(int32x1 sca) (cpp:cast (interpret sca) 'int32)]
-    [(int64x1 sca) (cpp:cast (interpret sca) 'int64)]
-            
     [(sca-add v1 v2) (halide:do-add (interpret v1) (interpret v2))]
     [(sca-sub v1 v2) (halide:do-sub (interpret v1) (interpret v2))]
     [(sca-mul v1 v2) (halide:do-mul (interpret v1) (interpret v2))]
@@ -617,7 +608,7 @@
          [(i16x64 v0) (i32x32x2 (lambda (i) (int32_t (sxt32 (v0 (* i 2))))) (lambda (i) (int32_t (sxt32 (v0 (+ (* i 2) 1))))))]))]
 
     [(vzxt Vu)
-     (let ([zxt16 (lambda (val) (zero-extend (cpp:eval val) (bitvector 16)))] [zxt32 (lambda (val) (sign-extend (cpp:eval val) (bitvector 32)))])
+     (let ([zxt16 (lambda (val) (zero-extend (cpp:eval val) (bitvector 16)))] [zxt32 (lambda (val) (zero-extend (cpp:eval val) (bitvector 32)))])
        (destruct (interpret Vu)
          [(u8x128 v0) (u16x64x2 (lambda (i) (uint16_t (zxt16 (v0 (* i 2))))) (lambda (i) (uint16_t (zxt16 (v0 (+ (* i 2) 1))))))]
          [(u16x64 v0) (u32x32x2 (lambda (i) (uint32_t (zxt32 (v0 (* i 2))))) (lambda (i) (uint32_t (zxt32 (v0 (+ (* i 2) 1))))))]))]
@@ -1018,26 +1009,26 @@
         (i16x64x2
          (lambda (i)
            (assert (contiguous-reads? (data-v0 (* i 2)) (data-v0 (+ (* i 2) 1)) (data-v1 (* i 2))))
-           (multiply-add-acc (data-v0 (* i 2)) w2 (data-v0 (+ (* i 2) 1)) w1 (data-v1 (* i 2)) 'int16))
+           (multiply-add-acc (data-v0 (* i 2)) w1 (data-v0 (+ (* i 2) 1)) w2 (data-v1 (* i 2)) 'int16))
          (lambda (i)
            (assert (contiguous-reads? (data-v0 (+ (* i 2) 1)) (data-v1 (* i 2)) (data-v1 (+ (* i 2) 1))))
-           (multiply-add-acc (data-v0 (+ (* i 2) 1)) w2 (data-v1 (* i 2)) w1 (data-v1 (+ (* i 2) 1)) 'int16)))]
+           (multiply-add-acc (data-v0 (+ (* i 2) 1)) w1 (data-v1 (* i 2)) w2 (data-v1 (+ (* i 2) 1)) 'int16)))]
        [((u8x128x2 data-v0 data-v1) (Rt2.b w1 w2))
         (i16x64x2
          (lambda (i)
            (assert (contiguous-reads? (data-v0 (* i 2)) (data-v0 (+ (* i 2) 1)) (data-v1 (* i 2))))
-           (multiply-add-acc (data-v0 (* i 2)) w2 (data-v0 (+ (* i 2) 1)) w1 (data-v1 (* i 2)) 'int16))
+           (multiply-add-acc (data-v0 (* i 2)) w1 (data-v0 (+ (* i 2) 1)) w2 (data-v1 (* i 2)) 'int16))
          (lambda (i)
            (assert (contiguous-reads? (data-v0 (+ (* i 2) 1)) (data-v1 (* i 2)) (data-v1 (+ (* i 2) 1))))
-           (multiply-add-acc (data-v0 (+ (* i 2) 1)) w2 (data-v1 (* i 2)) w1 (data-v1 (+ (* i 2) 1)) 'int16)))]
+           (multiply-add-acc (data-v0 (+ (* i 2) 1)) w1 (data-v1 (* i 2)) w2 (data-v1 (+ (* i 2) 1)) 'int16)))]
        [((i16x64x2 data-v0 data-v1) (Rt2.b w1 w2))
         (i32x32x2
          (lambda (i)
            (assert (contiguous-reads? (data-v0 (* i 2)) (data-v0 (+ (* i 2) 1)) (data-v1 (* i 2))))
-           (multiply-add-acc (data-v0 (* i 2)) w2 (data-v0 (+ (* i 2) 1)) w1 (data-v1 (* i 2)) 'int32))
+           (multiply-add-acc (data-v0 (* i 2)) w1 (data-v0 (+ (* i 2) 1)) w2 (data-v1 (* i 2)) 'int32))
          (lambda (i)
            (assert (contiguous-reads? (data-v0 (+ (* i 2) 1)) (data-v1 (* i 2)) (data-v1 (+ (* i 2) 1))))
-           (multiply-add-acc (data-v0 (+ (* i 2) 1)) w2 (data-v1 (* i 2)) w1 (data-v1 (+ (* i 2) 1)) 'int32)))])]
+           (multiply-add-acc (data-v0 (+ (* i 2) 1)) w1 (data-v1 (* i 2)) w2 (data-v1 (+ (* i 2) 1)) 'int32)))])]
 
     ;; Reduce (via sum) two vector-scalar multiplies in a sliding window with an additional accumulate.
     ;; Also accumulate the output into the target register
@@ -1047,26 +1038,26 @@
         (i16x64x2
          (lambda (i)
            (assert (contiguous-reads? (data-v0 (* i 2)) (data-v0 (+ (* i 2) 1)) (data-v1 (* i 2))))
-           (int16_t (bvadd (cpp:eval (acc-v0 i)) (cpp:eval (multiply-add-acc (data-v0 (* i 2)) w2 (data-v0 (+ (* i 2) 1)) w1 (data-v1 (* i 2)) 'int16)))))
+           (int16_t (bvadd (cpp:eval (acc-v0 i)) (cpp:eval (multiply-add-acc (data-v0 (* i 2)) w1 (data-v0 (+ (* i 2) 1)) w2 (data-v1 (* i 2)) 'int16)))))
          (lambda (i)
            (assert (contiguous-reads? (data-v0 (+ (* i 2) 1)) (data-v1 (* i 2)) (data-v1 (+ (* i 2) 1))))
-           (int16_t (bvadd (cpp:eval (acc-v1 i)) (cpp:eval (multiply-add-acc (data-v0 (+ (* i 2) 1)) w2 (data-v1 (* i 2)) w1 (data-v1 (+ (* i 2) 1)) 'int16))))))]
+           (int16_t (bvadd (cpp:eval (acc-v1 i)) (cpp:eval (multiply-add-acc (data-v0 (+ (* i 2) 1)) w1 (data-v1 (* i 2)) w2 (data-v1 (+ (* i 2) 1)) 'int16))))))]
        [(list (i16x64x2 acc-v0 acc-v1) (u8x128x2 data-v0 data-v1) (Rt2.b w1 w2))
         (i16x64x2
          (lambda (i)
            (assert (contiguous-reads? (data-v0 (* i 2)) (data-v0 (+ (* i 2) 1)) (data-v1 (* i 2))))
-           (int16_t (bvadd (cpp:eval (acc-v0 i)) (cpp:eval (multiply-add-acc (data-v0 (* i 2)) w2 (data-v0 (+ (* i 2) 1)) w1 (data-v1 (* i 2)) 'int16)))))
+           (int16_t (bvadd (cpp:eval (acc-v0 i)) (cpp:eval (multiply-add-acc (data-v0 (* i 2)) w1 (data-v0 (+ (* i 2) 1)) w2 (data-v1 (* i 2)) 'int16)))))
          (lambda (i)
            (assert (contiguous-reads? (data-v0 (+ (* i 2) 1)) (data-v1 (* i 2)) (data-v1 (+ (* i 2) 1))))
-           (int16_t (bvadd (cpp:eval (acc-v1 i)) (cpp:eval (multiply-add-acc (data-v0 (+ (* i 2) 1)) w2 (data-v1 (* i 2)) w1 (data-v1 (+ (* i 2) 1)) 'int16))))))]
+           (int16_t (bvadd (cpp:eval (acc-v1 i)) (cpp:eval (multiply-add-acc (data-v0 (+ (* i 2) 1)) w1 (data-v1 (* i 2)) w2 (data-v1 (+ (* i 2) 1)) 'int16))))))]
        [(list (i32x32x2 acc-v0 acc-v1) (i16x64x2 data-v0 data-v1) (Rt2.b w1 w2))
         (i32x32x2
          (lambda (i)
            (assert (contiguous-reads? (data-v0 (* i 2)) (data-v0 (+ (* i 2) 1)) (data-v1 (* i 2))))
-           (int32_t (bvadd (cpp:eval (acc-v0 i)) (cpp:eval (multiply-add-acc (data-v0 (* i 2)) w2 (data-v0 (+ (* i 2) 1)) w1 (data-v1 (* i 2)) 'int32)))))
+           (int32_t (bvadd (cpp:eval (acc-v0 i)) (cpp:eval (multiply-add-acc (data-v0 (* i 2)) w1 (data-v0 (+ (* i 2) 1)) w2 (data-v1 (* i 2)) 'int32)))))
          (lambda (i)
            (assert (contiguous-reads? (data-v0 (+ (* i 2) 1)) (data-v1 (* i 2)) (data-v1 (+ (* i 2) 1))))
-           (int32_t (bvadd (cpp:eval (acc-v1 i)) (cpp:eval (multiply-add-acc (data-v0 (+ (* i 2) 1)) w2 (data-v1 (* i 2)) w1 (data-v1 (+ (* i 2) 1)) 'int32))))))])]
+           (int32_t (bvadd (cpp:eval (acc-v1 i)) (cpp:eval (multiply-add-acc (data-v0 (+ (* i 2) 1)) w1 (data-v1 (* i 2)) w2 (data-v1 (+ (* i 2) 1)) 'int32))))))])]
 
     ;; Vector-scalar multiply with 4-wide within-vector reduction
     [(vrmpy Vu Rt)
@@ -1727,10 +1718,6 @@
 ;      (outType (lambda (i) ((choose* Vu Vv) (idx-tbl1 i))) (lambda (i) ((choose* Vu Vv) (idx-tbl2 i))))
 ;      (outType (lambda (i) (Vu (idx-tbl1 i))))))
 ;
-;;; The curr-cn flag is used to restrict the set of values a gather returns when the expression is being evaluated for
-;;; any particular channel
-(define curr-cn 0)
-(define (set-curr-cn v) (set! curr-cn v))
 ;
 ;;; Since gather and swizzle constructs abstract away data-movement, their implementation must be synthesized as a hash-table.
 ;;; Ideally this definition should be in the grammar file but that would cause a circular dependency, so here we are.
