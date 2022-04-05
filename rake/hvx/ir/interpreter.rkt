@@ -6,8 +6,7 @@
   rosette/lib/angelic
   rake/cpp
   rake/halide
-  rake/hvx/ir/instructions
-  rake/internal/counter)
+  rake/hvx/ir/instructions)
 
 (provide
  (rename-out [visit hvx-ir:visit])
