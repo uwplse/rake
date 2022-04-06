@@ -10,12 +10,15 @@
   rosette/lib/angelic
   rake/cpp
   rake/halide
-  rake/arm/ast/types
-  rake/internal/counter)
+  rake/arm/ast/types)
 
 (provide
  (rename-out
-  [interpret arm:interpret]))
+  [interpret arm:interpret]
+  [set-curr-cn! arm:set-curr-cn!]))
+
+(define curr-cn 0)
+(define (set-curr-cn! v) (set! curr-cn v))
 
 ;; ARM A64 interpreter
 (define (interpret p)
