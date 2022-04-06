@@ -119,13 +119,13 @@
   (define offset (quotient (hvx:num-elems se) 2))
   (cond
     [(and (hvx:vec-pair? se) (< lane offset))
-     (hvx:set-curr-cn lane)
+     (hvx:set-cn lane)
      (assert (eq? (oe lane) (hvx:v0-elem se lane)))]
     [(hvx:vec-pair? se)
-     (hvx:set-curr-cn lane)
+     (hvx:set-cn lane)
      (assert (eq? (oe lane) (hvx:v1-elem se (- lane offset))))]
     [else
-     (hvx:set-curr-cn lane)
+     (hvx:set-cn lane)
      (assert (eq? (oe lane) (hvx:elem se lane)))]))
 
 ;[(hvx:vec-pair? se)

@@ -94,7 +94,7 @@
      (define curr-lane (first lanes-to-verify))
      
      ;(display (format "Verifying lane: ~a\n" curr-lane))
-     ;(hvx:set-curr-cn curr-lane)
+     ;(hvx:set-cn curr-lane)
      ;(println ((halide:interpret halide-expr) curr-lane))
      ;(println (let ([x (hvx:interpret template)]) (if (hvx:vec-pair? x) (hvx:v0-elem x curr-lane) (hvx:elem x curr-lane))))
      
@@ -129,55 +129,55 @@
 ;    [(eq? output-layout 'standard)
 ;      (cond
 ;        [(and (hvx:vec-pair? se) (< lane offset))
-;         (hvx:set-curr-cn lane)
+;         (hvx:set-cn lane)
 ;         (assert (eq? (oe lane) (hvx:v0-elem se lane)))
-;         (hvx:set-curr-cn (add1 lane))
+;         (hvx:set-cn (add1 lane))
 ;         (assert (eq? (oe (add1 lane)) (hvx:v0-elem se (add1 lane))))]
 ;        [(hvx:vec-pair? se)
-;         (hvx:set-curr-cn lane)
+;         (hvx:set-cn lane)
 ;         (assert (eq? (oe lane) (hvx:v1-elem se (- lane offset))))
-;         (hvx:set-curr-cn (add1 lane))
+;         (hvx:set-cn (add1 lane))
 ;         (assert (eq? (oe (add1 lane)) (hvx:v1-elem se (- (add1 lane) offset))))]
 ;        [else
-;         (hvx:set-curr-cn lane)
+;         (hvx:set-cn lane)
 ;         (assert (eq? (oe lane) (hvx:elem se lane)))
-;         (hvx:set-curr-cn (add1 lane))
+;         (hvx:set-cn (add1 lane))
 ;         (assert (eq? (oe (add1 lane)) (hvx:elem se (add1 lane))))])]
 ;    [(eq? output-layout 'deinterleaved)
 ;      (cond
 ;        [(and (hvx:vec-pair? se) (even? lane))
-;         (hvx:set-curr-cn lane)
+;         (hvx:set-cn lane)
 ;         (assert (eq? (oe lane) (hvx:v0-elem se (quotient lane 2))))]
 ;        [(hvx:vec-pair? se)
-;         (hvx:set-curr-cn lane)
+;         (hvx:set-cn lane)
 ;         (assert (eq? (oe lane) (hvx:v1-elem se (quotient lane 2))))]
 ;        [else
-;         (hvx:set-curr-cn (* 2 lane))
+;         (hvx:set-cn (* 2 lane))
 ;         (assert (eq? (oe (* 2 lane)) (hvx:elem se lane)))])]
 ;    [(eq? output-layout 'deinterleavedx2)
 ;      (cond
 ;        [(and (hvx:vec-pair? se) (< lane offset))
-;         (hvx:set-curr-cn (* 4 lane))
+;         (hvx:set-cn (* 4 lane))
 ;         (assert (eq? (oe (* 4 lane)) (hvx:v0-elem se lane)))]
 ;        [(hvx:vec-pair? se)
-;         (hvx:set-curr-cn (+ 2 (* 4 (- lane offset))))
+;         (hvx:set-cn (+ 2 (* 4 (- lane offset))))
 ;         (assert (eq? (oe (+ 2 (* 4 (- lane offset)))) (hvx:v1-elem se (- lane offset))))]
 ;        [else
-;         (hvx:set-curr-cn (* 4 lane))
+;         (hvx:set-cn (* 4 lane))
 ;         (assert (eq? (oe (* 4 lane)) (hvx:elem se lane)))])]
 ;    [(eq? output-layout 'interleaved)
 ;      (cond
 ;        [(and (hvx:vec-pair? se) (< lane offset))
-;         (hvx:set-curr-cn (* 4 lane))
+;         (hvx:set-cn (* 4 lane))
 ;         (assert (eq? (oe (* 4 lane)) (hvx:v0-elem se lane)))]
 ;        [(hvx:vec-pair? se)
-;         (hvx:set-curr-cn (+ 2 (* 4 (- lane offset))))
+;         (hvx:set-cn (+ 2 (* 4 (- lane offset))))
 ;         (assert (eq? (oe (+ 2 (* 4 (- lane offset)))) (hvx:v1-elem se (- lane offset))))]
 ;        [(even? lane)
-;         (hvx:set-curr-cn (quotient lane 2))
+;         (hvx:set-cn (quotient lane 2))
 ;         (assert (eq? (oe (quotient lane 2)) (hvx:elem se lane)))]
 ;        [else
-;         (hvx:set-curr-cn (+ (quotient lane 2) offset))
+;         (hvx:set-cn (+ (quotient lane 2) offset))
 ;         (assert (eq? (oe (+ (quotient lane 2) offset)) (hvx:elem se lane)))])]
 ;    [else
 ;     (error "NYI")]))
@@ -186,7 +186,7 @@
   (define offset (quotient (hvx:num-elems se) 2))
   (cond
     [(eq? output-layout 'in-order)
-      (hvx:set-curr-cn lane)
+      (hvx:set-cn lane)
       (cond
         [(and (hvx:vec-pair? se) (< lane offset))
          (assert (eq? (oe lane) (hvx:v0-elem se lane)))]
@@ -197,38 +197,38 @@
     [(eq? output-layout 'deinterleaved)
       (cond
         [(and (hvx:vec-pair? se) (even? lane))
-         (hvx:set-curr-cn lane)
+         (hvx:set-cn lane)
          (assert (eq? (oe lane) (hvx:v0-elem se (quotient lane 2))))]
         [(hvx:vec-pair? se)
-         (hvx:set-curr-cn lane)
+         (hvx:set-cn lane)
          (assert (eq? (oe lane) (hvx:v1-elem se (quotient lane 2))))]
         [else
-         (hvx:set-curr-cn (* 2 lane))
+         (hvx:set-cn (* 2 lane))
          (assert (eq? (oe (* 2 lane)) (hvx:elem se lane)))])]
     [(eq? output-layout 'deinterleavedx2)
       (cond
         [(and (hvx:vec-pair? se) (< lane offset))
-         (hvx:set-curr-cn (* 4 lane))
+         (hvx:set-cn (* 4 lane))
          (assert (eq? (oe (* 4 lane)) (hvx:v0-elem se lane)))]
         [(hvx:vec-pair? se)
-         (hvx:set-curr-cn (+ 2 (* 4 (- lane offset))))
+         (hvx:set-cn (+ 2 (* 4 (- lane offset))))
          (assert (eq? (oe (+ 2 (* 4 (- lane offset)))) (hvx:v1-elem se (- lane offset))))]
         [else
-         (hvx:set-curr-cn (* 4 lane))
+         (hvx:set-cn (* 4 lane))
          (assert (eq? (oe (* 4 lane)) (hvx:elem se lane)))])]
     [(eq? output-layout 'interleaved)
       (cond
         [(and (hvx:vec-pair? se) (< lane offset))
-         (hvx:set-curr-cn (* 4 lane))
+         (hvx:set-cn (* 4 lane))
          (assert (eq? (oe (* 4 lane)) (hvx:v0-elem se lane)))]
         [(hvx:vec-pair? se)
-         (hvx:set-curr-cn (+ 2 (* 4 (- lane offset))))
+         (hvx:set-cn (+ 2 (* 4 (- lane offset))))
          (assert (eq? (oe (+ 2 (* 4 (- lane offset)))) (hvx:v1-elem se (- lane offset))))]
         [(even? lane)
-         (hvx:set-curr-cn (quotient lane 2))
+         (hvx:set-cn (quotient lane 2))
          (assert (eq? (oe (quotient lane 2)) (hvx:elem se lane)))]
         [else
-         (hvx:set-curr-cn (+ (quotient lane 2) offset))
+         (hvx:set-cn (+ (quotient lane 2) offset))
          (assert (eq? (oe (+ (quotient lane 2) offset)) (hvx:elem se lane)))])]
     [else
      (error "NYI")]))
