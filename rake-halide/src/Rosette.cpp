@@ -50,9 +50,13 @@ public:
             // Recurse through let-expressions
             if (llet_vars.count(op->name))
                 llet_vars[op->name].accept(this);
-        } 
-        else
+        } else {
             encoding[op->name] = Bitvector;
+
+            // Recurse through let-expressions
+            if (llet_vars.count(op->name))
+                let_vars[op->name].accept(this);
+        }
     }
 
     void visit(const Call *op) override {
