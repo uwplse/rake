@@ -1,8 +1,0 @@
-NYI: Please define a (extend) grammar for halide node: (vec-absd (vec-add (vec-add (vec-shl (vec-cast (load (buffer bounded_input 'uint8) (ramp (sca-add (sca-mul (var-lookup 't105) 16) 1) 1 16) (aligned 16 1)) 'uint16 16) (sca-broadcast (uint16_t (bv #x0001 16)) 16)) (vec-cast (load (buffer t106.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0)) 'uint16 16)) (vec-cast (load (buffer t107.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0)) 'uint16 16)) (vec-add (vec-add (vec-shl (vec-cast (load (buffer bounded_input 'uint8) (ramp (sca-add (sca-mul (var-lookup 't108) 16) 1) 1 16) (aligned 16 1)) 'uint16 16) (sca-broadcast (uint16_t (bv #x0001 16)) 16)) (vec-cast (load (buffer t109.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0)) 'uint16 16)) (vec-cast (load (buffer t110.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0)) 'uint16 16)))
-  context...:
-   /Users/alexanderroot/Projects/Rake/hvx/rake/rosette/rosette/base/form/control.rkt:16:25
-   [repeats 3 more times]
-   /Users/alexanderroot/Projects/Rake/hvx/rake/rosette/rosette/base/form/control.rkt:15:25
-   /Users/alexanderroot/Projects/Rake/rake/rake/synthesis/ir.rkt:9:0: synthesize-ir-expr
-   /Users/alexanderroot/Projects/Rake/hvx/rake/rosette/rosette/base/form/control.rkt:15:25
-   body of "/Users/alexanderroot/Projects/Rake/rake/rake/x86/ast/sobel_benchmark/sobel3x3_expr_7.rkt"
