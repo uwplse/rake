@@ -49,7 +49,7 @@
       (define candidates (get-arm-grammar halide-expr ir-expr arm-sub-exprs cost-ub))
       (define runtime (- (current-seconds) start-time))
 
-      (display (format "Template candidates: ~a\n" runtime))
+      (display (format "Template candidates: ~a\n" (length candidates)))
       (display (format "Template enumeration time: ~a seconds\n\n" runtime))
       
       (define-values (successful? arm-template)

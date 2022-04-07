@@ -1,0 +1,2329 @@
+Lifting input expression to x86 IR...
+=====================================
+
+"Building Expr:"
+(load
+ (buffer bounded_input 'uint8)
+ (ramp (sca-add (sca-mul (var-lookup 't98) 16) 1) 1 16)
+ (aligned 16 1))
+"Fold templates"
+'()
+here()
+
+"Replace templates"
+'()
+"Success?"
+#f
+#<void>
+run-x86-synthesizer
+halide-expr:
+  (load
+ (buffer bounded_input 'uint8)
+ (ramp (sca-add (sca-mul (var-lookup 't98) 16) 1) 1 16)
+ (aligned 16 1))
+template:
+  #<load-data>
+axioms:
+  '()
+optimized-halide-expr:
+  (load
+ (buffer bounded_input 'uint8)
+ (ramp (sca-add (sca-mul (var-lookup 't98) 16) 1) 1 16)
+ (aligned 16 1))
+optimized-template:
+  #<load-data>
+optimized Halide 0:
+  (uint8_t (app bounded_input (+ -15 (+ output.s0.x.x (+ -16 t200)))))
+optimized x86 0:
+  (uint8_t (app bounded_input (+ -15 (+ output.s0.x.x (+ -16 t200)))))
+Ran synthesizer for 21 ms
+(model
+ [idx$0 0])
+(load
+ (buffer bounded_input 'uint8)
+ (ramp (sca-add (sca-mul (var-lookup 't98) 16) 1) 1 16)
+ (aligned 16 1))
+#<load-data>
+Ran bounds analysis for 19 ms
+Ran bounds analysis for 9 ms
+"Extended success?"
+#t
+#<load-data>
+"Building Expr:"
+(vec-cast
+ (load
+  (buffer bounded_input 'uint8)
+  (ramp (sca-add (sca-mul (var-lookup 't98) 16) 1) 1 16)
+  (aligned 16 1))
+ 'uint16
+ 16)
+"Fold templates"
+'(#<load-data>)
+here(#<load-data>)
+
+"Replace templates"
+'()
+run-x86-synthesizer
+halide-expr:
+  (vec-cast
+ (load
+  (buffer bounded_input 'uint8)
+  (ramp (sca-add (sca-mul (var-lookup 't98) 16) 1) 1 16)
+  (aligned 16 1))
+ 'uint16
+ 16)
+template:
+  #<load-data>
+axioms:
+  '()
+optimized-halide-expr:
+  (vec-cast
+ (load
+  (buffer bounded_input 'uint8)
+  (ramp (sca-add (sca-mul (var-lookup 't98) 16) 1) 1 16)
+  (aligned 16 1))
+ 'uint16
+ 16)
+optimized-template:
+  #<load-data>
+optimized Halide 0:
+  (uint16_t
+ (zero-extend (app bounded_input (+ -15 (+ output.s0.x.x (+ -16 t200)))) (bitvector 16)))
+optimized x86 0:
+  (uint8_t (app bounded_input (+ -15 (+ output.s0.x.x (+ -16 t200)))))
+Ran synthesizer for 2 ms
+(unsat)
+"Success?"
+#f
+#<void>
+run-x86-synthesizer
+halide-expr:
+  (vec-cast
+ (load
+  (buffer bounded_input 'uint8)
+  (ramp (sca-add (sca-mul (var-lookup 't98) 16) 1) 1 16)
+  (aligned 16 1))
+ 'uint16
+ 16)
+template:
+  (cast ... #<load-data> 'uint16 #f)
+axioms:
+  '(#t)
+optimized-halide-expr:
+  (vec-cast #<abstr-halide-expr> 'uint16 16)
+optimized-template:
+  (cast ... #<abstr-expr> 'uint16 #f)
+optimized Halide 0:
+  (uint16_t (zero-extend (app abstr-vals$129 0) (bitvector 16)))
+optimized x86 0:
+  (uint16_t (zero-extend (app abstr-vals$129 0) (bitvector 16)))
+Ran synthesizer for 15 ms
+(model)
+(vec-cast #<abstr-halide-expr> 'uint16 16)
+(cast ... #<load-data> 'uint16 #f)
+Ran bounds analysis for 19 ms
+Ran bounds analysis for 15 ms
+"Extended success?"
+#t
+(cast ... #<load-data> 'uint16 #f)
+"Building Expr:"
+(sca-broadcast (uint16_t (bv #x0001 16)) 16)
+"Fold templates"
+'()
+here()
+
+"Replace templates"
+'()
+"Success?"
+#f
+#<void>
+run-x86-synthesizer
+halide-expr:
+  (sca-broadcast (uint16_t (bv #x0001 16)) 16)
+template:
+  (broadcast ... (uint16_t (bv #x0001 16)))
+axioms:
+  '()
+optimized-halide-expr:
+  (sca-broadcast (uint16_t (bv #x0001 16)) 16)
+optimized-template:
+  (broadcast ... (uint16_t (bv #x0001 16)))
+optimized Halide 0:
+  (uint16_t (bv #x0001 16))
+optimized x86 0:
+  (uint16_t (bv #x0001 16))
+Ran synthesizer for 17 ms
+(model)
+(sca-broadcast (uint16_t (bv #x0001 16)) 16)
+(broadcast ... (uint16_t (bv #x0001 16)))
+Ran bounds analysis for 22 ms
+Ran bounds analysis for 15 ms
+"Extended success?"
+#t
+(broadcast ... (uint16_t (bv #x0001 16)))
+"Building Expr:"
+(vec-shl
+ (vec-cast
+  (load
+   (buffer bounded_input 'uint8)
+   (ramp (sca-add (sca-mul (var-lookup 't98) 16) 1) 1 16)
+   (aligned 16 1))
+  'uint16
+  16)
+ (sca-broadcast (uint16_t (bv #x0001 16)) 16))
+"Fold templates"
+(list #<load-data> (cast ... #<load-data> 'uint16 x?$131))
+here(#<load-data> #(struct:cast ... #<load-data> uint16 x?$131))
+
+"Replace templates"
+(list
+ (vs-mpy-add
+  ...
+  #<load-data>
+  (list (uint16_t (bv #x0002 16)))
+  #f
+  #f
+  #f
+  'uint16))
+run-x86-synthesizer
+halide-expr:
+  (vec-shl
+ (vec-cast
+  (load
+   (buffer bounded_input 'uint8)
+   (ramp (sca-add (sca-mul (var-lookup 't98) 16) 1) 1 16)
+   (aligned 16 1))
+  'uint16
+  16)
+ (sca-broadcast (uint16_t (bv #x0001 16)) 16))
+template:
+  #<load-data>
+axioms:
+  '()
+optimized-halide-expr:
+  (vec-shl
+ (vec-cast
+  (load
+   (buffer bounded_input 'uint8)
+   (ramp (sca-add (sca-mul (var-lookup 't98) 16) 1) 1 16)
+   (aligned 16 1))
+  'uint16
+  16)
+ (sca-broadcast (uint16_t (bv #x0001 16)) 16))
+optimized-template:
+  #<load-data>
+optimized Halide 0:
+  (uint16_t
+ (bvshl (zero-extend (app bounded_input (+ -15 (+ output.s0.x.x (+ -16 t200)))) (bitvector 16)) (bv #x0001 16)))
+optimized x86 0:
+  (uint8_t (app bounded_input (+ -15 (+ output.s0.x.x (+ -16 t200)))))
+Ran synthesizer for 1 ms
+(unsat)
+run-x86-synthesizer
+halide-expr:
+  (vec-shl
+ (vec-cast
+  (load
+   (buffer bounded_input 'uint8)
+   (ramp (sca-add (sca-mul (var-lookup 't98) 16) 1) 1 16)
+   (aligned 16 1))
+  'uint16
+  16)
+ (sca-broadcast (uint16_t (bv #x0001 16)) 16))
+template:
+  (cast ... #<load-data> 'uint16 x?$131)
+axioms:
+  '(#t)
+optimized-halide-expr:
+  (vec-shl
+ (vec-cast #<abstr-halide-expr> 'uint16 16)
+ (sca-broadcast (uint16_t (bv #x0001 16)) 16))
+optimized-template:
+  (cast ... #<abstr-expr> 'uint16 x?$131)
+optimized Halide 0:
+  (uint16_t
+ (bvshl (zero-extend (app abstr-vals$196 0) (bitvector 16)) (bv #x0001 16)))
+optimized x86 0:
+  (uint16_t (zero-extend (app abstr-vals$196 0) (bitvector 16)))
+Ran synthesizer for 44 ms
+(unsat)
+run-x86-synthesizer
+halide-expr:
+  (vec-shl
+ (vec-cast
+  (load
+   (buffer bounded_input 'uint8)
+   (ramp (sca-add (sca-mul (var-lookup 't98) 16) 1) 1 16)
+   (aligned 16 1))
+  'uint16
+  16)
+ (sca-broadcast (uint16_t (bv #x0001 16)) 16))
+template:
+  (vs-mpy-add ... #<load-data> (list (uint16_t (bv #x0002 16))) #f #f #f 'uint16)
+axioms:
+  '(#t)
+optimized-halide-expr:
+  (vec-shl
+ (vec-cast #<abstr-halide-expr> 'uint16 16)
+ (sca-broadcast (uint16_t (bv #x0001 16)) 16))
+optimized-template:
+  (vs-mpy-add
+ ...
+ #<abstr-expr>
+ (list (uint16_t (bv #x0002 16)))
+ #f
+ #f
+ #f
+ 'uint16)
+optimized Halide 0:
+  (uint16_t
+ (bvshl (zero-extend (app abstr-vals$197 0) (bitvector 16)) (bv #x0001 16)))
+optimized x86 0:
+  (uint16_t
+ (bvmul (bv #x0002 16) (zero-extend (app abstr-vals$197 0) (bitvector 16))))
+Ran synthesizer for 52 ms
+(model)
+(vec-shl
+ (vec-cast #<abstr-halide-expr> 'uint16 16)
+ (sca-broadcast (uint16_t (bv #x0001 16)) 16))
+(vs-mpy-add ... #<load-data> (list (uint16_t (bv #x0002 16))) #f #f #f 'uint16)
+Ran bounds analysis for 20 ms
+Ran bounds analysis for 17 ms
+"Success?"
+#t
+(vs-mpy-add ... #<load-data> (list (uint16_t (bv #x0002 16))) #f #f #f 'uint16)
+"Building Expr:"
+(load (buffer t99.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+"Fold templates"
+'()
+here()
+
+"Replace templates"
+'()
+"Success?"
+#f
+#<void>
+run-x86-synthesizer
+halide-expr:
+  (load (buffer t99.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+template:
+  #<load-data>
+axioms:
+  '()
+optimized-halide-expr:
+  (load (buffer t99.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+optimized-template:
+  #<load-data>
+optimized Halide 0:
+  (uint8_t (app t99.s-buf 0))
+optimized x86 0:
+  (uint8_t (app t99.s-buf 0))
+Ran synthesizer for 17 ms
+(model
+ [idx$199 0])
+(load (buffer t99.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+#<load-data>
+Ran bounds analysis for 16 ms
+Ran bounds analysis for 14 ms
+"Extended success?"
+#t
+#<load-data>
+"Building Expr:"
+(vec-cast
+ (load (buffer t99.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+ 'uint16
+ 16)
+"Fold templates"
+'(#<load-data>)
+here(#<load-data>)
+
+"Replace templates"
+'()
+run-x86-synthesizer
+halide-expr:
+  (vec-cast
+ (load (buffer t99.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+ 'uint16
+ 16)
+template:
+  #<load-data>
+axioms:
+  '()
+optimized-halide-expr:
+  (vec-cast
+ (load (buffer t99.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+ 'uint16
+ 16)
+optimized-template:
+  #<load-data>
+optimized Halide 0:
+  (uint16_t (zero-extend (app t99.s-buf 0) (bitvector 16)))
+optimized x86 0:
+  (uint8_t (app t99.s-buf 0))
+Ran synthesizer for 1 ms
+(unsat)
+"Success?"
+#f
+#<void>
+run-x86-synthesizer
+halide-expr:
+  (vec-cast
+ (load (buffer t99.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+ 'uint16
+ 16)
+template:
+  (cast ... #<load-data> 'uint16 #f)
+axioms:
+  '(#t)
+optimized-halide-expr:
+  (vec-cast #<abstr-halide-expr> 'uint16 16)
+optimized-template:
+  (cast ... #<abstr-expr> 'uint16 #f)
+optimized Halide 0:
+  (uint16_t (zero-extend (app abstr-vals$328 0) (bitvector 16)))
+optimized x86 0:
+  (uint16_t (zero-extend (app abstr-vals$328 0) (bitvector 16)))
+Ran synthesizer for 17 ms
+(model)
+(vec-cast #<abstr-halide-expr> 'uint16 16)
+(cast ... #<load-data> 'uint16 #f)
+Ran bounds analysis for 20 ms
+Ran bounds analysis for 13 ms
+"Extended success?"
+#t
+(cast ... #<load-data> 'uint16 #f)
+"Building Expr:"
+(vec-add
+ (vec-shl
+  (vec-cast
+   (load
+    (buffer bounded_input 'uint8)
+    (ramp (sca-add (sca-mul (var-lookup 't98) 16) 1) 1 16)
+    (aligned 16 1))
+   'uint16
+   16)
+  (sca-broadcast (uint16_t (bv #x0001 16)) 16))
+ (vec-cast
+  (load (buffer t99.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+  'uint16
+  16))
+"Fold templates"
+(list
+ #<load-data>
+ (vs-mpy-add
+  ...
+  #<load-data>
+  (list
+   (uint16_t (bv #x0002 16))
+   (union [x?$333 #(struct:uint16_t (bv #x0002 16))] [(! x?$333) #(struct:int8_t
+                                                                   (bv #x01 8))]))
+  #f
+  #f
+  #f
+  'uint16)
+ (vs-mpy-add
+  ...
+  #<load-data>
+  (list (uint16_t (bv #x0002 16)))
+  #f
+  x?$331
+  #f
+  'uint16)
+ (vs-mpy-add
+  ...
+  (combine
+   (vs-mpy-add
+    ...
+    #<load-data>
+    (list (uint16_t (bv #x0002 16)))
+    #f
+    #f
+    #f
+    'uint16)
+   (union [x?$334 #(struct:vs-mpy-add
+                    ...
+                    #<load-data>
+                    (#(struct:uint16_t (bv #x0002 16)))
+                    #f
+                    #f
+                    #f
+                    uint16)] [(! x?$334) #(struct:cast
+                                           ...
+                                           #<load-data>
+                                           uint16
+                                           #f)]))
+  (list (uint16_t (bv #x0002 16)) (int8_t (bv #x01 8)))
+  #f
+  #f
+  #f
+  'uint16)
+ #<load-data>
+ (cast ... #<load-data> 'uint16 x?$527))
+here(#<load-data> #(struct:vs-mpy-add ... #<load-data> (#(struct:uint16_t (bv #x0002 16)) (union #:size 2 #:hash 1383451117667)) #f #f #f uint16) #(struct:vs-mpy-add ... #<load-data> (#(struct:uint16_t (bv #x0002 16))) #f x?$331 #f uint16) #(struct:vs-mpy-add ... #<combine: #(struct:vs-mpy-add ... #<load-data> (#(struct:uint16_t (bv #x0002 16))) #f #f #f uint16) (union #:size 2 #:hash 410069353815)> (#(struct:uint16_t (bv #x0002 16)) #(struct:int8_t (bv #x01 8))) #f #f #f uint16) #<load-data> #(struct:cast ... #<load-data> uint16 x?$527))
+
+"Replace templates"
+(list
+ (vs-mpy-add
+  ...
+  #<load-data>
+  (list (int8_t (bv #x01 8)) (int8_t (bv #x01 8)))
+  (! x?$657)
+  (! x?$658)
+  (! x?$659)
+  'uint16))
+run-x86-synthesizer
+halide-expr:
+  (vec-add
+ (vec-shl
+  (vec-cast
+   (load
+    (buffer bounded_input 'uint8)
+    (ramp (sca-add (sca-mul (var-lookup 't98) 16) 1) 1 16)
+    (aligned 16 1))
+   'uint16
+   16)
+  (sca-broadcast (uint16_t (bv #x0001 16)) 16))
+ (vec-cast
+  (load (buffer t99.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+  'uint16
+  16))
+template:
+  #<load-data>
+axioms:
+  '()
+optimized-halide-expr:
+  (vec-add
+ (vec-shl
+  (vec-cast
+   (load
+    (buffer bounded_input 'uint8)
+    (ramp (sca-add (sca-mul (var-lookup 't98) 16) 1) 1 16)
+    (aligned 16 1))
+   'uint16
+   16)
+  (sca-broadcast (uint16_t (bv #x0001 16)) 16))
+ (vec-cast
+  (load (buffer t99.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+  'uint16
+  16))
+optimized-template:
+  #<load-data>
+optimized Halide 0:
+  (uint16_t
+ (bvadd (bvshl (zero-extend (app bounded_input (+ -15 (+ output.s0.x.x (+ -16 t200)))) (bitvector 16)) (bv #x0001 16)) (zero-extend (app t99.s-buf 0) (bitvector 16))))
+optimized x86 0:
+  (uint8_t
+ (ite* (⊢ (= 0 idx$463) (app t99.s-buf 0)) (⊢ (= 1 idx$463) (app bounded_input (+ -15 (+ output.s0.x.x (+ -16 t200)))))))
+Ran synthesizer for 2 ms
+(unsat)
+run-x86-synthesizer
+halide-expr:
+  (vec-add
+ (vec-shl
+  (vec-cast
+   (load
+    (buffer bounded_input 'uint8)
+    (ramp (sca-add (sca-mul (var-lookup 't98) 16) 1) 1 16)
+    (aligned 16 1))
+   'uint16
+   16)
+  (sca-broadcast (uint16_t (bv #x0001 16)) 16))
+ (vec-cast
+  (load (buffer t99.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+  'uint16
+  16))
+template:
+  #<load-data>
+axioms:
+  '()
+optimized-halide-expr:
+  (vec-add
+ (vec-shl
+  (vec-cast
+   (load
+    (buffer bounded_input 'uint8)
+    (ramp (sca-add (sca-mul (var-lookup 't98) 16) 1) 1 16)
+    (aligned 16 1))
+   'uint16
+   16)
+  (sca-broadcast (uint16_t (bv #x0001 16)) 16))
+ (vec-cast
+  (load (buffer t99.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+  'uint16
+  16))
+optimized-template:
+  #<load-data>
+optimized Halide 0:
+  (uint16_t
+ (bvadd (bvshl (zero-extend (app bounded_input (+ -15 (+ output.s0.x.x (+ -16 t200)))) (bitvector 16)) (bv #x0001 16)) (zero-extend (app t99.s-buf 0) (bitvector 16))))
+optimized x86 0:
+  (uint8_t
+ (ite* (⊢ (= 0 idx$528) (app t99.s-buf 0)) (⊢ (= 1 idx$528) (app bounded_input (+ -15 (+ output.s0.x.x (+ -16 t200)))))))
+Ran synthesizer for 1 ms
+(unsat)
+run-x86-synthesizer
+halide-expr:
+  (vec-add
+ (vec-shl
+  (vec-cast
+   (load
+    (buffer bounded_input 'uint8)
+    (ramp (sca-add (sca-mul (var-lookup 't98) 16) 1) 1 16)
+    (aligned 16 1))
+   'uint16
+   16)
+  (sca-broadcast (uint16_t (bv #x0001 16)) 16))
+ (vec-cast
+  (load (buffer t99.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+  'uint16
+  16))
+template:
+  (vs-mpy-add
+ ...
+ #<load-data>
+ (list
+  (uint16_t (bv #x0002 16))
+  (union [x?$333 #(struct:uint16_t (bv #x0002 16))] [(! x?$333) #(struct:int8_t
+                                                                  (bv #x01 8))]))
+ #f
+ #f
+ #f
+ 'uint16)
+axioms:
+  '()
+optimized-halide-expr:
+  (vec-add
+ (vec-shl
+  (vec-cast
+   (load
+    (buffer bounded_input 'uint8)
+    (ramp (sca-add (sca-mul (var-lookup 't98) 16) 1) 1 16)
+    (aligned 16 1))
+   'uint16
+   16)
+  (sca-broadcast (uint16_t (bv #x0001 16)) 16))
+ (vec-cast
+  (load (buffer t99.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+  'uint16
+  16))
+optimized-template:
+  (vs-mpy-add
+ ...
+ #<load-data>
+ (list
+  (uint16_t (bv #x0002 16))
+  (union [x?$333 #(struct:uint16_t (bv #x0002 16))] [(! x?$333) #(struct:int8_t
+                                                                  (bv #x01 8))]))
+ #f
+ #f
+ #f
+ 'uint16)
+optimized Halide 0:
+  (uint16_t
+ (bvadd (bvshl (zero-extend (app bounded_input (+ -15 (+ output.s0.x.x (+ -16 t200)))) (bitvector 16)) (bv #x0001 16)) (zero-extend (app t99.s-buf 0) (bitvector 16))))
+optimized x86 0:
+  (uint16_t
+ (bvadd (bvmul (bv #x0002 16) (zero-extend (app bounded_input (+ -15 (+ output.s0.x.x (+ -16 t200)))) (bitvector 16))) (bvmul (zero-extend (ite* (⊢ (= 0 idx$1) (app bounded_input (+ -15 (+ output.s0.x.x (+ -16 t200))))) (⊢ (= 1 idx$1) (app t99.s-buf 0))) (bitvector 16)) (ite x?$333 (bv #x0002 16) (bv #x0001 16)))))
+Ran synthesizer for 70 ms
+(model
+ [idx$1 1]
+ [x?$333 #f])
+(vec-add
+ (vec-shl
+  (vec-cast
+   (load
+    (buffer bounded_input 'uint8)
+    (ramp (sca-add (sca-mul (var-lookup 't98) 16) 1) 1 16)
+    (aligned 16 1))
+   'uint16
+   16)
+  (sca-broadcast (uint16_t (bv #x0001 16)) 16))
+ (vec-cast
+  (load (buffer t99.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+  'uint16
+  16))
+(vs-mpy-add
+ ...
+ #<load-data>
+ (list (uint16_t (bv #x0002 16)) (int8_t (bv #x01 8)))
+ #f
+ #f
+ #f
+ 'uint16)
+Ran bounds analysis for 22 ms
+Ran bounds analysis for 16 ms
+"Success?"
+#t
+(vs-mpy-add ... #<load-data> (list (uint16_t (bv #x0002 16)) (int8_t (bv #x01 8))) #f #f #f 'uint16)
+"Building Expr:"
+(load (buffer t100.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+"Fold templates"
+'()
+here()
+
+"Replace templates"
+'()
+"Success?"
+#f
+#<void>
+run-x86-synthesizer
+halide-expr:
+  (load (buffer t100.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+template:
+  #<load-data>
+axioms:
+  '()
+optimized-halide-expr:
+  (load (buffer t100.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+optimized-template:
+  #<load-data>
+optimized Halide 0:
+  (uint8_t (app t100.s-buf 0))
+optimized x86 0:
+  (uint8_t (app t100.s-buf 0))
+Ran synthesizer for 17 ms
+(model
+ [idx$660 0])
+(load (buffer t100.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+#<load-data>
+Ran bounds analysis for 18 ms
+Ran bounds analysis for 10 ms
+"Extended success?"
+#t
+#<load-data>
+"Building Expr:"
+(vec-cast
+ (load (buffer t100.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+ 'uint16
+ 16)
+"Fold templates"
+'(#<load-data>)
+here(#<load-data>)
+
+"Replace templates"
+'()
+run-x86-synthesizer
+halide-expr:
+  (vec-cast
+ (load (buffer t100.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+ 'uint16
+ 16)
+template:
+  #<load-data>
+axioms:
+  '()
+optimized-halide-expr:
+  (vec-cast
+ (load (buffer t100.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+ 'uint16
+ 16)
+optimized-template:
+  #<load-data>
+optimized Halide 0:
+  (uint16_t (zero-extend (app t100.s-buf 0) (bitvector 16)))
+optimized x86 0:
+  (uint8_t (app t100.s-buf 0))
+Ran synthesizer for 1 ms
+(unsat)
+"Success?"
+#f
+#<void>
+run-x86-synthesizer
+halide-expr:
+  (vec-cast
+ (load (buffer t100.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+ 'uint16
+ 16)
+template:
+  (cast ... #<load-data> 'uint16 #f)
+axioms:
+  '(#t)
+optimized-halide-expr:
+  (vec-cast #<abstr-halide-expr> 'uint16 16)
+optimized-template:
+  (cast ... #<abstr-expr> 'uint16 #f)
+optimized Halide 0:
+  (uint16_t (zero-extend (app abstr-vals$789 0) (bitvector 16)))
+optimized x86 0:
+  (uint16_t (zero-extend (app abstr-vals$789 0) (bitvector 16)))
+Ran synthesizer for 15 ms
+(model)
+(vec-cast #<abstr-halide-expr> 'uint16 16)
+(cast ... #<load-data> 'uint16 #f)
+Ran bounds analysis for 19 ms
+Ran bounds analysis for 12 ms
+"Extended success?"
+#t
+(cast ... #<load-data> 'uint16 #f)
+"Building Expr:"
+(vec-add
+ (vec-add
+  (vec-shl
+   (vec-cast
+    (load
+     (buffer bounded_input 'uint8)
+     (ramp (sca-add (sca-mul (var-lookup 't98) 16) 1) 1 16)
+     (aligned 16 1))
+    'uint16
+    16)
+   (sca-broadcast (uint16_t (bv #x0001 16)) 16))
+  (vec-cast
+   (load (buffer t99.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   'uint16
+   16))
+ (vec-cast
+  (load (buffer t100.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+  'uint16
+  16))
+"Fold templates"
+(list
+ #<load-data>
+ (vs-mpy-add
+  ...
+  #<load-data>
+  (list
+   (uint16_t (bv #x0002 16))
+   (int8_t (bv #x01 8))
+   (union [x?$794 #(struct:uint16_t (bv #x0002 16))] [(! x?$794) #(struct:int8_t
+                                                                   (bv #x01 8))]))
+  #f
+  #f
+  #f
+  'uint16)
+ (vs-mpy-add
+  ...
+  #<load-data>
+  (list (uint16_t (bv #x0002 16)) (int8_t (bv #x01 8)))
+  #f
+  x?$792
+  #f
+  'uint16)
+ (vs-mpy-add
+  ...
+  (combine
+   (vs-mpy-add
+    ...
+    #<load-data>
+    (list (uint16_t (bv #x0002 16)) (int8_t (bv #x01 8)))
+    #f
+    #f
+    #f
+    'uint16)
+   (union [x?$795 #(struct:vs-mpy-add
+                    ...
+                    #<load-data>
+                    (#(struct:uint16_t (bv #x0002 16))
+                     #(struct:int8_t (bv #x01 8)))
+                    #f
+                    #f
+                    #f
+                    uint16)] [(! x?$795) #(struct:cast
+                                           ...
+                                           #<load-data>
+                                           uint16
+                                           #f)]))
+  (list (uint16_t (bv #x0002 16)) (int8_t (bv #x01 8)) (int8_t (bv #x01 8)))
+  #f
+  #f
+  #f
+  'uint16)
+ #<load-data>
+ (cast ... #<load-data> 'uint16 x?$988))
+here(#<load-data> #(struct:vs-mpy-add ... #<load-data> (#(struct:uint16_t (bv #x0002 16)) #(struct:int8_t (bv #x01 8)) (union #:size 2 #:hash 1419872833471)) #f #f #f uint16) #(struct:vs-mpy-add ... #<load-data> (#(struct:uint16_t (bv #x0002 16)) #(struct:int8_t (bv #x01 8))) #f x?$792 #f uint16) #(struct:vs-mpy-add ... #<combine: #(struct:vs-mpy-add ... #<load-data> (#(struct:uint16_t (bv #x0002 16)) #(struct:int8_t (bv #x01 8))) #f #f #f uint16) (union #:size 2 #:hash 408705767870)> (#(struct:uint16_t (bv #x0002 16)) #(struct:int8_t (bv #x01 8)) #(struct:int8_t (bv #x01 8))) #f #f #f uint16) #<load-data> #(struct:cast ... #<load-data> uint16 x?$988))
+
+"Replace templates"
+(list
+ (vs-mpy-add
+  ...
+  #<load-data>
+  (list (int8_t (bv #x01 8)) (int8_t (bv #x01 8)))
+  (! x?$1118)
+  (! x?$1119)
+  (! x?$1120)
+  'uint16))
+run-x86-synthesizer
+halide-expr:
+  (vec-add
+ (vec-add
+  (vec-shl
+   (vec-cast
+    (load
+     (buffer bounded_input 'uint8)
+     (ramp (sca-add (sca-mul (var-lookup 't98) 16) 1) 1 16)
+     (aligned 16 1))
+    'uint16
+    16)
+   (sca-broadcast (uint16_t (bv #x0001 16)) 16))
+  (vec-cast
+   (load (buffer t99.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   'uint16
+   16))
+ (vec-cast
+  (load (buffer t100.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+  'uint16
+  16))
+template:
+  #<load-data>
+axioms:
+  '()
+optimized-halide-expr:
+  (vec-add
+ (vec-add
+  (vec-shl
+   (vec-cast
+    (load
+     (buffer bounded_input 'uint8)
+     (ramp (sca-add (sca-mul (var-lookup 't98) 16) 1) 1 16)
+     (aligned 16 1))
+    'uint16
+    16)
+   (sca-broadcast (uint16_t (bv #x0001 16)) 16))
+  (vec-cast
+   (load (buffer t99.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   'uint16
+   16))
+ (vec-cast
+  (load (buffer t100.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+  'uint16
+  16))
+optimized-template:
+  #<load-data>
+optimized Halide 0:
+  (uint16_t
+ (bvadd (bvadd (bvshl (zero-extend (app bounded_input (+ -15 (+ output.s0.x.x (+ -16 t200)))) (bitvector 16)) (bv #x0001 16)) (zero-extend (app t99.s-buf 0) (bitvector 16))) (zero-extend (app t100.s-buf 0) (bitvector 16))))
+optimized x86 0:
+  (uint8_t
+ (ite* (⊢ (= 0 idx$924) (app t99.s-buf 0)) (⊢ (= 1 idx$924) (app t100.s-buf 0)) (⊢ (= 2 idx$924) (app bounded_input (+ -15 (+ output.s0.x.x (+ -16 t200)))))))
+Ran synthesizer for 2 ms
+(unsat)
+run-x86-synthesizer
+halide-expr:
+  (vec-add
+ (vec-add
+  (vec-shl
+   (vec-cast
+    (load
+     (buffer bounded_input 'uint8)
+     (ramp (sca-add (sca-mul (var-lookup 't98) 16) 1) 1 16)
+     (aligned 16 1))
+    'uint16
+    16)
+   (sca-broadcast (uint16_t (bv #x0001 16)) 16))
+  (vec-cast
+   (load (buffer t99.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   'uint16
+   16))
+ (vec-cast
+  (load (buffer t100.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+  'uint16
+  16))
+template:
+  #<load-data>
+axioms:
+  '()
+optimized-halide-expr:
+  (vec-add
+ (vec-add
+  (vec-shl
+   (vec-cast
+    (load
+     (buffer bounded_input 'uint8)
+     (ramp (sca-add (sca-mul (var-lookup 't98) 16) 1) 1 16)
+     (aligned 16 1))
+    'uint16
+    16)
+   (sca-broadcast (uint16_t (bv #x0001 16)) 16))
+  (vec-cast
+   (load (buffer t99.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   'uint16
+   16))
+ (vec-cast
+  (load (buffer t100.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+  'uint16
+  16))
+optimized-template:
+  #<load-data>
+optimized Halide 0:
+  (uint16_t
+ (bvadd (bvadd (bvshl (zero-extend (app bounded_input (+ -15 (+ output.s0.x.x (+ -16 t200)))) (bitvector 16)) (bv #x0001 16)) (zero-extend (app t99.s-buf 0) (bitvector 16))) (zero-extend (app t100.s-buf 0) (bitvector 16))))
+optimized x86 0:
+  (uint8_t
+ (ite* (⊢ (= 0 idx$989) (app t99.s-buf 0)) (⊢ (= 1 idx$989) (app t100.s-buf 0)) (⊢ (= 2 idx$989) (app bounded_input (+ -15 (+ output.s0.x.x (+ -16 t200)))))))
+Ran synthesizer for 1 ms
+(unsat)
+run-x86-synthesizer
+halide-expr:
+  (vec-add
+ (vec-add
+  (vec-shl
+   (vec-cast
+    (load
+     (buffer bounded_input 'uint8)
+     (ramp (sca-add (sca-mul (var-lookup 't98) 16) 1) 1 16)
+     (aligned 16 1))
+    'uint16
+    16)
+   (sca-broadcast (uint16_t (bv #x0001 16)) 16))
+  (vec-cast
+   (load (buffer t99.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   'uint16
+   16))
+ (vec-cast
+  (load (buffer t100.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+  'uint16
+  16))
+template:
+  (vs-mpy-add
+ ...
+ #<load-data>
+ (list
+  (uint16_t (bv #x0002 16))
+  (int8_t (bv #x01 8))
+  (union [x?$794 #(struct:uint16_t (bv #x0002 16))] [(! x?$794) #(struct:int8_t
+                                                                  (bv #x01 8))]))
+ #f
+ #f
+ #f
+ 'uint16)
+axioms:
+  '()
+optimized-halide-expr:
+  (vec-add
+ (vec-add
+  (vec-shl
+   (vec-cast
+    (load
+     (buffer bounded_input 'uint8)
+     (ramp (sca-add (sca-mul (var-lookup 't98) 16) 1) 1 16)
+     (aligned 16 1))
+    'uint16
+    16)
+   (sca-broadcast (uint16_t (bv #x0001 16)) 16))
+  (vec-cast
+   (load (buffer t99.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   'uint16
+   16))
+ (vec-cast
+  (load (buffer t100.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+  'uint16
+  16))
+optimized-template:
+  (vs-mpy-add
+ ...
+ #<load-data>
+ (list
+  (uint16_t (bv #x0002 16))
+  (int8_t (bv #x01 8))
+  (union [x?$794 #(struct:uint16_t (bv #x0002 16))] [(! x?$794) #(struct:int8_t
+                                                                  (bv #x01 8))]))
+ #f
+ #f
+ #f
+ 'uint16)
+optimized Halide 0:
+  (uint16_t
+ (bvadd (bvadd (bvshl (zero-extend (app bounded_input (+ -15 (+ output.s0.x.x (+ -16 t200)))) (bitvector 16)) (bv #x0001 16)) (zero-extend (app t99.s-buf 0) (bitvector 16))) (zero-extend (app t100.s-buf 0) (bitvector 16))))
+optimized x86 0:
+  (uint16_t
+ (bvadd (bvadd (zero-extend (app t99.s-buf 0) (bitvector 16)) (bvmul (bv #x0002 16) (zero-extend (app bounded_input (+ -15 (+ output.s0.x.x (+ -16 t200)))) (bitvector 16)))) (bvmul (zero-extend (ite* (⊢ (= 0 idx$2) (app bounded_input (+ -15 (+ output.s0.x.x (+ -16 t200))))) (⊢ (= 1 idx$2) (app t99.s-buf 0)) (⊢ (= 2 idx$2) (app t100.s-buf 0))) (bitvector 16)) (ite x?$794 (bv #x0002 16) (bv #x0001 16)))))
+Ran synthesizer for 129 ms
+(model
+ [idx$2 2]
+ [x?$794 #f])
+(vec-add
+ (vec-add
+  (vec-shl
+   (vec-cast
+    (load
+     (buffer bounded_input 'uint8)
+     (ramp (sca-add (sca-mul (var-lookup 't98) 16) 1) 1 16)
+     (aligned 16 1))
+    'uint16
+    16)
+   (sca-broadcast (uint16_t (bv #x0001 16)) 16))
+  (vec-cast
+   (load (buffer t99.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   'uint16
+   16))
+ (vec-cast
+  (load (buffer t100.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+  'uint16
+  16))
+(vs-mpy-add
+ ...
+ #<load-data>
+ (list (uint16_t (bv #x0002 16)) (int8_t (bv #x01 8)) (int8_t (bv #x01 8)))
+ #f
+ #f
+ #f
+ 'uint16)
+Ran bounds analysis for 24 ms
+Ran bounds analysis for 19 ms
+"Success?"
+#t
+(vs-mpy-add ... #<load-data> (list (uint16_t (bv #x0002 16)) (int8_t (bv #x01 8)) (int8_t (bv #x01 8))) #f #f #f 'uint16)
+"Building Expr:"
+(load
+ (buffer bounded_input 'uint8)
+ (ramp (sca-add (sca-mul (var-lookup 't101) 16) 1) 1 16)
+ (aligned 16 1))
+"Fold templates"
+'()
+here()
+
+"Replace templates"
+'()
+"Success?"
+#f
+#<void>
+run-x86-synthesizer
+halide-expr:
+  (load
+ (buffer bounded_input 'uint8)
+ (ramp (sca-add (sca-mul (var-lookup 't101) 16) 1) 1 16)
+ (aligned 16 1))
+template:
+  #<load-data>
+axioms:
+  '()
+optimized-halide-expr:
+  (load
+ (buffer bounded_input 'uint8)
+ (ramp (sca-add (sca-mul (var-lookup 't101) 16) 1) 1 16)
+ (aligned 16 1))
+optimized-template:
+  #<load-data>
+optimized Halide 0:
+  (uint8_t (app bounded_input (+ -15 (+ output.s0.x.x (+ -32 t200)))))
+optimized x86 0:
+  (uint8_t (app bounded_input (+ -15 (+ output.s0.x.x (+ -32 t200)))))
+Ran synthesizer for 17 ms
+(model
+ [idx$1121 0])
+(load
+ (buffer bounded_input 'uint8)
+ (ramp (sca-add (sca-mul (var-lookup 't101) 16) 1) 1 16)
+ (aligned 16 1))
+#<load-data>
+Ran bounds analysis for 17 ms
+Ran bounds analysis for 10 ms
+"Extended success?"
+#t
+#<load-data>
+"Building Expr:"
+(vec-cast
+ (load
+  (buffer bounded_input 'uint8)
+  (ramp (sca-add (sca-mul (var-lookup 't101) 16) 1) 1 16)
+  (aligned 16 1))
+ 'uint16
+ 16)
+"Fold templates"
+'(#<load-data>)
+here(#<load-data>)
+
+"Replace templates"
+'()
+run-x86-synthesizer
+halide-expr:
+  (vec-cast
+ (load
+  (buffer bounded_input 'uint8)
+  (ramp (sca-add (sca-mul (var-lookup 't101) 16) 1) 1 16)
+  (aligned 16 1))
+ 'uint16
+ 16)
+template:
+  #<load-data>
+axioms:
+  '()
+optimized-halide-expr:
+  (vec-cast
+ (load
+  (buffer bounded_input 'uint8)
+  (ramp (sca-add (sca-mul (var-lookup 't101) 16) 1) 1 16)
+  (aligned 16 1))
+ 'uint16
+ 16)
+optimized-template:
+  #<load-data>
+optimized Halide 0:
+  (uint16_t
+ (zero-extend (app bounded_input (+ -15 (+ output.s0.x.x (+ -32 t200)))) (bitvector 16)))
+optimized x86 0:
+  (uint8_t (app bounded_input (+ -15 (+ output.s0.x.x (+ -32 t200)))))
+Ran synthesizer for 1 ms
+(unsat)
+"Success?"
+#f
+#<void>
+run-x86-synthesizer
+halide-expr:
+  (vec-cast
+ (load
+  (buffer bounded_input 'uint8)
+  (ramp (sca-add (sca-mul (var-lookup 't101) 16) 1) 1 16)
+  (aligned 16 1))
+ 'uint16
+ 16)
+template:
+  (cast ... #<load-data> 'uint16 #f)
+axioms:
+  '(#t)
+optimized-halide-expr:
+  (vec-cast #<abstr-halide-expr> 'uint16 16)
+optimized-template:
+  (cast ... #<abstr-expr> 'uint16 #f)
+optimized Halide 0:
+  (uint16_t (zero-extend (app abstr-vals$1250 0) (bitvector 16)))
+optimized x86 0:
+  (uint16_t (zero-extend (app abstr-vals$1250 0) (bitvector 16)))
+Ran synthesizer for 16 ms
+(model)
+(vec-cast #<abstr-halide-expr> 'uint16 16)
+(cast ... #<load-data> 'uint16 #f)
+Ran bounds analysis for 21 ms
+Ran bounds analysis for 12 ms
+"Extended success?"
+#t
+(cast ... #<load-data> 'uint16 #f)
+"Building Expr:"
+(vec-shl
+ (vec-cast
+  (load
+   (buffer bounded_input 'uint8)
+   (ramp (sca-add (sca-mul (var-lookup 't101) 16) 1) 1 16)
+   (aligned 16 1))
+  'uint16
+  16)
+ (sca-broadcast (uint16_t (bv #x0001 16)) 16))
+"Fold templates"
+(list #<load-data> (cast ... #<load-data> 'uint16 x?$1252))
+here(#<load-data> #(struct:cast ... #<load-data> uint16 x?$1252))
+
+"Replace templates"
+(list
+ (vs-mpy-add
+  ...
+  #<load-data>
+  (list (uint16_t (bv #x0002 16)))
+  #f
+  #f
+  #f
+  'uint16))
+run-x86-synthesizer
+halide-expr:
+  (vec-shl
+ (vec-cast
+  (load
+   (buffer bounded_input 'uint8)
+   (ramp (sca-add (sca-mul (var-lookup 't101) 16) 1) 1 16)
+   (aligned 16 1))
+  'uint16
+  16)
+ (sca-broadcast (uint16_t (bv #x0001 16)) 16))
+template:
+  #<load-data>
+axioms:
+  '()
+optimized-halide-expr:
+  (vec-shl
+ (vec-cast
+  (load
+   (buffer bounded_input 'uint8)
+   (ramp (sca-add (sca-mul (var-lookup 't101) 16) 1) 1 16)
+   (aligned 16 1))
+  'uint16
+  16)
+ (sca-broadcast (uint16_t (bv #x0001 16)) 16))
+optimized-template:
+  #<load-data>
+optimized Halide 0:
+  (uint16_t
+ (bvshl (zero-extend (app bounded_input (+ -15 (+ output.s0.x.x (+ -32 t200)))) (bitvector 16)) (bv #x0001 16)))
+optimized x86 0:
+  (uint8_t (app bounded_input (+ -15 (+ output.s0.x.x (+ -32 t200)))))
+Ran synthesizer for 1 ms
+(unsat)
+run-x86-synthesizer
+halide-expr:
+  (vec-shl
+ (vec-cast
+  (load
+   (buffer bounded_input 'uint8)
+   (ramp (sca-add (sca-mul (var-lookup 't101) 16) 1) 1 16)
+   (aligned 16 1))
+  'uint16
+  16)
+ (sca-broadcast (uint16_t (bv #x0001 16)) 16))
+template:
+  (cast ... #<load-data> 'uint16 x?$1252)
+axioms:
+  '(#t)
+optimized-halide-expr:
+  (vec-shl
+ (vec-cast #<abstr-halide-expr> 'uint16 16)
+ (sca-broadcast (uint16_t (bv #x0001 16)) 16))
+optimized-template:
+  (cast ... #<abstr-expr> 'uint16 x?$1252)
+optimized Halide 0:
+  (uint16_t
+ (bvshl (zero-extend (app abstr-vals$1317 0) (bitvector 16)) (bv #x0001 16)))
+optimized x86 0:
+  (uint16_t (zero-extend (app abstr-vals$1317 0) (bitvector 16)))
+Ran synthesizer for 43 ms
+(unsat)
+run-x86-synthesizer
+halide-expr:
+  (vec-shl
+ (vec-cast
+  (load
+   (buffer bounded_input 'uint8)
+   (ramp (sca-add (sca-mul (var-lookup 't101) 16) 1) 1 16)
+   (aligned 16 1))
+  'uint16
+  16)
+ (sca-broadcast (uint16_t (bv #x0001 16)) 16))
+template:
+  (vs-mpy-add ... #<load-data> (list (uint16_t (bv #x0002 16))) #f #f #f 'uint16)
+axioms:
+  '(#t)
+optimized-halide-expr:
+  (vec-shl
+ (vec-cast #<abstr-halide-expr> 'uint16 16)
+ (sca-broadcast (uint16_t (bv #x0001 16)) 16))
+optimized-template:
+  (vs-mpy-add
+ ...
+ #<abstr-expr>
+ (list (uint16_t (bv #x0002 16)))
+ #f
+ #f
+ #f
+ 'uint16)
+optimized Halide 0:
+  (uint16_t
+ (bvshl (zero-extend (app abstr-vals$1318 0) (bitvector 16)) (bv #x0001 16)))
+optimized x86 0:
+  (uint16_t
+ (bvmul (bv #x0002 16) (zero-extend (app abstr-vals$1318 0) (bitvector 16))))
+Ran synthesizer for 56 ms
+(model)
+(vec-shl
+ (vec-cast #<abstr-halide-expr> 'uint16 16)
+ (sca-broadcast (uint16_t (bv #x0001 16)) 16))
+(vs-mpy-add ... #<load-data> (list (uint16_t (bv #x0002 16))) #f #f #f 'uint16)
+Ran bounds analysis for 20 ms
+Ran bounds analysis for 16 ms
+"Success?"
+#t
+(vs-mpy-add ... #<load-data> (list (uint16_t (bv #x0002 16))) #f #f #f 'uint16)
+"Building Expr:"
+(load (buffer t102.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+"Fold templates"
+'()
+here()
+
+"Replace templates"
+'()
+"Success?"
+#f
+#<void>
+run-x86-synthesizer
+halide-expr:
+  (load (buffer t102.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+template:
+  #<load-data>
+axioms:
+  '()
+optimized-halide-expr:
+  (load (buffer t102.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+optimized-template:
+  #<load-data>
+optimized Halide 0:
+  (uint8_t (app t102.s-buf 0))
+optimized x86 0:
+  (uint8_t (app t102.s-buf 0))
+Ran synthesizer for 18 ms
+(model
+ [idx$1320 0])
+(load (buffer t102.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+#<load-data>
+Ran bounds analysis for 18 ms
+Ran bounds analysis for 10 ms
+"Extended success?"
+#t
+#<load-data>
+"Building Expr:"
+(vec-cast
+ (load (buffer t102.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+ 'uint16
+ 16)
+"Fold templates"
+'(#<load-data>)
+here(#<load-data>)
+
+"Replace templates"
+'()
+run-x86-synthesizer
+halide-expr:
+  (vec-cast
+ (load (buffer t102.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+ 'uint16
+ 16)
+template:
+  #<load-data>
+axioms:
+  '()
+optimized-halide-expr:
+  (vec-cast
+ (load (buffer t102.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+ 'uint16
+ 16)
+optimized-template:
+  #<load-data>
+optimized Halide 0:
+  (uint16_t (zero-extend (app t102.s-buf 0) (bitvector 16)))
+optimized x86 0:
+  (uint8_t (app t102.s-buf 0))
+Ran synthesizer for 1 ms
+(unsat)
+"Success?"
+#f
+#<void>
+run-x86-synthesizer
+halide-expr:
+  (vec-cast
+ (load (buffer t102.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+ 'uint16
+ 16)
+template:
+  (cast ... #<load-data> 'uint16 #f)
+axioms:
+  '(#t)
+optimized-halide-expr:
+  (vec-cast #<abstr-halide-expr> 'uint16 16)
+optimized-template:
+  (cast ... #<abstr-expr> 'uint16 #f)
+optimized Halide 0:
+  (uint16_t (zero-extend (app abstr-vals$1449 0) (bitvector 16)))
+optimized x86 0:
+  (uint16_t (zero-extend (app abstr-vals$1449 0) (bitvector 16)))
+Ran synthesizer for 14 ms
+(model)
+(vec-cast #<abstr-halide-expr> 'uint16 16)
+(cast ... #<load-data> 'uint16 #f)
+Ran bounds analysis for 20 ms
+Ran bounds analysis for 11 ms
+"Extended success?"
+#t
+(cast ... #<load-data> 'uint16 #f)
+"Building Expr:"
+(vec-add
+ (vec-shl
+  (vec-cast
+   (load
+    (buffer bounded_input 'uint8)
+    (ramp (sca-add (sca-mul (var-lookup 't101) 16) 1) 1 16)
+    (aligned 16 1))
+   'uint16
+   16)
+  (sca-broadcast (uint16_t (bv #x0001 16)) 16))
+ (vec-cast
+  (load (buffer t102.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+  'uint16
+  16))
+"Fold templates"
+(list
+ #<load-data>
+ (vs-mpy-add
+  ...
+  #<load-data>
+  (list
+   (uint16_t (bv #x0002 16))
+   (union [x?$1454 #(struct:uint16_t (bv #x0002 16))] [(! x?$1454) #(struct:int8_t
+                                                                     (bv #x01 8))]))
+  #f
+  #f
+  #f
+  'uint16)
+ (vs-mpy-add
+  ...
+  #<load-data>
+  (list (uint16_t (bv #x0002 16)))
+  #f
+  x?$1452
+  #f
+  'uint16)
+ (vs-mpy-add
+  ...
+  (combine
+   (vs-mpy-add
+    ...
+    #<load-data>
+    (list (uint16_t (bv #x0002 16)))
+    #f
+    #f
+    #f
+    'uint16)
+   (union [x?$1455 #(struct:vs-mpy-add
+                     ...
+                     #<load-data>
+                     (#(struct:uint16_t (bv #x0002 16)))
+                     #f
+                     #f
+                     #f
+                     uint16)] [(! x?$1455) #(struct:cast
+                                             ...
+                                             #<load-data>
+                                             uint16
+                                             #f)]))
+  (list (uint16_t (bv #x0002 16)) (int8_t (bv #x01 8)))
+  #f
+  #f
+  #f
+  'uint16)
+ #<load-data>
+ (cast ... #<load-data> 'uint16 x?$1648))
+here(#<load-data> #(struct:vs-mpy-add ... #<load-data> (#(struct:uint16_t (bv #x0002 16)) (union #:size 2 #:hash 1420183949100)) #f #f #f uint16) #(struct:vs-mpy-add ... #<load-data> (#(struct:uint16_t (bv #x0002 16))) #f x?$1452 #f uint16) #(struct:vs-mpy-add ... #<combine: #(struct:vs-mpy-add ... #<load-data> (#(struct:uint16_t (bv #x0002 16))) #f #f #f uint16) (union #:size 2 #:hash 404009080334)> (#(struct:uint16_t (bv #x0002 16)) #(struct:int8_t (bv #x01 8))) #f #f #f uint16) #<load-data> #(struct:cast ... #<load-data> uint16 x?$1648))
+
+"Replace templates"
+(list
+ (vs-mpy-add
+  ...
+  #<load-data>
+  (list (int8_t (bv #x01 8)) (int8_t (bv #x01 8)))
+  (! x?$1778)
+  (! x?$1779)
+  (! x?$1780)
+  'uint16))
+run-x86-synthesizer
+halide-expr:
+  (vec-add
+ (vec-shl
+  (vec-cast
+   (load
+    (buffer bounded_input 'uint8)
+    (ramp (sca-add (sca-mul (var-lookup 't101) 16) 1) 1 16)
+    (aligned 16 1))
+   'uint16
+   16)
+  (sca-broadcast (uint16_t (bv #x0001 16)) 16))
+ (vec-cast
+  (load (buffer t102.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+  'uint16
+  16))
+template:
+  #<load-data>
+axioms:
+  '()
+optimized-halide-expr:
+  (vec-add
+ (vec-shl
+  (vec-cast
+   (load
+    (buffer bounded_input 'uint8)
+    (ramp (sca-add (sca-mul (var-lookup 't101) 16) 1) 1 16)
+    (aligned 16 1))
+   'uint16
+   16)
+  (sca-broadcast (uint16_t (bv #x0001 16)) 16))
+ (vec-cast
+  (load (buffer t102.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+  'uint16
+  16))
+optimized-template:
+  #<load-data>
+optimized Halide 0:
+  (uint16_t
+ (bvadd (bvshl (zero-extend (app bounded_input (+ -15 (+ output.s0.x.x (+ -32 t200)))) (bitvector 16)) (bv #x0001 16)) (zero-extend (app t102.s-buf 0) (bitvector 16))))
+optimized x86 0:
+  (uint8_t
+ (ite* (⊢ (= 0 idx$1584) (app t102.s-buf 0)) (⊢ (= 1 idx$1584) (app bounded_input (+ -15 (+ output.s0.x.x (+ -32 t200)))))))
+Ran synthesizer for 1 ms
+(unsat)
+run-x86-synthesizer
+halide-expr:
+  (vec-add
+ (vec-shl
+  (vec-cast
+   (load
+    (buffer bounded_input 'uint8)
+    (ramp (sca-add (sca-mul (var-lookup 't101) 16) 1) 1 16)
+    (aligned 16 1))
+   'uint16
+   16)
+  (sca-broadcast (uint16_t (bv #x0001 16)) 16))
+ (vec-cast
+  (load (buffer t102.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+  'uint16
+  16))
+template:
+  #<load-data>
+axioms:
+  '()
+optimized-halide-expr:
+  (vec-add
+ (vec-shl
+  (vec-cast
+   (load
+    (buffer bounded_input 'uint8)
+    (ramp (sca-add (sca-mul (var-lookup 't101) 16) 1) 1 16)
+    (aligned 16 1))
+   'uint16
+   16)
+  (sca-broadcast (uint16_t (bv #x0001 16)) 16))
+ (vec-cast
+  (load (buffer t102.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+  'uint16
+  16))
+optimized-template:
+  #<load-data>
+optimized Halide 0:
+  (uint16_t
+ (bvadd (bvshl (zero-extend (app bounded_input (+ -15 (+ output.s0.x.x (+ -32 t200)))) (bitvector 16)) (bv #x0001 16)) (zero-extend (app t102.s-buf 0) (bitvector 16))))
+optimized x86 0:
+  (uint8_t
+ (ite* (⊢ (= 0 idx$1649) (app t102.s-buf 0)) (⊢ (= 1 idx$1649) (app bounded_input (+ -15 (+ output.s0.x.x (+ -32 t200)))))))
+Ran synthesizer for 2 ms
+(unsat)
+run-x86-synthesizer
+halide-expr:
+  (vec-add
+ (vec-shl
+  (vec-cast
+   (load
+    (buffer bounded_input 'uint8)
+    (ramp (sca-add (sca-mul (var-lookup 't101) 16) 1) 1 16)
+    (aligned 16 1))
+   'uint16
+   16)
+  (sca-broadcast (uint16_t (bv #x0001 16)) 16))
+ (vec-cast
+  (load (buffer t102.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+  'uint16
+  16))
+template:
+  (vs-mpy-add
+ ...
+ #<load-data>
+ (list
+  (uint16_t (bv #x0002 16))
+  (union [x?$1454 #(struct:uint16_t (bv #x0002 16))] [(! x?$1454) #(struct:int8_t
+                                                                    (bv #x01 8))]))
+ #f
+ #f
+ #f
+ 'uint16)
+axioms:
+  '()
+optimized-halide-expr:
+  (vec-add
+ (vec-shl
+  (vec-cast
+   (load
+    (buffer bounded_input 'uint8)
+    (ramp (sca-add (sca-mul (var-lookup 't101) 16) 1) 1 16)
+    (aligned 16 1))
+   'uint16
+   16)
+  (sca-broadcast (uint16_t (bv #x0001 16)) 16))
+ (vec-cast
+  (load (buffer t102.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+  'uint16
+  16))
+optimized-template:
+  (vs-mpy-add
+ ...
+ #<load-data>
+ (list
+  (uint16_t (bv #x0002 16))
+  (union [x?$1454 #(struct:uint16_t (bv #x0002 16))] [(! x?$1454) #(struct:int8_t
+                                                                    (bv #x01 8))]))
+ #f
+ #f
+ #f
+ 'uint16)
+optimized Halide 0:
+  (uint16_t
+ (bvadd (bvshl (zero-extend (app bounded_input (+ -15 (+ output.s0.x.x (+ -32 t200)))) (bitvector 16)) (bv #x0001 16)) (zero-extend (app t102.s-buf 0) (bitvector 16))))
+optimized x86 0:
+  (uint16_t
+ (bvadd (bvmul (bv #x0002 16) (zero-extend (app bounded_input (+ -15 (+ output.s0.x.x (+ -32 t200)))) (bitvector 16))) (bvmul (zero-extend (ite* (⊢ (= 0 idx$1122) (app bounded_input (+ -15 (+ output.s0.x.x (+ -32 t200))))) (⊢ (= 1 idx$1122) (app t102.s-buf 0))) (bitvector 16)) (ite x?$1454 (bv #x0002 16) (bv #x0001 16)))))
+Ran synthesizer for 71 ms
+(model
+ [idx$1122 1]
+ [x?$1454 #f])
+(vec-add
+ (vec-shl
+  (vec-cast
+   (load
+    (buffer bounded_input 'uint8)
+    (ramp (sca-add (sca-mul (var-lookup 't101) 16) 1) 1 16)
+    (aligned 16 1))
+   'uint16
+   16)
+  (sca-broadcast (uint16_t (bv #x0001 16)) 16))
+ (vec-cast
+  (load (buffer t102.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+  'uint16
+  16))
+(vs-mpy-add
+ ...
+ #<load-data>
+ (list (uint16_t (bv #x0002 16)) (int8_t (bv #x01 8)))
+ #f
+ #f
+ #f
+ 'uint16)
+Ran bounds analysis for 22 ms
+Ran bounds analysis for 16 ms
+"Success?"
+#t
+(vs-mpy-add ... #<load-data> (list (uint16_t (bv #x0002 16)) (int8_t (bv #x01 8))) #f #f #f 'uint16)
+"Building Expr:"
+(load (buffer t103.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+"Fold templates"
+'()
+here()
+
+"Replace templates"
+'()
+"Success?"
+#f
+#<void>
+run-x86-synthesizer
+halide-expr:
+  (load (buffer t103.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+template:
+  #<load-data>
+axioms:
+  '()
+optimized-halide-expr:
+  (load (buffer t103.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+optimized-template:
+  #<load-data>
+optimized Halide 0:
+  (uint8_t (app t103.s-buf 0))
+optimized x86 0:
+  (uint8_t (app t103.s-buf 0))
+Ran synthesizer for 17 ms
+(model
+ [idx$1781 0])
+(load (buffer t103.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+#<load-data>
+Ran bounds analysis for 18 ms
+Ran bounds analysis for 11 ms
+"Extended success?"
+#t
+#<load-data>
+"Building Expr:"
+(vec-cast
+ (load (buffer t103.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+ 'uint16
+ 16)
+"Fold templates"
+'(#<load-data>)
+here(#<load-data>)
+
+"Replace templates"
+'()
+run-x86-synthesizer
+halide-expr:
+  (vec-cast
+ (load (buffer t103.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+ 'uint16
+ 16)
+template:
+  #<load-data>
+axioms:
+  '()
+optimized-halide-expr:
+  (vec-cast
+ (load (buffer t103.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+ 'uint16
+ 16)
+optimized-template:
+  #<load-data>
+optimized Halide 0:
+  (uint16_t (zero-extend (app t103.s-buf 0) (bitvector 16)))
+optimized x86 0:
+  (uint8_t (app t103.s-buf 0))
+Ran synthesizer for 1 ms
+(unsat)
+"Success?"
+#f
+#<void>
+run-x86-synthesizer
+halide-expr:
+  (vec-cast
+ (load (buffer t103.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+ 'uint16
+ 16)
+template:
+  (cast ... #<load-data> 'uint16 #f)
+axioms:
+  '(#t)
+optimized-halide-expr:
+  (vec-cast #<abstr-halide-expr> 'uint16 16)
+optimized-template:
+  (cast ... #<abstr-expr> 'uint16 #f)
+optimized Halide 0:
+  (uint16_t (zero-extend (app abstr-vals$1910 0) (bitvector 16)))
+optimized x86 0:
+  (uint16_t (zero-extend (app abstr-vals$1910 0) (bitvector 16)))
+Ran synthesizer for 17 ms
+(model)
+(vec-cast #<abstr-halide-expr> 'uint16 16)
+(cast ... #<load-data> 'uint16 #f)
+Ran bounds analysis for 20 ms
+Ran bounds analysis for 11 ms
+"Extended success?"
+#t
+(cast ... #<load-data> 'uint16 #f)
+"Building Expr:"
+(vec-add
+ (vec-add
+  (vec-shl
+   (vec-cast
+    (load
+     (buffer bounded_input 'uint8)
+     (ramp (sca-add (sca-mul (var-lookup 't101) 16) 1) 1 16)
+     (aligned 16 1))
+    'uint16
+    16)
+   (sca-broadcast (uint16_t (bv #x0001 16)) 16))
+  (vec-cast
+   (load (buffer t102.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   'uint16
+   16))
+ (vec-cast
+  (load (buffer t103.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+  'uint16
+  16))
+"Fold templates"
+(list
+ #<load-data>
+ (vs-mpy-add
+  ...
+  #<load-data>
+  (list
+   (uint16_t (bv #x0002 16))
+   (int8_t (bv #x01 8))
+   (union [x?$1915 #(struct:uint16_t (bv #x0002 16))] [(! x?$1915) #(struct:int8_t
+                                                                     (bv #x01 8))]))
+  #f
+  #f
+  #f
+  'uint16)
+ (vs-mpy-add
+  ...
+  #<load-data>
+  (list (uint16_t (bv #x0002 16)) (int8_t (bv #x01 8)))
+  #f
+  x?$1913
+  #f
+  'uint16)
+ (vs-mpy-add
+  ...
+  (combine
+   (vs-mpy-add
+    ...
+    #<load-data>
+    (list (uint16_t (bv #x0002 16)) (int8_t (bv #x01 8)))
+    #f
+    #f
+    #f
+    'uint16)
+   (union [x?$1916 #(struct:vs-mpy-add
+                     ...
+                     #<load-data>
+                     (#(struct:uint16_t (bv #x0002 16))
+                      #(struct:int8_t (bv #x01 8)))
+                     #f
+                     #f
+                     #f
+                     uint16)] [(! x?$1916) #(struct:cast
+                                             ...
+                                             #<load-data>
+                                             uint16
+                                             #f)]))
+  (list (uint16_t (bv #x0002 16)) (int8_t (bv #x01 8)) (int8_t (bv #x01 8)))
+  #f
+  #f
+  #f
+  'uint16)
+ #<load-data>
+ (cast ... #<load-data> 'uint16 x?$2109))
+here(#<load-data> #(struct:vs-mpy-add ... #<load-data> (#(struct:uint16_t (bv #x0002 16)) #(struct:int8_t (bv #x01 8)) (union #:size 2 #:hash 1418724138987)) #f #f #f uint16) #(struct:vs-mpy-add ... #<load-data> (#(struct:uint16_t (bv #x0002 16)) #(struct:int8_t (bv #x01 8))) #f x?$1913 #f uint16) #(struct:vs-mpy-add ... #<combine: #(struct:vs-mpy-add ... #<load-data> (#(struct:uint16_t (bv #x0002 16)) #(struct:int8_t (bv #x01 8))) #f #f #f uint16) (union #:size 2 #:hash 406959415840)> (#(struct:uint16_t (bv #x0002 16)) #(struct:int8_t (bv #x01 8)) #(struct:int8_t (bv #x01 8))) #f #f #f uint16) #<load-data> #(struct:cast ... #<load-data> uint16 x?$2109))
+
+"Replace templates"
+(list
+ (vs-mpy-add
+  ...
+  #<load-data>
+  (list (int8_t (bv #x01 8)) (int8_t (bv #x01 8)))
+  (! x?$2239)
+  (! x?$2240)
+  (! x?$2241)
+  'uint16))
+run-x86-synthesizer
+halide-expr:
+  (vec-add
+ (vec-add
+  (vec-shl
+   (vec-cast
+    (load
+     (buffer bounded_input 'uint8)
+     (ramp (sca-add (sca-mul (var-lookup 't101) 16) 1) 1 16)
+     (aligned 16 1))
+    'uint16
+    16)
+   (sca-broadcast (uint16_t (bv #x0001 16)) 16))
+  (vec-cast
+   (load (buffer t102.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   'uint16
+   16))
+ (vec-cast
+  (load (buffer t103.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+  'uint16
+  16))
+template:
+  #<load-data>
+axioms:
+  '()
+optimized-halide-expr:
+  (vec-add
+ (vec-add
+  (vec-shl
+   (vec-cast
+    (load
+     (buffer bounded_input 'uint8)
+     (ramp (sca-add (sca-mul (var-lookup 't101) 16) 1) 1 16)
+     (aligned 16 1))
+    'uint16
+    16)
+   (sca-broadcast (uint16_t (bv #x0001 16)) 16))
+  (vec-cast
+   (load (buffer t102.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   'uint16
+   16))
+ (vec-cast
+  (load (buffer t103.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+  'uint16
+  16))
+optimized-template:
+  #<load-data>
+optimized Halide 0:
+  (uint16_t
+ (bvadd (bvadd (bvshl (zero-extend (app bounded_input (+ -15 (+ output.s0.x.x (+ -32 t200)))) (bitvector 16)) (bv #x0001 16)) (zero-extend (app t102.s-buf 0) (bitvector 16))) (zero-extend (app t103.s-buf 0) (bitvector 16))))
+optimized x86 0:
+  (uint8_t
+ (ite* (⊢ (= 0 idx$2045) (app t102.s-buf 0)) (⊢ (= 1 idx$2045) (app t103.s-buf 0)) (⊢ (= 2 idx$2045) (app bounded_input (+ -15 (+ output.s0.x.x (+ -32 t200)))))))
+Ran synthesizer for 2 ms
+(unsat)
+run-x86-synthesizer
+halide-expr:
+  (vec-add
+ (vec-add
+  (vec-shl
+   (vec-cast
+    (load
+     (buffer bounded_input 'uint8)
+     (ramp (sca-add (sca-mul (var-lookup 't101) 16) 1) 1 16)
+     (aligned 16 1))
+    'uint16
+    16)
+   (sca-broadcast (uint16_t (bv #x0001 16)) 16))
+  (vec-cast
+   (load (buffer t102.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   'uint16
+   16))
+ (vec-cast
+  (load (buffer t103.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+  'uint16
+  16))
+template:
+  #<load-data>
+axioms:
+  '()
+optimized-halide-expr:
+  (vec-add
+ (vec-add
+  (vec-shl
+   (vec-cast
+    (load
+     (buffer bounded_input 'uint8)
+     (ramp (sca-add (sca-mul (var-lookup 't101) 16) 1) 1 16)
+     (aligned 16 1))
+    'uint16
+    16)
+   (sca-broadcast (uint16_t (bv #x0001 16)) 16))
+  (vec-cast
+   (load (buffer t102.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   'uint16
+   16))
+ (vec-cast
+  (load (buffer t103.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+  'uint16
+  16))
+optimized-template:
+  #<load-data>
+optimized Halide 0:
+  (uint16_t
+ (bvadd (bvadd (bvshl (zero-extend (app bounded_input (+ -15 (+ output.s0.x.x (+ -32 t200)))) (bitvector 16)) (bv #x0001 16)) (zero-extend (app t102.s-buf 0) (bitvector 16))) (zero-extend (app t103.s-buf 0) (bitvector 16))))
+optimized x86 0:
+  (uint8_t
+ (ite* (⊢ (= 0 idx$2110) (app t102.s-buf 0)) (⊢ (= 1 idx$2110) (app t103.s-buf 0)) (⊢ (= 2 idx$2110) (app bounded_input (+ -15 (+ output.s0.x.x (+ -32 t200)))))))
+Ran synthesizer for 2 ms
+(unsat)
+run-x86-synthesizer
+halide-expr:
+  (vec-add
+ (vec-add
+  (vec-shl
+   (vec-cast
+    (load
+     (buffer bounded_input 'uint8)
+     (ramp (sca-add (sca-mul (var-lookup 't101) 16) 1) 1 16)
+     (aligned 16 1))
+    'uint16
+    16)
+   (sca-broadcast (uint16_t (bv #x0001 16)) 16))
+  (vec-cast
+   (load (buffer t102.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   'uint16
+   16))
+ (vec-cast
+  (load (buffer t103.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+  'uint16
+  16))
+template:
+  (vs-mpy-add
+ ...
+ #<load-data>
+ (list
+  (uint16_t (bv #x0002 16))
+  (int8_t (bv #x01 8))
+  (union [x?$1915 #(struct:uint16_t (bv #x0002 16))] [(! x?$1915) #(struct:int8_t
+                                                                    (bv #x01 8))]))
+ #f
+ #f
+ #f
+ 'uint16)
+axioms:
+  '()
+optimized-halide-expr:
+  (vec-add
+ (vec-add
+  (vec-shl
+   (vec-cast
+    (load
+     (buffer bounded_input 'uint8)
+     (ramp (sca-add (sca-mul (var-lookup 't101) 16) 1) 1 16)
+     (aligned 16 1))
+    'uint16
+    16)
+   (sca-broadcast (uint16_t (bv #x0001 16)) 16))
+  (vec-cast
+   (load (buffer t102.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   'uint16
+   16))
+ (vec-cast
+  (load (buffer t103.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+  'uint16
+  16))
+optimized-template:
+  (vs-mpy-add
+ ...
+ #<load-data>
+ (list
+  (uint16_t (bv #x0002 16))
+  (int8_t (bv #x01 8))
+  (union [x?$1915 #(struct:uint16_t (bv #x0002 16))] [(! x?$1915) #(struct:int8_t
+                                                                    (bv #x01 8))]))
+ #f
+ #f
+ #f
+ 'uint16)
+optimized Halide 0:
+  (uint16_t
+ (bvadd (bvadd (bvshl (zero-extend (app bounded_input (+ -15 (+ output.s0.x.x (+ -32 t200)))) (bitvector 16)) (bv #x0001 16)) (zero-extend (app t102.s-buf 0) (bitvector 16))) (zero-extend (app t103.s-buf 0) (bitvector 16))))
+optimized x86 0:
+  (uint16_t
+ (bvadd (bvadd (zero-extend (app t102.s-buf 0) (bitvector 16)) (bvmul (bv #x0002 16) (zero-extend (app bounded_input (+ -15 (+ output.s0.x.x (+ -32 t200)))) (bitvector 16)))) (bvmul (zero-extend (ite* (⊢ (= 0 idx$1123) (app bounded_input (+ -15 (+ output.s0.x.x (+ -32 t200))))) (⊢ (= 1 idx$1123) (app t102.s-buf 0)) (⊢ (= 2 idx$1123) (app t103.s-buf 0))) (bitvector 16)) (ite x?$1915 (bv #x0002 16) (bv #x0001 16)))))
+Ran synthesizer for 131 ms
+(model
+ [idx$1123 2]
+ [x?$1915 #f])
+(vec-add
+ (vec-add
+  (vec-shl
+   (vec-cast
+    (load
+     (buffer bounded_input 'uint8)
+     (ramp (sca-add (sca-mul (var-lookup 't101) 16) 1) 1 16)
+     (aligned 16 1))
+    'uint16
+    16)
+   (sca-broadcast (uint16_t (bv #x0001 16)) 16))
+  (vec-cast
+   (load (buffer t102.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   'uint16
+   16))
+ (vec-cast
+  (load (buffer t103.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+  'uint16
+  16))
+(vs-mpy-add
+ ...
+ #<load-data>
+ (list (uint16_t (bv #x0002 16)) (int8_t (bv #x01 8)) (int8_t (bv #x01 8)))
+ #f
+ #f
+ #f
+ 'uint16)
+Ran bounds analysis for 24 ms
+Ran bounds analysis for 19 ms
+"Success?"
+#t
+(vs-mpy-add ... #<load-data> (list (uint16_t (bv #x0002 16)) (int8_t (bv #x01 8)) (int8_t (bv #x01 8))) #f #f #f 'uint16)
+"Building Expr:"
+(vec-absd
+ (vec-add
+  (vec-add
+   (vec-shl
+    (vec-cast
+     (load
+      (buffer bounded_input 'uint8)
+      (ramp (sca-add (sca-mul (var-lookup 't98) 16) 1) 1 16)
+      (aligned 16 1))
+     'uint16
+     16)
+    (sca-broadcast (uint16_t (bv #x0001 16)) 16))
+   (vec-cast
+    (load (buffer t99.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+    'uint16
+    16))
+  (vec-cast
+   (load (buffer t100.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   'uint16
+   16))
+ (vec-add
+  (vec-add
+   (vec-shl
+    (vec-cast
+     (load
+      (buffer bounded_input 'uint8)
+      (ramp (sca-add (sca-mul (var-lookup 't101) 16) 1) 1 16)
+      (aligned 16 1))
+     'uint16
+     16)
+    (sca-broadcast (uint16_t (bv #x0001 16)) 16))
+   (vec-cast
+    (load (buffer t102.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+    'uint16
+    16))
+  (vec-cast
+   (load (buffer t103.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   'uint16
+   16)))
+"Fold templates"
+'(#<load-data> #<load-data>)
+here(#<load-data> #<load-data>)
+
+"Replace templates"
+'()
+run-x86-synthesizer
+halide-expr:
+  (vec-absd
+ (vec-add
+  (vec-add
+   (vec-shl
+    (vec-cast
+     (load
+      (buffer bounded_input 'uint8)
+      (ramp (sca-add (sca-mul (var-lookup 't98) 16) 1) 1 16)
+      (aligned 16 1))
+     'uint16
+     16)
+    (sca-broadcast (uint16_t (bv #x0001 16)) 16))
+   (vec-cast
+    (load (buffer t99.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+    'uint16
+    16))
+  (vec-cast
+   (load (buffer t100.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   'uint16
+   16))
+ (vec-add
+  (vec-add
+   (vec-shl
+    (vec-cast
+     (load
+      (buffer bounded_input 'uint8)
+      (ramp (sca-add (sca-mul (var-lookup 't101) 16) 1) 1 16)
+      (aligned 16 1))
+     'uint16
+     16)
+    (sca-broadcast (uint16_t (bv #x0001 16)) 16))
+   (vec-cast
+    (load (buffer t102.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+    'uint16
+    16))
+  (vec-cast
+   (load (buffer t103.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   'uint16
+   16)))
+template:
+  #<load-data>
+axioms:
+  '()
+optimized-halide-expr:
+  (vec-absd
+ (vec-add
+  (vec-add
+   (vec-shl
+    (vec-cast
+     (load
+      (buffer bounded_input 'uint8)
+      (ramp (sca-add (sca-mul (var-lookup 't98) 16) 1) 1 16)
+      (aligned 16 1))
+     'uint16
+     16)
+    (sca-broadcast (uint16_t (bv #x0001 16)) 16))
+   (vec-cast
+    (load (buffer t99.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+    'uint16
+    16))
+  (vec-cast
+   (load (buffer t100.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   'uint16
+   16))
+ (vec-add
+  (vec-add
+   (vec-shl
+    (vec-cast
+     (load
+      (buffer bounded_input 'uint8)
+      (ramp (sca-add (sca-mul (var-lookup 't101) 16) 1) 1 16)
+      (aligned 16 1))
+     'uint16
+     16)
+    (sca-broadcast (uint16_t (bv #x0001 16)) 16))
+   (vec-cast
+    (load (buffer t102.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+    'uint16
+    16))
+  (vec-cast
+   (load (buffer t103.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   'uint16
+   16)))
+optimized-template:
+  #<load-data>
+optimized Halide 0:
+  (uint16_t
+ (ite (bvule (bvadd (bvadd (bvshl (zero-extend (app bounded_input (+ -15 (+ output.s0.x.x (+ -16 t200)))) (bitvector 16)) (bv #x0001 16)) (zero-extend (app t99.s-buf 0) (bitvector 16))) (zero-extend (app t100.s-buf 0) (bitvector 16))) (bvadd (bvadd (bvshl (zero-extend (app bounded_input (+ -15 (+ output.s0.x.x (+ -32 t200)))) (bitvector 16)) (bv #x0001 16)) (zero-extend (app t102.s-buf 0) (bitvector 16))) (zero-extend (app t103.s-buf 0) (bitvector 16)))) (bvadd (bvadd (bvadd (bvshl (zero-extend (app bounded_input (+ -15 (+ output.s0.x.x (+ -32 t200)))) (bitvector 16)) (bv #x0001 16)) (zero-extend (app t102.s-buf 0) (bitvector 16))) (zero-extend (app t103.s-buf 0) (bitvector 16))) (bvneg (bvadd (bvadd (bvshl (zero-extend (app bounded_input (+ -15 (+ output.s0.x.x (+ -16 t200)))) (bitvector 16)) (bv #x0001 16)) (zero-extend (app t99.s-buf 0) (bitvector 16))) (zero-extend (app t100.s-buf 0) (bitvector 16))))) (bvadd (bvadd (bvadd (bvshl (zero-extend (app bounded_input (+ -15 (+ output.s0.x.x (+ -16 t200)))) (bitvector 16)) (bv #x0001 16)) (zero-extend (app t99.s-buf 0) (bitvector 16))) (zero-extend (app t100.s-buf 0) (bitvector 16))) (bvneg (bvadd (bvadd (bvshl (zero-extend (app bounded_input (+ -15 (+ output.s0.x.x (+ -32 t200)))) (bitvector 16)) (bv #x0001 16)) (zero-extend (app t102.s-buf 0) (bitvector 16))) (zero-extend (app t103.s-buf 0) (bitvector 16)))))))
+optimized x86 0:
+  (uint8_t
+ (ite* (⊢ (= 0 idx$2246) (app bounded_input (+ -15 (+ output.s0.x.x (+ -16 t200))))) (⊢ (= 1 idx$2246) (app bounded_input (+ -15 (+ output.s0.x.x (+ -32 t200))))) (⊢ (= 2 idx$2246) (app t99.s-buf 0)) (⊢ (= 3 idx$2246) (app t100.s-buf 0)) (⊢ (= 4 idx$2246) (app t102.s-buf 0)) (⊢ (= 5 idx$2246) (app t103.s-buf 0))))
+Ran synthesizer for 2 ms
+(unsat)
+run-x86-synthesizer
+halide-expr:
+  (vec-absd
+ (vec-add
+  (vec-add
+   (vec-shl
+    (vec-cast
+     (load
+      (buffer bounded_input 'uint8)
+      (ramp (sca-add (sca-mul (var-lookup 't98) 16) 1) 1 16)
+      (aligned 16 1))
+     'uint16
+     16)
+    (sca-broadcast (uint16_t (bv #x0001 16)) 16))
+   (vec-cast
+    (load (buffer t99.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+    'uint16
+    16))
+  (vec-cast
+   (load (buffer t100.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   'uint16
+   16))
+ (vec-add
+  (vec-add
+   (vec-shl
+    (vec-cast
+     (load
+      (buffer bounded_input 'uint8)
+      (ramp (sca-add (sca-mul (var-lookup 't101) 16) 1) 1 16)
+      (aligned 16 1))
+     'uint16
+     16)
+    (sca-broadcast (uint16_t (bv #x0001 16)) 16))
+   (vec-cast
+    (load (buffer t102.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+    'uint16
+    16))
+  (vec-cast
+   (load (buffer t103.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   'uint16
+   16)))
+template:
+  #<load-data>
+axioms:
+  '()
+optimized-halide-expr:
+  (vec-absd
+ (vec-add
+  (vec-add
+   (vec-shl
+    (vec-cast
+     (load
+      (buffer bounded_input 'uint8)
+      (ramp (sca-add (sca-mul (var-lookup 't98) 16) 1) 1 16)
+      (aligned 16 1))
+     'uint16
+     16)
+    (sca-broadcast (uint16_t (bv #x0001 16)) 16))
+   (vec-cast
+    (load (buffer t99.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+    'uint16
+    16))
+  (vec-cast
+   (load (buffer t100.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   'uint16
+   16))
+ (vec-add
+  (vec-add
+   (vec-shl
+    (vec-cast
+     (load
+      (buffer bounded_input 'uint8)
+      (ramp (sca-add (sca-mul (var-lookup 't101) 16) 1) 1 16)
+      (aligned 16 1))
+     'uint16
+     16)
+    (sca-broadcast (uint16_t (bv #x0001 16)) 16))
+   (vec-cast
+    (load (buffer t102.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+    'uint16
+    16))
+  (vec-cast
+   (load (buffer t103.s-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   'uint16
+   16)))
+optimized-template:
+  #<load-data>
+optimized Halide 0:
+  (uint16_t
+ (ite (bvule (bvadd (bvadd (bvshl (zero-extend (app bounded_input (+ -15 (+ output.s0.x.x (+ -16 t200)))) (bitvector 16)) (bv #x0001 16)) (zero-extend (app t99.s-buf 0) (bitvector 16))) (zero-extend (app t100.s-buf 0) (bitvector 16))) (bvadd (bvadd (bvshl (zero-extend (app bounded_input (+ -15 (+ output.s0.x.x (+ -32 t200)))) (bitvector 16)) (bv #x0001 16)) (zero-extend (app t102.s-buf 0) (bitvector 16))) (zero-extend (app t103.s-buf 0) (bitvector 16)))) (bvadd (bvadd (bvadd (bvshl (zero-extend (app bounded_input (+ -15 (+ output.s0.x.x (+ -32 t200)))) (bitvector 16)) (bv #x0001 16)) (zero-extend (app t102.s-buf 0) (bitvector 16))) (zero-extend (app t103.s-buf 0) (bitvector 16))) (bvneg (bvadd (bvadd (bvshl (zero-extend (app bounded_input (+ -15 (+ output.s0.x.x (+ -16 t200)))) (bitvector 16)) (bv #x0001 16)) (zero-extend (app t99.s-buf 0) (bitvector 16))) (zero-extend (app t100.s-buf 0) (bitvector 16))))) (bvadd (bvadd (bvadd (bvshl (zero-extend (app bounded_input (+ -15 (+ output.s0.x.x (+ -16 t200)))) (bitvector 16)) (bv #x0001 16)) (zero-extend (app t99.s-buf 0) (bitvector 16))) (zero-extend (app t100.s-buf 0) (bitvector 16))) (bvneg (bvadd (bvadd (bvshl (zero-extend (app bounded_input (+ -15 (+ output.s0.x.x (+ -32 t200)))) (bitvector 16)) (bv #x0001 16)) (zero-extend (app t102.s-buf 0) (bitvector 16))) (zero-extend (app t103.s-buf 0) (bitvector 16)))))))
+optimized x86 0:
+  (uint8_t
+ (ite* (⊢ (= 0 idx$2314) (app bounded_input (+ -15 (+ output.s0.x.x (+ -16 t200))))) (⊢ (= 1 idx$2314) (app bounded_input (+ -15 (+ output.s0.x.x (+ -32 t200))))) (⊢ (= 2 idx$2314) (app t99.s-buf 0)) (⊢ (= 3 idx$2314) (app t100.s-buf 0)) (⊢ (= 4 idx$2314) (app t102.s-buf 0)) (⊢ (= 5 idx$2314) (app t103.s-buf 0))))
+Ran synthesizer for 2 ms
+(unsat)
+"Success?"
+#f
+#<void>

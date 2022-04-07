@@ -1,0 +1,1005 @@
+Lifting input expression to x86 IR...
+=====================================
+
+"Building Expr:"
+(ramp (int32_t (bv #xfffffffe 32)) (int32_t (bv #x00000001 32)) 16)
+"Fold templates"
+'()
+here()
+
+"Replace templates"
+'()
+"Success?"
+#f
+#<void>
+run-x86-synthesizer
+halide-expr:
+  (ramp (int32_t (bv #xfffffffe 32)) (int32_t (bv #x00000001 32)) 16)
+template:
+  (build-vec ... (int32_t (bv #xfffffffe 32)) (int32_t (bv #x00000001 32)) 16)
+axioms:
+  '()
+optimized-halide-expr:
+  (ramp (int32_t (bv #xfffffffe 32)) (int32_t (bv #x00000001 32)) 16)
+optimized-template:
+  (build-vec ... (int32_t (bv #xfffffffe 32)) (int32_t (bv #x00000001 32)) 16)
+optimized Halide 0:
+  (int32_t (bv #xfffffffe 32))
+optimized x86 0:
+  (int32_t (bv #xfffffffe 32))
+Ran synthesizer for 19 ms
+(model)
+(ramp (int32_t (bv #xfffffffe 32)) (int32_t (bv #x00000001 32)) 16)
+(build-vec ... (int32_t (bv #xfffffffe 32)) (int32_t (bv #x00000001 32)) 16)
+Ran bounds analysis for 22 ms
+Ran bounds analysis for 14 ms
+"Extended success?"
+#t
+(build-vec ... (int32_t (bv #xfffffffe 32)) (int32_t (bv #x00000001 32)) 16)
+"Building Expr:"
+(sca-broadcast
+ (sca-add (int32_t input.extent.0) (int32_t (bv #xffffffff 32)))
+ 16)
+"Fold templates"
+'()
+here()
+
+"Replace templates"
+'()
+"Success?"
+#f
+#<void>
+run-x86-synthesizer
+halide-expr:
+  (sca-broadcast
+ (sca-add (int32_t input.extent.0) (int32_t (bv #xffffffff 32)))
+ 16)
+template:
+  (broadcast ... (sca-add (int32_t input.extent.0) (int32_t (bv #xffffffff 32))))
+axioms:
+  '()
+optimized-halide-expr:
+  (sca-broadcast
+ (sca-add (int32_t input.extent.0) (int32_t (bv #xffffffff 32)))
+ 16)
+optimized-template:
+  (broadcast ... (sca-add (int32_t input.extent.0) (int32_t (bv #xffffffff 32))))
+optimized Halide 0:
+  (int32_t (bvadd (bv #xffffffff 32) input.extent.0))
+optimized x86 0:
+  (int32_t (bvadd (bv #xffffffff 32) input.extent.0))
+Ran synthesizer for 16 ms
+(model)
+(sca-broadcast
+ (sca-add (int32_t input.extent.0) (int32_t (bv #xffffffff 32)))
+ 16)
+(broadcast ... (sca-add (int32_t input.extent.0) (int32_t (bv #xffffffff 32))))
+Ran bounds analysis for 33 ms
+Ran bounds analysis for 18 ms
+"Extended success?"
+#t
+(broadcast ... (sca-add (int32_t input.extent.0) (int32_t (bv #xffffffff 32))))
+"Building Expr:"
+(vec-min
+ (ramp (int32_t (bv #xfffffffe 32)) (int32_t (bv #x00000001 32)) 16)
+ (sca-broadcast
+  (sca-add (int32_t input.extent.0) (int32_t (bv #xffffffff 32)))
+  16))
+"Fold templates"
+'()
+here()
+
+"Replace templates"
+'()
+"Success?"
+#f
+#<void>
+run-x86-synthesizer
+halide-expr:
+  (vec-min
+ (ramp (int32_t (bv #xfffffffe 32)) (int32_t (bv #x00000001 32)) 16)
+ (sca-broadcast
+  (sca-add (int32_t input.extent.0) (int32_t (bv #xffffffff 32)))
+  16))
+template:
+  (minimum
+ ...
+ (build-vec ... (int32_t (bv #xfffffffe 32)) (int32_t (bv #x00000001 32)) 16)
+ (broadcast
+  ...
+  (sca-add (int32_t input.extent.0) (int32_t (bv #xffffffff 32)))))
+axioms:
+  (list
+ (forall (idx) (&& (bvsle (app abstr-vals$0 idx) (bv #xfffffffe 32)) (bvsle (bv #xfffffffe 32) (app abstr-vals$0 idx))))
+ #t)
+optimized-halide-expr:
+  (vec-min #<abstr-halide-expr> #<abstr-halide-expr>)
+optimized-template:
+  (minimum ... #<abstr-expr> #<abstr-expr>)
+optimized Halide 0:
+  (int32_t
+ (ite (bvsle (app abstr-vals$0 0) (app abstr-vals$1 0)) (app abstr-vals$0 0) (app abstr-vals$1 0)))
+optimized x86 0:
+  (int32_t
+ (ite (bvsle (app abstr-vals$0 0) (app abstr-vals$1 0)) (app abstr-vals$0 0) (app abstr-vals$1 0)))
+Ran synthesizer for 40 ms
+(model)
+(vec-min #<abstr-halide-expr> #<abstr-halide-expr>)
+(minimum
+ ...
+ (build-vec ... (int32_t (bv #xfffffffe 32)) (int32_t (bv #x00000001 32)) 16)
+ (broadcast
+  ...
+  (sca-add (int32_t input.extent.0) (int32_t (bv #xffffffff 32)))))
+Ran bounds analysis for 32 ms
+Ran bounds analysis for 17 ms
+"Extended success?"
+#t
+(minimum
+ ...
+ (build-vec ... (int32_t (bv #xfffffffe 32)) (int32_t (bv #x00000001 32)) 16)
+ (broadcast
+  ...
+  (sca-add (int32_t input.extent.0) (int32_t (bv #xffffffff 32)))))
+"Building Expr:"
+(sca-broadcast (int32_t (bv #x00000000 32)) 16)
+"Fold templates"
+'()
+here()
+
+"Replace templates"
+'()
+"Success?"
+#f
+#<void>
+run-x86-synthesizer
+halide-expr:
+  (sca-broadcast (int32_t (bv #x00000000 32)) 16)
+template:
+  (broadcast ... (int32_t (bv #x00000000 32)))
+axioms:
+  '()
+optimized-halide-expr:
+  (sca-broadcast (int32_t (bv #x00000000 32)) 16)
+optimized-template:
+  (broadcast ... (int32_t (bv #x00000000 32)))
+optimized Halide 0:
+  (int32_t (bv #x00000000 32))
+optimized x86 0:
+  (int32_t (bv #x00000000 32))
+Ran synthesizer for 15 ms
+(model)
+(sca-broadcast (int32_t (bv #x00000000 32)) 16)
+(broadcast ... (int32_t (bv #x00000000 32)))
+Ran bounds analysis for 22 ms
+Ran bounds analysis for 13 ms
+"Extended success?"
+#t
+(broadcast ... (int32_t (bv #x00000000 32)))
+"Building Expr:"
+(vec-max
+ (vec-min
+  (ramp (int32_t (bv #xfffffffe 32)) (int32_t (bv #x00000001 32)) 16)
+  (sca-broadcast
+   (sca-add (int32_t input.extent.0) (int32_t (bv #xffffffff 32)))
+   16))
+ (sca-broadcast (int32_t (bv #x00000000 32)) 16))
+"Fold templates"
+'()
+here()
+
+"Replace templates"
+(list
+ (cast
+  ...
+  (build-vec ... (int32_t (bv #xfffffffe 32)) (int32_t (bv #x00000001 32)) 16)
+  'int32
+  #t)
+ (cast
+  ...
+  (broadcast
+   ...
+   (sca-add (int32_t input.extent.0) (int32_t (bv #xffffffff 32))))
+  'int32
+  #t))
+run-x86-synthesizer
+halide-expr:
+  (vec-max
+ (vec-min
+  (ramp (int32_t (bv #xfffffffe 32)) (int32_t (bv #x00000001 32)) 16)
+  (sca-broadcast
+   (sca-add (int32_t input.extent.0) (int32_t (bv #xffffffff 32)))
+   16))
+ (sca-broadcast (int32_t (bv #x00000000 32)) 16))
+template:
+  (cast
+ ...
+ (build-vec ... (int32_t (bv #xfffffffe 32)) (int32_t (bv #x00000001 32)) 16)
+ 'int32
+ #t)
+axioms:
+  (list
+ (forall (idx) (&& (bvsle (app abstr-vals$4 idx) (bv #xfffffffe 32)) (bvsle (bv #xfffffffe 32) (app abstr-vals$4 idx)))))
+optimized-halide-expr:
+  (vec-max
+ (vec-min
+  #<abstr-halide-expr>
+  (sca-broadcast
+   (sca-add (int32_t input.extent.0) (int32_t (bv #xffffffff 32)))
+   16))
+ (sca-broadcast (int32_t (bv #x00000000 32)) 16))
+optimized-template:
+  (cast ... #<abstr-expr> 'int32 #t)
+optimized Halide 0:
+  (int32_t
+ (ite (bvsle (bv #x00000000 32) (ite (bvsle (app abstr-vals$4 0) (bvadd (bv #xffffffff 32) input.extent.0)) (app abstr-vals$4 0) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (app abstr-vals$4 0) (bvadd (bv #xffffffff 32) input.extent.0)) (app abstr-vals$4 0) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)))
+optimized x86 0:
+  (int32_t (app abstr-vals$4 0))
+run-x86-synthesizer
+halide-expr:
+  (vec-max
+ (vec-min
+  (ramp (int32_t (bv #xfffffffe 32)) (int32_t (bv #x00000001 32)) 16)
+  (sca-broadcast
+   (sca-add (int32_t input.extent.0) (int32_t (bv #xffffffff 32)))
+   16))
+ (sca-broadcast (int32_t (bv #x00000000 32)) 16))
+template:
+  (cast
+ ...
+ (broadcast
+  ...
+  (sca-add (int32_t input.extent.0) (int32_t (bv #xffffffff 32))))
+ 'int32
+ #t)
+axioms:
+  '(#t)
+optimized-halide-expr:
+  (vec-max
+ (vec-min
+  (ramp (int32_t (bv #xfffffffe 32)) (int32_t (bv #x00000001 32)) 16)
+  #<abstr-halide-expr>)
+ (sca-broadcast (int32_t (bv #x00000000 32)) 16))
+optimized-template:
+  (cast ... #<abstr-expr> 'int32 #t)
+optimized Halide 0:
+  (int32_t
+ (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xfffffffe 32) (app abstr-vals$5 0)) (bv #xfffffffe 32) (app abstr-vals$5 0))) (ite (bvsle (bv #xfffffffe 32) (app abstr-vals$5 0)) (bv #xfffffffe 32) (app abstr-vals$5 0)) (bv #x00000000 32)))
+optimized x86 0:
+  (int32_t (app abstr-vals$5 0))
+Ran synthesizer for 50 ms
+(unsat)
+"Success?"
+#f
+#<void>
+run-x86-synthesizer
+halide-expr:
+  (vec-max
+ (vec-min
+  (ramp (int32_t (bv #xfffffffe 32)) (int32_t (bv #x00000001 32)) 16)
+  (sca-broadcast
+   (sca-add (int32_t input.extent.0) (int32_t (bv #xffffffff 32)))
+   16))
+ (sca-broadcast (int32_t (bv #x00000000 32)) 16))
+template:
+  (maximum
+ ...
+ (minimum
+  ...
+  (build-vec ... (int32_t (bv #xfffffffe 32)) (int32_t (bv #x00000001 32)) 16)
+  (broadcast
+   ...
+   (sca-add (int32_t input.extent.0) (int32_t (bv #xffffffff 32)))))
+ (broadcast ... (int32_t (bv #x00000000 32))))
+axioms:
+  (list
+ (forall (idx) (bvsle (app abstr-vals$6 idx) (bv #xfffffffe 32)))
+ (forall (idx) (&& (bvsle (app abstr-vals$7 idx) (bv #x00000000 32)) (bvsle (bv #x00000000 32) (app abstr-vals$7 idx)))))
+optimized-halide-expr:
+  (vec-max #<abstr-halide-expr> #<abstr-halide-expr>)
+optimized-template:
+  (maximum ... #<abstr-expr> #<abstr-expr>)
+optimized Halide 0:
+  (int32_t
+ (ite (bvsle (app abstr-vals$7 0) (app abstr-vals$6 0)) (app abstr-vals$6 0) (app abstr-vals$7 0)))
+optimized x86 0:
+  (int32_t
+ (ite (bvsle (app abstr-vals$7 0) (app abstr-vals$6 0)) (app abstr-vals$6 0) (app abstr-vals$7 0)))
+Ran synthesizer for 33 ms
+(model)
+(vec-max #<abstr-halide-expr> #<abstr-halide-expr>)
+(maximum
+ ...
+ (minimum
+  ...
+  (build-vec ... (int32_t (bv #xfffffffe 32)) (int32_t (bv #x00000001 32)) 16)
+  (broadcast
+   ...
+   (sca-add (int32_t input.extent.0) (int32_t (bv #xffffffff 32)))))
+ (broadcast ... (int32_t (bv #x00000000 32))))
+Ran bounds analysis for 26 ms
+Ran bounds analysis for 29 ms
+"Extended success?"
+#t
+(maximum
+ ...
+ (minimum
+  ...
+  (build-vec ... (int32_t (bv #xfffffffe 32)) (int32_t (bv #x00000001 32)) 16)
+  (broadcast
+   ...
+   (sca-add (int32_t input.extent.0) (int32_t (bv #xffffffff 32)))))
+ (broadcast ... (int32_t (bv #x00000000 32))))
+"Building Expr:"
+(sca-broadcast
+ (sca-mul
+  (sca-add
+   (sca-add
+    (int32_t bounded_input.s0.y.prologue.s)
+    (int32_t bounded_input.s0.y.rebased))
+   (int32_t (bv #xfffffffe 32)))
+  (int32_t input.stride.1))
+ 16)
+"Fold templates"
+'()
+here()
+
+"Replace templates"
+'()
+"Success?"
+#f
+#<void>
+run-x86-synthesizer
+halide-expr:
+  (sca-broadcast
+ (sca-mul
+  (sca-add
+   (sca-add
+    (int32_t bounded_input.s0.y.prologue.s)
+    (int32_t bounded_input.s0.y.rebased))
+   (int32_t (bv #xfffffffe 32)))
+  (int32_t input.stride.1))
+ 16)
+template:
+  (broadcast
+ ...
+ (sca-mul
+  (sca-add
+   (sca-add
+    (int32_t bounded_input.s0.y.prologue.s)
+    (int32_t bounded_input.s0.y.rebased))
+   (int32_t (bv #xfffffffe 32)))
+  (int32_t input.stride.1)))
+axioms:
+  '()
+optimized-halide-expr:
+  (sca-broadcast
+ (sca-mul
+  (sca-add
+   (sca-add
+    (int32_t bounded_input.s0.y.prologue.s)
+    (int32_t bounded_input.s0.y.rebased))
+   (int32_t (bv #xfffffffe 32)))
+  (int32_t input.stride.1))
+ 16)
+optimized-template:
+  (broadcast
+ ...
+ (sca-mul
+  (sca-add
+   (sca-add
+    (int32_t bounded_input.s0.y.prologue.s)
+    (int32_t bounded_input.s0.y.rebased))
+   (int32_t (bv #xfffffffe 32)))
+  (int32_t input.stride.1)))
+optimized Halide 0:
+  (int32_t
+ (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased))))
+optimized x86 0:
+  (int32_t
+ (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased))))
+Ran synthesizer for 16 ms
+(model)
+(sca-broadcast
+ (sca-mul
+  (sca-add
+   (sca-add
+    (int32_t bounded_input.s0.y.prologue.s)
+    (int32_t bounded_input.s0.y.rebased))
+   (int32_t (bv #xfffffffe 32)))
+  (int32_t input.stride.1))
+ 16)
+(broadcast
+ ...
+ (sca-mul
+  (sca-add
+   (sca-add
+    (int32_t bounded_input.s0.y.prologue.s)
+    (int32_t bounded_input.s0.y.rebased))
+   (int32_t (bv #xfffffffe 32)))
+  (int32_t input.stride.1)))
+Ran bounds analysis for 85 ms
+Ran bounds analysis for 202 ms
+"Extended success?"
+#t
+(broadcast
+ ...
+ (sca-mul
+  (sca-add
+   (sca-add
+    (int32_t bounded_input.s0.y.prologue.s)
+    (int32_t bounded_input.s0.y.rebased))
+   (int32_t (bv #xfffffffe 32)))
+  (int32_t input.stride.1)))
+"Building Expr:"
+(vec-add
+ (vec-max
+  (vec-min
+   (ramp (int32_t (bv #xfffffffe 32)) (int32_t (bv #x00000001 32)) 16)
+   (sca-broadcast
+    (sca-add (int32_t input.extent.0) (int32_t (bv #xffffffff 32)))
+    16))
+  (sca-broadcast (int32_t (bv #x00000000 32)) 16))
+ (sca-broadcast
+  (sca-mul
+   (sca-add
+    (sca-add
+     (int32_t bounded_input.s0.y.prologue.s)
+     (int32_t bounded_input.s0.y.rebased))
+    (int32_t (bv #xfffffffe 32)))
+   (int32_t input.stride.1))
+  16))
+"Fold templates"
+'()
+here()
+
+"Replace templates"
+(list
+ (cast
+  ...
+  (build-vec ... (int32_t (bv #xfffffffe 32)) (int32_t (bv #x00000001 32)) 16)
+  'int32
+  #t)
+ (cast
+  ...
+  (broadcast
+   ...
+   (sca-add (int32_t input.extent.0) (int32_t (bv #xffffffff 32))))
+  'int32
+  #t)
+ (cast
+  ...
+  (minimum
+   ...
+   (build-vec ... (int32_t (bv #xfffffffe 32)) (int32_t (bv #x00000001 32)) 16)
+   (broadcast
+    ...
+    (sca-add (int32_t input.extent.0) (int32_t (bv #xffffffff 32)))))
+  'int32
+  #t)
+ (cast ... (broadcast ... (int32_t (bv #x00000000 32))) 'int32 #t))
+run-x86-synthesizer
+halide-expr:
+  (vec-add
+ (vec-max
+  (vec-min
+   (ramp (int32_t (bv #xfffffffe 32)) (int32_t (bv #x00000001 32)) 16)
+   (sca-broadcast
+    (sca-add (int32_t input.extent.0) (int32_t (bv #xffffffff 32)))
+    16))
+  (sca-broadcast (int32_t (bv #x00000000 32)) 16))
+ (sca-broadcast
+  (sca-mul
+   (sca-add
+    (sca-add
+     (int32_t bounded_input.s0.y.prologue.s)
+     (int32_t bounded_input.s0.y.rebased))
+    (int32_t (bv #xfffffffe 32)))
+   (int32_t input.stride.1))
+  16))
+template:
+  (cast
+ ...
+ (build-vec ... (int32_t (bv #xfffffffe 32)) (int32_t (bv #x00000001 32)) 16)
+ 'int32
+ #t)
+axioms:
+  (list
+ (forall (idx) (&& (bvsle (app abstr-vals$10 idx) (bv #xfffffffe 32)) (bvsle (bv #xfffffffe 32) (app abstr-vals$10 idx)))))
+optimized-halide-expr:
+  (vec-add
+ (vec-max
+  (vec-min
+   #<abstr-halide-expr>
+   (sca-broadcast
+    (sca-add (int32_t input.extent.0) (int32_t (bv #xffffffff 32)))
+    16))
+  (sca-broadcast (int32_t (bv #x00000000 32)) 16))
+ (sca-broadcast
+  (sca-mul
+   (sca-add
+    (sca-add
+     (int32_t bounded_input.s0.y.prologue.s)
+     (int32_t bounded_input.s0.y.rebased))
+    (int32_t (bv #xfffffffe 32)))
+   (int32_t input.stride.1))
+  16))
+optimized-template:
+  (cast ... #<abstr-expr> 'int32 #t)
+optimized Halide 0:
+  (int32_t
+ (bvadd (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased))) (ite (bvsle (bv #x00000000 32) (ite (bvsle (app abstr-vals$10 0) (bvadd (bv #xffffffff 32) input.extent.0)) (app abstr-vals$10 0) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (app abstr-vals$10 0) (bvadd (bv #xffffffff 32) input.extent.0)) (app abstr-vals$10 0) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32))))
+optimized x86 0:
+  (int32_t (app abstr-vals$10 0))
+run-x86-synthesizer
+halide-expr:
+  (vec-add
+ (vec-max
+  (vec-min
+   (ramp (int32_t (bv #xfffffffe 32)) (int32_t (bv #x00000001 32)) 16)
+   (sca-broadcast
+    (sca-add (int32_t input.extent.0) (int32_t (bv #xffffffff 32)))
+    16))
+  (sca-broadcast (int32_t (bv #x00000000 32)) 16))
+ (sca-broadcast
+  (sca-mul
+   (sca-add
+    (sca-add
+     (int32_t bounded_input.s0.y.prologue.s)
+     (int32_t bounded_input.s0.y.rebased))
+    (int32_t (bv #xfffffffe 32)))
+   (int32_t input.stride.1))
+  16))
+template:
+  (cast
+ ...
+ (broadcast
+  ...
+  (sca-add (int32_t input.extent.0) (int32_t (bv #xffffffff 32))))
+ 'int32
+ #t)
+axioms:
+  '(#t)
+optimized-halide-expr:
+  (vec-add
+ (vec-max
+  (vec-min
+   (ramp (int32_t (bv #xfffffffe 32)) (int32_t (bv #x00000001 32)) 16)
+   #<abstr-halide-expr>)
+  (sca-broadcast (int32_t (bv #x00000000 32)) 16))
+ (sca-broadcast
+  (sca-mul
+   (sca-add
+    (sca-add
+     (int32_t bounded_input.s0.y.prologue.s)
+     (int32_t bounded_input.s0.y.rebased))
+    (int32_t (bv #xfffffffe 32)))
+   (int32_t input.stride.1))
+  16))
+optimized-template:
+  (cast ... #<abstr-expr> 'int32 #t)
+optimized Halide 0:
+  (int32_t
+ (bvadd (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased))) (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xfffffffe 32) (app abstr-vals$11 0)) (bv #xfffffffe 32) (app abstr-vals$11 0))) (ite (bvsle (bv #xfffffffe 32) (app abstr-vals$11 0)) (bv #xfffffffe 32) (app abstr-vals$11 0)) (bv #x00000000 32))))
+optimized x86 0:
+  (int32_t (app abstr-vals$11 0))
+run-x86-synthesizer
+halide-expr:
+  (vec-add
+ (vec-max
+  (vec-min
+   (ramp (int32_t (bv #xfffffffe 32)) (int32_t (bv #x00000001 32)) 16)
+   (sca-broadcast
+    (sca-add (int32_t input.extent.0) (int32_t (bv #xffffffff 32)))
+    16))
+  (sca-broadcast (int32_t (bv #x00000000 32)) 16))
+ (sca-broadcast
+  (sca-mul
+   (sca-add
+    (sca-add
+     (int32_t bounded_input.s0.y.prologue.s)
+     (int32_t bounded_input.s0.y.rebased))
+    (int32_t (bv #xfffffffe 32)))
+   (int32_t input.stride.1))
+  16))
+template:
+  (cast ... (broadcast ... (int32_t (bv #x00000000 32))) 'int32 #t)
+axioms:
+  (list
+ (forall (idx) (&& (bvsle (app abstr-vals$12 idx) (bv #x00000000 32)) (bvsle (bv #x00000000 32) (app abstr-vals$12 idx)))))
+optimized-halide-expr:
+  (vec-add
+ (vec-max
+  (vec-min
+   (ramp (int32_t (bv #xfffffffe 32)) (int32_t (bv #x00000001 32)) 16)
+   (sca-broadcast
+    (sca-add (int32_t input.extent.0) (int32_t (bv #xffffffff 32)))
+    16))
+  #<abstr-halide-expr>)
+ (sca-broadcast
+  (sca-mul
+   (sca-add
+    (sca-add
+     (int32_t bounded_input.s0.y.prologue.s)
+     (int32_t bounded_input.s0.y.rebased))
+    (int32_t (bv #xfffffffe 32)))
+   (int32_t input.stride.1))
+  16))
+optimized-template:
+  (cast ... #<abstr-expr> 'int32 #t)
+optimized Halide 0:
+  (int32_t
+ (bvadd (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased))) (ite (bvsle (app abstr-vals$12 0) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (app abstr-vals$12 0))))
+optimized x86 0:
+  (int32_t (app abstr-vals$12 0))
+run-x86-synthesizer
+halide-expr:
+  (vec-add
+ (vec-max
+  (vec-min
+   (ramp (int32_t (bv #xfffffffe 32)) (int32_t (bv #x00000001 32)) 16)
+   (sca-broadcast
+    (sca-add (int32_t input.extent.0) (int32_t (bv #xffffffff 32)))
+    16))
+  (sca-broadcast (int32_t (bv #x00000000 32)) 16))
+ (sca-broadcast
+  (sca-mul
+   (sca-add
+    (sca-add
+     (int32_t bounded_input.s0.y.prologue.s)
+     (int32_t bounded_input.s0.y.rebased))
+    (int32_t (bv #xfffffffe 32)))
+   (int32_t input.stride.1))
+  16))
+template:
+  (cast
+ ...
+ (minimum
+  ...
+  (build-vec ... (int32_t (bv #xfffffffe 32)) (int32_t (bv #x00000001 32)) 16)
+  (broadcast
+   ...
+   (sca-add (int32_t input.extent.0) (int32_t (bv #xffffffff 32)))))
+ 'int32
+ #t)
+axioms:
+  (list (forall (idx) (bvsle (app abstr-vals$13 idx) (bv #xfffffffe 32))))
+optimized-halide-expr:
+  (vec-add
+ (vec-max #<abstr-halide-expr> (sca-broadcast (int32_t (bv #x00000000 32)) 16))
+ (sca-broadcast
+  (sca-mul
+   (sca-add
+    (sca-add
+     (int32_t bounded_input.s0.y.prologue.s)
+     (int32_t bounded_input.s0.y.rebased))
+    (int32_t (bv #xfffffffe 32)))
+   (int32_t input.stride.1))
+  16))
+optimized-template:
+  (cast ... #<abstr-expr> 'int32 #t)
+optimized Halide 0:
+  (int32_t
+ (bvadd (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased))) (ite (bvsle (bv #x00000000 32) (app abstr-vals$13 0)) (app abstr-vals$13 0) (bv #x00000000 32))))
+optimized x86 0:
+  (int32_t (app abstr-vals$13 0))
+"Success?"
+#f
+#<void>
+run-x86-synthesizer
+halide-expr:
+  (vec-add
+ (vec-max
+  (vec-min
+   (ramp (int32_t (bv #xfffffffe 32)) (int32_t (bv #x00000001 32)) 16)
+   (sca-broadcast
+    (sca-add (int32_t input.extent.0) (int32_t (bv #xffffffff 32)))
+    16))
+  (sca-broadcast (int32_t (bv #x00000000 32)) 16))
+ (sca-broadcast
+  (sca-mul
+   (sca-add
+    (sca-add
+     (int32_t bounded_input.s0.y.prologue.s)
+     (int32_t bounded_input.s0.y.rebased))
+    (int32_t (bv #xfffffffe 32)))
+   (int32_t input.stride.1))
+  16))
+template:
+  (vs-mpy-add
+ ...
+ (union [x?$14 #(struct:maximum
+                 ...
+                 #(struct:minimum
+                   ...
+                   #(struct:build-vec
+                     ...
+                     #(struct:int32_t (bv #xfffffffe 32))
+                     #(struct:int32_t (bv #x00000001 32))
+                     16)
+                   #(struct:broadcast
+                     ...
+                     #(struct:sca-add
+                       #(struct:int32_t input.extent.0)
+                       #(struct:int32_t (bv #xffffffff 32)))))
+                 #(struct:broadcast ... #(struct:int32_t (bv #x00000000 32))))] [(! x?$14) #(struct:broadcast
+                                                                                             ...
+                                                                                             #(struct:sca-mul
+                                                                                               #(struct:sca-add
+                                                                                                 #(struct:sca-add
+                                                                                                   #(struct:int32_t
+                                                                                                     bounded_input.s0.y.prologue.s)
+                                                                                                   #(struct:int32_t
+                                                                                                     bounded_input.s0.y.rebased))
+                                                                                                 #(struct:int32_t
+                                                                                                   (bv #xfffffffe 32)))
+                                                                                               #(struct:int32_t
+                                                                                                 input.stride.1)))])
+ (list (int8_t (bv #x01 8)) (int8_t (bv #x01 8)))
+ (! x?$15)
+ (! x?$16)
+ (! x?$17)
+ 'int32)
+axioms:
+  '()
+optimized-halide-expr:
+  (vec-add
+ (vec-max
+  (vec-min
+   (ramp (int32_t (bv #xfffffffe 32)) (int32_t (bv #x00000001 32)) 16)
+   (sca-broadcast
+    (sca-add (int32_t input.extent.0) (int32_t (bv #xffffffff 32)))
+    16))
+  (sca-broadcast (int32_t (bv #x00000000 32)) 16))
+ (sca-broadcast
+  (sca-mul
+   (sca-add
+    (sca-add
+     (int32_t bounded_input.s0.y.prologue.s)
+     (int32_t bounded_input.s0.y.rebased))
+    (int32_t (bv #xfffffffe 32)))
+   (int32_t input.stride.1))
+  16))
+optimized-template:
+  (vs-mpy-add
+ ...
+ (union [x?$14 #(struct:maximum
+                 ...
+                 #(struct:minimum
+                   ...
+                   #(struct:build-vec
+                     ...
+                     #(struct:int32_t (bv #xfffffffe 32))
+                     #(struct:int32_t (bv #x00000001 32))
+                     16)
+                   #(struct:broadcast
+                     ...
+                     #(struct:sca-add
+                       #(struct:int32_t input.extent.0)
+                       #(struct:int32_t (bv #xffffffff 32)))))
+                 #(struct:broadcast ... #(struct:int32_t (bv #x00000000 32))))] [(! x?$14) #(struct:broadcast
+                                                                                             ...
+                                                                                             #(struct:sca-mul
+                                                                                               #(struct:sca-add
+                                                                                                 #(struct:sca-add
+                                                                                                   #(struct:int32_t
+                                                                                                     bounded_input.s0.y.prologue.s)
+                                                                                                   #(struct:int32_t
+                                                                                                     bounded_input.s0.y.rebased))
+                                                                                                 #(struct:int32_t
+                                                                                                   (bv #xfffffffe 32)))
+                                                                                               #(struct:int32_t
+                                                                                                 input.stride.1)))])
+ (list (int8_t (bv #x01 8)) (int8_t (bv #x01 8)))
+ (! x?$15)
+ (! x?$16)
+ (! x?$17)
+ 'int32)
+optimized Halide 0:
+  (int32_t
+ (bvadd (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))))
+optimized x86 0:
+  (int32_t
+ (ite* (⊢ (&& x?$17 (! (&& (! x?$15) (! x?$17)))) (ite x?$15 (bvadd (ite x?$14 (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xffffffff 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xffffffff 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xffffffff 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xffffffff 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))) (ite x?$15 (bvadd (ite x?$14 (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))) (ite x?$16 (bv #x00000000 32) (bv #x00000001 32))) (bvadd (ite x?$16 (bv #x00000000 32) (bv #x00000001 32)) (ite (bvsle (ite x?$14 (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))) (bvadd (bv #x7fffffff 32) (bvneg (ite x?$16 (bv #x00000000 32) (bv #x00000001 32))))) (ite x?$14 (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))) (bvadd (bv #x7fffffff 32) (bvneg (ite x?$16 (bv #x00000000 32) (bv #x00000001 32)))))))) (bvadd (ite x?$15 (bvadd (ite x?$14 (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))) (ite x?$16 (bv #x00000000 32) (bv #x00000001 32))) (bvadd (ite x?$16 (bv #x00000000 32) (bv #x00000001 32)) (ite (bvsle (ite x?$14 (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))) (bvadd (bv #x7fffffff 32) (bvneg (ite x?$16 (bv #x00000000 32) (bv #x00000001 32))))) (ite x?$14 (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))) (bvadd (bv #x7fffffff 32) (bvneg (ite x?$16 (bv #x00000000 32) (bv #x00000001 32))))))) (ite (bvsle (bvadd (bv #x80000000 32) (bvneg (ite (bvsle (ite x?$15 (bvadd (ite x?$14 (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))) (ite x?$16 (bv #x00000000 32) (bv #x00000001 32))) (bvadd (ite x?$16 (bv #x00000000 32) (bv #x00000001 32)) (ite (bvsle (ite x?$14 (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))) (bvadd (bv #x7fffffff 32) (bvneg (ite x?$16 (bv #x00000000 32) (bv #x00000001 32))))) (ite x?$14 (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))) (bvadd (bv #x7fffffff 32) (bvneg (ite x?$16 (bv #x00000000 32) (bv #x00000001 32))))))) (bv #x00000000 32)) (ite x?$15 (bvadd (ite x?$14 (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))) (ite x?$16 (bv #x00000000 32) (bv #x00000001 32))) (bvadd (ite x?$16 (bv #x00000000 32) (bv #x00000001 32)) (ite (bvsle (ite x?$14 (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))) (bvadd (bv #x7fffffff 32) (bvneg (ite x?$16 (bv #x00000000 32) (bv #x00000001 32))))) (ite x?$14 (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))) (bvadd (bv #x7fffffff 32) (bvneg (ite x?$16 (bv #x00000000 32) (bv #x00000001 32))))))) (bv #x00000000 32)))) (ite (bvsle (ite x?$14 (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xffffffff 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xffffffff 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xffffffff 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xffffffff 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))) (bvadd (bv #x7fffffff 32) (bvneg (ite (bvsle (bv #x00000000 32) (ite x?$15 (bvadd (ite x?$14 (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))) (ite x?$16 (bv #x00000000 32) (bv #x00000001 32))) (bvadd (ite x?$16 (bv #x00000000 32) (bv #x00000001 32)) (ite (bvsle (ite x?$14 (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))) (bvadd (bv #x7fffffff 32) (bvneg (ite x?$16 (bv #x00000000 32) (bv #x00000001 32))))) (ite x?$14 (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))) (bvadd (bv #x7fffffff 32) (bvneg (ite x?$16 (bv #x00000000 32) (bv #x00000001 32)))))))) (ite x?$15 (bvadd (ite x?$14 (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))) (ite x?$16 (bv #x00000000 32) (bv #x00000001 32))) (bvadd (ite x?$16 (bv #x00000000 32) (bv #x00000001 32)) (ite (bvsle (ite x?$14 (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))) (bvadd (bv #x7fffffff 32) (bvneg (ite x?$16 (bv #x00000000 32) (bv #x00000001 32))))) (ite x?$14 (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))) (bvadd (bv #x7fffffff 32) (bvneg (ite x?$16 (bv #x00000000 32) (bv #x00000001 32))))))) (bv #x00000000 32))))) (ite x?$14 (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xffffffff 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xffffffff 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xffffffff 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xffffffff 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))) (bvadd (bv #x7fffffff 32) (bvneg (ite (bvsle (bv #x00000000 32) (ite x?$15 (bvadd (ite x?$14 (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))) (ite x?$16 (bv #x00000000 32) (bv #x00000001 32))) (bvadd (ite x?$16 (bv #x00000000 32) (bv #x00000001 32)) (ite (bvsle (ite x?$14 (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))) (bvadd (bv #x7fffffff 32) (bvneg (ite x?$16 (bv #x00000000 32) (bv #x00000001 32))))) (ite x?$14 (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))) (bvadd (bv #x7fffffff 32) (bvneg (ite x?$16 (bv #x00000000 32) (bv #x00000001 32)))))))) (ite x?$15 (bvadd (ite x?$14 (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))) (ite x?$16 (bv #x00000000 32) (bv #x00000001 32))) (bvadd (ite x?$16 (bv #x00000000 32) (bv #x00000001 32)) (ite (bvsle (ite x?$14 (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))) (bvadd (bv #x7fffffff 32) (bvneg (ite x?$16 (bv #x00000000 32) (bv #x00000001 32))))) (ite x?$14 (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))) (bvadd (bv #x7fffffff 32) (bvneg (ite x?$16 (bv #x00000000 32) (bv #x00000001 32))))))) (bv #x00000000 32)))))) (ite (bvsle (ite x?$14 (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xffffffff 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xffffffff 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xffffffff 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xffffffff 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))) (bvadd (bv #x7fffffff 32) (bvneg (ite (bvsle (bv #x00000000 32) (ite x?$15 (bvadd (ite x?$14 (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))) (ite x?$16 (bv #x00000000 32) (bv #x00000001 32))) (bvadd (ite x?$16 (bv #x00000000 32) (bv #x00000001 32)) (ite (bvsle (ite x?$14 (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))) (bvadd (bv #x7fffffff 32) (bvneg (ite x?$16 (bv #x00000000 32) (bv #x00000001 32))))) (ite x?$14 (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))) (bvadd (bv #x7fffffff 32) (bvneg (ite x?$16 (bv #x00000000 32) (bv #x00000001 32)))))))) (ite x?$15 (bvadd (ite x?$14 (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))) (ite x?$16 (bv #x00000000 32) (bv #x00000001 32))) (bvadd (ite x?$16 (bv #x00000000 32) (bv #x00000001 32)) (ite (bvsle (ite x?$14 (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))) (bvadd (bv #x7fffffff 32) (bvneg (ite x?$16 (bv #x00000000 32) (bv #x00000001 32))))) (ite x?$14 (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))) (bvadd (bv #x7fffffff 32) (bvneg (ite x?$16 (bv #x00000000 32) (bv #x00000001 32))))))) (bv #x00000000 32))))) (ite x?$14 (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xffffffff 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xffffffff 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xffffffff 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xffffffff 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))) (bvadd (bv #x7fffffff 32) (bvneg (ite (bvsle (bv #x00000000 32) (ite x?$15 (bvadd (ite x?$14 (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))) (ite x?$16 (bv #x00000000 32) (bv #x00000001 32))) (bvadd (ite x?$16 (bv #x00000000 32) (bv #x00000001 32)) (ite (bvsle (ite x?$14 (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))) (bvadd (bv #x7fffffff 32) (bvneg (ite x?$16 (bv #x00000000 32) (bv #x00000001 32))))) (ite x?$14 (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))) (bvadd (bv #x7fffffff 32) (bvneg (ite x?$16 (bv #x00000000 32) (bv #x00000001 32)))))))) (ite x?$15 (bvadd (ite x?$14 (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))) (ite x?$16 (bv #x00000000 32) (bv #x00000001 32))) (bvadd (ite x?$16 (bv #x00000000 32) (bv #x00000001 32)) (ite (bvsle (ite x?$14 (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))) (bvadd (bv #x7fffffff 32) (bvneg (ite x?$16 (bv #x00000000 32) (bv #x00000001 32))))) (ite x?$14 (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))) (bvadd (bv #x7fffffff 32) (bvneg (ite x?$16 (bv #x00000000 32) (bv #x00000001 32))))))) (bv #x00000000 32))))) (bvadd (bv #x80000000 32) (bvneg (ite (bvsle (ite x?$15 (bvadd (ite x?$14 (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))) (ite x?$16 (bv #x00000000 32) (bv #x00000001 32))) (bvadd (ite x?$16 (bv #x00000000 32) (bv #x00000001 32)) (ite (bvsle (ite x?$14 (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))) (bvadd (bv #x7fffffff 32) (bvneg (ite x?$16 (bv #x00000000 32) (bv #x00000001 32))))) (ite x?$14 (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))) (bvadd (bv #x7fffffff 32) (bvneg (ite x?$16 (bv #x00000000 32) (bv #x00000001 32))))))) (bv #x00000000 32)) (ite x?$15 (bvadd (ite x?$14 (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))) (ite x?$16 (bv #x00000000 32) (bv #x00000001 32))) (bvadd (ite x?$16 (bv #x00000000 32) (bv #x00000001 32)) (ite (bvsle (ite x?$14 (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))) (bvadd (bv #x7fffffff 32) (bvneg (ite x?$16 (bv #x00000000 32) (bv #x00000001 32))))) (ite x?$14 (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))) (bvadd (bv #x7fffffff 32) (bvneg (ite x?$16 (bv #x00000000 32) (bv #x00000001 32))))))) (bv #x00000000 32)))))))) (⊢ (|| (&& (! x?$15) (! x?$17)) (&& (! x?$17) (! (&& (! x?$15) (! x?$17))))) (bvashr (ite x?$15 (bvadd (ite x?$14 (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xffffffff 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xffffffff 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xffffffff 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xffffffff 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))) (ite x?$15 (bvadd (ite x?$14 (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))) (ite x?$16 (bv #x00000000 32) (bv #x00000001 32))) (bvadd (ite x?$16 (bv #x00000000 32) (bv #x00000001 32)) (ite (bvsle (ite x?$14 (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))) (bvadd (bv #x7fffffff 32) (bvneg (ite x?$16 (bv #x00000000 32) (bv #x00000001 32))))) (ite x?$14 (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))) (bvadd (bv #x7fffffff 32) (bvneg (ite x?$16 (bv #x00000000 32) (bv #x00000001 32)))))))) (bvadd (ite x?$15 (bvadd (ite x?$14 (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))) (ite x?$16 (bv #x00000000 32) (bv #x00000001 32))) (bvadd (ite x?$16 (bv #x00000000 32) (bv #x00000001 32)) (ite (bvsle (ite x?$14 (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))) (bvadd (bv #x7fffffff 32) (bvneg (ite x?$16 (bv #x00000000 32) (bv #x00000001 32))))) (ite x?$14 (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))) (bvadd (bv #x7fffffff 32) (bvneg (ite x?$16 (bv #x00000000 32) (bv #x00000001 32))))))) (ite (bvsle (bvadd (bv #x80000000 32) (bvneg (ite (bvsle (ite x?$15 (bvadd (ite x?$14 (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))) (ite x?$16 (bv #x00000000 32) (bv #x00000001 32))) (bvadd (ite x?$16 (bv #x00000000 32) (bv #x00000001 32)) (ite (bvsle (ite x?$14 (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))) (bvadd (bv #x7fffffff 32) (bvneg (ite x?$16 (bv #x00000000 32) (bv #x00000001 32))))) (ite x?$14 (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))) (bvadd (bv #x7fffffff 32) (bvneg (ite x?$16 (bv #x00000000 32) (bv #x00000001 32))))))) (bv #x00000000 32)) (ite x?$15 (bvadd (ite x?$14 (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))) (ite x?$16 (bv #x00000000 32) (bv #x00000001 32))) (bvadd (ite x?$16 (bv #x00000000 32) (bv #x00000001 32)) (ite (bvsle (ite x?$14 (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))) (bvadd (bv #x7fffffff 32) (bvneg (ite x?$16 (bv #x00000000 32) (bv #x00000001 32))))) (ite x?$14 (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))) (bvadd (bv #x7fffffff 32) (bvneg (ite x?$16 (bv #x00000000 32) (bv #x00000001 32))))))) (bv #x00000000 32)))) (ite (bvsle (ite x?$14 (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xffffffff 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xffffffff 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xffffffff 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xffffffff 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))) (bvadd (bv #x7fffffff 32) (bvneg (ite (bvsle (bv #x00000000 32) (ite x?$15 (bvadd (ite x?$14 (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))) (ite x?$16 (bv #x00000000 32) (bv #x00000001 32))) (bvadd (ite x?$16 (bv #x00000000 32) (bv #x00000001 32)) (ite (bvsle (ite x?$14 (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))) (bvadd (bv #x7fffffff 32) (bvneg (ite x?$16 (bv #x00000000 32) (bv #x00000001 32))))) (ite x?$14 (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))) (bvadd (bv #x7fffffff 32) (bvneg (ite x?$16 (bv #x00000000 32) (bv #x00000001 32)))))))) (ite x?$15 (bvadd (ite x?$14 (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))) (ite x?$16 (bv #x00000000 32) (bv #x00000001 32))) (bvadd (ite x?$16 (bv #x00000000 32) (bv #x00000001 32)) (ite (bvsle (ite x?$14 (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))) (bvadd (bv #x7fffffff 32) (bvneg (ite x?$16 (bv #x00000000 32) (bv #x00000001 32))))) (ite x?$14 (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))) (bvadd (bv #x7fffffff 32) (bvneg (ite x?$16 (bv #x00000000 32) (bv #x00000001 32))))))) (bv #x00000000 32))))) (ite x?$14 (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xffffffff 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xffffffff 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xffffffff 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xffffffff 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))) (bvadd (bv #x7fffffff 32) (bvneg (ite (bvsle (bv #x00000000 32) (ite x?$15 (bvadd (ite x?$14 (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))) (ite x?$16 (bv #x00000000 32) (bv #x00000001 32))) (bvadd (ite x?$16 (bv #x00000000 32) (bv #x00000001 32)) (ite (bvsle (ite x?$14 (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))) (bvadd (bv #x7fffffff 32) (bvneg (ite x?$16 (bv #x00000000 32) (bv #x00000001 32))))) (ite x?$14 (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))) (bvadd (bv #x7fffffff 32) (bvneg (ite x?$16 (bv #x00000000 32) (bv #x00000001 32)))))))) (ite x?$15 (bvadd (ite x?$14 (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))) (ite x?$16 (bv #x00000000 32) (bv #x00000001 32))) (bvadd (ite x?$16 (bv #x00000000 32) (bv #x00000001 32)) (ite (bvsle (ite x?$14 (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))) (bvadd (bv #x7fffffff 32) (bvneg (ite x?$16 (bv #x00000000 32) (bv #x00000001 32))))) (ite x?$14 (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))) (bvadd (bv #x7fffffff 32) (bvneg (ite x?$16 (bv #x00000000 32) (bv #x00000001 32))))))) (bv #x00000000 32)))))) (ite (bvsle (ite x?$14 (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xffffffff 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xffffffff 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xffffffff 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xffffffff 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))) (bvadd (bv #x7fffffff 32) (bvneg (ite (bvsle (bv #x00000000 32) (ite x?$15 (bvadd (ite x?$14 (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))) (ite x?$16 (bv #x00000000 32) (bv #x00000001 32))) (bvadd (ite x?$16 (bv #x00000000 32) (bv #x00000001 32)) (ite (bvsle (ite x?$14 (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))) (bvadd (bv #x7fffffff 32) (bvneg (ite x?$16 (bv #x00000000 32) (bv #x00000001 32))))) (ite x?$14 (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))) (bvadd (bv #x7fffffff 32) (bvneg (ite x?$16 (bv #x00000000 32) (bv #x00000001 32)))))))) (ite x?$15 (bvadd (ite x?$14 (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))) (ite x?$16 (bv #x00000000 32) (bv #x00000001 32))) (bvadd (ite x?$16 (bv #x00000000 32) (bv #x00000001 32)) (ite (bvsle (ite x?$14 (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))) (bvadd (bv #x7fffffff 32) (bvneg (ite x?$16 (bv #x00000000 32) (bv #x00000001 32))))) (ite x?$14 (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))) (bvadd (bv #x7fffffff 32) (bvneg (ite x?$16 (bv #x00000000 32) (bv #x00000001 32))))))) (bv #x00000000 32))))) (ite x?$14 (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xffffffff 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xffffffff 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xffffffff 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xffffffff 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))) (bvadd (bv #x7fffffff 32) (bvneg (ite (bvsle (bv #x00000000 32) (ite x?$15 (bvadd (ite x?$14 (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))) (ite x?$16 (bv #x00000000 32) (bv #x00000001 32))) (bvadd (ite x?$16 (bv #x00000000 32) (bv #x00000001 32)) (ite (bvsle (ite x?$14 (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))) (bvadd (bv #x7fffffff 32) (bvneg (ite x?$16 (bv #x00000000 32) (bv #x00000001 32))))) (ite x?$14 (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))) (bvadd (bv #x7fffffff 32) (bvneg (ite x?$16 (bv #x00000000 32) (bv #x00000001 32)))))))) (ite x?$15 (bvadd (ite x?$14 (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))) (ite x?$16 (bv #x00000000 32) (bv #x00000001 32))) (bvadd (ite x?$16 (bv #x00000000 32) (bv #x00000001 32)) (ite (bvsle (ite x?$14 (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))) (bvadd (bv #x7fffffff 32) (bvneg (ite x?$16 (bv #x00000000 32) (bv #x00000001 32))))) (ite x?$14 (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))) (bvadd (bv #x7fffffff 32) (bvneg (ite x?$16 (bv #x00000000 32) (bv #x00000001 32))))))) (bv #x00000000 32))))) (bvadd (bv #x80000000 32) (bvneg (ite (bvsle (ite x?$15 (bvadd (ite x?$14 (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))) (ite x?$16 (bv #x00000000 32) (bv #x00000001 32))) (bvadd (ite x?$16 (bv #x00000000 32) (bv #x00000001 32)) (ite (bvsle (ite x?$14 (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))) (bvadd (bv #x7fffffff 32) (bvneg (ite x?$16 (bv #x00000000 32) (bv #x00000001 32))))) (ite x?$14 (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))) (bvadd (bv #x7fffffff 32) (bvneg (ite x?$16 (bv #x00000000 32) (bv #x00000001 32))))))) (bv #x00000000 32)) (ite x?$15 (bvadd (ite x?$14 (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))) (ite x?$16 (bv #x00000000 32) (bv #x00000001 32))) (bvadd (ite x?$16 (bv #x00000000 32) (bv #x00000001 32)) (ite (bvsle (ite x?$14 (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))) (bvadd (bv #x7fffffff 32) (bvneg (ite x?$16 (bv #x00000000 32) (bv #x00000001 32))))) (ite x?$14 (ite (bvsle (bv #x00000000 32) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0))) (ite (bvsle (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #xfffffffe 32) (bvadd (bv #xffffffff 32) input.extent.0)) (bv #x00000000 32)) (bvmul input.stride.1 (bvadd (bv #xfffffffe 32) (bvadd bounded_input.s0.y.prologue.s bounded_input.s0.y.rebased)))) (bvadd (bv #x7fffffff 32) (bvneg (ite x?$16 (bv #x00000000 32) (bv #x00000001 32))))))) (bv #x00000000 32))))))) (bv #x00000001 32)))))
+Ran synthesizer for 272 ms
+(unsat)
+run-x86-synthesizer
+halide-expr:
+  (vec-add
+ (vec-max
+  (vec-min
+   (ramp (int32_t (bv #xfffffffe 32)) (int32_t (bv #x00000001 32)) 16)
+   (sca-broadcast
+    (sca-add (int32_t input.extent.0) (int32_t (bv #xffffffff 32)))
+    16))
+  (sca-broadcast (int32_t (bv #x00000000 32)) 16))
+ (sca-broadcast
+  (sca-mul
+   (sca-add
+    (sca-add
+     (int32_t bounded_input.s0.y.prologue.s)
+     (int32_t bounded_input.s0.y.rebased))
+    (int32_t (bv #xfffffffe 32)))
+   (int32_t input.stride.1))
+  16))
+template:
+  (vs-mpy-add
+ ...
+ (combine
+  (maximum
+   ...
+   (minimum
+    ...
+    (build-vec
+     ...
+     (int32_t (bv #xfffffffe 32))
+     (int32_t (bv #x00000001 32))
+     16)
+    (broadcast
+     ...
+     (sca-add (int32_t input.extent.0) (int32_t (bv #xffffffff 32)))))
+   (broadcast ... (int32_t (bv #x00000000 32))))
+  (broadcast
+   ...
+   (sca-mul
+    (sca-add
+     (sca-add
+      (int32_t bounded_input.s0.y.prologue.s)
+      (int32_t bounded_input.s0.y.rebased))
+     (int32_t (bv #xfffffffe 32)))
+    (int32_t input.stride.1))))
+ (list (int8_t (bv #x01 8)) (int8_t (bv #x01 8)))
+ #f
+ #f
+ #f
+ 'int32)
+axioms:
+  (list
+ (forall (idx) (&& (bvsle (app abstr-vals$146 idx) (bv #x00000000 32)) (bvsle (bv #x00000000 32) (app abstr-vals$146 idx))))
+ #t)
+optimized-halide-expr:
+  (vec-add #<abstr-halide-expr> #<abstr-halide-expr>)
+optimized-template:
+  (vs-mpy-add
+ ...
+ (combine #<abstr-expr> #<abstr-expr>)
+ (list (int8_t (bv #x01 8)) (int8_t (bv #x01 8)))
+ #f
+ #f
+ #f
+ 'int32)
+optimized Halide 0:
+  (int32_t (bvadd (app abstr-vals$146 0) (app abstr-vals$147 0)))
+optimized x86 0:
+  (int32_t
+ (bvadd (ite c$19 (app abstr-vals$146 idx$18) (app abstr-vals$147 idx$18)) (ite c$21 (app abstr-vals$146 idx$20) (app abstr-vals$147 idx$20))))
+Ran synthesizer for 88 ms
+(model
+ [idx$18 0]
+ [c$19 #f]
+ [idx$20 1]
+ [c$21 #t])
+(vec-add #<abstr-halide-expr> #<abstr-halide-expr>)
+(vs-mpy-add
+ ...
+ (combine
+  (maximum
+   ...
+   (minimum
+    ...
+    (build-vec
+     ...
+     (int32_t (bv #xfffffffe 32))
+     (int32_t (bv #x00000001 32))
+     16)
+    (broadcast
+     ...
+     (sca-add (int32_t input.extent.0) (int32_t (bv #xffffffff 32)))))
+   (broadcast ... (int32_t (bv #x00000000 32))))
+  (broadcast
+   ...
+   (sca-mul
+    (sca-add
+     (sca-add
+      (int32_t bounded_input.s0.y.prologue.s)
+      (int32_t bounded_input.s0.y.rebased))
+     (int32_t (bv #xfffffffe 32)))
+    (int32_t input.stride.1))))
+ (list (int8_t (bv #x01 8)) (int8_t (bv #x01 8)))
+ #f
+ #f
+ #f
+ 'int32)
+Ran bounds analysis for 35 ms
+Ran bounds analysis for 26 ms
+"Extended success?"
+#t
+(vs-mpy-add
+ ...
+ (combine
+  (maximum
+   ...
+   (minimum
+    ...
+    (build-vec
+     ...
+     (int32_t (bv #xfffffffe 32))
+     (int32_t (bv #x00000001 32))
+     16)
+    (broadcast
+     ...
+     (sca-add (int32_t input.extent.0) (int32_t (bv #xffffffff 32)))))
+   (broadcast ... (int32_t (bv #x00000000 32))))
+  (broadcast
+   ...
+   (sca-mul
+    (sca-add
+     (sca-add
+      (int32_t bounded_input.s0.y.prologue.s)
+      (int32_t bounded_input.s0.y.rebased))
+     (int32_t (bv #xfffffffe 32)))
+    (int32_t input.stride.1))))
+ (list (int8_t (bv #x01 8)) (int8_t (bv #x01 8)))
+ #f
+ #f
+ #f
+ 'int32)
+
+(x86) Successfully found an equivalent IR expression.
+
+(vs-mpy-add
+ ...
+ (combine
+  (maximum
+   ...
+   (minimum
+    ...
+    (build-vec
+     ...
+     (int32_t (bv #xfffffffe 32))
+     (int32_t (bv #x00000001 32))
+     16)
+    (broadcast
+     ...
+     (sca-add (int32_t input.extent.0) (int32_t (bv #xffffffff 32)))))
+   (broadcast ... (int32_t (bv #x00000000 32))))
+  (broadcast
+   ...
+   (sca-mul
+    (sca-add
+     (sca-add
+      (int32_t bounded_input.s0.y.prologue.s)
+      (int32_t bounded_input.s0.y.rebased))
+     (int32_t (bv #xfffffffe 32)))
+    (int32_t input.stride.1))))
+ (list (int8_t (bv #x01 8)) (int8_t (bv #x01 8)))
+ #f
+ #f
+ #f
+ 'int32)
+
+Synthesis time: 1 seconds
+
+Synthesizing x86 for:
+(vec-add
+ (vec-max
+  (vec-min
+   (ramp (int32_t (bv #xfffffffe 32)) (int32_t (bv #x00000001 32)) 16)
+   (sca-broadcast
+    (sca-add (int32_t input.extent.0) (int32_t (bv #xffffffff 32)))
+    16))
+  (sca-broadcast (int32_t (bv #x00000000 32)) 16))
+ (sca-broadcast
+  (sca-mul
+   (sca-add
+    (sca-add
+     (int32_t bounded_input.s0.y.prologue.s)
+     (int32_t bounded_input.s0.y.rebased))
+    (int32_t (bv #xfffffffe 32)))
+   (int32_t input.stride.1))
+  16))
+
+
+synthesize-x86 output:
+#<void>
+#f

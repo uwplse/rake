@@ -1,0 +1,112 @@
+Lifting input expression to HVX IR...
+=====================================
+
+"Building Expr:"
+(sca-broadcast (int32_t (bv #x00000001 32)) 16)
+"Fold templates"
+'()
+here()
+
+"Replace templates"
+'()
+"Success?"
+#f
+#<void>
+Ran synthesizer for 18 ms
+Ran bounds analysis for 23 ms
+Ran bounds analysis for 13 ms
+"Extended success?"
+#t
+(broadcast ... (int32_t (bv #x00000001 32)))
+"Building Expr:"
+(load
+ (buffer input1 'uint8)
+ (ramp
+  (sca-add
+   (sca-mul output.s0.x.x 16)
+   (sca-add
+    (sca-mul (var-lookup 'input1.stride.1) (var-lookup 't68))
+    (var-lookup 't55)))
+  1
+  16)
+ (aligned 1 0))
+"Fold templates"
+'()
+here()
+
+"Replace templates"
+'()
+"Success?"
+#f
+#<void>
+Ran synthesizer for 18 ms
+Ran bounds analysis for 19 ms
+Ran bounds analysis for 12 ms
+"Extended success?"
+#t
+#<load-data>
+"Building Expr:"
+(vec-cast
+ (load
+  (buffer input1 'uint8)
+  (ramp
+   (sca-add
+    (sca-mul output.s0.x.x 16)
+    (sca-add
+     (sca-mul (var-lookup 'input1.stride.1) (var-lookup 't68))
+     (var-lookup 't55)))
+   1
+   16)
+  (aligned 1 0))
+ 'int16
+ 16)
+"Fold templates"
+'(#<load-data>)
+here(#<load-data>)
+
+"Replace templates"
+'()
+Ran synthesizer for 2 ms
+"Success?"
+#f
+#<void>
+Ran synthesizer for 17 ms
+Ran bounds analysis for 21 ms
+Ran bounds analysis for 12 ms
+"Extended success?"
+#t
+(cast ... #<load-data> 'int16)
+"Building Expr:"
+(sca-broadcast (int16_t (bv #x0040 16)) 16)
+"Fold templates"
+'()
+here()
+
+"Replace templates"
+'()
+"Success?"
+#f
+#<void>
+Ran synthesizer for 15 ms
+Ran bounds analysis for 20 ms
+Ran bounds analysis for 11 ms
+"Extended success?"
+#t
+(broadcast ... (int16_t (bv #x0040 16)))
+"Building Expr:"
+(vec-mul
+ (vec-cast
+  (load
+   (buffer input1 'uint8)
+   (ramp
+    (sca-add
+     (sca-mul output.s0.x.x 16)
+     (sca-add
+      (sca-mul (var-lookup 'input1.stride.1) (var-lookup 't68))
+      (var-lookup 't55)))
+    1
+    16)
+   (aligned 1 0))
+  'int16
+  16)
+ (sca-broadcast (int16_t (bv #x0040 16)) 16))

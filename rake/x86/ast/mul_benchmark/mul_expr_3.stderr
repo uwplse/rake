@@ -1,0 +1,14 @@
+user break
+  context...:
+   /Users/alexanderroot/Projects/Rake/hvx/rake/rosette/rosette/solver/smt/base-solver.rkt:133:0: read-solution
+   /Users/alexanderroot/Projects/Rake/hvx/rake/rosette/rosette/solver/smt/base-solver.rkt:92:0: solver-check
+   /Users/alexanderroot/Projects/Rake/hvx/rake/rosette/rosette/query/core.rkt:157:2: guess
+   /Users/alexanderroot/Projects/Rake/hvx/rake/rosette/rosette/query/core.rkt:151:0: cegis
+   /Users/alexanderroot/Projects/Rake/hvx/rake/rosette/rosette/query/core.rkt:129:6
+   /Users/alexanderroot/Projects/Rake/hvx/rake/rosette/rosette/base/form/control.rkt:15:25
+   /Users/alexanderroot/Projects/Rake/hvx/rake/rosette/rosette/base/form/control.rkt:16:25
+   [repeats 19 more times]
+   /Users/alexanderroot/Projects/Rake/hvx/rake/rosette/rosette/base/form/control.rkt:15:25
+   /Users/alexanderroot/Projects/Rake/rake/rake/synthesis/ir.rkt:9:0: synthesize-ir-expr
+   /Users/alexanderroot/Projects/Rake/hvx/rake/rosette/rosette/base/form/control.rkt:15:25
+   body of "/Users/alexanderroot/Projects/Rake/rake/rake/x86/ast/mul_benchmark/mul_expr_3.rkt"

@@ -1,0 +1,2773 @@
+Lifting input expression to x86 IR...
+=====================================
+
+"Building Expr:"
+(load (buffer t299-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+"Fold templates"
+'()
+here()
+
+"Replace templates"
+'()
+"Success?"
+#f
+#<void>
+run-x86-synthesizer
+halide-expr:
+  (load (buffer t299-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+template:
+  #<load-data>
+axioms:
+  '()
+optimized-halide-expr:
+  (load (buffer t299-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+optimized-template:
+  #<load-data>
+optimized Halide 0:
+  (uint8_t (app t299-buf 0))
+optimized x86 0:
+  (uint8_t (app t299-buf 0))
+Ran synthesizer for 24 ms
+(model
+ [idx$0 0])
+(load (buffer t299-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+#<load-data>
+Ran bounds analysis for 21 ms
+Ran bounds analysis for 14 ms
+"Extended success?"
+#t
+#<load-data>
+"Building Expr:"
+(load (buffer t301-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+"Fold templates"
+'()
+here()
+
+"Replace templates"
+'()
+"Success?"
+#f
+#<void>
+run-x86-synthesizer
+halide-expr:
+  (load (buffer t301-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+template:
+  #<load-data>
+axioms:
+  '()
+optimized-halide-expr:
+  (load (buffer t301-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+optimized-template:
+  #<load-data>
+optimized Halide 0:
+  (uint8_t (app t301-buf 0))
+optimized x86 0:
+  (uint8_t (app t301-buf 0))
+Ran synthesizer for 21 ms
+(model
+ [idx$65 0])
+(load (buffer t301-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+#<load-data>
+Ran bounds analysis for 21 ms
+Ran bounds analysis for 13 ms
+"Extended success?"
+#t
+#<load-data>
+"Building Expr:"
+(vec-max
+ (load (buffer t299-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+ (load (buffer t301-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+"Fold templates"
+'(#<load-data> #<load-data>)
+here(#<load-data> #<load-data>)
+
+"Replace templates"
+'()
+run-x86-synthesizer
+halide-expr:
+  (vec-max
+ (load (buffer t299-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+ (load (buffer t301-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+template:
+  #<load-data>
+axioms:
+  '()
+optimized-halide-expr:
+  (vec-max
+ (load (buffer t299-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+ (load (buffer t301-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+optimized-template:
+  #<load-data>
+optimized Halide 0:
+  (uint8_t
+ (ite (bvule (app t301-buf 0) (app t299-buf 0)) (app t299-buf 0) (app t301-buf 0)))
+optimized x86 0:
+  (uint8_t
+ (ite* (⊢ (= 0 idx$130) (app t301-buf 0)) (⊢ (= 1 idx$130) (app t299-buf 0))))
+Ran synthesizer for 86 ms
+(unsat)
+run-x86-synthesizer
+halide-expr:
+  (vec-max
+ (load (buffer t299-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+ (load (buffer t301-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+template:
+  #<load-data>
+axioms:
+  '()
+optimized-halide-expr:
+  (vec-max
+ (load (buffer t299-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+ (load (buffer t301-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+optimized-template:
+  #<load-data>
+optimized Halide 0:
+  (uint8_t
+ (ite (bvule (app t301-buf 0) (app t299-buf 0)) (app t299-buf 0) (app t301-buf 0)))
+optimized x86 0:
+  (uint8_t
+ (ite* (⊢ (= 0 idx$194) (app t301-buf 0)) (⊢ (= 1 idx$194) (app t299-buf 0))))
+Ran synthesizer for 86 ms
+(unsat)
+"Success?"
+#f
+#<void>
+run-x86-synthesizer
+halide-expr:
+  (vec-max
+ (load (buffer t299-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+ (load (buffer t301-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+template:
+  (maximum ... #<load-data> #<load-data>)
+axioms:
+  '(#t #t)
+optimized-halide-expr:
+  (vec-max #<abstr-halide-expr> #<abstr-halide-expr>)
+optimized-template:
+  (maximum ... #<abstr-expr> #<abstr-expr>)
+optimized Halide 0:
+  (uint8_t
+ (ite (bvule (app abstr-vals$259 0) (app abstr-vals$258 0)) (app abstr-vals$258 0) (app abstr-vals$259 0)))
+optimized x86 0:
+  (uint8_t
+ (ite (bvule (app abstr-vals$259 0) (app abstr-vals$258 0)) (app abstr-vals$258 0) (app abstr-vals$259 0)))
+Ran synthesizer for 18 ms
+(model)
+(vec-max #<abstr-halide-expr> #<abstr-halide-expr>)
+(maximum ... #<load-data> #<load-data>)
+Ran bounds analysis for 22 ms
+Ran bounds analysis for 11 ms
+"Extended success?"
+#t
+(maximum ... #<load-data> #<load-data>)
+"Building Expr:"
+(load (buffer t303-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+"Fold templates"
+'()
+here()
+
+"Replace templates"
+'()
+"Success?"
+#f
+#<void>
+run-x86-synthesizer
+halide-expr:
+  (load (buffer t303-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+template:
+  #<load-data>
+axioms:
+  '()
+optimized-halide-expr:
+  (load (buffer t303-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+optimized-template:
+  #<load-data>
+optimized Halide 0:
+  (uint8_t (app t303-buf 0))
+optimized x86 0:
+  (uint8_t (app t303-buf 0))
+Ran synthesizer for 23 ms
+(model
+ [idx$262 0])
+(load (buffer t303-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+#<load-data>
+Ran bounds analysis for 21 ms
+Ran bounds analysis for 14 ms
+"Extended success?"
+#t
+#<load-data>
+"Building Expr:"
+(vec-max
+ (vec-max
+  (load (buffer t299-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+  (load (buffer t301-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (load (buffer t303-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+"Fold templates"
+'(#<load-data> #<load-data> #<load-data>)
+here(#<load-data> #<load-data> #<load-data>)
+
+"Replace templates"
+(list (cast ... #<load-data> 'uint8 #t) (cast ... #<load-data> 'uint8 #t))
+run-x86-synthesizer
+halide-expr:
+  (vec-max
+ (vec-max
+  (load (buffer t299-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+  (load (buffer t301-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (load (buffer t303-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+template:
+  #<load-data>
+axioms:
+  '()
+optimized-halide-expr:
+  (vec-max
+ (vec-max
+  (load (buffer t299-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+  (load (buffer t301-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (load (buffer t303-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+optimized-template:
+  #<load-data>
+optimized Halide 0:
+  (uint8_t
+ (ite (bvule (app t303-buf 0) (ite (bvule (app t301-buf 0) (app t299-buf 0)) (app t299-buf 0) (app t301-buf 0))) (ite (bvule (app t301-buf 0) (app t299-buf 0)) (app t299-buf 0) (app t301-buf 0)) (app t303-buf 0)))
+optimized x86 0:
+  (uint8_t
+ (ite* (⊢ (= 0 idx$327) (app t301-buf 0)) (⊢ (= 1 idx$327) (app t299-buf 0)) (⊢ (= 2 idx$327) (app t303-buf 0))))
+Ran synthesizer for 91 ms
+(unsat)
+run-x86-synthesizer
+halide-expr:
+  (vec-max
+ (vec-max
+  (load (buffer t299-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+  (load (buffer t301-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (load (buffer t303-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+template:
+  #<load-data>
+axioms:
+  '()
+optimized-halide-expr:
+  (vec-max
+ (vec-max
+  (load (buffer t299-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+  (load (buffer t301-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (load (buffer t303-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+optimized-template:
+  #<load-data>
+optimized Halide 0:
+  (uint8_t
+ (ite (bvule (app t303-buf 0) (ite (bvule (app t301-buf 0) (app t299-buf 0)) (app t299-buf 0) (app t301-buf 0))) (ite (bvule (app t301-buf 0) (app t299-buf 0)) (app t299-buf 0) (app t301-buf 0)) (app t303-buf 0)))
+optimized x86 0:
+  (uint8_t
+ (ite* (⊢ (= 0 idx$391) (app t301-buf 0)) (⊢ (= 1 idx$391) (app t299-buf 0)) (⊢ (= 2 idx$391) (app t303-buf 0))))
+Ran synthesizer for 89 ms
+(unsat)
+run-x86-synthesizer
+halide-expr:
+  (vec-max
+ (vec-max
+  (load (buffer t299-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+  (load (buffer t301-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (load (buffer t303-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+template:
+  #<load-data>
+axioms:
+  '()
+optimized-halide-expr:
+  (vec-max
+ (vec-max
+  (load (buffer t299-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+  (load (buffer t301-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (load (buffer t303-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+optimized-template:
+  #<load-data>
+optimized Halide 0:
+  (uint8_t
+ (ite (bvule (app t303-buf 0) (ite (bvule (app t301-buf 0) (app t299-buf 0)) (app t299-buf 0) (app t301-buf 0))) (ite (bvule (app t301-buf 0) (app t299-buf 0)) (app t299-buf 0) (app t301-buf 0)) (app t303-buf 0)))
+optimized x86 0:
+  (uint8_t
+ (ite* (⊢ (= 0 idx$455) (app t301-buf 0)) (⊢ (= 1 idx$455) (app t299-buf 0)) (⊢ (= 2 idx$455) (app t303-buf 0))))
+Ran synthesizer for 87 ms
+(unsat)
+run-x86-synthesizer
+halide-expr:
+  (vec-max
+ (vec-max
+  (load (buffer t299-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+  (load (buffer t301-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (load (buffer t303-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+template:
+  (cast ... #<load-data> 'uint8 #t)
+axioms:
+  '(#t)
+optimized-halide-expr:
+  (vec-max
+ (vec-max
+  #<abstr-halide-expr>
+  (load (buffer t301-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (load (buffer t303-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+optimized-template:
+  (cast ... #<abstr-expr> 'uint8 #t)
+optimized Halide 0:
+  (uint8_t
+ (ite (bvule (app t303-buf 0) (ite (bvule (app t301-buf 0) (app abstr-vals$519 0)) (app abstr-vals$519 0) (app t301-buf 0))) (ite (bvule (app t301-buf 0) (app abstr-vals$519 0)) (app abstr-vals$519 0) (app t301-buf 0)) (app t303-buf 0)))
+optimized x86 0:
+  (uint8_t (app abstr-vals$519 0))
+run-x86-synthesizer
+halide-expr:
+  (vec-max
+ (vec-max
+  (load (buffer t299-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+  (load (buffer t301-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (load (buffer t303-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+template:
+  (cast ... #<load-data> 'uint8 #t)
+axioms:
+  '(#t)
+optimized-halide-expr:
+  (vec-max
+ (vec-max
+  (load (buffer t299-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+  #<abstr-halide-expr>)
+ (load (buffer t303-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+optimized-template:
+  (cast ... #<abstr-expr> 'uint8 #t)
+optimized Halide 0:
+  (uint8_t
+ (ite (bvule (app t303-buf 0) (ite (bvule (app abstr-vals$520 0) (app t299-buf 0)) (app t299-buf 0) (app abstr-vals$520 0))) (ite (bvule (app abstr-vals$520 0) (app t299-buf 0)) (app t299-buf 0) (app abstr-vals$520 0)) (app t303-buf 0)))
+optimized x86 0:
+  (uint8_t (app abstr-vals$520 0))
+"Success?"
+#f
+#<void>
+run-x86-synthesizer
+halide-expr:
+  (vec-max
+ (vec-max
+  (load (buffer t299-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+  (load (buffer t301-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (load (buffer t303-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+template:
+  (maximum ... (maximum ... #<load-data> #<load-data>) #<load-data>)
+axioms:
+  '(#t #t)
+optimized-halide-expr:
+  (vec-max #<abstr-halide-expr> #<abstr-halide-expr>)
+optimized-template:
+  (maximum ... #<abstr-expr> #<abstr-expr>)
+optimized Halide 0:
+  (uint8_t
+ (ite (bvule (app abstr-vals$522 0) (app abstr-vals$521 0)) (app abstr-vals$521 0) (app abstr-vals$522 0)))
+optimized x86 0:
+  (uint8_t
+ (ite (bvule (app abstr-vals$522 0) (app abstr-vals$521 0)) (app abstr-vals$521 0) (app abstr-vals$522 0)))
+Ran synthesizer for 16 ms
+(model)
+(vec-max #<abstr-halide-expr> #<abstr-halide-expr>)
+(maximum ... (maximum ... #<load-data> #<load-data>) #<load-data>)
+Ran bounds analysis for 23 ms
+Ran bounds analysis for 13 ms
+"Extended success?"
+#t
+(maximum ... (maximum ... #<load-data> #<load-data>) #<load-data>)
+"Building Expr:"
+(load (buffer t304-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+"Fold templates"
+'()
+here()
+
+"Replace templates"
+'()
+"Success?"
+#f
+#<void>
+run-x86-synthesizer
+halide-expr:
+  (load (buffer t304-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+template:
+  #<load-data>
+axioms:
+  '()
+optimized-halide-expr:
+  (load (buffer t304-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+optimized-template:
+  #<load-data>
+optimized Halide 0:
+  (uint8_t (app t304-buf 0))
+optimized x86 0:
+  (uint8_t (app t304-buf 0))
+Ran synthesizer for 22 ms
+(model
+ [idx$525 0])
+(load (buffer t304-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+#<load-data>
+Ran bounds analysis for 21 ms
+Ran bounds analysis for 13 ms
+"Extended success?"
+#t
+#<load-data>
+"Building Expr:"
+(load (buffer t305-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+"Fold templates"
+'()
+here()
+
+"Replace templates"
+'()
+"Success?"
+#f
+#<void>
+run-x86-synthesizer
+halide-expr:
+  (load (buffer t305-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+template:
+  #<load-data>
+axioms:
+  '()
+optimized-halide-expr:
+  (load (buffer t305-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+optimized-template:
+  #<load-data>
+optimized Halide 0:
+  (uint8_t (app t305-buf 0))
+optimized x86 0:
+  (uint8_t (app t305-buf 0))
+Ran synthesizer for 21 ms
+(model
+ [idx$590 0])
+(load (buffer t305-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+#<load-data>
+Ran bounds analysis for 22 ms
+Ran bounds analysis for 13 ms
+"Extended success?"
+#t
+#<load-data>
+"Building Expr:"
+(vec-max
+ (load (buffer t304-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+ (load (buffer t305-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+"Fold templates"
+'(#<load-data> #<load-data>)
+here(#<load-data> #<load-data>)
+
+"Replace templates"
+'()
+run-x86-synthesizer
+halide-expr:
+  (vec-max
+ (load (buffer t304-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+ (load (buffer t305-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+template:
+  #<load-data>
+axioms:
+  '()
+optimized-halide-expr:
+  (vec-max
+ (load (buffer t304-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+ (load (buffer t305-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+optimized-template:
+  #<load-data>
+optimized Halide 0:
+  (uint8_t
+ (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0)))
+optimized x86 0:
+  (uint8_t
+ (ite* (⊢ (= 0 idx$655) (app t304-buf 0)) (⊢ (= 1 idx$655) (app t305-buf 0))))
+Ran synthesizer for 78 ms
+(unsat)
+run-x86-synthesizer
+halide-expr:
+  (vec-max
+ (load (buffer t304-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+ (load (buffer t305-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+template:
+  #<load-data>
+axioms:
+  '()
+optimized-halide-expr:
+  (vec-max
+ (load (buffer t304-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+ (load (buffer t305-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+optimized-template:
+  #<load-data>
+optimized Halide 0:
+  (uint8_t
+ (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0)))
+optimized x86 0:
+  (uint8_t
+ (ite* (⊢ (= 0 idx$719) (app t304-buf 0)) (⊢ (= 1 idx$719) (app t305-buf 0))))
+Ran synthesizer for 86 ms
+(unsat)
+"Success?"
+#f
+#<void>
+run-x86-synthesizer
+halide-expr:
+  (vec-max
+ (load (buffer t304-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+ (load (buffer t305-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+template:
+  (maximum ... #<load-data> #<load-data>)
+axioms:
+  '(#t #t)
+optimized-halide-expr:
+  (vec-max #<abstr-halide-expr> #<abstr-halide-expr>)
+optimized-template:
+  (maximum ... #<abstr-expr> #<abstr-expr>)
+optimized Halide 0:
+  (uint8_t
+ (ite (bvule (app abstr-vals$784 0) (app abstr-vals$783 0)) (app abstr-vals$783 0) (app abstr-vals$784 0)))
+optimized x86 0:
+  (uint8_t
+ (ite (bvule (app abstr-vals$784 0) (app abstr-vals$783 0)) (app abstr-vals$783 0) (app abstr-vals$784 0)))
+Ran synthesizer for 19 ms
+(model)
+(vec-max #<abstr-halide-expr> #<abstr-halide-expr>)
+(maximum ... #<load-data> #<load-data>)
+Ran bounds analysis for 23 ms
+Ran bounds analysis for 11 ms
+"Extended success?"
+#t
+(maximum ... #<load-data> #<load-data>)
+"Building Expr:"
+(load (buffer t306-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+"Fold templates"
+'()
+here()
+
+"Replace templates"
+'()
+"Success?"
+#f
+#<void>
+run-x86-synthesizer
+halide-expr:
+  (load (buffer t306-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+template:
+  #<load-data>
+axioms:
+  '()
+optimized-halide-expr:
+  (load (buffer t306-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+optimized-template:
+  #<load-data>
+optimized Halide 0:
+  (uint8_t (app t306-buf 0))
+optimized x86 0:
+  (uint8_t (app t306-buf 0))
+Ran synthesizer for 22 ms
+(model
+ [idx$787 0])
+(load (buffer t306-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+#<load-data>
+Ran bounds analysis for 22 ms
+Ran bounds analysis for 13 ms
+"Extended success?"
+#t
+#<load-data>
+"Building Expr:"
+(vec-max
+ (vec-max
+  (load (buffer t304-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+  (load (buffer t305-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (load (buffer t306-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+"Fold templates"
+'(#<load-data> #<load-data> #<load-data>)
+here(#<load-data> #<load-data> #<load-data>)
+
+"Replace templates"
+(list (cast ... #<load-data> 'uint8 #t) (cast ... #<load-data> 'uint8 #t))
+run-x86-synthesizer
+halide-expr:
+  (vec-max
+ (vec-max
+  (load (buffer t304-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+  (load (buffer t305-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (load (buffer t306-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+template:
+  #<load-data>
+axioms:
+  '()
+optimized-halide-expr:
+  (vec-max
+ (vec-max
+  (load (buffer t304-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+  (load (buffer t305-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (load (buffer t306-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+optimized-template:
+  #<load-data>
+optimized Halide 0:
+  (uint8_t
+ (ite (bvule (app t306-buf 0) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0))) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0)) (app t306-buf 0)))
+optimized x86 0:
+  (uint8_t
+ (ite* (⊢ (= 0 idx$852) (app t304-buf 0)) (⊢ (= 1 idx$852) (app t306-buf 0)) (⊢ (= 2 idx$852) (app t305-buf 0))))
+Ran synthesizer for 92 ms
+(unsat)
+run-x86-synthesizer
+halide-expr:
+  (vec-max
+ (vec-max
+  (load (buffer t304-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+  (load (buffer t305-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (load (buffer t306-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+template:
+  #<load-data>
+axioms:
+  '()
+optimized-halide-expr:
+  (vec-max
+ (vec-max
+  (load (buffer t304-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+  (load (buffer t305-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (load (buffer t306-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+optimized-template:
+  #<load-data>
+optimized Halide 0:
+  (uint8_t
+ (ite (bvule (app t306-buf 0) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0))) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0)) (app t306-buf 0)))
+optimized x86 0:
+  (uint8_t
+ (ite* (⊢ (= 0 idx$916) (app t304-buf 0)) (⊢ (= 1 idx$916) (app t306-buf 0)) (⊢ (= 2 idx$916) (app t305-buf 0))))
+Ran synthesizer for 89 ms
+(unsat)
+run-x86-synthesizer
+halide-expr:
+  (vec-max
+ (vec-max
+  (load (buffer t304-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+  (load (buffer t305-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (load (buffer t306-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+template:
+  #<load-data>
+axioms:
+  '()
+optimized-halide-expr:
+  (vec-max
+ (vec-max
+  (load (buffer t304-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+  (load (buffer t305-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (load (buffer t306-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+optimized-template:
+  #<load-data>
+optimized Halide 0:
+  (uint8_t
+ (ite (bvule (app t306-buf 0) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0))) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0)) (app t306-buf 0)))
+optimized x86 0:
+  (uint8_t
+ (ite* (⊢ (= 0 idx$980) (app t304-buf 0)) (⊢ (= 1 idx$980) (app t306-buf 0)) (⊢ (= 2 idx$980) (app t305-buf 0))))
+Ran synthesizer for 81 ms
+(unsat)
+run-x86-synthesizer
+halide-expr:
+  (vec-max
+ (vec-max
+  (load (buffer t304-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+  (load (buffer t305-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (load (buffer t306-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+template:
+  (cast ... #<load-data> 'uint8 #t)
+axioms:
+  '(#t)
+optimized-halide-expr:
+  (vec-max
+ (vec-max
+  #<abstr-halide-expr>
+  (load (buffer t305-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (load (buffer t306-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+optimized-template:
+  (cast ... #<abstr-expr> 'uint8 #t)
+optimized Halide 0:
+  (uint8_t
+ (ite (bvule (app t306-buf 0) (ite (bvule (app t305-buf 0) (app abstr-vals$1044 0)) (app abstr-vals$1044 0) (app t305-buf 0))) (ite (bvule (app t305-buf 0) (app abstr-vals$1044 0)) (app abstr-vals$1044 0) (app t305-buf 0)) (app t306-buf 0)))
+optimized x86 0:
+  (uint8_t (app abstr-vals$1044 0))
+run-x86-synthesizer
+halide-expr:
+  (vec-max
+ (vec-max
+  (load (buffer t304-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+  (load (buffer t305-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (load (buffer t306-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+template:
+  (cast ... #<load-data> 'uint8 #t)
+axioms:
+  '(#t)
+optimized-halide-expr:
+  (vec-max
+ (vec-max
+  (load (buffer t304-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+  #<abstr-halide-expr>)
+ (load (buffer t306-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+optimized-template:
+  (cast ... #<abstr-expr> 'uint8 #t)
+optimized Halide 0:
+  (uint8_t
+ (ite (bvule (app t306-buf 0) (ite (bvule (app abstr-vals$1045 0) (app t304-buf 0)) (app t304-buf 0) (app abstr-vals$1045 0))) (ite (bvule (app abstr-vals$1045 0) (app t304-buf 0)) (app t304-buf 0) (app abstr-vals$1045 0)) (app t306-buf 0)))
+optimized x86 0:
+  (uint8_t (app abstr-vals$1045 0))
+"Success?"
+#f
+#<void>
+run-x86-synthesizer
+halide-expr:
+  (vec-max
+ (vec-max
+  (load (buffer t304-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+  (load (buffer t305-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (load (buffer t306-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+template:
+  (maximum ... (maximum ... #<load-data> #<load-data>) #<load-data>)
+axioms:
+  '(#t #t)
+optimized-halide-expr:
+  (vec-max #<abstr-halide-expr> #<abstr-halide-expr>)
+optimized-template:
+  (maximum ... #<abstr-expr> #<abstr-expr>)
+optimized Halide 0:
+  (uint8_t
+ (ite (bvule (app abstr-vals$1047 0) (app abstr-vals$1046 0)) (app abstr-vals$1046 0) (app abstr-vals$1047 0)))
+optimized x86 0:
+  (uint8_t
+ (ite (bvule (app abstr-vals$1047 0) (app abstr-vals$1046 0)) (app abstr-vals$1046 0) (app abstr-vals$1047 0)))
+Ran synthesizer for 18 ms
+(model)
+(vec-max #<abstr-halide-expr> #<abstr-halide-expr>)
+(maximum ... (maximum ... #<load-data> #<load-data>) #<load-data>)
+Ran bounds analysis for 22 ms
+Ran bounds analysis for 12 ms
+"Extended success?"
+#t
+(maximum ... (maximum ... #<load-data> #<load-data>) #<load-data>)
+"Building Expr:"
+(load (buffer t307-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+"Fold templates"
+'()
+here()
+
+"Replace templates"
+'()
+"Success?"
+#f
+#<void>
+run-x86-synthesizer
+halide-expr:
+  (load (buffer t307-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+template:
+  #<load-data>
+axioms:
+  '()
+optimized-halide-expr:
+  (load (buffer t307-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+optimized-template:
+  #<load-data>
+optimized Halide 0:
+  (uint8_t (app t307-buf 0))
+optimized x86 0:
+  (uint8_t (app t307-buf 0))
+Ran synthesizer for 20 ms
+(model
+ [idx$1050 0])
+(load (buffer t307-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+#<load-data>
+Ran bounds analysis for 20 ms
+Ran bounds analysis for 13 ms
+"Extended success?"
+#t
+#<load-data>
+"Building Expr:"
+(load (buffer t308-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+"Fold templates"
+'()
+here()
+
+"Replace templates"
+'()
+"Success?"
+#f
+#<void>
+run-x86-synthesizer
+halide-expr:
+  (load (buffer t308-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+template:
+  #<load-data>
+axioms:
+  '()
+optimized-halide-expr:
+  (load (buffer t308-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+optimized-template:
+  #<load-data>
+optimized Halide 0:
+  (uint8_t (app t308-buf 0))
+optimized x86 0:
+  (uint8_t (app t308-buf 0))
+Ran synthesizer for 23 ms
+(model
+ [idx$1115 0])
+(load (buffer t308-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+#<load-data>
+Ran bounds analysis for 21 ms
+Ran bounds analysis for 13 ms
+"Extended success?"
+#t
+#<load-data>
+"Building Expr:"
+(vec-max
+ (load (buffer t307-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+ (load (buffer t308-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+"Fold templates"
+'(#<load-data> #<load-data>)
+here(#<load-data> #<load-data>)
+
+"Replace templates"
+'()
+run-x86-synthesizer
+halide-expr:
+  (vec-max
+ (load (buffer t307-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+ (load (buffer t308-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+template:
+  #<load-data>
+axioms:
+  '()
+optimized-halide-expr:
+  (vec-max
+ (load (buffer t307-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+ (load (buffer t308-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+optimized-template:
+  #<load-data>
+optimized Halide 0:
+  (uint8_t
+ (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0)))
+optimized x86 0:
+  (uint8_t
+ (ite* (⊢ (= 0 idx$1180) (app t307-buf 0)) (⊢ (= 1 idx$1180) (app t308-buf 0))))
+Ran synthesizer for 83 ms
+(unsat)
+run-x86-synthesizer
+halide-expr:
+  (vec-max
+ (load (buffer t307-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+ (load (buffer t308-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+template:
+  #<load-data>
+axioms:
+  '()
+optimized-halide-expr:
+  (vec-max
+ (load (buffer t307-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+ (load (buffer t308-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+optimized-template:
+  #<load-data>
+optimized Halide 0:
+  (uint8_t
+ (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0)))
+optimized x86 0:
+  (uint8_t
+ (ite* (⊢ (= 0 idx$1244) (app t307-buf 0)) (⊢ (= 1 idx$1244) (app t308-buf 0))))
+Ran synthesizer for 74 ms
+(unsat)
+"Success?"
+#f
+#<void>
+run-x86-synthesizer
+halide-expr:
+  (vec-max
+ (load (buffer t307-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+ (load (buffer t308-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+template:
+  (maximum ... #<load-data> #<load-data>)
+axioms:
+  '(#t #t)
+optimized-halide-expr:
+  (vec-max #<abstr-halide-expr> #<abstr-halide-expr>)
+optimized-template:
+  (maximum ... #<abstr-expr> #<abstr-expr>)
+optimized Halide 0:
+  (uint8_t
+ (ite (bvule (app abstr-vals$1309 0) (app abstr-vals$1308 0)) (app abstr-vals$1308 0) (app abstr-vals$1309 0)))
+optimized x86 0:
+  (uint8_t
+ (ite (bvule (app abstr-vals$1309 0) (app abstr-vals$1308 0)) (app abstr-vals$1308 0) (app abstr-vals$1309 0)))
+Ran synthesizer for 15 ms
+(model)
+(vec-max #<abstr-halide-expr> #<abstr-halide-expr>)
+(maximum ... #<load-data> #<load-data>)
+Ran bounds analysis for 22 ms
+Ran bounds analysis for 11 ms
+"Extended success?"
+#t
+(maximum ... #<load-data> #<load-data>)
+"Building Expr:"
+(load (buffer t309-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+"Fold templates"
+'()
+here()
+
+"Replace templates"
+'()
+"Success?"
+#f
+#<void>
+run-x86-synthesizer
+halide-expr:
+  (load (buffer t309-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+template:
+  #<load-data>
+axioms:
+  '()
+optimized-halide-expr:
+  (load (buffer t309-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+optimized-template:
+  #<load-data>
+optimized Halide 0:
+  (uint8_t (app t309-buf 0))
+optimized x86 0:
+  (uint8_t (app t309-buf 0))
+Ran synthesizer for 21 ms
+(model
+ [idx$1312 0])
+(load (buffer t309-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+#<load-data>
+Ran bounds analysis for 21 ms
+Ran bounds analysis for 13 ms
+"Extended success?"
+#t
+#<load-data>
+"Building Expr:"
+(vec-max
+ (vec-max
+  (load (buffer t307-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+  (load (buffer t308-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (load (buffer t309-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+"Fold templates"
+'(#<load-data> #<load-data> #<load-data>)
+here(#<load-data> #<load-data> #<load-data>)
+
+"Replace templates"
+(list (cast ... #<load-data> 'uint8 #t) (cast ... #<load-data> 'uint8 #t))
+run-x86-synthesizer
+halide-expr:
+  (vec-max
+ (vec-max
+  (load (buffer t307-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+  (load (buffer t308-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (load (buffer t309-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+template:
+  #<load-data>
+axioms:
+  '()
+optimized-halide-expr:
+  (vec-max
+ (vec-max
+  (load (buffer t307-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+  (load (buffer t308-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (load (buffer t309-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+optimized-template:
+  #<load-data>
+optimized Halide 0:
+  (uint8_t
+ (ite (bvule (app t309-buf 0) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0))) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0)) (app t309-buf 0)))
+optimized x86 0:
+  (uint8_t
+ (ite* (⊢ (= 0 idx$1377) (app t307-buf 0)) (⊢ (= 1 idx$1377) (app t309-buf 0)) (⊢ (= 2 idx$1377) (app t308-buf 0))))
+Ran synthesizer for 80 ms
+(unsat)
+run-x86-synthesizer
+halide-expr:
+  (vec-max
+ (vec-max
+  (load (buffer t307-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+  (load (buffer t308-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (load (buffer t309-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+template:
+  #<load-data>
+axioms:
+  '()
+optimized-halide-expr:
+  (vec-max
+ (vec-max
+  (load (buffer t307-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+  (load (buffer t308-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (load (buffer t309-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+optimized-template:
+  #<load-data>
+optimized Halide 0:
+  (uint8_t
+ (ite (bvule (app t309-buf 0) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0))) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0)) (app t309-buf 0)))
+optimized x86 0:
+  (uint8_t
+ (ite* (⊢ (= 0 idx$1441) (app t307-buf 0)) (⊢ (= 1 idx$1441) (app t309-buf 0)) (⊢ (= 2 idx$1441) (app t308-buf 0))))
+Ran synthesizer for 78 ms
+(unsat)
+run-x86-synthesizer
+halide-expr:
+  (vec-max
+ (vec-max
+  (load (buffer t307-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+  (load (buffer t308-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (load (buffer t309-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+template:
+  #<load-data>
+axioms:
+  '()
+optimized-halide-expr:
+  (vec-max
+ (vec-max
+  (load (buffer t307-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+  (load (buffer t308-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (load (buffer t309-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+optimized-template:
+  #<load-data>
+optimized Halide 0:
+  (uint8_t
+ (ite (bvule (app t309-buf 0) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0))) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0)) (app t309-buf 0)))
+optimized x86 0:
+  (uint8_t
+ (ite* (⊢ (= 0 idx$1505) (app t307-buf 0)) (⊢ (= 1 idx$1505) (app t309-buf 0)) (⊢ (= 2 idx$1505) (app t308-buf 0))))
+Ran synthesizer for 82 ms
+(unsat)
+run-x86-synthesizer
+halide-expr:
+  (vec-max
+ (vec-max
+  (load (buffer t307-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+  (load (buffer t308-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (load (buffer t309-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+template:
+  (cast ... #<load-data> 'uint8 #t)
+axioms:
+  '(#t)
+optimized-halide-expr:
+  (vec-max
+ (vec-max
+  #<abstr-halide-expr>
+  (load (buffer t308-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (load (buffer t309-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+optimized-template:
+  (cast ... #<abstr-expr> 'uint8 #t)
+optimized Halide 0:
+  (uint8_t
+ (ite (bvule (app t309-buf 0) (ite (bvule (app t308-buf 0) (app abstr-vals$1569 0)) (app abstr-vals$1569 0) (app t308-buf 0))) (ite (bvule (app t308-buf 0) (app abstr-vals$1569 0)) (app abstr-vals$1569 0) (app t308-buf 0)) (app t309-buf 0)))
+optimized x86 0:
+  (uint8_t (app abstr-vals$1569 0))
+run-x86-synthesizer
+halide-expr:
+  (vec-max
+ (vec-max
+  (load (buffer t307-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+  (load (buffer t308-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (load (buffer t309-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+template:
+  (cast ... #<load-data> 'uint8 #t)
+axioms:
+  '(#t)
+optimized-halide-expr:
+  (vec-max
+ (vec-max
+  (load (buffer t307-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+  #<abstr-halide-expr>)
+ (load (buffer t309-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+optimized-template:
+  (cast ... #<abstr-expr> 'uint8 #t)
+optimized Halide 0:
+  (uint8_t
+ (ite (bvule (app t309-buf 0) (ite (bvule (app abstr-vals$1570 0) (app t307-buf 0)) (app t307-buf 0) (app abstr-vals$1570 0))) (ite (bvule (app abstr-vals$1570 0) (app t307-buf 0)) (app t307-buf 0) (app abstr-vals$1570 0)) (app t309-buf 0)))
+optimized x86 0:
+  (uint8_t (app abstr-vals$1570 0))
+"Success?"
+#f
+#<void>
+run-x86-synthesizer
+halide-expr:
+  (vec-max
+ (vec-max
+  (load (buffer t307-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+  (load (buffer t308-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (load (buffer t309-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+template:
+  (maximum ... (maximum ... #<load-data> #<load-data>) #<load-data>)
+axioms:
+  '(#t #t)
+optimized-halide-expr:
+  (vec-max #<abstr-halide-expr> #<abstr-halide-expr>)
+optimized-template:
+  (maximum ... #<abstr-expr> #<abstr-expr>)
+optimized Halide 0:
+  (uint8_t
+ (ite (bvule (app abstr-vals$1572 0) (app abstr-vals$1571 0)) (app abstr-vals$1571 0) (app abstr-vals$1572 0)))
+optimized x86 0:
+  (uint8_t
+ (ite (bvule (app abstr-vals$1572 0) (app abstr-vals$1571 0)) (app abstr-vals$1571 0) (app abstr-vals$1572 0)))
+Ran synthesizer for 15 ms
+(model)
+(vec-max #<abstr-halide-expr> #<abstr-halide-expr>)
+(maximum ... (maximum ... #<load-data> #<load-data>) #<load-data>)
+Ran bounds analysis for 20 ms
+Ran bounds analysis for 10 ms
+"Extended success?"
+#t
+(maximum ... (maximum ... #<load-data> #<load-data>) #<load-data>)
+"Building Expr:"
+(vec-min
+ (vec-max
+  (vec-max
+   (load (buffer t304-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   (load (buffer t305-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (load (buffer t306-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (vec-max
+  (vec-max
+   (load (buffer t307-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   (load (buffer t308-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (load (buffer t309-buf 'uint8) (ramp 0 1 16) (aligned 0 0))))
+"Fold templates"
+'(#<load-data>
+  #<load-data>
+  #<load-data>
+  #<load-data>
+  #<load-data>
+  #<load-data>)
+here(#<load-data> #<load-data> #<load-data> #<load-data> #<load-data> #<load-data>)
+
+"Replace templates"
+(list
+ (cast ... #<load-data> 'uint8 #t)
+ (cast ... #<load-data> 'uint8 #t)
+ (cast ... (maximum ... #<load-data> #<load-data>) 'uint8 #t)
+ (cast ... #<load-data> 'uint8 #t)
+ (cast ... #<load-data> 'uint8 #t)
+ (cast ... #<load-data> 'uint8 #t)
+ (cast ... (maximum ... #<load-data> #<load-data>) 'uint8 #t)
+ (cast ... #<load-data> 'uint8 #t))
+run-x86-synthesizer
+halide-expr:
+  (vec-min
+ (vec-max
+  (vec-max
+   (load (buffer t304-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   (load (buffer t305-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (load (buffer t306-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (vec-max
+  (vec-max
+   (load (buffer t307-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   (load (buffer t308-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (load (buffer t309-buf 'uint8) (ramp 0 1 16) (aligned 0 0))))
+template:
+  #<load-data>
+axioms:
+  '()
+optimized-halide-expr:
+  (vec-min
+ (vec-max
+  (vec-max
+   (load (buffer t304-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   (load (buffer t305-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (load (buffer t306-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (vec-max
+  (vec-max
+   (load (buffer t307-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   (load (buffer t308-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (load (buffer t309-buf 'uint8) (ramp 0 1 16) (aligned 0 0))))
+optimized-template:
+  #<load-data>
+optimized Halide 0:
+  (uint8_t
+ (ite (bvule (ite (bvule (app t306-buf 0) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0))) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0)) (app t306-buf 0)) (ite (bvule (app t309-buf 0) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0))) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0)) (app t309-buf 0))) (ite (bvule (app t306-buf 0) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0))) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0)) (app t306-buf 0)) (ite (bvule (app t309-buf 0) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0))) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0)) (app t309-buf 0))))
+optimized x86 0:
+  (uint8_t
+ (ite* (⊢ (= 0 idx$1575) (app t304-buf 0)) (⊢ (= 1 idx$1575) (app t306-buf 0)) (⊢ (= 2 idx$1575) (app t307-buf 0)) (⊢ (= 3 idx$1575) (app t305-buf 0)) (⊢ (= 4 idx$1575) (app t309-buf 0)) (⊢ (= 5 idx$1575) (app t308-buf 0))))
+Ran synthesizer for 151 ms
+(unsat)
+run-x86-synthesizer
+halide-expr:
+  (vec-min
+ (vec-max
+  (vec-max
+   (load (buffer t304-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   (load (buffer t305-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (load (buffer t306-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (vec-max
+  (vec-max
+   (load (buffer t307-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   (load (buffer t308-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (load (buffer t309-buf 'uint8) (ramp 0 1 16) (aligned 0 0))))
+template:
+  #<load-data>
+axioms:
+  '()
+optimized-halide-expr:
+  (vec-min
+ (vec-max
+  (vec-max
+   (load (buffer t304-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   (load (buffer t305-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (load (buffer t306-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (vec-max
+  (vec-max
+   (load (buffer t307-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   (load (buffer t308-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (load (buffer t309-buf 'uint8) (ramp 0 1 16) (aligned 0 0))))
+optimized-template:
+  #<load-data>
+optimized Halide 0:
+  (uint8_t
+ (ite (bvule (ite (bvule (app t306-buf 0) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0))) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0)) (app t306-buf 0)) (ite (bvule (app t309-buf 0) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0))) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0)) (app t309-buf 0))) (ite (bvule (app t306-buf 0) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0))) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0)) (app t306-buf 0)) (ite (bvule (app t309-buf 0) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0))) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0)) (app t309-buf 0))))
+optimized x86 0:
+  (uint8_t
+ (ite* (⊢ (= 0 idx$1639) (app t304-buf 0)) (⊢ (= 1 idx$1639) (app t306-buf 0)) (⊢ (= 2 idx$1639) (app t307-buf 0)) (⊢ (= 3 idx$1639) (app t305-buf 0)) (⊢ (= 4 idx$1639) (app t309-buf 0)) (⊢ (= 5 idx$1639) (app t308-buf 0))))
+Ran synthesizer for 141 ms
+(unsat)
+run-x86-synthesizer
+halide-expr:
+  (vec-min
+ (vec-max
+  (vec-max
+   (load (buffer t304-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   (load (buffer t305-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (load (buffer t306-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (vec-max
+  (vec-max
+   (load (buffer t307-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   (load (buffer t308-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (load (buffer t309-buf 'uint8) (ramp 0 1 16) (aligned 0 0))))
+template:
+  #<load-data>
+axioms:
+  '()
+optimized-halide-expr:
+  (vec-min
+ (vec-max
+  (vec-max
+   (load (buffer t304-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   (load (buffer t305-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (load (buffer t306-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (vec-max
+  (vec-max
+   (load (buffer t307-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   (load (buffer t308-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (load (buffer t309-buf 'uint8) (ramp 0 1 16) (aligned 0 0))))
+optimized-template:
+  #<load-data>
+optimized Halide 0:
+  (uint8_t
+ (ite (bvule (ite (bvule (app t306-buf 0) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0))) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0)) (app t306-buf 0)) (ite (bvule (app t309-buf 0) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0))) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0)) (app t309-buf 0))) (ite (bvule (app t306-buf 0) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0))) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0)) (app t306-buf 0)) (ite (bvule (app t309-buf 0) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0))) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0)) (app t309-buf 0))))
+optimized x86 0:
+  (uint8_t
+ (ite* (⊢ (= 0 idx$1703) (app t304-buf 0)) (⊢ (= 1 idx$1703) (app t306-buf 0)) (⊢ (= 2 idx$1703) (app t307-buf 0)) (⊢ (= 3 idx$1703) (app t305-buf 0)) (⊢ (= 4 idx$1703) (app t309-buf 0)) (⊢ (= 5 idx$1703) (app t308-buf 0))))
+Ran synthesizer for 142 ms
+(unsat)
+run-x86-synthesizer
+halide-expr:
+  (vec-min
+ (vec-max
+  (vec-max
+   (load (buffer t304-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   (load (buffer t305-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (load (buffer t306-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (vec-max
+  (vec-max
+   (load (buffer t307-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   (load (buffer t308-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (load (buffer t309-buf 'uint8) (ramp 0 1 16) (aligned 0 0))))
+template:
+  #<load-data>
+axioms:
+  '()
+optimized-halide-expr:
+  (vec-min
+ (vec-max
+  (vec-max
+   (load (buffer t304-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   (load (buffer t305-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (load (buffer t306-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (vec-max
+  (vec-max
+   (load (buffer t307-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   (load (buffer t308-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (load (buffer t309-buf 'uint8) (ramp 0 1 16) (aligned 0 0))))
+optimized-template:
+  #<load-data>
+optimized Halide 0:
+  (uint8_t
+ (ite (bvule (ite (bvule (app t306-buf 0) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0))) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0)) (app t306-buf 0)) (ite (bvule (app t309-buf 0) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0))) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0)) (app t309-buf 0))) (ite (bvule (app t306-buf 0) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0))) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0)) (app t306-buf 0)) (ite (bvule (app t309-buf 0) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0))) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0)) (app t309-buf 0))))
+optimized x86 0:
+  (uint8_t
+ (ite* (⊢ (= 0 idx$1767) (app t304-buf 0)) (⊢ (= 1 idx$1767) (app t306-buf 0)) (⊢ (= 2 idx$1767) (app t307-buf 0)) (⊢ (= 3 idx$1767) (app t305-buf 0)) (⊢ (= 4 idx$1767) (app t309-buf 0)) (⊢ (= 5 idx$1767) (app t308-buf 0))))
+Ran synthesizer for 141 ms
+(unsat)
+run-x86-synthesizer
+halide-expr:
+  (vec-min
+ (vec-max
+  (vec-max
+   (load (buffer t304-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   (load (buffer t305-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (load (buffer t306-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (vec-max
+  (vec-max
+   (load (buffer t307-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   (load (buffer t308-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (load (buffer t309-buf 'uint8) (ramp 0 1 16) (aligned 0 0))))
+template:
+  #<load-data>
+axioms:
+  '()
+optimized-halide-expr:
+  (vec-min
+ (vec-max
+  (vec-max
+   (load (buffer t304-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   (load (buffer t305-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (load (buffer t306-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (vec-max
+  (vec-max
+   (load (buffer t307-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   (load (buffer t308-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (load (buffer t309-buf 'uint8) (ramp 0 1 16) (aligned 0 0))))
+optimized-template:
+  #<load-data>
+optimized Halide 0:
+  (uint8_t
+ (ite (bvule (ite (bvule (app t306-buf 0) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0))) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0)) (app t306-buf 0)) (ite (bvule (app t309-buf 0) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0))) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0)) (app t309-buf 0))) (ite (bvule (app t306-buf 0) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0))) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0)) (app t306-buf 0)) (ite (bvule (app t309-buf 0) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0))) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0)) (app t309-buf 0))))
+optimized x86 0:
+  (uint8_t
+ (ite* (⊢ (= 0 idx$1831) (app t304-buf 0)) (⊢ (= 1 idx$1831) (app t306-buf 0)) (⊢ (= 2 idx$1831) (app t307-buf 0)) (⊢ (= 3 idx$1831) (app t305-buf 0)) (⊢ (= 4 idx$1831) (app t309-buf 0)) (⊢ (= 5 idx$1831) (app t308-buf 0))))
+Ran synthesizer for 139 ms
+(unsat)
+run-x86-synthesizer
+halide-expr:
+  (vec-min
+ (vec-max
+  (vec-max
+   (load (buffer t304-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   (load (buffer t305-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (load (buffer t306-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (vec-max
+  (vec-max
+   (load (buffer t307-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   (load (buffer t308-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (load (buffer t309-buf 'uint8) (ramp 0 1 16) (aligned 0 0))))
+template:
+  #<load-data>
+axioms:
+  '()
+optimized-halide-expr:
+  (vec-min
+ (vec-max
+  (vec-max
+   (load (buffer t304-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   (load (buffer t305-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (load (buffer t306-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (vec-max
+  (vec-max
+   (load (buffer t307-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   (load (buffer t308-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (load (buffer t309-buf 'uint8) (ramp 0 1 16) (aligned 0 0))))
+optimized-template:
+  #<load-data>
+optimized Halide 0:
+  (uint8_t
+ (ite (bvule (ite (bvule (app t306-buf 0) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0))) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0)) (app t306-buf 0)) (ite (bvule (app t309-buf 0) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0))) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0)) (app t309-buf 0))) (ite (bvule (app t306-buf 0) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0))) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0)) (app t306-buf 0)) (ite (bvule (app t309-buf 0) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0))) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0)) (app t309-buf 0))))
+optimized x86 0:
+  (uint8_t
+ (ite* (⊢ (= 0 idx$1895) (app t304-buf 0)) (⊢ (= 1 idx$1895) (app t306-buf 0)) (⊢ (= 2 idx$1895) (app t307-buf 0)) (⊢ (= 3 idx$1895) (app t305-buf 0)) (⊢ (= 4 idx$1895) (app t309-buf 0)) (⊢ (= 5 idx$1895) (app t308-buf 0))))
+Ran synthesizer for 144 ms
+(unsat)
+run-x86-synthesizer
+halide-expr:
+  (vec-min
+ (vec-max
+  (vec-max
+   (load (buffer t304-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   (load (buffer t305-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (load (buffer t306-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (vec-max
+  (vec-max
+   (load (buffer t307-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   (load (buffer t308-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (load (buffer t309-buf 'uint8) (ramp 0 1 16) (aligned 0 0))))
+template:
+  (cast ... #<load-data> 'uint8 #t)
+axioms:
+  '(#t)
+optimized-halide-expr:
+  (vec-min
+ (vec-max
+  (vec-max
+   #<abstr-halide-expr>
+   (load (buffer t305-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (load (buffer t306-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (vec-max
+  (vec-max
+   (load (buffer t307-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   (load (buffer t308-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (load (buffer t309-buf 'uint8) (ramp 0 1 16) (aligned 0 0))))
+optimized-template:
+  (cast ... #<abstr-expr> 'uint8 #t)
+optimized Halide 0:
+  (uint8_t
+ (ite (bvule (ite (bvule (app t306-buf 0) (ite (bvule (app t305-buf 0) (app abstr-vals$1959 0)) (app abstr-vals$1959 0) (app t305-buf 0))) (ite (bvule (app t305-buf 0) (app abstr-vals$1959 0)) (app abstr-vals$1959 0) (app t305-buf 0)) (app t306-buf 0)) (ite (bvule (app t309-buf 0) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0))) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0)) (app t309-buf 0))) (ite (bvule (app t306-buf 0) (ite (bvule (app t305-buf 0) (app abstr-vals$1959 0)) (app abstr-vals$1959 0) (app t305-buf 0))) (ite (bvule (app t305-buf 0) (app abstr-vals$1959 0)) (app abstr-vals$1959 0) (app t305-buf 0)) (app t306-buf 0)) (ite (bvule (app t309-buf 0) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0))) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0)) (app t309-buf 0))))
+optimized x86 0:
+  (uint8_t (app abstr-vals$1959 0))
+run-x86-synthesizer
+halide-expr:
+  (vec-min
+ (vec-max
+  (vec-max
+   (load (buffer t304-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   (load (buffer t305-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (load (buffer t306-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (vec-max
+  (vec-max
+   (load (buffer t307-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   (load (buffer t308-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (load (buffer t309-buf 'uint8) (ramp 0 1 16) (aligned 0 0))))
+template:
+  (cast ... #<load-data> 'uint8 #t)
+axioms:
+  '(#t)
+optimized-halide-expr:
+  (vec-min
+ (vec-max
+  (vec-max
+   (load (buffer t304-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   #<abstr-halide-expr>)
+  (load (buffer t306-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (vec-max
+  (vec-max
+   (load (buffer t307-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   (load (buffer t308-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (load (buffer t309-buf 'uint8) (ramp 0 1 16) (aligned 0 0))))
+optimized-template:
+  (cast ... #<abstr-expr> 'uint8 #t)
+optimized Halide 0:
+  (uint8_t
+ (ite (bvule (ite (bvule (app t306-buf 0) (ite (bvule (app abstr-vals$1960 0) (app t304-buf 0)) (app t304-buf 0) (app abstr-vals$1960 0))) (ite (bvule (app abstr-vals$1960 0) (app t304-buf 0)) (app t304-buf 0) (app abstr-vals$1960 0)) (app t306-buf 0)) (ite (bvule (app t309-buf 0) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0))) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0)) (app t309-buf 0))) (ite (bvule (app t306-buf 0) (ite (bvule (app abstr-vals$1960 0) (app t304-buf 0)) (app t304-buf 0) (app abstr-vals$1960 0))) (ite (bvule (app abstr-vals$1960 0) (app t304-buf 0)) (app t304-buf 0) (app abstr-vals$1960 0)) (app t306-buf 0)) (ite (bvule (app t309-buf 0) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0))) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0)) (app t309-buf 0))))
+optimized x86 0:
+  (uint8_t (app abstr-vals$1960 0))
+run-x86-synthesizer
+halide-expr:
+  (vec-min
+ (vec-max
+  (vec-max
+   (load (buffer t304-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   (load (buffer t305-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (load (buffer t306-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (vec-max
+  (vec-max
+   (load (buffer t307-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   (load (buffer t308-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (load (buffer t309-buf 'uint8) (ramp 0 1 16) (aligned 0 0))))
+template:
+  (cast ... #<load-data> 'uint8 #t)
+axioms:
+  '(#t)
+optimized-halide-expr:
+  (vec-min
+ (vec-max
+  (vec-max
+   (load (buffer t304-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   (load (buffer t305-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  #<abstr-halide-expr>)
+ (vec-max
+  (vec-max
+   (load (buffer t307-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   (load (buffer t308-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (load (buffer t309-buf 'uint8) (ramp 0 1 16) (aligned 0 0))))
+optimized-template:
+  (cast ... #<abstr-expr> 'uint8 #t)
+optimized Halide 0:
+  (uint8_t
+ (ite (bvule (ite (bvule (app abstr-vals$1961 0) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0))) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0)) (app abstr-vals$1961 0)) (ite (bvule (app t309-buf 0) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0))) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0)) (app t309-buf 0))) (ite (bvule (app abstr-vals$1961 0) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0))) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0)) (app abstr-vals$1961 0)) (ite (bvule (app t309-buf 0) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0))) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0)) (app t309-buf 0))))
+optimized x86 0:
+  (uint8_t (app abstr-vals$1961 0))
+run-x86-synthesizer
+halide-expr:
+  (vec-min
+ (vec-max
+  (vec-max
+   (load (buffer t304-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   (load (buffer t305-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (load (buffer t306-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (vec-max
+  (vec-max
+   (load (buffer t307-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   (load (buffer t308-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (load (buffer t309-buf 'uint8) (ramp 0 1 16) (aligned 0 0))))
+template:
+  (cast ... #<load-data> 'uint8 #t)
+axioms:
+  '(#t)
+optimized-halide-expr:
+  (vec-min
+ (vec-max
+  (vec-max
+   (load (buffer t304-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   (load (buffer t305-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (load (buffer t306-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (vec-max
+  (vec-max
+   #<abstr-halide-expr>
+   (load (buffer t308-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (load (buffer t309-buf 'uint8) (ramp 0 1 16) (aligned 0 0))))
+optimized-template:
+  (cast ... #<abstr-expr> 'uint8 #t)
+optimized Halide 0:
+  (uint8_t
+ (ite (bvule (ite (bvule (app t306-buf 0) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0))) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0)) (app t306-buf 0)) (ite (bvule (app t309-buf 0) (ite (bvule (app t308-buf 0) (app abstr-vals$1962 0)) (app abstr-vals$1962 0) (app t308-buf 0))) (ite (bvule (app t308-buf 0) (app abstr-vals$1962 0)) (app abstr-vals$1962 0) (app t308-buf 0)) (app t309-buf 0))) (ite (bvule (app t306-buf 0) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0))) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0)) (app t306-buf 0)) (ite (bvule (app t309-buf 0) (ite (bvule (app t308-buf 0) (app abstr-vals$1962 0)) (app abstr-vals$1962 0) (app t308-buf 0))) (ite (bvule (app t308-buf 0) (app abstr-vals$1962 0)) (app abstr-vals$1962 0) (app t308-buf 0)) (app t309-buf 0))))
+optimized x86 0:
+  (uint8_t (app abstr-vals$1962 0))
+run-x86-synthesizer
+halide-expr:
+  (vec-min
+ (vec-max
+  (vec-max
+   (load (buffer t304-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   (load (buffer t305-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (load (buffer t306-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (vec-max
+  (vec-max
+   (load (buffer t307-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   (load (buffer t308-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (load (buffer t309-buf 'uint8) (ramp 0 1 16) (aligned 0 0))))
+template:
+  (cast ... #<load-data> 'uint8 #t)
+axioms:
+  '(#t)
+optimized-halide-expr:
+  (vec-min
+ (vec-max
+  (vec-max
+   (load (buffer t304-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   (load (buffer t305-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (load (buffer t306-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (vec-max
+  (vec-max
+   (load (buffer t307-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   #<abstr-halide-expr>)
+  (load (buffer t309-buf 'uint8) (ramp 0 1 16) (aligned 0 0))))
+optimized-template:
+  (cast ... #<abstr-expr> 'uint8 #t)
+optimized Halide 0:
+  (uint8_t
+ (ite (bvule (ite (bvule (app t306-buf 0) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0))) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0)) (app t306-buf 0)) (ite (bvule (app t309-buf 0) (ite (bvule (app abstr-vals$1963 0) (app t307-buf 0)) (app t307-buf 0) (app abstr-vals$1963 0))) (ite (bvule (app abstr-vals$1963 0) (app t307-buf 0)) (app t307-buf 0) (app abstr-vals$1963 0)) (app t309-buf 0))) (ite (bvule (app t306-buf 0) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0))) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0)) (app t306-buf 0)) (ite (bvule (app t309-buf 0) (ite (bvule (app abstr-vals$1963 0) (app t307-buf 0)) (app t307-buf 0) (app abstr-vals$1963 0))) (ite (bvule (app abstr-vals$1963 0) (app t307-buf 0)) (app t307-buf 0) (app abstr-vals$1963 0)) (app t309-buf 0))))
+optimized x86 0:
+  (uint8_t (app abstr-vals$1963 0))
+run-x86-synthesizer
+halide-expr:
+  (vec-min
+ (vec-max
+  (vec-max
+   (load (buffer t304-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   (load (buffer t305-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (load (buffer t306-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (vec-max
+  (vec-max
+   (load (buffer t307-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   (load (buffer t308-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (load (buffer t309-buf 'uint8) (ramp 0 1 16) (aligned 0 0))))
+template:
+  (cast ... #<load-data> 'uint8 #t)
+axioms:
+  '(#t)
+optimized-halide-expr:
+  (vec-min
+ (vec-max
+  (vec-max
+   (load (buffer t304-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   (load (buffer t305-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (load (buffer t306-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (vec-max
+  (vec-max
+   (load (buffer t307-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   (load (buffer t308-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  #<abstr-halide-expr>))
+optimized-template:
+  (cast ... #<abstr-expr> 'uint8 #t)
+optimized Halide 0:
+  (uint8_t
+ (ite (bvule (ite (bvule (app t306-buf 0) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0))) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0)) (app t306-buf 0)) (ite (bvule (app abstr-vals$1964 0) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0))) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0)) (app abstr-vals$1964 0))) (ite (bvule (app t306-buf 0) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0))) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0)) (app t306-buf 0)) (ite (bvule (app abstr-vals$1964 0) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0))) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0)) (app abstr-vals$1964 0))))
+optimized x86 0:
+  (uint8_t (app abstr-vals$1964 0))
+run-x86-synthesizer
+halide-expr:
+  (vec-min
+ (vec-max
+  (vec-max
+   (load (buffer t304-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   (load (buffer t305-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (load (buffer t306-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (vec-max
+  (vec-max
+   (load (buffer t307-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   (load (buffer t308-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (load (buffer t309-buf 'uint8) (ramp 0 1 16) (aligned 0 0))))
+template:
+  (cast ... (maximum ... #<load-data> #<load-data>) 'uint8 #t)
+axioms:
+  '(#t)
+optimized-halide-expr:
+  (vec-min
+ (vec-max
+  #<abstr-halide-expr>
+  (load (buffer t306-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (vec-max
+  (vec-max
+   (load (buffer t307-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   (load (buffer t308-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (load (buffer t309-buf 'uint8) (ramp 0 1 16) (aligned 0 0))))
+optimized-template:
+  (cast ... #<abstr-expr> 'uint8 #t)
+optimized Halide 0:
+  (uint8_t
+ (ite (bvule (ite (bvule (app t306-buf 0) (app abstr-vals$1965 0)) (app abstr-vals$1965 0) (app t306-buf 0)) (ite (bvule (app t309-buf 0) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0))) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0)) (app t309-buf 0))) (ite (bvule (app t306-buf 0) (app abstr-vals$1965 0)) (app abstr-vals$1965 0) (app t306-buf 0)) (ite (bvule (app t309-buf 0) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0))) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0)) (app t309-buf 0))))
+optimized x86 0:
+  (uint8_t (app abstr-vals$1965 0))
+run-x86-synthesizer
+halide-expr:
+  (vec-min
+ (vec-max
+  (vec-max
+   (load (buffer t304-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   (load (buffer t305-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (load (buffer t306-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (vec-max
+  (vec-max
+   (load (buffer t307-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   (load (buffer t308-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (load (buffer t309-buf 'uint8) (ramp 0 1 16) (aligned 0 0))))
+template:
+  (cast ... (maximum ... #<load-data> #<load-data>) 'uint8 #t)
+axioms:
+  '(#t)
+optimized-halide-expr:
+  (vec-min
+ (vec-max
+  (vec-max
+   (load (buffer t304-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   (load (buffer t305-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (load (buffer t306-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (vec-max
+  #<abstr-halide-expr>
+  (load (buffer t309-buf 'uint8) (ramp 0 1 16) (aligned 0 0))))
+optimized-template:
+  (cast ... #<abstr-expr> 'uint8 #t)
+optimized Halide 0:
+  (uint8_t
+ (ite (bvule (ite (bvule (app t306-buf 0) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0))) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0)) (app t306-buf 0)) (ite (bvule (app t309-buf 0) (app abstr-vals$1966 0)) (app abstr-vals$1966 0) (app t309-buf 0))) (ite (bvule (app t306-buf 0) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0))) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0)) (app t306-buf 0)) (ite (bvule (app t309-buf 0) (app abstr-vals$1966 0)) (app abstr-vals$1966 0) (app t309-buf 0))))
+optimized x86 0:
+  (uint8_t (app abstr-vals$1966 0))
+"Success?"
+#f
+#<void>
+run-x86-synthesizer
+halide-expr:
+  (vec-min
+ (vec-max
+  (vec-max
+   (load (buffer t304-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   (load (buffer t305-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (load (buffer t306-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (vec-max
+  (vec-max
+   (load (buffer t307-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   (load (buffer t308-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (load (buffer t309-buf 'uint8) (ramp 0 1 16) (aligned 0 0))))
+template:
+  (minimum
+ ...
+ (maximum ... (maximum ... #<load-data> #<load-data>) #<load-data>)
+ (maximum ... (maximum ... #<load-data> #<load-data>) #<load-data>))
+axioms:
+  '(#t #t)
+optimized-halide-expr:
+  (vec-min #<abstr-halide-expr> #<abstr-halide-expr>)
+optimized-template:
+  (minimum ... #<abstr-expr> #<abstr-expr>)
+optimized Halide 0:
+  (uint8_t
+ (ite (bvule (app abstr-vals$1967 0) (app abstr-vals$1968 0)) (app abstr-vals$1967 0) (app abstr-vals$1968 0)))
+optimized x86 0:
+  (uint8_t
+ (ite (bvule (app abstr-vals$1967 0) (app abstr-vals$1968 0)) (app abstr-vals$1967 0) (app abstr-vals$1968 0)))
+Ran synthesizer for 15 ms
+(model)
+(vec-min #<abstr-halide-expr> #<abstr-halide-expr>)
+(minimum
+ ...
+ (maximum ... (maximum ... #<load-data> #<load-data>) #<load-data>)
+ (maximum ... (maximum ... #<load-data> #<load-data>) #<load-data>))
+Ran bounds analysis for 19 ms
+Ran bounds analysis for 9 ms
+"Extended success?"
+#t
+(minimum
+ ...
+ (maximum ... (maximum ... #<load-data> #<load-data>) #<load-data>)
+ (maximum ... (maximum ... #<load-data> #<load-data>) #<load-data>))
+"Building Expr:"
+(vec-min
+ (vec-max
+  (vec-max
+   (load (buffer t299-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   (load (buffer t301-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (load (buffer t303-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (vec-min
+  (vec-max
+   (vec-max
+    (load (buffer t304-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+    (load (buffer t305-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+   (load (buffer t306-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (vec-max
+   (vec-max
+    (load (buffer t307-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+    (load (buffer t308-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+   (load (buffer t309-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))))
+"Fold templates"
+'(#<load-data> #<load-data> #<load-data> #<load-data> #<load-data>)
+here(#<load-data> #<load-data> #<load-data> #<load-data> #<load-data>)
+
+"Replace templates"
+(list
+ (cast ... #<load-data> 'uint8 #t)
+ (cast ... #<load-data> 'uint8 #t)
+ (cast ... (maximum ... #<load-data> #<load-data>) 'uint8 #t)
+ (cast ... #<load-data> 'uint8 #t)
+ (cast ... #<load-data> 'uint8 #t)
+ (cast ... #<load-data> 'uint8 #t)
+ (cast ... (maximum ... #<load-data> #<load-data>) 'uint8 #t)
+ (cast ... #<load-data> 'uint8 #t)
+ (cast ... #<load-data> 'uint8 #t)
+ (cast ... #<load-data> 'uint8 #t)
+ (cast ... (maximum ... #<load-data> #<load-data>) 'uint8 #t)
+ (cast ... #<load-data> 'uint8 #t)
+ (cast
+  ...
+  (maximum ... (maximum ... #<load-data> #<load-data>) #<load-data>)
+  'uint8
+  #t)
+ (cast
+  ...
+  (maximum ... (maximum ... #<load-data> #<load-data>) #<load-data>)
+  'uint8
+  #t))
+run-x86-synthesizer
+halide-expr:
+  (vec-min
+ (vec-max
+  (vec-max
+   (load (buffer t299-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   (load (buffer t301-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (load (buffer t303-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (vec-min
+  (vec-max
+   (vec-max
+    (load (buffer t304-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+    (load (buffer t305-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+   (load (buffer t306-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (vec-max
+   (vec-max
+    (load (buffer t307-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+    (load (buffer t308-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+   (load (buffer t309-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))))
+template:
+  #<load-data>
+axioms:
+  '()
+optimized-halide-expr:
+  (vec-min
+ (vec-max
+  (vec-max
+   (load (buffer t299-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   (load (buffer t301-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (load (buffer t303-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (vec-min
+  (vec-max
+   (vec-max
+    (load (buffer t304-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+    (load (buffer t305-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+   (load (buffer t306-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (vec-max
+   (vec-max
+    (load (buffer t307-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+    (load (buffer t308-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+   (load (buffer t309-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))))
+optimized-template:
+  #<load-data>
+optimized Halide 0:
+  (uint8_t
+ (ite (bvule (ite (bvule (app t303-buf 0) (ite (bvule (app t301-buf 0) (app t299-buf 0)) (app t299-buf 0) (app t301-buf 0))) (ite (bvule (app t301-buf 0) (app t299-buf 0)) (app t299-buf 0) (app t301-buf 0)) (app t303-buf 0)) (ite (bvule (ite (bvule (app t306-buf 0) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0))) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0)) (app t306-buf 0)) (ite (bvule (app t309-buf 0) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0))) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0)) (app t309-buf 0))) (ite (bvule (app t306-buf 0) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0))) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0)) (app t306-buf 0)) (ite (bvule (app t309-buf 0) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0))) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0)) (app t309-buf 0)))) (ite (bvule (app t303-buf 0) (ite (bvule (app t301-buf 0) (app t299-buf 0)) (app t299-buf 0) (app t301-buf 0))) (ite (bvule (app t301-buf 0) (app t299-buf 0)) (app t299-buf 0) (app t301-buf 0)) (app t303-buf 0)) (ite (bvule (ite (bvule (app t306-buf 0) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0))) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0)) (app t306-buf 0)) (ite (bvule (app t309-buf 0) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0))) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0)) (app t309-buf 0))) (ite (bvule (app t306-buf 0) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0))) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0)) (app t306-buf 0)) (ite (bvule (app t309-buf 0) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0))) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0)) (app t309-buf 0)))))
+optimized x86 0:
+  (uint8_t
+ (ite* (⊢ (= 0 idx$1971) (app t301-buf 0)) (⊢ (= 1 idx$1971) (app t299-buf 0)) (⊢ (= 2 idx$1971) (app t303-buf 0)) (⊢ (= 3 idx$1971) (app t304-buf 0)) (⊢ (= 4 idx$1971) (app t306-buf 0)) (⊢ (= 5 idx$1971) (app t307-buf 0)) (⊢ (= 6 idx$1971) (app t305-buf 0)) (⊢ (= 7 idx$1971) (app t309-buf 0)) (⊢ (= 8 idx$1971) (app t308-buf 0))))
+Ran synthesizer for 167 ms
+(unsat)
+run-x86-synthesizer
+halide-expr:
+  (vec-min
+ (vec-max
+  (vec-max
+   (load (buffer t299-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   (load (buffer t301-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (load (buffer t303-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (vec-min
+  (vec-max
+   (vec-max
+    (load (buffer t304-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+    (load (buffer t305-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+   (load (buffer t306-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (vec-max
+   (vec-max
+    (load (buffer t307-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+    (load (buffer t308-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+   (load (buffer t309-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))))
+template:
+  #<load-data>
+axioms:
+  '()
+optimized-halide-expr:
+  (vec-min
+ (vec-max
+  (vec-max
+   (load (buffer t299-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   (load (buffer t301-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (load (buffer t303-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (vec-min
+  (vec-max
+   (vec-max
+    (load (buffer t304-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+    (load (buffer t305-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+   (load (buffer t306-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (vec-max
+   (vec-max
+    (load (buffer t307-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+    (load (buffer t308-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+   (load (buffer t309-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))))
+optimized-template:
+  #<load-data>
+optimized Halide 0:
+  (uint8_t
+ (ite (bvule (ite (bvule (app t303-buf 0) (ite (bvule (app t301-buf 0) (app t299-buf 0)) (app t299-buf 0) (app t301-buf 0))) (ite (bvule (app t301-buf 0) (app t299-buf 0)) (app t299-buf 0) (app t301-buf 0)) (app t303-buf 0)) (ite (bvule (ite (bvule (app t306-buf 0) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0))) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0)) (app t306-buf 0)) (ite (bvule (app t309-buf 0) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0))) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0)) (app t309-buf 0))) (ite (bvule (app t306-buf 0) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0))) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0)) (app t306-buf 0)) (ite (bvule (app t309-buf 0) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0))) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0)) (app t309-buf 0)))) (ite (bvule (app t303-buf 0) (ite (bvule (app t301-buf 0) (app t299-buf 0)) (app t299-buf 0) (app t301-buf 0))) (ite (bvule (app t301-buf 0) (app t299-buf 0)) (app t299-buf 0) (app t301-buf 0)) (app t303-buf 0)) (ite (bvule (ite (bvule (app t306-buf 0) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0))) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0)) (app t306-buf 0)) (ite (bvule (app t309-buf 0) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0))) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0)) (app t309-buf 0))) (ite (bvule (app t306-buf 0) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0))) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0)) (app t306-buf 0)) (ite (bvule (app t309-buf 0) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0))) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0)) (app t309-buf 0)))))
+optimized x86 0:
+  (uint8_t
+ (ite* (⊢ (= 0 idx$2035) (app t301-buf 0)) (⊢ (= 1 idx$2035) (app t299-buf 0)) (⊢ (= 2 idx$2035) (app t303-buf 0)) (⊢ (= 3 idx$2035) (app t304-buf 0)) (⊢ (= 4 idx$2035) (app t306-buf 0)) (⊢ (= 5 idx$2035) (app t307-buf 0)) (⊢ (= 6 idx$2035) (app t305-buf 0)) (⊢ (= 7 idx$2035) (app t309-buf 0)) (⊢ (= 8 idx$2035) (app t308-buf 0))))
+Ran synthesizer for 141 ms
+(unsat)
+run-x86-synthesizer
+halide-expr:
+  (vec-min
+ (vec-max
+  (vec-max
+   (load (buffer t299-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   (load (buffer t301-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (load (buffer t303-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (vec-min
+  (vec-max
+   (vec-max
+    (load (buffer t304-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+    (load (buffer t305-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+   (load (buffer t306-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (vec-max
+   (vec-max
+    (load (buffer t307-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+    (load (buffer t308-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+   (load (buffer t309-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))))
+template:
+  #<load-data>
+axioms:
+  '()
+optimized-halide-expr:
+  (vec-min
+ (vec-max
+  (vec-max
+   (load (buffer t299-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   (load (buffer t301-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (load (buffer t303-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (vec-min
+  (vec-max
+   (vec-max
+    (load (buffer t304-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+    (load (buffer t305-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+   (load (buffer t306-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (vec-max
+   (vec-max
+    (load (buffer t307-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+    (load (buffer t308-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+   (load (buffer t309-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))))
+optimized-template:
+  #<load-data>
+optimized Halide 0:
+  (uint8_t
+ (ite (bvule (ite (bvule (app t303-buf 0) (ite (bvule (app t301-buf 0) (app t299-buf 0)) (app t299-buf 0) (app t301-buf 0))) (ite (bvule (app t301-buf 0) (app t299-buf 0)) (app t299-buf 0) (app t301-buf 0)) (app t303-buf 0)) (ite (bvule (ite (bvule (app t306-buf 0) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0))) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0)) (app t306-buf 0)) (ite (bvule (app t309-buf 0) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0))) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0)) (app t309-buf 0))) (ite (bvule (app t306-buf 0) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0))) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0)) (app t306-buf 0)) (ite (bvule (app t309-buf 0) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0))) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0)) (app t309-buf 0)))) (ite (bvule (app t303-buf 0) (ite (bvule (app t301-buf 0) (app t299-buf 0)) (app t299-buf 0) (app t301-buf 0))) (ite (bvule (app t301-buf 0) (app t299-buf 0)) (app t299-buf 0) (app t301-buf 0)) (app t303-buf 0)) (ite (bvule (ite (bvule (app t306-buf 0) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0))) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0)) (app t306-buf 0)) (ite (bvule (app t309-buf 0) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0))) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0)) (app t309-buf 0))) (ite (bvule (app t306-buf 0) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0))) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0)) (app t306-buf 0)) (ite (bvule (app t309-buf 0) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0))) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0)) (app t309-buf 0)))))
+optimized x86 0:
+  (uint8_t
+ (ite* (⊢ (= 0 idx$2099) (app t301-buf 0)) (⊢ (= 1 idx$2099) (app t299-buf 0)) (⊢ (= 2 idx$2099) (app t303-buf 0)) (⊢ (= 3 idx$2099) (app t304-buf 0)) (⊢ (= 4 idx$2099) (app t306-buf 0)) (⊢ (= 5 idx$2099) (app t307-buf 0)) (⊢ (= 6 idx$2099) (app t305-buf 0)) (⊢ (= 7 idx$2099) (app t309-buf 0)) (⊢ (= 8 idx$2099) (app t308-buf 0))))
+Ran synthesizer for 134 ms
+(unsat)
+run-x86-synthesizer
+halide-expr:
+  (vec-min
+ (vec-max
+  (vec-max
+   (load (buffer t299-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   (load (buffer t301-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (load (buffer t303-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (vec-min
+  (vec-max
+   (vec-max
+    (load (buffer t304-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+    (load (buffer t305-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+   (load (buffer t306-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (vec-max
+   (vec-max
+    (load (buffer t307-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+    (load (buffer t308-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+   (load (buffer t309-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))))
+template:
+  #<load-data>
+axioms:
+  '()
+optimized-halide-expr:
+  (vec-min
+ (vec-max
+  (vec-max
+   (load (buffer t299-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   (load (buffer t301-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (load (buffer t303-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (vec-min
+  (vec-max
+   (vec-max
+    (load (buffer t304-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+    (load (buffer t305-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+   (load (buffer t306-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (vec-max
+   (vec-max
+    (load (buffer t307-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+    (load (buffer t308-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+   (load (buffer t309-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))))
+optimized-template:
+  #<load-data>
+optimized Halide 0:
+  (uint8_t
+ (ite (bvule (ite (bvule (app t303-buf 0) (ite (bvule (app t301-buf 0) (app t299-buf 0)) (app t299-buf 0) (app t301-buf 0))) (ite (bvule (app t301-buf 0) (app t299-buf 0)) (app t299-buf 0) (app t301-buf 0)) (app t303-buf 0)) (ite (bvule (ite (bvule (app t306-buf 0) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0))) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0)) (app t306-buf 0)) (ite (bvule (app t309-buf 0) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0))) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0)) (app t309-buf 0))) (ite (bvule (app t306-buf 0) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0))) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0)) (app t306-buf 0)) (ite (bvule (app t309-buf 0) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0))) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0)) (app t309-buf 0)))) (ite (bvule (app t303-buf 0) (ite (bvule (app t301-buf 0) (app t299-buf 0)) (app t299-buf 0) (app t301-buf 0))) (ite (bvule (app t301-buf 0) (app t299-buf 0)) (app t299-buf 0) (app t301-buf 0)) (app t303-buf 0)) (ite (bvule (ite (bvule (app t306-buf 0) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0))) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0)) (app t306-buf 0)) (ite (bvule (app t309-buf 0) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0))) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0)) (app t309-buf 0))) (ite (bvule (app t306-buf 0) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0))) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0)) (app t306-buf 0)) (ite (bvule (app t309-buf 0) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0))) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0)) (app t309-buf 0)))))
+optimized x86 0:
+  (uint8_t
+ (ite* (⊢ (= 0 idx$2163) (app t301-buf 0)) (⊢ (= 1 idx$2163) (app t299-buf 0)) (⊢ (= 2 idx$2163) (app t303-buf 0)) (⊢ (= 3 idx$2163) (app t304-buf 0)) (⊢ (= 4 idx$2163) (app t306-buf 0)) (⊢ (= 5 idx$2163) (app t307-buf 0)) (⊢ (= 6 idx$2163) (app t305-buf 0)) (⊢ (= 7 idx$2163) (app t309-buf 0)) (⊢ (= 8 idx$2163) (app t308-buf 0))))
+Ran synthesizer for 131 ms
+(unsat)
+run-x86-synthesizer
+halide-expr:
+  (vec-min
+ (vec-max
+  (vec-max
+   (load (buffer t299-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   (load (buffer t301-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (load (buffer t303-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (vec-min
+  (vec-max
+   (vec-max
+    (load (buffer t304-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+    (load (buffer t305-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+   (load (buffer t306-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (vec-max
+   (vec-max
+    (load (buffer t307-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+    (load (buffer t308-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+   (load (buffer t309-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))))
+template:
+  #<load-data>
+axioms:
+  '()
+optimized-halide-expr:
+  (vec-min
+ (vec-max
+  (vec-max
+   (load (buffer t299-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   (load (buffer t301-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (load (buffer t303-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (vec-min
+  (vec-max
+   (vec-max
+    (load (buffer t304-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+    (load (buffer t305-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+   (load (buffer t306-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (vec-max
+   (vec-max
+    (load (buffer t307-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+    (load (buffer t308-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+   (load (buffer t309-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))))
+optimized-template:
+  #<load-data>
+optimized Halide 0:
+  (uint8_t
+ (ite (bvule (ite (bvule (app t303-buf 0) (ite (bvule (app t301-buf 0) (app t299-buf 0)) (app t299-buf 0) (app t301-buf 0))) (ite (bvule (app t301-buf 0) (app t299-buf 0)) (app t299-buf 0) (app t301-buf 0)) (app t303-buf 0)) (ite (bvule (ite (bvule (app t306-buf 0) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0))) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0)) (app t306-buf 0)) (ite (bvule (app t309-buf 0) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0))) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0)) (app t309-buf 0))) (ite (bvule (app t306-buf 0) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0))) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0)) (app t306-buf 0)) (ite (bvule (app t309-buf 0) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0))) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0)) (app t309-buf 0)))) (ite (bvule (app t303-buf 0) (ite (bvule (app t301-buf 0) (app t299-buf 0)) (app t299-buf 0) (app t301-buf 0))) (ite (bvule (app t301-buf 0) (app t299-buf 0)) (app t299-buf 0) (app t301-buf 0)) (app t303-buf 0)) (ite (bvule (ite (bvule (app t306-buf 0) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0))) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0)) (app t306-buf 0)) (ite (bvule (app t309-buf 0) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0))) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0)) (app t309-buf 0))) (ite (bvule (app t306-buf 0) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0))) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0)) (app t306-buf 0)) (ite (bvule (app t309-buf 0) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0))) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0)) (app t309-buf 0)))))
+optimized x86 0:
+  (uint8_t
+ (ite* (⊢ (= 0 idx$2227) (app t301-buf 0)) (⊢ (= 1 idx$2227) (app t299-buf 0)) (⊢ (= 2 idx$2227) (app t303-buf 0)) (⊢ (= 3 idx$2227) (app t304-buf 0)) (⊢ (= 4 idx$2227) (app t306-buf 0)) (⊢ (= 5 idx$2227) (app t307-buf 0)) (⊢ (= 6 idx$2227) (app t305-buf 0)) (⊢ (= 7 idx$2227) (app t309-buf 0)) (⊢ (= 8 idx$2227) (app t308-buf 0))))
+Ran synthesizer for 135 ms
+(unsat)
+run-x86-synthesizer
+halide-expr:
+  (vec-min
+ (vec-max
+  (vec-max
+   (load (buffer t299-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   (load (buffer t301-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (load (buffer t303-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (vec-min
+  (vec-max
+   (vec-max
+    (load (buffer t304-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+    (load (buffer t305-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+   (load (buffer t306-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (vec-max
+   (vec-max
+    (load (buffer t307-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+    (load (buffer t308-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+   (load (buffer t309-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))))
+template:
+  (cast ... #<load-data> 'uint8 #t)
+axioms:
+  '(#t)
+optimized-halide-expr:
+  (vec-min
+ (vec-max
+  (vec-max
+   #<abstr-halide-expr>
+   (load (buffer t301-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (load (buffer t303-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (vec-min
+  (vec-max
+   (vec-max
+    (load (buffer t304-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+    (load (buffer t305-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+   (load (buffer t306-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (vec-max
+   (vec-max
+    (load (buffer t307-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+    (load (buffer t308-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+   (load (buffer t309-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))))
+optimized-template:
+  (cast ... #<abstr-expr> 'uint8 #t)
+optimized Halide 0:
+  (uint8_t
+ (ite (bvule (ite (bvule (app t303-buf 0) (ite (bvule (app t301-buf 0) (app abstr-vals$2291 0)) (app abstr-vals$2291 0) (app t301-buf 0))) (ite (bvule (app t301-buf 0) (app abstr-vals$2291 0)) (app abstr-vals$2291 0) (app t301-buf 0)) (app t303-buf 0)) (ite (bvule (ite (bvule (app t306-buf 0) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0))) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0)) (app t306-buf 0)) (ite (bvule (app t309-buf 0) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0))) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0)) (app t309-buf 0))) (ite (bvule (app t306-buf 0) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0))) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0)) (app t306-buf 0)) (ite (bvule (app t309-buf 0) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0))) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0)) (app t309-buf 0)))) (ite (bvule (app t303-buf 0) (ite (bvule (app t301-buf 0) (app abstr-vals$2291 0)) (app abstr-vals$2291 0) (app t301-buf 0))) (ite (bvule (app t301-buf 0) (app abstr-vals$2291 0)) (app abstr-vals$2291 0) (app t301-buf 0)) (app t303-buf 0)) (ite (bvule (ite (bvule (app t306-buf 0) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0))) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0)) (app t306-buf 0)) (ite (bvule (app t309-buf 0) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0))) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0)) (app t309-buf 0))) (ite (bvule (app t306-buf 0) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0))) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0)) (app t306-buf 0)) (ite (bvule (app t309-buf 0) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0))) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0)) (app t309-buf 0)))))
+optimized x86 0:
+  (uint8_t (app abstr-vals$2291 0))
+run-x86-synthesizer
+halide-expr:
+  (vec-min
+ (vec-max
+  (vec-max
+   (load (buffer t299-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   (load (buffer t301-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (load (buffer t303-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (vec-min
+  (vec-max
+   (vec-max
+    (load (buffer t304-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+    (load (buffer t305-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+   (load (buffer t306-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (vec-max
+   (vec-max
+    (load (buffer t307-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+    (load (buffer t308-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+   (load (buffer t309-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))))
+template:
+  (cast ... #<load-data> 'uint8 #t)
+axioms:
+  '(#t)
+optimized-halide-expr:
+  (vec-min
+ (vec-max
+  (vec-max
+   (load (buffer t299-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   #<abstr-halide-expr>)
+  (load (buffer t303-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (vec-min
+  (vec-max
+   (vec-max
+    (load (buffer t304-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+    (load (buffer t305-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+   (load (buffer t306-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (vec-max
+   (vec-max
+    (load (buffer t307-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+    (load (buffer t308-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+   (load (buffer t309-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))))
+optimized-template:
+  (cast ... #<abstr-expr> 'uint8 #t)
+optimized Halide 0:
+  (uint8_t
+ (ite (bvule (ite (bvule (app t303-buf 0) (ite (bvule (app abstr-vals$2292 0) (app t299-buf 0)) (app t299-buf 0) (app abstr-vals$2292 0))) (ite (bvule (app abstr-vals$2292 0) (app t299-buf 0)) (app t299-buf 0) (app abstr-vals$2292 0)) (app t303-buf 0)) (ite (bvule (ite (bvule (app t306-buf 0) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0))) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0)) (app t306-buf 0)) (ite (bvule (app t309-buf 0) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0))) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0)) (app t309-buf 0))) (ite (bvule (app t306-buf 0) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0))) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0)) (app t306-buf 0)) (ite (bvule (app t309-buf 0) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0))) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0)) (app t309-buf 0)))) (ite (bvule (app t303-buf 0) (ite (bvule (app abstr-vals$2292 0) (app t299-buf 0)) (app t299-buf 0) (app abstr-vals$2292 0))) (ite (bvule (app abstr-vals$2292 0) (app t299-buf 0)) (app t299-buf 0) (app abstr-vals$2292 0)) (app t303-buf 0)) (ite (bvule (ite (bvule (app t306-buf 0) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0))) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0)) (app t306-buf 0)) (ite (bvule (app t309-buf 0) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0))) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0)) (app t309-buf 0))) (ite (bvule (app t306-buf 0) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0))) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0)) (app t306-buf 0)) (ite (bvule (app t309-buf 0) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0))) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0)) (app t309-buf 0)))))
+optimized x86 0:
+  (uint8_t (app abstr-vals$2292 0))
+run-x86-synthesizer
+halide-expr:
+  (vec-min
+ (vec-max
+  (vec-max
+   (load (buffer t299-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   (load (buffer t301-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (load (buffer t303-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (vec-min
+  (vec-max
+   (vec-max
+    (load (buffer t304-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+    (load (buffer t305-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+   (load (buffer t306-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (vec-max
+   (vec-max
+    (load (buffer t307-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+    (load (buffer t308-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+   (load (buffer t309-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))))
+template:
+  (cast ... #<load-data> 'uint8 #t)
+axioms:
+  '(#t)
+optimized-halide-expr:
+  (vec-min
+ (vec-max
+  (vec-max
+   (load (buffer t299-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   (load (buffer t301-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  #<abstr-halide-expr>)
+ (vec-min
+  (vec-max
+   (vec-max
+    (load (buffer t304-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+    (load (buffer t305-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+   (load (buffer t306-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (vec-max
+   (vec-max
+    (load (buffer t307-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+    (load (buffer t308-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+   (load (buffer t309-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))))
+optimized-template:
+  (cast ... #<abstr-expr> 'uint8 #t)
+optimized Halide 0:
+  (uint8_t
+ (ite (bvule (ite (bvule (app abstr-vals$2293 0) (ite (bvule (app t301-buf 0) (app t299-buf 0)) (app t299-buf 0) (app t301-buf 0))) (ite (bvule (app t301-buf 0) (app t299-buf 0)) (app t299-buf 0) (app t301-buf 0)) (app abstr-vals$2293 0)) (ite (bvule (ite (bvule (app t306-buf 0) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0))) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0)) (app t306-buf 0)) (ite (bvule (app t309-buf 0) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0))) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0)) (app t309-buf 0))) (ite (bvule (app t306-buf 0) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0))) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0)) (app t306-buf 0)) (ite (bvule (app t309-buf 0) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0))) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0)) (app t309-buf 0)))) (ite (bvule (app abstr-vals$2293 0) (ite (bvule (app t301-buf 0) (app t299-buf 0)) (app t299-buf 0) (app t301-buf 0))) (ite (bvule (app t301-buf 0) (app t299-buf 0)) (app t299-buf 0) (app t301-buf 0)) (app abstr-vals$2293 0)) (ite (bvule (ite (bvule (app t306-buf 0) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0))) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0)) (app t306-buf 0)) (ite (bvule (app t309-buf 0) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0))) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0)) (app t309-buf 0))) (ite (bvule (app t306-buf 0) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0))) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0)) (app t306-buf 0)) (ite (bvule (app t309-buf 0) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0))) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0)) (app t309-buf 0)))))
+optimized x86 0:
+  (uint8_t (app abstr-vals$2293 0))
+run-x86-synthesizer
+halide-expr:
+  (vec-min
+ (vec-max
+  (vec-max
+   (load (buffer t299-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   (load (buffer t301-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (load (buffer t303-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (vec-min
+  (vec-max
+   (vec-max
+    (load (buffer t304-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+    (load (buffer t305-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+   (load (buffer t306-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (vec-max
+   (vec-max
+    (load (buffer t307-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+    (load (buffer t308-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+   (load (buffer t309-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))))
+template:
+  (cast ... #<load-data> 'uint8 #t)
+axioms:
+  '(#t)
+optimized-halide-expr:
+  (vec-min
+ (vec-max
+  (vec-max
+   (load (buffer t299-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   (load (buffer t301-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (load (buffer t303-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (vec-min
+  (vec-max
+   (vec-max
+    #<abstr-halide-expr>
+    (load (buffer t305-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+   (load (buffer t306-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (vec-max
+   (vec-max
+    (load (buffer t307-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+    (load (buffer t308-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+   (load (buffer t309-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))))
+optimized-template:
+  (cast ... #<abstr-expr> 'uint8 #t)
+optimized Halide 0:
+  (uint8_t
+ (ite (bvule (ite (bvule (app t303-buf 0) (ite (bvule (app t301-buf 0) (app t299-buf 0)) (app t299-buf 0) (app t301-buf 0))) (ite (bvule (app t301-buf 0) (app t299-buf 0)) (app t299-buf 0) (app t301-buf 0)) (app t303-buf 0)) (ite (bvule (ite (bvule (app t306-buf 0) (ite (bvule (app t305-buf 0) (app abstr-vals$2294 0)) (app abstr-vals$2294 0) (app t305-buf 0))) (ite (bvule (app t305-buf 0) (app abstr-vals$2294 0)) (app abstr-vals$2294 0) (app t305-buf 0)) (app t306-buf 0)) (ite (bvule (app t309-buf 0) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0))) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0)) (app t309-buf 0))) (ite (bvule (app t306-buf 0) (ite (bvule (app t305-buf 0) (app abstr-vals$2294 0)) (app abstr-vals$2294 0) (app t305-buf 0))) (ite (bvule (app t305-buf 0) (app abstr-vals$2294 0)) (app abstr-vals$2294 0) (app t305-buf 0)) (app t306-buf 0)) (ite (bvule (app t309-buf 0) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0))) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0)) (app t309-buf 0)))) (ite (bvule (app t303-buf 0) (ite (bvule (app t301-buf 0) (app t299-buf 0)) (app t299-buf 0) (app t301-buf 0))) (ite (bvule (app t301-buf 0) (app t299-buf 0)) (app t299-buf 0) (app t301-buf 0)) (app t303-buf 0)) (ite (bvule (ite (bvule (app t306-buf 0) (ite (bvule (app t305-buf 0) (app abstr-vals$2294 0)) (app abstr-vals$2294 0) (app t305-buf 0))) (ite (bvule (app t305-buf 0) (app abstr-vals$2294 0)) (app abstr-vals$2294 0) (app t305-buf 0)) (app t306-buf 0)) (ite (bvule (app t309-buf 0) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0))) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0)) (app t309-buf 0))) (ite (bvule (app t306-buf 0) (ite (bvule (app t305-buf 0) (app abstr-vals$2294 0)) (app abstr-vals$2294 0) (app t305-buf 0))) (ite (bvule (app t305-buf 0) (app abstr-vals$2294 0)) (app abstr-vals$2294 0) (app t305-buf 0)) (app t306-buf 0)) (ite (bvule (app t309-buf 0) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0))) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0)) (app t309-buf 0)))))
+optimized x86 0:
+  (uint8_t (app abstr-vals$2294 0))
+run-x86-synthesizer
+halide-expr:
+  (vec-min
+ (vec-max
+  (vec-max
+   (load (buffer t299-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   (load (buffer t301-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (load (buffer t303-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (vec-min
+  (vec-max
+   (vec-max
+    (load (buffer t304-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+    (load (buffer t305-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+   (load (buffer t306-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (vec-max
+   (vec-max
+    (load (buffer t307-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+    (load (buffer t308-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+   (load (buffer t309-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))))
+template:
+  (cast ... #<load-data> 'uint8 #t)
+axioms:
+  '(#t)
+optimized-halide-expr:
+  (vec-min
+ (vec-max
+  (vec-max
+   (load (buffer t299-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   (load (buffer t301-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (load (buffer t303-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (vec-min
+  (vec-max
+   (vec-max
+    (load (buffer t304-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+    #<abstr-halide-expr>)
+   (load (buffer t306-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (vec-max
+   (vec-max
+    (load (buffer t307-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+    (load (buffer t308-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+   (load (buffer t309-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))))
+optimized-template:
+  (cast ... #<abstr-expr> 'uint8 #t)
+optimized Halide 0:
+  (uint8_t
+ (ite (bvule (ite (bvule (app t303-buf 0) (ite (bvule (app t301-buf 0) (app t299-buf 0)) (app t299-buf 0) (app t301-buf 0))) (ite (bvule (app t301-buf 0) (app t299-buf 0)) (app t299-buf 0) (app t301-buf 0)) (app t303-buf 0)) (ite (bvule (ite (bvule (app t306-buf 0) (ite (bvule (app abstr-vals$2295 0) (app t304-buf 0)) (app t304-buf 0) (app abstr-vals$2295 0))) (ite (bvule (app abstr-vals$2295 0) (app t304-buf 0)) (app t304-buf 0) (app abstr-vals$2295 0)) (app t306-buf 0)) (ite (bvule (app t309-buf 0) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0))) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0)) (app t309-buf 0))) (ite (bvule (app t306-buf 0) (ite (bvule (app abstr-vals$2295 0) (app t304-buf 0)) (app t304-buf 0) (app abstr-vals$2295 0))) (ite (bvule (app abstr-vals$2295 0) (app t304-buf 0)) (app t304-buf 0) (app abstr-vals$2295 0)) (app t306-buf 0)) (ite (bvule (app t309-buf 0) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0))) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0)) (app t309-buf 0)))) (ite (bvule (app t303-buf 0) (ite (bvule (app t301-buf 0) (app t299-buf 0)) (app t299-buf 0) (app t301-buf 0))) (ite (bvule (app t301-buf 0) (app t299-buf 0)) (app t299-buf 0) (app t301-buf 0)) (app t303-buf 0)) (ite (bvule (ite (bvule (app t306-buf 0) (ite (bvule (app abstr-vals$2295 0) (app t304-buf 0)) (app t304-buf 0) (app abstr-vals$2295 0))) (ite (bvule (app abstr-vals$2295 0) (app t304-buf 0)) (app t304-buf 0) (app abstr-vals$2295 0)) (app t306-buf 0)) (ite (bvule (app t309-buf 0) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0))) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0)) (app t309-buf 0))) (ite (bvule (app t306-buf 0) (ite (bvule (app abstr-vals$2295 0) (app t304-buf 0)) (app t304-buf 0) (app abstr-vals$2295 0))) (ite (bvule (app abstr-vals$2295 0) (app t304-buf 0)) (app t304-buf 0) (app abstr-vals$2295 0)) (app t306-buf 0)) (ite (bvule (app t309-buf 0) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0))) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0)) (app t309-buf 0)))))
+optimized x86 0:
+  (uint8_t (app abstr-vals$2295 0))
+run-x86-synthesizer
+halide-expr:
+  (vec-min
+ (vec-max
+  (vec-max
+   (load (buffer t299-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   (load (buffer t301-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (load (buffer t303-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (vec-min
+  (vec-max
+   (vec-max
+    (load (buffer t304-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+    (load (buffer t305-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+   (load (buffer t306-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (vec-max
+   (vec-max
+    (load (buffer t307-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+    (load (buffer t308-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+   (load (buffer t309-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))))
+template:
+  (cast ... #<load-data> 'uint8 #t)
+axioms:
+  '(#t)
+optimized-halide-expr:
+  (vec-min
+ (vec-max
+  (vec-max
+   (load (buffer t299-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   (load (buffer t301-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (load (buffer t303-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (vec-min
+  (vec-max
+   (vec-max
+    (load (buffer t304-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+    (load (buffer t305-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+   #<abstr-halide-expr>)
+  (vec-max
+   (vec-max
+    (load (buffer t307-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+    (load (buffer t308-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+   (load (buffer t309-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))))
+optimized-template:
+  (cast ... #<abstr-expr> 'uint8 #t)
+optimized Halide 0:
+  (uint8_t
+ (ite (bvule (ite (bvule (app t303-buf 0) (ite (bvule (app t301-buf 0) (app t299-buf 0)) (app t299-buf 0) (app t301-buf 0))) (ite (bvule (app t301-buf 0) (app t299-buf 0)) (app t299-buf 0) (app t301-buf 0)) (app t303-buf 0)) (ite (bvule (ite (bvule (app abstr-vals$2296 0) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0))) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0)) (app abstr-vals$2296 0)) (ite (bvule (app t309-buf 0) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0))) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0)) (app t309-buf 0))) (ite (bvule (app abstr-vals$2296 0) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0))) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0)) (app abstr-vals$2296 0)) (ite (bvule (app t309-buf 0) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0))) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0)) (app t309-buf 0)))) (ite (bvule (app t303-buf 0) (ite (bvule (app t301-buf 0) (app t299-buf 0)) (app t299-buf 0) (app t301-buf 0))) (ite (bvule (app t301-buf 0) (app t299-buf 0)) (app t299-buf 0) (app t301-buf 0)) (app t303-buf 0)) (ite (bvule (ite (bvule (app abstr-vals$2296 0) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0))) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0)) (app abstr-vals$2296 0)) (ite (bvule (app t309-buf 0) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0))) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0)) (app t309-buf 0))) (ite (bvule (app abstr-vals$2296 0) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0))) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0)) (app abstr-vals$2296 0)) (ite (bvule (app t309-buf 0) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0))) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0)) (app t309-buf 0)))))
+optimized x86 0:
+  (uint8_t (app abstr-vals$2296 0))
+run-x86-synthesizer
+halide-expr:
+  (vec-min
+ (vec-max
+  (vec-max
+   (load (buffer t299-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   (load (buffer t301-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (load (buffer t303-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (vec-min
+  (vec-max
+   (vec-max
+    (load (buffer t304-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+    (load (buffer t305-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+   (load (buffer t306-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (vec-max
+   (vec-max
+    (load (buffer t307-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+    (load (buffer t308-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+   (load (buffer t309-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))))
+template:
+  (cast ... #<load-data> 'uint8 #t)
+axioms:
+  '(#t)
+optimized-halide-expr:
+  (vec-min
+ (vec-max
+  (vec-max
+   (load (buffer t299-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   (load (buffer t301-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (load (buffer t303-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (vec-min
+  (vec-max
+   (vec-max
+    (load (buffer t304-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+    (load (buffer t305-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+   (load (buffer t306-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (vec-max
+   (vec-max
+    #<abstr-halide-expr>
+    (load (buffer t308-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+   (load (buffer t309-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))))
+optimized-template:
+  (cast ... #<abstr-expr> 'uint8 #t)
+optimized Halide 0:
+  (uint8_t
+ (ite (bvule (ite (bvule (app t303-buf 0) (ite (bvule (app t301-buf 0) (app t299-buf 0)) (app t299-buf 0) (app t301-buf 0))) (ite (bvule (app t301-buf 0) (app t299-buf 0)) (app t299-buf 0) (app t301-buf 0)) (app t303-buf 0)) (ite (bvule (ite (bvule (app t306-buf 0) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0))) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0)) (app t306-buf 0)) (ite (bvule (app t309-buf 0) (ite (bvule (app t308-buf 0) (app abstr-vals$2297 0)) (app abstr-vals$2297 0) (app t308-buf 0))) (ite (bvule (app t308-buf 0) (app abstr-vals$2297 0)) (app abstr-vals$2297 0) (app t308-buf 0)) (app t309-buf 0))) (ite (bvule (app t306-buf 0) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0))) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0)) (app t306-buf 0)) (ite (bvule (app t309-buf 0) (ite (bvule (app t308-buf 0) (app abstr-vals$2297 0)) (app abstr-vals$2297 0) (app t308-buf 0))) (ite (bvule (app t308-buf 0) (app abstr-vals$2297 0)) (app abstr-vals$2297 0) (app t308-buf 0)) (app t309-buf 0)))) (ite (bvule (app t303-buf 0) (ite (bvule (app t301-buf 0) (app t299-buf 0)) (app t299-buf 0) (app t301-buf 0))) (ite (bvule (app t301-buf 0) (app t299-buf 0)) (app t299-buf 0) (app t301-buf 0)) (app t303-buf 0)) (ite (bvule (ite (bvule (app t306-buf 0) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0))) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0)) (app t306-buf 0)) (ite (bvule (app t309-buf 0) (ite (bvule (app t308-buf 0) (app abstr-vals$2297 0)) (app abstr-vals$2297 0) (app t308-buf 0))) (ite (bvule (app t308-buf 0) (app abstr-vals$2297 0)) (app abstr-vals$2297 0) (app t308-buf 0)) (app t309-buf 0))) (ite (bvule (app t306-buf 0) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0))) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0)) (app t306-buf 0)) (ite (bvule (app t309-buf 0) (ite (bvule (app t308-buf 0) (app abstr-vals$2297 0)) (app abstr-vals$2297 0) (app t308-buf 0))) (ite (bvule (app t308-buf 0) (app abstr-vals$2297 0)) (app abstr-vals$2297 0) (app t308-buf 0)) (app t309-buf 0)))))
+optimized x86 0:
+  (uint8_t (app abstr-vals$2297 0))
+run-x86-synthesizer
+halide-expr:
+  (vec-min
+ (vec-max
+  (vec-max
+   (load (buffer t299-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   (load (buffer t301-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (load (buffer t303-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (vec-min
+  (vec-max
+   (vec-max
+    (load (buffer t304-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+    (load (buffer t305-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+   (load (buffer t306-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (vec-max
+   (vec-max
+    (load (buffer t307-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+    (load (buffer t308-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+   (load (buffer t309-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))))
+template:
+  (cast ... #<load-data> 'uint8 #t)
+axioms:
+  '(#t)
+optimized-halide-expr:
+  (vec-min
+ (vec-max
+  (vec-max
+   (load (buffer t299-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   (load (buffer t301-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (load (buffer t303-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (vec-min
+  (vec-max
+   (vec-max
+    (load (buffer t304-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+    (load (buffer t305-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+   (load (buffer t306-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (vec-max
+   (vec-max
+    (load (buffer t307-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+    #<abstr-halide-expr>)
+   (load (buffer t309-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))))
+optimized-template:
+  (cast ... #<abstr-expr> 'uint8 #t)
+optimized Halide 0:
+  (uint8_t
+ (ite (bvule (ite (bvule (app t303-buf 0) (ite (bvule (app t301-buf 0) (app t299-buf 0)) (app t299-buf 0) (app t301-buf 0))) (ite (bvule (app t301-buf 0) (app t299-buf 0)) (app t299-buf 0) (app t301-buf 0)) (app t303-buf 0)) (ite (bvule (ite (bvule (app t306-buf 0) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0))) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0)) (app t306-buf 0)) (ite (bvule (app t309-buf 0) (ite (bvule (app abstr-vals$2298 0) (app t307-buf 0)) (app t307-buf 0) (app abstr-vals$2298 0))) (ite (bvule (app abstr-vals$2298 0) (app t307-buf 0)) (app t307-buf 0) (app abstr-vals$2298 0)) (app t309-buf 0))) (ite (bvule (app t306-buf 0) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0))) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0)) (app t306-buf 0)) (ite (bvule (app t309-buf 0) (ite (bvule (app abstr-vals$2298 0) (app t307-buf 0)) (app t307-buf 0) (app abstr-vals$2298 0))) (ite (bvule (app abstr-vals$2298 0) (app t307-buf 0)) (app t307-buf 0) (app abstr-vals$2298 0)) (app t309-buf 0)))) (ite (bvule (app t303-buf 0) (ite (bvule (app t301-buf 0) (app t299-buf 0)) (app t299-buf 0) (app t301-buf 0))) (ite (bvule (app t301-buf 0) (app t299-buf 0)) (app t299-buf 0) (app t301-buf 0)) (app t303-buf 0)) (ite (bvule (ite (bvule (app t306-buf 0) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0))) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0)) (app t306-buf 0)) (ite (bvule (app t309-buf 0) (ite (bvule (app abstr-vals$2298 0) (app t307-buf 0)) (app t307-buf 0) (app abstr-vals$2298 0))) (ite (bvule (app abstr-vals$2298 0) (app t307-buf 0)) (app t307-buf 0) (app abstr-vals$2298 0)) (app t309-buf 0))) (ite (bvule (app t306-buf 0) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0))) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0)) (app t306-buf 0)) (ite (bvule (app t309-buf 0) (ite (bvule (app abstr-vals$2298 0) (app t307-buf 0)) (app t307-buf 0) (app abstr-vals$2298 0))) (ite (bvule (app abstr-vals$2298 0) (app t307-buf 0)) (app t307-buf 0) (app abstr-vals$2298 0)) (app t309-buf 0)))))
+optimized x86 0:
+  (uint8_t (app abstr-vals$2298 0))
+run-x86-synthesizer
+halide-expr:
+  (vec-min
+ (vec-max
+  (vec-max
+   (load (buffer t299-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   (load (buffer t301-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (load (buffer t303-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (vec-min
+  (vec-max
+   (vec-max
+    (load (buffer t304-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+    (load (buffer t305-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+   (load (buffer t306-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (vec-max
+   (vec-max
+    (load (buffer t307-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+    (load (buffer t308-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+   (load (buffer t309-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))))
+template:
+  (cast ... #<load-data> 'uint8 #t)
+axioms:
+  '(#t)
+optimized-halide-expr:
+  (vec-min
+ (vec-max
+  (vec-max
+   (load (buffer t299-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   (load (buffer t301-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (load (buffer t303-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (vec-min
+  (vec-max
+   (vec-max
+    (load (buffer t304-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+    (load (buffer t305-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+   (load (buffer t306-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (vec-max
+   (vec-max
+    (load (buffer t307-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+    (load (buffer t308-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+   #<abstr-halide-expr>)))
+optimized-template:
+  (cast ... #<abstr-expr> 'uint8 #t)
+optimized Halide 0:
+  (uint8_t
+ (ite (bvule (ite (bvule (app t303-buf 0) (ite (bvule (app t301-buf 0) (app t299-buf 0)) (app t299-buf 0) (app t301-buf 0))) (ite (bvule (app t301-buf 0) (app t299-buf 0)) (app t299-buf 0) (app t301-buf 0)) (app t303-buf 0)) (ite (bvule (ite (bvule (app t306-buf 0) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0))) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0)) (app t306-buf 0)) (ite (bvule (app abstr-vals$2299 0) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0))) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0)) (app abstr-vals$2299 0))) (ite (bvule (app t306-buf 0) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0))) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0)) (app t306-buf 0)) (ite (bvule (app abstr-vals$2299 0) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0))) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0)) (app abstr-vals$2299 0)))) (ite (bvule (app t303-buf 0) (ite (bvule (app t301-buf 0) (app t299-buf 0)) (app t299-buf 0) (app t301-buf 0))) (ite (bvule (app t301-buf 0) (app t299-buf 0)) (app t299-buf 0) (app t301-buf 0)) (app t303-buf 0)) (ite (bvule (ite (bvule (app t306-buf 0) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0))) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0)) (app t306-buf 0)) (ite (bvule (app abstr-vals$2299 0) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0))) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0)) (app abstr-vals$2299 0))) (ite (bvule (app t306-buf 0) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0))) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0)) (app t306-buf 0)) (ite (bvule (app abstr-vals$2299 0) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0))) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0)) (app abstr-vals$2299 0)))))
+optimized x86 0:
+  (uint8_t (app abstr-vals$2299 0))
+run-x86-synthesizer
+halide-expr:
+  (vec-min
+ (vec-max
+  (vec-max
+   (load (buffer t299-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   (load (buffer t301-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (load (buffer t303-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (vec-min
+  (vec-max
+   (vec-max
+    (load (buffer t304-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+    (load (buffer t305-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+   (load (buffer t306-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (vec-max
+   (vec-max
+    (load (buffer t307-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+    (load (buffer t308-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+   (load (buffer t309-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))))
+template:
+  (cast ... (maximum ... #<load-data> #<load-data>) 'uint8 #t)
+axioms:
+  '(#t)
+optimized-halide-expr:
+  (vec-min
+ (vec-max
+  #<abstr-halide-expr>
+  (load (buffer t303-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (vec-min
+  (vec-max
+   (vec-max
+    (load (buffer t304-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+    (load (buffer t305-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+   (load (buffer t306-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (vec-max
+   (vec-max
+    (load (buffer t307-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+    (load (buffer t308-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+   (load (buffer t309-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))))
+optimized-template:
+  (cast ... #<abstr-expr> 'uint8 #t)
+optimized Halide 0:
+  (uint8_t
+ (ite (bvule (ite (bvule (app t303-buf 0) (app abstr-vals$2300 0)) (app abstr-vals$2300 0) (app t303-buf 0)) (ite (bvule (ite (bvule (app t306-buf 0) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0))) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0)) (app t306-buf 0)) (ite (bvule (app t309-buf 0) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0))) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0)) (app t309-buf 0))) (ite (bvule (app t306-buf 0) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0))) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0)) (app t306-buf 0)) (ite (bvule (app t309-buf 0) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0))) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0)) (app t309-buf 0)))) (ite (bvule (app t303-buf 0) (app abstr-vals$2300 0)) (app abstr-vals$2300 0) (app t303-buf 0)) (ite (bvule (ite (bvule (app t306-buf 0) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0))) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0)) (app t306-buf 0)) (ite (bvule (app t309-buf 0) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0))) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0)) (app t309-buf 0))) (ite (bvule (app t306-buf 0) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0))) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0)) (app t306-buf 0)) (ite (bvule (app t309-buf 0) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0))) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0)) (app t309-buf 0)))))
+optimized x86 0:
+  (uint8_t (app abstr-vals$2300 0))
+run-x86-synthesizer
+halide-expr:
+  (vec-min
+ (vec-max
+  (vec-max
+   (load (buffer t299-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   (load (buffer t301-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (load (buffer t303-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (vec-min
+  (vec-max
+   (vec-max
+    (load (buffer t304-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+    (load (buffer t305-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+   (load (buffer t306-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (vec-max
+   (vec-max
+    (load (buffer t307-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+    (load (buffer t308-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+   (load (buffer t309-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))))
+template:
+  (cast ... (maximum ... #<load-data> #<load-data>) 'uint8 #t)
+axioms:
+  '(#t)
+optimized-halide-expr:
+  (vec-min
+ (vec-max
+  (vec-max
+   (load (buffer t299-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   (load (buffer t301-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (load (buffer t303-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (vec-min
+  (vec-max
+   #<abstr-halide-expr>
+   (load (buffer t306-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (vec-max
+   (vec-max
+    (load (buffer t307-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+    (load (buffer t308-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+   (load (buffer t309-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))))
+optimized-template:
+  (cast ... #<abstr-expr> 'uint8 #t)
+optimized Halide 0:
+  (uint8_t
+ (ite (bvule (ite (bvule (app t303-buf 0) (ite (bvule (app t301-buf 0) (app t299-buf 0)) (app t299-buf 0) (app t301-buf 0))) (ite (bvule (app t301-buf 0) (app t299-buf 0)) (app t299-buf 0) (app t301-buf 0)) (app t303-buf 0)) (ite (bvule (ite (bvule (app t306-buf 0) (app abstr-vals$2301 0)) (app abstr-vals$2301 0) (app t306-buf 0)) (ite (bvule (app t309-buf 0) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0))) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0)) (app t309-buf 0))) (ite (bvule (app t306-buf 0) (app abstr-vals$2301 0)) (app abstr-vals$2301 0) (app t306-buf 0)) (ite (bvule (app t309-buf 0) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0))) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0)) (app t309-buf 0)))) (ite (bvule (app t303-buf 0) (ite (bvule (app t301-buf 0) (app t299-buf 0)) (app t299-buf 0) (app t301-buf 0))) (ite (bvule (app t301-buf 0) (app t299-buf 0)) (app t299-buf 0) (app t301-buf 0)) (app t303-buf 0)) (ite (bvule (ite (bvule (app t306-buf 0) (app abstr-vals$2301 0)) (app abstr-vals$2301 0) (app t306-buf 0)) (ite (bvule (app t309-buf 0) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0))) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0)) (app t309-buf 0))) (ite (bvule (app t306-buf 0) (app abstr-vals$2301 0)) (app abstr-vals$2301 0) (app t306-buf 0)) (ite (bvule (app t309-buf 0) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0))) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0)) (app t309-buf 0)))))
+optimized x86 0:
+  (uint8_t (app abstr-vals$2301 0))
+run-x86-synthesizer
+halide-expr:
+  (vec-min
+ (vec-max
+  (vec-max
+   (load (buffer t299-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   (load (buffer t301-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (load (buffer t303-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (vec-min
+  (vec-max
+   (vec-max
+    (load (buffer t304-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+    (load (buffer t305-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+   (load (buffer t306-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (vec-max
+   (vec-max
+    (load (buffer t307-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+    (load (buffer t308-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+   (load (buffer t309-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))))
+template:
+  (cast ... (maximum ... #<load-data> #<load-data>) 'uint8 #t)
+axioms:
+  '(#t)
+optimized-halide-expr:
+  (vec-min
+ (vec-max
+  (vec-max
+   (load (buffer t299-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   (load (buffer t301-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (load (buffer t303-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (vec-min
+  (vec-max
+   (vec-max
+    (load (buffer t304-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+    (load (buffer t305-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+   (load (buffer t306-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (vec-max
+   #<abstr-halide-expr>
+   (load (buffer t309-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))))
+optimized-template:
+  (cast ... #<abstr-expr> 'uint8 #t)
+optimized Halide 0:
+  (uint8_t
+ (ite (bvule (ite (bvule (app t303-buf 0) (ite (bvule (app t301-buf 0) (app t299-buf 0)) (app t299-buf 0) (app t301-buf 0))) (ite (bvule (app t301-buf 0) (app t299-buf 0)) (app t299-buf 0) (app t301-buf 0)) (app t303-buf 0)) (ite (bvule (ite (bvule (app t306-buf 0) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0))) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0)) (app t306-buf 0)) (ite (bvule (app t309-buf 0) (app abstr-vals$2302 0)) (app abstr-vals$2302 0) (app t309-buf 0))) (ite (bvule (app t306-buf 0) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0))) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0)) (app t306-buf 0)) (ite (bvule (app t309-buf 0) (app abstr-vals$2302 0)) (app abstr-vals$2302 0) (app t309-buf 0)))) (ite (bvule (app t303-buf 0) (ite (bvule (app t301-buf 0) (app t299-buf 0)) (app t299-buf 0) (app t301-buf 0))) (ite (bvule (app t301-buf 0) (app t299-buf 0)) (app t299-buf 0) (app t301-buf 0)) (app t303-buf 0)) (ite (bvule (ite (bvule (app t306-buf 0) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0))) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0)) (app t306-buf 0)) (ite (bvule (app t309-buf 0) (app abstr-vals$2302 0)) (app abstr-vals$2302 0) (app t309-buf 0))) (ite (bvule (app t306-buf 0) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0))) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0)) (app t306-buf 0)) (ite (bvule (app t309-buf 0) (app abstr-vals$2302 0)) (app abstr-vals$2302 0) (app t309-buf 0)))))
+optimized x86 0:
+  (uint8_t (app abstr-vals$2302 0))
+run-x86-synthesizer
+halide-expr:
+  (vec-min
+ (vec-max
+  (vec-max
+   (load (buffer t299-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   (load (buffer t301-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (load (buffer t303-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (vec-min
+  (vec-max
+   (vec-max
+    (load (buffer t304-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+    (load (buffer t305-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+   (load (buffer t306-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (vec-max
+   (vec-max
+    (load (buffer t307-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+    (load (buffer t308-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+   (load (buffer t309-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))))
+template:
+  (cast
+ ...
+ (maximum ... (maximum ... #<load-data> #<load-data>) #<load-data>)
+ 'uint8
+ #t)
+axioms:
+  '(#t)
+optimized-halide-expr:
+  (vec-min
+ (vec-max
+  (vec-max
+   (load (buffer t299-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   (load (buffer t301-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (load (buffer t303-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (vec-min
+  #<abstr-halide-expr>
+  (vec-max
+   (vec-max
+    (load (buffer t307-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+    (load (buffer t308-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+   (load (buffer t309-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))))
+optimized-template:
+  (cast ... #<abstr-expr> 'uint8 #t)
+optimized Halide 0:
+  (uint8_t
+ (ite (bvule (ite (bvule (app t303-buf 0) (ite (bvule (app t301-buf 0) (app t299-buf 0)) (app t299-buf 0) (app t301-buf 0))) (ite (bvule (app t301-buf 0) (app t299-buf 0)) (app t299-buf 0) (app t301-buf 0)) (app t303-buf 0)) (ite (bvule (app abstr-vals$2303 0) (ite (bvule (app t309-buf 0) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0))) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0)) (app t309-buf 0))) (app abstr-vals$2303 0) (ite (bvule (app t309-buf 0) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0))) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0)) (app t309-buf 0)))) (ite (bvule (app t303-buf 0) (ite (bvule (app t301-buf 0) (app t299-buf 0)) (app t299-buf 0) (app t301-buf 0))) (ite (bvule (app t301-buf 0) (app t299-buf 0)) (app t299-buf 0) (app t301-buf 0)) (app t303-buf 0)) (ite (bvule (app abstr-vals$2303 0) (ite (bvule (app t309-buf 0) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0))) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0)) (app t309-buf 0))) (app abstr-vals$2303 0) (ite (bvule (app t309-buf 0) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0))) (ite (bvule (app t308-buf 0) (app t307-buf 0)) (app t307-buf 0) (app t308-buf 0)) (app t309-buf 0)))))
+optimized x86 0:
+  (uint8_t (app abstr-vals$2303 0))
+run-x86-synthesizer
+halide-expr:
+  (vec-min
+ (vec-max
+  (vec-max
+   (load (buffer t299-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   (load (buffer t301-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (load (buffer t303-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (vec-min
+  (vec-max
+   (vec-max
+    (load (buffer t304-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+    (load (buffer t305-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+   (load (buffer t306-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (vec-max
+   (vec-max
+    (load (buffer t307-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+    (load (buffer t308-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+   (load (buffer t309-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))))
+template:
+  (cast
+ ...
+ (maximum ... (maximum ... #<load-data> #<load-data>) #<load-data>)
+ 'uint8
+ #t)
+axioms:
+  '(#t)
+optimized-halide-expr:
+  (vec-min
+ (vec-max
+  (vec-max
+   (load (buffer t299-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   (load (buffer t301-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (load (buffer t303-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (vec-min
+  (vec-max
+   (vec-max
+    (load (buffer t304-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+    (load (buffer t305-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+   (load (buffer t306-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  #<abstr-halide-expr>))
+optimized-template:
+  (cast ... #<abstr-expr> 'uint8 #t)
+optimized Halide 0:
+  (uint8_t
+ (ite (bvule (ite (bvule (app t303-buf 0) (ite (bvule (app t301-buf 0) (app t299-buf 0)) (app t299-buf 0) (app t301-buf 0))) (ite (bvule (app t301-buf 0) (app t299-buf 0)) (app t299-buf 0) (app t301-buf 0)) (app t303-buf 0)) (ite (bvule (ite (bvule (app t306-buf 0) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0))) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0)) (app t306-buf 0)) (app abstr-vals$2304 0)) (ite (bvule (app t306-buf 0) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0))) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0)) (app t306-buf 0)) (app abstr-vals$2304 0))) (ite (bvule (app t303-buf 0) (ite (bvule (app t301-buf 0) (app t299-buf 0)) (app t299-buf 0) (app t301-buf 0))) (ite (bvule (app t301-buf 0) (app t299-buf 0)) (app t299-buf 0) (app t301-buf 0)) (app t303-buf 0)) (ite (bvule (ite (bvule (app t306-buf 0) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0))) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0)) (app t306-buf 0)) (app abstr-vals$2304 0)) (ite (bvule (app t306-buf 0) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0))) (ite (bvule (app t305-buf 0) (app t304-buf 0)) (app t304-buf 0) (app t305-buf 0)) (app t306-buf 0)) (app abstr-vals$2304 0))))
+optimized x86 0:
+  (uint8_t (app abstr-vals$2304 0))
+"Success?"
+#f
+#<void>
+run-x86-synthesizer
+halide-expr:
+  (vec-min
+ (vec-max
+  (vec-max
+   (load (buffer t299-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   (load (buffer t301-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (load (buffer t303-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (vec-min
+  (vec-max
+   (vec-max
+    (load (buffer t304-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+    (load (buffer t305-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+   (load (buffer t306-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (vec-max
+   (vec-max
+    (load (buffer t307-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+    (load (buffer t308-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+   (load (buffer t309-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))))
+template:
+  (minimum
+ ...
+ (maximum ... (maximum ... #<load-data> #<load-data>) #<load-data>)
+ (minimum
+  ...
+  (maximum ... (maximum ... #<load-data> #<load-data>) #<load-data>)
+  (maximum ... (maximum ... #<load-data> #<load-data>) #<load-data>)))
+axioms:
+  '(#t #t)
+optimized-halide-expr:
+  (vec-min #<abstr-halide-expr> #<abstr-halide-expr>)
+optimized-template:
+  (minimum ... #<abstr-expr> #<abstr-expr>)
+optimized Halide 0:
+  (uint8_t
+ (ite (bvule (app abstr-vals$2305 0) (app abstr-vals$2306 0)) (app abstr-vals$2305 0) (app abstr-vals$2306 0)))
+optimized x86 0:
+  (uint8_t
+ (ite (bvule (app abstr-vals$2305 0) (app abstr-vals$2306 0)) (app abstr-vals$2305 0) (app abstr-vals$2306 0)))
+Ran synthesizer for 17 ms
+(model)
+(vec-min #<abstr-halide-expr> #<abstr-halide-expr>)
+(minimum
+ ...
+ (maximum ... (maximum ... #<load-data> #<load-data>) #<load-data>)
+ (minimum
+  ...
+  (maximum ... (maximum ... #<load-data> #<load-data>) #<load-data>)
+  (maximum ... (maximum ... #<load-data> #<load-data>) #<load-data>)))
+Ran bounds analysis for 21 ms
+Ran bounds analysis for 12 ms
+"Extended success?"
+#t
+(minimum
+ ...
+ (maximum ... (maximum ... #<load-data> #<load-data>) #<load-data>)
+ (minimum
+  ...
+  (maximum ... (maximum ... #<load-data> #<load-data>) #<load-data>)
+  (maximum ... (maximum ... #<load-data> #<load-data>) #<load-data>)))
+
+(x86) Successfully found an equivalent IR expression.
+
+(minimum
+ ...
+ (maximum ... (maximum ... #<load-data> #<load-data>) #<load-data>)
+ (minimum
+  ...
+  (maximum ... (maximum ... #<load-data> #<load-data>) #<load-data>)
+  (maximum ... (maximum ... #<load-data> #<load-data>) #<load-data>)))
+
+Synthesis time: 5 seconds
+
+Synthesizing x86 for:
+(vec-min
+ (vec-max
+  (vec-max
+   (load (buffer t299-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+   (load (buffer t301-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (load (buffer t303-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+ (vec-min
+  (vec-max
+   (vec-max
+    (load (buffer t304-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+    (load (buffer t305-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+   (load (buffer t306-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+  (vec-max
+   (vec-max
+    (load (buffer t307-buf 'uint8) (ramp 0 1 16) (aligned 0 0))
+    (load (buffer t308-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))
+   (load (buffer t309-buf 'uint8) (ramp 0 1 16) (aligned 0 0)))))
+
+
+synthesize-x86 output:
+#<void>
+#f

@@ -10,10 +10,14 @@
   rake/arm/ir/interpreter
   rake/hvx/ir/instructions
   rake/hvx/ir/interpreter
+  rake/x86/ir/instructions
+  rake/x86/ir/interpreter
   rake/synthesis/lifting/synthesizer/arm
   rake/synthesis/lifting/synthesizer/hvx
+  rake/synthesis/lifting/synthesizer/x86
   rake/synthesis/lifting/grammar/hvx
   rake/synthesis/lifting/grammar/arm
+  rake/synthesis/lifting/grammar/x86
   rake/synthesis/lifting/grammar/util
   rake/internal/counter)
 
@@ -83,8 +87,41 @@
             (pretty-print res)
             (display (format "\nSynthesis time: ~a seconds\n\n" runtime))
             (values res annotations (get-lifted-arm-expr-bounds))))]
+
+    [(eq? ir-name 'x86-uberinstrs)
+      (display "Lifting input expression to x86 IR...\n")
+      (display "=====================================\n\n")
+
+      ;; Init state
+      (set! cache (make-hash))
+      (set! annotations (make-hash))
+      
+      (define halide-expr (spec-expr spec))
+      (define axioms (spec-axioms spec))
+      (define context (symbolics halide-expr))
+      (define uber-instrs x86-uber-instructions)
+      (define synthesize-fn synthesize-x86-translation)
+      (define instr-counter x86-ir:instr-count)
+      
+      (define st (current-seconds))
+      (define res (build-ir-expr halide-expr axioms uber-instrs synthesize-fn instr-counter x86-ir:ast-node-id context))
+      (define runtime (- (current-seconds) st))
+
+      (hash-set! annotations (x86-ir:ast-node-id res) halide-expr)
+      
+      (if (eq? res (unsat))
+          (begin
+            (display "(x86) Failed to find an equivalent IR expression.\n\n")
+            (display (format "Synthesis time: ~a seconds\n\n" runtime))
+            (values (void) (void) (void)))
+          (begin
+            (display "\n(x86) Successfully found an equivalent IR expression.\n\n")
+            (pretty-print res)
+            (display (format "\nSynthesis time: ~a seconds\n\n" runtime))
+            (values res annotations (get-lifted-x86-expr-bounds))))]
+
     [else
-      (error (format "Unrecognized lifting target IR: '~a. Supported lifting IRs: ['hvx-uberinstr]" ir-name))]))
+      (error (format "Unrecognized lifting target IR: '~a. Supported lifting IRs: ['hvx-uberinstr | 'arm-uberinstr | 'x86-uberinstr]" ir-name))]))
 
 (define cache (make-hash))
 (define annotations (make-hash))
@@ -103,9 +140,19 @@
          (hash-set! annotations (get-node-id ir-equiv) sub-expr)
          ir-equiv))
 
+    (println "Building Expr:")
+    (pretty-print halide-expr)
+
      ;; Step 1: Folding.
      ;; Can we fold the new node into the **existing** sequence of IR instructions?
      (define fold-templates (fold-into-subexprs lifted-sub-exprs lifted-sub-exprs halide-expr uber-instrs))
+     (println "Fold templates")
+
+     (pretty-print fold-templates)
+     (display "here")
+     (display fold-templates)
+     (newline)
+     (newline)
      
      ;; Can we fold the new node into a **modified** version of the existing IR
      ;; instruction sequence? We restrict modifications such that:
@@ -113,6 +160,8 @@
      ;; - 0 or more IR instructions may be removed
      ;; - We only explore changing or removing the last N instructions in the sequence (N=3 atm)
      (define repl-templates (repl-subexprs lifted-sub-exprs halide-expr uber-instrs))
+     (println "Replace templates")
+     (pretty-print repl-templates)
 
      ;(pretty-print repl-templates)
 
@@ -123,6 +172,10 @@
      (define bounded-eq? (if (interleave? halide-expr) bounded-eq-1? bounded-eq-0?))
      (define-values (success? folded-ir-expr)
        (synthesize-translation sorted-templates halide-expr axioms context bounded-eq?))
+      
+      (println "Success?")
+      (println success?)
+      (println folded-ir-expr)
      
      (cond
        [success? (hash-set! cache halide-expr folded-ir-expr) folded-ir-expr]
@@ -132,6 +185,10 @@
         (define-values (success? extended-ir-expr)
           (extend-subexprs lifted-sub-exprs halide-expr axioms uber-instrs synthesize-translation context))
         
+        (println "Extended success?")
+        (println success?)
+        (pretty-print extended-ir-expr)
+
         (cond
           [success? (hash-set! cache halide-expr extended-ir-expr) extended-ir-expr]
           [else (error "synthesis\\lifting\\greedy-ir-lifted.rkt: FOLD-REPLACE-EXTEND algorithm failed to lift the halide expression:" halide-expr)])])]))

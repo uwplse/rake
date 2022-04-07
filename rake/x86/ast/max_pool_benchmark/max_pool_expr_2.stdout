@@ -1,0 +1,290 @@
+Lifting input expression to x86 IR...
+=====================================
+
+"Building Expr:"
+(load (buffer maximum 'uint8) (ramp 0 1 32) (aligned 0 0))
+"Fold templates"
+'()
+here()
+
+"Replace templates"
+'()
+"Success?"
+#f
+#<void>
+run-x86-synthesizer
+halide-expr:
+  (load (buffer maximum 'uint8) (ramp 0 1 32) (aligned 0 0))
+template:
+  #<load-data>
+axioms:
+  '()
+optimized-halide-expr:
+  (load (buffer maximum 'uint8) (ramp 0 1 32) (aligned 0 0))
+optimized-template:
+  #<load-data>
+optimized Halide 0:
+  (uint8_t (app maximum 0))
+optimized x86 0:
+  (uint8_t (app maximum 0))
+Ran synthesizer for 27 ms
+(model
+ [idx$0 0])
+(load (buffer maximum 'uint8) (ramp 0 1 32) (aligned 0 0))
+#<load-data>
+Ran bounds analysis for 25 ms
+Ran bounds analysis for 16 ms
+"Extended success?"
+#t
+#<load-data>
+"Building Expr:"
+(load
+ (buffer input 'uint8)
+ (ramp
+  (sca-add
+   (sca-mul
+    (sca-add maximum.s1.r$x.rebased (var-lookup 't308))
+    (var-lookup 'input.stride.1))
+   (var-lookup 't311))
+  1
+  32)
+ (aligned 1 0))
+"Fold templates"
+'()
+here()
+
+"Replace templates"
+'()
+"Success?"
+#f
+#<void>
+run-x86-synthesizer
+halide-expr:
+  (load
+ (buffer input 'uint8)
+ (ramp
+  (sca-add
+   (sca-mul
+    (sca-add maximum.s1.r$x.rebased (var-lookup 't308))
+    (var-lookup 'input.stride.1))
+   (var-lookup 't311))
+  1
+  32)
+ (aligned 1 0))
+template:
+  #<load-data>
+axioms:
+  '()
+optimized-halide-expr:
+  (load
+ (buffer input 'uint8)
+ (ramp
+  (sca-add
+   (sca-mul
+    (sca-add maximum.s1.r$x.rebased (var-lookup 't308))
+    (var-lookup 'input.stride.1))
+   (var-lookup 't311))
+  1
+  32)
+ (aligned 1 0))
+optimized-template:
+  #<load-data>
+optimized Halide 0:
+  (uint8_t
+ (app input (+ (+ (+ maximum.s1.r$x.rebased (+ t443 (ite (<= 0 (ite (<= (+ t379 (- t443)) filter_width) (+ t379 (- t443)) filter_width)) (ite (<= (+ t379 (- t443)) filter_width) (+ t379 (- t443)) filter_width) 0))) (- t381)) (+ t445 (+ (ite (<= (+ -32 output.s0.c.c) (+ -32 t377)) (+ -32 output.s0.c.c) (+ -32 t377)) (+ t440 (+ (+ (+ (+ t376 (- t436)) (- t437)) (- t438)) (- t376))))))))
+optimized x86 0:
+  (uint8_t
+ (app input (+ (+ (+ maximum.s1.r$x.rebased (+ t443 (ite (<= 0 (ite (<= (+ t379 (- t443)) filter_width) (+ t379 (- t443)) filter_width)) (ite (<= (+ t379 (- t443)) filter_width) (+ t379 (- t443)) filter_width) 0))) (- t381)) (+ t445 (+ (ite (<= (+ -32 output.s0.c.c) (+ -32 t377)) (+ -32 output.s0.c.c) (+ -32 t377)) (+ t440 (+ (+ (+ (+ t376 (- t436)) (- t437)) (- t438)) (- t376))))))))
+Ran synthesizer for 27 ms
+(model
+ [idx$65 0])
+(load
+ (buffer input 'uint8)
+ (ramp
+  (sca-add
+   (sca-mul
+    (sca-add maximum.s1.r$x.rebased (var-lookup 't308))
+    (var-lookup 'input.stride.1))
+   (var-lookup 't311))
+  1
+  32)
+ (aligned 1 0))
+#<load-data>
+Ran bounds analysis for 24 ms
+Ran bounds analysis for 15 ms
+"Extended success?"
+#t
+#<load-data>
+"Building Expr:"
+(vec-max
+ (load (buffer maximum 'uint8) (ramp 0 1 32) (aligned 0 0))
+ (load
+  (buffer input 'uint8)
+  (ramp
+   (sca-add
+    (sca-mul
+     (sca-add maximum.s1.r$x.rebased (var-lookup 't308))
+     (var-lookup 'input.stride.1))
+    (var-lookup 't311))
+   1
+   32)
+  (aligned 1 0)))
+"Fold templates"
+'(#<load-data> #<load-data>)
+here(#<load-data> #<load-data>)
+
+"Replace templates"
+'()
+run-x86-synthesizer
+halide-expr:
+  (vec-max
+ (load (buffer maximum 'uint8) (ramp 0 1 32) (aligned 0 0))
+ (load
+  (buffer input 'uint8)
+  (ramp
+   (sca-add
+    (sca-mul
+     (sca-add maximum.s1.r$x.rebased (var-lookup 't308))
+     (var-lookup 'input.stride.1))
+    (var-lookup 't311))
+   1
+   32)
+  (aligned 1 0)))
+template:
+  #<load-data>
+axioms:
+  '()
+optimized-halide-expr:
+  (vec-max
+ (load (buffer maximum 'uint8) (ramp 0 1 32) (aligned 0 0))
+ (load
+  (buffer input 'uint8)
+  (ramp
+   (sca-add
+    (sca-mul
+     (sca-add maximum.s1.r$x.rebased (var-lookup 't308))
+     (var-lookup 'input.stride.1))
+    (var-lookup 't311))
+   1
+   32)
+  (aligned 1 0)))
+optimized-template:
+  #<load-data>
+optimized Halide 0:
+  (uint8_t
+ (ite (bvule (app input (+ (+ (+ maximum.s1.r$x.rebased (+ t443 (ite (<= 0 (ite (<= (+ t379 (- t443)) filter_width) (+ t379 (- t443)) filter_width)) (ite (<= (+ t379 (- t443)) filter_width) (+ t379 (- t443)) filter_width) 0))) (- t381)) (+ t445 (+ (ite (<= (+ -32 output.s0.c.c) (+ -32 t377)) (+ -32 output.s0.c.c) (+ -32 t377)) (+ t440 (+ (+ (+ (+ t376 (- t436)) (- t437)) (- t438)) (- t376))))))) (app maximum 0)) (app maximum 0) (app input (+ (+ (+ maximum.s1.r$x.rebased (+ t443 (ite (<= 0 (ite (<= (+ t379 (- t443)) filter_width) (+ t379 (- t443)) filter_width)) (ite (<= (+ t379 (- t443)) filter_width) (+ t379 (- t443)) filter_width) 0))) (- t381)) (+ t445 (+ (ite (<= (+ -32 output.s0.c.c) (+ -32 t377)) (+ -32 output.s0.c.c) (+ -32 t377)) (+ t440 (+ (+ (+ (+ t376 (- t436)) (- t437)) (- t438)) (- t376)))))))))
+optimized x86 0:
+  (uint8_t
+ (ite* (⊢ (= 0 idx$130) (app maximum 0)) (⊢ (= 1 idx$130) (app input (+ (+ (+ maximum.s1.r$x.rebased (+ t443 (ite (<= 0 (ite (<= (+ t379 (- t443)) filter_width) (+ t379 (- t443)) filter_width)) (ite (<= (+ t379 (- t443)) filter_width) (+ t379 (- t443)) filter_width) 0))) (- t381)) (+ t445 (+ (ite (<= (+ -32 output.s0.c.c) (+ -32 t377)) (+ -32 output.s0.c.c) (+ -32 t377)) (+ t440 (+ (+ (+ (+ t376 (- t436)) (- t437)) (- t438)) (- t376))))))))))
+Ran synthesizer for 104 ms
+(unsat)
+run-x86-synthesizer
+halide-expr:
+  (vec-max
+ (load (buffer maximum 'uint8) (ramp 0 1 32) (aligned 0 0))
+ (load
+  (buffer input 'uint8)
+  (ramp
+   (sca-add
+    (sca-mul
+     (sca-add maximum.s1.r$x.rebased (var-lookup 't308))
+     (var-lookup 'input.stride.1))
+    (var-lookup 't311))
+   1
+   32)
+  (aligned 1 0)))
+template:
+  #<load-data>
+axioms:
+  '()
+optimized-halide-expr:
+  (vec-max
+ (load (buffer maximum 'uint8) (ramp 0 1 32) (aligned 0 0))
+ (load
+  (buffer input 'uint8)
+  (ramp
+   (sca-add
+    (sca-mul
+     (sca-add maximum.s1.r$x.rebased (var-lookup 't308))
+     (var-lookup 'input.stride.1))
+    (var-lookup 't311))
+   1
+   32)
+  (aligned 1 0)))
+optimized-template:
+  #<load-data>
+optimized Halide 0:
+  (uint8_t
+ (ite (bvule (app input (+ (+ (+ maximum.s1.r$x.rebased (+ t443 (ite (<= 0 (ite (<= (+ t379 (- t443)) filter_width) (+ t379 (- t443)) filter_width)) (ite (<= (+ t379 (- t443)) filter_width) (+ t379 (- t443)) filter_width) 0))) (- t381)) (+ t445 (+ (ite (<= (+ -32 output.s0.c.c) (+ -32 t377)) (+ -32 output.s0.c.c) (+ -32 t377)) (+ t440 (+ (+ (+ (+ t376 (- t436)) (- t437)) (- t438)) (- t376))))))) (app maximum 0)) (app maximum 0) (app input (+ (+ (+ maximum.s1.r$x.rebased (+ t443 (ite (<= 0 (ite (<= (+ t379 (- t443)) filter_width) (+ t379 (- t443)) filter_width)) (ite (<= (+ t379 (- t443)) filter_width) (+ t379 (- t443)) filter_width) 0))) (- t381)) (+ t445 (+ (ite (<= (+ -32 output.s0.c.c) (+ -32 t377)) (+ -32 output.s0.c.c) (+ -32 t377)) (+ t440 (+ (+ (+ (+ t376 (- t436)) (- t437)) (- t438)) (- t376)))))))))
+optimized x86 0:
+  (uint8_t
+ (ite* (⊢ (= 0 idx$194) (app maximum 0)) (⊢ (= 1 idx$194) (app input (+ (+ (+ maximum.s1.r$x.rebased (+ t443 (ite (<= 0 (ite (<= (+ t379 (- t443)) filter_width) (+ t379 (- t443)) filter_width)) (ite (<= (+ t379 (- t443)) filter_width) (+ t379 (- t443)) filter_width) 0))) (- t381)) (+ t445 (+ (ite (<= (+ -32 output.s0.c.c) (+ -32 t377)) (+ -32 output.s0.c.c) (+ -32 t377)) (+ t440 (+ (+ (+ (+ t376 (- t436)) (- t437)) (- t438)) (- t376))))))))))
+Ran synthesizer for 113 ms
+(unsat)
+"Success?"
+#f
+#<void>
+run-x86-synthesizer
+halide-expr:
+  (vec-max
+ (load (buffer maximum 'uint8) (ramp 0 1 32) (aligned 0 0))
+ (load
+  (buffer input 'uint8)
+  (ramp
+   (sca-add
+    (sca-mul
+     (sca-add maximum.s1.r$x.rebased (var-lookup 't308))
+     (var-lookup 'input.stride.1))
+    (var-lookup 't311))
+   1
+   32)
+  (aligned 1 0)))
+template:
+  (maximum ... #<load-data> #<load-data>)
+axioms:
+  '(#t #t)
+optimized-halide-expr:
+  (vec-max #<abstr-halide-expr> #<abstr-halide-expr>)
+optimized-template:
+  (maximum ... #<abstr-expr> #<abstr-expr>)
+optimized Halide 0:
+  (uint8_t
+ (ite (bvule (app abstr-vals$259 0) (app abstr-vals$258 0)) (app abstr-vals$258 0) (app abstr-vals$259 0)))
+optimized x86 0:
+  (uint8_t
+ (ite (bvule (app abstr-vals$259 0) (app abstr-vals$258 0)) (app abstr-vals$258 0) (app abstr-vals$259 0)))
+Ran synthesizer for 20 ms
+(model)
+(vec-max #<abstr-halide-expr> #<abstr-halide-expr>)
+(maximum ... #<load-data> #<load-data>)
+Ran bounds analysis for 26 ms
+Ran bounds analysis for 14 ms
+"Extended success?"
+#t
+(maximum ... #<load-data> #<load-data>)
+
+(x86) Successfully found an equivalent IR expression.
+
+(maximum ... #<load-data> #<load-data>)
+
+Synthesis time: 1 seconds
+
+Synthesizing x86 for:
+(vec-max
+ (load (buffer maximum 'uint8) (ramp 0 1 32) (aligned 0 0))
+ (load
+  (buffer input 'uint8)
+  (ramp
+   (sca-add
+    (sca-mul
+     (sca-add maximum.s1.r$x.rebased (var-lookup 't308))
+     (var-lookup 'input.stride.1))
+    (var-lookup 't311))
+   1
+   32)
+  (aligned 1 0)))
+
+
+synthesize-x86 output:
+#<void>
+#f

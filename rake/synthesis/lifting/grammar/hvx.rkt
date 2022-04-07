@@ -20,7 +20,7 @@
 ;; the current IR-expression. In these tempalates, we do not
 ;; change any uber-instruction in the IR expression, only their
 ;; inputs.
-(define (fold-grammar lifted-sub-expr halide-expr [depth 0])
+(define (fold-grammar lifted-sub-expr lifted-sibling-exprs halide-expr [depth 0])
   (define candidates
     (destruct lifted-sub-expr
 

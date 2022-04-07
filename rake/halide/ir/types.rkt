@@ -84,6 +84,8 @@
 
 (struct vec-bwand (v1 v2) #:transparent)
 (struct vec-bwxor (v1 v2) #:transparent)
+(struct vec-bwor (v1 v2) #:transparent)
+(struct vec-bwnot (v1) #:transparent)
 (struct vec-reinterpret (v type lanes) #:transparent)
 
 (struct vector_reduce (op width vec) #:transparent)

@@ -1,0 +1,8 @@
+synthesis\lifting\greedy-ir-lifted.rkt: FOLD-REPLACE-EXTEND algorithm failed to lift the halide expression: (vec-mul (vec-cast (vec-add (vec-mul (vec-cast (load (buffer input1 'uint8) (ramp (sca-add (sca-mul output.s0.x.x 16) (sca-add (sca-mul (var-lookup 'input1.stride.1) (var-lookup 't69)) (var-lookup 't55))) 1 16) (aligned 1 0)) 'int16 16) (sca-broadcast (int16_t (bv #x0040 16)) 16)) (sca-broadcast (sca-mul (int16_t t127) (int16_t (bv #xffc0 16))) 16)) 'int32 16) (vec-cast (vec-add (vec-mul (vec-cast (load (buffer input2 'uint8) (ramp (sca-add (sca-mul output.s0.x.x 16) (sca-add (sca-mul (var-lookup 'input2.stride.1) (var-lookup 't69)) (var-lookup 't56))) 1 16) (aligned 1 0)) 'int16 16) (sca-broadcast (int16_t (bv #x0040 16)) 16)) (sca-broadcast (sca-mul (int16_t t128) (int16_t (bv #xffc0 16))) 16)) 'int32 16))
+  context...:
+   /Users/alexanderroot/Projects/Rake/hvx/rake/rosette/rosette/base/form/control.rkt:16:25
+   [repeats 22 more times]
+   /Users/alexanderroot/Projects/Rake/hvx/rake/rosette/rosette/base/form/control.rkt:15:25
+   /Users/alexanderroot/Projects/Rake/rake/rake/synthesis/ir.rkt:9:0: synthesize-ir-expr
+   /Users/alexanderroot/Projects/Rake/hvx/rake/rosette/rosette/base/form/control.rkt:15:25
+   body of "/Users/alexanderroot/Projects/Rake/rake/rake/x86/ast/mul_benchmark/mul_expr_0.rkt"

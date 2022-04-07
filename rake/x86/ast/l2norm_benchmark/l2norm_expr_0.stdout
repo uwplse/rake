@@ -1,0 +1,648 @@
+Lifting input expression to x86 IR...
+=====================================
+
+"Building Expr:"
+(load
+ (buffer input 'uint8)
+ (ramp
+  (sca-add (sca-mul sum_input_sq.s1.rx$x.rx$x 16) (var-lookup 't110))
+  1
+  16)
+ (aligned 1 0))
+"Fold templates"
+'()
+here()
+
+"Replace templates"
+'()
+"Success?"
+#f
+#<void>
+run-x86-synthesizer
+halide-expr:
+  (load
+ (buffer input 'uint8)
+ (ramp
+  (sca-add (sca-mul sum_input_sq.s1.rx$x.rx$x 16) (var-lookup 't110))
+  1
+  16)
+ (aligned 1 0))
+template:
+  #<load-data>
+axioms:
+  '()
+optimized-halide-expr:
+  (load
+ (buffer input 'uint8)
+ (ramp
+  (sca-add (sca-mul sum_input_sq.s1.rx$x.rx$x 16) (var-lookup 't110))
+  1
+  16)
+ (aligned 1 0))
+optimized-template:
+  #<load-data>
+optimized Halide 0:
+  (uint8_t (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))))
+optimized x86 0:
+  (uint8_t (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))))
+Ran synthesizer for 23 ms
+(model
+ [idx$0 0])
+(load
+ (buffer input 'uint8)
+ (ramp
+  (sca-add (sca-mul sum_input_sq.s1.rx$x.rx$x 16) (var-lookup 't110))
+  1
+  16)
+ (aligned 1 0))
+#<load-data>
+Ran bounds analysis for 21 ms
+Ran bounds analysis for 13 ms
+"Extended success?"
+#t
+#<load-data>
+"Building Expr:"
+(vec-cast
+ (load
+  (buffer input 'uint8)
+  (ramp
+   (sca-add (sca-mul sum_input_sq.s1.rx$x.rx$x 16) (var-lookup 't110))
+   1
+   16)
+  (aligned 1 0))
+ 'int16
+ 16)
+"Fold templates"
+'(#<load-data>)
+here(#<load-data>)
+
+"Replace templates"
+'()
+run-x86-synthesizer
+halide-expr:
+  (vec-cast
+ (load
+  (buffer input 'uint8)
+  (ramp
+   (sca-add (sca-mul sum_input_sq.s1.rx$x.rx$x 16) (var-lookup 't110))
+   1
+   16)
+  (aligned 1 0))
+ 'int16
+ 16)
+template:
+  #<load-data>
+axioms:
+  '()
+optimized-halide-expr:
+  (vec-cast
+ (load
+  (buffer input 'uint8)
+  (ramp
+   (sca-add (sca-mul sum_input_sq.s1.rx$x.rx$x 16) (var-lookup 't110))
+   1
+   16)
+  (aligned 1 0))
+ 'int16
+ 16)
+optimized-template:
+  #<load-data>
+optimized Halide 0:
+  (int16_t
+ (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)))
+optimized x86 0:
+  (uint8_t (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))))
+Ran synthesizer for 2 ms
+(unsat)
+"Success?"
+#f
+#<void>
+run-x86-synthesizer
+halide-expr:
+  (vec-cast
+ (load
+  (buffer input 'uint8)
+  (ramp
+   (sca-add (sca-mul sum_input_sq.s1.rx$x.rx$x 16) (var-lookup 't110))
+   1
+   16)
+  (aligned 1 0))
+ 'int16
+ 16)
+template:
+  (cast ... #<load-data> 'int16 #f)
+axioms:
+  '(#t)
+optimized-halide-expr:
+  (vec-cast #<abstr-halide-expr> 'int16 16)
+optimized-template:
+  (cast ... #<abstr-expr> 'int16 #f)
+optimized Halide 0:
+  (int16_t (zero-extend (app abstr-vals$129 0) (bitvector 16)))
+optimized x86 0:
+  (int16_t (zero-extend (app abstr-vals$129 0) (bitvector 16)))
+Ran synthesizer for 18 ms
+(model)
+(vec-cast #<abstr-halide-expr> 'int16 16)
+(cast ... #<load-data> 'int16 #f)
+Ran bounds analysis for 22 ms
+Ran bounds analysis for 15 ms
+"Extended success?"
+#t
+(cast ... #<load-data> 'int16 #f)
+"Building Expr:"
+(sca-broadcast (uint8_t input_zero) 16)
+"Fold templates"
+'()
+here()
+
+"Replace templates"
+'()
+"Success?"
+#f
+#<void>
+run-x86-synthesizer
+halide-expr:
+  (sca-broadcast (uint8_t input_zero) 16)
+template:
+  (broadcast ... (uint8_t input_zero))
+axioms:
+  '()
+optimized-halide-expr:
+  (sca-broadcast (uint8_t input_zero) 16)
+optimized-template:
+  (broadcast ... (uint8_t input_zero))
+optimized Halide 0:
+  (uint8_t input_zero)
+optimized x86 0:
+  (uint8_t input_zero)
+Ran synthesizer for 18 ms
+(model)
+(sca-broadcast (uint8_t input_zero) 16)
+(broadcast ... (uint8_t input_zero))
+Ran bounds analysis for 21 ms
+Ran bounds analysis for 13 ms
+"Extended success?"
+#t
+(broadcast ... (uint8_t input_zero))
+"Building Expr:"
+(vec-cast (sca-broadcast (uint8_t input_zero) 16) 'int16 16)
+"Fold templates"
+'()
+here()
+
+"Replace templates"
+'()
+"Success?"
+#f
+#<void>
+run-x86-synthesizer
+halide-expr:
+  (vec-cast (sca-broadcast (uint8_t input_zero) 16) 'int16 16)
+template:
+  (cast ... (broadcast ... (uint8_t input_zero)) 'int16 #f)
+axioms:
+  '(#t)
+optimized-halide-expr:
+  (vec-cast #<abstr-halide-expr> 'int16 16)
+optimized-template:
+  (cast ... #<abstr-expr> 'int16 #f)
+optimized Halide 0:
+  (int16_t (zero-extend (app abstr-vals$131 0) (bitvector 16)))
+optimized x86 0:
+  (int16_t (zero-extend (app abstr-vals$131 0) (bitvector 16)))
+Ran synthesizer for 19 ms
+(model)
+(vec-cast #<abstr-halide-expr> 'int16 16)
+(cast ... (broadcast ... (uint8_t input_zero)) 'int16 #f)
+Ran bounds analysis for 24 ms
+Ran bounds analysis for 14 ms
+"Extended success?"
+#t
+(cast ... (broadcast ... (uint8_t input_zero)) 'int16 #f)
+"Building Expr:"
+(vec-sub
+ (vec-cast
+  (load
+   (buffer input 'uint8)
+   (ramp
+    (sca-add (sca-mul sum_input_sq.s1.rx$x.rx$x 16) (var-lookup 't110))
+    1
+    16)
+   (aligned 1 0))
+  'int16
+  16)
+ (vec-cast (sca-broadcast (uint8_t input_zero) 16) 'int16 16))
+"Fold templates"
+(list
+ #<load-data>
+ (cast ... #<load-data> 'int16 x?$133)
+ (cast ... (broadcast ... (uint8_t input_zero)) 'int16 x?$198))
+here(#<load-data> #(struct:cast ... #<load-data> int16 x?$133) #(struct:cast ... #(struct:broadcast ... #(struct:uint8_t input_zero)) int16 x?$198))
+
+"Replace templates"
+(list
+ (vs-mpy-add
+  ...
+  #<load-data>
+  (list (int8_t (bv #x01 8)) (int8_t (bv #xff 8)))
+  (! x?$455)
+  (! x?$456)
+  (! x?$457)
+  'int16)
+ (vs-mpy-add
+  ...
+  (broadcast ... (uint8_t input_zero))
+  (list (int8_t (bv #x01 8)) (int8_t (bv #xff 8)))
+  (! x?$650)
+  (! x?$651)
+  (! x?$652)
+  'int16))
+run-x86-synthesizer
+halide-expr:
+  (vec-sub
+ (vec-cast
+  (load
+   (buffer input 'uint8)
+   (ramp
+    (sca-add (sca-mul sum_input_sq.s1.rx$x.rx$x 16) (var-lookup 't110))
+    1
+    16)
+   (aligned 1 0))
+  'int16
+  16)
+ (vec-cast (sca-broadcast (uint8_t input_zero) 16) 'int16 16))
+template:
+  #<load-data>
+axioms:
+  '()
+optimized-halide-expr:
+  (vec-sub
+ (vec-cast
+  (load
+   (buffer input 'uint8)
+   (ramp
+    (sca-add (sca-mul sum_input_sq.s1.rx$x.rx$x 16) (var-lookup 't110))
+    1
+    16)
+   (aligned 1 0))
+  'int16
+  16)
+ (vec-cast (sca-broadcast (uint8_t input_zero) 16) 'int16 16))
+optimized-template:
+  #<load-data>
+optimized Halide 0:
+  (int16_t
+ (bvadd (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (bvneg (zero-extend input_zero (bitvector 16)))))
+optimized x86 0:
+  (uint8_t (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))))
+run-x86-synthesizer
+halide-expr:
+  (vec-sub
+ (vec-cast
+  (load
+   (buffer input 'uint8)
+   (ramp
+    (sca-add (sca-mul sum_input_sq.s1.rx$x.rx$x 16) (var-lookup 't110))
+    1
+    16)
+   (aligned 1 0))
+  'int16
+  16)
+ (vec-cast (sca-broadcast (uint8_t input_zero) 16) 'int16 16))
+template:
+  (cast ... #<load-data> 'int16 x?$133)
+axioms:
+  '(#t)
+optimized-halide-expr:
+  (vec-sub
+ (vec-cast #<abstr-halide-expr> 'int16 16)
+ (vec-cast (sca-broadcast (uint8_t input_zero) 16) 'int16 16))
+optimized-template:
+  (cast ... #<abstr-expr> 'int16 x?$133)
+optimized Halide 0:
+  (int16_t
+ (bvadd (bvneg (zero-extend input_zero (bitvector 16))) (zero-extend (app abstr-vals$653 0) (bitvector 16))))
+optimized x86 0:
+  (int16_t (zero-extend (app abstr-vals$653 0) (bitvector 16)))
+run-x86-synthesizer
+halide-expr:
+  (vec-sub
+ (vec-cast
+  (load
+   (buffer input 'uint8)
+   (ramp
+    (sca-add (sca-mul sum_input_sq.s1.rx$x.rx$x 16) (var-lookup 't110))
+    1
+    16)
+   (aligned 1 0))
+  'int16
+  16)
+ (vec-cast (sca-broadcast (uint8_t input_zero) 16) 'int16 16))
+template:
+  (vs-mpy-add
+ ...
+ #<load-data>
+ (list (int8_t (bv #x01 8)) (int8_t (bv #xff 8)))
+ (! x?$455)
+ (! x?$456)
+ (! x?$457)
+ 'int16)
+axioms:
+  '()
+optimized-halide-expr:
+  (vec-sub
+ (vec-cast
+  (load
+   (buffer input 'uint8)
+   (ramp
+    (sca-add (sca-mul sum_input_sq.s1.rx$x.rx$x 16) (var-lookup 't110))
+    1
+    16)
+   (aligned 1 0))
+  'int16
+  16)
+ (vec-cast (sca-broadcast (uint8_t input_zero) 16) 'int16 16))
+optimized-template:
+  (vs-mpy-add
+ ...
+ #<load-data>
+ (list (int8_t (bv #x01 8)) (int8_t (bv #xff 8)))
+ (! x?$455)
+ (! x?$456)
+ (! x?$457)
+ 'int16)
+optimized Halide 0:
+  (int16_t
+ (bvadd (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (bvneg (zero-extend input_zero (bitvector 16)))))
+optimized x86 0:
+  (int16_t
+ (ite* (⊢ (&& x?$457 (! (&& (! x?$455) (! x?$457)))) (ite x?$455 (bvadd (bvneg (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16))) (ite x?$455 (bvadd (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (ite x?$456 (bv #x0000 16) (bv #x0001 16))) (bvadd (ite x?$456 (bv #x0000 16) (bv #x0001 16)) (ite (bvsle (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$456 (bv #x0000 16) (bv #x0001 16))))) (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$456 (bv #x0000 16) (bv #x0001 16)))))))) (bvadd (ite x?$455 (bvadd (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (ite x?$456 (bv #x0000 16) (bv #x0001 16))) (bvadd (ite x?$456 (bv #x0000 16) (bv #x0001 16)) (ite (bvsle (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$456 (bv #x0000 16) (bv #x0001 16))))) (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$456 (bv #x0000 16) (bv #x0001 16))))))) (ite (bvsle (bvadd (bv #x8000 16) (bvneg (ite (bvsle (ite x?$455 (bvadd (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (ite x?$456 (bv #x0000 16) (bv #x0001 16))) (bvadd (ite x?$456 (bv #x0000 16) (bv #x0001 16)) (ite (bvsle (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$456 (bv #x0000 16) (bv #x0001 16))))) (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$456 (bv #x0000 16) (bv #x0001 16))))))) (bv #x0000 16)) (ite x?$455 (bvadd (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (ite x?$456 (bv #x0000 16) (bv #x0001 16))) (bvadd (ite x?$456 (bv #x0000 16) (bv #x0001 16)) (ite (bvsle (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$456 (bv #x0000 16) (bv #x0001 16))))) (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$456 (bv #x0000 16) (bv #x0001 16))))))) (bv #x0000 16)))) (ite (bvsle (bvneg (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16))) (bvadd (bv #x7fff 16) (bvneg (ite (bvsle (bv #x0000 16) (ite x?$455 (bvadd (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (ite x?$456 (bv #x0000 16) (bv #x0001 16))) (bvadd (ite x?$456 (bv #x0000 16) (bv #x0001 16)) (ite (bvsle (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$456 (bv #x0000 16) (bv #x0001 16))))) (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$456 (bv #x0000 16) (bv #x0001 16)))))))) (ite x?$455 (bvadd (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (ite x?$456 (bv #x0000 16) (bv #x0001 16))) (bvadd (ite x?$456 (bv #x0000 16) (bv #x0001 16)) (ite (bvsle (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$456 (bv #x0000 16) (bv #x0001 16))))) (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$456 (bv #x0000 16) (bv #x0001 16))))))) (bv #x0000 16))))) (bvneg (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16))) (bvadd (bv #x7fff 16) (bvneg (ite (bvsle (bv #x0000 16) (ite x?$455 (bvadd (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (ite x?$456 (bv #x0000 16) (bv #x0001 16))) (bvadd (ite x?$456 (bv #x0000 16) (bv #x0001 16)) (ite (bvsle (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$456 (bv #x0000 16) (bv #x0001 16))))) (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$456 (bv #x0000 16) (bv #x0001 16)))))))) (ite x?$455 (bvadd (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (ite x?$456 (bv #x0000 16) (bv #x0001 16))) (bvadd (ite x?$456 (bv #x0000 16) (bv #x0001 16)) (ite (bvsle (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$456 (bv #x0000 16) (bv #x0001 16))))) (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$456 (bv #x0000 16) (bv #x0001 16))))))) (bv #x0000 16)))))) (ite (bvsle (bvneg (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16))) (bvadd (bv #x7fff 16) (bvneg (ite (bvsle (bv #x0000 16) (ite x?$455 (bvadd (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (ite x?$456 (bv #x0000 16) (bv #x0001 16))) (bvadd (ite x?$456 (bv #x0000 16) (bv #x0001 16)) (ite (bvsle (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$456 (bv #x0000 16) (bv #x0001 16))))) (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$456 (bv #x0000 16) (bv #x0001 16)))))))) (ite x?$455 (bvadd (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (ite x?$456 (bv #x0000 16) (bv #x0001 16))) (bvadd (ite x?$456 (bv #x0000 16) (bv #x0001 16)) (ite (bvsle (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$456 (bv #x0000 16) (bv #x0001 16))))) (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$456 (bv #x0000 16) (bv #x0001 16))))))) (bv #x0000 16))))) (bvneg (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16))) (bvadd (bv #x7fff 16) (bvneg (ite (bvsle (bv #x0000 16) (ite x?$455 (bvadd (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (ite x?$456 (bv #x0000 16) (bv #x0001 16))) (bvadd (ite x?$456 (bv #x0000 16) (bv #x0001 16)) (ite (bvsle (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$456 (bv #x0000 16) (bv #x0001 16))))) (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$456 (bv #x0000 16) (bv #x0001 16)))))))) (ite x?$455 (bvadd (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (ite x?$456 (bv #x0000 16) (bv #x0001 16))) (bvadd (ite x?$456 (bv #x0000 16) (bv #x0001 16)) (ite (bvsle (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$456 (bv #x0000 16) (bv #x0001 16))))) (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$456 (bv #x0000 16) (bv #x0001 16))))))) (bv #x0000 16))))) (bvadd (bv #x8000 16) (bvneg (ite (bvsle (ite x?$455 (bvadd (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (ite x?$456 (bv #x0000 16) (bv #x0001 16))) (bvadd (ite x?$456 (bv #x0000 16) (bv #x0001 16)) (ite (bvsle (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$456 (bv #x0000 16) (bv #x0001 16))))) (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$456 (bv #x0000 16) (bv #x0001 16))))))) (bv #x0000 16)) (ite x?$455 (bvadd (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (ite x?$456 (bv #x0000 16) (bv #x0001 16))) (bvadd (ite x?$456 (bv #x0000 16) (bv #x0001 16)) (ite (bvsle (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$456 (bv #x0000 16) (bv #x0001 16))))) (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$456 (bv #x0000 16) (bv #x0001 16))))))) (bv #x0000 16)))))))) (⊢ (|| (&& (! x?$455) (! x?$457)) (&& (! x?$457) (! (&& (! x?$455) (! x?$457))))) (bvashr (ite x?$455 (bvadd (bvneg (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16))) (ite x?$455 (bvadd (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (ite x?$456 (bv #x0000 16) (bv #x0001 16))) (bvadd (ite x?$456 (bv #x0000 16) (bv #x0001 16)) (ite (bvsle (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$456 (bv #x0000 16) (bv #x0001 16))))) (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$456 (bv #x0000 16) (bv #x0001 16)))))))) (bvadd (ite x?$455 (bvadd (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (ite x?$456 (bv #x0000 16) (bv #x0001 16))) (bvadd (ite x?$456 (bv #x0000 16) (bv #x0001 16)) (ite (bvsle (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$456 (bv #x0000 16) (bv #x0001 16))))) (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$456 (bv #x0000 16) (bv #x0001 16))))))) (ite (bvsle (bvadd (bv #x8000 16) (bvneg (ite (bvsle (ite x?$455 (bvadd (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (ite x?$456 (bv #x0000 16) (bv #x0001 16))) (bvadd (ite x?$456 (bv #x0000 16) (bv #x0001 16)) (ite (bvsle (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$456 (bv #x0000 16) (bv #x0001 16))))) (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$456 (bv #x0000 16) (bv #x0001 16))))))) (bv #x0000 16)) (ite x?$455 (bvadd (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (ite x?$456 (bv #x0000 16) (bv #x0001 16))) (bvadd (ite x?$456 (bv #x0000 16) (bv #x0001 16)) (ite (bvsle (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$456 (bv #x0000 16) (bv #x0001 16))))) (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$456 (bv #x0000 16) (bv #x0001 16))))))) (bv #x0000 16)))) (ite (bvsle (bvneg (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16))) (bvadd (bv #x7fff 16) (bvneg (ite (bvsle (bv #x0000 16) (ite x?$455 (bvadd (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (ite x?$456 (bv #x0000 16) (bv #x0001 16))) (bvadd (ite x?$456 (bv #x0000 16) (bv #x0001 16)) (ite (bvsle (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$456 (bv #x0000 16) (bv #x0001 16))))) (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$456 (bv #x0000 16) (bv #x0001 16)))))))) (ite x?$455 (bvadd (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (ite x?$456 (bv #x0000 16) (bv #x0001 16))) (bvadd (ite x?$456 (bv #x0000 16) (bv #x0001 16)) (ite (bvsle (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$456 (bv #x0000 16) (bv #x0001 16))))) (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$456 (bv #x0000 16) (bv #x0001 16))))))) (bv #x0000 16))))) (bvneg (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16))) (bvadd (bv #x7fff 16) (bvneg (ite (bvsle (bv #x0000 16) (ite x?$455 (bvadd (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (ite x?$456 (bv #x0000 16) (bv #x0001 16))) (bvadd (ite x?$456 (bv #x0000 16) (bv #x0001 16)) (ite (bvsle (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$456 (bv #x0000 16) (bv #x0001 16))))) (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$456 (bv #x0000 16) (bv #x0001 16)))))))) (ite x?$455 (bvadd (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (ite x?$456 (bv #x0000 16) (bv #x0001 16))) (bvadd (ite x?$456 (bv #x0000 16) (bv #x0001 16)) (ite (bvsle (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$456 (bv #x0000 16) (bv #x0001 16))))) (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$456 (bv #x0000 16) (bv #x0001 16))))))) (bv #x0000 16)))))) (ite (bvsle (bvneg (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16))) (bvadd (bv #x7fff 16) (bvneg (ite (bvsle (bv #x0000 16) (ite x?$455 (bvadd (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (ite x?$456 (bv #x0000 16) (bv #x0001 16))) (bvadd (ite x?$456 (bv #x0000 16) (bv #x0001 16)) (ite (bvsle (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$456 (bv #x0000 16) (bv #x0001 16))))) (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$456 (bv #x0000 16) (bv #x0001 16)))))))) (ite x?$455 (bvadd (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (ite x?$456 (bv #x0000 16) (bv #x0001 16))) (bvadd (ite x?$456 (bv #x0000 16) (bv #x0001 16)) (ite (bvsle (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$456 (bv #x0000 16) (bv #x0001 16))))) (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$456 (bv #x0000 16) (bv #x0001 16))))))) (bv #x0000 16))))) (bvneg (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16))) (bvadd (bv #x7fff 16) (bvneg (ite (bvsle (bv #x0000 16) (ite x?$455 (bvadd (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (ite x?$456 (bv #x0000 16) (bv #x0001 16))) (bvadd (ite x?$456 (bv #x0000 16) (bv #x0001 16)) (ite (bvsle (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$456 (bv #x0000 16) (bv #x0001 16))))) (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$456 (bv #x0000 16) (bv #x0001 16)))))))) (ite x?$455 (bvadd (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (ite x?$456 (bv #x0000 16) (bv #x0001 16))) (bvadd (ite x?$456 (bv #x0000 16) (bv #x0001 16)) (ite (bvsle (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$456 (bv #x0000 16) (bv #x0001 16))))) (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$456 (bv #x0000 16) (bv #x0001 16))))))) (bv #x0000 16))))) (bvadd (bv #x8000 16) (bvneg (ite (bvsle (ite x?$455 (bvadd (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (ite x?$456 (bv #x0000 16) (bv #x0001 16))) (bvadd (ite x?$456 (bv #x0000 16) (bv #x0001 16)) (ite (bvsle (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$456 (bv #x0000 16) (bv #x0001 16))))) (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$456 (bv #x0000 16) (bv #x0001 16))))))) (bv #x0000 16)) (ite x?$455 (bvadd (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (ite x?$456 (bv #x0000 16) (bv #x0001 16))) (bvadd (ite x?$456 (bv #x0000 16) (bv #x0001 16)) (ite (bvsle (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$456 (bv #x0000 16) (bv #x0001 16))))) (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$456 (bv #x0000 16) (bv #x0001 16))))))) (bv #x0000 16))))))) (bv #x0001 16)))))
+run-x86-synthesizer
+halide-expr:
+  (vec-sub
+ (vec-cast
+  (load
+   (buffer input 'uint8)
+   (ramp
+    (sca-add (sca-mul sum_input_sq.s1.rx$x.rx$x 16) (var-lookup 't110))
+    1
+    16)
+   (aligned 1 0))
+  'int16
+  16)
+ (vec-cast (sca-broadcast (uint8_t input_zero) 16) 'int16 16))
+template:
+  (cast ... (broadcast ... (uint8_t input_zero)) 'int16 x?$198)
+axioms:
+  '(#t)
+optimized-halide-expr:
+  (vec-sub
+ (vec-cast
+  (load
+   (buffer input 'uint8)
+   (ramp
+    (sca-add (sca-mul sum_input_sq.s1.rx$x.rx$x 16) (var-lookup 't110))
+    1
+    16)
+   (aligned 1 0))
+  'int16
+  16)
+ (vec-cast #<abstr-halide-expr> 'int16 16))
+optimized-template:
+  (cast ... #<abstr-expr> 'int16 x?$198)
+optimized Halide 0:
+  (int16_t
+ (bvadd (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (bvneg (zero-extend (app abstr-vals$654 0) (bitvector 16)))))
+optimized x86 0:
+  (int16_t (zero-extend (app abstr-vals$654 0) (bitvector 16)))
+run-x86-synthesizer
+halide-expr:
+  (vec-sub
+ (vec-cast
+  (load
+   (buffer input 'uint8)
+   (ramp
+    (sca-add (sca-mul sum_input_sq.s1.rx$x.rx$x 16) (var-lookup 't110))
+    1
+    16)
+   (aligned 1 0))
+  'int16
+  16)
+ (vec-cast (sca-broadcast (uint8_t input_zero) 16) 'int16 16))
+template:
+  (vs-mpy-add
+ ...
+ (broadcast ... (uint8_t input_zero))
+ (list (int8_t (bv #x01 8)) (int8_t (bv #xff 8)))
+ (! x?$650)
+ (! x?$651)
+ (! x?$652)
+ 'int16)
+axioms:
+  '(#t)
+optimized-halide-expr:
+  (vec-sub
+ (vec-cast
+  (load
+   (buffer input 'uint8)
+   (ramp
+    (sca-add (sca-mul sum_input_sq.s1.rx$x.rx$x 16) (var-lookup 't110))
+    1
+    16)
+   (aligned 1 0))
+  'int16
+  16)
+ (vec-cast #<abstr-halide-expr> 'int16 16))
+optimized-template:
+  (vs-mpy-add
+ ...
+ #<abstr-expr>
+ (list (int8_t (bv #x01 8)) (int8_t (bv #xff 8)))
+ (! x?$650)
+ (! x?$651)
+ (! x?$652)
+ 'int16)
+optimized Halide 0:
+  (int16_t
+ (bvadd (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (bvneg (zero-extend (app abstr-vals$655 0) (bitvector 16)))))
+optimized x86 0:
+  (int16_t
+ (ite* (⊢ (&& x?$652 (! (&& (! x?$650) (! x?$652)))) (ite x?$650 (bvadd (bvneg (zero-extend (app abstr-vals$655 1) (bitvector 16))) (ite x?$650 (bvadd (zero-extend (app abstr-vals$655 0) (bitvector 16)) (ite x?$651 (bv #x0000 16) (bv #x0001 16))) (bvadd (ite x?$651 (bv #x0000 16) (bv #x0001 16)) (ite (bvsle (zero-extend (app abstr-vals$655 0) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$651 (bv #x0000 16) (bv #x0001 16))))) (zero-extend (app abstr-vals$655 0) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$651 (bv #x0000 16) (bv #x0001 16)))))))) (bvadd (ite x?$650 (bvadd (zero-extend (app abstr-vals$655 0) (bitvector 16)) (ite x?$651 (bv #x0000 16) (bv #x0001 16))) (bvadd (ite x?$651 (bv #x0000 16) (bv #x0001 16)) (ite (bvsle (zero-extend (app abstr-vals$655 0) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$651 (bv #x0000 16) (bv #x0001 16))))) (zero-extend (app abstr-vals$655 0) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$651 (bv #x0000 16) (bv #x0001 16))))))) (ite (bvsle (bvadd (bv #x8000 16) (bvneg (ite (bvsle (ite x?$650 (bvadd (zero-extend (app abstr-vals$655 0) (bitvector 16)) (ite x?$651 (bv #x0000 16) (bv #x0001 16))) (bvadd (ite x?$651 (bv #x0000 16) (bv #x0001 16)) (ite (bvsle (zero-extend (app abstr-vals$655 0) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$651 (bv #x0000 16) (bv #x0001 16))))) (zero-extend (app abstr-vals$655 0) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$651 (bv #x0000 16) (bv #x0001 16))))))) (bv #x0000 16)) (ite x?$650 (bvadd (zero-extend (app abstr-vals$655 0) (bitvector 16)) (ite x?$651 (bv #x0000 16) (bv #x0001 16))) (bvadd (ite x?$651 (bv #x0000 16) (bv #x0001 16)) (ite (bvsle (zero-extend (app abstr-vals$655 0) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$651 (bv #x0000 16) (bv #x0001 16))))) (zero-extend (app abstr-vals$655 0) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$651 (bv #x0000 16) (bv #x0001 16))))))) (bv #x0000 16)))) (ite (bvsle (bvneg (zero-extend (app abstr-vals$655 1) (bitvector 16))) (bvadd (bv #x7fff 16) (bvneg (ite (bvsle (bv #x0000 16) (ite x?$650 (bvadd (zero-extend (app abstr-vals$655 0) (bitvector 16)) (ite x?$651 (bv #x0000 16) (bv #x0001 16))) (bvadd (ite x?$651 (bv #x0000 16) (bv #x0001 16)) (ite (bvsle (zero-extend (app abstr-vals$655 0) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$651 (bv #x0000 16) (bv #x0001 16))))) (zero-extend (app abstr-vals$655 0) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$651 (bv #x0000 16) (bv #x0001 16)))))))) (ite x?$650 (bvadd (zero-extend (app abstr-vals$655 0) (bitvector 16)) (ite x?$651 (bv #x0000 16) (bv #x0001 16))) (bvadd (ite x?$651 (bv #x0000 16) (bv #x0001 16)) (ite (bvsle (zero-extend (app abstr-vals$655 0) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$651 (bv #x0000 16) (bv #x0001 16))))) (zero-extend (app abstr-vals$655 0) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$651 (bv #x0000 16) (bv #x0001 16))))))) (bv #x0000 16))))) (bvneg (zero-extend (app abstr-vals$655 1) (bitvector 16))) (bvadd (bv #x7fff 16) (bvneg (ite (bvsle (bv #x0000 16) (ite x?$650 (bvadd (zero-extend (app abstr-vals$655 0) (bitvector 16)) (ite x?$651 (bv #x0000 16) (bv #x0001 16))) (bvadd (ite x?$651 (bv #x0000 16) (bv #x0001 16)) (ite (bvsle (zero-extend (app abstr-vals$655 0) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$651 (bv #x0000 16) (bv #x0001 16))))) (zero-extend (app abstr-vals$655 0) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$651 (bv #x0000 16) (bv #x0001 16)))))))) (ite x?$650 (bvadd (zero-extend (app abstr-vals$655 0) (bitvector 16)) (ite x?$651 (bv #x0000 16) (bv #x0001 16))) (bvadd (ite x?$651 (bv #x0000 16) (bv #x0001 16)) (ite (bvsle (zero-extend (app abstr-vals$655 0) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$651 (bv #x0000 16) (bv #x0001 16))))) (zero-extend (app abstr-vals$655 0) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$651 (bv #x0000 16) (bv #x0001 16))))))) (bv #x0000 16)))))) (ite (bvsle (bvneg (zero-extend (app abstr-vals$655 1) (bitvector 16))) (bvadd (bv #x7fff 16) (bvneg (ite (bvsle (bv #x0000 16) (ite x?$650 (bvadd (zero-extend (app abstr-vals$655 0) (bitvector 16)) (ite x?$651 (bv #x0000 16) (bv #x0001 16))) (bvadd (ite x?$651 (bv #x0000 16) (bv #x0001 16)) (ite (bvsle (zero-extend (app abstr-vals$655 0) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$651 (bv #x0000 16) (bv #x0001 16))))) (zero-extend (app abstr-vals$655 0) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$651 (bv #x0000 16) (bv #x0001 16)))))))) (ite x?$650 (bvadd (zero-extend (app abstr-vals$655 0) (bitvector 16)) (ite x?$651 (bv #x0000 16) (bv #x0001 16))) (bvadd (ite x?$651 (bv #x0000 16) (bv #x0001 16)) (ite (bvsle (zero-extend (app abstr-vals$655 0) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$651 (bv #x0000 16) (bv #x0001 16))))) (zero-extend (app abstr-vals$655 0) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$651 (bv #x0000 16) (bv #x0001 16))))))) (bv #x0000 16))))) (bvneg (zero-extend (app abstr-vals$655 1) (bitvector 16))) (bvadd (bv #x7fff 16) (bvneg (ite (bvsle (bv #x0000 16) (ite x?$650 (bvadd (zero-extend (app abstr-vals$655 0) (bitvector 16)) (ite x?$651 (bv #x0000 16) (bv #x0001 16))) (bvadd (ite x?$651 (bv #x0000 16) (bv #x0001 16)) (ite (bvsle (zero-extend (app abstr-vals$655 0) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$651 (bv #x0000 16) (bv #x0001 16))))) (zero-extend (app abstr-vals$655 0) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$651 (bv #x0000 16) (bv #x0001 16)))))))) (ite x?$650 (bvadd (zero-extend (app abstr-vals$655 0) (bitvector 16)) (ite x?$651 (bv #x0000 16) (bv #x0001 16))) (bvadd (ite x?$651 (bv #x0000 16) (bv #x0001 16)) (ite (bvsle (zero-extend (app abstr-vals$655 0) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$651 (bv #x0000 16) (bv #x0001 16))))) (zero-extend (app abstr-vals$655 0) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$651 (bv #x0000 16) (bv #x0001 16))))))) (bv #x0000 16))))) (bvadd (bv #x8000 16) (bvneg (ite (bvsle (ite x?$650 (bvadd (zero-extend (app abstr-vals$655 0) (bitvector 16)) (ite x?$651 (bv #x0000 16) (bv #x0001 16))) (bvadd (ite x?$651 (bv #x0000 16) (bv #x0001 16)) (ite (bvsle (zero-extend (app abstr-vals$655 0) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$651 (bv #x0000 16) (bv #x0001 16))))) (zero-extend (app abstr-vals$655 0) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$651 (bv #x0000 16) (bv #x0001 16))))))) (bv #x0000 16)) (ite x?$650 (bvadd (zero-extend (app abstr-vals$655 0) (bitvector 16)) (ite x?$651 (bv #x0000 16) (bv #x0001 16))) (bvadd (ite x?$651 (bv #x0000 16) (bv #x0001 16)) (ite (bvsle (zero-extend (app abstr-vals$655 0) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$651 (bv #x0000 16) (bv #x0001 16))))) (zero-extend (app abstr-vals$655 0) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$651 (bv #x0000 16) (bv #x0001 16))))))) (bv #x0000 16)))))))) (⊢ (|| (&& (! x?$650) (! x?$652)) (&& (! x?$652) (! (&& (! x?$650) (! x?$652))))) (bvashr (ite x?$650 (bvadd (bvneg (zero-extend (app abstr-vals$655 1) (bitvector 16))) (ite x?$650 (bvadd (zero-extend (app abstr-vals$655 0) (bitvector 16)) (ite x?$651 (bv #x0000 16) (bv #x0001 16))) (bvadd (ite x?$651 (bv #x0000 16) (bv #x0001 16)) (ite (bvsle (zero-extend (app abstr-vals$655 0) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$651 (bv #x0000 16) (bv #x0001 16))))) (zero-extend (app abstr-vals$655 0) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$651 (bv #x0000 16) (bv #x0001 16)))))))) (bvadd (ite x?$650 (bvadd (zero-extend (app abstr-vals$655 0) (bitvector 16)) (ite x?$651 (bv #x0000 16) (bv #x0001 16))) (bvadd (ite x?$651 (bv #x0000 16) (bv #x0001 16)) (ite (bvsle (zero-extend (app abstr-vals$655 0) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$651 (bv #x0000 16) (bv #x0001 16))))) (zero-extend (app abstr-vals$655 0) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$651 (bv #x0000 16) (bv #x0001 16))))))) (ite (bvsle (bvadd (bv #x8000 16) (bvneg (ite (bvsle (ite x?$650 (bvadd (zero-extend (app abstr-vals$655 0) (bitvector 16)) (ite x?$651 (bv #x0000 16) (bv #x0001 16))) (bvadd (ite x?$651 (bv #x0000 16) (bv #x0001 16)) (ite (bvsle (zero-extend (app abstr-vals$655 0) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$651 (bv #x0000 16) (bv #x0001 16))))) (zero-extend (app abstr-vals$655 0) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$651 (bv #x0000 16) (bv #x0001 16))))))) (bv #x0000 16)) (ite x?$650 (bvadd (zero-extend (app abstr-vals$655 0) (bitvector 16)) (ite x?$651 (bv #x0000 16) (bv #x0001 16))) (bvadd (ite x?$651 (bv #x0000 16) (bv #x0001 16)) (ite (bvsle (zero-extend (app abstr-vals$655 0) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$651 (bv #x0000 16) (bv #x0001 16))))) (zero-extend (app abstr-vals$655 0) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$651 (bv #x0000 16) (bv #x0001 16))))))) (bv #x0000 16)))) (ite (bvsle (bvneg (zero-extend (app abstr-vals$655 1) (bitvector 16))) (bvadd (bv #x7fff 16) (bvneg (ite (bvsle (bv #x0000 16) (ite x?$650 (bvadd (zero-extend (app abstr-vals$655 0) (bitvector 16)) (ite x?$651 (bv #x0000 16) (bv #x0001 16))) (bvadd (ite x?$651 (bv #x0000 16) (bv #x0001 16)) (ite (bvsle (zero-extend (app abstr-vals$655 0) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$651 (bv #x0000 16) (bv #x0001 16))))) (zero-extend (app abstr-vals$655 0) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$651 (bv #x0000 16) (bv #x0001 16)))))))) (ite x?$650 (bvadd (zero-extend (app abstr-vals$655 0) (bitvector 16)) (ite x?$651 (bv #x0000 16) (bv #x0001 16))) (bvadd (ite x?$651 (bv #x0000 16) (bv #x0001 16)) (ite (bvsle (zero-extend (app abstr-vals$655 0) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$651 (bv #x0000 16) (bv #x0001 16))))) (zero-extend (app abstr-vals$655 0) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$651 (bv #x0000 16) (bv #x0001 16))))))) (bv #x0000 16))))) (bvneg (zero-extend (app abstr-vals$655 1) (bitvector 16))) (bvadd (bv #x7fff 16) (bvneg (ite (bvsle (bv #x0000 16) (ite x?$650 (bvadd (zero-extend (app abstr-vals$655 0) (bitvector 16)) (ite x?$651 (bv #x0000 16) (bv #x0001 16))) (bvadd (ite x?$651 (bv #x0000 16) (bv #x0001 16)) (ite (bvsle (zero-extend (app abstr-vals$655 0) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$651 (bv #x0000 16) (bv #x0001 16))))) (zero-extend (app abstr-vals$655 0) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$651 (bv #x0000 16) (bv #x0001 16)))))))) (ite x?$650 (bvadd (zero-extend (app abstr-vals$655 0) (bitvector 16)) (ite x?$651 (bv #x0000 16) (bv #x0001 16))) (bvadd (ite x?$651 (bv #x0000 16) (bv #x0001 16)) (ite (bvsle (zero-extend (app abstr-vals$655 0) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$651 (bv #x0000 16) (bv #x0001 16))))) (zero-extend (app abstr-vals$655 0) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$651 (bv #x0000 16) (bv #x0001 16))))))) (bv #x0000 16)))))) (ite (bvsle (bvneg (zero-extend (app abstr-vals$655 1) (bitvector 16))) (bvadd (bv #x7fff 16) (bvneg (ite (bvsle (bv #x0000 16) (ite x?$650 (bvadd (zero-extend (app abstr-vals$655 0) (bitvector 16)) (ite x?$651 (bv #x0000 16) (bv #x0001 16))) (bvadd (ite x?$651 (bv #x0000 16) (bv #x0001 16)) (ite (bvsle (zero-extend (app abstr-vals$655 0) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$651 (bv #x0000 16) (bv #x0001 16))))) (zero-extend (app abstr-vals$655 0) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$651 (bv #x0000 16) (bv #x0001 16)))))))) (ite x?$650 (bvadd (zero-extend (app abstr-vals$655 0) (bitvector 16)) (ite x?$651 (bv #x0000 16) (bv #x0001 16))) (bvadd (ite x?$651 (bv #x0000 16) (bv #x0001 16)) (ite (bvsle (zero-extend (app abstr-vals$655 0) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$651 (bv #x0000 16) (bv #x0001 16))))) (zero-extend (app abstr-vals$655 0) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$651 (bv #x0000 16) (bv #x0001 16))))))) (bv #x0000 16))))) (bvneg (zero-extend (app abstr-vals$655 1) (bitvector 16))) (bvadd (bv #x7fff 16) (bvneg (ite (bvsle (bv #x0000 16) (ite x?$650 (bvadd (zero-extend (app abstr-vals$655 0) (bitvector 16)) (ite x?$651 (bv #x0000 16) (bv #x0001 16))) (bvadd (ite x?$651 (bv #x0000 16) (bv #x0001 16)) (ite (bvsle (zero-extend (app abstr-vals$655 0) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$651 (bv #x0000 16) (bv #x0001 16))))) (zero-extend (app abstr-vals$655 0) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$651 (bv #x0000 16) (bv #x0001 16)))))))) (ite x?$650 (bvadd (zero-extend (app abstr-vals$655 0) (bitvector 16)) (ite x?$651 (bv #x0000 16) (bv #x0001 16))) (bvadd (ite x?$651 (bv #x0000 16) (bv #x0001 16)) (ite (bvsle (zero-extend (app abstr-vals$655 0) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$651 (bv #x0000 16) (bv #x0001 16))))) (zero-extend (app abstr-vals$655 0) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$651 (bv #x0000 16) (bv #x0001 16))))))) (bv #x0000 16))))) (bvadd (bv #x8000 16) (bvneg (ite (bvsle (ite x?$650 (bvadd (zero-extend (app abstr-vals$655 0) (bitvector 16)) (ite x?$651 (bv #x0000 16) (bv #x0001 16))) (bvadd (ite x?$651 (bv #x0000 16) (bv #x0001 16)) (ite (bvsle (zero-extend (app abstr-vals$655 0) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$651 (bv #x0000 16) (bv #x0001 16))))) (zero-extend (app abstr-vals$655 0) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$651 (bv #x0000 16) (bv #x0001 16))))))) (bv #x0000 16)) (ite x?$650 (bvadd (zero-extend (app abstr-vals$655 0) (bitvector 16)) (ite x?$651 (bv #x0000 16) (bv #x0001 16))) (bvadd (ite x?$651 (bv #x0000 16) (bv #x0001 16)) (ite (bvsle (zero-extend (app abstr-vals$655 0) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$651 (bv #x0000 16) (bv #x0001 16))))) (zero-extend (app abstr-vals$655 0) (bitvector 16)) (bvadd (bv #x7fff 16) (bvneg (ite x?$651 (bv #x0000 16) (bv #x0001 16))))))) (bv #x0000 16))))))) (bv #x0001 16)))))
+"Success?"
+#f
+#<void>
+run-x86-synthesizer
+halide-expr:
+  (vec-sub
+ (vec-cast
+  (load
+   (buffer input 'uint8)
+   (ramp
+    (sca-add (sca-mul sum_input_sq.s1.rx$x.rx$x 16) (var-lookup 't110))
+    1
+    16)
+   (aligned 1 0))
+  'int16
+  16)
+ (vec-cast (sca-broadcast (uint8_t input_zero) 16) 'int16 16))
+template:
+  (vs-mpy-add
+ ...
+ (union [x?$848 #(struct:cast ... #<load-data> int16 #f)] [(! x?$848) #(struct:cast
+                                                                        ...
+                                                                        #(struct:broadcast
+                                                                          ...
+                                                                          #(struct:uint8_t
+                                                                            input_zero))
+                                                                        int16
+                                                                        #f)])
+ (list (int8_t (bv #x01 8)) (int8_t (bv #xff 8)))
+ (! x?$849)
+ (! x?$850)
+ (! x?$851)
+ 'int16)
+axioms:
+  '()
+optimized-halide-expr:
+  (vec-sub
+ (vec-cast
+  (load
+   (buffer input 'uint8)
+   (ramp
+    (sca-add (sca-mul sum_input_sq.s1.rx$x.rx$x 16) (var-lookup 't110))
+    1
+    16)
+   (aligned 1 0))
+  'int16
+  16)
+ (vec-cast (sca-broadcast (uint8_t input_zero) 16) 'int16 16))
+optimized-template:
+  (vs-mpy-add
+ ...
+ (union [x?$848 #(struct:cast ... #<load-data> int16 #f)] [(! x?$848) #(struct:cast
+                                                                        ...
+                                                                        #(struct:broadcast
+                                                                          ...
+                                                                          #(struct:uint8_t
+                                                                            input_zero))
+                                                                        int16
+                                                                        #f)])
+ (list (int8_t (bv #x01 8)) (int8_t (bv #xff 8)))
+ (! x?$849)
+ (! x?$850)
+ (! x?$851)
+ 'int16)
+optimized Halide 0:
+  (int16_t
+ (bvadd (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (bvneg (zero-extend input_zero (bitvector 16)))))
+optimized x86 0:
+  (int16_t
+ (ite* (⊢ (&& x?$851 (! (&& (! x?$849) (! x?$851)))) (ite x?$849 (bvadd (bvneg (ite x?$848 (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (zero-extend input_zero (bitvector 16)))) (ite x?$849 (bvadd (ite x?$848 (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (zero-extend input_zero (bitvector 16))) (ite x?$850 (bv #x0000 16) (bv #x0001 16))) (bvadd (ite x?$850 (bv #x0000 16) (bv #x0001 16)) (ite (bvsle (ite x?$848 (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (zero-extend input_zero (bitvector 16))) (bvadd (bv #x7fff 16) (bvneg (ite x?$850 (bv #x0000 16) (bv #x0001 16))))) (ite x?$848 (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (zero-extend input_zero (bitvector 16))) (bvadd (bv #x7fff 16) (bvneg (ite x?$850 (bv #x0000 16) (bv #x0001 16)))))))) (bvadd (ite x?$849 (bvadd (ite x?$848 (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (zero-extend input_zero (bitvector 16))) (ite x?$850 (bv #x0000 16) (bv #x0001 16))) (bvadd (ite x?$850 (bv #x0000 16) (bv #x0001 16)) (ite (bvsle (ite x?$848 (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (zero-extend input_zero (bitvector 16))) (bvadd (bv #x7fff 16) (bvneg (ite x?$850 (bv #x0000 16) (bv #x0001 16))))) (ite x?$848 (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (zero-extend input_zero (bitvector 16))) (bvadd (bv #x7fff 16) (bvneg (ite x?$850 (bv #x0000 16) (bv #x0001 16))))))) (ite (bvsle (bvadd (bv #x8000 16) (bvneg (ite (bvsle (ite x?$849 (bvadd (ite x?$848 (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (zero-extend input_zero (bitvector 16))) (ite x?$850 (bv #x0000 16) (bv #x0001 16))) (bvadd (ite x?$850 (bv #x0000 16) (bv #x0001 16)) (ite (bvsle (ite x?$848 (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (zero-extend input_zero (bitvector 16))) (bvadd (bv #x7fff 16) (bvneg (ite x?$850 (bv #x0000 16) (bv #x0001 16))))) (ite x?$848 (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (zero-extend input_zero (bitvector 16))) (bvadd (bv #x7fff 16) (bvneg (ite x?$850 (bv #x0000 16) (bv #x0001 16))))))) (bv #x0000 16)) (ite x?$849 (bvadd (ite x?$848 (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (zero-extend input_zero (bitvector 16))) (ite x?$850 (bv #x0000 16) (bv #x0001 16))) (bvadd (ite x?$850 (bv #x0000 16) (bv #x0001 16)) (ite (bvsle (ite x?$848 (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (zero-extend input_zero (bitvector 16))) (bvadd (bv #x7fff 16) (bvneg (ite x?$850 (bv #x0000 16) (bv #x0001 16))))) (ite x?$848 (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (zero-extend input_zero (bitvector 16))) (bvadd (bv #x7fff 16) (bvneg (ite x?$850 (bv #x0000 16) (bv #x0001 16))))))) (bv #x0000 16)))) (ite (bvsle (bvneg (ite x?$848 (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (zero-extend input_zero (bitvector 16)))) (bvadd (bv #x7fff 16) (bvneg (ite (bvsle (bv #x0000 16) (ite x?$849 (bvadd (ite x?$848 (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (zero-extend input_zero (bitvector 16))) (ite x?$850 (bv #x0000 16) (bv #x0001 16))) (bvadd (ite x?$850 (bv #x0000 16) (bv #x0001 16)) (ite (bvsle (ite x?$848 (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (zero-extend input_zero (bitvector 16))) (bvadd (bv #x7fff 16) (bvneg (ite x?$850 (bv #x0000 16) (bv #x0001 16))))) (ite x?$848 (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (zero-extend input_zero (bitvector 16))) (bvadd (bv #x7fff 16) (bvneg (ite x?$850 (bv #x0000 16) (bv #x0001 16)))))))) (ite x?$849 (bvadd (ite x?$848 (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (zero-extend input_zero (bitvector 16))) (ite x?$850 (bv #x0000 16) (bv #x0001 16))) (bvadd (ite x?$850 (bv #x0000 16) (bv #x0001 16)) (ite (bvsle (ite x?$848 (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (zero-extend input_zero (bitvector 16))) (bvadd (bv #x7fff 16) (bvneg (ite x?$850 (bv #x0000 16) (bv #x0001 16))))) (ite x?$848 (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (zero-extend input_zero (bitvector 16))) (bvadd (bv #x7fff 16) (bvneg (ite x?$850 (bv #x0000 16) (bv #x0001 16))))))) (bv #x0000 16))))) (bvneg (ite x?$848 (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (zero-extend input_zero (bitvector 16)))) (bvadd (bv #x7fff 16) (bvneg (ite (bvsle (bv #x0000 16) (ite x?$849 (bvadd (ite x?$848 (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (zero-extend input_zero (bitvector 16))) (ite x?$850 (bv #x0000 16) (bv #x0001 16))) (bvadd (ite x?$850 (bv #x0000 16) (bv #x0001 16)) (ite (bvsle (ite x?$848 (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (zero-extend input_zero (bitvector 16))) (bvadd (bv #x7fff 16) (bvneg (ite x?$850 (bv #x0000 16) (bv #x0001 16))))) (ite x?$848 (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (zero-extend input_zero (bitvector 16))) (bvadd (bv #x7fff 16) (bvneg (ite x?$850 (bv #x0000 16) (bv #x0001 16)))))))) (ite x?$849 (bvadd (ite x?$848 (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (zero-extend input_zero (bitvector 16))) (ite x?$850 (bv #x0000 16) (bv #x0001 16))) (bvadd (ite x?$850 (bv #x0000 16) (bv #x0001 16)) (ite (bvsle (ite x?$848 (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (zero-extend input_zero (bitvector 16))) (bvadd (bv #x7fff 16) (bvneg (ite x?$850 (bv #x0000 16) (bv #x0001 16))))) (ite x?$848 (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (zero-extend input_zero (bitvector 16))) (bvadd (bv #x7fff 16) (bvneg (ite x?$850 (bv #x0000 16) (bv #x0001 16))))))) (bv #x0000 16)))))) (ite (bvsle (bvneg (ite x?$848 (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (zero-extend input_zero (bitvector 16)))) (bvadd (bv #x7fff 16) (bvneg (ite (bvsle (bv #x0000 16) (ite x?$849 (bvadd (ite x?$848 (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (zero-extend input_zero (bitvector 16))) (ite x?$850 (bv #x0000 16) (bv #x0001 16))) (bvadd (ite x?$850 (bv #x0000 16) (bv #x0001 16)) (ite (bvsle (ite x?$848 (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (zero-extend input_zero (bitvector 16))) (bvadd (bv #x7fff 16) (bvneg (ite x?$850 (bv #x0000 16) (bv #x0001 16))))) (ite x?$848 (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (zero-extend input_zero (bitvector 16))) (bvadd (bv #x7fff 16) (bvneg (ite x?$850 (bv #x0000 16) (bv #x0001 16)))))))) (ite x?$849 (bvadd (ite x?$848 (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (zero-extend input_zero (bitvector 16))) (ite x?$850 (bv #x0000 16) (bv #x0001 16))) (bvadd (ite x?$850 (bv #x0000 16) (bv #x0001 16)) (ite (bvsle (ite x?$848 (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (zero-extend input_zero (bitvector 16))) (bvadd (bv #x7fff 16) (bvneg (ite x?$850 (bv #x0000 16) (bv #x0001 16))))) (ite x?$848 (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (zero-extend input_zero (bitvector 16))) (bvadd (bv #x7fff 16) (bvneg (ite x?$850 (bv #x0000 16) (bv #x0001 16))))))) (bv #x0000 16))))) (bvneg (ite x?$848 (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (zero-extend input_zero (bitvector 16)))) (bvadd (bv #x7fff 16) (bvneg (ite (bvsle (bv #x0000 16) (ite x?$849 (bvadd (ite x?$848 (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (zero-extend input_zero (bitvector 16))) (ite x?$850 (bv #x0000 16) (bv #x0001 16))) (bvadd (ite x?$850 (bv #x0000 16) (bv #x0001 16)) (ite (bvsle (ite x?$848 (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (zero-extend input_zero (bitvector 16))) (bvadd (bv #x7fff 16) (bvneg (ite x?$850 (bv #x0000 16) (bv #x0001 16))))) (ite x?$848 (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (zero-extend input_zero (bitvector 16))) (bvadd (bv #x7fff 16) (bvneg (ite x?$850 (bv #x0000 16) (bv #x0001 16)))))))) (ite x?$849 (bvadd (ite x?$848 (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (zero-extend input_zero (bitvector 16))) (ite x?$850 (bv #x0000 16) (bv #x0001 16))) (bvadd (ite x?$850 (bv #x0000 16) (bv #x0001 16)) (ite (bvsle (ite x?$848 (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (zero-extend input_zero (bitvector 16))) (bvadd (bv #x7fff 16) (bvneg (ite x?$850 (bv #x0000 16) (bv #x0001 16))))) (ite x?$848 (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (zero-extend input_zero (bitvector 16))) (bvadd (bv #x7fff 16) (bvneg (ite x?$850 (bv #x0000 16) (bv #x0001 16))))))) (bv #x0000 16))))) (bvadd (bv #x8000 16) (bvneg (ite (bvsle (ite x?$849 (bvadd (ite x?$848 (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (zero-extend input_zero (bitvector 16))) (ite x?$850 (bv #x0000 16) (bv #x0001 16))) (bvadd (ite x?$850 (bv #x0000 16) (bv #x0001 16)) (ite (bvsle (ite x?$848 (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (zero-extend input_zero (bitvector 16))) (bvadd (bv #x7fff 16) (bvneg (ite x?$850 (bv #x0000 16) (bv #x0001 16))))) (ite x?$848 (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (zero-extend input_zero (bitvector 16))) (bvadd (bv #x7fff 16) (bvneg (ite x?$850 (bv #x0000 16) (bv #x0001 16))))))) (bv #x0000 16)) (ite x?$849 (bvadd (ite x?$848 (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (zero-extend input_zero (bitvector 16))) (ite x?$850 (bv #x0000 16) (bv #x0001 16))) (bvadd (ite x?$850 (bv #x0000 16) (bv #x0001 16)) (ite (bvsle (ite x?$848 (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (zero-extend input_zero (bitvector 16))) (bvadd (bv #x7fff 16) (bvneg (ite x?$850 (bv #x0000 16) (bv #x0001 16))))) (ite x?$848 (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (zero-extend input_zero (bitvector 16))) (bvadd (bv #x7fff 16) (bvneg (ite x?$850 (bv #x0000 16) (bv #x0001 16))))))) (bv #x0000 16)))))))) (⊢ (|| (&& (! x?$849) (! x?$851)) (&& (! x?$851) (! (&& (! x?$849) (! x?$851))))) (bvashr (ite x?$849 (bvadd (bvneg (ite x?$848 (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (zero-extend input_zero (bitvector 16)))) (ite x?$849 (bvadd (ite x?$848 (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (zero-extend input_zero (bitvector 16))) (ite x?$850 (bv #x0000 16) (bv #x0001 16))) (bvadd (ite x?$850 (bv #x0000 16) (bv #x0001 16)) (ite (bvsle (ite x?$848 (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (zero-extend input_zero (bitvector 16))) (bvadd (bv #x7fff 16) (bvneg (ite x?$850 (bv #x0000 16) (bv #x0001 16))))) (ite x?$848 (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (zero-extend input_zero (bitvector 16))) (bvadd (bv #x7fff 16) (bvneg (ite x?$850 (bv #x0000 16) (bv #x0001 16)))))))) (bvadd (ite x?$849 (bvadd (ite x?$848 (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (zero-extend input_zero (bitvector 16))) (ite x?$850 (bv #x0000 16) (bv #x0001 16))) (bvadd (ite x?$850 (bv #x0000 16) (bv #x0001 16)) (ite (bvsle (ite x?$848 (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (zero-extend input_zero (bitvector 16))) (bvadd (bv #x7fff 16) (bvneg (ite x?$850 (bv #x0000 16) (bv #x0001 16))))) (ite x?$848 (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (zero-extend input_zero (bitvector 16))) (bvadd (bv #x7fff 16) (bvneg (ite x?$850 (bv #x0000 16) (bv #x0001 16))))))) (ite (bvsle (bvadd (bv #x8000 16) (bvneg (ite (bvsle (ite x?$849 (bvadd (ite x?$848 (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (zero-extend input_zero (bitvector 16))) (ite x?$850 (bv #x0000 16) (bv #x0001 16))) (bvadd (ite x?$850 (bv #x0000 16) (bv #x0001 16)) (ite (bvsle (ite x?$848 (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (zero-extend input_zero (bitvector 16))) (bvadd (bv #x7fff 16) (bvneg (ite x?$850 (bv #x0000 16) (bv #x0001 16))))) (ite x?$848 (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (zero-extend input_zero (bitvector 16))) (bvadd (bv #x7fff 16) (bvneg (ite x?$850 (bv #x0000 16) (bv #x0001 16))))))) (bv #x0000 16)) (ite x?$849 (bvadd (ite x?$848 (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (zero-extend input_zero (bitvector 16))) (ite x?$850 (bv #x0000 16) (bv #x0001 16))) (bvadd (ite x?$850 (bv #x0000 16) (bv #x0001 16)) (ite (bvsle (ite x?$848 (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (zero-extend input_zero (bitvector 16))) (bvadd (bv #x7fff 16) (bvneg (ite x?$850 (bv #x0000 16) (bv #x0001 16))))) (ite x?$848 (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (zero-extend input_zero (bitvector 16))) (bvadd (bv #x7fff 16) (bvneg (ite x?$850 (bv #x0000 16) (bv #x0001 16))))))) (bv #x0000 16)))) (ite (bvsle (bvneg (ite x?$848 (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (zero-extend input_zero (bitvector 16)))) (bvadd (bv #x7fff 16) (bvneg (ite (bvsle (bv #x0000 16) (ite x?$849 (bvadd (ite x?$848 (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (zero-extend input_zero (bitvector 16))) (ite x?$850 (bv #x0000 16) (bv #x0001 16))) (bvadd (ite x?$850 (bv #x0000 16) (bv #x0001 16)) (ite (bvsle (ite x?$848 (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (zero-extend input_zero (bitvector 16))) (bvadd (bv #x7fff 16) (bvneg (ite x?$850 (bv #x0000 16) (bv #x0001 16))))) (ite x?$848 (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (zero-extend input_zero (bitvector 16))) (bvadd (bv #x7fff 16) (bvneg (ite x?$850 (bv #x0000 16) (bv #x0001 16)))))))) (ite x?$849 (bvadd (ite x?$848 (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (zero-extend input_zero (bitvector 16))) (ite x?$850 (bv #x0000 16) (bv #x0001 16))) (bvadd (ite x?$850 (bv #x0000 16) (bv #x0001 16)) (ite (bvsle (ite x?$848 (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (zero-extend input_zero (bitvector 16))) (bvadd (bv #x7fff 16) (bvneg (ite x?$850 (bv #x0000 16) (bv #x0001 16))))) (ite x?$848 (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (zero-extend input_zero (bitvector 16))) (bvadd (bv #x7fff 16) (bvneg (ite x?$850 (bv #x0000 16) (bv #x0001 16))))))) (bv #x0000 16))))) (bvneg (ite x?$848 (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (zero-extend input_zero (bitvector 16)))) (bvadd (bv #x7fff 16) (bvneg (ite (bvsle (bv #x0000 16) (ite x?$849 (bvadd (ite x?$848 (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (zero-extend input_zero (bitvector 16))) (ite x?$850 (bv #x0000 16) (bv #x0001 16))) (bvadd (ite x?$850 (bv #x0000 16) (bv #x0001 16)) (ite (bvsle (ite x?$848 (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (zero-extend input_zero (bitvector 16))) (bvadd (bv #x7fff 16) (bvneg (ite x?$850 (bv #x0000 16) (bv #x0001 16))))) (ite x?$848 (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (zero-extend input_zero (bitvector 16))) (bvadd (bv #x7fff 16) (bvneg (ite x?$850 (bv #x0000 16) (bv #x0001 16)))))))) (ite x?$849 (bvadd (ite x?$848 (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (zero-extend input_zero (bitvector 16))) (ite x?$850 (bv #x0000 16) (bv #x0001 16))) (bvadd (ite x?$850 (bv #x0000 16) (bv #x0001 16)) (ite (bvsle (ite x?$848 (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (zero-extend input_zero (bitvector 16))) (bvadd (bv #x7fff 16) (bvneg (ite x?$850 (bv #x0000 16) (bv #x0001 16))))) (ite x?$848 (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (zero-extend input_zero (bitvector 16))) (bvadd (bv #x7fff 16) (bvneg (ite x?$850 (bv #x0000 16) (bv #x0001 16))))))) (bv #x0000 16)))))) (ite (bvsle (bvneg (ite x?$848 (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (zero-extend input_zero (bitvector 16)))) (bvadd (bv #x7fff 16) (bvneg (ite (bvsle (bv #x0000 16) (ite x?$849 (bvadd (ite x?$848 (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (zero-extend input_zero (bitvector 16))) (ite x?$850 (bv #x0000 16) (bv #x0001 16))) (bvadd (ite x?$850 (bv #x0000 16) (bv #x0001 16)) (ite (bvsle (ite x?$848 (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (zero-extend input_zero (bitvector 16))) (bvadd (bv #x7fff 16) (bvneg (ite x?$850 (bv #x0000 16) (bv #x0001 16))))) (ite x?$848 (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (zero-extend input_zero (bitvector 16))) (bvadd (bv #x7fff 16) (bvneg (ite x?$850 (bv #x0000 16) (bv #x0001 16)))))))) (ite x?$849 (bvadd (ite x?$848 (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (zero-extend input_zero (bitvector 16))) (ite x?$850 (bv #x0000 16) (bv #x0001 16))) (bvadd (ite x?$850 (bv #x0000 16) (bv #x0001 16)) (ite (bvsle (ite x?$848 (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (zero-extend input_zero (bitvector 16))) (bvadd (bv #x7fff 16) (bvneg (ite x?$850 (bv #x0000 16) (bv #x0001 16))))) (ite x?$848 (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (zero-extend input_zero (bitvector 16))) (bvadd (bv #x7fff 16) (bvneg (ite x?$850 (bv #x0000 16) (bv #x0001 16))))))) (bv #x0000 16))))) (bvneg (ite x?$848 (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (zero-extend input_zero (bitvector 16)))) (bvadd (bv #x7fff 16) (bvneg (ite (bvsle (bv #x0000 16) (ite x?$849 (bvadd (ite x?$848 (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (zero-extend input_zero (bitvector 16))) (ite x?$850 (bv #x0000 16) (bv #x0001 16))) (bvadd (ite x?$850 (bv #x0000 16) (bv #x0001 16)) (ite (bvsle (ite x?$848 (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (zero-extend input_zero (bitvector 16))) (bvadd (bv #x7fff 16) (bvneg (ite x?$850 (bv #x0000 16) (bv #x0001 16))))) (ite x?$848 (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (zero-extend input_zero (bitvector 16))) (bvadd (bv #x7fff 16) (bvneg (ite x?$850 (bv #x0000 16) (bv #x0001 16)))))))) (ite x?$849 (bvadd (ite x?$848 (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (zero-extend input_zero (bitvector 16))) (ite x?$850 (bv #x0000 16) (bv #x0001 16))) (bvadd (ite x?$850 (bv #x0000 16) (bv #x0001 16)) (ite (bvsle (ite x?$848 (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (zero-extend input_zero (bitvector 16))) (bvadd (bv #x7fff 16) (bvneg (ite x?$850 (bv #x0000 16) (bv #x0001 16))))) (ite x?$848 (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (zero-extend input_zero (bitvector 16))) (bvadd (bv #x7fff 16) (bvneg (ite x?$850 (bv #x0000 16) (bv #x0001 16))))))) (bv #x0000 16))))) (bvadd (bv #x8000 16) (bvneg (ite (bvsle (ite x?$849 (bvadd (ite x?$848 (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (zero-extend input_zero (bitvector 16))) (ite x?$850 (bv #x0000 16) (bv #x0001 16))) (bvadd (ite x?$850 (bv #x0000 16) (bv #x0001 16)) (ite (bvsle (ite x?$848 (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (zero-extend input_zero (bitvector 16))) (bvadd (bv #x7fff 16) (bvneg (ite x?$850 (bv #x0000 16) (bv #x0001 16))))) (ite x?$848 (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (zero-extend input_zero (bitvector 16))) (bvadd (bv #x7fff 16) (bvneg (ite x?$850 (bv #x0000 16) (bv #x0001 16))))))) (bv #x0000 16)) (ite x?$849 (bvadd (ite x?$848 (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (zero-extend input_zero (bitvector 16))) (ite x?$850 (bv #x0000 16) (bv #x0001 16))) (bvadd (ite x?$850 (bv #x0000 16) (bv #x0001 16)) (ite (bvsle (ite x?$848 (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (zero-extend input_zero (bitvector 16))) (bvadd (bv #x7fff 16) (bvneg (ite x?$850 (bv #x0000 16) (bv #x0001 16))))) (ite x?$848 (zero-extend (app input (+ (+ -16 sum_input_sq.s1.rx$x.rx$x) (+ t140 (- t136)))) (bitvector 16)) (zero-extend input_zero (bitvector 16))) (bvadd (bv #x7fff 16) (bvneg (ite x?$850 (bv #x0000 16) (bv #x0001 16))))))) (bv #x0000 16))))))) (bv #x0001 16)))))
+Ran synthesizer for 145 ms
+(unsat)
+run-x86-synthesizer
+halide-expr:
+  (vec-sub
+ (vec-cast
+  (load
+   (buffer input 'uint8)
+   (ramp
+    (sca-add (sca-mul sum_input_sq.s1.rx$x.rx$x 16) (var-lookup 't110))
+    1
+    16)
+   (aligned 1 0))
+  'int16
+  16)
+ (vec-cast (sca-broadcast (uint8_t input_zero) 16) 'int16 16))
+template:
+  (vs-mpy-add
+ ...
+ (combine #<load-data> (broadcast ... (uint8_t input_zero)))
+ (list (int8_t (bv #x01 8)) (int8_t (bv #xff 8)))
+ #f
+ #f
+ #f
+ 'int16)
+axioms:
+  '(#t #t)
+optimized-halide-expr:
+  (vec-sub
+ (vec-cast #<abstr-halide-expr> 'int16 16)
+ (vec-cast #<abstr-halide-expr> 'int16 16))
+optimized-template:
+  (vs-mpy-add
+ ...
+ (combine #<abstr-expr> #<abstr-expr>)
+ (list (int8_t (bv #x01 8)) (int8_t (bv #xff 8)))
+ #f
+ #f
+ #f
+ 'int16)
+optimized Halide 0:
+  (int16_t
+ (bvadd (zero-extend (app abstr-vals$980 0) (bitvector 16)) (bvneg (zero-extend (app abstr-vals$981 0) (bitvector 16)))))
+optimized x86 0:
+  (int16_t
+ (bvadd (zero-extend (ite c$853 (app abstr-vals$980 idx$852) (app abstr-vals$981 idx$852)) (bitvector 16)) (bvneg (zero-extend (ite c$855 (app abstr-vals$980 idx$854) (app abstr-vals$981 idx$854)) (bitvector 16)))))
+Ran synthesizer for 97 ms
+(model
+ [idx$852 0]
+ [c$853 #t]
+ [idx$854 0]
+ [c$855 #f])
+(vec-sub
+ (vec-cast #<abstr-halide-expr> 'int16 16)
+ (vec-cast #<abstr-halide-expr> 'int16 16))
+(vs-mpy-add
+ ...
+ (combine #<load-data> (broadcast ... (uint8_t input_zero)))
+ (list (int8_t (bv #x01 8)) (int8_t (bv #xff 8)))
+ #f
+ #f
+ #f
+ 'int16)
+Ran bounds analysis for 34 ms
+Ran bounds analysis for 22 ms
+"Extended success?"
+#t
+(vs-mpy-add
+ ...
+ (combine #<load-data> (broadcast ... (uint8_t input_zero)))
+ (list (int8_t (bv #x01 8)) (int8_t (bv #xff 8)))
+ #f
+ #f
+ #f
+ 'int16)
+
+(x86) Successfully found an equivalent IR expression.
+
+(vs-mpy-add
+ ...
+ (combine #<load-data> (broadcast ... (uint8_t input_zero)))
+ (list (int8_t (bv #x01 8)) (int8_t (bv #xff 8)))
+ #f
+ #f
+ #f
+ 'int16)
+
+Synthesis time: 0 seconds
+
+Synthesizing x86 for:
+(vec-sub
+ (vec-cast
+  (load
+   (buffer input 'uint8)
+   (ramp
+    (sca-add (sca-mul sum_input_sq.s1.rx$x.rx$x 16) (var-lookup 't110))
+    1
+    16)
+   (aligned 1 0))
+  'int16
+  16)
+ (vec-cast (sca-broadcast (uint8_t input_zero) 16) 'int16 16))
+
+
+synthesize-x86 output:
+#<void>
+#f

@@ -1,7 +1,7 @@
 #lang rosette/safe
 
 (require
-  (only-in racket/base error bitwise-and bitwise-xor)
+  (only-in racket/base error bitwise-and bitwise-xor bitwise-ior bitwise-not)
   rosette/lib/destruct
   rake/cpp
   rake/halide/ir/types)
@@ -52,6 +52,8 @@
 
     [(vec-bwand v1 v2) (vec-len v1)]
     [(vec-bwxor v1 v2) (vec-len v1)]
+    [(vec-bwor v1 v2) (vec-len v1)]
+    [(vec-bwnot v1) (vec-len v1)]
 
     [(vec-reinterpret v type lanes) lanes]
     [(vector_reduce op width vec) (quotient (vec-len vec) width)]
@@ -104,6 +106,8 @@
 
     [(vec-bwand v1 v2) (list v1 v2)]
     [(vec-bwxor v1 v2) (list v1 v2)]
+    [(vec-bwor v1 v2) (list v1 v2)]
+    [(vec-bwnot v1) (list v1)]
 
     [(vec-reinterpret v type lanes) (list v)]
     [(vector_reduce op width vec) (list vec)]
@@ -197,6 +201,8 @@
 
     [(vec-bwand v1 v2) (lambda (i) (do-bwand ((interpret v1) i) ((interpret v2) i)))]
     [(vec-bwxor v1 v2) (lambda (i) (do-bwxor ((interpret v1) i) ((interpret v2) i)))]
+    [(vec-bwor v1 v2) (lambda (i) (do-bwor ((interpret v1) i) ((interpret v2) i)))]
+    [(vec-bwnot v1) (lambda (i) (do-bwnot ((interpret v1) i)))]
 
     [(vec-reinterpret v type lanes) (lambda (i) (do-reinterpret (interpret v) i type lanes))]
 
@@ -442,6 +448,21 @@
      (define outT (infer-out-type lhs rhs))
      (mk-cpp-expr (bvxor (cpp:eval lhs) (cpp:eval rhs)) outT)]))
 
+(define (do-bwor lhs rhs)
+  (cond
+    [(and (integer? lhs) (integer? rhs))
+     (bitwise-ior lhs rhs)]
+    [else
+     (define outT (infer-out-type lhs rhs))
+     (mk-cpp-expr (bvor (cpp:eval lhs) (cpp:eval rhs)) outT)]))
+
+(define (do-bwnot lhs)
+  (cond
+    [(and (integer? lhs))
+     (bitwise-not lhs)]
+    [else
+     (define outT (infer-out-type lhs lhs))
+     (mk-cpp-expr (bvnot (cpp:eval lhs)) outT)]))
 
 (define (do-reinterpret-extract vec index type lanes)
   (error "TODO: implement do-reinterpret-extract as needed\n"))

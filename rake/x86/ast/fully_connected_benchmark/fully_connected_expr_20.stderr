@@ -1,0 +1,7 @@
+synthesis\lifting\greedy-ir-lifted.rkt: FOLD-REPLACE-EXTEND algorithm failed to lift the halide expression: (vector_reduce 'add 4 (vec-cast (load (buffer filter 'uint8) (ramp (sca-add (sca-mul multiplied_intm.s1.rc$x.rc$x.rco 16) (var-lookup 't676)) 1 16) (aligned 1 0)) 'uint32 16))
+  context...:
+   /Users/alexanderroot/Projects/Rake/hvx/rake/rosette/rosette/base/form/control.rkt:16:25
+   /Users/alexanderroot/Projects/Rake/hvx/rake/rosette/rosette/base/form/control.rkt:15:25
+   /Users/alexanderroot/Projects/Rake/rake/rake/synthesis/ir.rkt:9:0: synthesize-ir-expr
+   /Users/alexanderroot/Projects/Rake/hvx/rake/rosette/rosette/base/form/control.rkt:15:25
+   body of "/Users/alexanderroot/Projects/Rake/rake/rake/x86/ast/fully_connected_benchmark/fully_connected_expr_20.rkt"

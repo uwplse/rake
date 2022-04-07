@@ -1,0 +1,150 @@
+Lifting input expression to x86 IR...
+=====================================
+
+"Building Expr:"
+(load (buffer maximum 'uint8) (ramp 0 1 32) (aligned 0 0))
+"Fold templates"
+'()
+here()
+
+"Replace templates"
+'()
+"Success?"
+#f
+#<void>
+run-x86-synthesizer
+halide-expr:
+  (load (buffer maximum 'uint8) (ramp 0 1 32) (aligned 0 0))
+template:
+  #<load-data>
+axioms:
+  '()
+optimized-halide-expr:
+  (load (buffer maximum 'uint8) (ramp 0 1 32) (aligned 0 0))
+optimized-template:
+  #<load-data>
+optimized Halide 0:
+  (uint8_t (app maximum 0))
+optimized x86 0:
+  (uint8_t (app maximum 0))
+Ran synthesizer for 22 ms
+(model
+ [idx$0 0])
+(load (buffer maximum 'uint8) (ramp 0 1 32) (aligned 0 0))
+#<load-data>
+Ran bounds analysis for 21 ms
+Ran bounds analysis for 12 ms
+"Extended success?"
+#t
+#<load-data>
+"Building Expr:"
+(sca-broadcast (uint8_t output_max) 32)
+"Fold templates"
+'()
+here()
+
+"Replace templates"
+'()
+"Success?"
+#f
+#<void>
+run-x86-synthesizer
+halide-expr:
+  (sca-broadcast (uint8_t output_max) 32)
+template:
+  (broadcast ... (uint8_t output_max))
+axioms:
+  '()
+optimized-halide-expr:
+  (sca-broadcast (uint8_t output_max) 32)
+optimized-template:
+  (broadcast ... (uint8_t output_max))
+optimized Halide 0:
+  (uint8_t output_max)
+optimized x86 0:
+  (uint8_t output_max)
+Ran synthesizer for 18 ms
+(model)
+(sca-broadcast (uint8_t output_max) 32)
+(broadcast ... (uint8_t output_max))
+Ran bounds analysis for 20 ms
+Ran bounds analysis for 13 ms
+"Extended success?"
+#t
+(broadcast ... (uint8_t output_max))
+"Building Expr:"
+(vec-min
+ (load (buffer maximum 'uint8) (ramp 0 1 32) (aligned 0 0))
+ (sca-broadcast (uint8_t output_max) 32))
+"Fold templates"
+'(#<load-data>)
+here(#<load-data>)
+
+"Replace templates"
+'()
+run-x86-synthesizer
+halide-expr:
+  (vec-min
+ (load (buffer maximum 'uint8) (ramp 0 1 32) (aligned 0 0))
+ (sca-broadcast (uint8_t output_max) 32))
+template:
+  #<load-data>
+axioms:
+  '()
+optimized-halide-expr:
+  (vec-min
+ (load (buffer maximum 'uint8) (ramp 0 1 32) (aligned 0 0))
+ (sca-broadcast (uint8_t output_max) 32))
+optimized-template:
+  #<load-data>
+optimized Halide 0:
+  (uint8_t (ite (bvule (app maximum 0) output_max) (app maximum 0) output_max))
+optimized x86 0:
+  (uint8_t (app maximum 0))
+"Success?"
+#f
+#<void>
+run-x86-synthesizer
+halide-expr:
+  (vec-min
+ (load (buffer maximum 'uint8) (ramp 0 1 32) (aligned 0 0))
+ (sca-broadcast (uint8_t output_max) 32))
+template:
+  (minimum ... #<load-data> (broadcast ... (uint8_t output_max)))
+axioms:
+  '(#t #t)
+optimized-halide-expr:
+  (vec-min #<abstr-halide-expr> #<abstr-halide-expr>)
+optimized-template:
+  (minimum ... #<abstr-expr> #<abstr-expr>)
+optimized Halide 0:
+  (uint8_t
+ (ite (bvule (app abstr-vals$129 0) (app abstr-vals$130 0)) (app abstr-vals$129 0) (app abstr-vals$130 0)))
+optimized x86 0:
+  (uint8_t
+ (ite (bvule (app abstr-vals$129 0) (app abstr-vals$130 0)) (app abstr-vals$129 0) (app abstr-vals$130 0)))
+Ran synthesizer for 18 ms
+(model)
+(vec-min #<abstr-halide-expr> #<abstr-halide-expr>)
+(minimum ... #<load-data> (broadcast ... (uint8_t output_max)))
+Ran bounds analysis for 21 ms
+Ran bounds analysis for 11 ms
+"Extended success?"
+#t
+(minimum ... #<load-data> (broadcast ... (uint8_t output_max)))
+
+(x86) Successfully found an equivalent IR expression.
+
+(minimum ... #<load-data> (broadcast ... (uint8_t output_max)))
+
+Synthesis time: 0 seconds
+
+Synthesizing x86 for:
+(vec-min
+ (load (buffer maximum 'uint8) (ramp 0 1 32) (aligned 0 0))
+ (sca-broadcast (uint8_t output_max) 32))
+
+
+synthesize-x86 output:
+#<void>
+#f

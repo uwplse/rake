@@ -30,9 +30,11 @@
     ;(println check-cache)
     ;(println (get-arm-grammar-helper halide-expr ir-expr arm-sub-exprs))
     ;(println (if check-cache (hash-ref grammar-cache key) (get-arm-grammar-helper halide-expr ir-expr arm-sub-exprs)))
-    ;(println candidates)
+    (display (format "get-arm-grammar received ~a candidates\n" (length candidates)))
     ;(println (filter (lambda (c) (<= (cdr c) cost-ub)) candidates))
-      (filter (lambda (c) (<= (cdr c) cost-ub)) candidates)))
+    (let ([filtered (filter (lambda (c) (<= (cdr c) cost-ub)) candidates)])
+      (display (format "And ~a of them pass the cost filtering\n" (length filtered)))
+      filtered)))
 
 (define (get-input-type expr)
   (if (arm-ir:combine? expr)
@@ -58,32 +60,45 @@
                 (list arm:reinterpret arm:add arm:addv arm:saddlv arm:uaddlv arm:saddl arm:saddw arm:saddlp arm:sadalp arm:smlal-vs arm:smlsl-vs arm:sdot.v2i32.v8i8 arm:udot.v2i32.v8i8 arm:sdot.v4i32.v16i8 arm:udot.v4i32.v16i8 arm:shll arm:ssubl arm:sub arm:uadalp arm:uaddl arm:uaddlp arm:uaddw arm:umlal-vs arm:umlsl-vs arm:usubl arm:usubw arm:smull-vs arm:umull-vs)
                 ;(list arm:reinterpret arm:umull-vs arm:add)
                 (list arm:reinterpret arm:add arm:sub arm:addp arm:mla-vs arm:mls-vs arm:mul-vs arm:shl arm:neg))]
+         [depth (if widening? 4 4)]
          [grouped-sub-exprs (prepare-sub-exprs arm-sub-exprs)]
          [number-reads (length weights)]
          [desired-types (arm:get-vector-types output-type)]
          ; Enumerate those with the correct output type
          ; TODO: do the pruning somehow...
-         [candidates (time (enumerate-arm isa desired-types grouped-sub-exprs 4 7 number-reads))]
+         [candidates (time (enumerate-arm isa desired-types grouped-sub-exprs depth 7 number-reads))]
          [load-buffers (halide:extract-live-buffers halide-expr)]
          [live-buffers (lambda (expr)
                          (let* ([live-bufs (mutable-set)]
                                [extract-buffer (lambda (node [pos -1])
                                                   (destruct node
                                                     [(buffer data elemT) (set-add! live-bufs node) node]
+                                                    [(arm:??swizzle id live-data exprs idx-tbl output-type) (display (format "checking: (arm:??swizzle ~a ~a ~a ~a ~a)\n" id live-data exprs idx-tbl output-type))]
                                                     [_ node]))])
                             (arm:visit expr extract-buffer)
                             live-bufs))])
 
-    ; (display "Hey there!\n")
-    ; (pretty-print candidates)
-    ; (display (format "~a ~a ~a\n" isa desired-types grouped-sub-exprs))
-    ; (pretty-print grouped-sub-exprs)
-    ; (display (format "Types; ~a ~a ~a\n" input-type output-type widening?))
+    (display "arm sub exprs!\n")
+    (pretty-print arm-sub-exprs)
+    (display "grouped sub exprs!\n")
+    (pretty-print grouped-sub-exprs)
+    (display "candidates!\n")
+    (pretty-print candidates)
+    (display (format "~a ~a ~a\n" isa desired-types grouped-sub-exprs))
+    (pretty-print grouped-sub-exprs)
+    (display (format "Types; ~a ~a ~a\n" input-type output-type widening?))
 
     ;; Filter out templates that read too much or too little data
+    (display (format "Before filtering reads: ~a\n" (length candidates)))
     (set! candidates (time (filter (lambda (c) (eq? (arm:max-unique-inputs (car c)) number-reads)) candidates)))
+    (display (format "After filtering reads: ~a\n" (length candidates)))
+    (display (format "Load buffers: ~a\n" load-buffers))
+    (display "First:\n")
+    (pretty-print (first candidates))
+    (display (format "LB: ~a\n" (live-buffers (car (first candidates)))))
     (set! candidates (time (filter (lambda (c) (equal? (live-buffers (car c)) load-buffers)) candidates)))
 
+    (display (format "After filtering buffers: ~a\n" (length candidates)))
     ;(pretty-print (take candidates 50))
     ;(println (length candidates))
 
@@ -411,10 +426,9 @@
 
 (define enumeration-cache (make-hash))
 
-(define (remove-dbl-reinterpret parent-instr child-instr)
-  (not
-   (or
-    (and (eq? parent-instr arm:reinterpret) (eq? child-instr arm:reinterpret)))))
+(define (not-dbl-reinterpret parent-instr child-instr)
+  (display (format "(not-dbl-reinterpret ~a ~a)\n\n" parent-instr child-instr))
+  (not (and (eqv? parent-instr arm:reinterpret) (eqv? child-instr arm:reinterpret))))
 
 (define (enumerate-arm instr-set output-types base-exprs depth max-cost [read-count -1] [parent-instr (void)] [arg-pos -1])
   (let ([key (list instr-set output-types base-exprs depth max-cost read-count arg-pos)])
@@ -430,7 +444,7 @@
         (let* ([sub-candidates (enumerate-arm instr-set output-types base-exprs (- depth 1) max-cost read-count parent-instr arg-pos)]
                [curried-builder (curryr build-instr-exprs instr-set output-types base-exprs depth max-cost read-count)]
                ; TODO: HVX does more filtering here, we do not for now.
-               [kept-instrs (filter (curry remove-dbl-reinterpret parent-instr) instr-set)]
+               [kept-instrs (filter (curry not-dbl-reinterpret parent-instr) instr-set)]
                [candidates (foldr append sub-candidates (map curried-builder kept-instrs))]
                [candidates-cost (filter (lambda (expr) (<= (cdr expr) max-cost)) candidates)]
                [candidates-read (if (eq? read-count -1) candidates-cost (filter (lambda (expr) (<= (arm:max-unique-inputs (car expr)) read-count)) candidates-cost))]

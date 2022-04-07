@@ -90,6 +90,9 @@
      (display "optimal successful?\n")
      (display successful?)
      (newline)
+     (pretty-print ir-expr)
+     (display "\n\n->\n\n")
+     (pretty-print arm-expr)
      (cond
        [successful? (values #t arm-expr)]
        [else (values #f (void))])]
