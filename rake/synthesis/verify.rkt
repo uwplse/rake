@@ -52,7 +52,7 @@
         (define halide-output (halide:interpret halide-expr))
         (define hvx-output (hvx:interpret hvx-expr))
         (define is-hvx-pair? (hvx:vec-pair? hvx-output))
-        (define offset (quotient (hvx:num-elems hvx-output) 2)) 
+        (define offset (quotient (hvx:num-elems hvx-output) 2))
         (verify-equiv halide-output hvx-output (verification-lanes (hvx:type hvx-output)) (symbolics halide-expr) axioms is-hvx-pair? offset)]))
 
   (define runtime (- (current-milliseconds) st))
@@ -89,8 +89,8 @@
      (display "=")
      (define sol (verify-lane halide-output hvx-output lane ctx axioms is-hvx-pair? offset))
      (cond
-       [(or (unsat? sol) (unknown? sol)) #f]
-       [else (verify-equiv halide-output hvx-output (rest lanes) ctx axioms is-hvx-pair? offset)])]))
+       [(or (unsat? sol) (unknown? sol)) (verify-equiv halide-output hvx-output (rest lanes) ctx axioms is-hvx-pair? offset)]
+       [else #f])]))
 
 (define (verify-lane halide-output hvx-output lane ctx axioms is-hvx-pair? offset)
   (clear-vc!)
