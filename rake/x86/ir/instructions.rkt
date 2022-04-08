@@ -28,12 +28,18 @@
 ;;               vpmovzxwd, vpmovzxwq, vpmovzxdq, vpmovzxbw, vpmovzxbd, vpmovzxbq,
 ;;               vpacksswb, vpackssdw, vpackuswb, vpackusdw
 (struct cast (expr type saturate?) #:super struct:ast-node #:transparent)
+
 ;; Instructions: vpabsw, vpabsd, vpabsb, vpsignw, vpsignd, vpsignb
 ;; TODO: are there more? x86 has no saturating abs?
 (struct abs (expr saturate? output-type) #:super struct:ast-node #:transparent)
+
+;; Instructions: TODO: min/max/sub/sat_sub/bitwise-or/vpsadbw
+(struct abs-diff (expr0 expr1 widening? outT) #:super struct:ast-node #:transparent)
+
 ;; Instructions: vpminsw, vpminsd, vpminsb, vpminuw, vpminud, vpminub
 ;; TODO: add conditional?
 (struct minimum (expr0 expr1) #:super struct:ast-node #:transparent)
+
 ;; Instructions: vpmaxsw, vpmaxsd, vpmaxsb, vpmaxuw, vpmaxud, vpmaxub
 ;; TODO: add conditional?
 (struct maximum (expr0 expr1) #:super struct:ast-node #:transparent)

@@ -165,6 +165,7 @@
 
       ;; TODO:
       [(x86-ir:bitwise-op op expr0 expr1) '()]
+      [(x86-ir:abs-diff sexpr0 sexpr1 widening? out-type) '()]
 
       [_ (error "NYI: Please define a (fold) grammar for IR Expr:" lifted-sub-expr halide-expr)]))
 
@@ -239,6 +240,7 @@
 
       ;; TODO:
       [(x86-ir:bitwise-op op expr0 expr1) '()]
+      [(x86-ir:abs-diff sexpr0 sexpr1 widening? out-type) '()]
 
       [_ (error "NYI: Please define a (repl) grammar for IR Expr:" lifted-sub-expr halide-expr)]))
 
@@ -285,8 +287,10 @@
           (x86-ir:vv-mpy-add (get-node-id) (apply choose* lifted-sub-exprs) (list 1) (choose* #f #t) (choose* #f #t) (choose* #f #t) (halide:elem-type halide-expr))
           (x86-ir:vv-mpy-add (get-node-id) (x86-ir:load-data (get-load-id) live-reads gather-tbl) (list 1) (choose* #f #t) (choose* #f #t) (choose* #f #t) (halide:elem-type halide-expr))
           ; TODO: add combine nodes
+
+          (mk-vv-mpy-add-combine-subexprs lifted-sub-exprs (halide:elem-type halide-expr)) ;; Extend both of the sub-exprs (combine them)
         )))
-        (println a)
+        ; (println a)
         a]
 
     ;; Addition
@@ -368,15 +372,13 @@
     [(vec-max v1 v2) (if (eq? (length lifted-sub-exprs) 2) (list (x86-ir:maximum (get-node-id) (list-ref lifted-sub-exprs 0) (list-ref lifted-sub-exprs 1))) '())]
 
     [(vec-abs v1) (list (x86-ir:abs (get-node-id) (list-ref lifted-sub-exprs 0) (choose* #t #f) (halide:elem-type halide-expr)))]
-    ; [(vec-absd v1 v2) (if (eq? (length lifted-sub-exprs) 2) (list (x86-ir:abs-diff (get-node-id) (list-ref lifted-sub-exprs 0) (list-ref lifted-sub-exprs 1) (choose* #t #f) (halide:elem-type halide-expr))) '())]
+
+    [(vec-absd v1 v2) (if (eq? (length lifted-sub-exprs) 2) (list (x86-ir:abs-diff (get-node-id) (list-ref lifted-sub-exprs 0) (list-ref lifted-sub-exprs 1) (choose* #t #f) (halide:elem-type halide-expr))) '())]
 
     [(vector_reduce op width vec)
-      ; TODO: is there any other way to handle this?
-      ; TODO: what to do about output type?
-      (list
-        (x86-ir:vs-mpy-add (get-node-id) (mk-load-instr halide-expr) (list (int8_t (bv 1 8)) (int8_t (bv -1 8))) (choose* #f #t) (choose* #f #t) (choose* #f #t) (halide:elem-type halide-expr))
-    
-      )]
+     (define updated-sub-expr (update-input-data (list-ref lifted-sub-exprs 0) halide-expr))
+     (list
+      (x86-ir:vs-mpy-add (get-node-id) updated-sub-expr (map (lambda (i) (int8_t (bv 1 8))) (range width)) (choose* #f #t) (choose* #f #t) (choose* #f #t) (halide:elem-type halide-expr)))]
 
     [(vec-if v1 v2 v3)
      (if (eq? (length lifted-sub-exprs) 3)
@@ -507,4 +509,10 @@
        [((x86-ir:vs-mpy-add sub-expr0 weights0 sat0? round0? half0? out-type0) (x86-ir:vs-mpy-add sub-expr1 weights1 sat1? round1? half1? out-type1))
         (x86-ir:vs-mpy-add (get-node-id) (mk-combine-instr1 sub-expr0 sub-expr1) (append (list w) weights0) (choose* sat0? sat1?) (choose* round0? round1?) (choose* half0? half1?) (choose* out-type0 out-type1))]
        [(_ _) '()])]
+    [else '()]))
+
+(define (mk-vv-mpy-add-combine-subexprs lifted-sub-exprs output-type)
+  (cond
+    [(eq? (length lifted-sub-exprs) 2)
+     (x86-ir:vv-mpy-add (get-node-id) (mk-combine-instr lifted-sub-exprs) (list 1)  (choose* #f #t) (choose* #f #t) (choose* #f #t) output-type)]
     [else '()]))

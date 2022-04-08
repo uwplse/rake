@@ -304,6 +304,20 @@
 (define (widen expr)
   (cpp:cast expr (get-wide-type expr)))
 
+(define (absd-impl lhs rhs out-type)
+  ; TODO: assert lhs and rhs have the same type
+  (let* ([type (cpp:type lhs)]
+         [a (cpp:eval lhs)]
+         [b (cpp:eval rhs)]
+         [gtcheck (if (cpp:signed-expr? lhs) bvsgt bvugt)]
+         [bvalue (if (gtcheck a b) (bvsub a b) (bvsub b a))]
+         ; TODO: is this the right semantic for output type?
+         [obj (mk-cpp-expr bvalue type)])
+      (cpp:cast obj out-type)))
+
+(define (widening-absd-impl lhs rhs type)
+  (absd-impl (widen lhs) (widen rhs) type))
+
 (define (vs-mpy-add-helper input weights width interm-type xo xi)
   (if (eq? width xi)
       (list)
@@ -374,6 +388,9 @@
              [value (bvmul a b)]
              [recurse (vv-mpy-add-helper input (rest weights) interm-type xo (+ 2 xi))])
         (append (list value) recurse))]))
+
+; (define (const-zero? value)
+;   (bveq (cpp:eval value) (cpp:eval (const-zero (cpp:type value)))))
 
 (define (vv-mpy-add-impl input i weights sat? round? half? out-type)
   (let* ([elem-cnt (foldl (lambda (w sum) (+ sum (if (zero? w) 1 2))) 0 weights)]
@@ -499,6 +516,20 @@
      (lambda (i)
         (define val (input i))
         (abs-f val output-type))]
+
+    [(x86-ir:abs-diff expr0 expr1 widening? outT)
+     (define input0 (interpret expr0))
+     (define input1 (interpret expr1))
+     ; TODO: do we need a saturating cast? I don't think we do.
+     (if widening?
+        (lambda (i)
+          (let ([value0 (input0 i)]
+                [value1 (input1 i)])
+            (widening-absd-impl value0 value1 outT)))
+        (lambda (i)
+          (let ([value0 (input0 i)]
+                [value1 (input1 i)])
+            (absd-impl value0 value1 outT))))]
 
     [(x86-ir:minimum expr0 expr1)
      (define input0 (interpret expr0))
@@ -642,6 +673,7 @@
 
     [(x86-ir:cast expr type saturate?) (+ (instr-count expr) 1)]
     [(x86-ir:abs expr saturate? outT) (+ (instr-count expr) 1)]
+    [(x86-ir:abs-diff expr0 expr1 widening? outT) (+ (instr-count expr0) (instr-count expr1) 1)]
     [(x86-ir:maximum expr0 expr1) (+ (instr-count expr0) (instr-count expr1) 1)]
     [(x86-ir:minimum expr0 expr1) (+ (instr-count expr0) (instr-count expr1) 1)]
 
@@ -672,6 +704,7 @@
 
       [(x86-ir:cast expr type saturate?) (handler (x86-ir:cast (x86-ir:ast-node-id ir-expr) (visit expr handler) type saturate?))]
       [(x86-ir:abs expr saturate? output-type) (handler (x86-ir:abs (x86-ir:ast-node-id ir-expr) (visit expr handler) saturate? output-type))]
+      [(x86-ir:abs-diff expr0 expr1 widening? outT) (handler (x86-ir:abs-diff (x86-ir:ast-node-id ir-expr) (visit expr0 handler) (visit expr1 handler) widening? outT))]
       [(x86-ir:maximum expr0 expr1) (handler (x86-ir:maximum (x86-ir:ast-node-id ir-expr) (visit expr0 handler) (visit expr1 handler)))]
       [(x86-ir:minimum expr0 expr1) (handler (x86-ir:minimum (x86-ir:ast-node-id ir-expr) (visit expr0 handler) (visit expr1 handler)))]
 
@@ -705,6 +738,7 @@
 
     [(x86-ir:cast expr type saturate?) (list expr)]
     [(x86-ir:abs expr saturate? output-type) (list expr)]
+    [(x86-ir:abs-diff expr0 expr1 widening? outT) (list expr0 expr1)]
     [(x86-ir:maximum expr0 expr1) (list expr0 expr1)]
     [(x86-ir:minimum expr0 expr1) (list expr0 expr1)]
 
