@@ -690,6 +690,7 @@
     [(x86-ir:bitwise-op op expr0 expr1) (+ (instr-count expr0) (instr-count expr1) 1)]
 
     [(x86-ir:vs-divide expr divisor) (+ (instr-count expr) 1)]
+    [(x86-ir:select expr0 expr1 expr2) (+ (instr-count expr0) (instr-count expr1) (instr-count expr2) 1)]
 
     [_ (error "instr-count not implemented for ir-expr: " ir-expr)]))
 
