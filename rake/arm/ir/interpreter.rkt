@@ -27,11 +27,19 @@
   (define b (cpp:type (e 1)))
   (if (< (cpp:type-bw a) (cpp:type-bw b)) a b))
 
+(define (can-lossless-cast e ty)
+  (define x (equal? (cpp:eval e) (cpp:eval (cpp:cast (cpp:cast e ty) (cpp:type e)))))
+  (and (concrete? x) x))
+
 (define (elem-type^ expr)
   (define e (interpret expr))
+  
   (define a (cpp:type (e 0)))
   (define b (cpp:type (e 1)))
-  (if (< (cpp:type-bw a) (cpp:type-bw b)) b a))
+  
+  (if (< (cpp:type-bw a) (cpp:type-bw b))
+      (if (can-lossless-cast (e 1) (cpp:type (e 0))) a b)
+      (if (can-lossless-cast (e 0) (cpp:type (e 1))) b a)))
 
 ;; Model C++ Saturation
 (define MIN_CHAR -128)
