@@ -1913,7 +1913,7 @@ public:
                 break;
             }
         }
-        if (found)
+        if (found) 
             return expr;
         else
             return IRMutator::mutate(expr);
@@ -2487,10 +2487,10 @@ Stmt optimize_hexagon_instructions_legacy(Stmt s, const Target &t, std::set<cons
     // Peephole optimize for Hexagon instructions. These can generate
     // interleaves and deinterleaves alongside the HVX intrinsics.
     s = OptimizePatterns(t, mutated_exprs).mutate(s);
-
+    
     // Try to eliminate any redundant interleave/deinterleave pairs.
     s = EliminateInterleaves(t.natural_vector_size(Int(8)), mutated_exprs).mutate(s);
-
+    
     // There may be interleaves left over that we can fuse with other
     // operations.
     s = FuseInterleaves().mutate(s);
@@ -2501,11 +2501,11 @@ Stmt optimize_hexagon_instructions_legacy(Stmt s, const Target &t, std::set<cons
 Stmt optimize_hexagon_instructions_synthesis(Stmt s, const Target &t, FuncValueBounds fvb) {
     // Print the IR before optimization
     // debug(1) << s << "\n\n";
-
+    
     // Mutate IR expressions using Rake
     std::set<const BaseExprNode *> mutated_exprs;
     s = rake_optimize_hvx(fvb, s, mutated_exprs);
-
+    
     // Run the legacy optimizer (to optimize all of the expressions we do not
     // currently support).
     s = optimize_hexagon_instructions_legacy(s, t, mutated_exprs);

@@ -46,7 +46,7 @@ public:
     void visit(const Variable *op) override {
         if (inside_indexing_expr.top()) {
             encoding[op->name] = Integer;
-
+            
             // Recurse through let-expressions
             if (llet_vars.count(op->name))
                 llet_vars[op->name].accept(this);
@@ -154,10 +154,10 @@ class ExprPrinter : public VariadicVisitor<ExprPrinter, std::string, std::string
             std::string rkt_lhs = dispatch(a);
             std::string rkt_rhs = dispatch(b);
             return tabs() + "(sca-" + bv_name + " " + rkt_lhs + " " + rkt_rhs + ")";
-        }  //else {
-           //std::string rkt_lhs = dispatch(a);
-           //std::string rkt_rhs = dispatch(b);
-           //return tabs() + "(" + int_name + " " + rkt_lhs + " " + rkt_rhs + ")";
+        } //else {
+            //std::string rkt_lhs = dispatch(a);
+            //std::string rkt_rhs = dispatch(b);
+            //return tabs() + "(" + int_name + " " + rkt_lhs + " " + rkt_rhs + ")";
         //}
     }
 
@@ -255,7 +255,7 @@ public:
     std::string visit(const IntImm *op) {
         if (mode.top() == VarEncoding::Bitvector)
             return tabs() + "(" + type_to_rake_type(op->type, false, true) + " (bv " +
-                   std::to_string(op->value) + " " + std::to_string(op->type.bits()) + "))";
+                std::to_string(op->value) + " " + std::to_string(op->type.bits()) + "))";
         else
             return tabs() + std::to_string(op->value);
     }
@@ -263,7 +263,7 @@ public:
     std::string visit(const UIntImm *op) {
         if (mode.top() == VarEncoding::Bitvector)
             return tabs() + "(" + type_to_rake_type(op->type, false, true) + " (bv " +
-                   std::to_string(op->value) + " " + std::to_string(op->type.bits()) + "))";
+                std::to_string(op->value) + " " + std::to_string(op->type.bits()) + "))";
         else
             return tabs() + std::to_string(op->value);
     }
@@ -415,13 +415,13 @@ public:
             indent.pop();
 
             return tabs() + "(" + op->name + rkt_args + ")";
-        } 
+        }
         else if (op->is_intrinsic(Call::dynamic_shuffle)) {
             indent.push(indent.top() + 1);
-
+            
             // Print the lookup table in (default) bit-vector mode
             std::string rkt_args = "\n" + dispatch(op->args[0]);
-
+            
             // Print the lookup indexes in integer mode
             mode.push(VarEncoding::Integer);
             for (unsigned int i = 1; i < op->args.size(); i++)
@@ -433,7 +433,7 @@ public:
         } 
         else if (op->is_intrinsic(Call::shift_right)) {
             return print_intrinsic("shr", op->args, op->type.is_scalar());
-        } 
+        }
         else if (op->is_intrinsic(Call::shift_left)) {
             return print_intrinsic("shl", op->args, op->type.is_scalar());
         } 
@@ -445,26 +445,26 @@ public:
         } 
         else if (op->is_intrinsic(Call::bitwise_xor)) {
             return print_intrinsic("bwxor", op->args, op->type.is_scalar());
-        } 
+        }
         else if (op->is_intrinsic(Call::count_leading_zeros)) {
             return print_intrinsic("clz", op->args, op->type.is_scalar());
-        } 
+        }
         else if (op->is_intrinsic(Call::if_then_else)) {
             vector<Expr> args_fixed = op->args;
             if (op->args[0].type().is_scalar())
                 args_fixed[0] = Broadcast::make(op->args[0], op->args[1].type().lanes());
             return print_intrinsic("if", args_fixed, op->type.is_scalar());
-        } 
+        }
         else if (op->is_intrinsic(Call::reinterpret)) {
             internal_assert(op->args.size() == 1);
             const std::string call_string = tabs() + "(vec-reinterpret" + "\n";
             const std::string type_string = get_type_string(op->type.element_of());
             indent.push(indent.top() + 1);
             const std::string arg = dispatch(op->args[0]);
-            const std::string full_type_string = "\n" + tabs() + "\'" + type_string + " " + std::to_string(op->type.lanes());
+            const std::string full_type_string = "\n" + tabs() + "\'"  + type_string + " " + std::to_string(op->type.lanes());
             indent.pop();
             return call_string + arg + full_type_string + ")";
-        } 
+        }
         else {
             return print_intrinsic(op->name, op->args, op->type.is_scalar());
         }
@@ -552,28 +552,28 @@ public:
         } 
         else if (op->is_interleave()) {
             switch (op->vectors.size()) {
-            case 2: {
-                indent.push(indent.top() + 1);
-                std::string rkt_lhs = dispatch(op->vectors[0]);
-                std::string rkt_rhs = dispatch(op->vectors[1]);
-                indent.pop();
-                return tabs() + "(interleave\n" + rkt_lhs + "\n" + rkt_rhs + ")";
-            }
-            case 4: {
-                indent.push(indent.top() + 1);
-                indent.push(indent.top() + 1);
-                std::string rkt_vec0 = dispatch(op->vectors[0]);
-                std::string rkt_vec1 = dispatch(op->vectors[1]);
-                std::string rkt_vec2 = dispatch(op->vectors[2]);
-                std::string rkt_vec3 = dispatch(op->vectors[3]);
-                indent.pop();
-                std::string rkt_lhs = tabs() + "(interleave\n" + rkt_vec0 + "\n" + rkt_vec2 + ")";
-                std::string rkt_rhs = tabs() + "(interleave\n" + rkt_vec1 + "\n" + rkt_vec3 + ")";
-                indent.pop();
-                return tabs() + "(interleave\n" + rkt_lhs + "\n" + rkt_rhs + ")";
-            }
-            default:
-                return NYI();
+                case 2: {
+                    indent.push(indent.top() + 1);
+                    std::string rkt_lhs = dispatch(op->vectors[0]);
+                    std::string rkt_rhs = dispatch(op->vectors[1]);
+                    indent.pop();
+                    return tabs() + "(interleave\n" + rkt_lhs + "\n" + rkt_rhs + ")";
+                }
+                case 4: {
+                    indent.push(indent.top() + 1);
+                    indent.push(indent.top() + 1);
+                    std::string rkt_vec0 = dispatch(op->vectors[0]);
+                    std::string rkt_vec1 = dispatch(op->vectors[1]);
+                    std::string rkt_vec2 = dispatch(op->vectors[2]);
+                    std::string rkt_vec3 = dispatch(op->vectors[3]);
+                    indent.pop();
+                    std::string rkt_lhs = tabs() + "(interleave\n" + rkt_vec0 + "\n" + rkt_vec2 + ")";
+                    std::string rkt_rhs = tabs() + "(interleave\n" + rkt_vec1 + "\n" + rkt_vec3 + ")";
+                    indent.pop();
+                    return tabs() + "(interleave\n" + rkt_lhs + "\n" + rkt_rhs + ")";
+                }
+                default:
+                    return NYI();
             }
         } 
         else if (op->is_concat()) {
@@ -662,8 +662,8 @@ public:
         indent.push(indent.top() + 1);
         std::string rkt_val = dispatch(op->value);
         indent.pop();
-        return tabs() + "(vector_reduce '" + rkt_op + " " +
-               std::to_string(op->value.type().lanes() / op->type.lanes()) + "\n" + rkt_val + ")";
+        return tabs() + "(vector_reduce '" + rkt_op + " " + 
+            std::to_string(op->value.type().lanes() / op->type.lanes()) + "\n" + rkt_val + ")";
     }
 };
 
@@ -677,7 +677,7 @@ void insert_encodings(Encoding &encoding, const Encoding &other) {
 }
 
 class GatherVars : public IRVisitor {
-    Scope<> let_vars;
+  Scope<> let_vars;
 
 public:
     using IRVisitor::visit;
@@ -707,7 +707,7 @@ Encoding get_encoding(const Expr &expr, const std::map<std::string, Expr> &let_v
 }
 
 std::string expr_to_racket(const Expr &expr, int indent) {
-    std::map<std::string, Expr> let_vars;  // Empty by default.
+    std::map<std::string, Expr> let_vars; // Empty by default.
     const auto encoding = get_encoding(expr, let_vars, let_vars);
     return expr_to_racket(expr, encoding, let_vars, indent);
 }
@@ -810,8 +810,8 @@ class InferSymbolics : public IRVisitor {
 public:
     using IRVisitor::visit;
 
-    InferSymbolics(std::map<std::string, Expr> lvs, std::map<std::string, Expr> llvs, Scope<Interval> &bnds,
-                   FuncValueBounds fvb, Encoding enc)
+    InferSymbolics(std::map<std::string, Expr> lvs, std::map<std::string, Expr> llvs, Scope<Interval> &bnds, 
+        FuncValueBounds fvb, Encoding enc)
         : external_let_vars(lvs), external_llet_vars(llvs), bounds(bnds), func_value_bounds(fvb), encoding(enc) {
     }
 
@@ -872,7 +872,7 @@ public:
     using IRMutator::mutate;
 
     enum Architecture {
-        HVX, ARM
+        HVX, ARM, X86
     };
 
     IROptimizer(FuncValueBounds fvb, Architecture _arch, std::set<const BaseExprNode *> &ms)
@@ -901,8 +901,8 @@ public:
                 return IRMutator::mutate(expr);
 
             // If the expression produces a vector that is not a multiple of the base vector length, ignore it
-            if ((expr.type().bits() * expr.type().lanes() % 1024 != 0) && (expr.type().bits() > 1))
-                return IRMutator::mutate(expr);
+             if ((expr.type().bits() * expr.type().lanes() % 1024 != 0) && (expr.type().bits() > 1))
+                 return IRMutator::mutate(expr);
 
             // If the expression is a dynamic shuffle, ignore it
             const Call *c = expr.as<Call>();
@@ -953,13 +953,13 @@ public:
             mutated_exprs.insert(final_expr.get());
 
             debug(0) << "\nOptimized expression: " << final_expr << "\n";
-
+            
             return final_expr;
         }
-
+        
         else if (arch == IROptimizer::ARM) {
             /* Disqualify expressions we do not currently support */
-
+            
             // If the expression produces a scalar output, ignore it
             if (!expr.type().is_vector())
                 return IRMutator::mutate(expr);
@@ -1024,8 +1024,78 @@ public:
             debug(0) << "\nOptimized expression: " << final_expr << "\n";
 
             return final_expr;
-        } else {
-            return expr;
+        }
+
+        else if (arch == IROptimizer::X86) {
+            /* Disqualify expressions we do not currently support */
+
+            // If the expression produces a scalar output, ignore it
+            if (!expr.type().is_vector())
+                return IRMutator::mutate(expr);
+
+            // If the expression produces an output of float type, ignore it
+            if (expr.type().element_of().is_float())
+                return IRMutator::mutate(expr);
+
+            // If the expression produces an output of boolean type, ignore it
+            if (expr.type().element_of().is_bool())
+                return IRMutator::mutate(expr);
+
+            // If the expression produces a vector that is not a multiple of the base vector length, ignore it
+            if ((expr.type().bits() * expr.type().lanes() % 128 != 0) && (expr.type().bits() > 1))
+                return IRMutator::mutate(expr);
+
+            // If the expression is a dynamic shuffle, ignore it
+            const Call *c = expr.as<Call>();
+            if (c && c->is_intrinsic(Call::dynamic_shuffle))
+                return expr;
+
+            /* Ignore some qualifying but trivial expressions to reduce noise in the results */
+            Expr base_e = expr;
+            while (base_e.node_type() == IRNodeType::Let)
+                base_e = base_e.as<Let>()->body;
+
+            // If the expression is just a single ramp instruction, ignore it
+            if (base_e.node_type() == IRNodeType::Ramp)
+                return IRMutator::mutate(expr);
+
+            // If the expression is just a single load instruction, ignore it
+            if (base_e.node_type() == IRNodeType::Load)
+                return IRMutator::mutate(expr);
+
+            // If the expression is just a single broadcast instruction, ignore it
+            if (base_e.node_type() == IRNodeType::Broadcast)
+                return IRMutator::mutate(expr);
+
+            // If the expression is just a variable, ignore it
+            if (base_e.node_type() == IRNodeType::Variable)
+                return IRMutator::mutate(expr);
+
+            // If the expression is a conditional, optimize the branches individually
+            if (base_e.node_type() == IRNodeType::Select)
+                return IRMutator::mutate(expr);
+
+            // Abstract out unsupported nodes if they appear as sub-expressions
+            Expr spec_expr = AbstractUnsupportedNodes(IROptimizer::X86, abstractions).mutate(expr);
+
+            // Lower intrinsics
+            spec_expr = LowerIntrinsics().mutate(spec_expr);
+
+            // Lift cse for more readable specs
+            spec_expr = common_subexpression_elimination(spec_expr);
+
+            // Re-write expression using synthesis
+            Expr optimized_expr = synthesize_impl(spec_expr, expr);
+
+            // Replace abstracted abstractions
+            Expr final_expr = ReplaceAbstractedNodes(abstractions, let_vars).mutate(optimized_expr);
+
+            debug(0) << "\nOptimized expression: " << final_expr << "\n";
+
+            return final_expr;
+        }
+        else {
+            return expr;            
         }
     }
 
@@ -1035,7 +1105,7 @@ private:
     FuncValueBounds func_value_bounds;
     std::set<const BaseExprNode *> &mutated_exprs;
     Scope<Interval> bounds;
-
+    
     std::map<std::string, Expr> let_vars;
     std::map<std::string, Expr> linearized_let_vars;
     std::vector<std::string> let_decl_order;
@@ -1063,19 +1133,19 @@ private:
             // Generate cleaner specs. Since performance is not a concern, we can freely
             // use widening casts etc.
             if (op->is_intrinsic(Call::saturating_add)) {
-                lowered = narrow(clamp(widen(op->args[0]) + widen(op->args[1]),
-                                       op->args[0].type().min(), op->args[0].type().max()));
-            } 
+                lowered = narrow(clamp(widen(op->args[0]) + widen(op->args[1]), 
+                    op->args[0].type().min(), op->args[0].type().max()));
+            }
             else if (op->is_intrinsic(Call::saturating_sub)) {
                 lowered = narrow(clamp(widen(op->args[0]) - widen(op->args[1]),
                                        op->args[0].type().min(), op->args[0].type().max()));
             } 
             else if (op->is_intrinsic(Call::halving_add)) {
                 lowered = narrow((widen(op->args[0]) + widen(op->args[1])) / 2);
-            } 
+            }
             else if (op->is_intrinsic(Call::halving_sub)) {
                 lowered = narrow((widen(op->args[0]) - widen(op->args[1])) / 2);
-            } 
+            }
             else if (op->is_intrinsic(Call::rounding_halving_add)) {
                 lowered = narrow((widen(op->args[0]) + widen(op->args[1]) + 1) / 2);
             } 
@@ -1084,12 +1154,12 @@ private:
             } 
             else if (op->is_intrinsic(Call::rounding_halving_sub)) {
                 lowered = narrow((widen(op->args[0]) - widen(op->args[1]) + 1) / 2);
-            } 
+            }
             else if (op->is_intrinsic(Call::sorted_avg)) {
                 lowered = narrow((widen(op->args[0]) + widen(op->args[1])) / 2);
             } 
             else {
-                lowered = lower_intrinsic(op);
+                    lowered = lower_intrinsic(op);
             }
             if (lowered.defined()) {
                 return mutate(lowered);
@@ -1135,14 +1205,14 @@ private:
                 std::string uname = unique_name('t');
                 abstractions[uname] = IRMutator::visit(op);
                 return Variable::make(op->type, uname);
-            } 
+            }
             else if (op->is_intrinsic(Call::if_then_else)) {
                 //debug(0) << "ITE found: " << op << "\n";
                 std::string uname = unique_name('t');
                 //debug(0) << "Replaced with: " << uname << "\n";
                 abstractions[uname] = IRMutator::visit(op);
                 return Variable::make(op->type, uname);
-            } 
+            }
             else
                 return IRMutator::visit(op);
         }
@@ -1153,7 +1223,7 @@ private:
             if (v.type().is_vector() && (v.type().bits() * v.type().lanes() % vec_len != 0) && (v.type().bits() > 1)) {
                 std::string uname = unique_name('t');
                 abstractions[uname] = IRMutator::visit(op);
-                return Variable::make(op->type, uname);
+                return Variable::make(op->type, uname); 
             }
             return IRMutator::visit(op);
         }
@@ -1173,7 +1243,7 @@ private:
 
         Expr visit(const Variable *v) override {
             if (abstractions.count(v->name) == 0)
-                return IRMutator::visit(v);
+                return IRMutator::visit(v);    
             return abstractions[v->name];
         }
 
@@ -1186,9 +1256,9 @@ private:
                 if (abstractions.count(vname) > 0) {
                     if (const Ramp *ramp = v->index.as<Ramp>()) {
                         return Shuffle::make_slice(
-                            abstractions[vname],
-                            ((ramp->base).as<IntImm>())->value,
-                            ((ramp->stride).as<IntImm>())->value,
+                            abstractions[vname], 
+                            ((ramp->base).as<IntImm>())->value, 
+                            ((ramp->stride).as<IntImm>())->value, 
                             ramp->lanes
                         );
                     } else
@@ -1356,7 +1426,7 @@ Expr IROptimizer::synthesize_impl(Expr spec_expr, Expr orig_expr) {
 
     std::stringstream sym_vars;
     for (auto var : symFinder.getSymVars()) {
-        debug(1) << "Symbolic var: " << var->name << "\n";
+        debug(1) << "Symbolic var: " << var->name << " [" << encoding[var->name] << "]\n";
         if (var->type.is_vector() && !var->type.is_bool()) {
             sym_bufs << "(define-symbolic-buffer " << var->name << "-buf " << type_to_rake_type(var->type.element_of(), false, true) << ")\n";
             sym_vars << "(define " << var->name << " (load " << var->name
@@ -1473,7 +1543,7 @@ Expr IROptimizer::synthesize_impl(Expr spec_expr, Expr orig_expr) {
         << expr << ")\n"
         << "\n"
         << "(define spec (synthesis-spec 'halide-ir halide-expr axioms))\n";
-
+    
     if (arch == IROptimizer::HVX) {
         rakeInputF << "(define hvx-expr (synthesize-hvx spec 'greedy 'enumerative 'enumerative))\n"
                    << "\n"
@@ -1482,6 +1552,10 @@ Expr IROptimizer::synthesize_impl(Expr spec_expr, Expr orig_expr) {
         rakeInputF << "(define arm-expr (synthesize-arm spec 'greedy 'enumerative 'enumerative))\n"
                    << "\n"
                    << "(llvm-codegen arm-expr \"" << output_filename << "\")";
+    } else if (arch == IROptimizer::X86) {
+        rakeInputF << "(define x86-expr (synthesize-x86 spec 'greedy 'enumerative 'enumerative))\n"
+                   << "\n"
+                   << "(llvm-codegen x86-expr \"" << output_filename << "\")";
     } else {
         internal_error << "Which architecture are you optimizing?\n";
     }
@@ -1526,7 +1600,7 @@ Expr IROptimizer::synthesize_impl(Expr spec_expr, Expr orig_expr) {
     return optimized;
 }
 
-}  // namespace Rake
+} // namespace Rake
 
 Stmt rake_optimize_hvx(FuncValueBounds fvb, const Stmt &s, std::set<const BaseExprNode *> &mutated_exprs) {
     return Rake::IROptimizer(fvb, Rake::IROptimizer::HVX, mutated_exprs).mutate(s);
@@ -1536,15 +1610,19 @@ Stmt rake_optimize_arm(FuncValueBounds fvb, const Stmt &s, std::set<const BaseEx
     return Rake::IROptimizer(fvb, Rake::IROptimizer::ARM, mutated_exprs).mutate(s);
 }
 
+Stmt rake_optimize_x86(FuncValueBounds fvb, const Stmt &s, std::set<const BaseExprNode *> &mutated_exprs) {
+    return Rake::IROptimizer(fvb, Rake::IROptimizer::X86, mutated_exprs).mutate(s);
+}
+
 Stmt optimize_arm_instructions_synthesis(const Stmt &s, const Target &t, FuncValueBounds fvb) {
     // Print the IR before optimization
     // debug(0) << s << "\n\n";
-
+    
     std::set<const BaseExprNode *> mutated_exprs;
 
     // Mutate IR expressions using Rake
     Stmt opt = rake_optimize_arm(fvb, s, mutated_exprs);
-
+    
     // Do code cleanup: lift CSE, remove dead lets and simplify
     opt = simplify(opt);
     opt = common_subexpression_elimination(opt);
@@ -1554,6 +1632,27 @@ Stmt optimize_arm_instructions_synthesis(const Stmt &s, const Target &t, FuncVal
     // debug(1) << opt << "\n\n";
 
     // TODO: can we run arm legacy optimizations?
+    return opt;
+}
+
+Stmt optimize_x86_instructions_synthesis(const Stmt &s, const Target &t, FuncValueBounds fvb) {
+    // Print the IR before optimization
+    // debug(0) << s << "\n\n";
+
+    std::set<const BaseExprNode *> mutated_exprs;
+
+    // Mutate IR expressions using Rake
+    Stmt opt = rake_optimize_x86(fvb, s, mutated_exprs);
+
+    // Do code cleanup: lift CSE, remove dead lets and simplify
+    opt = simplify(opt);
+    opt = common_subexpression_elimination(opt);
+    opt = simplify(opt);
+
+    // Print the IR after Rake's optimization
+    // debug(1) << opt << "\n\n";
+
+    // TODO: can we run x86 legacy optimizations?
     return opt;
 }
 

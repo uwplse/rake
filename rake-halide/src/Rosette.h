@@ -26,6 +26,7 @@ Stmt rake_optimize_hvx(FuncValueBounds fvb, const Stmt &s, std::set<const BaseEx
 Stmt rake_optimize_arm(FuncValueBounds fvb, const Stmt &s, std::set<const BaseExprNode *> &mutated_exprs);
 
 Stmt optimize_arm_instructions_synthesis(const Stmt &s, const Target &t, FuncValueBounds fvb);
+Stmt optimize_x86_instructions_synthesis(const Stmt &s, const Target &t, FuncValueBounds fvb);
 
 }  // namespace Internal
 
