@@ -44,6 +44,8 @@
 
     [(vec-bwand v1 v2) (handler (vec-bwand (visit v1 handler) (visit v2 handler)))]
     [(vec-bwxor v1 v2) (handler (vec-bwxor (visit v1 handler) (visit v2 handler)))]
+    [(vec-bwor v1 v2) (handler (vec-bwor (visit v1 handler) (visit v2 handler)))]
+    [(vec-bwnot v1) (handler (vec-bwnot (visit v1 handler)))]
 
     [(vec-reinterpret v type lanes) (handler (vec-reinterpret (visit v handler) type lanes))]
     
