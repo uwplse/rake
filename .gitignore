@@ -6,6 +6,8 @@ benchmarks/**/out/*
 benchmarks/**/build/*
 benchmarks/**/ref_build/*
 benchmarks/**/profile/*
+benchmarks/**/*.rkt
+benchmarks/**/*.bak
 rake/**/compiled/**/*
 Halide-master-d48fbde/include/Halide.h.gch/Halide.default.gch
 Halide-master-d48fbde/include/Halide.h.gch/Halide.test.gch
