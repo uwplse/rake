@@ -11,7 +11,10 @@ benchmarks = gaussian3x3 \
 			 sobel3x3 \
 			 blur3x3 \
 			 add \
+			 mul \
 			 max_pool \
+			 average_pool \
+			 l2norm \
 			 matmul
 
 bin_dirs = $(addsuffix /bin,$(benchmarks))
