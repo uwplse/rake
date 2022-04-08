@@ -10,21 +10,17 @@
   rake/cpp
   rake/halide
   rake/hvx/ir/instructions
-  rake/hvx/ir/interpreter)
+  rake/hvx/ir/interpreter
+  rake/synthesis/lifting/ir)
 
-(provide lifting-ir-fold-grammar
-         lifting-ir-repl-grammar
-         lifting-ir-extend-grammar
-         hvx-uber-instructions)
-
-(struct lifting-ir (fold-grammar repl-grammar extend-grammar))
+(provide hvx-uber-instructions)
 
 ;; This function returns the list of templates that the
 ;; synthesizer may use to fold the new Halide IR node into
 ;; the current IR-expression. In these tempalates, we do not
 ;; change any uber-instruction in the IR expression, only their
 ;; inputs.
-(define (fold-grammar lifted-sub-expr halide-expr [depth 0])
+(define (fold-grammar lifted-sub-expr lifted-sibling-exprs halide-expr [depth 0])
   (define candidates
     (destruct lifted-sub-expr
 
@@ -35,7 +31,16 @@
 
       [(broadcast value)
        (define output-type (halide:elem-type halide-expr))
-       (define castfn (match output-type ['int8 int8x1] ['int16 int16x1] ['int32 int32x1] ['uint8 uint8x1] ['uint16 uint16x1] ['uint32 uint32x1]))
+       (define castfn
+         (match output-type
+           ['int8 int8x1]
+           ['int16 int16x1]
+           ['int32 int32x1]
+           ['int64 int64x1]
+           ['uint8 uint8x1]
+           ['uint16 uint16x1]
+           ['uint32 uint32x1]
+           ['uint64 uint64x1]))
        (list (broadcast (get-node-id) (castfn value)))]
       
       [(build-vec base stride len) '()]
@@ -198,7 +203,7 @@
 
   (cond
     [(eq? depth 0) candidates]
-    [else (flatten (append (map (lambda (se) (fold-grammar se halide-expr (- depth 1))) (hvx-ir:get-subexprs lifted-sub-expr)) candidates))]))
+    [else (flatten (append (map (lambda (se) (fold-grammar se lifted-sibling-exprs halide-expr (- depth 1))) (hvx-ir:get-subexprs lifted-sub-expr)) candidates))]))
 
 ;; This function returns the list of templates that the
 ;; synthesizer may use to fold the new Halide IR node into

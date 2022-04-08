@@ -72,7 +72,7 @@
     (optimize-query halide-expr template hvx-sub-exprs value-bounds translation-history))
 
   ;(pretty-print optimized-halide-expr)
-  (pretty-print optimized-template)
+  ;(pretty-print optimized-template)
 
   ;; Incrementally checks the template for more and more lanes
   (define lanes-to-verify (verification-lanes (hvx:type (hvx:interpret optimized-template))))

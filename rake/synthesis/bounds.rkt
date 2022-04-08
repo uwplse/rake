@@ -9,12 +9,19 @@
          rake/hvx/ast/types
          rake/hvx/interpreter
          rake/hvx/ir/interpreter
-         rake/arm/ir/interpreter)
+         rake/arm/ir/interpreter
+         rake/x86/ir/interpreter)
 
 (provide infer-value-range-expr
          infer-value-range-hvx
          infer-value-range-hvx-ir
-         infer-value-range-arm-ir)
+         infer-value-range-arm-ir
+         infer-value-range-x86-ir)
+
+;;;; X86
+
+(define (infer-value-range-x86-ir expr axioms abstr-val-bounds)
+  (infer-value-range-expr ((x86-ir:interpret expr) 0) axioms abstr-val-bounds))
 
 ;;;; ARM
 

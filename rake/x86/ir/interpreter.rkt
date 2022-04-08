@@ -6,8 +6,10 @@
   rosette/lib/angelic
   rake/cpp
   rake/halide
-  rake/x86/ir/instructions
-  rake/internal/counter)
+  rake/x86/ir/instructions)
+
+(define curr-cn 0)
+(define (set-curr-cn! v) (set! curr-cn v))
 
 ; TODO: do provides
 (provide
