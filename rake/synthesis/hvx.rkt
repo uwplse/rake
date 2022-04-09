@@ -20,7 +20,7 @@
   rake/synthesis/layouts
   rake/synthesis/lowering/algorithm
   rake/synthesis/swizzling/algorithm
-  rake/synthesis/lowering/synthesizer)
+  rake/synthesis/lowering/hvx/synthesizer)
 
 (provide synthesize-hvx-expr)
 
@@ -30,7 +30,7 @@
 
 (define (synthesize-hvx-expr ir-expr ir-annotations ir-bounds lowering-algo swizzling-algo [sub-expr? #f] [output-layout 'in-order])
   ;; Reset the state of synthesis database
-  (lowering:synthesizer:reset-db)
+  (hvx:lowering:synthesizer:reset-db)
 
   (when (not sub-expr?)
     (display "Inferring Data Layouts...\n")

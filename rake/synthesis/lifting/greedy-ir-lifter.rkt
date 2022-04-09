@@ -3,6 +3,7 @@
 (require
   ;; This file uses these rosette unsafe ops, but they should be fine
   (only-in racket/base values error sort for/list make-hash hash-has-key? hash-ref hash-set!)
+  rake/internal/counter
   rake/internal/debug
   rake/halide
   rake/synthesis/spec
@@ -209,15 +210,13 @@
 (define (bounded-eq-0? oe se)
   (for-each
    (lambda (lane)
-     (hvx-ir:set-cn lane)
-     (arm-ir:set-curr-cn! lane)
+     (set-curr-cn! lane)
      (assert (eq? (oe lane) (se lane))))
    (list 0)))
 
 (define (bounded-eq-1? oe se)
   (for-each
    (lambda (lane)
-     (hvx-ir:set-cn lane)
-     (arm-ir:set-curr-cn! lane)
+     (set-curr-cn! lane)
      (assert (eq? (oe lane) (se lane))))
    (list 0 1)))

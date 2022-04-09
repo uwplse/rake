@@ -3,6 +3,7 @@
 (require (only-in racket/base values make-hash hash-set!)
          (only-in racket/set subset?)
          rosette/lib/destruct
+         rake/internal/counter
          rake/internal/log
          rake/cpp
          rake/halide
@@ -39,7 +40,7 @@
   ;(pretty-print template)
   
   ;(println ((halide:interpret halide-expr) 0))
-  ;(hvx-ir:set-cn 0) (println ((hvx-ir:interpret template) 0))
+  ;(set-curr-cn! 0) (println ((hvx-ir:interpret template) 0))
   
   (define-values (optimized-template optimized-halide-expr inferred-axioms abstr-value-bounds)
     (optimize-query halide-expr template translation-history value-bounds))
@@ -49,7 +50,7 @@
   ;(pretty-print inferred-axioms)
   
   ;(println ((halide:interpret optimized-halide-expr) 0))
-  ;(hvx-ir:set-cn 0) (println ((hvx-ir:interpret optimized-template) 0))
+  ;(set-curr-cn! 0) (println ((hvx-ir:interpret optimized-template) 0))
 
   (cond
     [(subset? (symbolics optimized-halide-expr) (symbolics optimized-template))

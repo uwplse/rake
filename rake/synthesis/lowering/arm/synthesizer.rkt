@@ -4,12 +4,13 @@
   (only-in racket/base exit values for make-hash hash-set! hash-has-key?)
   rosette/lib/destruct
   rosette/lib/synthax
+  rake/internal/counter
   rake/internal/log
   rake/halide
   rake/arm/ast/types
   rake/arm/ast/interpreter
   rake/arm/ast/analysis
-  rake/synthesis/lowering/util/arm)
+  rake/synthesis/lowering/arm/util)
 
 (provide (rename-out
           [synthesize-translation arm:synthesize-translation]
@@ -138,5 +139,5 @@
         (unsat)])]))
 
 (define (lane-eq? oe se lane)
-  (arm:set-curr-cn! lane)
+  (set-curr-cn! lane)
   (assert (eq? (oe lane) (arm:get-element se lane))))
