@@ -52,7 +52,7 @@
             (display (format "Synthesis time: ~a seconds\n\n" runtime))
             (values (void) (void) (void)))
           (begin
-            (display "\nSuccessfully found an equivalent IR expression.\n\n")
+            (display "\n(HVX) Successfully found an equivalent IR expression.\n\n")
             (pretty-print res)
             (display (format "\nSynthesis time: ~a seconds\n\n" runtime))
             (values res annotations (get-lifted-hvx-expr-bounds))))]
@@ -83,7 +83,7 @@
             (display (format "Synthesis time: ~a seconds\n\n" runtime))
             (values (void) (void) (void)))
           (begin
-            (display "\nSuccessfully found an equivalent IR expression.\n\n")
+            (display "\n(ARM) Successfully found an equivalent IR expression.\n\n")
             (pretty-print res)
             (display (format "\nSynthesis time: ~a seconds\n\n" runtime))
             (values res annotations (get-lifted-arm-expr-bounds))))]

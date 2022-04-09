@@ -8,12 +8,15 @@
   rake/hvx/ir/instructions
   rake/synthesis/lowering/grammar/hvx
   rake/synthesis/lowering/grammar/arm
+  rake/synthesis/lowering/grammar/x86
   rake/synthesis/lowering/synthesizer/hvx
-  rake/synthesis/lowering/synthesizer/arm)
+  rake/synthesis/lowering/synthesizer/arm
+  rake/synthesis/lowering/synthesizer/x86
+)
 
 (require (only-in racket/base exit))
 
-(provide synthesize-hvx-template synthesize-arm-template)
+(provide synthesize-hvx-template synthesize-arm-template synthesize-x86-template)
 
 (define (synthesize-hvx-template halide-expr ir-expr hvx-sub-exprs value-bounds translation-history lowering-algo cost-ub)
   (cond
@@ -61,6 +64,36 @@
           (display (format "~a\n" (pretty-format (car arm-template))))
           (display "\nSynthesis time: 0 seconds\n\n")
           (values #t (car arm-template) (cdr arm-template))]
+        [else
+          (display "Failed to synthesize template.\n\n")
+          (values #f (void) 0)])]
+    [else (error (format "Unrecognized lowering algorithm specified: '~a. Supported algorithms: ['enumerative]" lowering-algo))]))
+
+(define (synthesize-x86-template halide-expr ir-expr x86-sub-exprs value-bounds translation-history lowering-algo cost-ub)
+  (cond
+    [(eq? lowering-algo 'enumerative)
+      (display "Lowering IR to x86...\n")
+      (display "====================\n\n")
+      (display (format "IR Operation: \n\n~a\n\n" (pretty-format ir-expr)))
+
+      (define start-time (current-seconds))
+      (define candidates (get-x86-grammar halide-expr ir-expr x86-sub-exprs cost-ub))
+      (define runtime (- (current-seconds) start-time))
+
+      (display (format "Template candidates: ~a\n" (length candidates)))
+      (display (format "Template enumeration time: ~a seconds\n\n" runtime))
+      
+      (define-values (successful? x86-template)
+        (x86:synthesize-translation candidates halide-expr x86-sub-exprs value-bounds translation-history))
+      
+      (display "Finished synthesizing translation\n")
+
+      (cond
+        [successful?
+          (display "\nSuccessfully found an equivalent x86 template.\n\n")
+          (display (format "~a\n" (pretty-format (car x86-template))))
+          (display "\nSynthesis time: 0 seconds\n\n")
+          (values #t (car x86-template) (cdr x86-template))]
         [else
           (display "Failed to synthesize template.\n\n")
           (values #f (void) 0)])]

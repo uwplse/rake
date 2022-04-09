@@ -11,6 +11,8 @@
   rake/cpp
   rake/halide
   rake/x86/ast/types
+  rake/x86/ast/utils
+  rake/internal/counter
 )
 
 (provide (rename-out [interpret x86:interpret]))
@@ -23805,4 +23807,45 @@
 
         [(_ _) (assert #f "infeasible in interpreting vpxor")])]
 
+    ;; TODO: these do not currently get auto-generated.
+    [(x86:??shuffle id loads output-type)
+      (let ([vecType (x86:get-type-struct output-type)]
+            [interpreted-loads (map interpret loads)])
+        (define (shuffle-body i)
+          (apply choose* (filter (lambda (r) (not (void? r)) (map (curryr x86:get-element i) interpreted-loads)))))
+        (vecType shuffle-body))]
+
+    [(x86:??load id live-data buffer idx-tbl output-type)
+      (let ([data (buffer-data buffer)]
+            [vecType (x86:get-type-struct output-type)])
+        ; TODO: understand what the heck this is doing...
+        (define (is-of-buffer? read)
+          (rs-match (cpp:eval read)
+            [(expression (== @app) xs ...) (equal? (list-ref xs 0) data)]
+            [_ #f]))
+
+        (define (filter-reads reads)
+          (filter is-of-buffer? reads))
+
+        (define filtered-reads (map filter-reads live-data))
+
+        (define read-history (make-hash))
+
+        (define (load-body i)
+          (let ([data (list-ref filtered-reads curr-cn)])
+            (if (empty? data)
+              (void)
+              (hash-ref! read-history i (apply choose* data)))))
+
+      (vecType load-body))]
+
+    [(x86:??swizzle id live-data exprs idx-tbl output-type)
+      (let ([vecType (x86:get-type-struct output-type)])
+        ;; TODO: it is probably much more complicated than this...
+        (vecType
+          (lambda (i) (list-ref (list-ref live-data curr-cn) (list-ref idx-tbl i)))))]
+    
+    [(x86:??sub-expr exprs c) (interpret (list-ref exprs c))]
+
+    [_ (error "x86:interpreter does not recognize instruction: " p)]
 ))

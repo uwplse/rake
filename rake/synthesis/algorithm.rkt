@@ -121,6 +121,10 @@
 
         (error "here")
 
+        ;; TODO: NEED x86 full verification check.
+        ;; Full verification of the synthesized expression
+        ; (define correct? (verify-equivalence (spec-expr spec) (first hvx-expr) (spec-axioms spec)))
+
         ;; For now, just return the lowered x86 template
         ir-expr]
         ;; Full verification of the synthesized expression
