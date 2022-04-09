@@ -180,48 +180,6 @@
         
 (define (incremental-swizzle halide-expr ir-expr x86-template x86-sub-exprs lowering-algo swizzling-algo template-cost cost-ub sub-expr?)
   (error "Need to implement x86:incremental-swizzle\n"))
-  ; (let* ([swizzle-budget (- cost-ub template-cost 0.01)]
-  ;        ; TODO: how the heck do we do this calculation?
-  ;        [x86-tile-size 128]
-  ;        [halide-tile-elem-count (halide:vec-len halide-expr)]
-  ;        [halide-tile-elem-bits (cpp:type-bw (halide:elem-type halide-expr))]
-  ;        [halide-tile-size (* halide-tile-elem-count halide-tile-elem-bits)]
-  ;        [elems-per-x86-tile (quotient x86-tile-size halide-tile-elem-bits)])
-      
-  ;   (define (break-to-tiles expr tile-size st)
-  ;     (cond
-  ;       [(< tile-size (- halide-tile-elem-count st)) (cons (slice_vectors expr st 1 tile-size) (break-to-tiles halide-expr tile-size (+ st tile-size)))]
-  ;       [(eq? st 0) (list halide-expr)]
-  ;       [else (list (slice_vectors expr st 1 tile-size))]))
-    
-  ;   (define halide-expr-tiles (break-to-tiles halide-expr elems-per-x86-tile 0))
-
-  ;   (display "Made it this far\n")
-  ;   (pretty-print halide-expr-tiles)
-
-  ;   (if (< 1 (length halide-expr-tiles))
-  ;     (let ([incremental-swizzler (construct-incremental-swizzle-helper x86-template swizzle-budget swizzling-algo x86-sub-exprs (length halide-expr-tiles))])
-  ;       (define-values (successful? x86-tiles swizzle-cost)
-  ;         (incremental-swizzler halide-expr-tiles 1))
-
-  ;       (display (format "Template Cost: ~a\n" template-cost))
-  ;       (display (format "Swizzle Cost: ~a\n\n" swizzle-cost))
-
-  ;       (if successful?
-  ;         (values #t (x86:concat-tiles x86-tiles) (+ template-cost swizzle-cost -0.01) template-cost swizzle-cost)
-  ;         (lower-to-x86 halide-expr ir-expr x86-sub-exprs lowering-algo swizzling-algo sub-expr? cost-ub)))
-  ;         ; (error "Why does incremental-swizzle plural recurse??")))
-  ;     (begin
-  ;       (define-values (successful? x86-expr swizzle-cost)
-  ;         (synthesize-x86-swizzles halide-expr x86-template swizzle-budget swizzling-algo x86-sub-exprs value-bounds translation-history))
-
-  ;       (display (format "Template Cost: ~a\n" template-cost))
-  ;       (display (format "Swizzle Cost: ~a\n\n" swizzle-cost))
-
-  ;       (if successful?
-  ;         (values #t x86-expr (+ template-cost swizzle-cost -0.01) template-cost swizzle-cost)
-  ;         ; (error "Why does incremental-swizzle single recurse??"))))))
-  ;         (lower-to-x86 halide-expr ir-expr x86-sub-exprs lowering-algo swizzling-algo sub-expr? cost-ub))))))
 
 (define (lower-to-x86 halide-expr ir-expr x86-sub-exprs lowering-algo swizzling-algo sub-expr? cost-ub)
   ;; Synthesize equivalent x86 template (compute instructions)
