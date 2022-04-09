@@ -10525,18 +10525,65 @@
         [((x86:i16x16 a) (x86:i16x16 b))
             (x86:i16x16
              (halide:interpret
-              (vector_reduce 'sadd 2
-               (concat_vectors
+              (vec-add
+               (vec-max
+                (vec-min
+                 (slice_vectors
+                  (concat_vectors
+                   (concat_vectors
+                    (slice_vectors
+                     a 0 1 8)
+                    (slice_vectors
+                     b 0 1 8))
+                   (concat_vectors
+                    (slice_vectors
+                     b 0 1 8)
+                    (slice_vectors
+                     a 1 1 8))) 0 2 16)
+                 (vec-sub
+                  (x16 (int16_t (bv 32767 16)))
+                  (vec-max
+                   (slice_vectors
+                    (concat_vectors
+                     (concat_vectors
+                      (slice_vectors
+                       a 0 1 8)
+                      (slice_vectors
+                       b 0 1 8))
+                     (concat_vectors
+                      (slice_vectors
+                       b 0 1 8)
+                      (slice_vectors
+                       a 1 1 8))) 1 2 16)
+                   (x16 (int16_t (bv 0 16))))))
+                (vec-sub
+                 (x16 (int16_t (bv -32768 16)))
+                 (vec-min
+                  (slice_vectors
+                   (concat_vectors
+                    (concat_vectors
+                     (slice_vectors
+                      a 0 1 8)
+                     (slice_vectors
+                      b 0 1 8))
+                    (concat_vectors
+                     (slice_vectors
+                      b 0 1 8)
+                     (slice_vectors
+                      a 1 1 8))) 1 2 16)
+                  (x16 (int16_t (bv 0 16))))))
+               (slice_vectors
                 (concat_vectors
-                 (slice_vectors
-                  a 0 1 8)
-                 (slice_vectors
-                  b 0 1 8))
-                (concat_vectors
-                 (slice_vectors
-                  b 0 1 8)
-                 (slice_vectors
-                  a 1 1 8))))))]
+                 (concat_vectors
+                  (slice_vectors
+                   a 0 1 8)
+                  (slice_vectors
+                   b 0 1 8))
+                 (concat_vectors
+                  (slice_vectors
+                   b 0 1 8)
+                  (slice_vectors
+                   a 1 1 8))) 1 2 16))))]
 
         [(_ _) (assert #f "infeasible in interpreting vphaddsw")])]
 
@@ -10698,13 +10745,45 @@
         [((x86:u8x32 a) (x86:i8x32 b))
             (x86:i16x16
              (halide:interpret
-              (vector_reduce 'sadd 2
-               (vec-mul
-                (int16x32
-                 (uint16x32
-                  a))
-                (int16x32
-                 b)))))]
+              (vec-add
+               (vec-max
+                (vec-min
+                 (slice_vectors
+                  (vec-mul
+                   (int16x32
+                    (uint16x32
+                     a))
+                   (int16x32
+                    b)) 0 2 16)
+                 (vec-sub
+                  (x16 (int16_t (bv 32767 16)))
+                  (vec-max
+                   (slice_vectors
+                    (vec-mul
+                     (int16x32
+                      (uint16x32
+                       a))
+                     (int16x32
+                      b)) 1 2 16)
+                   (x16 (int16_t (bv 0 16))))))
+                (vec-sub
+                 (x16 (int16_t (bv -32768 16)))
+                 (vec-min
+                  (slice_vectors
+                   (vec-mul
+                    (int16x32
+                     (uint16x32
+                      a))
+                    (int16x32
+                     b)) 1 2 16)
+                  (x16 (int16_t (bv 0 16))))))
+               (slice_vectors
+                (vec-mul
+                 (int16x32
+                  (uint16x32
+                   a))
+                 (int16x32
+                  b)) 1 2 16))))]
 
         [(_ _) (assert #f "infeasible in interpreting vpmaddubsw")])]
 
@@ -23847,5 +23926,35 @@
 
     [(x86:??sub-expr exprs c) (interpret (list-ref exprs c))]
 
-    [_ (error "x86:interpreter does not recognize instruction: " p)]
+    [(x86:reinterpret Vn)
+      (destruct (interpret Vn)
+        [(x86:i8x16 v0) (x86:u8x16 (lambda (i) (uint8_t (cpp:eval (v0 i)))))]
+        [(x86:u8x16 v0) (x86:i8x16 (lambda (i) (int8_t (cpp:eval (v0 i)))))]
+
+        [(x86:i16x8 v0) (x86:u16x8 (lambda (i) (uint16_t (cpp:eval (v0 i)))))]
+        [(x86:u16x8 v0) (x86:i16x8 (lambda (i) (int16_t (cpp:eval (v0 i)))))]
+
+        [(x86:i32x4 v0) (x86:u32x4 (lambda (i) (uint32_t (cpp:eval (v0 i)))))]
+        [(x86:u32x4 v0) (x86:i32x4 (lambda (i) (int32_t (cpp:eval (v0 i)))))]
+
+        [(x86:i64x2 v0) (x86:u64x2 (lambda (i) (uint64_t (cpp:eval (v0 i)))))]
+        [(x86:u64x2 v0) (x86:i64x2 (lambda (i) (int64_t (cpp:eval (v0 i)))))]
+
+        [(x86:i8x32 v0) (x86:u8x32 (lambda (i) (uint8_t (cpp:eval (v0 i)))))]
+        [(x86:u8x32 v0) (x86:i8x32 (lambda (i) (int8_t (cpp:eval (v0 i)))))]
+
+        [(x86:i16x16 v0) (x86:u16x16 (lambda (i) (uint16_t (cpp:eval (v0 i)))))]
+        [(x86:u16x16 v0) (x86:i16x16 (lambda (i) (int16_t (cpp:eval (v0 i)))))]
+
+        [(x86:i32x8 v0) (x86:u32x8 (lambda (i) (uint32_t (cpp:eval (v0 i)))))]
+        [(x86:u32x8 v0) (x86:i32x8 (lambda (i) (int32_t (cpp:eval (v0 i)))))]
+
+        [(x86:i64x4 v0) (x86:u64x4 (lambda (i) (uint64_t (cpp:eval (v0 i)))))]
+        [(x86:u64x4 v0) (x86:i64x4 (lambda (i) (int64_t (cpp:eval (v0 i)))))]
+        [_ (error "x86:reinterpret interpreter does not recognize instruction: " p)]
+      )]
+
+    ;; TODO: check that it is a scalar value, not a forgotten instruction.
+    [_ p]
+    ; [_ (error "x86:interpreter does not recognize instruction: " p)]
 ))
