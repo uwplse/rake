@@ -13,6 +13,7 @@
 ;; Auto-generated cost model of Skylake latencies.
 (define (instr-cost instr sig)
   (cond
+    [(eq? instr x86:reinterpret) 0]
     [(eq? instr x86:resize) 0]
     [(eq? instr x86:vbroadcasti128) 7]
     [(eq? instr x86:vpabsb) 1]
