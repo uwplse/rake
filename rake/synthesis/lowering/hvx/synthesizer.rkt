@@ -4,13 +4,16 @@
   (only-in racket/base exit values for make-hash hash-set! hash-has-key?)
   rosette/lib/destruct
   rosette/lib/synthax
+  rake/internal/counter
   rake/internal/log
   rake/halide
   rake/hvx/ast/types
   rake/hvx/interpreter
-  rake/synthesis/lowering/util)
+  rake/synthesis/lowering/hvx/util)
 
-(provide synthesize-translation lowering:synthesizer:reset-db)
+(provide
+ (rename-out [synthesize-translation hvx:synthesize-translation])
+ (rename-out [lowering:synthesizer:reset-db hvx:lowering:synthesizer:reset-db]))
 
 (define (incorrect? sol)
   (or (unsat? sol) (unknown? sol)))
@@ -119,13 +122,13 @@
   (define offset (quotient (hvx:num-elems se) 2))
   (cond
     [(and (hvx:vec-pair? se) (< lane offset))
-     (hvx:set-cn lane)
+     (set-curr-cn! lane)
      (assert (eq? (oe lane) (hvx:v0-elem se lane)))]
     [(hvx:vec-pair? se)
-     (hvx:set-cn lane)
+     (set-curr-cn! lane)
      (assert (eq? (oe lane) (hvx:v1-elem se (- lane offset))))]
     [else
-     (hvx:set-cn lane)
+     (set-curr-cn! lane)
      (assert (eq? (oe lane) (hvx:elem se lane)))]))
 
 ;[(hvx:vec-pair? se)

@@ -5,6 +5,7 @@
   (only-in racket/base make-hash hash-set! hash-has-key? hash-ref hash-ref!)
   (only-in racket/set list->set set->list set-subtract)
   (only-in racket/list range cartesian-product)
+  rake/internal/counter
   rake/internal/error
   rake/internal/log
   rosette/lib/destruct
@@ -319,7 +320,7 @@
 
 (define (lane-eq? oe se lane)
   ;; TODO: do we even need output-layout?
-  (arm:set-curr-cn! lane)
+  (set-curr-cn! lane)
   (assert (eq? (oe lane) (arm:get-element se lane))))
 
 (define (enumerate-arm instr-set output-type base-exprs depth max-cost [parent-instr (void)])

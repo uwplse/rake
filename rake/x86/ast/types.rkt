@@ -157,6 +157,68 @@
 ;; x86 instructions for vector creation
 (struct ld (buf loc align output-type) #:transparent)
 
+;; TODO: these are not currently auto-generated
+(struct ??shuffle (id lds output-type) #:transparent)
+
+(struct ??load (id live-data buffer gather-tbl output-type)
+  #:transparent
+  #:methods gen:custom-write
+  [(define write-proc
+     (make-constructor-style-printer
+      (lambda (obj) `??load)
+      (lambda (obj) (list (??load-id obj) (??load-buffer obj) (??load-output-type obj)))))] ; (filter concrete? (??load-gather-tbl obj))
+  #:methods gen:equal+hash
+  [(define (equal-proc a b equal?-recur)
+     (and
+      (equal?-recur (??load-id a) (??load-id b))
+      (equal?-recur (??load-buffer a) (??load-buffer b))
+      (equal?-recur (??load-output-type a) (??load-output-type b))))
+   (define (hash-proc a hash-recur) (??load-id a))
+   (define (hash2-proc a hash2-recur) (??load-id a))])
+
+(struct ??swizzle (id live-data exprs gather-tbl output-type)
+  #:transparent
+  #:methods gen:custom-write
+  [(define write-proc
+     (make-constructor-style-printer
+      (lambda (obj) `??swizzle)
+      (lambda (obj) (list (??swizzle-id obj) (length (??swizzle-exprs obj)) (??swizzle-output-type obj)))))]
+  #:methods gen:equal+hash
+  [(define (equal-proc a b equal?-recur)
+     (and
+      (equal?-recur (??swizzle-output-type a) (??swizzle-output-type b))
+      (equal?-recur (??swizzle-id a) (??swizzle-id b))
+      (equal?-recur (??swizzle-live-data a) (??swizzle-live-data b))
+      (equal?-recur (??swizzle-exprs a) (??swizzle-exprs b))))
+   (define (hash-proc a hash-recur) (??swizzle-id a))
+   (define (hash2-proc a hash2-recur) (??swizzle-id a))])
+
+(struct ??abstr-load (id live-data buffer)
+  #:transparent
+  #:methods gen:custom-write
+  [(define write-proc
+     (make-constructor-style-printer
+      (lambda (obj) `??abstr-load)
+      (lambda (obj) (list (??abstr-load-buffer obj)))))])
+
+;; New types to represent abstract computation (these types should never appear in output code)
+(struct abstr-expr (orig-expr abstr-vals offset)
+  #:transparent
+  #:methods gen:custom-write
+  [(define write-proc
+     (make-constructor-style-printer
+      (lambda (obj) `arm:abstr-expr)
+      (lambda (obj) (list ))))])
+
+(struct ??sub-expr (exprs c)
+  #:transparent
+  #:methods gen:custom-write
+  [(define write-proc
+     (make-constructor-style-printer
+      (lambda (obj) `??sub-expr)
+      (lambda (obj) (if (concrete? (??sub-expr-c obj))
+                        (list (list-ref (??sub-expr-exprs obj) (??sub-expr-c obj)))
+                        (list (length (??sub-expr-exprs obj)) (??sub-expr-c obj))))))])
 
 (struct instr-sig (ret-val args) #:transparent)
 
@@ -886,3 +948,79 @@
 
     [else (error "Unknown instruction:" instr)]))
 
+;; TODO: need to auto-generate these...
+(define (elem-type expr)
+  (cond
+    [(eq? i8x16 expr) 'int8]
+    [(eq? i8x32 expr) 'int8]
+    [(eq? i16x8 expr) 'int16]
+    [(eq? i16x16 expr) 'int16]
+    [(eq? i32x4 expr) 'int32]
+    [(eq? i32x8 expr) 'int32]
+    [(eq? i64x2 expr) 'int64]
+    [(eq? i64x4 expr) 'int64]
+
+    [(eq? u8x16 expr) 'uint8]
+    [(eq? u8x32 expr) 'uint8]
+    [(eq? u16x8 expr) 'uint16]
+    [(eq? u16x16 expr) 'uint16]
+    [(eq? u32x4 expr) 'uint32]
+    [(eq? u32x8 expr) 'uint32]
+    [(eq? u64x2 expr) 'uint64]
+    [(eq? u64x4 expr) 'uint64]
+
+    [(i8x16? expr) 'int8]
+    [(i8x32? expr) 'int8]
+    [(i16x8? expr) 'int16]
+    [(i16x16? expr) 'int16]
+    [(i32x4? expr) 'int32]
+    [(i32x8? expr) 'int32]
+    [(i64x2? expr) 'int64]
+    [(i64x4? expr) 'int64]
+
+    [(u8x16? expr) 'uint8]
+    [(u8x32? expr) 'uint8]
+    [(u16x8? expr) 'uint16]
+    [(u16x16? expr) 'uint16]
+    [(u32x4? expr) 'uint32]
+    [(u32x8? expr) 'uint32]
+    [(u64x2? expr) 'uint64]
+    [(u64x4? expr) 'uint64]
+
+    [(eq? 'i8x16 expr) 'int8]
+    [(eq? 'i8x32 expr) 'int8]
+    [(eq? 'i16x8 expr) 'int16]
+    [(eq? 'i16x16 expr) 'int16]
+    [(eq? 'i32x4 expr) 'int32]
+    [(eq? 'i32x8 expr) 'int32]
+    [(eq? 'i64x2 expr) 'int64]
+    [(eq? 'i64x4 expr) 'int64]
+
+    [(eq? 'u8x16 expr) 'uint8]
+    [(eq? 'u8x32 expr) 'uint8]
+    [(eq? 'u16x8 expr) 'uint16]
+    [(eq? 'u16x16 expr) 'uint16]
+    [(eq? 'u32x4 expr) 'uint32]
+    [(eq? 'u32x8 expr) 'uint32]
+    [(eq? 'u64x2 expr) 'uint64]
+    [(eq? 'u64x4 expr) 'uint64]))
+
+(define (type expr)
+  (destruct expr
+    [(i8x16 data) 'i8x16]
+    [(i8x32 data) 'i8x32]
+    [(i16x8 data) 'i16x8]
+    [(i16x16 data) 'i16x16]
+    [(i32x4 data) 'i32x4]
+    [(i32x8 data) 'i32x8]
+    [(i64x2 data) 'i64x2]
+    [(i64x4 data) 'i64x4]
+
+    [(u8x16 data) 'u8x16]
+    [(u8x32 data) 'u8x32]
+    [(u16x8 data) 'u16x8]
+    [(u16x16 data) 'u16x16]
+    [(u32x4 data) 'u32x4]
+    [(u32x8 data) 'u32x8]
+    [(u64x2 data) 'u64x2]
+    [(u64x4 data) 'u64x4]))

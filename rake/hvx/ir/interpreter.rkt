@@ -6,19 +6,16 @@
   rosette/lib/angelic
   rake/cpp
   rake/halide
-  rake/hvx/ir/instructions)
+  rake/hvx/ir/instructions
+  rake/internal/counter)
 
 (provide
  (rename-out [visit hvx-ir:visit])
  (rename-out [instr-count hvx-ir:instr-count])
  (rename-out [get-subexprs hvx-ir:get-subexprs])
- (rename-out [set-cn hvx-ir:set-cn])
  (rename-out [elem-type hvx-ir:elem-type])
  (rename-out [elem-type^ hvx-ir:elem-type^])
  (rename-out [interpret hvx-ir:interpret]))
-
-(define curr-cn 0)
-(define (set-cn v) (set! curr-cn v))
 
 (define (elem-type expr)
   (define e (interpret expr))
