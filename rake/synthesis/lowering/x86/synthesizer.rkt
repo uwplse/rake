@@ -38,10 +38,6 @@
 ;; TODO: fix these.
 (define (verification-lanes type)
   (cond
-    [(eq? type 'i8x8) '(0 1 6 7)]
-    [(eq? type 'i16x4) '(0 1 2 3)]
-    [(eq? type 'i32x2) '(0 1)]
-    [(eq? type 'i64x1) '(0)]
     [(eq? type 'i8x16) '(0 7 12 15)]
     [(eq? type 'i16x8) '(0 1 6 7)]
     [(eq? type 'i32x4) '(0 1 2 3)]
@@ -51,10 +47,6 @@
     [(eq? type 'i32x8) '(0 1 6 7)]
     [(eq? type 'i64x4) '(0 1 2 3)]
 
-    [(eq? type 'u8x8) '(0 1 6 7)]
-    [(eq? type 'u16x4) '(0 1 2 3)]
-    [(eq? type 'u32x2) '(0 1)]
-    [(eq? type 'u64x1) '(0)]
     [(eq? type 'u8x16) '(0 7 12 15)]
     [(eq? type 'u16x8) '(0 1 6 7)]
     [(eq? type 'u32x4) '(0 1 2 3)]
@@ -86,12 +78,16 @@
   ;(pretty-print translation-history)
   ;(pretty-print x86-sub-exprs)
 
+  (println "(x86) Calling optimize-query...)")
+
   (define-values (optimized-halide-expr optimized-template inferred-axioms)
     (x86:optimize-query halide-expr template x86-sub-exprs value-bounds translation-history))
 
-  ;(pretty-print optimized-halide-expr)
-  ;(pretty-print optimized-template)
+  (println "x86 Optimized Expressions:")
+  (pretty-print optimized-halide-expr)
+  (pretty-print optimized-template)
 
+  (println "(x86) Calling synthesize-incremental...")
   ;; Incrementally checks the template for more and more lanes
   ;(display "interpreting for lane verification\n")
   ;(pretty-print optimized-template)
@@ -99,6 +95,7 @@
   ;(display (x86:??shuffle? template))
   ;(newline)
   (define lanes-to-verify (verification-lanes (x86:get-interpreted-type optimized-template)))
+  (println (format "Verifying lanes: ~a" lanes-to-verify))
   (synthesize-incremental optimized-halide-expr optimized-template inferred-axioms lanes-to-verify '()))
 
 (define (synthesize-incremental optimized-halide-expr optimized-template inferred-axioms lanes-to-verify discarded-sols)
@@ -107,11 +104,13 @@
     [else
      (define curr-lane (first lanes-to-verify))
 
-     ;(display (format "Verifying lane: ~a\n" curr-lane))
-     ;(println inferred-axioms)
-     ;(println ((halide:interpret optimized-halide-expr) curr-lane))
-     ;(set-curr-cn! curr-lane)
-     ;(println (x86:get-element (x86:interpret optimized-template) curr-lane))
+     (display (format "Verifying lane: ~a\n" curr-lane))
+     (println inferred-axioms)
+     (println ((halide:interpret optimized-halide-expr) curr-lane))
+     (set-curr-cn! curr-lane)
+     (define i (x86:interpret optimized-template))
+     (println i)
+     (println (x86:get-element i curr-lane))
 
      (define st (current-milliseconds))
      (clear-vc!)

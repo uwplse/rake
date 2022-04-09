@@ -23921,6 +23921,10 @@
     [(x86:??swizzle id live-data exprs idx-tbl output-type)
       (let ([vecType (x86:get-type-struct output-type)])
         ;; TODO: it is probably much more complicated than this...
+        (println (format "Interpreting x86:??swizzle ~a ~a \n" id output-type))
+        (pretty-print live-data)
+        (pretty-print exprs)
+        (println (format "vectype: ~a\n" vecType))
         (vecType
           (lambda (i) (list-ref (list-ref live-data curr-cn) (list-ref idx-tbl i)))))]
 

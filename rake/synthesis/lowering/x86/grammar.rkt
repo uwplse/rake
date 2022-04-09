@@ -54,30 +54,120 @@
   (for/list ([candidate candidates]) (cons (uniquify-swizzles candidate) (cdr candidate))))
 
 (define (make-scalar-broadcast scalar x86-instr)
-  (list (cons (x86-instr scalar) (x86:instr-cost x86-instr 0))))
+  (cons (x86-instr scalar) (x86:instr-cost x86-instr 0)))
 
 (define (handle-broadcast scalar halide-expr)
-  (let ([type (halide:elem-type halide-expr)]
-        [lanes (halide:vec-len halide-expr)])
+  (let ([type (halide:elem-type halide-expr)])
     (cond
       ;; TODO: is this the right way to do this?
-      [(and (or (eq? type 'int8) (eq? type 'uint8)) (eq? lanes 32))
-        (make-scalar-broadcast scalar x86:vpbroadcastb)]
-      [(and (or (eq? type 'int8) (eq? type 'uint8)) (eq? lanes 16))
-        (make-scalar-broadcast scalar x86:vpbroadcastb_128)]
-      [(and (or (eq? type 'int16) (eq? type 'uint16)) (eq? lanes 16))
-        (make-scalar-broadcast scalar x86:vpbroadcastw)]
-      [(and (or (eq? type 'int16) (eq? type 'uint16)) (eq? lanes 8))
-        (make-scalar-broadcast scalar x86:vpbroadcastw_128)]
-      [(and (or (eq? type 'int32) (eq? type 'uint32)) (eq? lanes 8))
-        (make-scalar-broadcast scalar x86:vpbroadcastd)]
-      [(and (or (eq? type 'int32) (eq? type 'uint32)) (eq? lanes 4))
-        (make-scalar-broadcast scalar x86:vpbroadcastd_128)]
-      [(and (or (eq? type 'int64) (eq? type 'uint64)) (eq? lanes 4))
-        (make-scalar-broadcast scalar x86:vpbroadcastq)]
-      [(and (or (eq? type 'int64) (eq? type 'uint64)) (eq? lanes 2))
-        (make-scalar-broadcast scalar x86:vpbroadcastq_128)]
-      [else (error (format "Broadcast type not available: \n~a\n~a" halide-expr scalar))])))
+      [(or (eq? type 'int8) (eq? type 'uint8))
+        (list (make-scalar-broadcast scalar x86:vpbroadcastb) (make-scalar-broadcast scalar x86:vpbroadcastb_128))]
+      [(or (eq? type 'int16) (eq? type 'uint16))
+        (list (make-scalar-broadcast scalar x86:vpbroadcastw) (make-scalar-broadcast scalar x86:vpbroadcastw_128))]
+      [(or (eq? type 'int32) (eq? type 'uint32))
+        (list (make-scalar-broadcast scalar x86:vpbroadcastd) (make-scalar-broadcast scalar x86:vpbroadcastd_128))]
+      [(or (eq? type 'int16) (eq? type 'uint16))
+        (list (make-scalar-broadcast scalar x86:vpbroadcastq) (make-scalar-broadcast scalar x86:vpbroadcastq_128))]
+      [else (error (format "Broadcast type not available: \n~a\n~a\n~a\n~\n" type halide-expr scalar))])))
+
+(define (get-widen-isa)
+  (list x86:vpmovsxwd x86:vpmovsxwq x86:vpmovsxdq x86:vpmovsxbw x86:vpmovsxbd x86:vpmovsxbq
+        x86:vpmovzxwd x86:vpmovzxwq x86:vpmovzxdq x86:vpmovzxbw x86:vpmovzxbd x86:vpmovzxbq))
+
+(define (handle-vs-mpy-add expr weights sat? round? half? output-type x86-sub-exprs halide-expr)
+  (let* ([input-type (get-input-type expr)]
+         ;; TODO: try pruning.
+         [isa
+          (append
+            (list x86:reinterpret x86:vpaddw x86:vpaddd x86:vpaddq x86:vpaddb
+                  x86:vpaddsw x86:vpaddsb x86:vpaddusw x86:vpaddusb x86:vpavgw
+                  x86:vpavgb x86:vphaddw x86:vphaddd x86:vphaddsw x86:vphsubw
+                  x86:vphsubd x86:vphsubsw
+                  ;; TODO: should these be here?
+                  x86:vpmaddwd x86:vpmaddubsw
+                  x86:vpsubw x86:vpsubd x86:vpsubq x86:vpsubb x86:vpsubsw
+                  x86:vpsubsb x86:vpsubusw x86:vpsubusb)
+            (get-widen-isa))]
+         ; TODO: better pruning and more isa options
+         ; TODO: are there better depth/cost combos?
+         [depth 4]
+         [max-cost 20]
+         [grouped-sub-exprs (prepare-sub-exprs x86-sub-exprs)]
+         [number-reads (length weights)]
+         [desired-types (x86:get-vector-types output-type)]
+         ; Enumerate those with the correct output type
+         ; TODO: do the pruning somehow...
+         [candidates (time (enumerate-x86 isa desired-types grouped-sub-exprs depth max-cost number-reads))]
+         [load-buffers (halide:extract-live-buffers halide-expr)]
+         [live-buffers (lambda (expr)
+                         (let* ([live-bufs (mutable-set)]
+                               [extract-buffer (lambda (node [pos -1])
+                                                  (destruct node
+                                                    [(buffer data elemT) (set-add! live-bufs node) node]
+                                                    [(x86:??swizzle id live-data exprs idx-tbl output-type)
+                                                      (begin
+                                                        (display (format "checking: (x86:??swizzle ~a ~a ~a ~a ~a)\n" id live-data exprs idx-tbl output-type))
+                                                        node)]
+                                                    [_ node]))])
+                            (x86:visit expr extract-buffer)
+                            live-bufs))])
+
+    (display "x86 vs-mpy-add sub exprs!\n")
+    (pretty-print x86-sub-exprs)
+    (display "grouped sub exprs!\n")
+    (pretty-print grouped-sub-exprs)
+    (display "candidates!\n")
+    (pretty-print candidates)
+    (display (format "~a ~a ~a\n" isa desired-types grouped-sub-exprs))
+    (pretty-print grouped-sub-exprs)
+    (display (format "Types; ~a ~a \n" input-type output-type))
+
+    ;; Filter out templates that read too much or too little data
+    (display (format "Before filtering reads: ~a\n" (length candidates)))
+    (set! candidates (time (filter (lambda (c) (eq? (x86:max-unique-inputs (car c)) number-reads)) candidates)))
+    (display (format "After filtering reads: ~a\n" (length candidates)))
+    (display (format "Load buffers: ~a\n" load-buffers))
+    (display "First:\n")
+    (pretty-print (first candidates))
+    (display (format "LB: ~a\n" (live-buffers (car (first candidates)))))
+    (set! candidates (time (filter (lambda (c) (equal? (live-buffers (car c)) load-buffers)) candidates)))
+
+    (display (format "After filtering buffers: ~a\n" (length candidates)))
+    ;(pretty-print (take candidates 50))
+    ;(println (length candidates))
+
+    ;; Compute read counts
+    (set! candidates (time (map (lambda (c) (cons (car c) (cons (cdr c) (count-reads (car c))))) candidates)))
+
+    ;; Sort them (I am ashamed of this line below)
+    (set! candidates (time (sort candidates (lambda (v1 v2) (if (eq? (car (cdr v1)) (car (cdr v2))) (< (cdr (cdr v1)) (cdr (cdr v2))) (< (car (cdr v1)) (car (cdr v2))))))))
+
+    (let* ([add-scalars (halide:extract-add-scalars halide-expr)]
+           [int-consts (set->list (list->set (append weights add-scalars)))])
+      (define (bool-const) (define-symbolic* b boolean?) b)
+      (define (int8-const) (int8_t (apply choose* int-consts)))
+      (define (uint8-const) (uint8_t (apply choose* int-consts)))
+      (define (int16-const) (int16_t (apply choose* int-consts)))
+      (define (uint16-const) (uint16_t (apply choose* int-consts)))
+      (define (int32-const) (int32_t (apply choose* int-consts)))
+      (define (uint32-const) (uint32_t (apply choose* int-consts)))
+      (define (int64-const) (int64_t (apply choose* int-consts)))
+      (define (uint64-const) (uint64_t (apply choose* int-consts)))
+      (define (fill-arg-grammars node [pos -1])
+       (match node
+         ['bool (bool-const)]
+         ['int8 (int8-const)]
+         ['uint8 (uint8-const)]
+         ['int16 (int16-const)]
+         ['uint16 (uint16-const)]
+         ['int32 (int32-const)]
+         ['uint32 (uint32-const)]
+         ['int64 (int64-const)]
+         ['uint64 (uint64-const)]
+         ; TODO: HVX has some weird types here, for scalar registers?
+         [_ node]))
+
+      (time (for/list ([candidate candidates]) (cons (uniquify-swizzles (x86:visit (car candidate) fill-arg-grammars)) (car (cdr candidate))))))))
 
 (define (get-x86-grammar-helper halide-expr ir-expr x86-sub-exprs)
   (destruct ir-expr
@@ -101,11 +191,9 @@
     [(x86-ir:broadcast scalar-expr)
       ;; TODO: is this correct?
       (handle-broadcast scalar-expr halide-expr)]
-      ; (println (halide:elem-type halide-expr))
-      ; (println (halide:vec-len halide-expr))
-      ; (pretty-print ir-expr)
-      ; (pretty-print halide-expr)
-      ; (error "implement broadcast!")]
+
+    [(x86-ir:vs-mpy-add expr weights sat? round? half? output-type)
+      (handle-vs-mpy-add expr weights sat? round? half? output-type x86-sub-exprs halide-expr)]
 
     ;; TODO: load-data, broadcast, build-vec
     ;; TODO: cast, abs, abs-diff,
@@ -243,3 +331,57 @@
         output-type]
       [_ node]))
   (x86:visit x86-template clone-swizzle-node))
+
+;; Taken directly from arm.rkt
+(define (prepare-sub-exprs x86-sub-exprs)
+  (define grouped-sub-exprs (make-hash))
+  (define swizzle-node-id -1)
+  ; TODO: fix this when we have concat-tiles working
+  ; (define x86-sub-exprs-untiled (flatten (map (lambda (expr) (if (x86:concat-tiles? expr) (x86:concat-tiles-vecs expr) expr)) (set->list (list->set x86-sub-exprs)))))
+  (define x86-sub-exprs-untiled (flatten (set->list (list->set x86-sub-exprs))))
+  (for ([x86-sub-expr x86-sub-exprs-untiled])
+    (cond
+      [(x86:??abstr-load? x86-sub-expr)
+       (define elemT (x86:get-interpreted-elem-type x86-sub-expr))
+       (for ([out-type (x86:get-vector-types elemT)])
+         (set! swizzle-node-id (add1 swizzle-node-id))
+         (define live-data (x86:??abstr-load-live-data x86-sub-expr))
+         (define buffer (x86:??abstr-load-buffer x86-sub-expr))
+         (define tbl (map (lambda (i) (define-symbolic* idx integer?) idx) (range 256)))
+         (define base-load-expr (x86:??load swizzle-node-id live-data buffer tbl out-type))
+         (define exprs (hash-ref! grouped-sub-exprs out-type (set)))
+         (hash-set! grouped-sub-exprs out-type (set-add exprs base-load-expr)))]
+      [(x86:??shuffle? x86-sub-expr)
+       (define elemT (x86:get-interpreted-elem-type x86-sub-expr))
+       (for ([out-type (x86:get-vector-types elemT)])
+         (set! swizzle-node-id (add1 swizzle-node-id))
+         (define base-load-expr (x86:??shuffle swizzle-node-id (x86:??shuffle-lds x86-sub-expr) out-type))
+         (define exprs (hash-ref! grouped-sub-exprs out-type (set)))
+         (hash-set! grouped-sub-exprs out-type (set-add exprs base-load-expr)))]
+      ; TODO: ask Maaz about the vspalt cond here from the HVX code
+      [else
+       (define sub-expr-type (x86:get-interpreted-type x86-sub-expr))
+       (define exprs (hash-ref! grouped-sub-exprs sub-expr-type (set)))
+       (hash-set! grouped-sub-exprs sub-expr-type (set-add exprs x86-sub-expr))]))
+
+  ;; Merge base-expr choices
+  (define grouped-merged-sub-exprs (make-hash))
+  (for ([(output-type candidates) grouped-sub-exprs])
+    (define candidates-l (set->list candidates))
+    (set! swizzle-node-id (add1 swizzle-node-id))
+    (define merged-candidates
+      (append
+       (map (curryr cons 0) (filter is-load? candidates-l))
+       (let ([c (filter (lambda (c) (not (is-load? c))) candidates-l)])
+         (cond
+           [(empty? c) '()]
+           [else
+            (list (cons (x86:??swizzle swizzle-node-id '() c (void) output-type) 0))]))))
+    (hash-set! grouped-merged-sub-exprs output-type merged-candidates))
+
+  grouped-merged-sub-exprs)
+
+(define (is-load? expr)
+  (or
+   (x86:??load? expr)
+   (x86:??shuffle? expr)))
