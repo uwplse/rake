@@ -54,7 +54,7 @@
   (for/list ([candidate candidates]) (cons (uniquify-swizzles candidate) (cdr candidate))))
 
 (define (make-scalar-broadcast scalar x86-instr)
-  (cons (x86-instr scalar) (x86:instr-cost x86-instr 0)))
+  (cons (x86-instr scalar) (x86:instr-cost x86-instr)))
 
 (define (handle-broadcast scalar halide-expr)
   (let ([type (halide:elem-type halide-expr)])
@@ -72,26 +72,43 @@
 
 (define (get-widen-isa)
   (list x86:vpmovsxwd x86:vpmovsxwq x86:vpmovsxdq x86:vpmovsxbw x86:vpmovsxbd x86:vpmovsxbq
-        x86:vpmovzxwd x86:vpmovzxwq x86:vpmovzxdq x86:vpmovzxbw x86:vpmovzxbd x86:vpmovzxbq))
+        x86:vpmovzxwd x86:vpmovzxwq x86:vpmovzxdq x86:vpmovzxbw x86:vpmovzxbd x86:vpmovzxbq
+        ;; TODO: let unsigned widening merge into widen+reinterpret, i.e.:
+        x86:vpmovzxbw_s
+  ))
 
 (define (handle-vs-mpy-add expr weights sat? round? half? output-type x86-sub-exprs halide-expr)
   (let* ([input-type (get-input-type expr)]
+         [widening? (> (cpp:type-bw output-type) (cpp:type-bw  input-type))]
          ;; TODO: try pruning.
          [isa
-          (append
-            (list x86:reinterpret x86:vpaddw x86:vpaddd x86:vpaddq x86:vpaddb
-                  x86:vpaddsw x86:vpaddsb x86:vpaddusw x86:vpaddusb x86:vpavgw
-                  x86:vpavgb x86:vphaddw x86:vphaddd x86:vphaddsw x86:vphsubw
-                  x86:vphsubd x86:vphsubsw
-                  ;; TODO: should these be here?
-                  x86:vpmaddwd x86:vpmaddubsw
-                  x86:vpsubw x86:vpsubd x86:vpsubq x86:vpsubb x86:vpsubsw
-                  x86:vpsubsb x86:vpsubusw x86:vpsubusb)
-            (get-widen-isa))]
+          (flatten
+            (list
+              ;; always allow reinterpretation
+              x86:reinterpret
+              ;; TODO: verify these pruning techniques...
+              ;; zext/sext
+              (if widening? (get-widen-isa) '())
+              ;; rounding_halving_adds
+              (if (or half? round?) (list x86:vpavgw x86:vpavgb) '())
+              ;; regular adds/subs (and horizontal adds/subs)
+              (list x86:vpaddb x86:vpaddw x86:vpaddd x86:vpaddq
+                    x86:vphaddw x86:vphaddd x86:vphsubw x86:vphsubd
+                    x86:vpsubb x86:vpsubw x86:vpsubd x86:vpsubq)
+              ;; TODO: should we have conditions on including dot_products?
+              (list x86:vpmaddwd x86:vpmaddubsw)
+              ;; TODO: need more vector-scalar variants of multiply instructions.
+              (list x86:vpmullw-vs)
+              ;; TODO: should we include saturating adds even if not sat?
+              (if sat?
+                (list x86:vpaddsb x86:vpaddsw x86:vpaddusb x86:vpaddusw
+                      x86:vphaddsw x86:vphsubsw
+                      x86:vpsubsw x86:vpsubsb x86:vpsubusw x86:vpsubusb)
+                '())))]
          ; TODO: better pruning and more isa options
          ; TODO: are there better depth/cost combos?
-         [depth 4]
-         [max-cost 20]
+         [depth 3]
+         [max-cost 15]
          [grouped-sub-exprs (prepare-sub-exprs x86-sub-exprs)]
          [number-reads (length weights)]
          [desired-types (x86:get-vector-types output-type)]
@@ -112,29 +129,27 @@
                             (x86:visit expr extract-buffer)
                             live-bufs))])
 
-    (display "x86 vs-mpy-add sub exprs!\n")
-    (pretty-print x86-sub-exprs)
-    (display "grouped sub exprs!\n")
-    (pretty-print grouped-sub-exprs)
-    (display "candidates!\n")
-    (pretty-print candidates)
-    (display (format "~a ~a ~a\n" isa desired-types grouped-sub-exprs))
-    (pretty-print grouped-sub-exprs)
-    (display (format "Types; ~a ~a \n" input-type output-type))
+    ; (display "x86 vs-mpy-add sub exprs!\n")
+    ; (pretty-print x86-sub-exprs)
+    ; (display "grouped sub exprs!\n")
+    ; (pretty-print grouped-sub-exprs)
+    ; (pretty-print candidates)
+    ; (display (format "~a ~a ~a\n" isa desired-types grouped-sub-exprs))
+    ; (pretty-print grouped-sub-exprs)
+    ; (display (format "Types; ~a ~a \n" input-type output-type))
 
     ;; Filter out templates that read too much or too little data
     (display (format "Before filtering reads: ~a\n" (length candidates)))
+    ; (display (format "Number of reads: ~a\n" number-reads))
+
     (set! candidates (time (filter (lambda (c) (eq? (x86:max-unique-inputs (car c)) number-reads)) candidates)))
+
     (display (format "After filtering reads: ~a\n" (length candidates)))
+    ; (pretty-print candidates)
     (display (format "Load buffers: ~a\n" load-buffers))
-    (display "First:\n")
-    (pretty-print (first candidates))
-    (display (format "LB: ~a\n" (live-buffers (car (first candidates)))))
     (set! candidates (time (filter (lambda (c) (equal? (live-buffers (car c)) load-buffers)) candidates)))
 
     (display (format "After filtering buffers: ~a\n" (length candidates)))
-    ;(pretty-print (take candidates 50))
-    ;(println (length candidates))
 
     ;; Compute read counts
     (set! candidates (time (map (lambda (c) (cons (car c) (cons (cdr c) (count-reads (car c))))) candidates)))
@@ -142,22 +157,26 @@
     ;; Sort them (I am ashamed of this line below)
     (set! candidates (time (sort candidates (lambda (v1 v2) (if (eq? (car (cdr v1)) (car (cdr v2))) (< (cdr (cdr v1)) (cdr (cdr v2))) (< (car (cdr v1)) (car (cdr v2))))))))
 
+    ; (println "candidates!")
+    ; (pretty-print candidates)
+
     (let* ([add-scalars (halide:extract-add-scalars halide-expr)]
            [int-consts (set->list (list->set (append weights add-scalars)))])
       (define (bool-const) (define-symbolic* b boolean?) b)
-      (define (int8-const) (int8_t (apply choose* int-consts)))
-      (define (uint8-const) (uint8_t (apply choose* int-consts)))
-      (define (int16-const) (int16_t (apply choose* int-consts)))
-      (define (uint16-const) (uint16_t (apply choose* int-consts)))
-      (define (int32-const) (int32_t (apply choose* int-consts)))
-      (define (uint32-const) (uint32_t (apply choose* int-consts)))
-      (define (int64-const) (int64_t (apply choose* int-consts)))
-      (define (uint64-const) (uint64_t (apply choose* int-consts)))
+      (define (int8-const) (cpp:cast (apply choose* int-consts) 'int8))
+      (define (uint8-const) (cpp:cast (apply choose* int-consts) 'uint8))
+      (define (int16-const) (cpp:cast (apply choose* int-consts) 'int16))
+      (define (uint16-const) (cpp:cast (apply choose* int-consts) 'uint16))
+      (define (int32-const) (cpp:cast (apply choose* int-consts) 'int32))
+      (define (uint32-const) (cpp:cast (apply choose* int-consts) 'uint32))
+      (define (int64-const) (cpp:cast (apply choose* int-consts) 'int64))
+      (define (uint64-const) (cpp:cast (apply choose* int-consts) 'uint64))
       (define (fill-arg-grammars node [pos -1])
        (match node
          ['bool (bool-const)]
          ['int8 (int8-const)]
          ['uint8 (uint8-const)]
+         ['uint8_t (uint8-const)]
          ['int16 (int16-const)]
          ['uint16 (uint16-const)]
          ['int32 (int32-const)]
@@ -212,8 +231,18 @@
   (not (and (eqv? parent-instr x86:reinterpret) (eqv? child-instr x86:reinterpret))))
 
 (define (enumerate-x86 instr-set output-types base-exprs depth max-cost [read-count -1] [parent-instr (void)] [arg-pos -1])
+  (begin
+    ; (display (format "parent-instr: ~a\n" parent-instr))
+    ; (display (format "depth: ~a\n" depth))
+    ; (display (format "output-types: ~a\n" output-types))
+    ; (display (format "max-cost: ~a\n\n" max-cost))
   (let ([key (list instr-set output-types base-exprs depth max-cost read-count arg-pos)])
     (cond
+      ;; max-cost has been reduced to < 0, don't try to keep enumerating.
+      ;; This is more liberal than it could be - it only looks at one path
+      ;; through the AST, but it should help with pruning.
+      [(< max-cost 0) '()]
+
       ; We have enumerated this tree before
       [(hash-has-key? enumeration-cache key) (hash-ref enumeration-cache key)]
 
@@ -230,8 +259,8 @@
                [candidates-cost (filter (lambda (expr) (<= (cdr expr) max-cost)) candidates)]
                [candidates-read (if (eq? read-count -1) candidates-cost (filter (lambda (expr) (<= (x86:max-unique-inputs (car expr)) read-count)) candidates-cost))]
                [candidates-unique (set->list (list->set candidates-read))])
-          (display (format "depth: ~a\n" depth))
-          (display (format "output-types: ~a\n" output-types))
+          ; (display (format "depth: ~a\n" depth))
+          ; (display (format "output-types: ~a\n" output-types))
           ; (display "base-exprs: \n")
           ; (pretty-print base-exprs)
           ; (display "candidates: \n")
@@ -242,12 +271,13 @@
           ; (println parent-instr)
           ;(pretty-print base-exprs)
           (hash-set! enumeration-cache key candidates-unique)
-          candidates-unique)])))
+          candidates-unique)]))))
 
 ; Filter based in output type
 (define (build-instr-exprs instr instr-set output-types base-exprs depth max-cost read-count)
   ;(display (format "instr: ~a\n" instr))
-  (let* ([curried-build (curryr build-sig-exprs instr-set base-exprs depth max-cost read-count instr)]
+  (let* ([new-max-cost (- max-cost (x86:instr-cost instr))]
+         [curried-build (curryr build-sig-exprs instr-set base-exprs depth new-max-cost read-count instr)]
          [filtered (filter (curry out-member? output-types) (x86:instr-forms instr))]
          [built (map curried-build filtered)])
     (foldr append '() built)))
@@ -292,9 +322,8 @@
           (append (list opts) (get-arg-opts (rest arg-types) instr instr-set base-exprs depth max-cost read-count (add1 arg-pos))))))
 
 
-; TODO: we need x86:instr-cost to work for this
 (define (build-ast instr sig sig-expr)
-  (let ([cost (foldr + (x86:instr-cost instr sig) (map cdr sig-expr))]
+  (let ([cost (foldr + (x86:instr-cost instr) (map cdr sig-expr))]
         [expr (apply instr (map car sig-expr))])
     (cons expr cost)))
 

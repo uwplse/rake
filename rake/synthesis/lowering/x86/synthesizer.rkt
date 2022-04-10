@@ -105,7 +105,7 @@
      (define curr-lane (first lanes-to-verify))
 
      (display (format "Verifying lane: ~a\n" curr-lane))
-     (display (format "Count of discarded sols: ~a\n" (length discarded-sols)))
+    ;  (display (format "Count of discarded sols: ~a\n" (length discarded-sols)))
     ;  (println inferred-axioms)
     ;  (println ((halide:interpret optimized-halide-expr) curr-lane))
     ;  (set-curr-cn! curr-lane)
@@ -119,13 +119,21 @@
      ;(display "interpreting for synthesis\n")
      ;(display "Halide Expr: ")
      ;(pretty-print optimized-halide-expr)
+     (define ihalide (halide:interpret optimized-halide-expr))
+     (define irake (x86:interpret optimized-template))
+    ;  (set-curr-cn! curr-lane)
+    ;  (pretty-print (ihalide curr-lane))
+    ;  (pretty-print (x86:get-element irake curr-lane))
+
      (define sol (synthesize #:forall (symbolics optimized-halide-expr)
                              #:guarantee (begin
                                            (assert (not (ormap (lambda (discarded-sol) (equal? optimized-template discarded-sol)) discarded-sols)))
-                                           (lane-eq? (halide:interpret optimized-halide-expr) (x86:interpret optimized-template) curr-lane))))
+                                           (lane-eq? ihalide irake curr-lane))))
      (define runtime (- (current-milliseconds) st))
 
      (display (format "Ran synthesizer for ~a ms\n" runtime))
+    ;  (display (format "Solution correct? ~a\n" (correct? sol)))
+    ;  (display (format "Solution: ~a\n" sol))
      (log (format "Lowering query: ~a ms\n" runtime))
 
      (cond
