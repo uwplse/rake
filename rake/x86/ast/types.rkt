@@ -102,6 +102,7 @@
 (struct vpmovzxbd (a) #:transparent)                        ;; _mm256_cvtepu8_epi32 | double_widen
 (struct vpmovzxbq (a) #:transparent)                        ;; _mm256_cvtepu8_epi64 | triple_widen
 (struct vpmovzxbw (a) #:transparent)                        ;; _mm256_cvtepu8_epi16 | widen
+(struct vpmovzxbw_s (a) #:transparent)                        ;; _mm256_cvtepu8_epi16 | widen
 (struct vpmovzxdq (a) #:transparent)                        ;; _mm256_cvtepu32_epi64 | widen
 (struct vpmovzxwd (a) #:transparent)                        ;; _mm256_cvtepu16_epi32 | widen
 (struct vpmovzxwq (a) #:transparent)                        ;; _mm256_cvtepu16_epi64 | double_widen
@@ -111,6 +112,7 @@
 (struct vpmulhw (a b) #:transparent)                        ;; _mm256_mulhi_epi16 | multiply_keep_high_half
 (struct vpmulld (a b) #:transparent)                        ;; _mm256_mullo_epi32 | multiply_keep_low_half
 (struct vpmullw (a b) #:transparent)                        ;; _mm256_mullo_epi16 | multiply_keep_low_half
+(struct vpmullw-vs (a b) #:transparent)                        ;; _mm256_mullo_epi16 | multiply_keep_low_half
 (struct vpmuludq (a b) #:transparent)                       ;; _mm256_mul_epu32 | multiply_evens
 (struct vpor (a b) #:transparent)                           ;; _mm256_or_si256 | bitwise_or
 (struct vpsadbw (a b) #:transparent)                        ;; _mm256_sad_epu8 | unsigned_absd_sum
@@ -324,17 +326,17 @@
                         )]
 
     [(eq? vpalignr instr) (list
-                         (instr-sig 'i8x32 (list 'i8x32 'i8x32 'uint8_t))
-                         (instr-sig 'u8x32 (list 'u8x32 'u8x32 'uint8_t))
+                         (instr-sig 'i8x32 (list 'i8x32 'i8x32 'uint8))
+                         (instr-sig 'u8x32 (list 'u8x32 'u8x32 'uint8))
 
-                         (instr-sig 'i16x16 (list 'i16x16 'i16x16 'uint8_t))
-                         (instr-sig 'u16x16 (list 'u16x16 'u16x16 'uint8_t))
+                         (instr-sig 'i16x16 (list 'i16x16 'i16x16 'uint8))
+                         (instr-sig 'u16x16 (list 'u16x16 'u16x16 'uint8))
 
-                         (instr-sig 'i32x8 (list 'i32x8 'i32x8 'uint8_t))
-                         (instr-sig 'u32x8 (list 'u32x8 'u32x8 'uint8_t))
+                         (instr-sig 'i32x8 (list 'i32x8 'i32x8 'uint8))
+                         (instr-sig 'u32x8 (list 'u32x8 'u32x8 'uint8))
 
-                         (instr-sig 'i64x4 (list 'i64x4 'i64x4 'uint8_t))
-                         (instr-sig 'u64x4 (list 'u64x4 'u64x4 'uint8_t))
+                         (instr-sig 'i64x4 (list 'i64x4 'i64x4 'uint8))
+                         (instr-sig 'u64x4 (list 'u64x4 'u64x4 'uint8))
 
                         )]
 
@@ -371,14 +373,14 @@
                         )]
 
     [(eq? vpblendd instr) (list
-                         (instr-sig 'i32x8 (list 'i32x8 'i32x8 'uint8_t))
-                         (instr-sig 'u32x8 (list 'u32x8 'u32x8 'uint8_t))
+                         (instr-sig 'i32x8 (list 'i32x8 'i32x8 'uint8))
+                         (instr-sig 'u32x8 (list 'u32x8 'u32x8 'uint8))
 
                         )]
 
     [(eq? vpblendd_128 instr) (list
-                         (instr-sig 'i32x4 (list 'i32x4 'i32x4 'uint8_t))
-                         (instr-sig 'u32x4 (list 'u32x4 'u32x4 'uint8_t))
+                         (instr-sig 'i32x4 (list 'i32x4 'i32x4 'uint8))
+                         (instr-sig 'u32x4 (list 'u32x4 'u32x4 'uint8))
 
                         )]
 
@@ -389,8 +391,8 @@
                         )]
 
     [(eq? vpblendw instr) (list
-                         (instr-sig 'i16x16 (list 'i16x16 'i16x16 'uint8_t))
-                         (instr-sig 'u16x16 (list 'u16x16 'u16x16 'uint8_t))
+                         (instr-sig 'i16x16 (list 'i16x16 'i16x16 'uint8))
+                         (instr-sig 'u16x16 (list 'u16x16 'u16x16 'uint8))
 
                         )]
 
@@ -483,26 +485,26 @@
                         )]
 
     [(eq? vperm2f128 instr) (list
-                         (instr-sig 'i8x32 (list 'i8x32 'i8x32 'uint8_t))
-                         (instr-sig 'i16x16 (list 'i16x16 'i16x16 'uint8_t))
-                         (instr-sig 'i32x8 (list 'i32x8 'i32x8 'uint8_t))
-                         (instr-sig 'i64x4 (list 'i64x4 'i64x4 'uint8_t))
-                         (instr-sig 'u8x32 (list 'u8x32 'u8x32 'uint8_t))
-                         (instr-sig 'u16x16 (list 'u16x16 'u16x16 'uint8_t))
-                         (instr-sig 'u32x8 (list 'u32x8 'u32x8 'uint8_t))
-                         (instr-sig 'u64x4 (list 'u64x4 'u64x4 'uint8_t))
+                         (instr-sig 'i8x32 (list 'i8x32 'i8x32 'uint8))
+                         (instr-sig 'i16x16 (list 'i16x16 'i16x16 'uint8))
+                         (instr-sig 'i32x8 (list 'i32x8 'i32x8 'uint8))
+                         (instr-sig 'i64x4 (list 'i64x4 'i64x4 'uint8))
+                         (instr-sig 'u8x32 (list 'u8x32 'u8x32 'uint8))
+                         (instr-sig 'u16x16 (list 'u16x16 'u16x16 'uint8))
+                         (instr-sig 'u32x8 (list 'u32x8 'u32x8 'uint8))
+                         (instr-sig 'u64x4 (list 'u64x4 'u64x4 'uint8))
 
                         )]
 
     [(eq? vperm2i128 instr) (list
-                         (instr-sig 'i8x32 (list 'i8x32 'i8x32 'uint8_t))
-                         (instr-sig 'i16x16 (list 'i16x16 'i16x16 'uint8_t))
-                         (instr-sig 'i32x8 (list 'i32x8 'i32x8 'uint8_t))
-                         (instr-sig 'i64x4 (list 'i64x4 'i64x4 'uint8_t))
-                         (instr-sig 'u8x32 (list 'u8x32 'u8x32 'uint8_t))
-                         (instr-sig 'u16x16 (list 'u16x16 'u16x16 'uint8_t))
-                         (instr-sig 'u32x8 (list 'u32x8 'u32x8 'uint8_t))
-                         (instr-sig 'u64x4 (list 'u64x4 'u64x4 'uint8_t))
+                         (instr-sig 'i8x32 (list 'i8x32 'i8x32 'uint8))
+                         (instr-sig 'i16x16 (list 'i16x16 'i16x16 'uint8))
+                         (instr-sig 'i32x8 (list 'i32x8 'i32x8 'uint8))
+                         (instr-sig 'i64x4 (list 'i64x4 'i64x4 'uint8))
+                         (instr-sig 'u8x32 (list 'u8x32 'u8x32 'uint8))
+                         (instr-sig 'u16x16 (list 'u16x16 'u16x16 'uint8))
+                         (instr-sig 'u32x8 (list 'u32x8 'u32x8 'uint8))
+                         (instr-sig 'u64x4 (list 'u64x4 'u64x4 'uint8))
 
                         )]
 
@@ -513,8 +515,8 @@
                         )]
 
     [(eq? vpermq instr) (list
-                         (instr-sig 'i64x4 (list 'i64x4 'uint8_t))
-                         (instr-sig 'u64x4 (list 'u64x4 'uint8_t))
+                         (instr-sig 'i64x4 (list 'i64x4 'uint8))
+                         (instr-sig 'u64x4 (list 'u64x4 'uint8))
 
                         )]
 
@@ -634,6 +636,10 @@
                          (instr-sig 'u16x16 (list 'u8x16))
                         )]
 
+    [(eq? vpmovzxbw_s instr) (list
+                         (instr-sig 'i16x16 (list 'u8x16))
+                        )]
+
     [(eq? vpmovzxdq instr) (list
                          (instr-sig 'u64x4 (list 'u32x4))
                         )]
@@ -670,6 +676,10 @@
                          (instr-sig 'i16x16 (list 'i16x16 'i16x16))
                         )]
 
+    [(eq? vpmullw-vs instr) (list
+                         (instr-sig 'i16x16 (list 'i16x16 'int16))
+                        )]
+
     [(eq? vpmuludq instr) (list
                          (instr-sig 'u64x4 (list 'u32x8 'u32x8))
                         )]
@@ -697,20 +707,20 @@
                         )]
 
     [(eq? vpshufd instr) (list
-                         (instr-sig 'i32x8 (list 'i32x8 'uint8_t))
-                         (instr-sig 'u32x8 (list 'u32x8 'uint8_t))
+                         (instr-sig 'i32x8 (list 'i32x8 'uint8))
+                         (instr-sig 'u32x8 (list 'u32x8 'uint8))
 
                         )]
 
     [(eq? vpshufhw instr) (list
-                         (instr-sig 'i16x16 (list 'i16x16 'uint8_t))
-                         (instr-sig 'u16x16 (list 'u16x16 'uint8_t))
+                         (instr-sig 'i16x16 (list 'i16x16 'uint8))
+                         (instr-sig 'u16x16 (list 'u16x16 'uint8))
 
                         )]
 
     [(eq? vpshuflw instr) (list
-                         (instr-sig 'i16x16 (list 'i16x16 'uint8_t))
-                         (instr-sig 'u16x16 (list 'u16x16 'uint8_t))
+                         (instr-sig 'i16x16 (list 'i16x16 'uint8))
+                         (instr-sig 'u16x16 (list 'u16x16 'uint8))
 
                         )]
 
@@ -727,29 +737,29 @@
                         )]
 
     [(eq? vpslld instr) (list
-                         (instr-sig 'i32x8 (list 'i32x8 'uint8_t))
-                         (instr-sig 'u32x8 (list 'u32x8 'uint8_t))
+                         (instr-sig 'i32x8 (list 'i32x8 'uint8))
+                         (instr-sig 'u32x8 (list 'u32x8 'uint8))
 
                         )]
 
     [(eq? vpslldq instr) (list
-                         (instr-sig 'i8x32 (list 'i8x32 'uint8_t))
-                         (instr-sig 'u8x32 (list 'u8x32 'uint8_t))
+                         (instr-sig 'i8x32 (list 'i8x32 'uint8))
+                         (instr-sig 'u8x32 (list 'u8x32 'uint8))
 
-                         (instr-sig 'i16x16 (list 'i16x16 'uint8_t))
-                         (instr-sig 'u16x16 (list 'u16x16 'uint8_t))
+                         (instr-sig 'i16x16 (list 'i16x16 'uint8))
+                         (instr-sig 'u16x16 (list 'u16x16 'uint8))
 
-                         (instr-sig 'i32x8 (list 'i32x8 'uint8_t))
-                         (instr-sig 'u32x8 (list 'u32x8 'uint8_t))
+                         (instr-sig 'i32x8 (list 'i32x8 'uint8))
+                         (instr-sig 'u32x8 (list 'u32x8 'uint8))
 
-                         (instr-sig 'i64x4 (list 'i64x4 'uint8_t))
-                         (instr-sig 'u64x4 (list 'u64x4 'uint8_t))
+                         (instr-sig 'i64x4 (list 'i64x4 'uint8))
+                         (instr-sig 'u64x4 (list 'u64x4 'uint8))
 
                         )]
 
     [(eq? vpsllq instr) (list
-                         (instr-sig 'i64x4 (list 'i64x4 'uint8_t))
-                         (instr-sig 'u64x4 (list 'u64x4 'uint8_t))
+                         (instr-sig 'i64x4 (list 'i64x4 'uint8))
+                         (instr-sig 'u64x4 (list 'u64x4 'uint8))
 
                         )]
 
@@ -772,13 +782,13 @@
                         )]
 
     [(eq? vpsllw instr) (list
-                         (instr-sig 'i16x16 (list 'i16x16 'uint8_t))
-                         (instr-sig 'u16x16 (list 'u16x16 'uint8_t))
+                         (instr-sig 'i16x16 (list 'i16x16 'uint8))
+                         (instr-sig 'u16x16 (list 'u16x16 'uint8))
 
                         )]
 
     [(eq? vpsrad instr) (list
-                         (instr-sig 'i32x8 (list 'i32x8 'uint8_t))
+                         (instr-sig 'i32x8 (list 'i32x8 'uint8))
                         )]
 
     [(eq? vpsravd instr) (list
@@ -787,30 +797,30 @@
                         )]
 
     [(eq? vpsraw instr) (list
-                         (instr-sig 'i16x16 (list 'i16x16 'uint8_t))
+                         (instr-sig 'i16x16 (list 'i16x16 'uint8))
                         )]
 
     [(eq? vpsrld instr) (list
-                         (instr-sig 'u32x8 (list 'u32x8 'uint8_t))
+                         (instr-sig 'u32x8 (list 'u32x8 'uint8))
                         )]
 
     [(eq? vpsrldq instr) (list
-                         (instr-sig 'i8x32 (list 'i8x32 'uint8_t))
-                         (instr-sig 'u8x32 (list 'u8x32 'uint8_t))
+                         (instr-sig 'i8x32 (list 'i8x32 'uint8))
+                         (instr-sig 'u8x32 (list 'u8x32 'uint8))
 
-                         (instr-sig 'i16x16 (list 'i16x16 'uint8_t))
-                         (instr-sig 'u16x16 (list 'u16x16 'uint8_t))
+                         (instr-sig 'i16x16 (list 'i16x16 'uint8))
+                         (instr-sig 'u16x16 (list 'u16x16 'uint8))
 
-                         (instr-sig 'i32x8 (list 'i32x8 'uint8_t))
-                         (instr-sig 'u32x8 (list 'u32x8 'uint8_t))
+                         (instr-sig 'i32x8 (list 'i32x8 'uint8))
+                         (instr-sig 'u32x8 (list 'u32x8 'uint8))
 
-                         (instr-sig 'i64x4 (list 'i64x4 'uint8_t))
-                         (instr-sig 'u64x4 (list 'u64x4 'uint8_t))
+                         (instr-sig 'i64x4 (list 'i64x4 'uint8))
+                         (instr-sig 'u64x4 (list 'u64x4 'uint8))
 
                         )]
 
     [(eq? vpsrlq instr) (list
-                         (instr-sig 'u64x4 (list 'u64x4 'uint8_t))
+                         (instr-sig 'u64x4 (list 'u64x4 'uint8))
                         )]
 
     [(eq? vpsrlvd instr) (list
@@ -824,7 +834,7 @@
                         )]
 
     [(eq? vpsrlw instr) (list
-                         (instr-sig 'u16x16 (list 'u16x16 'uint8_t))
+                         (instr-sig 'u16x16 (list 'u16x16 'uint8))
                         )]
 
     [(eq? vpsubb instr) (list

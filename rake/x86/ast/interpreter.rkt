@@ -11028,6 +11028,16 @@
 
         [(_) (assert #f "infeasible in interpreting vpmovzxbw")])]
 
+    [(x86:vpmovzxbw_s a)
+      (destruct* ((interpret a))
+        [((x86:u8x16 a))
+            (x86:i16x16
+             (halide:interpret
+              (uint16x16
+               a)))]
+
+        [(_) (assert #f "infeasible in interpreting vpmovzxbw_s")])]
+
     [(x86:vpmovzxdq a)
       (destruct* ((interpret a))
         [((x86:u32x4 a))
@@ -11137,18 +11147,9 @@
         [((x86:i32x8 a) (x86:i32x8 b))
             (x86:i32x8
              (halide:interpret
-              (vec-reinterpret
-               (uint32x8
-                (vec-bwand
-                 (x8 (uint64_t (bv 4294967295 64)))
-                 (vec-reinterpret
-                  (vec-mul
-                   (int64x8
-                    a)
-                   (int64x8
-                    b))
-                  'uint64 8)))
-               'int32 8)))]
+              (vec-mul
+               a
+               b)))]
 
         [(_ _) (assert #f "infeasible in interpreting vpmulld")])]
 
@@ -11157,20 +11158,22 @@
         [((x86:i16x16 a) (x86:i16x16 b))
             (x86:i16x16
              (halide:interpret
-              (vec-reinterpret
-               (uint16x16
-                (vec-bwand
-                 (x16 (uint32_t (bv 65535 32)))
-                 (vec-reinterpret
-                  (vec-mul
-                   (int32x16
-                    a)
-                   (int32x16
-                    b))
-                  'uint32 16)))
-               'int16 16)))]
+              (vec-mul
+               a
+               b)))]
 
         [(_ _) (assert #f "infeasible in interpreting vpmullw")])]
+
+    [(x86:vpmullw-vs a imm16)
+      (destruct* ((interpret a) (interpret imm16))
+        [((x86:i16x16 a) (int16_t imm16))
+            (x86:i16x16
+             (halide:interpret
+              (vec-mul
+               a
+               (x16 (int16_t imm16)))))]
+
+        [(_ _) (assert #f "infeasible in interpreting vpmullw-vs")])]
 
     [(x86:vpmuludq a b)
       (destruct* ((interpret a) (interpret b))

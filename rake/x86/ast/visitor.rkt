@@ -171,6 +171,8 @@
       (transform (x86:vpmovzxbq (visit a transform)))]
     [(x86:vpmovzxbw a)
       (transform (x86:vpmovzxbw (visit a transform)))]
+    [(x86:vpmovzxbw_s a)
+      (transform (x86:vpmovzxbw_s (visit a transform)))]
     [(x86:vpmovzxdq a)
       (transform (x86:vpmovzxdq (visit a transform)))]
     [(x86:vpmovzxwd a)
@@ -189,6 +191,8 @@
       (transform (x86:vpmulld (visit a transform) (visit b transform)))]
     [(x86:vpmullw a b)
       (transform (x86:vpmullw (visit a transform) (visit b transform)))]
+    [(x86:vpmullw-vs a imm16)
+      (transform (x86:vpmullw-vs (visit a transform) (visit imm16 transform)))]
     [(x86:vpmuludq a b)
       (transform (x86:vpmuludq (visit a transform) (visit b transform)))]
     [(x86:vpor a b)
@@ -435,6 +439,8 @@
       (transform (x86:vpmovzxbq (visit a transform)))]
     [(x86:vpmovzxbw a)
       (transform (x86:vpmovzxbw (visit a transform)))]
+    [(x86:vpmovzxbw_s a)
+      (transform (x86:vpmovzxbw_s (visit a transform)))]
     [(x86:vpmovzxdq a)
       (transform (x86:vpmovzxdq (visit a transform)))]
     [(x86:vpmovzxwd a)
@@ -453,6 +459,8 @@
       (transform (x86:vpmulld (visit a transform) (visit b transform)))]
     [(x86:vpmullw a b)
       (transform (x86:vpmullw (visit a transform) (visit b transform)))]
+    [(x86:vpmullw-vs a imm16)
+      (transform (x86:vpmullw-vs (visit a transform) (visit imm16 transform)))]
     [(x86:vpmuludq a b)
       (transform (x86:vpmuludq (visit a transform) (visit b transform)))]
     [(x86:vpor a b)

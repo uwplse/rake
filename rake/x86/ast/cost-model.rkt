@@ -11,7 +11,7 @@
 (provide (prefix-out x86: (all-defined-out)))
 
 ;; Auto-generated cost model of Skylake latencies.
-(define (instr-cost instr sig)
+(define (instr-cost instr)
   (cond
     [(eq? instr x86:reinterpret) 0]
     [(eq? instr x86:resize) 0]
@@ -89,6 +89,7 @@
     [(eq? instr x86:vpmovzxbd) 3]
     [(eq? instr x86:vpmovzxbq) 3]
     [(eq? instr x86:vpmovzxbw) 3]
+    [(eq? instr x86:vpmovzxbw_s) 3]
     [(eq? instr x86:vpmovzxdq) 3]
     [(eq? instr x86:vpmovzxwd) 3]
     [(eq? instr x86:vpmovzxwq) 3]
@@ -98,6 +99,7 @@
     [(eq? instr x86:vpmulhw) 5]
     [(eq? instr x86:vpmulld) 10]
     [(eq? instr x86:vpmullw) 5]
+    [(eq? instr x86:vpmullw-vs) 8]
     [(eq? instr x86:vpmuludq) 5]
     [(eq? instr x86:vpor) 1]
     [(eq? instr x86:vpsadbw) 3]
