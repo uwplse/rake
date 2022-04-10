@@ -208,7 +208,7 @@
 (define enumeration-cache (make-hash))
 
 (define (not-dbl-reinterpret parent-instr child-instr)
-  (display (format "(not-dbl-reinterpret ~a ~a)\n\n" parent-instr child-instr))
+  ; (display (format "(not-dbl-reinterpret ~a ~a)\n\n" parent-instr child-instr))
   (not (and (eqv? parent-instr x86:reinterpret) (eqv? child-instr x86:reinterpret))))
 
 (define (enumerate-x86 instr-set output-types base-exprs depth max-cost [read-count -1] [parent-instr (void)] [arg-pos -1])
@@ -230,8 +230,8 @@
                [candidates-cost (filter (lambda (expr) (<= (cdr expr) max-cost)) candidates)]
                [candidates-read (if (eq? read-count -1) candidates-cost (filter (lambda (expr) (<= (x86:max-unique-inputs (car expr)) read-count)) candidates-cost))]
                [candidates-unique (set->list (list->set candidates-read))])
-          ; (display (format "depth: ~a\n" depth))
-          ; (display (format "output-types: ~a\n" output-types))
+          (display (format "depth: ~a\n" depth))
+          (display (format "output-types: ~a\n" output-types))
           ; (display "base-exprs: \n")
           ; (pretty-print base-exprs)
           ; (display "candidates: \n")
@@ -358,7 +358,12 @@
          (define base-load-expr (x86:??shuffle swizzle-node-id (x86:??shuffle-lds x86-sub-expr) out-type))
          (define exprs (hash-ref! grouped-sub-exprs out-type (set)))
          (hash-set! grouped-sub-exprs out-type (set-add exprs base-load-expr)))]
-      ; TODO: ask Maaz about the vspalt cond here from the HVX code
+      ; TODO: ask Maaz about the vsplat cond here from the HVX code
+      [(x86:is-broadcast? x86-sub-expr)
+       (define elemT (x86:elem-type (x86:interpret x86-sub-expr)))
+       (for ([out-type (x86:get-vector-types elemT)])
+         (define exprs (hash-ref! grouped-sub-exprs out-type (set)))
+         (hash-set! grouped-sub-exprs out-type (set-add exprs x86-sub-expr)))]
       [else
        (define sub-expr-type (x86:get-interpreted-type x86-sub-expr))
        (define exprs (hash-ref! grouped-sub-exprs sub-expr-type (set)))
@@ -372,7 +377,8 @@
     (define merged-candidates
       (append
        (map (curryr cons 0) (filter is-load? candidates-l))
-       (let ([c (filter (lambda (c) (not (is-load? c))) candidates-l)])
+       (map (curryr cons 0) (filter x86:is-broadcast? candidates-l))
+       (let ([c (filter (lambda (c) (not (or (x86:is-broadcast? c) (is-load? c)))) candidates-l)])
          (cond
            [(empty? c) '()]
            [else

@@ -16,6 +16,7 @@
   rake/x86/ir/interpreter
   rake/x86/ast/types
   rake/x86/ast/utils
+  rake/x86/ast/type_utils
   rake/synthesis/lowering/algorithm
   ; rake/synthesis/swizzling/x86
   rake/synthesis/lowering/x86/synthesizer
@@ -157,16 +158,6 @@
       (x86:??abstr-load? x86-template)
       (x86:??shuffle? x86-template)))
 
-(define (broadcast? x86-template)
-  (or (x86:vpbroadcastb? x86-template)
-      (x86:vpbroadcastw? x86-template)
-      (x86:vpbroadcastd? x86-template)
-      (x86:vpbroadcastq? x86-template)
-      (x86:vpbroadcastb_128? x86-template)
-      (x86:vpbroadcastw_128? x86-template)
-      (x86:vpbroadcastd_128? x86-template)
-      (x86:vpbroadcastq_128? x86-template)))
-
 (define (construct-incremental-swizzle-helper x86-template swizzle-budget swizzling-algo x86-sub-exprs num-tiles)
   (define (incremental-swizzle-helper tiles tile-id)
     (if (empty? tiles)
@@ -209,7 +200,7 @@
         (values #t x86-template template-cost template-cost 0)]
       ;; If it's just a broadcast then return it
       ;; TODO: might need a concat-tiles here?
-      [(and sub-expr? (broadcast? x86-template))
+      [(and sub-expr? (x86:is-broadcast? x86-template))
         (values #t x86-template template-cost template-cost 0)]
       [else
         (begin
