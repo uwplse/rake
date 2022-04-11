@@ -204,13 +204,13 @@
       (lambda (obj) (list (??abstr-load-buffer obj)))))])
 
 ;; New types to represent abstract computation (these types should never appear in output code)
-(struct abstr-expr (orig-expr abstr-vals offset)
+(struct abstr-expr (orig-expr abstr-vals offset type)
   #:transparent
   #:methods gen:custom-write
   [(define write-proc
      (make-constructor-style-printer
-      (lambda (obj) `arm:abstr-expr)
-      (lambda (obj) (list ))))])
+      (lambda (obj) `x86:abstr-expr)
+      (lambda (obj) (list (abstr-expr-type obj)))))])
 
 (struct ??sub-expr (exprs c)
   #:transparent

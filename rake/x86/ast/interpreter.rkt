@@ -23961,6 +23961,11 @@
         [_ (error "x86:reinterpret interpreter does not recognize instruction: " p)]
       )]
 
+    [(x86:abstr-expr orig-expr abstr-vals offset output-type)
+      (let ([vecType (x86:get-type-struct output-type)])
+        ;; TODO: is this correct?
+        (vecType (lambda (i) (halide:buffer-ref abstr-vals (+ i offset)))))]
+
     ;; TODO: check that it is a scalar value, not a forgotten instruction.
     [_ p]
     ; [_ (error "x86:interpreter does not recognize instruction: " p)]
