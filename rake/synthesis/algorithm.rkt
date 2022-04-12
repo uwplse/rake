@@ -95,11 +95,11 @@
         (pretty-print (spec-expr spec))
         (newline)
         (newline)
-        (define-values (lowering-success? x86-expr)
+        (define-values (lowering-success? x86-exprs)
           (synthesize-x86-expr ir-expr ir-annotations ir-bounds lowering-algo swizzling-algo))
 
         (display "synthesize-x86 output:\n")
-        (pretty-print x86-expr)
+        (pretty-print x86-exprs)
         (display lowering-success?)
         (newline)
 

@@ -7,6 +7,7 @@
          rake/cpp
          rake/halide
          rake/x86/ast/types
+         rake/x86/ast/type_utils
          rake/x86/ast/visitor
          rake/x86/ast/interpreter
          rake/synthesis/axioms)
@@ -27,9 +28,22 @@
      (when (hash-has-key? translation-history sub-expr)
        (define halide-sub-expr (hash-ref translation-history sub-expr))
        (define abstracted-halide-subexpr (make-abstr-halide-expr halide-sub-expr))
-       (if (hash-has-key? value-bounds sub-expr)
-          (set!-values (updated-spec updated-template) (abstr-equiv-subexprs updated-spec updated-template sub-expr halide-sub-expr abstracted-halide-subexpr 0 (hash-ref value-bounds sub-expr)))
-          (set!-values (updated-spec updated-template) (abstr-equiv-subexprs updated-spec updated-template sub-expr halide-sub-expr abstracted-halide-subexpr 0)))))
+       (cond
+         [(x86:concat-tiles? sub-expr)
+          (define offset 0)
+          (for ([tile (x86:concat-tiles-vecs sub-expr)])
+            (cond
+              [(hash-has-key? value-bounds sub-expr)
+               (set!-values (updated-spec updated-template) (abstr-equiv-subexprs updated-spec updated-template tile halide-sub-expr abstracted-halide-subexpr offset (hash-ref value-bounds sub-expr)))]
+              [else
+               (set!-values (updated-spec updated-template) (abstr-equiv-subexprs updated-spec updated-template tile halide-sub-expr abstracted-halide-subexpr offset))])
+            (set! offset (+ offset (x86:num-elems (x86:interpret tile)))))]
+         [else
+          (cond
+            [(hash-has-key? value-bounds sub-expr)
+             (set!-values (updated-spec updated-template) (abstr-equiv-subexprs updated-spec updated-template sub-expr halide-sub-expr abstracted-halide-subexpr 0 (hash-ref value-bounds sub-expr)))]
+            [else
+             (set!-values (updated-spec updated-template) (abstr-equiv-subexprs updated-spec updated-template sub-expr halide-sub-expr abstracted-halide-subexpr 0))])])))
    x86-sub-exprs)
   (values updated-spec (if (not (empty? x86-sub-exprs)) (fix-swizzle-reads updated-spec updated-template) updated-template) axioms))
 
@@ -89,7 +103,7 @@
   (define abstr-vals (abstr-halide-expr-abstr-vals abstracted-halide-subexpr))
   (when (not (void? sub-expr-bounds))
     (set! axioms (append axioms (list (values-range-from abstr-vals (car sub-expr-bounds) (cdr sub-expr-bounds))))))
-  (x86:abstr-expr sub-expr (abstr-halide-expr-abstr-vals abstracted-halide-subexpr) offset))
+  (x86:abstr-expr sub-expr (abstr-halide-expr-abstr-vals abstracted-halide-subexpr) offset (x86:get-interpreted-type sub-expr)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

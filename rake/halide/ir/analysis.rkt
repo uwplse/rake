@@ -19,6 +19,7 @@
  (prefix-out halide: extract-buffer-reads)
  (prefix-out halide: extract-loads)
  (prefix-out halide: extract-arm-loads)
+ (prefix-out halide: extract-x86-loads)
  (prefix-out halide: extract-add-scalars)
  (prefix-out halide: extract-sub-scalars)
  (prefix-out halide: extract-mul-scalars)
@@ -27,7 +28,9 @@
  (prefix-out halide: extract-shl-scalars)
  (prefix-out halide: extract-mod-scalars)
  (prefix-out halide: extract-minmax-scalars)
- (prefix-out halide: cast-op?))
+ (prefix-out halide: cast-op?)
+ (prefix-out halide: make-scalar-log2s)
+)
 
 (define (extract-live-buffers expr)
   (define live-buffers (mutable-set))
@@ -298,6 +301,51 @@
   (halide:visit expr extract-load-ops)
   (set->list loads))
 
+(define (extract-x86-loads expr)
+  (define loads (mutable-set))
+  (define (extract-load-ops node)
+    (destruct node
+      [(load buf idxs align)
+        (destruct idxs
+          [(ramp base stride len)
+           (define elem-bw (cpp:type-bw (buffer-elemT buf)))
+           (define tile-w (* len stride elem-bw))
+           (define lds
+             (cond
+               ; TODO: what sizes should these be?
+               [(< tile-w 128)
+                (set)]
+               [(eq? tile-w 128)
+                (set (list buf base align))]
+               [(eq? tile-w 256)
+                (set
+                 (list buf base align)
+                 (list buf (sca-add base (quotient 128 elem-bw)) align))]
+               [(eq? tile-w 512)
+                (set
+                 (list buf base align)
+                 (list buf (sca-add base (quotient 128 elem-bw)) align)
+                 (list buf (sca-add base (quotient 256 elem-bw)) align)
+                 (list buf (sca-add base (quotient 384 elem-bw)) align))]
+               [(eq? tile-w 1024)
+                (set
+                 (list buf base align)
+                 (list buf (sca-add base (quotient 128 elem-bw)) align)
+                 (list buf (sca-add base (quotient 256 elem-bw)) align)
+                 (list buf (sca-add base (quotient 384 elem-bw)) align)
+                 (list buf (sca-add base (quotient 512 elem-bw)) align)
+                 (list buf (sca-add base (quotient 640 elem-bw)) align)
+                 (list buf (sca-add base (quotient 768 elem-bw)) align)
+                 (list buf (sca-add base (quotient 896 elem-bw)) align))]
+               [else
+                (error "NYI: Extracting vec from:" expr)]))
+           (set-union! loads lds)]
+        [_ (error "NYI: Extracting vec from:" expr)])]
+      ;; Ignore everything else
+      [_ node]))
+  (halide:visit expr extract-load-ops)
+  (set->list loads))
+
 ;;;;;;;;;;;;;;;;;; Some helper functions ;;;;;;;;;;;;;;;;;;;;;;
 
 (define (is-power-of-2? val)
@@ -336,3 +384,6 @@
   (destruct expr
     [(vec-cast vec type lanes) #t]
     [_ #f]))
+
+(define (make-scalar-log2s scalars)
+  (map log-2 (filter is-power-of-2? scalars)))

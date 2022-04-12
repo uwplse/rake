@@ -7,6 +7,7 @@
   rosette/lib/angelic
   rake/cpp
   rake/halide
+  rake/halide/ir/analysis
   rake/x86/ir/instructions
   rake/x86/ir/interpreter
   rake/x86/ast/types
@@ -22,10 +23,10 @@
 
 (define grammar-cache (make-hash))
 
-(define (get-x86-grammar halide-expr ir-expr x86-sub-exprs cost-ub)
+(define (get-x86-grammar halide-expr ir-expr x86-sub-exprs output-layout cost-ub)
   (let* ([key (cons (x86-ir:ast-node-id ir-expr) x86-sub-exprs)]
          [check-cache (and (not (x86-ir:load-data? ir-expr)) (hash-has-key? grammar-cache key))]
-         [candidates (if check-cache (hash-ref grammar-cache key) (get-x86-grammar-helper halide-expr ir-expr x86-sub-exprs))])
+         [candidates (if check-cache (hash-ref grammar-cache key) (get-x86-grammar-helper halide-expr ir-expr x86-sub-exprs output-layout))])
     ;(println cost-ub)
     ;(println key)
     ;(println grammar-cache)
@@ -99,6 +100,8 @@
               (list x86:vpmaddwd x86:vpmaddubsw)
               ;; TODO: need more vector-scalar variants of multiply instructions.
               (list x86:vpmullw-vs)
+              ;; TODO: should we include the shift-left variants? I think we need to.
+              (list x86:vpsllw x86:vpslld x86:vpsllq)
               ;; TODO: should we include saturating adds even if not sat?
               (if sat?
                 (list x86:vpaddsb x86:vpaddsw x86:vpaddusb x86:vpaddusw
@@ -123,7 +126,7 @@
                                                     [(buffer data elemT) (set-add! live-bufs node) node]
                                                     [(x86:??swizzle id live-data exprs idx-tbl output-type)
                                                       (begin
-                                                        (display (format "checking: (x86:??swizzle ~a ~a ~a ~a ~a)\n" id live-data exprs idx-tbl output-type))
+                                                        ; (display (format "checking: (x86:??swizzle ~a ~a ~a ~a ~a)\n" id live-data exprs idx-tbl output-type))
                                                         node)]
                                                     [_ node]))])
                             (x86:visit expr extract-buffer)
@@ -139,17 +142,17 @@
     ; (display (format "Types; ~a ~a \n" input-type output-type))
 
     ;; Filter out templates that read too much or too little data
-    (display (format "Before filtering reads: ~a\n" (length candidates)))
+    ; (display (format "Before filtering reads: ~a\n" (length candidates)))
     ; (display (format "Number of reads: ~a\n" number-reads))
 
     (set! candidates (time (filter (lambda (c) (eq? (x86:max-unique-inputs (car c)) number-reads)) candidates)))
 
-    (display (format "After filtering reads: ~a\n" (length candidates)))
+    ; (display (format "After filtering reads: ~a\n" (length candidates)))
     ; (pretty-print candidates)
-    (display (format "Load buffers: ~a\n" load-buffers))
+    ; (display (format "Load buffers: ~a\n" load-buffers))
     (set! candidates (time (filter (lambda (c) (equal? (live-buffers (car c)) load-buffers)) candidates)))
 
-    (display (format "After filtering buffers: ~a\n" (length candidates)))
+    ; (display (format "After filtering buffers: ~a\n" (length candidates)))
 
     ;; Compute read counts
     (set! candidates (time (map (lambda (c) (cons (car c) (cons (cdr c) (count-reads (car c))))) candidates)))
@@ -161,7 +164,9 @@
     ; (pretty-print candidates)
 
     (let* ([add-scalars (halide:extract-add-scalars halide-expr)]
-           [int-consts (set->list (list->set (append weights add-scalars)))])
+           [mpy-add-scalars (set->list (list->set (append weights add-scalars)))]
+           [shl-scalars (halide:make-scalar-log2s mpy-add-scalars)]
+           [int-consts (set->list (list->set (append shl-scalars mpy-add-scalars)))])
       (define (bool-const) (define-symbolic* b boolean?) b)
       (define (int8-const) (cpp:cast (apply choose* int-consts) 'int8))
       (define (uint8-const) (cpp:cast (apply choose* int-consts) 'uint8))
@@ -188,7 +193,8 @@
 
       (time (for/list ([candidate candidates]) (cons (uniquify-swizzles (x86:visit (car candidate) fill-arg-grammars)) (car (cdr candidate))))))))
 
-(define (get-x86-grammar-helper halide-expr ir-expr x86-sub-exprs)
+(define (get-x86-grammar-helper halide-expr ir-expr x86-sub-exprs output-layout)
+  ;; TODO: figure out which operations should use output-layout...
   (destruct ir-expr
 
     ; Data loading/shuffling
@@ -227,16 +233,11 @@
 (define enumeration-cache (make-hash))
 
 (define (not-dbl-reinterpret parent-instr child-instr)
-  ; (display (format "(not-dbl-reinterpret ~a ~a)\n\n" parent-instr child-instr))
+  ; (display (format "(not-dbl-reinterpret ~a ~a) -> ~a\n\n" parent-instr child-instr (not (and (eqv? parent-instr x86:reinterpret) (eqv? child-instr x86:reinterpret)))))
   (not (and (eqv? parent-instr x86:reinterpret) (eqv? child-instr x86:reinterpret))))
 
 (define (enumerate-x86 instr-set output-types base-exprs depth max-cost [read-count -1] [parent-instr (void)] [arg-pos -1])
-  (begin
-    ; (display (format "parent-instr: ~a\n" parent-instr))
-    ; (display (format "depth: ~a\n" depth))
-    ; (display (format "output-types: ~a\n" output-types))
-    ; (display (format "max-cost: ~a\n\n" max-cost))
-  (let ([key (list instr-set output-types base-exprs depth max-cost read-count arg-pos)])
+  (let ([key (list instr-set output-types base-exprs depth max-cost read-count parent-instr arg-pos)])
     (cond
       ;; max-cost has been reduced to < 0, don't try to keep enumerating.
       ;; This is more liberal than it could be - it only looks at one path
@@ -259,19 +260,23 @@
                [candidates-cost (filter (lambda (expr) (<= (cdr expr) max-cost)) candidates)]
                [candidates-read (if (eq? read-count -1) candidates-cost (filter (lambda (expr) (<= (x86:max-unique-inputs (car expr)) read-count)) candidates-cost))]
                [candidates-unique (set->list (list->set candidates-read))])
+
           ; (display (format "depth: ~a\n" depth))
           ; (display (format "output-types: ~a\n" output-types))
-          ; (display "base-exprs: \n")
-          ; (pretty-print base-exprs)
-          ; (display "candidates: \n")
-          ; (println candidates)
-          ; (display "candidates-unique: \n")
-          ; (println candidates-unique)
           ; (display "parent-instr: \n")
           ; (println parent-instr)
-          ;(pretty-print base-exprs)
+          ; (display "base-exprs: \n")
+          ; (pretty-print base-exprs)
+          ; (display "sub-candidates: \n")
+          ; (pretty-print sub-candidates)
+
+          ; (display "candidates: \n")
+          ; (pretty-print candidates)
+          ; (display "candidates-unique: \n")
+          ; (pretty-print candidates-unique)
+
           (hash-set! enumeration-cache key candidates-unique)
-          candidates-unique)]))))
+          candidates-unique)])))
 
 ; Filter based in output type
 (define (build-instr-exprs instr instr-set output-types base-exprs depth max-cost read-count)
@@ -287,10 +292,8 @@
 
 ; I do not quite understand what this one is doing
 (define (build-sig-exprs sig instr-set base-exprs depth max-cost read-count instr)
-  ;(display (format "sig: ~a\n" sig))
   (let ([sig-exprs
     (let ([arg-opts (get-arg-opts (x86:instr-sig-args sig) instr instr-set base-exprs depth max-cost read-count 0)])
-      ;(println arg-opts)
       (apply cartesian-product arg-opts))])
     (map (curry build-ast instr sig) sig-exprs)))
 
@@ -365,9 +368,7 @@
 (define (prepare-sub-exprs x86-sub-exprs)
   (define grouped-sub-exprs (make-hash))
   (define swizzle-node-id -1)
-  ; TODO: fix this when we have concat-tiles working
-  ; (define x86-sub-exprs-untiled (flatten (map (lambda (expr) (if (x86:concat-tiles? expr) (x86:concat-tiles-vecs expr) expr)) (set->list (list->set x86-sub-exprs)))))
-  (define x86-sub-exprs-untiled (flatten (set->list (list->set x86-sub-exprs))))
+  (define x86-sub-exprs-untiled (flatten (map (lambda (expr) (if (x86:concat-tiles? expr) (x86:concat-tiles-vecs expr) expr)) (set->list (list->set x86-sub-exprs)))))
   (for ([x86-sub-expr x86-sub-exprs-untiled])
     (cond
       [(x86:??abstr-load? x86-sub-expr)
