@@ -285,7 +285,7 @@
 
     ;; Casts
     [(vec-cast vec type lanes) (list (arm-ir:cast (get-node-id) (list-ref lifted-sub-exprs 0) type #f))]
-    
+
     ;; Multiplication
     [(vec-mul v1 v2)
       ; TODO: understand these (ask Maaz)
@@ -301,7 +301,8 @@
           ;; or vector-vector multiply-add
           (arm-ir:vv-mpy-add (get-node-id) (apply choose* lifted-sub-exprs) (list 1) (halide:elem-type halide-expr))
           (arm-ir:vv-mpy-add (get-node-id) (arm-ir:load-data (get-load-id) live-reads gather-tbl) (list 1) (halide:elem-type halide-expr))
-          ; TODO: add combine nodes
+          ;; Extend both of the sub-exprs (combine them)
+          (mk-vv-mpy-add-combine-subexprs lifted-sub-exprs (list 1) (halide:elem-type halide-expr))
       ))]
 
     ;; Addition
@@ -338,6 +339,11 @@
         (if (subexprs-are-loads? lifted-sub-exprs)
           (arm-ir:vs-mpy-add (get-node-id) (mk-load-instr halide-expr) (list (int8_t (bv 1 8)) (int8_t (bv -1 8))) (halide:elem-type halide-expr))
           (arm-ir:vs-mpy-add (get-node-id) (apply choose* lifted-sub-exprs) (list (int8_t (bv 1 8)) (int8_t (bv -1 8))) (halide:elem-type halide-expr)))
+        ;; Extend sub-sub-expressions (useful to throw away redundant casts)
+        (mk-vs-mpy-add-combine-subsubexprs ;; Extend sub-sub-exprs (combine them)
+         lifted-sub-exprs
+         (list (int8_t (bv 1 8)) (int8_t (bv -1 8)))
+         (halide:elem-type halide-expr))
         ;; Extend both of the sub-exprs (combine them)
         (mk-vs-mpy-add-combine-subexprs    
           lifted-sub-exprs
@@ -432,7 +438,10 @@
   (cond
     [(arm-ir:load-data? sub-expr)
      (define live-reads (merge-live-reads (arm-ir:load-data-live-data sub-expr) (halide:extract-buffer-reads halide-expr)))
-     (arm-ir:load-data (get-node-id) live-reads (arm-ir:load-data-gather-tbl sub-expr))]
+     (define gather-tbl (map (lambda (i) (define-symbolic* idx integer?) idx) (range SYMBOL_TBL_SIZE)))
+     (arm-ir:load-data (get-node-id) live-reads gather-tbl)]
+    [(arm-ir:combine? sub-expr)
+     (mk-combine-instr (list (update-input-data (arm-ir:combine-expr0 sub-expr) halide-expr) (update-input-data (arm-ir:combine-expr1 sub-expr) halide-expr)))]
     [else sub-expr]))
 
 (define (merge-live-reads old-dataset new-dataset)
@@ -491,7 +500,9 @@
        [((arm-ir:broadcast sca-val) (arm-ir:vs-mpy-add sub-expr0 weights out-type))
         (arm-ir:vs-mpy-add (get-node-id) (mk-combine-instr (list sub-expr0 sub0)) (append (list (int8_t (bv 1 8))) weights) out-type)]
        [((arm-ir:vs-mpy-add sub-expr0 weights0 out-type0) (arm-ir:vs-mpy-add sub-expr1 weights1 out-type1))
-        (arm-ir:vs-mpy-add (get-node-id) (mk-combine-instr (list sub-expr0 sub-expr1)) (append (list w) weights0) (choose* out-type0 out-type1))]
+        (list
+         (arm-ir:vs-mpy-add (get-node-id) (mk-combine-instr (list sub-expr0 sub-expr1)) (append (list w) weights0) (choose* out-type0 out-type1))
+         (arm-ir:vs-mpy-add (get-node-id) (mk-combine-instr (list sub-expr0 sub-expr1)) (append weights0 weights1) (choose* out-type0 out-type1)))]
        [(_ _) '()])]
     [else '()]))
 
@@ -522,3 +533,9 @@
 
 (define (mk-saturate-instr sub-expr out-type)
   (arm-ir:cast (get-node-id) sub-expr out-type #t))
+
+(define (mk-vv-mpy-add-combine-subexprs lifted-sub-exprs width output-type)
+  (cond
+    [(eq? (length lifted-sub-exprs) 2)
+     (arm-ir:vv-mpy-add (get-node-id) (mk-combine-instr lifted-sub-exprs) width output-type)]
+    [else '()]))
