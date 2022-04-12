@@ -159,6 +159,9 @@
 ;; x86 instructions for vector creation
 (struct ld (buf loc align output-type) #:transparent)
 
+;; Concat vectors (not an intrinsic but a useful construct)
+(struct concat-tiles (vecs) #:transparent)
+
 ;; TODO: these are not currently auto-generated
 (struct ??shuffle (id lds output-type) #:transparent)
 
@@ -1034,3 +1037,23 @@
     [(u32x8 data) 'u32x8]
     [(u64x2 data) 'u64x2]
     [(u64x4 data) 'u64x4]))
+
+(define (num-elems expr)
+  (destruct expr
+    [(i8x16 data) 16]
+    [(i8x32 data) 32]
+    [(i16x8 data) 8]
+    [(i16x16 data) 16]
+    [(i32x4 data) 4]
+    [(i32x8 data) 8]
+    [(i64x2 data) 2]
+    [(i64x4 data) 4]
+
+    [(u8x16 data) 16]
+    [(u8x32 data) 32]
+    [(u16x8 data) 8]
+    [(u16x16 data) 16]
+    [(u32x4 data) 4]
+    [(u32x8 data) 8]
+    [(u64x2 data) 2]
+    [(u64x4 data) 4]))

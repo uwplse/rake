@@ -19,7 +19,7 @@
     [(x86:??shuffle id lds output-type) (transform (x86:??shuffle id (for/list ([ld lds]) (visit ld transform)) output-type))]
     [(x86:??swizzle id live-data exprs idx-tbl output-type) (transform (x86:??swizzle id live-data (for/list ([expr exprs]) (visit expr transform)) idx-tbl output-type))]
     [(x86:reinterpret Vn) (transform (x86:reinterpret (visit Vn transform)))]
-    ;; [(x86:concat-tiles exprs) (transform (x86:concat-tiles (for/list ([expr exprs]) (visit expr transform))))]
+    [(x86:concat-tiles exprs) (transform (x86:concat-tiles (for/list ([expr exprs]) (visit expr transform))))]
 
     [(x86:resize a)
       (transform (x86:resize (visit a transform)))]
@@ -287,7 +287,7 @@
     [(x86:??shuffle id lds output-type) (transform expr)]
     [(x86:??swizzle id live-data exprs idx-tbl output-type) (transform expr)]
     [(x86:reinterpret Vn) (transform (x86:reinterpret (visit-shallow Vn transform)))]
-    ;; [(x86:concat-tiles exprs) (transform (x86:concat-tiles (for/list ([expr exprs]) (visit expr transform))))]
+    [(x86:concat-tiles exprs) (transform (x86:concat-tiles (for/list ([expr exprs]) (visit expr transform))))]
 
     [(x86:resize a)
       (transform (x86:resize (visit a transform)))]

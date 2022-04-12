@@ -18115,15 +18115,13 @@
              (halide:interpret
               (vec-shl
                a
-               (uint8_t
-                imm8))))]
+               (x8 (uint32x1 (uint8_t imm8))))))]
         [((x86:u32x8 a) (uint8_t imm8))
             (x86:u32x8
              (halide:interpret
               (vec-shl
                a
-               (uint8_t
-                imm8))))]
+               (x8 (uint32x1 (uint8_t imm8))))))]
 
         [(_ _) (assert #f "infeasible in interpreting vpslld")])]
 
@@ -20651,15 +20649,13 @@
              (halide:interpret
               (vec-shl
                a
-               (uint8_t
-                imm8))))]
+               (x4 (uint64x1 (uint8_t imm8))))))]
         [((x86:u64x4 a) (uint8_t imm8))
             (x86:u64x4
              (halide:interpret
               (vec-shl
                a
-               (uint8_t
-                imm8))))]
+               (x4 (uint64x1 (uint8_t imm8))))))]
 
         [(_ _) (assert #f "infeasible in interpreting vpsllq")])]
 
@@ -20728,15 +20724,13 @@
              (halide:interpret
               (vec-shl
                a
-               (uint8_t
-                imm8))))]
+               (x16 (uint16x1 (uint8_t imm8))))))]
         [((x86:u16x16 a) (uint8_t imm8))
             (x86:u16x16
              (halide:interpret
               (vec-shl
                a
-               (uint8_t
-                imm8))))]
+               (x16 (uint16x1 (uint8_t imm8))))))]
 
         [(_ _) (assert #f "infeasible in interpreting vpsllw")])]
 
@@ -20747,8 +20741,7 @@
              (halide:interpret
               (vec-shr
                a
-               (uint8_t
-                imm8))))]
+               (x8 (uint32x1 (uint8_t imm8))))))]
 
         [(_ _) (assert #f "infeasible in interpreting vpsrad")])]
 
@@ -20776,8 +20769,7 @@
              (halide:interpret
               (vec-shr
                a
-               (uint8_t
-                imm8))))]
+               (x16 (uint16x1 (uint8_t imm8))))))]
 
         [(_ _) (assert #f "infeasible in interpreting vpsraw")])]
 
@@ -20788,8 +20780,7 @@
              (halide:interpret
               (vec-shr
                a
-               (uint8_t
-                imm8))))]
+               (x8 (uint32x1 (uint8_t imm8))))))]
 
         [(_ _) (assert #f "infeasible in interpreting vpsrld")])]
 
@@ -23317,8 +23308,7 @@
              (halide:interpret
               (vec-shr
                a
-               (uint8_t
-                imm8))))]
+               (x4 (uint64x1 (uint8_t imm8))))))]
 
         [(_ _) (assert #f "infeasible in interpreting vpsrlq")])]
 
@@ -23363,8 +23353,7 @@
              (halide:interpret
               (vec-shr
                a
-               (uint8_t
-                imm8))))]
+               (x16 (uint16x1 (uint8_t imm8))))))]
 
         [(_ _) (assert #f "infeasible in interpreting vpsrlw")])]
 
@@ -23965,6 +23954,14 @@
       (let ([vecType (x86:get-type-struct output-type)])
         ;; TODO: is this correct?
         (vecType (lambda (i) (halide:buffer-ref abstr-vals (+ i offset)))))]
+
+    [(x86:concat-tiles tiles)
+      (error "trying to interpret concat-tiles")]
+
+    [(x86:ld buf loc align output-type)
+      (let ([vecType (x86:get-type-struct output-type)])
+        (vecType
+          (lambda (i) (halide:buffer-ref buf (+ (interpret loc) i)))))]
 
     ;; TODO: check that it is a scalar value, not a forgotten instruction.
     [_ p]
