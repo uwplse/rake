@@ -13,7 +13,6 @@
 
 (define (visit expr transform [arg-pos -1])
   (match expr
-
     [(arm:ld buf loc align output-type) (transform (arm:ld (visit buf transform) loc align output-type))]
 
     [(arm:abs Vn) (transform (arm:abs (visit Vn transform)))]
