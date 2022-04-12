@@ -15,7 +15,8 @@ benchmarks = gaussian3x3 \
 			 max_pool \
 			 average_pool \
 			 l2norm \
-			 matmul
+			 matmul \
+			 camera_pipe
 
 bin_dirs = $(addsuffix /bin,$(benchmarks))
 out_dirs = $(addsuffix /out,$(benchmarks))
