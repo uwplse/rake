@@ -11,7 +11,7 @@
   rake/hvx/ast/types
   rake/hvx/ast/visitor
   rake/synthesis/layouts
-  rake/synthesis/lowering/util)
+  rake/synthesis/lowering/hvx/util)
 
 (provide get-hvx-swizzle-grammar)
 
