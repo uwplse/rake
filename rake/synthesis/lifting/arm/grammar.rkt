@@ -152,6 +152,12 @@
         ;; Try updating the rounding flag / saturation flag / output-type
         (arm-ir:vs-shift-right (get-node-id) sub-expr shift (choose* #t round?) (choose* #t saturate?) (choose* #t signed?) wider-type))]
 
+      [(arm-ir:halving-add sub-expr round?)
+       (define e-type (halide:elem-type halide-expr))
+       (list
+        ;; Try updating the rounding flag
+        (arm-ir:halving-add (get-node-id) sub-expr (choose* #t #f)))]
+
       [(arm-ir:maximum expr0 expr1) '()]
       [(arm-ir:minimum expr0 expr1) '()]
       
@@ -208,6 +214,7 @@
       [(arm-ir:vs-mpy-add sub-expr weights outT)
         (flatten
           (list
+            (mk-halving-add-instr (update-input-data sub-expr halide-expr) (choose* #t #f) (halide:extract-shr-scalars halide-expr))
             (if (<= (length weights) 2)
                 (arm-ir:vs-dmpy-add-sat (get-node-id) sub-expr (apply choose* weights) (choose* #t #f) (halide:elem-type halide-expr))
                 '())
@@ -227,6 +234,8 @@
       [(arm-ir:add-sat expr0 expr1) '()]
 
       [(arm-ir:vs-shift-right sub-expr const-val round? saturate? signed? output-type) '()]
+
+      [(arm-ir:halving-add sub-expr round?) '()]
 
       [(arm-ir:bitwise-and expr0 expr1) '()]
 
@@ -280,7 +289,7 @@
     [(load buf idxs align) (list (mk-load-instr halide-expr))]
     [(slice_vectors vec base stride len) (list (mk-load-instr halide-expr))]
     [(concat_vectors v1 v2) (list (mk-load-instr halide-expr))]
-    ;[(interleave v1 v2) (list (mk-combine-instr lifted-sub-exprs))]
+    [(interleave v1 v2) (list (mk-combine-instr lifted-sub-exprs))]
     [(dynamic_shuffle vec idxs st end) (list (mk-load-instr halide-expr))]
 
     ;; Casts
@@ -407,6 +416,8 @@
     [(vec-if v1 v2 v3)
      (if (eq? (length lifted-sub-exprs) 3)
          (list (arm-ir:select (get-node-id) (list-ref lifted-sub-exprs 0) (list-ref lifted-sub-exprs 1) (list-ref lifted-sub-exprs 2))) '())]
+
+    [(vec-lt v1 v2) (if (eq? (length lifted-sub-exprs) 2) (list (arm-ir:less-than (get-node-id) (list-ref lifted-sub-exprs 0) (list-ref lifted-sub-exprs 1))) '())]
     
     [_ (error "NYI: Please define a (extend) grammar for halide node:" halide-expr)]))
 
@@ -513,13 +524,10 @@
       (list (arm-ir:vs-mpy-add (get-node-id) (arm-ir:combine (get-load-id) (first sub-exprs0) (first sub-exprs1) read-tbl) weights output-type)))
     '()))
 
-; This was causing the generation of an arm-ir:vs-mpy-add with an empty list as an input
-; (define (mk-combine-instr2 lifted-sub-exprs0 lifted-sub-exprs1)
-;   (cond
-;     [(and (not (empty? lifted-sub-exprs0)) (not (empty? lifted-sub-exprs1)))
-;       (define read-tbl (map (lambda (i) (define-symbolic* idx integer?) (define-symbolic* c boolean?) (cons idx c)) (range SYMBOL_TBL_SIZE)))
-;       (arm-ir:combine (get-load-id) (first lifted-sub-exprs0) (first lifted-sub-exprs1) read-tbl)]
-;     [else '()]))
+(define (mk-halving-add-instr sub-expr round? shr-scalars)
+  (cond
+    [(empty? shr-scalars) '()]
+    [else (arm-ir:halving-add (get-node-id) sub-expr round?)]))
 
 (define (mk-shr-instr sub-expr shr-scalars round? saturate? signed? output-type)
   (cond

@@ -192,11 +192,11 @@
 ; (a >> 1) + (b >> 1) + (((a & 1) + (b & 1) + 1) >> 1)
 (define (rhalf-add-impl-signed a b bits)
   (let ([one (bv 1 bits)])
-    (bvadd (bvashr a one) (bvashr b one) (bvashr (bvadd (bvand a one) (bvadd b one) one) one))))
+    (bvadd (bvashr a one) (bvashr b one) (bvashr (bvadd (bvand a one) (bvand b one) one) one))))
 
 (define (rhalf-add-impl-unsigned a b bits)
   (let ([one (bv 1 bits)])
-    (bvadd (bvlshr a one) (bvlshr b one) (bvlshr (bvadd (bvand a one) (bvadd b one) one) one))))
+    (bvadd (bvlshr a one) (bvlshr b one) (bvlshr (bvadd (bvand a one) (bvand b one) one) one))))
 
 (define (rhalf-add-impl lhs rhs)
   (destruct* (lhs rhs)
@@ -560,23 +560,21 @@
     ; TODO: sub-high-narrow
 
 
-    [(arm-ir:halving-add expr0 expr1 round?)
-     (define input0 (interpret expr0))
-     (define input1 (interpret expr1))
+    [(arm-ir:halving-add expr round?)
+     (define input (interpret expr))
      (if round?
          (lambda (i)
-            (rhalf-add-impl (input0 i) (input1 i)))
+            (rhalf-add-impl (input i) (input (+ i 1))))
          (lambda (i)
-            (half-add-impl (input0 i) (input1 i))))]
+            (half-add-impl (input i) (input (+ i 1)))))]
 
-    [(arm-ir:halving-sub expr0 expr1 round?)
-     (define input0 (interpret expr0))
-     (define input1 (interpret expr1))
+    [(arm-ir:halving-sub expr round?)
+     (define input (interpret expr))
      (if round?
          (lambda (i)
-            (rhalf-sub-impl (input0 i) (input1 i)))
+            (rhalf-sub-impl (input i) (input (+ i 1))))
          (lambda (i)
-            (half-sub-impl (input0 i) (input1 i))))]
+            (half-sub-impl (input i) (input (+ i 1)))))]
 
     [(arm-ir:reduce expr width reduce-op outT)
      (define input (interpret expr))
@@ -761,7 +759,8 @@
 
     [(arm-ir:add-high-narrow expr round?) (+ (instr-count expr) 1)]
     [(arm-ir:sub-high-narrow expr round?) (+ (instr-count expr) 1)]
-    [(arm-ir:halving-add expr0 expr1 round?) (+ (instr-count expr0) (instr-count expr1) 1)]
+    [(arm-ir:halving-add expr round?) (+ (instr-count expr) 1)]
+    [(arm-ir:halving-sub expr round?) (+ (instr-count expr) 1)]
 
     [(arm-ir:reduce expr width reduce-op widening?) (+ (instr-count expr) 1)]
 
@@ -791,6 +790,7 @@
     [(arm-ir:bitwise-and expr0 expr1) (+ (instr-count expr0) (instr-count expr1) 1)]
 
     [(arm-ir:select expr0 expr1 expr2) (+ (instr-count expr0) (instr-count expr1) (instr-count expr2) 1)]
+    [(arm-ir:less-than-eq expr0 expr1) (+ (instr-count expr0) (instr-count expr1) 1)]
 
     [(arm-ir:vs-divide expr divisor) (+ (instr-count expr) 1)]
 
@@ -813,8 +813,8 @@
       [(arm-ir:add-high-narrow expr round?) (handler (arm-ir:add-high-narrow (arm-ir:ast-node-id ir-expr) (visit expr handler) round?))]
       [(arm-ir:sub-high-narrow expr round?) (handler (arm-ir:sub-high-narrow (arm-ir:ast-node-id ir-expr) (visit expr handler) round?))]
 
-      [(arm-ir:halving-add expr0 expr1 round?) (handler (arm-ir:halving-add (arm-ir:ast-node-id ir-expr) (visit expr0 handler) (visit expr1 handler) round?))]
-      [(arm-ir:halving-sub expr0 expr1 round?) (handler (arm-ir:halving-sub (arm-ir:ast-node-id ir-expr) (visit expr0 handler) (visit expr1 handler) round?))]
+      [(arm-ir:halving-add expr round?) (handler (arm-ir:halving-add (arm-ir:ast-node-id ir-expr) (visit expr handler) round?))]
+      [(arm-ir:halving-sub expr round?) (handler (arm-ir:halving-sub (arm-ir:ast-node-id ir-expr) (visit expr handler) round?))]
 
       [(arm-ir:reduce expr width reduce-op widening?) (handler (arm-ir:reduce (arm-ir:ast-node-id ir-expr) (visit expr handler) width reduce-op widening?))]
 
@@ -868,8 +868,8 @@
 
     [(arm-ir:add-high-narrow expr round?) (list expr)]
     [(arm-ir:sub-high-narrow expr round?) (list expr)]
-    [(arm-ir:halving-add expr0 expr1 round?) (list expr0 expr1)]
-    [(arm-ir:halving-sub expr0 expr1 round?) (list expr0 expr1)]
+    [(arm-ir:halving-add expr round?) (list expr)]
+    [(arm-ir:halving-sub expr round?) (list expr)]
 
     [(arm-ir:reduce expr width reduce-op widening?) (list expr)]
 

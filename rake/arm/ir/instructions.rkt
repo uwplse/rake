@@ -30,8 +30,8 @@
 ;; Fused instructions
 (struct add-high-narrow (expr round?) #:super struct:ast-node #:transparent)                 ;; Instructions: addhn, raddhn
 (struct sub-high-narrow (expr round?) #:super struct:ast-node #:transparent)                 ;; Instructions: subhn, rsubhn
-(struct halving-add (expr0 expr1 round?) #:super struct:ast-node #:transparent)              ;; Instructions: shadd, srhadd, uhadd
-(struct halving-sub (expr0 expr1 round?) #:super struct:ast-node #:transparent)              ;; Instructions: shsub, urhadd, uhsub
+(struct halving-add (expr round?) #:super struct:ast-node #:transparent)              ;; Instructions: shadd, srhadd, uhadd
+(struct halving-sub (expr round?) #:super struct:ast-node #:transparent)              ;; Instructions: shsub, urhadd, uhsub
 
 ; TODO: halving-add and halving-sub should be merged
 
