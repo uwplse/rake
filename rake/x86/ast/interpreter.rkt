@@ -52,6 +52,4867 @@
 
     ;;;;;;;;;;;;;;
 
+    [(x86:packssdw a b)
+      (destruct* ((interpret a) (interpret b))
+        [((x86:i32x4 a) (x86:i32x4 b))
+            (x86:i16x8
+             (halide:interpret
+              (int16x8
+               (vec-max
+                (vec-min
+                 (concat_vectors
+                  a
+                  b)
+                 (x8 (int32_t (bv 32767 32))))
+                (x8 (int32_t (bv -32768 32)))))))]
+
+        [(_ _) (assert #f "infeasible in interpreting packssdw")])]
+
+    [(x86:packsswb a b)
+      (destruct* ((interpret a) (interpret b))
+        [((x86:i16x8 a) (x86:i16x8 b))
+            (x86:i8x16
+             (halide:interpret
+              (int8x16
+               (vec-max
+                (vec-min
+                 (concat_vectors
+                  a
+                  b)
+                 (x16 (int16_t (bv 127 16))))
+                (x16 (int16_t (bv -128 16)))))))]
+
+        [(_ _) (assert #f "infeasible in interpreting packsswb")])]
+
+    [(x86:packuswb a b)
+      (destruct* ((interpret a) (interpret b))
+        [((x86:i16x8 a) (x86:i16x8 b))
+            (x86:u8x16
+             (halide:interpret
+              (uint8x16
+               (vec-max
+                (vec-min
+                 (concat_vectors
+                  a
+                  b)
+                 (x16 (int16_t (bv 255 16))))
+                (x16 (int16_t (bv 0 16)))))))]
+
+        [(_ _) (assert #f "infeasible in interpreting packuswb")])]
+
+    [(x86:paddb a b)
+      (destruct* ((interpret a) (interpret b))
+        [((x86:i8x16 a) (x86:i8x16 b))
+            (x86:i8x16
+             (halide:interpret
+              (vec-add
+               a
+               b)))]
+        [((x86:u8x16 a) (x86:u8x16 b))
+            (x86:u8x16
+             (halide:interpret
+              (vec-add
+               a
+               b)))]
+
+        [(_ _) (assert #f "infeasible in interpreting paddb")])]
+
+    [(x86:paddd a b)
+      (destruct* ((interpret a) (interpret b))
+        [((x86:i32x4 a) (x86:i32x4 b))
+            (x86:i32x4
+             (halide:interpret
+              (vec-add
+               a
+               b)))]
+        [((x86:u32x4 a) (x86:u32x4 b))
+            (x86:u32x4
+             (halide:interpret
+              (vec-add
+               a
+               b)))]
+
+        [(_ _) (assert #f "infeasible in interpreting paddd")])]
+
+    [(x86:paddq a b)
+      (destruct* ((interpret a) (interpret b))
+        [((x86:i64x2 a) (x86:i64x2 b))
+            (x86:i64x2
+             (halide:interpret
+              (vec-add
+               a
+               b)))]
+        [((x86:u64x2 a) (x86:u64x2 b))
+            (x86:u64x2
+             (halide:interpret
+              (vec-add
+               a
+               b)))]
+
+        [(_ _) (assert #f "infeasible in interpreting paddq")])]
+
+    [(x86:paddsb a b)
+      (destruct* ((interpret a) (interpret b))
+        [((x86:i8x16 a) (x86:i8x16 b))
+            (x86:i8x16
+             (halide:interpret
+              (vec-add
+               (vec-max
+                (vec-min
+                 (vec-sub
+                  (x16 (int8_t (bv 127 8)))
+                  (vec-max
+                   b
+                   (x16 (int8_t (bv 0 8)))))
+                 a)
+                (vec-sub
+                 (x16 (int8_t (bv -128 8)))
+                 (vec-min
+                  b
+                  (x16 (int8_t (bv 0 8))))))
+               b)))]
+
+        [(_ _) (assert #f "infeasible in interpreting paddsb")])]
+
+    [(x86:paddsw a b)
+      (destruct* ((interpret a) (interpret b))
+        [((x86:i16x8 a) (x86:i16x8 b))
+            (x86:i16x8
+             (halide:interpret
+              (vec-add
+               (vec-max
+                (vec-min
+                 (vec-sub
+                  (x8 (int16_t (bv 32767 16)))
+                  (vec-max
+                   b
+                   (x8 (int16_t (bv 0 16)))))
+                 a)
+                (vec-sub
+                 (x8 (int16_t (bv -32768 16)))
+                 (vec-min
+                  b
+                  (x8 (int16_t (bv 0 16))))))
+               b)))]
+
+        [(_ _) (assert #f "infeasible in interpreting paddsw")])]
+
+    [(x86:paddusb a b)
+      (destruct* ((interpret a) (interpret b))
+        [((x86:u8x16 a) (x86:u8x16 b))
+            (x86:u8x16
+             (halide:interpret
+              (vec-add
+               (vec-min
+                (vec-sub
+                 (x16 (uint8_t (bv 255 8)))
+                 b)
+                a)
+               b)))]
+
+        [(_ _) (assert #f "infeasible in interpreting paddusb")])]
+
+    [(x86:paddusw a b)
+      (destruct* ((interpret a) (interpret b))
+        [((x86:u16x8 a) (x86:u16x8 b))
+            (x86:u16x8
+             (halide:interpret
+              (vec-add
+               (vec-min
+                (vec-sub
+                 (x8 (uint16_t (bv 65535 16)))
+                 b)
+                a)
+               b)))]
+
+        [(_ _) (assert #f "infeasible in interpreting paddusw")])]
+
+    [(x86:paddw a b)
+      (destruct* ((interpret a) (interpret b))
+        [((x86:i16x8 a) (x86:i16x8 b))
+            (x86:i16x8
+             (halide:interpret
+              (vec-add
+               a
+               b)))]
+        [((x86:u16x8 a) (x86:u16x8 b))
+            (x86:u16x8
+             (halide:interpret
+              (vec-add
+               a
+               b)))]
+
+        [(_ _) (assert #f "infeasible in interpreting paddw")])]
+
+    [(x86:pand a b)
+      (destruct* ((interpret a) (interpret b))
+        [((x86:i8x16 a) (x86:i8x16 b))
+            (x86:i8x16
+             (halide:interpret
+              (vec-bwand
+               a
+               b)))]
+        [((x86:i16x8 a) (x86:i16x8 b))
+            (x86:i16x8
+             (halide:interpret
+              (vec-bwand
+               a
+               b)))]
+        [((x86:i32x4 a) (x86:i32x4 b))
+            (x86:i32x4
+             (halide:interpret
+              (vec-bwand
+               a
+               b)))]
+        [((x86:i64x2 a) (x86:i64x2 b))
+            (x86:i64x2
+             (halide:interpret
+              (vec-bwand
+               a
+               b)))]
+        [((x86:u8x16 a) (x86:u8x16 b))
+            (x86:u8x16
+             (halide:interpret
+              (vec-bwand
+               a
+               b)))]
+        [((x86:u16x8 a) (x86:u16x8 b))
+            (x86:u16x8
+             (halide:interpret
+              (vec-bwand
+               a
+               b)))]
+        [((x86:u32x4 a) (x86:u32x4 b))
+            (x86:u32x4
+             (halide:interpret
+              (vec-bwand
+               a
+               b)))]
+        [((x86:u64x2 a) (x86:u64x2 b))
+            (x86:u64x2
+             (halide:interpret
+              (vec-bwand
+               a
+               b)))]
+
+        [(_ _) (assert #f "infeasible in interpreting pand")])]
+
+    [(x86:pandn a)
+      (destruct* ((interpret a))
+        [((x86:i8x16 a))
+            (x86:i8x16
+             (halide:interpret
+              (vec-bwnot
+               a)))]
+        [((x86:i16x8 a))
+            (x86:i16x8
+             (halide:interpret
+              (vec-bwnot
+               a)))]
+        [((x86:i32x4 a))
+            (x86:i32x4
+             (halide:interpret
+              (vec-bwnot
+               a)))]
+        [((x86:i64x2 a))
+            (x86:i64x2
+             (halide:interpret
+              (vec-bwnot
+               a)))]
+        [((x86:u8x16 a))
+            (x86:u8x16
+             (halide:interpret
+              (vec-bwnot
+               a)))]
+        [((x86:u16x8 a))
+            (x86:u16x8
+             (halide:interpret
+              (vec-bwnot
+               a)))]
+        [((x86:u32x4 a))
+            (x86:u32x4
+             (halide:interpret
+              (vec-bwnot
+               a)))]
+        [((x86:u64x2 a))
+            (x86:u64x2
+             (halide:interpret
+              (vec-bwnot
+               a)))]
+
+        [(_) (assert #f "infeasible in interpreting pandn")])]
+
+    [(x86:pavgb a b)
+      (destruct* ((interpret a) (interpret b))
+        [((x86:u8x16 a) (x86:u8x16 b))
+            (x86:u8x16
+             (halide:interpret
+              (vec-add
+               (vec-add
+                (vec-shr
+                 a
+                 (x16 (uint8_t (bv 1 8))))
+                (vec-shr
+                 b
+                 (x16 (uint8_t (bv 1 8)))))
+               (vec-shr
+                (vec-add
+                 (vec-add
+                  (vec-bwand
+                   a
+                   (x16 (uint8_t (bv 1 8))))
+                  (vec-bwand
+                   b
+                   (x16 (uint8_t (bv 1 8)))))
+                 (x16 (uint8_t (bv 1 8))))
+                (x16 (uint8_t (bv 1 8)))))))]
+
+        [(_ _) (assert #f "infeasible in interpreting pavgb")])]
+
+    [(x86:pavgw a b)
+      (destruct* ((interpret a) (interpret b))
+        [((x86:u16x8 a) (x86:u16x8 b))
+            (x86:u16x8
+             (halide:interpret
+              (vec-add
+               (vec-add
+                (vec-shr
+                 a
+                 (x8 (uint16_t (bv 1 16))))
+                (vec-shr
+                 b
+                 (x8 (uint16_t (bv 1 16)))))
+               (vec-shr
+                (vec-add
+                 (vec-add
+                  (vec-bwand
+                   a
+                   (x8 (uint16_t (bv 1 16))))
+                  (vec-bwand
+                   b
+                   (x8 (uint16_t (bv 1 16)))))
+                 (x8 (uint16_t (bv 1 16))))
+                (x8 (uint16_t (bv 1 16)))))))]
+
+        [(_ _) (assert #f "infeasible in interpreting pavgw")])]
+
+    [(x86:pcmpeqb a b)
+      (destruct* ((interpret a) (interpret b))
+        [((x86:i8x16 a) (x86:i8x16 b))
+             (x86:i8x16
+              (halide:interpret
+               (vec-if
+               (vec-eq
+                a
+                b)
+               (x16 (int8_t (bv -1 8)))
+               (x16 (int8_t (bv 0 8))))))]
+        [((x86:u8x16 a) (x86:u8x16 b))
+             (x86:u8x16
+              (halide:interpret
+               (vec-if
+               (vec-eq
+                a
+                b)
+               (x16 (uint8_t (bv 255 8)))
+               (x16 (uint8_t (bv 0 8))))))]
+
+        [(_ _) (assert #f "infeasible in interpreting pcmpeqb")])]
+
+    [(x86:pcmpeqd a b)
+      (destruct* ((interpret a) (interpret b))
+        [((x86:i32x4 a) (x86:i32x4 b))
+             (x86:i32x4
+              (halide:interpret
+               (vec-if
+               (vec-eq
+                a
+                b)
+               (x4 (int32_t (bv -1 32)))
+               (x4 (int32_t (bv 0 32))))))]
+        [((x86:u32x4 a) (x86:u32x4 b))
+             (x86:u32x4
+              (halide:interpret
+               (vec-if
+               (vec-eq
+                a
+                b)
+               (x4 (uint32_t (bv 4294967295 32)))
+               (x4 (uint32_t (bv 0 32))))))]
+
+        [(_ _) (assert #f "infeasible in interpreting pcmpeqd")])]
+
+    [(x86:pcmpeqw a b)
+      (destruct* ((interpret a) (interpret b))
+        [((x86:i16x8 a) (x86:i16x8 b))
+             (x86:i16x8
+              (halide:interpret
+               (vec-if
+               (vec-eq
+                a
+                b)
+               (x8 (int16_t (bv -1 16)))
+               (x8 (int16_t (bv 0 16))))))]
+        [((x86:u16x8 a) (x86:u16x8 b))
+             (x86:u16x8
+              (halide:interpret
+               (vec-if
+               (vec-eq
+                a
+                b)
+               (x8 (uint16_t (bv 65535 16)))
+               (x8 (uint16_t (bv 0 16))))))]
+
+        [(_ _) (assert #f "infeasible in interpreting pcmpeqw")])]
+
+    [(x86:pcmpgtb a b)
+      (destruct* ((interpret a) (interpret b))
+        [((x86:i8x16 a) (x86:i8x16 b))
+             (x86:i8x16
+              (halide:interpret
+               (vec-if
+               (vec-gt
+                a
+                b)
+               (x16 (int8_t (bv -1 8)))
+               (x16 (int8_t (bv 0 8))))))]
+
+        [(_ _) (assert #f "infeasible in interpreting pcmpgtb")])]
+
+    [(x86:pcmpgtd a b)
+      (destruct* ((interpret a) (interpret b))
+        [((x86:i32x8 a) (x86:i32x8 b))
+             (x86:i32x8
+              (halide:interpret
+               (vec-if
+               (vec-gt
+                a
+                b)
+               (x8 (int32_t (bv -1 32)))
+               (x8 (int32_t (bv 0 32))))))]
+
+        [(_ _) (assert #f "infeasible in interpreting pcmpgtd")])]
+
+    [(x86:pcmpgtw a b)
+      (destruct* ((interpret a) (interpret b))
+        [((x86:i16x16 a) (x86:i16x16 b))
+             (x86:i16x16
+              (halide:interpret
+               (vec-if
+               (vec-gt
+                a
+                b)
+               (x16 (int16_t (bv -1 16)))
+               (x16 (int16_t (bv 0 16))))))]
+
+        [(_ _) (assert #f "infeasible in interpreting pcmpgtw")])]
+
+    [(x86:pmaddwd a b)
+      (destruct* ((interpret a) (interpret b))
+        [((x86:i16x8 a) (x86:i16x8 b))
+            (x86:i32x4
+             (halide:interpret
+              (vector_reduce 'add 2
+               (vec-mul
+                (int32x8
+                 a)
+                (int32x8
+                 b)))))]
+
+        [(_ _) (assert #f "infeasible in interpreting pmaddwd")])]
+
+    [(x86:pmaxsw a b)
+      (destruct* ((interpret a) (interpret b))
+        [((x86:i16x8 a) (x86:i16x8 b))
+            (x86:i16x8
+             (halide:interpret
+              (vec-max
+               a
+               b)))]
+
+        [(_ _) (assert #f "infeasible in interpreting pmaxsw")])]
+
+    [(x86:pmaxub a b)
+      (destruct* ((interpret a) (interpret b))
+        [((x86:u8x16 a) (x86:u8x16 b))
+            (x86:u8x16
+             (halide:interpret
+              (vec-max
+               a
+               b)))]
+
+        [(_ _) (assert #f "infeasible in interpreting pmaxub")])]
+
+    [(x86:pminsw a b)
+      (destruct* ((interpret a) (interpret b))
+        [((x86:i16x8 a) (x86:i16x8 b))
+            (x86:i16x8
+             (halide:interpret
+              (vec-min
+               a
+               b)))]
+
+        [(_ _) (assert #f "infeasible in interpreting pminsw")])]
+
+    [(x86:pminub a b)
+      (destruct* ((interpret a) (interpret b))
+        [((x86:u8x16 a) (x86:u8x16 b))
+            (x86:u8x16
+             (halide:interpret
+              (vec-min
+               a
+               b)))]
+
+        [(_ _) (assert #f "infeasible in interpreting pminub")])]
+
+    [(x86:pmulhuw a b)
+      (destruct* ((interpret a) (interpret b))
+        [((x86:u16x8 a) (x86:u16x8 b))
+            (x86:u16x8
+             (halide:interpret
+              (uint16x8
+               (vec-shr
+                (vec-mul
+                 (uint32x8
+                  a)
+                 (uint32x8
+                  b))
+                (x8 (uint32_t (bv 16 32)))))))]
+
+        [(_ _) (assert #f "infeasible in interpreting pmulhuw")])]
+
+    [(x86:pmulhw a b)
+      (destruct* ((interpret a) (interpret b))
+        [((x86:i16x8 a) (x86:i16x8 b))
+            (x86:i16x8
+             (halide:interpret
+              (int16x8
+               (vec-shr
+                (vec-mul
+                 (int32x8
+                  a)
+                 (int32x8
+                  b))
+                (x8 (uint32_t (bv 16 32)))))))]
+
+        [(_ _) (assert #f "infeasible in interpreting pmulhw")])]
+
+    [(x86:pmullw a b)
+      (destruct* ((interpret a) (interpret b))
+        [((x86:i16x8 a) (x86:i16x8 b))
+            (x86:i16x8
+             (halide:interpret
+              (vec-mul
+               a
+               b)))]
+
+        [(_ _) (assert #f "infeasible in interpreting pmullw")])]
+
+    [(x86:pmuludq a b)
+      (destruct* ((interpret a) (interpret b))
+        [((x86:u32x4 a) (x86:u32x4 b))
+            (x86:u64x2
+             (halide:interpret
+              (vec-mul
+               (uint64x2
+                (slice_vectors
+                 a 0 2 2))
+               (uint64x2
+                (slice_vectors
+                 b 0 2 2)))))]
+
+        [(_ _) (assert #f "infeasible in interpreting pmuludq")])]
+
+    [(x86:por a b)
+      (destruct* ((interpret a) (interpret b))
+        [((x86:i8x16 a) (x86:i8x16 b))
+            (x86:i8x16
+             (halide:interpret
+              (vec-bwor
+               a
+               b)))]
+        [((x86:i16x8 a) (x86:i16x8 b))
+            (x86:i16x8
+             (halide:interpret
+              (vec-bwor
+               a
+               b)))]
+        [((x86:i32x4 a) (x86:i32x4 b))
+            (x86:i32x4
+             (halide:interpret
+              (vec-bwor
+               a
+               b)))]
+        [((x86:i64x2 a) (x86:i64x2 b))
+            (x86:i64x2
+             (halide:interpret
+              (vec-bwor
+               a
+               b)))]
+        [((x86:u8x16 a) (x86:u8x16 b))
+            (x86:u8x16
+             (halide:interpret
+              (vec-bwor
+               a
+               b)))]
+        [((x86:u16x8 a) (x86:u16x8 b))
+            (x86:u16x8
+             (halide:interpret
+              (vec-bwor
+               a
+               b)))]
+        [((x86:u32x4 a) (x86:u32x4 b))
+            (x86:u32x4
+             (halide:interpret
+              (vec-bwor
+               a
+               b)))]
+        [((x86:u64x2 a) (x86:u64x2 b))
+            (x86:u64x2
+             (halide:interpret
+              (vec-bwor
+               a
+               b)))]
+
+        [(_ _) (assert #f "infeasible in interpreting por")])]
+
+    [(x86:psadbw a b)
+      (destruct* ((interpret a) (interpret b))
+        [((x86:u8x16 a) (x86:u8x16 b))
+            (x86:u64x2
+             (halide:interpret
+              (uint64x2
+               (vector_reduce 'add 8
+                (uint16x16
+                 (vec-absd
+                  a
+                  b))))))]
+
+        [(_ _) (assert #f "infeasible in interpreting psadbw")])]
+
+    [(x86:pshufd a imm8)
+      (destruct* ((interpret a) (interpret imm8))
+        [((x86:i32x4 a) (uint8_t imm8))
+            (x86:i32x4
+             (halide:interpret
+              (concat_vectors
+               (concat_vectors
+                (sca-if
+                 (slice_vectors
+                  (vec-reinterpret
+                   (uint8_t
+                    imm8)
+                   'uint1 8) 0 1 1)
+                 (sca-if
+                  (slice_vectors
+                   (vec-reinterpret
+                    (uint8_t
+                     imm8)
+                    'uint1 8) 1 1 1)
+                  (slice_vectors
+                   a 3 1 1)
+                  (slice_vectors
+                   a 1 1 1))
+                 (sca-if
+                  (slice_vectors
+                   (vec-reinterpret
+                    (uint8_t
+                     imm8)
+                    'uint1 8) 1 1 1)
+                  (slice_vectors
+                   a 2 1 1)
+                  (slice_vectors
+                   a 0 1 1)))
+                (sca-if
+                 (slice_vectors
+                  (vec-reinterpret
+                   (uint8_t
+                    imm8)
+                   'uint1 8) 2 1 1)
+                 (sca-if
+                  (slice_vectors
+                   (vec-reinterpret
+                    (uint8_t
+                     imm8)
+                    'uint1 8) 3 1 1)
+                  (slice_vectors
+                   a 3 1 1)
+                  (slice_vectors
+                   a 1 1 1))
+                 (sca-if
+                  (slice_vectors
+                   (vec-reinterpret
+                    (uint8_t
+                     imm8)
+                    'uint1 8) 3 1 1)
+                  (slice_vectors
+                   a 2 1 1)
+                  (slice_vectors
+                   a 0 1 1))))
+               (concat_vectors
+                (sca-if
+                 (slice_vectors
+                  (vec-reinterpret
+                   (uint8_t
+                    imm8)
+                   'uint1 8) 2 1 1)
+                 (sca-if
+                  (slice_vectors
+                   (vec-reinterpret
+                    (uint8_t
+                     imm8)
+                    'uint1 8) 3 1 1)
+                  (slice_vectors
+                   a 3 1 1)
+                  (slice_vectors
+                   a 1 1 1))
+                 (sca-if
+                  (slice_vectors
+                   (vec-reinterpret
+                    (uint8_t
+                     imm8)
+                    'uint1 8) 3 1 1)
+                  (slice_vectors
+                   a 2 1 1)
+                  (slice_vectors
+                   a 0 1 1)))
+                (sca-if
+                 (slice_vectors
+                  (vec-reinterpret
+                   (uint8_t
+                    imm8)
+                   'uint1 8) 4 1 1)
+                 (sca-if
+                  (slice_vectors
+                   (vec-reinterpret
+                    (uint8_t
+                     imm8)
+                    'uint1 8) 5 1 1)
+                  (slice_vectors
+                   a 3 1 1)
+                  (slice_vectors
+                   a 1 1 1))
+                 (sca-if
+                  (slice_vectors
+                   (vec-reinterpret
+                    (uint8_t
+                     imm8)
+                    'uint1 8) 5 1 1)
+                  (slice_vectors
+                   a 2 1 1)
+                  (slice_vectors
+                   a 0 1 1)))))))]
+        [((x86:u32x4 a) (uint8_t imm8))
+            (x86:u32x4
+             (halide:interpret
+              (concat_vectors
+               (concat_vectors
+                (sca-if
+                 (slice_vectors
+                  (vec-reinterpret
+                   (uint8_t
+                    imm8)
+                   'uint1 8) 0 1 1)
+                 (sca-if
+                  (slice_vectors
+                   (vec-reinterpret
+                    (uint8_t
+                     imm8)
+                    'uint1 8) 1 1 1)
+                  (slice_vectors
+                   a 3 1 1)
+                  (slice_vectors
+                   a 1 1 1))
+                 (sca-if
+                  (slice_vectors
+                   (vec-reinterpret
+                    (uint8_t
+                     imm8)
+                    'uint1 8) 1 1 1)
+                  (slice_vectors
+                   a 2 1 1)
+                  (slice_vectors
+                   a 0 1 1)))
+                (sca-if
+                 (slice_vectors
+                  (vec-reinterpret
+                   (uint8_t
+                    imm8)
+                   'uint1 8) 2 1 1)
+                 (sca-if
+                  (slice_vectors
+                   (vec-reinterpret
+                    (uint8_t
+                     imm8)
+                    'uint1 8) 3 1 1)
+                  (slice_vectors
+                   a 3 1 1)
+                  (slice_vectors
+                   a 1 1 1))
+                 (sca-if
+                  (slice_vectors
+                   (vec-reinterpret
+                    (uint8_t
+                     imm8)
+                    'uint1 8) 3 1 1)
+                  (slice_vectors
+                   a 2 1 1)
+                  (slice_vectors
+                   a 0 1 1))))
+               (concat_vectors
+                (sca-if
+                 (slice_vectors
+                  (vec-reinterpret
+                   (uint8_t
+                    imm8)
+                   'uint1 8) 2 1 1)
+                 (sca-if
+                  (slice_vectors
+                   (vec-reinterpret
+                    (uint8_t
+                     imm8)
+                    'uint1 8) 3 1 1)
+                  (slice_vectors
+                   a 3 1 1)
+                  (slice_vectors
+                   a 1 1 1))
+                 (sca-if
+                  (slice_vectors
+                   (vec-reinterpret
+                    (uint8_t
+                     imm8)
+                    'uint1 8) 3 1 1)
+                  (slice_vectors
+                   a 2 1 1)
+                  (slice_vectors
+                   a 0 1 1)))
+                (sca-if
+                 (slice_vectors
+                  (vec-reinterpret
+                   (uint8_t
+                    imm8)
+                   'uint1 8) 4 1 1)
+                 (sca-if
+                  (slice_vectors
+                   (vec-reinterpret
+                    (uint8_t
+                     imm8)
+                    'uint1 8) 5 1 1)
+                  (slice_vectors
+                   a 3 1 1)
+                  (slice_vectors
+                   a 1 1 1))
+                 (sca-if
+                  (slice_vectors
+                   (vec-reinterpret
+                    (uint8_t
+                     imm8)
+                    'uint1 8) 5 1 1)
+                  (slice_vectors
+                   a 2 1 1)
+                  (slice_vectors
+                   a 0 1 1)))))))]
+
+        [(_ _) (assert #f "infeasible in interpreting pshufd")])]
+
+    [(x86:pshufhw a imm8)
+      (destruct* ((interpret a) (interpret imm8))
+        [((x86:i16x8 a) (uint8_t imm8))
+            (x86:i16x8
+             (halide:interpret
+              (concat_vectors
+               (slice_vectors
+                a 0 1 4)
+               (concat_vectors
+                (concat_vectors
+                 (sca-if
+                  (sca-eq
+                   (sca-bwand
+                    (uint8_t
+                     imm8)
+                    (uint8_t (bv 3 8)))
+                   (uint8_t (bv 0 8)))
+                  (slice_vectors
+                   (slice_vectors
+                    a 1 1 4) 0 1 1)
+                  (sca-if
+                   (sca-eq
+                    (sca-bwand
+                     (uint8_t
+                      imm8)
+                     (uint8_t (bv 3 8)))
+                    (uint8_t (bv 1 8)))
+                   (slice_vectors
+                    (slice_vectors
+                     a 1 1 4) 1 1 1)
+                   (sca-if
+                    (sca-eq
+                     (sca-bwand
+                      (uint8_t
+                       imm8)
+                      (uint8_t (bv 3 8)))
+                     (uint8_t (bv 2 8)))
+                    (slice_vectors
+                     (slice_vectors
+                      a 1 1 4) 2 1 1)
+                    (slice_vectors
+                     (slice_vectors
+                      a 1 1 4) 3 1 1))))
+                 (sca-if
+                  (sca-eq
+                   (sca-bwand
+                    (sca-shr
+                     (uint8_t
+                      imm8)
+                     (uint8_t (bv 2 8)))
+                    (uint8_t (bv 3 8)))
+                   (uint8_t (bv 0 8)))
+                  (slice_vectors
+                   (slice_vectors
+                    a 1 1 4) 0 1 1)
+                  (sca-if
+                   (sca-eq
+                    (sca-bwand
+                     (sca-shr
+                      (uint8_t
+                       imm8)
+                      (uint8_t (bv 2 8)))
+                     (uint8_t (bv 3 8)))
+                    (uint8_t (bv 1 8)))
+                   (slice_vectors
+                    (slice_vectors
+                     a 1 1 4) 1 1 1)
+                   (sca-if
+                    (sca-eq
+                     (sca-bwand
+                      (sca-shr
+                       (uint8_t
+                        imm8)
+                       (uint8_t (bv 2 8)))
+                      (uint8_t (bv 3 8)))
+                     (uint8_t (bv 2 8)))
+                    (slice_vectors
+                     (slice_vectors
+                      a 1 1 4) 2 1 1)
+                    (slice_vectors
+                     (slice_vectors
+                      a 1 1 4) 3 1 1)))))
+                (concat_vectors
+                 (sca-if
+                  (sca-eq
+                   (sca-bwand
+                    (sca-shr
+                     (uint8_t
+                      imm8)
+                     (uint8_t (bv 2 8)))
+                    (uint8_t (bv 3 8)))
+                   (uint8_t (bv 0 8)))
+                  (slice_vectors
+                   (slice_vectors
+                    a 1 1 4) 0 1 1)
+                  (sca-if
+                   (sca-eq
+                    (sca-bwand
+                     (sca-shr
+                      (uint8_t
+                       imm8)
+                      (uint8_t (bv 2 8)))
+                     (uint8_t (bv 3 8)))
+                    (uint8_t (bv 1 8)))
+                   (slice_vectors
+                    (slice_vectors
+                     a 1 1 4) 1 1 1)
+                   (sca-if
+                    (sca-eq
+                     (sca-bwand
+                      (sca-shr
+                       (uint8_t
+                        imm8)
+                       (uint8_t (bv 2 8)))
+                      (uint8_t (bv 3 8)))
+                     (uint8_t (bv 2 8)))
+                    (slice_vectors
+                     (slice_vectors
+                      a 1 1 4) 2 1 1)
+                    (slice_vectors
+                     (slice_vectors
+                      a 1 1 4) 3 1 1))))
+                 (sca-if
+                  (sca-eq
+                   (sca-bwand
+                    (sca-shr
+                     (uint8_t
+                      imm8)
+                     (uint8_t (bv 4 8)))
+                    (uint8_t (bv 3 8)))
+                   (uint8_t (bv 0 8)))
+                  (slice_vectors
+                   (slice_vectors
+                    a 1 1 4) 0 1 1)
+                  (sca-if
+                   (sca-eq
+                    (sca-bwand
+                     (sca-shr
+                      (uint8_t
+                       imm8)
+                      (uint8_t (bv 4 8)))
+                     (uint8_t (bv 3 8)))
+                    (uint8_t (bv 1 8)))
+                   (slice_vectors
+                    (slice_vectors
+                     a 1 1 4) 1 1 1)
+                   (sca-if
+                    (sca-eq
+                     (sca-bwand
+                      (sca-shr
+                       (uint8_t
+                        imm8)
+                       (uint8_t (bv 4 8)))
+                      (uint8_t (bv 3 8)))
+                     (uint8_t (bv 2 8)))
+                    (slice_vectors
+                     (slice_vectors
+                      a 1 1 4) 2 1 1)
+                    (slice_vectors
+                     (slice_vectors
+                      a 1 1 4) 3 1 1)))))))))]
+        [((x86:u16x8 a) (uint8_t imm8))
+            (x86:u16x8
+             (halide:interpret
+              (concat_vectors
+               (slice_vectors
+                a 0 1 4)
+               (concat_vectors
+                (concat_vectors
+                 (sca-if
+                  (sca-eq
+                   (sca-bwand
+                    (uint8_t
+                     imm8)
+                    (uint8_t (bv 3 8)))
+                   (uint8_t (bv 0 8)))
+                  (slice_vectors
+                   (slice_vectors
+                    a 1 1 4) 0 1 1)
+                  (sca-if
+                   (sca-eq
+                    (sca-bwand
+                     (uint8_t
+                      imm8)
+                     (uint8_t (bv 3 8)))
+                    (uint8_t (bv 1 8)))
+                   (slice_vectors
+                    (slice_vectors
+                     a 1 1 4) 1 1 1)
+                   (sca-if
+                    (sca-eq
+                     (sca-bwand
+                      (uint8_t
+                       imm8)
+                      (uint8_t (bv 3 8)))
+                     (uint8_t (bv 2 8)))
+                    (slice_vectors
+                     (slice_vectors
+                      a 1 1 4) 2 1 1)
+                    (slice_vectors
+                     (slice_vectors
+                      a 1 1 4) 3 1 1))))
+                 (sca-if
+                  (sca-eq
+                   (sca-bwand
+                    (sca-shr
+                     (uint8_t
+                      imm8)
+                     (uint8_t (bv 2 8)))
+                    (uint8_t (bv 3 8)))
+                   (uint8_t (bv 0 8)))
+                  (slice_vectors
+                   (slice_vectors
+                    a 1 1 4) 0 1 1)
+                  (sca-if
+                   (sca-eq
+                    (sca-bwand
+                     (sca-shr
+                      (uint8_t
+                       imm8)
+                      (uint8_t (bv 2 8)))
+                     (uint8_t (bv 3 8)))
+                    (uint8_t (bv 1 8)))
+                   (slice_vectors
+                    (slice_vectors
+                     a 1 1 4) 1 1 1)
+                   (sca-if
+                    (sca-eq
+                     (sca-bwand
+                      (sca-shr
+                       (uint8_t
+                        imm8)
+                       (uint8_t (bv 2 8)))
+                      (uint8_t (bv 3 8)))
+                     (uint8_t (bv 2 8)))
+                    (slice_vectors
+                     (slice_vectors
+                      a 1 1 4) 2 1 1)
+                    (slice_vectors
+                     (slice_vectors
+                      a 1 1 4) 3 1 1)))))
+                (concat_vectors
+                 (sca-if
+                  (sca-eq
+                   (sca-bwand
+                    (sca-shr
+                     (uint8_t
+                      imm8)
+                     (uint8_t (bv 2 8)))
+                    (uint8_t (bv 3 8)))
+                   (uint8_t (bv 0 8)))
+                  (slice_vectors
+                   (slice_vectors
+                    a 1 1 4) 0 1 1)
+                  (sca-if
+                   (sca-eq
+                    (sca-bwand
+                     (sca-shr
+                      (uint8_t
+                       imm8)
+                      (uint8_t (bv 2 8)))
+                     (uint8_t (bv 3 8)))
+                    (uint8_t (bv 1 8)))
+                   (slice_vectors
+                    (slice_vectors
+                     a 1 1 4) 1 1 1)
+                   (sca-if
+                    (sca-eq
+                     (sca-bwand
+                      (sca-shr
+                       (uint8_t
+                        imm8)
+                       (uint8_t (bv 2 8)))
+                      (uint8_t (bv 3 8)))
+                     (uint8_t (bv 2 8)))
+                    (slice_vectors
+                     (slice_vectors
+                      a 1 1 4) 2 1 1)
+                    (slice_vectors
+                     (slice_vectors
+                      a 1 1 4) 3 1 1))))
+                 (sca-if
+                  (sca-eq
+                   (sca-bwand
+                    (sca-shr
+                     (uint8_t
+                      imm8)
+                     (uint8_t (bv 4 8)))
+                    (uint8_t (bv 3 8)))
+                   (uint8_t (bv 0 8)))
+                  (slice_vectors
+                   (slice_vectors
+                    a 1 1 4) 0 1 1)
+                  (sca-if
+                   (sca-eq
+                    (sca-bwand
+                     (sca-shr
+                      (uint8_t
+                       imm8)
+                      (uint8_t (bv 4 8)))
+                     (uint8_t (bv 3 8)))
+                    (uint8_t (bv 1 8)))
+                   (slice_vectors
+                    (slice_vectors
+                     a 1 1 4) 1 1 1)
+                   (sca-if
+                    (sca-eq
+                     (sca-bwand
+                      (sca-shr
+                       (uint8_t
+                        imm8)
+                       (uint8_t (bv 4 8)))
+                      (uint8_t (bv 3 8)))
+                     (uint8_t (bv 2 8)))
+                    (slice_vectors
+                     (slice_vectors
+                      a 1 1 4) 2 1 1)
+                    (slice_vectors
+                     (slice_vectors
+                      a 1 1 4) 3 1 1)))))))))]
+
+        [(_ _) (assert #f "infeasible in interpreting pshufhw")])]
+
+    [(x86:pshuflw a imm8)
+      (destruct* ((interpret a) (interpret imm8))
+        [((x86:i16x8 a) (uint8_t imm8))
+            (x86:i16x8
+             (halide:interpret
+              (concat_vectors
+               (concat_vectors
+                (concat_vectors
+                 (sca-if
+                  (sca-eq
+                   (sca-bwand
+                    (uint8_t
+                     imm8)
+                    (uint8_t (bv 3 8)))
+                   (uint8_t (bv 0 8)))
+                  (slice_vectors
+                   (slice_vectors
+                    a 0 1 4) 0 1 1)
+                  (sca-if
+                   (sca-eq
+                    (sca-bwand
+                     (uint8_t
+                      imm8)
+                     (uint8_t (bv 3 8)))
+                    (uint8_t (bv 1 8)))
+                   (slice_vectors
+                    (slice_vectors
+                     a 0 1 4) 1 1 1)
+                   (sca-if
+                    (sca-eq
+                     (sca-bwand
+                      (uint8_t
+                       imm8)
+                      (uint8_t (bv 3 8)))
+                     (uint8_t (bv 2 8)))
+                    (slice_vectors
+                     (slice_vectors
+                      a 0 1 4) 2 1 1)
+                    (slice_vectors
+                     (slice_vectors
+                      a 0 1 4) 3 1 1))))
+                 (sca-if
+                  (sca-eq
+                   (sca-bwand
+                    (sca-shr
+                     (uint8_t
+                      imm8)
+                     (uint8_t (bv 2 8)))
+                    (uint8_t (bv 3 8)))
+                   (uint8_t (bv 0 8)))
+                  (slice_vectors
+                   (slice_vectors
+                    a 0 1 4) 0 1 1)
+                  (sca-if
+                   (sca-eq
+                    (sca-bwand
+                     (sca-shr
+                      (uint8_t
+                       imm8)
+                      (uint8_t (bv 2 8)))
+                     (uint8_t (bv 3 8)))
+                    (uint8_t (bv 1 8)))
+                   (slice_vectors
+                    (slice_vectors
+                     a 0 1 4) 1 1 1)
+                   (sca-if
+                    (sca-eq
+                     (sca-bwand
+                      (sca-shr
+                       (uint8_t
+                        imm8)
+                       (uint8_t (bv 2 8)))
+                      (uint8_t (bv 3 8)))
+                     (uint8_t (bv 2 8)))
+                    (slice_vectors
+                     (slice_vectors
+                      a 0 1 4) 2 1 1)
+                    (slice_vectors
+                     (slice_vectors
+                      a 0 1 4) 3 1 1)))))
+                (concat_vectors
+                 (sca-if
+                  (sca-eq
+                   (sca-bwand
+                    (sca-shr
+                     (uint8_t
+                      imm8)
+                     (uint8_t (bv 2 8)))
+                    (uint8_t (bv 3 8)))
+                   (uint8_t (bv 0 8)))
+                  (slice_vectors
+                   (slice_vectors
+                    a 0 1 4) 0 1 1)
+                  (sca-if
+                   (sca-eq
+                    (sca-bwand
+                     (sca-shr
+                      (uint8_t
+                       imm8)
+                      (uint8_t (bv 2 8)))
+                     (uint8_t (bv 3 8)))
+                    (uint8_t (bv 1 8)))
+                   (slice_vectors
+                    (slice_vectors
+                     a 0 1 4) 1 1 1)
+                   (sca-if
+                    (sca-eq
+                     (sca-bwand
+                      (sca-shr
+                       (uint8_t
+                        imm8)
+                       (uint8_t (bv 2 8)))
+                      (uint8_t (bv 3 8)))
+                     (uint8_t (bv 2 8)))
+                    (slice_vectors
+                     (slice_vectors
+                      a 0 1 4) 2 1 1)
+                    (slice_vectors
+                     (slice_vectors
+                      a 0 1 4) 3 1 1))))
+                 (sca-if
+                  (sca-eq
+                   (sca-bwand
+                    (sca-shr
+                     (uint8_t
+                      imm8)
+                     (uint8_t (bv 4 8)))
+                    (uint8_t (bv 3 8)))
+                   (uint8_t (bv 0 8)))
+                  (slice_vectors
+                   (slice_vectors
+                    a 0 1 4) 0 1 1)
+                  (sca-if
+                   (sca-eq
+                    (sca-bwand
+                     (sca-shr
+                      (uint8_t
+                       imm8)
+                      (uint8_t (bv 4 8)))
+                     (uint8_t (bv 3 8)))
+                    (uint8_t (bv 1 8)))
+                   (slice_vectors
+                    (slice_vectors
+                     a 0 1 4) 1 1 1)
+                   (sca-if
+                    (sca-eq
+                     (sca-bwand
+                      (sca-shr
+                       (uint8_t
+                        imm8)
+                       (uint8_t (bv 4 8)))
+                      (uint8_t (bv 3 8)))
+                     (uint8_t (bv 2 8)))
+                    (slice_vectors
+                     (slice_vectors
+                      a 0 1 4) 2 1 1)
+                    (slice_vectors
+                     (slice_vectors
+                      a 0 1 4) 3 1 1))))))
+               (slice_vectors
+                a 1 1 4))))]
+        [((x86:u16x8 a) (uint8_t imm8))
+            (x86:u16x8
+             (halide:interpret
+              (concat_vectors
+               (concat_vectors
+                (concat_vectors
+                 (sca-if
+                  (sca-eq
+                   (sca-bwand
+                    (uint8_t
+                     imm8)
+                    (uint8_t (bv 3 8)))
+                   (uint8_t (bv 0 8)))
+                  (slice_vectors
+                   (slice_vectors
+                    a 0 1 4) 0 1 1)
+                  (sca-if
+                   (sca-eq
+                    (sca-bwand
+                     (uint8_t
+                      imm8)
+                     (uint8_t (bv 3 8)))
+                    (uint8_t (bv 1 8)))
+                   (slice_vectors
+                    (slice_vectors
+                     a 0 1 4) 1 1 1)
+                   (sca-if
+                    (sca-eq
+                     (sca-bwand
+                      (uint8_t
+                       imm8)
+                      (uint8_t (bv 3 8)))
+                     (uint8_t (bv 2 8)))
+                    (slice_vectors
+                     (slice_vectors
+                      a 0 1 4) 2 1 1)
+                    (slice_vectors
+                     (slice_vectors
+                      a 0 1 4) 3 1 1))))
+                 (sca-if
+                  (sca-eq
+                   (sca-bwand
+                    (sca-shr
+                     (uint8_t
+                      imm8)
+                     (uint8_t (bv 2 8)))
+                    (uint8_t (bv 3 8)))
+                   (uint8_t (bv 0 8)))
+                  (slice_vectors
+                   (slice_vectors
+                    a 0 1 4) 0 1 1)
+                  (sca-if
+                   (sca-eq
+                    (sca-bwand
+                     (sca-shr
+                      (uint8_t
+                       imm8)
+                      (uint8_t (bv 2 8)))
+                     (uint8_t (bv 3 8)))
+                    (uint8_t (bv 1 8)))
+                   (slice_vectors
+                    (slice_vectors
+                     a 0 1 4) 1 1 1)
+                   (sca-if
+                    (sca-eq
+                     (sca-bwand
+                      (sca-shr
+                       (uint8_t
+                        imm8)
+                       (uint8_t (bv 2 8)))
+                      (uint8_t (bv 3 8)))
+                     (uint8_t (bv 2 8)))
+                    (slice_vectors
+                     (slice_vectors
+                      a 0 1 4) 2 1 1)
+                    (slice_vectors
+                     (slice_vectors
+                      a 0 1 4) 3 1 1)))))
+                (concat_vectors
+                 (sca-if
+                  (sca-eq
+                   (sca-bwand
+                    (sca-shr
+                     (uint8_t
+                      imm8)
+                     (uint8_t (bv 2 8)))
+                    (uint8_t (bv 3 8)))
+                   (uint8_t (bv 0 8)))
+                  (slice_vectors
+                   (slice_vectors
+                    a 0 1 4) 0 1 1)
+                  (sca-if
+                   (sca-eq
+                    (sca-bwand
+                     (sca-shr
+                      (uint8_t
+                       imm8)
+                      (uint8_t (bv 2 8)))
+                     (uint8_t (bv 3 8)))
+                    (uint8_t (bv 1 8)))
+                   (slice_vectors
+                    (slice_vectors
+                     a 0 1 4) 1 1 1)
+                   (sca-if
+                    (sca-eq
+                     (sca-bwand
+                      (sca-shr
+                       (uint8_t
+                        imm8)
+                       (uint8_t (bv 2 8)))
+                      (uint8_t (bv 3 8)))
+                     (uint8_t (bv 2 8)))
+                    (slice_vectors
+                     (slice_vectors
+                      a 0 1 4) 2 1 1)
+                    (slice_vectors
+                     (slice_vectors
+                      a 0 1 4) 3 1 1))))
+                 (sca-if
+                  (sca-eq
+                   (sca-bwand
+                    (sca-shr
+                     (uint8_t
+                      imm8)
+                     (uint8_t (bv 4 8)))
+                    (uint8_t (bv 3 8)))
+                   (uint8_t (bv 0 8)))
+                  (slice_vectors
+                   (slice_vectors
+                    a 0 1 4) 0 1 1)
+                  (sca-if
+                   (sca-eq
+                    (sca-bwand
+                     (sca-shr
+                      (uint8_t
+                       imm8)
+                      (uint8_t (bv 4 8)))
+                     (uint8_t (bv 3 8)))
+                    (uint8_t (bv 1 8)))
+                   (slice_vectors
+                    (slice_vectors
+                     a 0 1 4) 1 1 1)
+                   (sca-if
+                    (sca-eq
+                     (sca-bwand
+                      (sca-shr
+                       (uint8_t
+                        imm8)
+                       (uint8_t (bv 4 8)))
+                      (uint8_t (bv 3 8)))
+                     (uint8_t (bv 2 8)))
+                    (slice_vectors
+                     (slice_vectors
+                      a 0 1 4) 2 1 1)
+                    (slice_vectors
+                     (slice_vectors
+                      a 0 1 4) 3 1 1))))))
+               (slice_vectors
+                a 1 1 4))))]
+
+        [(_ _) (assert #f "infeasible in interpreting pshuflw")])]
+
+    [(x86:pslld a imm8)
+      (destruct* ((interpret a) (interpret imm8))
+        [((x86:i32x4 a) (uint8_t imm8))
+            (x86:i32x4
+             (halide:interpret
+              (vec-shl
+               a
+               (x4 (uint32x1 (uint8_t
+ imm8))))))]
+        [((x86:u32x4 a) (uint8_t imm8))
+            (x86:u32x4
+             (halide:interpret
+              (vec-shl
+               a
+               (x4 (uint32x1 (uint8_t
+ imm8))))))]
+
+        [(_ _) (assert #f "infeasible in interpreting pslld")])]
+
+    [(x86:pslldq a imm8)
+      (destruct* ((interpret a) (interpret imm8))
+        [((x86:i8x16 a) (uint8_t imm8))
+                            (x86:i8x16
+                             (halide:interpret
+              (vec-reinterpret
+                               (vec-if
+                (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 15 8))))
+                (concat_vectors
+                 (x15 (uint8_t (bv 0 8)))
+                 (slice_vectors
+                  (vec-reinterpret
+                   a
+                   'uint8 16) 0 1 1))
+                               (vec-if
+                 (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 14 8))))
+                 (concat_vectors
+                  (x14 (uint8_t (bv 0 8)))
+                  (slice_vectors
+                   (vec-reinterpret
+                    a
+                    'uint8 16) 0 1 2))
+                               (vec-if
+                  (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 13 8))))
+                  (concat_vectors
+                   (x13 (uint8_t (bv 0 8)))
+                   (slice_vectors
+                    (vec-reinterpret
+                     a
+                     'uint8 16) 0 1 3))
+                               (vec-if
+                   (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 12 8))))
+                   (concat_vectors
+                    (x12 (uint8_t (bv 0 8)))
+                    (slice_vectors
+                     (vec-reinterpret
+                      a
+                      'uint8 16) 0 1 4))
+                               (vec-if
+                    (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 11 8))))
+                    (concat_vectors
+                     (x11 (uint8_t (bv 0 8)))
+                     (slice_vectors
+                      (vec-reinterpret
+                       a
+                       'uint8 16) 0 1 5))
+                               (vec-if
+                     (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 10 8))))
+                     (concat_vectors
+                      (x10 (uint8_t (bv 0 8)))
+                      (slice_vectors
+                       (vec-reinterpret
+                        a
+                        'uint8 16) 0 1 6))
+                               (vec-if
+                      (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 9 8))))
+                      (concat_vectors
+                       (x9 (uint8_t (bv 0 8)))
+                       (slice_vectors
+                        (vec-reinterpret
+                         a
+                         'uint8 16) 0 1 7))
+                               (vec-if
+                       (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 8 8))))
+                       (concat_vectors
+                        (x8 (uint8_t (bv 0 8)))
+                        (slice_vectors
+                         (vec-reinterpret
+                          a
+                          'uint8 16) 0 1 8))
+                               (vec-if
+                        (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 7 8))))
+                        (concat_vectors
+                         (x7 (uint8_t (bv 0 8)))
+                         (slice_vectors
+                          (vec-reinterpret
+                           a
+                           'uint8 16) 0 1 9))
+                               (vec-if
+                         (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 6 8))))
+                         (concat_vectors
+                          (x6 (uint8_t (bv 0 8)))
+                          (slice_vectors
+                           (vec-reinterpret
+                            a
+                            'uint8 16) 0 1 10))
+                               (vec-if
+                          (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 5 8))))
+                          (concat_vectors
+                           (x5 (uint8_t (bv 0 8)))
+                           (slice_vectors
+                            (vec-reinterpret
+                             a
+                             'uint8 16) 0 1 11))
+                               (vec-if
+                           (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 4 8))))
+                           (concat_vectors
+                            (x4 (uint8_t (bv 0 8)))
+                            (slice_vectors
+                             (vec-reinterpret
+                              a
+                              'uint8 16) 0 1 12))
+                               (vec-if
+                            (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 3 8))))
+                            (concat_vectors
+                             (x3 (uint8_t (bv 0 8)))
+                             (slice_vectors
+                              (vec-reinterpret
+                               a
+                               'uint8 16) 0 1 13))
+                               (vec-if
+                             (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 2 8))))
+                             (concat_vectors
+                              (x2 (uint8_t (bv 0 8)))
+                              (slice_vectors
+                               (vec-reinterpret
+                                a
+                                'uint8 16) 0 1 14))
+                               (vec-if
+                              (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 1 8))))
+                              (concat_vectors
+                               (uint8_t (bv 0 8))
+                               (slice_vectors
+                                (vec-reinterpret
+                                 a
+                                 'uint8 16) 0 1 15))
+                               (vec-if
+                               (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 0 8))))
+                               (vec-reinterpret
+                                a
+                                'uint8 16)
+                               (x16 (uint8_t (bv 0 8)))))))))))))))))))
+                               'int8 16)))]
+        [((x86:u8x16 a) (uint8_t imm8))
+                            (x86:u8x16
+                             (halide:interpret
+              (vec-reinterpret
+                               (vec-if
+                (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 15 8))))
+                (concat_vectors
+                 (x15 (uint8_t (bv 0 8)))
+                 (slice_vectors
+                  (vec-reinterpret
+                   a
+                   'uint8 16) 0 1 1))
+                               (vec-if
+                 (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 14 8))))
+                 (concat_vectors
+                  (x14 (uint8_t (bv 0 8)))
+                  (slice_vectors
+                   (vec-reinterpret
+                    a
+                    'uint8 16) 0 1 2))
+                               (vec-if
+                  (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 13 8))))
+                  (concat_vectors
+                   (x13 (uint8_t (bv 0 8)))
+                   (slice_vectors
+                    (vec-reinterpret
+                     a
+                     'uint8 16) 0 1 3))
+                               (vec-if
+                   (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 12 8))))
+                   (concat_vectors
+                    (x12 (uint8_t (bv 0 8)))
+                    (slice_vectors
+                     (vec-reinterpret
+                      a
+                      'uint8 16) 0 1 4))
+                               (vec-if
+                    (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 11 8))))
+                    (concat_vectors
+                     (x11 (uint8_t (bv 0 8)))
+                     (slice_vectors
+                      (vec-reinterpret
+                       a
+                       'uint8 16) 0 1 5))
+                               (vec-if
+                     (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 10 8))))
+                     (concat_vectors
+                      (x10 (uint8_t (bv 0 8)))
+                      (slice_vectors
+                       (vec-reinterpret
+                        a
+                        'uint8 16) 0 1 6))
+                               (vec-if
+                      (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 9 8))))
+                      (concat_vectors
+                       (x9 (uint8_t (bv 0 8)))
+                       (slice_vectors
+                        (vec-reinterpret
+                         a
+                         'uint8 16) 0 1 7))
+                               (vec-if
+                       (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 8 8))))
+                       (concat_vectors
+                        (x8 (uint8_t (bv 0 8)))
+                        (slice_vectors
+                         (vec-reinterpret
+                          a
+                          'uint8 16) 0 1 8))
+                               (vec-if
+                        (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 7 8))))
+                        (concat_vectors
+                         (x7 (uint8_t (bv 0 8)))
+                         (slice_vectors
+                          (vec-reinterpret
+                           a
+                           'uint8 16) 0 1 9))
+                               (vec-if
+                         (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 6 8))))
+                         (concat_vectors
+                          (x6 (uint8_t (bv 0 8)))
+                          (slice_vectors
+                           (vec-reinterpret
+                            a
+                            'uint8 16) 0 1 10))
+                               (vec-if
+                          (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 5 8))))
+                          (concat_vectors
+                           (x5 (uint8_t (bv 0 8)))
+                           (slice_vectors
+                            (vec-reinterpret
+                             a
+                             'uint8 16) 0 1 11))
+                               (vec-if
+                           (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 4 8))))
+                           (concat_vectors
+                            (x4 (uint8_t (bv 0 8)))
+                            (slice_vectors
+                             (vec-reinterpret
+                              a
+                              'uint8 16) 0 1 12))
+                               (vec-if
+                            (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 3 8))))
+                            (concat_vectors
+                             (x3 (uint8_t (bv 0 8)))
+                             (slice_vectors
+                              (vec-reinterpret
+                               a
+                               'uint8 16) 0 1 13))
+                               (vec-if
+                             (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 2 8))))
+                             (concat_vectors
+                              (x2 (uint8_t (bv 0 8)))
+                              (slice_vectors
+                               (vec-reinterpret
+                                a
+                                'uint8 16) 0 1 14))
+                               (vec-if
+                              (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 1 8))))
+                              (concat_vectors
+                               (uint8_t (bv 0 8))
+                               (slice_vectors
+                                (vec-reinterpret
+                                 a
+                                 'uint8 16) 0 1 15))
+                               (vec-if
+                               (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 0 8))))
+                               (vec-reinterpret
+                                a
+                                'uint8 16)
+                               (x16 (uint8_t (bv 0 8)))))))))))))))))))
+                               'uint8 16)))]
+        [((x86:i16x8 a) (uint8_t imm8))
+                            (x86:i16x8
+                             (halide:interpret
+              (vec-reinterpret
+                               (vec-if
+                (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 15 8))))
+                (concat_vectors
+                 (x15 (uint8_t (bv 0 8)))
+                 (slice_vectors
+                  (vec-reinterpret
+                   a
+                   'uint8 16) 0 1 1))
+                               (vec-if
+                 (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 14 8))))
+                 (concat_vectors
+                  (x14 (uint8_t (bv 0 8)))
+                  (slice_vectors
+                   (vec-reinterpret
+                    a
+                    'uint8 16) 0 1 2))
+                               (vec-if
+                  (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 13 8))))
+                  (concat_vectors
+                   (x13 (uint8_t (bv 0 8)))
+                   (slice_vectors
+                    (vec-reinterpret
+                     a
+                     'uint8 16) 0 1 3))
+                               (vec-if
+                   (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 12 8))))
+                   (concat_vectors
+                    (x12 (uint8_t (bv 0 8)))
+                    (slice_vectors
+                     (vec-reinterpret
+                      a
+                      'uint8 16) 0 1 4))
+                               (vec-if
+                    (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 11 8))))
+                    (concat_vectors
+                     (x11 (uint8_t (bv 0 8)))
+                     (slice_vectors
+                      (vec-reinterpret
+                       a
+                       'uint8 16) 0 1 5))
+                               (vec-if
+                     (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 10 8))))
+                     (concat_vectors
+                      (x10 (uint8_t (bv 0 8)))
+                      (slice_vectors
+                       (vec-reinterpret
+                        a
+                        'uint8 16) 0 1 6))
+                               (vec-if
+                      (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 9 8))))
+                      (concat_vectors
+                       (x9 (uint8_t (bv 0 8)))
+                       (slice_vectors
+                        (vec-reinterpret
+                         a
+                         'uint8 16) 0 1 7))
+                               (vec-if
+                       (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 8 8))))
+                       (concat_vectors
+                        (x8 (uint8_t (bv 0 8)))
+                        (slice_vectors
+                         (vec-reinterpret
+                          a
+                          'uint8 16) 0 1 8))
+                               (vec-if
+                        (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 7 8))))
+                        (concat_vectors
+                         (x7 (uint8_t (bv 0 8)))
+                         (slice_vectors
+                          (vec-reinterpret
+                           a
+                           'uint8 16) 0 1 9))
+                               (vec-if
+                         (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 6 8))))
+                         (concat_vectors
+                          (x6 (uint8_t (bv 0 8)))
+                          (slice_vectors
+                           (vec-reinterpret
+                            a
+                            'uint8 16) 0 1 10))
+                               (vec-if
+                          (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 5 8))))
+                          (concat_vectors
+                           (x5 (uint8_t (bv 0 8)))
+                           (slice_vectors
+                            (vec-reinterpret
+                             a
+                             'uint8 16) 0 1 11))
+                               (vec-if
+                           (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 4 8))))
+                           (concat_vectors
+                            (x4 (uint8_t (bv 0 8)))
+                            (slice_vectors
+                             (vec-reinterpret
+                              a
+                              'uint8 16) 0 1 12))
+                               (vec-if
+                            (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 3 8))))
+                            (concat_vectors
+                             (x3 (uint8_t (bv 0 8)))
+                             (slice_vectors
+                              (vec-reinterpret
+                               a
+                               'uint8 16) 0 1 13))
+                               (vec-if
+                             (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 2 8))))
+                             (concat_vectors
+                              (x2 (uint8_t (bv 0 8)))
+                              (slice_vectors
+                               (vec-reinterpret
+                                a
+                                'uint8 16) 0 1 14))
+                               (vec-if
+                              (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 1 8))))
+                              (concat_vectors
+                               (uint8_t (bv 0 8))
+                               (slice_vectors
+                                (vec-reinterpret
+                                 a
+                                 'uint8 16) 0 1 15))
+                               (vec-if
+                               (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 0 8))))
+                               (vec-reinterpret
+                                a
+                                'uint8 16)
+                               (x16 (uint8_t (bv 0 8)))))))))))))))))))
+                               'int16 8)))]
+        [((x86:u16x8 a) (uint8_t imm8))
+                            (x86:u16x8
+                             (halide:interpret
+              (vec-reinterpret
+                               (vec-if
+                (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 15 8))))
+                (concat_vectors
+                 (x15 (uint8_t (bv 0 8)))
+                 (slice_vectors
+                  (vec-reinterpret
+                   a
+                   'uint8 16) 0 1 1))
+                               (vec-if
+                 (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 14 8))))
+                 (concat_vectors
+                  (x14 (uint8_t (bv 0 8)))
+                  (slice_vectors
+                   (vec-reinterpret
+                    a
+                    'uint8 16) 0 1 2))
+                               (vec-if
+                  (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 13 8))))
+                  (concat_vectors
+                   (x13 (uint8_t (bv 0 8)))
+                   (slice_vectors
+                    (vec-reinterpret
+                     a
+                     'uint8 16) 0 1 3))
+                               (vec-if
+                   (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 12 8))))
+                   (concat_vectors
+                    (x12 (uint8_t (bv 0 8)))
+                    (slice_vectors
+                     (vec-reinterpret
+                      a
+                      'uint8 16) 0 1 4))
+                               (vec-if
+                    (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 11 8))))
+                    (concat_vectors
+                     (x11 (uint8_t (bv 0 8)))
+                     (slice_vectors
+                      (vec-reinterpret
+                       a
+                       'uint8 16) 0 1 5))
+                               (vec-if
+                     (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 10 8))))
+                     (concat_vectors
+                      (x10 (uint8_t (bv 0 8)))
+                      (slice_vectors
+                       (vec-reinterpret
+                        a
+                        'uint8 16) 0 1 6))
+                               (vec-if
+                      (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 9 8))))
+                      (concat_vectors
+                       (x9 (uint8_t (bv 0 8)))
+                       (slice_vectors
+                        (vec-reinterpret
+                         a
+                         'uint8 16) 0 1 7))
+                               (vec-if
+                       (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 8 8))))
+                       (concat_vectors
+                        (x8 (uint8_t (bv 0 8)))
+                        (slice_vectors
+                         (vec-reinterpret
+                          a
+                          'uint8 16) 0 1 8))
+                               (vec-if
+                        (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 7 8))))
+                        (concat_vectors
+                         (x7 (uint8_t (bv 0 8)))
+                         (slice_vectors
+                          (vec-reinterpret
+                           a
+                           'uint8 16) 0 1 9))
+                               (vec-if
+                         (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 6 8))))
+                         (concat_vectors
+                          (x6 (uint8_t (bv 0 8)))
+                          (slice_vectors
+                           (vec-reinterpret
+                            a
+                            'uint8 16) 0 1 10))
+                               (vec-if
+                          (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 5 8))))
+                          (concat_vectors
+                           (x5 (uint8_t (bv 0 8)))
+                           (slice_vectors
+                            (vec-reinterpret
+                             a
+                             'uint8 16) 0 1 11))
+                               (vec-if
+                           (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 4 8))))
+                           (concat_vectors
+                            (x4 (uint8_t (bv 0 8)))
+                            (slice_vectors
+                             (vec-reinterpret
+                              a
+                              'uint8 16) 0 1 12))
+                               (vec-if
+                            (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 3 8))))
+                            (concat_vectors
+                             (x3 (uint8_t (bv 0 8)))
+                             (slice_vectors
+                              (vec-reinterpret
+                               a
+                               'uint8 16) 0 1 13))
+                               (vec-if
+                             (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 2 8))))
+                             (concat_vectors
+                              (x2 (uint8_t (bv 0 8)))
+                              (slice_vectors
+                               (vec-reinterpret
+                                a
+                                'uint8 16) 0 1 14))
+                               (vec-if
+                              (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 1 8))))
+                              (concat_vectors
+                               (uint8_t (bv 0 8))
+                               (slice_vectors
+                                (vec-reinterpret
+                                 a
+                                 'uint8 16) 0 1 15))
+                               (vec-if
+                               (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 0 8))))
+                               (vec-reinterpret
+                                a
+                                'uint8 16)
+                               (x16 (uint8_t (bv 0 8)))))))))))))))))))
+                               'uint16 8)))]
+        [((x86:i32x4 a) (uint8_t imm8))
+                            (x86:i32x4
+                             (halide:interpret
+              (vec-reinterpret
+                               (vec-if
+                (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 15 8))))
+                (concat_vectors
+                 (x15 (uint8_t (bv 0 8)))
+                 (slice_vectors
+                  (vec-reinterpret
+                   a
+                   'uint8 16) 0 1 1))
+                               (vec-if
+                 (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 14 8))))
+                 (concat_vectors
+                  (x14 (uint8_t (bv 0 8)))
+                  (slice_vectors
+                   (vec-reinterpret
+                    a
+                    'uint8 16) 0 1 2))
+                               (vec-if
+                  (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 13 8))))
+                  (concat_vectors
+                   (x13 (uint8_t (bv 0 8)))
+                   (slice_vectors
+                    (vec-reinterpret
+                     a
+                     'uint8 16) 0 1 3))
+                               (vec-if
+                   (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 12 8))))
+                   (concat_vectors
+                    (x12 (uint8_t (bv 0 8)))
+                    (slice_vectors
+                     (vec-reinterpret
+                      a
+                      'uint8 16) 0 1 4))
+                               (vec-if
+                    (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 11 8))))
+                    (concat_vectors
+                     (x11 (uint8_t (bv 0 8)))
+                     (slice_vectors
+                      (vec-reinterpret
+                       a
+                       'uint8 16) 0 1 5))
+                               (vec-if
+                     (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 10 8))))
+                     (concat_vectors
+                      (x10 (uint8_t (bv 0 8)))
+                      (slice_vectors
+                       (vec-reinterpret
+                        a
+                        'uint8 16) 0 1 6))
+                               (vec-if
+                      (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 9 8))))
+                      (concat_vectors
+                       (x9 (uint8_t (bv 0 8)))
+                       (slice_vectors
+                        (vec-reinterpret
+                         a
+                         'uint8 16) 0 1 7))
+                               (vec-if
+                       (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 8 8))))
+                       (concat_vectors
+                        (x8 (uint8_t (bv 0 8)))
+                        (slice_vectors
+                         (vec-reinterpret
+                          a
+                          'uint8 16) 0 1 8))
+                               (vec-if
+                        (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 7 8))))
+                        (concat_vectors
+                         (x7 (uint8_t (bv 0 8)))
+                         (slice_vectors
+                          (vec-reinterpret
+                           a
+                           'uint8 16) 0 1 9))
+                               (vec-if
+                         (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 6 8))))
+                         (concat_vectors
+                          (x6 (uint8_t (bv 0 8)))
+                          (slice_vectors
+                           (vec-reinterpret
+                            a
+                            'uint8 16) 0 1 10))
+                               (vec-if
+                          (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 5 8))))
+                          (concat_vectors
+                           (x5 (uint8_t (bv 0 8)))
+                           (slice_vectors
+                            (vec-reinterpret
+                             a
+                             'uint8 16) 0 1 11))
+                               (vec-if
+                           (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 4 8))))
+                           (concat_vectors
+                            (x4 (uint8_t (bv 0 8)))
+                            (slice_vectors
+                             (vec-reinterpret
+                              a
+                              'uint8 16) 0 1 12))
+                               (vec-if
+                            (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 3 8))))
+                            (concat_vectors
+                             (x3 (uint8_t (bv 0 8)))
+                             (slice_vectors
+                              (vec-reinterpret
+                               a
+                               'uint8 16) 0 1 13))
+                               (vec-if
+                             (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 2 8))))
+                             (concat_vectors
+                              (x2 (uint8_t (bv 0 8)))
+                              (slice_vectors
+                               (vec-reinterpret
+                                a
+                                'uint8 16) 0 1 14))
+                               (vec-if
+                              (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 1 8))))
+                              (concat_vectors
+                               (uint8_t (bv 0 8))
+                               (slice_vectors
+                                (vec-reinterpret
+                                 a
+                                 'uint8 16) 0 1 15))
+                               (vec-if
+                               (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 0 8))))
+                               (vec-reinterpret
+                                a
+                                'uint8 16)
+                               (x16 (uint8_t (bv 0 8)))))))))))))))))))
+                               'int32 4)))]
+        [((x86:u32x4 a) (uint8_t imm8))
+                            (x86:u32x4
+                             (halide:interpret
+              (vec-reinterpret
+                               (vec-if
+                (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 15 8))))
+                (concat_vectors
+                 (x15 (uint8_t (bv 0 8)))
+                 (slice_vectors
+                  (vec-reinterpret
+                   a
+                   'uint8 16) 0 1 1))
+                               (vec-if
+                 (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 14 8))))
+                 (concat_vectors
+                  (x14 (uint8_t (bv 0 8)))
+                  (slice_vectors
+                   (vec-reinterpret
+                    a
+                    'uint8 16) 0 1 2))
+                               (vec-if
+                  (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 13 8))))
+                  (concat_vectors
+                   (x13 (uint8_t (bv 0 8)))
+                   (slice_vectors
+                    (vec-reinterpret
+                     a
+                     'uint8 16) 0 1 3))
+                               (vec-if
+                   (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 12 8))))
+                   (concat_vectors
+                    (x12 (uint8_t (bv 0 8)))
+                    (slice_vectors
+                     (vec-reinterpret
+                      a
+                      'uint8 16) 0 1 4))
+                               (vec-if
+                    (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 11 8))))
+                    (concat_vectors
+                     (x11 (uint8_t (bv 0 8)))
+                     (slice_vectors
+                      (vec-reinterpret
+                       a
+                       'uint8 16) 0 1 5))
+                               (vec-if
+                     (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 10 8))))
+                     (concat_vectors
+                      (x10 (uint8_t (bv 0 8)))
+                      (slice_vectors
+                       (vec-reinterpret
+                        a
+                        'uint8 16) 0 1 6))
+                               (vec-if
+                      (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 9 8))))
+                      (concat_vectors
+                       (x9 (uint8_t (bv 0 8)))
+                       (slice_vectors
+                        (vec-reinterpret
+                         a
+                         'uint8 16) 0 1 7))
+                               (vec-if
+                       (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 8 8))))
+                       (concat_vectors
+                        (x8 (uint8_t (bv 0 8)))
+                        (slice_vectors
+                         (vec-reinterpret
+                          a
+                          'uint8 16) 0 1 8))
+                               (vec-if
+                        (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 7 8))))
+                        (concat_vectors
+                         (x7 (uint8_t (bv 0 8)))
+                         (slice_vectors
+                          (vec-reinterpret
+                           a
+                           'uint8 16) 0 1 9))
+                               (vec-if
+                         (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 6 8))))
+                         (concat_vectors
+                          (x6 (uint8_t (bv 0 8)))
+                          (slice_vectors
+                           (vec-reinterpret
+                            a
+                            'uint8 16) 0 1 10))
+                               (vec-if
+                          (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 5 8))))
+                          (concat_vectors
+                           (x5 (uint8_t (bv 0 8)))
+                           (slice_vectors
+                            (vec-reinterpret
+                             a
+                             'uint8 16) 0 1 11))
+                               (vec-if
+                           (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 4 8))))
+                           (concat_vectors
+                            (x4 (uint8_t (bv 0 8)))
+                            (slice_vectors
+                             (vec-reinterpret
+                              a
+                              'uint8 16) 0 1 12))
+                               (vec-if
+                            (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 3 8))))
+                            (concat_vectors
+                             (x3 (uint8_t (bv 0 8)))
+                             (slice_vectors
+                              (vec-reinterpret
+                               a
+                               'uint8 16) 0 1 13))
+                               (vec-if
+                             (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 2 8))))
+                             (concat_vectors
+                              (x2 (uint8_t (bv 0 8)))
+                              (slice_vectors
+                               (vec-reinterpret
+                                a
+                                'uint8 16) 0 1 14))
+                               (vec-if
+                              (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 1 8))))
+                              (concat_vectors
+                               (uint8_t (bv 0 8))
+                               (slice_vectors
+                                (vec-reinterpret
+                                 a
+                                 'uint8 16) 0 1 15))
+                               (vec-if
+                               (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 0 8))))
+                               (vec-reinterpret
+                                a
+                                'uint8 16)
+                               (x16 (uint8_t (bv 0 8)))))))))))))))))))
+                               'uint32 4)))]
+        [((x86:i64x2 a) (uint8_t imm8))
+                            (x86:i64x2
+                             (halide:interpret
+              (vec-reinterpret
+                               (vec-if
+                (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 15 8))))
+                (concat_vectors
+                 (x15 (uint8_t (bv 0 8)))
+                 (slice_vectors
+                  (vec-reinterpret
+                   a
+                   'uint8 16) 0 1 1))
+                               (vec-if
+                 (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 14 8))))
+                 (concat_vectors
+                  (x14 (uint8_t (bv 0 8)))
+                  (slice_vectors
+                   (vec-reinterpret
+                    a
+                    'uint8 16) 0 1 2))
+                               (vec-if
+                  (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 13 8))))
+                  (concat_vectors
+                   (x13 (uint8_t (bv 0 8)))
+                   (slice_vectors
+                    (vec-reinterpret
+                     a
+                     'uint8 16) 0 1 3))
+                               (vec-if
+                   (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 12 8))))
+                   (concat_vectors
+                    (x12 (uint8_t (bv 0 8)))
+                    (slice_vectors
+                     (vec-reinterpret
+                      a
+                      'uint8 16) 0 1 4))
+                               (vec-if
+                    (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 11 8))))
+                    (concat_vectors
+                     (x11 (uint8_t (bv 0 8)))
+                     (slice_vectors
+                      (vec-reinterpret
+                       a
+                       'uint8 16) 0 1 5))
+                               (vec-if
+                     (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 10 8))))
+                     (concat_vectors
+                      (x10 (uint8_t (bv 0 8)))
+                      (slice_vectors
+                       (vec-reinterpret
+                        a
+                        'uint8 16) 0 1 6))
+                               (vec-if
+                      (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 9 8))))
+                      (concat_vectors
+                       (x9 (uint8_t (bv 0 8)))
+                       (slice_vectors
+                        (vec-reinterpret
+                         a
+                         'uint8 16) 0 1 7))
+                               (vec-if
+                       (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 8 8))))
+                       (concat_vectors
+                        (x8 (uint8_t (bv 0 8)))
+                        (slice_vectors
+                         (vec-reinterpret
+                          a
+                          'uint8 16) 0 1 8))
+                               (vec-if
+                        (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 7 8))))
+                        (concat_vectors
+                         (x7 (uint8_t (bv 0 8)))
+                         (slice_vectors
+                          (vec-reinterpret
+                           a
+                           'uint8 16) 0 1 9))
+                               (vec-if
+                         (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 6 8))))
+                         (concat_vectors
+                          (x6 (uint8_t (bv 0 8)))
+                          (slice_vectors
+                           (vec-reinterpret
+                            a
+                            'uint8 16) 0 1 10))
+                               (vec-if
+                          (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 5 8))))
+                          (concat_vectors
+                           (x5 (uint8_t (bv 0 8)))
+                           (slice_vectors
+                            (vec-reinterpret
+                             a
+                             'uint8 16) 0 1 11))
+                               (vec-if
+                           (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 4 8))))
+                           (concat_vectors
+                            (x4 (uint8_t (bv 0 8)))
+                            (slice_vectors
+                             (vec-reinterpret
+                              a
+                              'uint8 16) 0 1 12))
+                               (vec-if
+                            (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 3 8))))
+                            (concat_vectors
+                             (x3 (uint8_t (bv 0 8)))
+                             (slice_vectors
+                              (vec-reinterpret
+                               a
+                               'uint8 16) 0 1 13))
+                               (vec-if
+                             (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 2 8))))
+                             (concat_vectors
+                              (x2 (uint8_t (bv 0 8)))
+                              (slice_vectors
+                               (vec-reinterpret
+                                a
+                                'uint8 16) 0 1 14))
+                               (vec-if
+                              (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 1 8))))
+                              (concat_vectors
+                               (uint8_t (bv 0 8))
+                               (slice_vectors
+                                (vec-reinterpret
+                                 a
+                                 'uint8 16) 0 1 15))
+                               (vec-if
+                               (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 0 8))))
+                               (vec-reinterpret
+                                a
+                                'uint8 16)
+                               (x16 (uint8_t (bv 0 8)))))))))))))))))))
+                               'int64 2)))]
+        [((x86:u64x2 a) (uint8_t imm8))
+                            (x86:u64x2
+                             (halide:interpret
+              (vec-reinterpret
+                               (vec-if
+                (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 15 8))))
+                (concat_vectors
+                 (x15 (uint8_t (bv 0 8)))
+                 (slice_vectors
+                  (vec-reinterpret
+                   a
+                   'uint8 16) 0 1 1))
+                               (vec-if
+                 (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 14 8))))
+                 (concat_vectors
+                  (x14 (uint8_t (bv 0 8)))
+                  (slice_vectors
+                   (vec-reinterpret
+                    a
+                    'uint8 16) 0 1 2))
+                               (vec-if
+                  (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 13 8))))
+                  (concat_vectors
+                   (x13 (uint8_t (bv 0 8)))
+                   (slice_vectors
+                    (vec-reinterpret
+                     a
+                     'uint8 16) 0 1 3))
+                               (vec-if
+                   (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 12 8))))
+                   (concat_vectors
+                    (x12 (uint8_t (bv 0 8)))
+                    (slice_vectors
+                     (vec-reinterpret
+                      a
+                      'uint8 16) 0 1 4))
+                               (vec-if
+                    (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 11 8))))
+                    (concat_vectors
+                     (x11 (uint8_t (bv 0 8)))
+                     (slice_vectors
+                      (vec-reinterpret
+                       a
+                       'uint8 16) 0 1 5))
+                               (vec-if
+                     (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 10 8))))
+                     (concat_vectors
+                      (x10 (uint8_t (bv 0 8)))
+                      (slice_vectors
+                       (vec-reinterpret
+                        a
+                        'uint8 16) 0 1 6))
+                               (vec-if
+                      (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 9 8))))
+                      (concat_vectors
+                       (x9 (uint8_t (bv 0 8)))
+                       (slice_vectors
+                        (vec-reinterpret
+                         a
+                         'uint8 16) 0 1 7))
+                               (vec-if
+                       (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 8 8))))
+                       (concat_vectors
+                        (x8 (uint8_t (bv 0 8)))
+                        (slice_vectors
+                         (vec-reinterpret
+                          a
+                          'uint8 16) 0 1 8))
+                               (vec-if
+                        (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 7 8))))
+                        (concat_vectors
+                         (x7 (uint8_t (bv 0 8)))
+                         (slice_vectors
+                          (vec-reinterpret
+                           a
+                           'uint8 16) 0 1 9))
+                               (vec-if
+                         (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 6 8))))
+                         (concat_vectors
+                          (x6 (uint8_t (bv 0 8)))
+                          (slice_vectors
+                           (vec-reinterpret
+                            a
+                            'uint8 16) 0 1 10))
+                               (vec-if
+                          (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 5 8))))
+                          (concat_vectors
+                           (x5 (uint8_t (bv 0 8)))
+                           (slice_vectors
+                            (vec-reinterpret
+                             a
+                             'uint8 16) 0 1 11))
+                               (vec-if
+                           (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 4 8))))
+                           (concat_vectors
+                            (x4 (uint8_t (bv 0 8)))
+                            (slice_vectors
+                             (vec-reinterpret
+                              a
+                              'uint8 16) 0 1 12))
+                               (vec-if
+                            (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 3 8))))
+                            (concat_vectors
+                             (x3 (uint8_t (bv 0 8)))
+                             (slice_vectors
+                              (vec-reinterpret
+                               a
+                               'uint8 16) 0 1 13))
+                               (vec-if
+                             (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 2 8))))
+                             (concat_vectors
+                              (x2 (uint8_t (bv 0 8)))
+                              (slice_vectors
+                               (vec-reinterpret
+                                a
+                                'uint8 16) 0 1 14))
+                               (vec-if
+                              (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 1 8))))
+                              (concat_vectors
+                               (uint8_t (bv 0 8))
+                               (slice_vectors
+                                (vec-reinterpret
+                                 a
+                                 'uint8 16) 0 1 15))
+                               (vec-if
+                               (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 0 8))))
+                               (vec-reinterpret
+                                a
+                                'uint8 16)
+                               (x16 (uint8_t (bv 0 8)))))))))))))))))))
+                               'uint64 2)))]
+
+        [(_ _) (assert #f "infeasible in interpreting pslldq")])]
+
+    [(x86:psllq a imm8)
+      (destruct* ((interpret a) (interpret imm8))
+        [((x86:i64x2 a) (uint8_t imm8))
+            (x86:i64x2
+             (halide:interpret
+              (vec-shl
+               a
+               (x2 (uint64x1 (uint8_t
+ imm8))))))]
+        [((x86:u64x2 a) (uint8_t imm8))
+            (x86:u64x2
+             (halide:interpret
+              (vec-shl
+               a
+               (x2 (uint64x1 (uint8_t
+ imm8))))))]
+
+        [(_ _) (assert #f "infeasible in interpreting psllq")])]
+
+    [(x86:psllw a imm8)
+      (destruct* ((interpret a) (interpret imm8))
+        [((x86:i16x8 a) (uint8_t imm8))
+            (x86:i16x8
+             (halide:interpret
+              (vec-shl
+               a
+               (x8 (uint16x1 (uint8_t
+ imm8))))))]
+        [((x86:u16x8 a) (uint8_t imm8))
+            (x86:u16x8
+             (halide:interpret
+              (vec-shl
+               a
+               (x8 (uint16x1 (uint8_t
+ imm8))))))]
+
+        [(_ _) (assert #f "infeasible in interpreting psllw")])]
+
+    [(x86:psrad a imm8)
+      (destruct* ((interpret a) (interpret imm8))
+        [((x86:i32x4 a) (uint8_t imm8))
+            (x86:i32x4
+             (halide:interpret
+              (vec-shr
+               a
+               (x4 (uint32x1 (uint8_t
+ imm8))))))]
+
+        [(_ _) (assert #f "infeasible in interpreting psrad")])]
+
+    [(x86:psraw a imm8)
+      (destruct* ((interpret a) (interpret imm8))
+        [((x86:i16x8 a) (uint8_t imm8))
+            (x86:i16x8
+             (halide:interpret
+              (vec-shr
+               a
+               (x8 (uint16x1 (uint8_t
+ imm8))))))]
+
+        [(_ _) (assert #f "infeasible in interpreting psraw")])]
+
+    [(x86:psrld a imm8)
+      (destruct* ((interpret a) (interpret imm8))
+        [((x86:u32x4 a) (uint8_t imm8))
+            (x86:u32x4
+             (halide:interpret
+              (vec-shr
+               a
+               (x4 (uint32x1 (uint8_t
+ imm8))))))]
+
+        [(_ _) (assert #f "infeasible in interpreting psrld")])]
+
+    [(x86:psrldq a imm8)
+      (destruct* ((interpret a) (interpret imm8))
+        [((x86:i8x16 a) (uint8_t imm8))
+                            (x86:i8x16
+                             (halide:interpret
+              (vec-reinterpret
+                               (vec-if
+                (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 15 8))))
+                (concat_vectors
+                 (slice_vectors
+                  (vec-reinterpret
+                   a
+                   'uint8 16) 15 1 1)
+                 (x15 (uint8_t (bv 0 8))))
+                               (vec-if
+                 (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 14 8))))
+                 (concat_vectors
+                  (slice_vectors
+                   (vec-reinterpret
+                    a
+                    'uint8 16) 14 1 2)
+                  (x14 (uint8_t (bv 0 8))))
+                               (vec-if
+                  (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 13 8))))
+                  (concat_vectors
+                   (slice_vectors
+                    (vec-reinterpret
+                     a
+                     'uint8 16) 13 1 3)
+                   (x13 (uint8_t (bv 0 8))))
+                               (vec-if
+                   (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 12 8))))
+                   (concat_vectors
+                    (slice_vectors
+                     (vec-reinterpret
+                      a
+                      'uint8 16) 12 1 4)
+                    (x12 (uint8_t (bv 0 8))))
+                               (vec-if
+                    (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 11 8))))
+                    (concat_vectors
+                     (slice_vectors
+                      (vec-reinterpret
+                       a
+                       'uint8 16) 11 1 5)
+                     (x11 (uint8_t (bv 0 8))))
+                               (vec-if
+                     (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 10 8))))
+                     (concat_vectors
+                      (slice_vectors
+                       (vec-reinterpret
+                        a
+                        'uint8 16) 10 1 6)
+                      (x10 (uint8_t (bv 0 8))))
+                               (vec-if
+                      (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 9 8))))
+                      (concat_vectors
+                       (slice_vectors
+                        (vec-reinterpret
+                         a
+                         'uint8 16) 9 1 7)
+                       (x9 (uint8_t (bv 0 8))))
+                               (vec-if
+                       (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 8 8))))
+                       (concat_vectors
+                        (slice_vectors
+                         (vec-reinterpret
+                          a
+                          'uint8 16) 8 1 8)
+                        (x8 (uint8_t (bv 0 8))))
+                               (vec-if
+                        (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 7 8))))
+                        (concat_vectors
+                         (slice_vectors
+                          (vec-reinterpret
+                           a
+                           'uint8 16) 7 1 9)
+                         (x7 (uint8_t (bv 0 8))))
+                               (vec-if
+                         (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 6 8))))
+                         (concat_vectors
+                          (slice_vectors
+                           (vec-reinterpret
+                            a
+                            'uint8 16) 6 1 10)
+                          (x6 (uint8_t (bv 0 8))))
+                               (vec-if
+                          (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 5 8))))
+                          (concat_vectors
+                           (slice_vectors
+                            (vec-reinterpret
+                             a
+                             'uint8 16) 5 1 11)
+                           (x5 (uint8_t (bv 0 8))))
+                               (vec-if
+                           (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 4 8))))
+                           (concat_vectors
+                            (slice_vectors
+                             (vec-reinterpret
+                              a
+                              'uint8 16) 4 1 12)
+                            (x4 (uint8_t (bv 0 8))))
+                               (vec-if
+                            (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 3 8))))
+                            (concat_vectors
+                             (slice_vectors
+                              (vec-reinterpret
+                               a
+                               'uint8 16) 3 1 13)
+                             (x3 (uint8_t (bv 0 8))))
+                               (vec-if
+                             (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 2 8))))
+                             (concat_vectors
+                              (slice_vectors
+                               (vec-reinterpret
+                                a
+                                'uint8 16) 2 1 14)
+                              (x2 (uint8_t (bv 0 8))))
+                               (vec-if
+                              (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 1 8))))
+                              (concat_vectors
+                               (slice_vectors
+                                (vec-reinterpret
+                                 a
+                                 'uint8 16) 1 1 15)
+                               (uint8_t (bv 0 8)))
+                               (vec-if
+                               (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 0 8))))
+                               (vec-reinterpret
+                                a
+                                'uint8 16)
+                               (x16 (uint8_t (bv 0 8)))))))))))))))))))
+                               'int8 16)))]
+        [((x86:u8x16 a) (uint8_t imm8))
+                            (x86:u8x16
+                             (halide:interpret
+              (vec-reinterpret
+                               (vec-if
+                (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 15 8))))
+                (concat_vectors
+                 (slice_vectors
+                  (vec-reinterpret
+                   a
+                   'uint8 16) 15 1 1)
+                 (x15 (uint8_t (bv 0 8))))
+                               (vec-if
+                 (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 14 8))))
+                 (concat_vectors
+                  (slice_vectors
+                   (vec-reinterpret
+                    a
+                    'uint8 16) 14 1 2)
+                  (x14 (uint8_t (bv 0 8))))
+                               (vec-if
+                  (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 13 8))))
+                  (concat_vectors
+                   (slice_vectors
+                    (vec-reinterpret
+                     a
+                     'uint8 16) 13 1 3)
+                   (x13 (uint8_t (bv 0 8))))
+                               (vec-if
+                   (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 12 8))))
+                   (concat_vectors
+                    (slice_vectors
+                     (vec-reinterpret
+                      a
+                      'uint8 16) 12 1 4)
+                    (x12 (uint8_t (bv 0 8))))
+                               (vec-if
+                    (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 11 8))))
+                    (concat_vectors
+                     (slice_vectors
+                      (vec-reinterpret
+                       a
+                       'uint8 16) 11 1 5)
+                     (x11 (uint8_t (bv 0 8))))
+                               (vec-if
+                     (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 10 8))))
+                     (concat_vectors
+                      (slice_vectors
+                       (vec-reinterpret
+                        a
+                        'uint8 16) 10 1 6)
+                      (x10 (uint8_t (bv 0 8))))
+                               (vec-if
+                      (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 9 8))))
+                      (concat_vectors
+                       (slice_vectors
+                        (vec-reinterpret
+                         a
+                         'uint8 16) 9 1 7)
+                       (x9 (uint8_t (bv 0 8))))
+                               (vec-if
+                       (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 8 8))))
+                       (concat_vectors
+                        (slice_vectors
+                         (vec-reinterpret
+                          a
+                          'uint8 16) 8 1 8)
+                        (x8 (uint8_t (bv 0 8))))
+                               (vec-if
+                        (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 7 8))))
+                        (concat_vectors
+                         (slice_vectors
+                          (vec-reinterpret
+                           a
+                           'uint8 16) 7 1 9)
+                         (x7 (uint8_t (bv 0 8))))
+                               (vec-if
+                         (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 6 8))))
+                         (concat_vectors
+                          (slice_vectors
+                           (vec-reinterpret
+                            a
+                            'uint8 16) 6 1 10)
+                          (x6 (uint8_t (bv 0 8))))
+                               (vec-if
+                          (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 5 8))))
+                          (concat_vectors
+                           (slice_vectors
+                            (vec-reinterpret
+                             a
+                             'uint8 16) 5 1 11)
+                           (x5 (uint8_t (bv 0 8))))
+                               (vec-if
+                           (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 4 8))))
+                           (concat_vectors
+                            (slice_vectors
+                             (vec-reinterpret
+                              a
+                              'uint8 16) 4 1 12)
+                            (x4 (uint8_t (bv 0 8))))
+                               (vec-if
+                            (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 3 8))))
+                            (concat_vectors
+                             (slice_vectors
+                              (vec-reinterpret
+                               a
+                               'uint8 16) 3 1 13)
+                             (x3 (uint8_t (bv 0 8))))
+                               (vec-if
+                             (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 2 8))))
+                             (concat_vectors
+                              (slice_vectors
+                               (vec-reinterpret
+                                a
+                                'uint8 16) 2 1 14)
+                              (x2 (uint8_t (bv 0 8))))
+                               (vec-if
+                              (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 1 8))))
+                              (concat_vectors
+                               (slice_vectors
+                                (vec-reinterpret
+                                 a
+                                 'uint8 16) 1 1 15)
+                               (uint8_t (bv 0 8)))
+                               (vec-if
+                               (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 0 8))))
+                               (vec-reinterpret
+                                a
+                                'uint8 16)
+                               (x16 (uint8_t (bv 0 8)))))))))))))))))))
+                               'uint8 16)))]
+        [((x86:i16x8 a) (uint8_t imm8))
+                            (x86:i16x8
+                             (halide:interpret
+              (vec-reinterpret
+                               (vec-if
+                (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 15 8))))
+                (concat_vectors
+                 (slice_vectors
+                  (vec-reinterpret
+                   a
+                   'uint8 16) 15 1 1)
+                 (x15 (uint8_t (bv 0 8))))
+                               (vec-if
+                 (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 14 8))))
+                 (concat_vectors
+                  (slice_vectors
+                   (vec-reinterpret
+                    a
+                    'uint8 16) 14 1 2)
+                  (x14 (uint8_t (bv 0 8))))
+                               (vec-if
+                  (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 13 8))))
+                  (concat_vectors
+                   (slice_vectors
+                    (vec-reinterpret
+                     a
+                     'uint8 16) 13 1 3)
+                   (x13 (uint8_t (bv 0 8))))
+                               (vec-if
+                   (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 12 8))))
+                   (concat_vectors
+                    (slice_vectors
+                     (vec-reinterpret
+                      a
+                      'uint8 16) 12 1 4)
+                    (x12 (uint8_t (bv 0 8))))
+                               (vec-if
+                    (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 11 8))))
+                    (concat_vectors
+                     (slice_vectors
+                      (vec-reinterpret
+                       a
+                       'uint8 16) 11 1 5)
+                     (x11 (uint8_t (bv 0 8))))
+                               (vec-if
+                     (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 10 8))))
+                     (concat_vectors
+                      (slice_vectors
+                       (vec-reinterpret
+                        a
+                        'uint8 16) 10 1 6)
+                      (x10 (uint8_t (bv 0 8))))
+                               (vec-if
+                      (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 9 8))))
+                      (concat_vectors
+                       (slice_vectors
+                        (vec-reinterpret
+                         a
+                         'uint8 16) 9 1 7)
+                       (x9 (uint8_t (bv 0 8))))
+                               (vec-if
+                       (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 8 8))))
+                       (concat_vectors
+                        (slice_vectors
+                         (vec-reinterpret
+                          a
+                          'uint8 16) 8 1 8)
+                        (x8 (uint8_t (bv 0 8))))
+                               (vec-if
+                        (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 7 8))))
+                        (concat_vectors
+                         (slice_vectors
+                          (vec-reinterpret
+                           a
+                           'uint8 16) 7 1 9)
+                         (x7 (uint8_t (bv 0 8))))
+                               (vec-if
+                         (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 6 8))))
+                         (concat_vectors
+                          (slice_vectors
+                           (vec-reinterpret
+                            a
+                            'uint8 16) 6 1 10)
+                          (x6 (uint8_t (bv 0 8))))
+                               (vec-if
+                          (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 5 8))))
+                          (concat_vectors
+                           (slice_vectors
+                            (vec-reinterpret
+                             a
+                             'uint8 16) 5 1 11)
+                           (x5 (uint8_t (bv 0 8))))
+                               (vec-if
+                           (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 4 8))))
+                           (concat_vectors
+                            (slice_vectors
+                             (vec-reinterpret
+                              a
+                              'uint8 16) 4 1 12)
+                            (x4 (uint8_t (bv 0 8))))
+                               (vec-if
+                            (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 3 8))))
+                            (concat_vectors
+                             (slice_vectors
+                              (vec-reinterpret
+                               a
+                               'uint8 16) 3 1 13)
+                             (x3 (uint8_t (bv 0 8))))
+                               (vec-if
+                             (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 2 8))))
+                             (concat_vectors
+                              (slice_vectors
+                               (vec-reinterpret
+                                a
+                                'uint8 16) 2 1 14)
+                              (x2 (uint8_t (bv 0 8))))
+                               (vec-if
+                              (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 1 8))))
+                              (concat_vectors
+                               (slice_vectors
+                                (vec-reinterpret
+                                 a
+                                 'uint8 16) 1 1 15)
+                               (uint8_t (bv 0 8)))
+                               (vec-if
+                               (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 0 8))))
+                               (vec-reinterpret
+                                a
+                                'uint8 16)
+                               (x16 (uint8_t (bv 0 8)))))))))))))))))))
+                               'int16 8)))]
+        [((x86:u16x8 a) (uint8_t imm8))
+                            (x86:u16x8
+                             (halide:interpret
+              (vec-reinterpret
+                               (vec-if
+                (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 15 8))))
+                (concat_vectors
+                 (slice_vectors
+                  (vec-reinterpret
+                   a
+                   'uint8 16) 15 1 1)
+                 (x15 (uint8_t (bv 0 8))))
+                               (vec-if
+                 (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 14 8))))
+                 (concat_vectors
+                  (slice_vectors
+                   (vec-reinterpret
+                    a
+                    'uint8 16) 14 1 2)
+                  (x14 (uint8_t (bv 0 8))))
+                               (vec-if
+                  (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 13 8))))
+                  (concat_vectors
+                   (slice_vectors
+                    (vec-reinterpret
+                     a
+                     'uint8 16) 13 1 3)
+                   (x13 (uint8_t (bv 0 8))))
+                               (vec-if
+                   (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 12 8))))
+                   (concat_vectors
+                    (slice_vectors
+                     (vec-reinterpret
+                      a
+                      'uint8 16) 12 1 4)
+                    (x12 (uint8_t (bv 0 8))))
+                               (vec-if
+                    (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 11 8))))
+                    (concat_vectors
+                     (slice_vectors
+                      (vec-reinterpret
+                       a
+                       'uint8 16) 11 1 5)
+                     (x11 (uint8_t (bv 0 8))))
+                               (vec-if
+                     (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 10 8))))
+                     (concat_vectors
+                      (slice_vectors
+                       (vec-reinterpret
+                        a
+                        'uint8 16) 10 1 6)
+                      (x10 (uint8_t (bv 0 8))))
+                               (vec-if
+                      (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 9 8))))
+                      (concat_vectors
+                       (slice_vectors
+                        (vec-reinterpret
+                         a
+                         'uint8 16) 9 1 7)
+                       (x9 (uint8_t (bv 0 8))))
+                               (vec-if
+                       (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 8 8))))
+                       (concat_vectors
+                        (slice_vectors
+                         (vec-reinterpret
+                          a
+                          'uint8 16) 8 1 8)
+                        (x8 (uint8_t (bv 0 8))))
+                               (vec-if
+                        (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 7 8))))
+                        (concat_vectors
+                         (slice_vectors
+                          (vec-reinterpret
+                           a
+                           'uint8 16) 7 1 9)
+                         (x7 (uint8_t (bv 0 8))))
+                               (vec-if
+                         (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 6 8))))
+                         (concat_vectors
+                          (slice_vectors
+                           (vec-reinterpret
+                            a
+                            'uint8 16) 6 1 10)
+                          (x6 (uint8_t (bv 0 8))))
+                               (vec-if
+                          (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 5 8))))
+                          (concat_vectors
+                           (slice_vectors
+                            (vec-reinterpret
+                             a
+                             'uint8 16) 5 1 11)
+                           (x5 (uint8_t (bv 0 8))))
+                               (vec-if
+                           (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 4 8))))
+                           (concat_vectors
+                            (slice_vectors
+                             (vec-reinterpret
+                              a
+                              'uint8 16) 4 1 12)
+                            (x4 (uint8_t (bv 0 8))))
+                               (vec-if
+                            (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 3 8))))
+                            (concat_vectors
+                             (slice_vectors
+                              (vec-reinterpret
+                               a
+                               'uint8 16) 3 1 13)
+                             (x3 (uint8_t (bv 0 8))))
+                               (vec-if
+                             (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 2 8))))
+                             (concat_vectors
+                              (slice_vectors
+                               (vec-reinterpret
+                                a
+                                'uint8 16) 2 1 14)
+                              (x2 (uint8_t (bv 0 8))))
+                               (vec-if
+                              (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 1 8))))
+                              (concat_vectors
+                               (slice_vectors
+                                (vec-reinterpret
+                                 a
+                                 'uint8 16) 1 1 15)
+                               (uint8_t (bv 0 8)))
+                               (vec-if
+                               (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 0 8))))
+                               (vec-reinterpret
+                                a
+                                'uint8 16)
+                               (x16 (uint8_t (bv 0 8)))))))))))))))))))
+                               'uint16 8)))]
+        [((x86:i32x4 a) (uint8_t imm8))
+                            (x86:i32x4
+                             (halide:interpret
+              (vec-reinterpret
+                               (vec-if
+                (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 15 8))))
+                (concat_vectors
+                 (slice_vectors
+                  (vec-reinterpret
+                   a
+                   'uint8 16) 15 1 1)
+                 (x15 (uint8_t (bv 0 8))))
+                               (vec-if
+                 (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 14 8))))
+                 (concat_vectors
+                  (slice_vectors
+                   (vec-reinterpret
+                    a
+                    'uint8 16) 14 1 2)
+                  (x14 (uint8_t (bv 0 8))))
+                               (vec-if
+                  (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 13 8))))
+                  (concat_vectors
+                   (slice_vectors
+                    (vec-reinterpret
+                     a
+                     'uint8 16) 13 1 3)
+                   (x13 (uint8_t (bv 0 8))))
+                               (vec-if
+                   (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 12 8))))
+                   (concat_vectors
+                    (slice_vectors
+                     (vec-reinterpret
+                      a
+                      'uint8 16) 12 1 4)
+                    (x12 (uint8_t (bv 0 8))))
+                               (vec-if
+                    (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 11 8))))
+                    (concat_vectors
+                     (slice_vectors
+                      (vec-reinterpret
+                       a
+                       'uint8 16) 11 1 5)
+                     (x11 (uint8_t (bv 0 8))))
+                               (vec-if
+                     (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 10 8))))
+                     (concat_vectors
+                      (slice_vectors
+                       (vec-reinterpret
+                        a
+                        'uint8 16) 10 1 6)
+                      (x10 (uint8_t (bv 0 8))))
+                               (vec-if
+                      (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 9 8))))
+                      (concat_vectors
+                       (slice_vectors
+                        (vec-reinterpret
+                         a
+                         'uint8 16) 9 1 7)
+                       (x9 (uint8_t (bv 0 8))))
+                               (vec-if
+                       (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 8 8))))
+                       (concat_vectors
+                        (slice_vectors
+                         (vec-reinterpret
+                          a
+                          'uint8 16) 8 1 8)
+                        (x8 (uint8_t (bv 0 8))))
+                               (vec-if
+                        (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 7 8))))
+                        (concat_vectors
+                         (slice_vectors
+                          (vec-reinterpret
+                           a
+                           'uint8 16) 7 1 9)
+                         (x7 (uint8_t (bv 0 8))))
+                               (vec-if
+                         (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 6 8))))
+                         (concat_vectors
+                          (slice_vectors
+                           (vec-reinterpret
+                            a
+                            'uint8 16) 6 1 10)
+                          (x6 (uint8_t (bv 0 8))))
+                               (vec-if
+                          (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 5 8))))
+                          (concat_vectors
+                           (slice_vectors
+                            (vec-reinterpret
+                             a
+                             'uint8 16) 5 1 11)
+                           (x5 (uint8_t (bv 0 8))))
+                               (vec-if
+                           (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 4 8))))
+                           (concat_vectors
+                            (slice_vectors
+                             (vec-reinterpret
+                              a
+                              'uint8 16) 4 1 12)
+                            (x4 (uint8_t (bv 0 8))))
+                               (vec-if
+                            (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 3 8))))
+                            (concat_vectors
+                             (slice_vectors
+                              (vec-reinterpret
+                               a
+                               'uint8 16) 3 1 13)
+                             (x3 (uint8_t (bv 0 8))))
+                               (vec-if
+                             (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 2 8))))
+                             (concat_vectors
+                              (slice_vectors
+                               (vec-reinterpret
+                                a
+                                'uint8 16) 2 1 14)
+                              (x2 (uint8_t (bv 0 8))))
+                               (vec-if
+                              (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 1 8))))
+                              (concat_vectors
+                               (slice_vectors
+                                (vec-reinterpret
+                                 a
+                                 'uint8 16) 1 1 15)
+                               (uint8_t (bv 0 8)))
+                               (vec-if
+                               (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 0 8))))
+                               (vec-reinterpret
+                                a
+                                'uint8 16)
+                               (x16 (uint8_t (bv 0 8)))))))))))))))))))
+                               'int32 4)))]
+        [((x86:u32x4 a) (uint8_t imm8))
+                            (x86:u32x4
+                             (halide:interpret
+              (vec-reinterpret
+                               (vec-if
+                (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 15 8))))
+                (concat_vectors
+                 (slice_vectors
+                  (vec-reinterpret
+                   a
+                   'uint8 16) 15 1 1)
+                 (x15 (uint8_t (bv 0 8))))
+                               (vec-if
+                 (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 14 8))))
+                 (concat_vectors
+                  (slice_vectors
+                   (vec-reinterpret
+                    a
+                    'uint8 16) 14 1 2)
+                  (x14 (uint8_t (bv 0 8))))
+                               (vec-if
+                  (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 13 8))))
+                  (concat_vectors
+                   (slice_vectors
+                    (vec-reinterpret
+                     a
+                     'uint8 16) 13 1 3)
+                   (x13 (uint8_t (bv 0 8))))
+                               (vec-if
+                   (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 12 8))))
+                   (concat_vectors
+                    (slice_vectors
+                     (vec-reinterpret
+                      a
+                      'uint8 16) 12 1 4)
+                    (x12 (uint8_t (bv 0 8))))
+                               (vec-if
+                    (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 11 8))))
+                    (concat_vectors
+                     (slice_vectors
+                      (vec-reinterpret
+                       a
+                       'uint8 16) 11 1 5)
+                     (x11 (uint8_t (bv 0 8))))
+                               (vec-if
+                     (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 10 8))))
+                     (concat_vectors
+                      (slice_vectors
+                       (vec-reinterpret
+                        a
+                        'uint8 16) 10 1 6)
+                      (x10 (uint8_t (bv 0 8))))
+                               (vec-if
+                      (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 9 8))))
+                      (concat_vectors
+                       (slice_vectors
+                        (vec-reinterpret
+                         a
+                         'uint8 16) 9 1 7)
+                       (x9 (uint8_t (bv 0 8))))
+                               (vec-if
+                       (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 8 8))))
+                       (concat_vectors
+                        (slice_vectors
+                         (vec-reinterpret
+                          a
+                          'uint8 16) 8 1 8)
+                        (x8 (uint8_t (bv 0 8))))
+                               (vec-if
+                        (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 7 8))))
+                        (concat_vectors
+                         (slice_vectors
+                          (vec-reinterpret
+                           a
+                           'uint8 16) 7 1 9)
+                         (x7 (uint8_t (bv 0 8))))
+                               (vec-if
+                         (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 6 8))))
+                         (concat_vectors
+                          (slice_vectors
+                           (vec-reinterpret
+                            a
+                            'uint8 16) 6 1 10)
+                          (x6 (uint8_t (bv 0 8))))
+                               (vec-if
+                          (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 5 8))))
+                          (concat_vectors
+                           (slice_vectors
+                            (vec-reinterpret
+                             a
+                             'uint8 16) 5 1 11)
+                           (x5 (uint8_t (bv 0 8))))
+                               (vec-if
+                           (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 4 8))))
+                           (concat_vectors
+                            (slice_vectors
+                             (vec-reinterpret
+                              a
+                              'uint8 16) 4 1 12)
+                            (x4 (uint8_t (bv 0 8))))
+                               (vec-if
+                            (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 3 8))))
+                            (concat_vectors
+                             (slice_vectors
+                              (vec-reinterpret
+                               a
+                               'uint8 16) 3 1 13)
+                             (x3 (uint8_t (bv 0 8))))
+                               (vec-if
+                             (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 2 8))))
+                             (concat_vectors
+                              (slice_vectors
+                               (vec-reinterpret
+                                a
+                                'uint8 16) 2 1 14)
+                              (x2 (uint8_t (bv 0 8))))
+                               (vec-if
+                              (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 1 8))))
+                              (concat_vectors
+                               (slice_vectors
+                                (vec-reinterpret
+                                 a
+                                 'uint8 16) 1 1 15)
+                               (uint8_t (bv 0 8)))
+                               (vec-if
+                               (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 0 8))))
+                               (vec-reinterpret
+                                a
+                                'uint8 16)
+                               (x16 (uint8_t (bv 0 8)))))))))))))))))))
+                               'uint32 4)))]
+        [((x86:i64x2 a) (uint8_t imm8))
+                            (x86:i64x2
+                             (halide:interpret
+              (vec-reinterpret
+                               (vec-if
+                (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 15 8))))
+                (concat_vectors
+                 (slice_vectors
+                  (vec-reinterpret
+                   a
+                   'uint8 16) 15 1 1)
+                 (x15 (uint8_t (bv 0 8))))
+                               (vec-if
+                 (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 14 8))))
+                 (concat_vectors
+                  (slice_vectors
+                   (vec-reinterpret
+                    a
+                    'uint8 16) 14 1 2)
+                  (x14 (uint8_t (bv 0 8))))
+                               (vec-if
+                  (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 13 8))))
+                  (concat_vectors
+                   (slice_vectors
+                    (vec-reinterpret
+                     a
+                     'uint8 16) 13 1 3)
+                   (x13 (uint8_t (bv 0 8))))
+                               (vec-if
+                   (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 12 8))))
+                   (concat_vectors
+                    (slice_vectors
+                     (vec-reinterpret
+                      a
+                      'uint8 16) 12 1 4)
+                    (x12 (uint8_t (bv 0 8))))
+                               (vec-if
+                    (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 11 8))))
+                    (concat_vectors
+                     (slice_vectors
+                      (vec-reinterpret
+                       a
+                       'uint8 16) 11 1 5)
+                     (x11 (uint8_t (bv 0 8))))
+                               (vec-if
+                     (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 10 8))))
+                     (concat_vectors
+                      (slice_vectors
+                       (vec-reinterpret
+                        a
+                        'uint8 16) 10 1 6)
+                      (x10 (uint8_t (bv 0 8))))
+                               (vec-if
+                      (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 9 8))))
+                      (concat_vectors
+                       (slice_vectors
+                        (vec-reinterpret
+                         a
+                         'uint8 16) 9 1 7)
+                       (x9 (uint8_t (bv 0 8))))
+                               (vec-if
+                       (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 8 8))))
+                       (concat_vectors
+                        (slice_vectors
+                         (vec-reinterpret
+                          a
+                          'uint8 16) 8 1 8)
+                        (x8 (uint8_t (bv 0 8))))
+                               (vec-if
+                        (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 7 8))))
+                        (concat_vectors
+                         (slice_vectors
+                          (vec-reinterpret
+                           a
+                           'uint8 16) 7 1 9)
+                         (x7 (uint8_t (bv 0 8))))
+                               (vec-if
+                         (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 6 8))))
+                         (concat_vectors
+                          (slice_vectors
+                           (vec-reinterpret
+                            a
+                            'uint8 16) 6 1 10)
+                          (x6 (uint8_t (bv 0 8))))
+                               (vec-if
+                          (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 5 8))))
+                          (concat_vectors
+                           (slice_vectors
+                            (vec-reinterpret
+                             a
+                             'uint8 16) 5 1 11)
+                           (x5 (uint8_t (bv 0 8))))
+                               (vec-if
+                           (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 4 8))))
+                           (concat_vectors
+                            (slice_vectors
+                             (vec-reinterpret
+                              a
+                              'uint8 16) 4 1 12)
+                            (x4 (uint8_t (bv 0 8))))
+                               (vec-if
+                            (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 3 8))))
+                            (concat_vectors
+                             (slice_vectors
+                              (vec-reinterpret
+                               a
+                               'uint8 16) 3 1 13)
+                             (x3 (uint8_t (bv 0 8))))
+                               (vec-if
+                             (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 2 8))))
+                             (concat_vectors
+                              (slice_vectors
+                               (vec-reinterpret
+                                a
+                                'uint8 16) 2 1 14)
+                              (x2 (uint8_t (bv 0 8))))
+                               (vec-if
+                              (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 1 8))))
+                              (concat_vectors
+                               (slice_vectors
+                                (vec-reinterpret
+                                 a
+                                 'uint8 16) 1 1 15)
+                               (uint8_t (bv 0 8)))
+                               (vec-if
+                               (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 0 8))))
+                               (vec-reinterpret
+                                a
+                                'uint8 16)
+                               (x16 (uint8_t (bv 0 8)))))))))))))))))))
+                               'int64 2)))]
+        [((x86:u64x2 a) (uint8_t imm8))
+                            (x86:u64x2
+                             (halide:interpret
+              (vec-reinterpret
+                               (vec-if
+                (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 15 8))))
+                (concat_vectors
+                 (slice_vectors
+                  (vec-reinterpret
+                   a
+                   'uint8 16) 15 1 1)
+                 (x15 (uint8_t (bv 0 8))))
+                               (vec-if
+                 (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 14 8))))
+                 (concat_vectors
+                  (slice_vectors
+                   (vec-reinterpret
+                    a
+                    'uint8 16) 14 1 2)
+                  (x14 (uint8_t (bv 0 8))))
+                               (vec-if
+                  (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 13 8))))
+                  (concat_vectors
+                   (slice_vectors
+                    (vec-reinterpret
+                     a
+                     'uint8 16) 13 1 3)
+                   (x13 (uint8_t (bv 0 8))))
+                               (vec-if
+                   (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 12 8))))
+                   (concat_vectors
+                    (slice_vectors
+                     (vec-reinterpret
+                      a
+                      'uint8 16) 12 1 4)
+                    (x12 (uint8_t (bv 0 8))))
+                               (vec-if
+                    (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 11 8))))
+                    (concat_vectors
+                     (slice_vectors
+                      (vec-reinterpret
+                       a
+                       'uint8 16) 11 1 5)
+                     (x11 (uint8_t (bv 0 8))))
+                               (vec-if
+                     (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 10 8))))
+                     (concat_vectors
+                      (slice_vectors
+                       (vec-reinterpret
+                        a
+                        'uint8 16) 10 1 6)
+                      (x10 (uint8_t (bv 0 8))))
+                               (vec-if
+                      (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 9 8))))
+                      (concat_vectors
+                       (slice_vectors
+                        (vec-reinterpret
+                         a
+                         'uint8 16) 9 1 7)
+                       (x9 (uint8_t (bv 0 8))))
+                               (vec-if
+                       (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 8 8))))
+                       (concat_vectors
+                        (slice_vectors
+                         (vec-reinterpret
+                          a
+                          'uint8 16) 8 1 8)
+                        (x8 (uint8_t (bv 0 8))))
+                               (vec-if
+                        (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 7 8))))
+                        (concat_vectors
+                         (slice_vectors
+                          (vec-reinterpret
+                           a
+                           'uint8 16) 7 1 9)
+                         (x7 (uint8_t (bv 0 8))))
+                               (vec-if
+                         (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 6 8))))
+                         (concat_vectors
+                          (slice_vectors
+                           (vec-reinterpret
+                            a
+                            'uint8 16) 6 1 10)
+                          (x6 (uint8_t (bv 0 8))))
+                               (vec-if
+                          (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 5 8))))
+                          (concat_vectors
+                           (slice_vectors
+                            (vec-reinterpret
+                             a
+                             'uint8 16) 5 1 11)
+                           (x5 (uint8_t (bv 0 8))))
+                               (vec-if
+                           (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 4 8))))
+                           (concat_vectors
+                            (slice_vectors
+                             (vec-reinterpret
+                              a
+                              'uint8 16) 4 1 12)
+                            (x4 (uint8_t (bv 0 8))))
+                               (vec-if
+                            (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 3 8))))
+                            (concat_vectors
+                             (slice_vectors
+                              (vec-reinterpret
+                               a
+                               'uint8 16) 3 1 13)
+                             (x3 (uint8_t (bv 0 8))))
+                               (vec-if
+                             (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 2 8))))
+                             (concat_vectors
+                              (slice_vectors
+                               (vec-reinterpret
+                                a
+                                'uint8 16) 2 1 14)
+                              (x2 (uint8_t (bv 0 8))))
+                               (vec-if
+                              (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 1 8))))
+                              (concat_vectors
+                               (slice_vectors
+                                (vec-reinterpret
+                                 a
+                                 'uint8 16) 1 1 15)
+                               (uint8_t (bv 0 8)))
+                               (vec-if
+                               (x16 (sca-eq
+ (uint8_t
+  imm8)
+ (uint8_t (bv 0 8))))
+                               (vec-reinterpret
+                                a
+                                'uint8 16)
+                               (x16 (uint8_t (bv 0 8)))))))))))))))))))
+                               'uint64 2)))]
+
+        [(_ _) (assert #f "infeasible in interpreting psrldq")])]
+
+    [(x86:psrlq a imm8)
+      (destruct* ((interpret a) (interpret imm8))
+        [((x86:u64x2 a) (uint8_t imm8))
+            (x86:u64x2
+             (halide:interpret
+              (vec-shr
+               a
+               (x2 (uint64x1 (uint8_t
+ imm8))))))]
+
+        [(_ _) (assert #f "infeasible in interpreting psrlq")])]
+
+    [(x86:psrlw a imm8)
+      (destruct* ((interpret a) (interpret imm8))
+        [((x86:u16x8 a) (uint8_t imm8))
+            (x86:u16x8
+             (halide:interpret
+              (vec-shr
+               a
+               (x8 (uint16x1 (uint8_t
+ imm8))))))]
+
+        [(_ _) (assert #f "infeasible in interpreting psrlw")])]
+
+    [(x86:psubb a b)
+      (destruct* ((interpret a) (interpret b))
+        [((x86:i8x16 a) (x86:i8x16 b))
+            (x86:i8x16
+             (halide:interpret
+              (vec-sub
+               a
+               b)))]
+        [((x86:u8x16 a) (x86:u8x16 b))
+            (x86:u8x16
+             (halide:interpret
+              (vec-sub
+               a
+               b)))]
+
+        [(_ _) (assert #f "infeasible in interpreting psubb")])]
+
+    [(x86:psubd a b)
+      (destruct* ((interpret a) (interpret b))
+        [((x86:i32x4 a) (x86:i32x4 b))
+            (x86:i32x4
+             (halide:interpret
+              (vec-sub
+               a
+               b)))]
+        [((x86:u32x4 a) (x86:u32x4 b))
+            (x86:u32x4
+             (halide:interpret
+              (vec-sub
+               a
+               b)))]
+
+        [(_ _) (assert #f "infeasible in interpreting psubd")])]
+
+    [(x86:psubq a b)
+      (destruct* ((interpret a) (interpret b))
+        [((x86:i64x2 a) (x86:i64x2 b))
+            (x86:i64x2
+             (halide:interpret
+              (vec-sub
+               a
+               b)))]
+        [((x86:u64x2 a) (x86:u64x2 b))
+            (x86:u64x2
+             (halide:interpret
+              (vec-sub
+               a
+               b)))]
+
+        [(_ _) (assert #f "infeasible in interpreting psubq")])]
+
+    [(x86:psubsb a b)
+      (destruct* ((interpret a) (interpret b))
+        [((x86:i8x16 a) (x86:i8x16 b))
+            (x86:i8x16
+             (halide:interpret
+              (vec-sub
+               (vec-max
+                (vec-min
+                 (vec-add
+                  (vec-min
+                   b
+                   (x16 (int8_t (bv 0 8))))
+                  (x16 (int8_t (bv 127 8))))
+                 a)
+                (vec-add
+                 (vec-max
+                  b
+                  (x16 (int8_t (bv 0 8))))
+                 (x16 (int8_t (bv -128 8)))))
+               b)))]
+
+        [(_ _) (assert #f "infeasible in interpreting psubsb")])]
+
+    [(x86:psubsw a b)
+      (destruct* ((interpret a) (interpret b))
+        [((x86:i16x8 a) (x86:i16x8 b))
+            (x86:i16x8
+             (halide:interpret
+              (vec-sub
+               (vec-max
+                (vec-min
+                 (vec-add
+                  (vec-min
+                   b
+                   (x8 (int16_t (bv 0 16))))
+                  (x8 (int16_t (bv 32767 16))))
+                 a)
+                (vec-add
+                 (vec-max
+                  b
+                  (x8 (int16_t (bv 0 16))))
+                 (x8 (int16_t (bv -32768 16)))))
+               b)))]
+
+        [(_ _) (assert #f "infeasible in interpreting psubsw")])]
+
+    [(x86:psubusb a b)
+      (destruct* ((interpret a) (interpret b))
+        [((x86:u8x16 a) (x86:u8x16 b))
+            (x86:u8x16
+             (halide:interpret
+              (vec-sub
+               (vec-max
+                a
+                b)
+               b)))]
+
+        [(_ _) (assert #f "infeasible in interpreting psubusb")])]
+
+    [(x86:psubusw a b)
+      (destruct* ((interpret a) (interpret b))
+        [((x86:u16x8 a) (x86:u16x8 b))
+            (x86:u16x8
+             (halide:interpret
+              (vec-sub
+               (vec-max
+                a
+                b)
+               b)))]
+
+        [(_ _) (assert #f "infeasible in interpreting psubusw")])]
+
+    [(x86:psubw a b)
+      (destruct* ((interpret a) (interpret b))
+        [((x86:i16x8 a) (x86:i16x8 b))
+            (x86:i16x8
+             (halide:interpret
+              (vec-sub
+               a
+               b)))]
+        [((x86:u16x8 a) (x86:u16x8 b))
+            (x86:u16x8
+             (halide:interpret
+              (vec-sub
+               a
+               b)))]
+
+        [(_ _) (assert #f "infeasible in interpreting psubw")])]
+
+    [(x86:punpckhbw a b)
+      (destruct* ((interpret a) (interpret b))
+        [((x86:i8x16 a) (x86:i8x16 b))
+            (x86:i8x16
+             (halide:interpret
+              (interleave
+               (slice_vectors
+                a 1 1 8)
+               (slice_vectors
+                b 1 1 8))))]
+        [((x86:u8x16 a) (x86:u8x16 b))
+            (x86:u8x16
+             (halide:interpret
+              (interleave
+               (slice_vectors
+                a 1 1 8)
+               (slice_vectors
+                b 1 1 8))))]
+
+        [(_ _) (assert #f "infeasible in interpreting punpckhbw")])]
+
+    [(x86:punpckhdq a b)
+      (destruct* ((interpret a) (interpret b))
+        [((x86:i32x4 a) (x86:i32x4 b))
+            (x86:i32x4
+             (halide:interpret
+              (interleave
+               (slice_vectors
+                a 1 1 2)
+               (slice_vectors
+                b 1 1 2))))]
+        [((x86:u32x4 a) (x86:u32x4 b))
+            (x86:u32x4
+             (halide:interpret
+              (interleave
+               (slice_vectors
+                a 1 1 2)
+               (slice_vectors
+                b 1 1 2))))]
+
+        [(_ _) (assert #f "infeasible in interpreting punpckhdq")])]
+
+    [(x86:punpckhqdq a b)
+      (destruct* ((interpret a) (interpret b))
+        [((x86:i64x2 a) (x86:i64x2 b))
+            (x86:i64x2
+             (halide:interpret
+              (concat_vectors
+               (slice_vectors
+                a 1 1 1)
+               (slice_vectors
+                b 1 1 1))))]
+        [((x86:u64x2 a) (x86:u64x2 b))
+            (x86:u64x2
+             (halide:interpret
+              (concat_vectors
+               (slice_vectors
+                a 1 1 1)
+               (slice_vectors
+                b 1 1 1))))]
+
+        [(_ _) (assert #f "infeasible in interpreting punpckhqdq")])]
+
+    [(x86:punpckhwd a b)
+      (destruct* ((interpret a) (interpret b))
+        [((x86:i16x8 a) (x86:i16x8 b))
+            (x86:i16x8
+             (halide:interpret
+              (interleave
+               (slice_vectors
+                a 1 1 4)
+               (slice_vectors
+                b 1 1 4))))]
+        [((x86:u16x8 a) (x86:u16x8 b))
+            (x86:u16x8
+             (halide:interpret
+              (interleave
+               (slice_vectors
+                a 1 1 4)
+               (slice_vectors
+                b 1 1 4))))]
+
+        [(_ _) (assert #f "infeasible in interpreting punpckhwd")])]
+
+    [(x86:punpcklbw a b)
+      (destruct* ((interpret a) (interpret b))
+        [((x86:i8x16 a) (x86:i8x16 b))
+            (x86:i8x16
+             (halide:interpret
+              (interleave
+               (slice_vectors
+                a 0 1 8)
+               (slice_vectors
+                b 0 1 8))))]
+        [((x86:u8x16 a) (x86:u8x16 b))
+            (x86:u8x16
+             (halide:interpret
+              (interleave
+               (slice_vectors
+                a 0 1 8)
+               (slice_vectors
+                b 0 1 8))))]
+
+        [(_ _) (assert #f "infeasible in interpreting punpcklbw")])]
+
+    [(x86:punpckldq a b)
+      (destruct* ((interpret a) (interpret b))
+        [((x86:i32x4 a) (x86:i32x4 b))
+            (x86:i32x4
+             (halide:interpret
+              (interleave
+               (slice_vectors
+                a 0 1 2)
+               (slice_vectors
+                b 0 1 2))))]
+        [((x86:u32x4 a) (x86:u32x4 b))
+            (x86:u32x4
+             (halide:interpret
+              (interleave
+               (slice_vectors
+                a 0 1 2)
+               (slice_vectors
+                b 0 1 2))))]
+
+        [(_ _) (assert #f "infeasible in interpreting punpckldq")])]
+
+    [(x86:punpcklqdq a b)
+      (destruct* ((interpret a) (interpret b))
+        [((x86:i64x2 a) (x86:i64x2 b))
+            (x86:i64x2
+             (halide:interpret
+              (concat_vectors
+               (slice_vectors
+                a 0 1 1)
+               (slice_vectors
+                b 0 1 1))))]
+        [((x86:u64x2 a) (x86:u64x2 b))
+            (x86:u64x2
+             (halide:interpret
+              (concat_vectors
+               (slice_vectors
+                a 0 1 1)
+               (slice_vectors
+                b 0 1 1))))]
+
+        [(_ _) (assert #f "infeasible in interpreting punpcklqdq")])]
+
+    [(x86:punpcklwd a b)
+      (destruct* ((interpret a) (interpret b))
+        [((x86:i16x8 a) (x86:i16x8 b))
+            (x86:i16x8
+             (halide:interpret
+              (interleave
+               (slice_vectors
+                a 0 1 4)
+               (slice_vectors
+                b 0 1 4))))]
+        [((x86:u16x8 a) (x86:u16x8 b))
+            (x86:u16x8
+             (halide:interpret
+              (interleave
+               (slice_vectors
+                a 0 1 4)
+               (slice_vectors
+                b 0 1 4))))]
+
+        [(_ _) (assert #f "infeasible in interpreting punpcklwd")])]
+
+    [(x86:pxor a b)
+      (destruct* ((interpret a) (interpret b))
+        [((x86:i8x16 a) (x86:i8x16 b))
+            (x86:i8x16
+             (halide:interpret
+              (vec-bwxor
+               a
+               b)))]
+        [((x86:i16x8 a) (x86:i16x8 b))
+            (x86:i16x8
+             (halide:interpret
+              (vec-bwxor
+               a
+               b)))]
+        [((x86:i32x4 a) (x86:i32x4 b))
+            (x86:i32x4
+             (halide:interpret
+              (vec-bwxor
+               a
+               b)))]
+        [((x86:i64x2 a) (x86:i64x2 b))
+            (x86:i64x2
+             (halide:interpret
+              (vec-bwxor
+               a
+               b)))]
+        [((x86:u8x16 a) (x86:u8x16 b))
+            (x86:u8x16
+             (halide:interpret
+              (vec-bwxor
+               a
+               b)))]
+        [((x86:u16x8 a) (x86:u16x8 b))
+            (x86:u16x8
+             (halide:interpret
+              (vec-bwxor
+               a
+               b)))]
+        [((x86:u32x4 a) (x86:u32x4 b))
+            (x86:u32x4
+             (halide:interpret
+              (vec-bwxor
+               a
+               b)))]
+        [((x86:u64x2 a) (x86:u64x2 b))
+            (x86:u64x2
+             (halide:interpret
+              (vec-bwxor
+               a
+               b)))]
+
+        [(_ _) (assert #f "infeasible in interpreting pxor")])]
+
     [(x86:resize a)
       (destruct* ((interpret a))
         [((x86:u8x16 a))
@@ -242,7 +5103,7 @@
         [((x86:i32x8 a) (x86:i32x8 b))
             (x86:u16x16
              (halide:interpret
-              (int16x16
+              (uint16x16
                (vec-max
                 (vec-min
                  (concat_vectors
@@ -256,8 +5117,8 @@
                     b 0 1 4)
                    (slice_vectors
                     a 1 1 4)))
-                 (x16 (int32_t (bv 32767 32))))
-                (x16 (int32_t (bv -32768 32)))))))]
+                 (x16 (int32_t (bv 65535 32))))
+                (x16 (int32_t (bv 0 32)))))))]
 
         [(_ _) (assert #f "infeasible in interpreting vpackusdw")])]
 
@@ -266,7 +5127,7 @@
         [((x86:i16x16 a) (x86:i16x16 b))
             (x86:u8x32
              (halide:interpret
-              (int8x32
+              (uint8x32
                (vec-max
                 (vec-min
                  (concat_vectors
@@ -280,8 +5141,8 @@
                     b 0 1 8)
                    (slice_vectors
                     a 1 1 8)))
-                 (x32 (int16_t (bv 127 16))))
-                (x32 (int16_t (bv -128 16)))))))]
+                 (x32 (int16_t (bv 255 16))))
+                (x32 (int16_t (bv 0 16)))))))]
 
         [(_ _) (assert #f "infeasible in interpreting vpackuswb")])]
 
@@ -11028,16 +15889,6 @@
 
         [(_) (assert #f "infeasible in interpreting vpmovzxbw")])]
 
-    [(x86:vpmovzxbw_s a)
-      (destruct* ((interpret a))
-        [((x86:u8x16 a))
-            (x86:i16x16
-             (halide:interpret
-              (uint16x16
-               a)))]
-
-        [(_) (assert #f "infeasible in interpreting vpmovzxbw_s")])]
-
     [(x86:vpmovzxdq a)
       (destruct* ((interpret a))
         [((x86:u32x4 a))
@@ -11171,7 +16022,8 @@
              (halide:interpret
               (vec-mul
                a
-               (x16 (int16_t imm16)))))]
+               (x16 (int16_t
+ imm16)))))]
 
         [(_ _) (assert #f "infeasible in interpreting vpmullw-vs")])]
 
@@ -18115,13 +22967,15 @@
              (halide:interpret
               (vec-shl
                a
-               (x8 (uint32x1 (uint8_t imm8))))))]
+               (x8 (uint32x1 (uint8_t
+ imm8))))))]
         [((x86:u32x8 a) (uint8_t imm8))
             (x86:u32x8
              (halide:interpret
               (vec-shl
                a
-               (x8 (uint32x1 (uint8_t imm8))))))]
+               (x8 (uint32x1 (uint8_t
+ imm8))))))]
 
         [(_ _) (assert #f "infeasible in interpreting vpslld")])]
 
@@ -20649,13 +25503,15 @@
              (halide:interpret
               (vec-shl
                a
-               (x4 (uint64x1 (uint8_t imm8))))))]
+               (x4 (uint64x1 (uint8_t
+ imm8))))))]
         [((x86:u64x4 a) (uint8_t imm8))
             (x86:u64x4
              (halide:interpret
               (vec-shl
                a
-               (x4 (uint64x1 (uint8_t imm8))))))]
+               (x4 (uint64x1 (uint8_t
+ imm8))))))]
 
         [(_ _) (assert #f "infeasible in interpreting vpsllq")])]
 
@@ -20724,13 +25580,15 @@
              (halide:interpret
               (vec-shl
                a
-               (x16 (uint16x1 (uint8_t imm8))))))]
+               (x16 (uint16x1 (uint8_t
+ imm8))))))]
         [((x86:u16x16 a) (uint8_t imm8))
             (x86:u16x16
              (halide:interpret
               (vec-shl
                a
-               (x16 (uint16x1 (uint8_t imm8))))))]
+               (x16 (uint16x1 (uint8_t
+ imm8))))))]
 
         [(_ _) (assert #f "infeasible in interpreting vpsllw")])]
 
@@ -20741,7 +25599,8 @@
              (halide:interpret
               (vec-shr
                a
-               (x8 (uint32x1 (uint8_t imm8))))))]
+               (x8 (uint32x1 (uint8_t
+ imm8))))))]
 
         [(_ _) (assert #f "infeasible in interpreting vpsrad")])]
 
@@ -20769,7 +25628,8 @@
              (halide:interpret
               (vec-shr
                a
-               (x16 (uint16x1 (uint8_t imm8))))))]
+               (x16 (uint16x1 (uint8_t
+ imm8))))))]
 
         [(_ _) (assert #f "infeasible in interpreting vpsraw")])]
 
@@ -20780,7 +25640,8 @@
              (halide:interpret
               (vec-shr
                a
-               (x8 (uint32x1 (uint8_t imm8))))))]
+               (x8 (uint32x1 (uint8_t
+ imm8))))))]
 
         [(_ _) (assert #f "infeasible in interpreting vpsrld")])]
 
@@ -23308,7 +28169,8 @@
              (halide:interpret
               (vec-shr
                a
-               (x4 (uint64x1 (uint8_t imm8))))))]
+               (x4 (uint64x1 (uint8_t
+ imm8))))))]
 
         [(_ _) (assert #f "infeasible in interpreting vpsrlq")])]
 
@@ -23353,7 +28215,8 @@
              (halide:interpret
               (vec-shr
                a
-               (x16 (uint16x1 (uint8_t imm8))))))]
+               (x16 (uint16x1 (uint8_t
+ imm8))))))]
 
         [(_ _) (assert #f "infeasible in interpreting vpsrlw")])]
 
