@@ -276,7 +276,7 @@
          [one (cpp:eval (const-one type))]
          [zero (cpp:eval (const-zero type))]
          [shift (cpp:eval (cpp:cast rhs type))]
-         [gtcheck (if (cpp:signed-expr? lhs) bvsgt bvugt)]
+         [gtcheck (if (cpp:signed-expr? rhs) bvsgt bvugt)]
          [b_pos (if (gtcheck shift zero) one zero)]
          [value (cpp:eval lhs)]
          [rshifted0 (shift-func value shift)]
@@ -792,6 +792,8 @@
     [(arm-ir:abs-diff-acc acc expr0 expr1 widening?) (+ (instr-count acc) (instr-count expr0) (instr-count expr1) 1)]
 
     [(arm-ir:bitwise-and expr0 expr1) (+ (instr-count expr0) (instr-count expr1) 1)]
+
+    [(arm-ir:select expr0 expr1 expr2) (+ (instr-count expr0) (instr-count expr1) (instr-count expr2) 1)]
 
     [(arm-ir:vs-divide expr divisor) (+ (instr-count expr) 1)]
 
