@@ -27,9 +27,22 @@
      (when (hash-has-key? translation-history sub-expr)
        (define halide-sub-expr (hash-ref translation-history sub-expr))
        (define abstracted-halide-subexpr (make-abstr-halide-expr halide-sub-expr))
-       (if (hash-has-key? value-bounds sub-expr)
-          (set!-values (updated-spec updated-template) (abstr-equiv-subexprs updated-spec updated-template sub-expr halide-sub-expr abstracted-halide-subexpr 0 (hash-ref value-bounds sub-expr)))
-          (set!-values (updated-spec updated-template) (abstr-equiv-subexprs updated-spec updated-template sub-expr halide-sub-expr abstracted-halide-subexpr 0)))))
+       (cond
+         [(arm:concat-tiles? sub-expr)
+          (define offset 0)
+          (for ([tile (arm:concat-tiles-vecs sub-expr)])
+            (cond
+              [(hash-has-key? value-bounds sub-expr)
+               (set!-values (updated-spec updated-template) (abstr-equiv-subexprs updated-spec updated-template tile halide-sub-expr abstracted-halide-subexpr offset (hash-ref value-bounds sub-expr)))]
+              [else
+               (set!-values (updated-spec updated-template) (abstr-equiv-subexprs updated-spec updated-template tile halide-sub-expr abstracted-halide-subexpr offset))])
+            (set! offset (+ offset (arm:num-elems (arm:interpret tile)))))]
+         [else
+          (cond
+            [(hash-has-key? value-bounds sub-expr)
+             (set!-values (updated-spec updated-template) (abstr-equiv-subexprs updated-spec updated-template sub-expr halide-sub-expr abstracted-halide-subexpr 0 (hash-ref value-bounds sub-expr)))]
+            [else
+             (set!-values (updated-spec updated-template) (abstr-equiv-subexprs updated-spec updated-template sub-expr halide-sub-expr abstracted-halide-subexpr 0))])])))
    arm-sub-exprs)
   (values updated-spec (if (not (empty? arm-sub-exprs)) (fix-swizzle-reads updated-spec updated-template) updated-template) axioms))
 
@@ -38,6 +51,7 @@
     ;; Don't bother if the sub-expr is just a load or a broadcast (leaf nodes anyways)
     [(arm:??load? arm-sub-expr) (values spec template)]
     [(arm:??shuffle? arm-sub-expr) (values spec template)]
+    [(arm:dup? arm-sub-expr) (values spec template)]
     [else
       (define abstracted-arm-subexpr (make-arm-abstr-sub-expr arm-sub-expr abstracted-halide-subexpr offset sub-expr-bounds))
        
