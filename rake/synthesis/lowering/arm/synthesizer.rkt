@@ -109,6 +109,7 @@
      ;(println ((halide:interpret optimized-halide-expr) curr-lane))
      ;(set-curr-cn! curr-lane)
      ;(println (arm:get-element (arm:interpret optimized-template) curr-lane))
+     ;(display "\n")
 
      (define st (current-milliseconds))
      (clear-vc!)

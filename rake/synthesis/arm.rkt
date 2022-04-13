@@ -16,6 +16,7 @@
   rake/arm/ir/interpreter
   ;rake/hvx/ast/visitor
   rake/arm/ast/types
+  rake/arm/ast/interpreter
   ;rake/hvx/cost-model
   ;rake/synthesis/bounds
   rake/synthesis/lowering/algorithm

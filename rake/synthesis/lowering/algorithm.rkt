@@ -38,7 +38,7 @@
           (values #t (car hvx-template) (cdr hvx-template))]
         [else
           (display "Failed to synthesize template.\n\n")
-          (values #f (void) 0 )])]
+          (values #f (void) 0)])]
     [else (error (format "Unrecognized lowering algorithm specified: '~a. Supported algorithms: ['enumerative]" lowering-algo))]))
 
 (define (synthesize-arm-template halide-expr ir-expr arm-sub-exprs value-bounds translation-history lowering-algo cost-ub)

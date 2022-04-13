@@ -24,16 +24,10 @@
   (let* ([key (cons (arm-ir:ast-node-id ir-expr) arm-sub-exprs)]
          [check-cache (and (not (arm-ir:load-data? ir-expr)) (hash-has-key? grammar-cache key))]
          [candidates (if check-cache (hash-ref grammar-cache key) (get-arm-grammar-helper halide-expr ir-expr arm-sub-exprs))])
-    ;(println cost-ub)
-    ;(println key)
-    ;(println grammar-cache)
-    ;(println check-cache)
-    ;(println (get-arm-grammar-helper halide-expr ir-expr arm-sub-exprs))
-    ;(println (if check-cache (hash-ref grammar-cache key) (get-arm-grammar-helper halide-expr ir-expr arm-sub-exprs)))
-    (display (format "get-arm-grammar received ~a candidates\n" (length candidates)))
+    ;(display (format "get-arm-grammar received ~a candidates\n" (length candidates)))
     ;(println (filter (lambda (c) (<= (cdr c) cost-ub)) candidates))
     (let ([filtered (filter (lambda (c) (<= (cdr c) cost-ub)) candidates)])
-      (display (format "And ~a of them pass the cost filtering\n" (length filtered)))
+      ;(display (format "And ~a of them pass the cost filtering\n" (length filtered)))
       filtered)))
 
 (define (get-input-type expr)
@@ -49,7 +43,7 @@
   (set! candidates (sort candidates (lambda (v1 v2) (<= (cdr v1) (cdr v2)))))
 
   ;; Fill in param grammars
-  (for/list ([candidate candidates]) (cons (uniquify-swizzles candidate) (cdr candidate))))
+  (for/list ([candidate candidates]) (cons (uniquify-swizzles (car candidate)) (cdr candidate))))
 
 
 (define (handle-vs-mpy-add expr weights output-type arm-sub-exprs halide-expr)
@@ -78,27 +72,27 @@
                             (arm:visit expr extract-buffer)
                             live-bufs))])
 
-    (display "arm sub exprs!\n")
-    (pretty-print arm-sub-exprs)
-    (display "grouped sub exprs!\n")
-    (pretty-print grouped-sub-exprs)
-    (display "candidates!\n")
-    (pretty-print candidates)
-    (display (format "~a ~a ~a\n" isa desired-types grouped-sub-exprs))
-    (pretty-print grouped-sub-exprs)
-    (display (format "Types; ~a ~a ~a\n" input-type output-type widening?))
+    ;(display "arm sub exprs!\n")
+    ;(pretty-print arm-sub-exprs)
+    ;(display "grouped sub exprs!\n")
+    ;(pretty-print grouped-sub-exprs)
+    ;(display "candidates!\n")
+    ;(pretty-print candidates)
+    ;(display (format "~a ~a ~a\n" isa desired-types grouped-sub-exprs))
+    ;(pretty-print grouped-sub-exprs)
+    ;(display (format "Types; ~a ~a ~a\n" input-type output-type widening?))
 
     ;; Filter out templates that read too much or too little data
-    (display (format "Before filtering reads: ~a\n" (length candidates)))
+    ;(display (format "Before filtering reads: ~a\n" (length candidates)))
     (set! candidates (time (filter (lambda (c) (eq? (arm:max-unique-inputs (car c)) number-reads)) candidates)))
-    (display (format "After filtering reads: ~a\n" (length candidates)))
-    (display (format "Load buffers: ~a\n" load-buffers))
-    (display "First:\n")
-    (pretty-print (first candidates))
-    (display (format "LB: ~a\n" (live-buffers (car (first candidates)))))
+    ;(display (format "After filtering reads: ~a\n" (length candidates)))
+    ;(display (format "Load buffers: ~a\n" load-buffers))
+    ;(display "First:\n")
+    ;(pretty-print (first candidates))
+    ;(display (format "LB: ~a\n" (live-buffers (car (first candidates)))))
     (set! candidates (time (filter (lambda (c) (equal? (live-buffers (car c)) load-buffers)) candidates)))
 
-    (display (format "After filtering buffers: ~a\n" (length candidates)))
+    ;(display (format "After filtering buffers: ~a\n" (length candidates)))
     ;(pretty-print (take candidates 50))
     ;(println (length candidates))
 
@@ -376,7 +370,7 @@
 (define (prepare-sub-exprs arm-sub-exprs)
   (define grouped-sub-exprs (make-hash))
   (define swizzle-node-id -1)
-  (define arm-sub-exprs-untiled (flatten (map (lambda (expr) (if (arm:concat-tiles? expr) (arm:concat-tiles-vecs expr) expr)) (set->list (list->set arm-sub-exprs)))))
+  (define arm-sub-exprs-untiled (set->list (list->set (flatten (map (lambda (expr) (if (arm:concat-tiles? expr) (arm:concat-tiles-vecs expr) expr)) (set->list (list->set arm-sub-exprs)))))))
   (for ([arm-sub-expr arm-sub-exprs-untiled])
     (cond
       [(arm:??abstr-load? arm-sub-expr)
@@ -410,7 +404,8 @@
     (define merged-candidates
       (append
        (map (curryr cons 0) (filter is-load? candidates-l))
-       (let ([c (filter (lambda (c) (not (is-load? c))) candidates-l)])
+       (map (curryr cons 0) (filter is-dup? candidates-l))
+       (let ([c (filter (lambda (c) (not (or (is-dup? c) (is-load? c)))) candidates-l)])
          (cond
            [(empty? c) '()]
            [else
@@ -424,10 +419,16 @@
    (arm:??load? expr)
    (arm:??shuffle? expr)))
 
+(define (is-dup? expr)
+  (or
+   (arm:dup? expr)
+   ;(and (arm:vcombine? expr) (vsplat? (vcombine-Vu expr)) (vsplat? (vcombine-Vv expr)))
+   ))
+
 (define enumeration-cache (make-hash))
 
 (define (not-dbl-reinterpret parent-instr child-instr)
-  (display (format "(not-dbl-reinterpret ~a ~a)\n\n" parent-instr child-instr))
+  ;(display (format "(not-dbl-reinterpret ~a ~a)\n\n" parent-instr child-instr))
   (not (and (eqv? parent-instr arm:reinterpret) (eqv? child-instr arm:reinterpret))))
 
 (define (enumerate-arm instr-set output-types base-exprs depth max-cost [read-count -1] [parent-instr (void)] [arg-pos -1])

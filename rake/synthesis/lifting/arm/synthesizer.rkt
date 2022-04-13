@@ -46,7 +46,7 @@
   (define-values (optimized-template optimized-halide-expr inferred-axioms abstr-value-bounds)
     (optimize-arm-query halide-expr template translation-history value-bounds))
 
-  ;(when (and (arm-ir:vs-shift-right? optimized-template) (vec-add? optimized-halide-expr))
+  ;(when (arm-ir:halving-add? optimized-template)
     ;(arm-ir:set-curr-cn! 0)
 ;  (display "\n\n\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n")
 ;  ;(display "axioms:\n  ")
