@@ -294,7 +294,7 @@
      (define candidates (for/list ([buffer buffers]) (cons (arm:??abstr-load 0 live-data buffer) 1)))
      (define buf-elemTypes (map buffer-elemT buffers))
      (define (label-cost value)
-        (cons value 2))
+        (cons value (if (arm:half-width? (arm:interpret value)) 2 1)))
      (define (generate-shuffles type)
         (define (construct-loads b)
           (define tbl (map (lambda (i) (define-symbolic* idx integer?) idx) (range 256)))
@@ -302,12 +302,12 @@
           (map make-load (arm:get-vector-types (buffer-elemT b))))
         (define actual-loads (flatten (map construct-loads buffers)))
         (arm:make-shuffles-list actual-loads type))
-     (map label-cost (flatten (map generate-shuffles buf-elemTypes)))]
+     (sort (map label-cost (flatten (map generate-shuffles buf-elemTypes))) (lambda (v1 v2) (<= (cdr v1) (cdr v2))))]
 
     ;; Data broadcasting
     [(arm-ir:broadcast scalar-expr)
       ; TODO: do type pruning
-      (list (cons (arm:dup scalar-expr) 1.2) (cons (arm:dupw scalar-expr) 1))]
+      (list (cons (arm:dupw scalar-expr) 1) (cons (arm:dup scalar-expr) 1.2))]
 
     [(arm-ir:cast expr type saturate?)
       (handle-cast expr type saturate? arm-sub-exprs halide-expr)]
