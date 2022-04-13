@@ -22,8 +22,6 @@
      (define-values (lifting-success? ir-expr ir-annotations ir-bounds)
        (synthesize-ir-expr spec 'hvx-uberinstrs lifting-algo))
 
-     (exit)
-
      (cond
        [lifting-success?
         ;; Lower the uber-instructions to an expression template (in HVX ISA)
@@ -53,32 +51,27 @@
      (define-values (lifting-success? ir-expr ir-annotations ir-bounds)
        (synthesize-ir-expr spec 'arm-uberinstrs lifting-algo))
 
-     (exit)
-
      (cond
        [lifting-success?
         ;; Lower the super-instructions to an expression template (in ARM ISA)
-       ; (define arm-expr (synthesize-arm-expr ir-expr ir-annotations ir-bounds lowering-algo swizzling-algo))
+        (define-values (lowering-success? arm-expr)
+          (synthesize-arm-expr ir-expr ir-annotations ir-bounds lowering-algo swizzling-algo))
 
         ;; Full verification of the synthesized expression
-        ;(define correct? (verify-equivalence (spec-expr spec) arm-expr (spec-axioms spec)))
+        ;(define correct? (verify-equivalence-arm (spec-expr spec) arm-expr (spec-axioms spec)))
  
         (cond
-          [lifting-success?;correct?
-            ;(pretty-print arm-expr)
+          [lowering-success?
+            (pretty-print arm-expr)
             (display "Synthesized solution is correct.\n\n")
-            ir-expr];arm-expr]
+            arm-expr]
           [else
             (display "Synthesized solution is incorrect.\n\n")
-            ir-expr];arm-expr]
-          )]
+            arm-expr])]
        
        [else (error (format "Could not lift Halide expression to ARM IR."))])]
 
     [else (error (format "Input specification is provided in a language Rake currently does not support: '~a. Supported IRs: ['halide-ir]" spec-lang))]))
-
-
-
 
 (define (synthesize-x86 spec [lifting-algo 'greedy] [lowering-algo 'enumerative] [swizzling-algo 'enumerative])
   (cond

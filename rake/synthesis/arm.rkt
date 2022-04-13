@@ -36,12 +36,10 @@
   ;; Push node to trace
   (set! trace (append (list ir-expr) trace))
 
-  (display "here 1\n")
   ;; Lower sub-expressions first
   (define-values (successful? arm-sub-exprs)
     (lower-sub-exprs ir-expr (arm-ir:get-subexprs ir-expr) ir-annotations ir-bounds lowering-algo swizzling-algo sub-expr?))
 
-  (display "here 2\n")
   ;; Pop node from trace
   (set! trace (rest trace))
 
@@ -87,12 +85,6 @@
      (define-values (successful? arm-expr _)
        (lower-to-optimal-arm halide-spec ir-expr arm-sub-exprs lowering-algo swizzling-algo sub-expr?))
      (when successful? (hash-set! translation-history arm-expr halide-spec))
-     (display "optimal successful?\n")
-     (display successful?)
-     (newline)
-     (pretty-print ir-expr)
-     (display "\n\n->\n\n")
-     (pretty-print arm-expr)
      (cond
        [successful? (values #t arm-expr)]
        [else (values #f (void))])]
@@ -138,9 +130,6 @@
          (display "Searching for a more optimal implementation...\n\n")
          (define-values (successful? better-arm-expr new-cost)
            (lower-to-optimal-arm halide-expr ir-expr arm-sub-exprs lowering-algo swizzling-algo sub-expr? expr-cost))
-        (display "recursive successful?\n")
-        (display successful?)
-        (newline)
          (cond
            [successful? (values #t better-arm-expr new-cost)]
            [else (values #t arm-expr expr-cost)])]
@@ -177,7 +166,7 @@
 (define (incremental-swizzle halide-expr ir-expr arm-template arm-sub-exprs lowering-algo swizzling-algo template-cost cost-ub sub-expr?)
   (let* ([swizzle-budget (- cost-ub template-cost 0.01)]
          ; TODO: how the heck do we do this calculation?
-         [arm-tile-size 128]
+         [arm-tile-size (if (arm:half-width? (arm:interpret arm-template)) 64 128)]
          [halide-tile-elem-count (halide:vec-len halide-expr)]
          [halide-tile-elem-bits (cpp:type-bw (halide:elem-type halide-expr))]
          [halide-tile-size (* halide-tile-elem-count halide-tile-elem-bits)]
@@ -191,8 +180,8 @@
     
     (define halide-expr-tiles (break-to-tiles halide-expr elems-per-arm-tile 0))
 
-    (display "Made it this far\n")
-    (pretty-print halide-expr-tiles)
+    ;(display "Made it this far\n")
+    ;(pretty-print halide-expr-tiles)
 
     (if (< 1 (length halide-expr-tiles))
       (let ([incremental-swizzler (construct-incremental-swizzle-helper arm-template swizzle-budget swizzling-algo arm-sub-exprs (length halide-expr-tiles))])
@@ -223,7 +212,7 @@
   (define-values (successful? arm-template template-cost)
     (synthesize-arm-template halide-expr ir-expr arm-sub-exprs value-bounds translation-history lowering-algo cost-ub))
 
-  (display "here\n")
+  ;(display "here\n")
   ;(pretty-print arm-template)
   ;(pretty-print halide-expr)
   ;(display (swizzle-only? arm-template))
@@ -234,10 +223,5 @@
       (if (and sub-expr? (swizzle-only? arm-template))
           ; TODO: why return template-cost twice?
           (values #t arm-template template-cost template-cost 0)
-          (begin
-              ; TODO: do we need the incremental swizzling stuff?
-              (pretty-print arm-template)
-              (pretty-print halide-expr)
-              (incremental-swizzle halide-expr ir-expr arm-template arm-sub-exprs lowering-algo swizzling-algo template-cost cost-ub sub-expr?)
-          ))
+          (incremental-swizzle halide-expr ir-expr arm-template arm-sub-exprs lowering-algo swizzling-algo template-cost cost-ub sub-expr?))
       (values #f (void) 0 0 0)))
