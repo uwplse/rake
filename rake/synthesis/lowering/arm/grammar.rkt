@@ -277,8 +277,8 @@
   (cond
     ;; TODO: handle arbitrary logical vector lengths.
     [(and (int32_t? stride) (eq? len 16))
-      (let ([output-type 'i32x8]
-            [exprs (list (ramp base stride 8) (ramp (sca-add base (int32_t (bv 8 32))) stride 8))]
+      (let ([output-type 'i32x4]
+            [exprs (list (ramp base stride 4) (ramp (sca-add base (int32_t (bv 4 32))) stride 4) (ramp (sca-add base (int32_t (bv 8 32))) stride 4) (ramp (sca-add base (int32_t (bv 12 32))) stride 4))]
             [ihal (halide:interpret halide-expr)]
             [tbl (map (lambda (i) (define-symbolic* idx integer?) idx) (range 256))])
         (list (cons (arm:??swizzle 0 (for/list ([i (range 8)]) (list (ihal i))) exprs tbl output-type) 1)))]
@@ -307,7 +307,7 @@
     ;; Data broadcasting
     [(arm-ir:broadcast scalar-expr)
       ; TODO: do type pruning
-      (list (cons (arm:dup scalar-expr) 1) (cons (arm:dupw scalar-expr) 1))]
+      (list (cons (arm:dup scalar-expr) 1.2) (cons (arm:dupw scalar-expr) 1))]
 
     [(arm-ir:cast expr type saturate?)
       (handle-cast expr type saturate? arm-sub-exprs halide-expr)]
@@ -422,6 +422,8 @@
 (define (is-dup? expr)
   (or
    (arm:dup? expr)
+   (arm:dupw? expr)
+   (arm:dupn? expr)
    ;(and (arm:vcombine? expr) (vsplat? (vcombine-Vu expr)) (vsplat? (vcombine-Vv expr)))
    ))
 

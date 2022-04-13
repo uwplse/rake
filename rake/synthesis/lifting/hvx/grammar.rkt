@@ -318,7 +318,7 @@
     
     [(load buf idxs align) (list (mk-load-instr halide-expr))]
     [(slice_vectors vec base stride len) (list (mk-load-instr halide-expr))]
-    [(concat_vectors v1 v2) (list (mk-load-instr halide-expr))]
+    [(concat_vectors v1 v2 len) (list (mk-load-instr halide-expr))]
     [(interleave v1 v2) (list (mk-combine-instr lifted-sub-exprs))]
     [(dynamic_shuffle vec idxs st end) (list (mk-load-instr halide-expr))]
 

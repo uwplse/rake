@@ -54,7 +54,7 @@
     ;; Shuffles
     [(vec-broadcast n vec) (handler (vec-broadcast n (visit vec handler)))]
     [(slice_vectors vec base stride len) (handler (slice_vectors (visit vec handler) (visit base handler) (visit stride handler) (visit len handler)))]
-    [(concat_vectors v1 v2) (handler (concat_vectors (visit v1 handler) (visit v2 handler)))]
+    [(concat_vectors v1 v2 len) (handler (concat_vectors (visit v1 handler) (visit v2 handler) (visit len handler)))]
     [(interleave v1 v2) (handler (interleave (visit v1 handler) (visit v2 handler)))]
     [(interleave4 v1 v2 v3 v4) (handler (interleave4 (visit v1 handler) (visit v2 handler) (visit v3 handler) (visit v4 handler)))]
     [(dynamic_shuffle vec idxs st end) (handler (slice_vectors (visit vec handler) (visit idxs handler) (visit st handler) (visit end handler)))]

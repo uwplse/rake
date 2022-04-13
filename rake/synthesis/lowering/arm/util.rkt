@@ -52,6 +52,8 @@
     [(arm:??load? arm-sub-expr) (values spec template)]
     [(arm:??shuffle? arm-sub-expr) (values spec template)]
     [(arm:dup? arm-sub-expr) (values spec template)]
+    [(arm:dupw? arm-sub-expr) (values spec template)]
+    [(arm:dupn? arm-sub-expr) (values spec template)]
     [else
       (define abstracted-arm-subexpr (make-arm-abstr-sub-expr arm-sub-expr abstracted-halide-subexpr offset sub-expr-bounds))
        

@@ -43,9 +43,9 @@
       (define (register-gather-node node [pos -1])
         (destruct node
           [(arm:??abstr-load id live-data buffer) (set! swizzle-nodes (append (list node) swizzle-nodes)) node]
-          [(arm:??shuffle id lds pair?) (set! swizzle-nodes (append (list node) swizzle-nodes)) node]
-          [(arm:??load id live-data buffer gather-tbl pair?) (set! swizzle-nodes (append (list node) swizzle-nodes)) node]
-          [(arm:??swizzle id live-data expr gather-tbl pair?) (set! swizzle-nodes (append (list node) swizzle-nodes)) node]
+          [(arm:??shuffle id lds output-type) (set! swizzle-nodes (append (list node) swizzle-nodes)) node]
+          [(arm:??load id live-data buffer gather-tbl output-type) (set! swizzle-nodes (append (list node) swizzle-nodes)) node]
+          [(arm:??swizzle id live-data expr gather-tbl output-type) (set! swizzle-nodes (append (list node) swizzle-nodes)) node]
           [_ node]))
       (arm:visit-shallow arm-template register-gather-node)
       
@@ -99,7 +99,7 @@
   
   (cond
     [successful?
-     ;; Inline sub-expr nodes
+     ;; Inline sub-expr nodes?
      (define (inline-subexprs node [pos -1])
        (destruct node
          [(arm:??sub-expr exprs c) (list-ref exprs (if (concrete? c) c (evaluate c (complete-solution (sat) (list c)))))]
@@ -270,9 +270,9 @@
       (define (repl-swizzle-node-with-candidate node [pos -1])
         (destruct node
           [(arm:??abstr-load id live-data buffer) (arm:visit (car candidate-swizzle) uniquify-sub-exprs)]
-          [(arm:??shuffle id lds pair?) (if (equal? id target-node-id) (arm:visit (car candidate-swizzle) uniquify-sub-exprs) node)]
-          [(arm:??load id live-data buffer gather-tbl pair?) (if (equal? id target-node-id) (arm:visit (car candidate-swizzle) uniquify-sub-exprs) node)]
-          [(arm:??swizzle id live-data expr gather-tbl pair?) (if (equal? id target-node-id) (arm:visit (car candidate-swizzle) uniquify-sub-exprs) node)]
+          [(arm:??shuffle id lds output-type) (if (equal? id target-node-id) (arm:visit (car candidate-swizzle) uniquify-sub-exprs) node)]
+          [(arm:??load id live-data buffer gather-tbl output-type) (if (equal? id target-node-id) (arm:visit (car candidate-swizzle) uniquify-sub-exprs) node)]
+          [(arm:??swizzle id live-data expr gather-tbl output-type) (if (equal? id target-node-id) (arm:visit (car candidate-swizzle) uniquify-sub-exprs) node)]
           [_ node]))
 
       (define updated-candidate (arm:visit-shallow updated-template repl-swizzle-node-with-candidate))
@@ -288,12 +288,14 @@
                   (arm:ld (list-ref base-expr 0) (list-ref base-expr 1) (list-ref base-expr 2) output-type))
                 (filter (lambda (vec) (eq? buffer (list-ref vec 0))) starting-vecs))])
         (values id base-exprs))]
+    [(arm:??swizzle id live-data expr gather-tbl output-type) (values id expr)]
     ;; TODO: handle other swizzle nodes!!
     [_ (error "Unknown swizzle node ~a" swizzle-node)]))
 
 (define (get-output-type swizzle-node)
   (destruct swizzle-node
     [(arm:??load id live-data buffer gather-tbl output-type) output-type]
+    [(arm:??swizzle id live-data expr gather-tbl output-type) output-type]
     ;; TODO: handle other swizzle nodes!!
     [_ (error "Unknown swizzle node for get-output-type ~a" swizzle-node)]))
 
