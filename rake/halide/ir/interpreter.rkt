@@ -211,6 +211,20 @@
      (cond
        [(eq? op 'add)
         (lambda (i) (do-reduce (interpret vec) bvadd (* i width) width))]
+       [(eq? op 'min)
+        (define outT (infer-out-type ((interpret vec) 0) ((interpret vec) 0)))
+        (cond
+          [(cpp:signed-type? outT)
+           (lambda (i) (do-reduce (interpret vec) bvsmin (* i width) width))]
+          [else
+           (lambda (i) (do-reduce (interpret vec) bvumin (* i width) width))])]
+       [(eq? op 'max)
+        (define outT (infer-out-type ((interpret vec) 0) ((interpret vec) 0)))
+        (cond
+          [(cpp:signed-type? outT)
+           (lambda (i) (do-reduce (interpret vec) bvsmax (* i width) width))]
+          [else
+           (lambda (i) (do-reduce (interpret vec) bvumax (* i width) width))])]
        [else (error "Unexpected vector_reduce op:" op)])]
 
     ;; Shuffles
