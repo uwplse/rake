@@ -21,6 +21,134 @@
     [(x86:reinterpret Vn) (transform (x86:reinterpret (visit Vn transform)))]
     [(x86:concat-tiles exprs) (transform (x86:concat-tiles (for/list ([expr exprs]) (visit expr transform))))]
 
+    [(x86:packssdw a b)
+      (transform (x86:packssdw (visit a transform) (visit b transform)))]
+    [(x86:packsswb a b)
+      (transform (x86:packsswb (visit a transform) (visit b transform)))]
+    [(x86:packuswb a b)
+      (transform (x86:packuswb (visit a transform) (visit b transform)))]
+    [(x86:paddb a b)
+      (transform (x86:paddb (visit a transform) (visit b transform)))]
+    [(x86:paddd a b)
+      (transform (x86:paddd (visit a transform) (visit b transform)))]
+    [(x86:paddq a b)
+      (transform (x86:paddq (visit a transform) (visit b transform)))]
+    [(x86:paddsb a b)
+      (transform (x86:paddsb (visit a transform) (visit b transform)))]
+    [(x86:paddsw a b)
+      (transform (x86:paddsw (visit a transform) (visit b transform)))]
+    [(x86:paddusb a b)
+      (transform (x86:paddusb (visit a transform) (visit b transform)))]
+    [(x86:paddusw a b)
+      (transform (x86:paddusw (visit a transform) (visit b transform)))]
+    [(x86:paddw a b)
+      (transform (x86:paddw (visit a transform) (visit b transform)))]
+    [(x86:pand a b)
+      (transform (x86:pand (visit a transform) (visit b transform)))]
+    [(x86:pandn a)
+      (transform (x86:pandn (visit a transform)))]
+    [(x86:pavgb a b)
+      (transform (x86:pavgb (visit a transform) (visit b transform)))]
+    [(x86:pavgw a b)
+      (transform (x86:pavgw (visit a transform) (visit b transform)))]
+    [(x86:pcmpeqb a b)
+      (transform (x86:pcmpeqb (visit a transform) (visit b transform)))]
+    [(x86:pcmpeqd a b)
+      (transform (x86:pcmpeqd (visit a transform) (visit b transform)))]
+    [(x86:pcmpeqw a b)
+      (transform (x86:pcmpeqw (visit a transform) (visit b transform)))]
+    [(x86:pcmpgtb a b)
+      (transform (x86:pcmpgtb (visit a transform) (visit b transform)))]
+    [(x86:pcmpgtd a b)
+      (transform (x86:pcmpgtd (visit a transform) (visit b transform)))]
+    [(x86:pcmpgtw a b)
+      (transform (x86:pcmpgtw (visit a transform) (visit b transform)))]
+    [(x86:pmaddwd a b)
+      (transform (x86:pmaddwd (visit a transform) (visit b transform)))]
+    [(x86:pmaxsw a b)
+      (transform (x86:pmaxsw (visit a transform) (visit b transform)))]
+    [(x86:pmaxub a b)
+      (transform (x86:pmaxub (visit a transform) (visit b transform)))]
+    [(x86:pminsw a b)
+      (transform (x86:pminsw (visit a transform) (visit b transform)))]
+    [(x86:pminub a b)
+      (transform (x86:pminub (visit a transform) (visit b transform)))]
+    [(x86:pmulhuw a b)
+      (transform (x86:pmulhuw (visit a transform) (visit b transform)))]
+    [(x86:pmulhw a b)
+      (transform (x86:pmulhw (visit a transform) (visit b transform)))]
+    [(x86:pmullw a b)
+      (transform (x86:pmullw (visit a transform) (visit b transform)))]
+    [(x86:pmullw-vs a imm16)
+      (transform (x86:pmullw-vs (visit a transform) (visit imm16 transform)))]
+    [(x86:pmuludq a b)
+      (transform (x86:pmuludq (visit a transform) (visit b transform)))]
+    [(x86:pmuludq-vs a imm32)
+      (transform (x86:pmuludq-vs (visit a transform) (visit imm32 transform)))]
+    [(x86:por a b)
+      (transform (x86:por (visit a transform) (visit b transform)))]
+    [(x86:psadbw a b)
+      (transform (x86:psadbw (visit a transform) (visit b transform)))]
+    [(x86:pshufd a imm8)
+      (transform (x86:pshufd (visit a transform) (visit imm8 transform)))]
+    [(x86:pshufhw a imm8)
+      (transform (x86:pshufhw (visit a transform) (visit imm8 transform)))]
+    [(x86:pshuflw a imm8)
+      (transform (x86:pshuflw (visit a transform) (visit imm8 transform)))]
+    [(x86:pslld a imm8)
+      (transform (x86:pslld (visit a transform) (visit imm8 transform)))]
+    [(x86:pslldq a imm8)
+      (transform (x86:pslldq (visit a transform) (visit imm8 transform)))]
+    [(x86:psllq a imm8)
+      (transform (x86:psllq (visit a transform) (visit imm8 transform)))]
+    [(x86:psllw a imm8)
+      (transform (x86:psllw (visit a transform) (visit imm8 transform)))]
+    [(x86:psrad a imm8)
+      (transform (x86:psrad (visit a transform) (visit imm8 transform)))]
+    [(x86:psraw a imm8)
+      (transform (x86:psraw (visit a transform) (visit imm8 transform)))]
+    [(x86:psrld a imm8)
+      (transform (x86:psrld (visit a transform) (visit imm8 transform)))]
+    [(x86:psrldq a imm8)
+      (transform (x86:psrldq (visit a transform) (visit imm8 transform)))]
+    [(x86:psrlq a imm8)
+      (transform (x86:psrlq (visit a transform) (visit imm8 transform)))]
+    [(x86:psrlw a imm8)
+      (transform (x86:psrlw (visit a transform) (visit imm8 transform)))]
+    [(x86:psubb a b)
+      (transform (x86:psubb (visit a transform) (visit b transform)))]
+    [(x86:psubd a b)
+      (transform (x86:psubd (visit a transform) (visit b transform)))]
+    [(x86:psubq a b)
+      (transform (x86:psubq (visit a transform) (visit b transform)))]
+    [(x86:psubsb a b)
+      (transform (x86:psubsb (visit a transform) (visit b transform)))]
+    [(x86:psubsw a b)
+      (transform (x86:psubsw (visit a transform) (visit b transform)))]
+    [(x86:psubusb a b)
+      (transform (x86:psubusb (visit a transform) (visit b transform)))]
+    [(x86:psubusw a b)
+      (transform (x86:psubusw (visit a transform) (visit b transform)))]
+    [(x86:psubw a b)
+      (transform (x86:psubw (visit a transform) (visit b transform)))]
+    [(x86:punpckhbw a b)
+      (transform (x86:punpckhbw (visit a transform) (visit b transform)))]
+    [(x86:punpckhdq a b)
+      (transform (x86:punpckhdq (visit a transform) (visit b transform)))]
+    [(x86:punpckhqdq a b)
+      (transform (x86:punpckhqdq (visit a transform) (visit b transform)))]
+    [(x86:punpckhwd a b)
+      (transform (x86:punpckhwd (visit a transform) (visit b transform)))]
+    [(x86:punpcklbw a b)
+      (transform (x86:punpcklbw (visit a transform) (visit b transform)))]
+    [(x86:punpckldq a b)
+      (transform (x86:punpckldq (visit a transform) (visit b transform)))]
+    [(x86:punpcklqdq a b)
+      (transform (x86:punpcklqdq (visit a transform) (visit b transform)))]
+    [(x86:punpcklwd a b)
+      (transform (x86:punpcklwd (visit a transform) (visit b transform)))]
+    [(x86:pxor a b)
+      (transform (x86:pxor (visit a transform) (visit b transform)))]
     [(x86:resize a)
       (transform (x86:resize (visit a transform)))]
     [(x86:vbroadcasti128 a)
@@ -181,6 +309,8 @@
       (transform (x86:vpmovzxwq (visit a transform)))]
     [(x86:vpmuldq a b)
       (transform (x86:vpmuldq (visit a transform) (visit b transform)))]
+    [(x86:vpmuldq-vs a imm32)
+      (transform (x86:vpmuldq-vs (visit a transform) (visit imm32 transform)))]
     [(x86:vpmulhrsw a b)
       (transform (x86:vpmulhrsw (visit a transform) (visit b transform)))]
     [(x86:vpmulhuw a b)
@@ -189,12 +319,16 @@
       (transform (x86:vpmulhw (visit a transform) (visit b transform)))]
     [(x86:vpmulld a b)
       (transform (x86:vpmulld (visit a transform) (visit b transform)))]
+    [(x86:vpmulld-vs a imm32)
+      (transform (x86:vpmulld-vs (visit a transform) (visit imm32 transform)))]
     [(x86:vpmullw a b)
       (transform (x86:vpmullw (visit a transform) (visit b transform)))]
     [(x86:vpmullw-vs a imm16)
       (transform (x86:vpmullw-vs (visit a transform) (visit imm16 transform)))]
     [(x86:vpmuludq a b)
       (transform (x86:vpmuludq (visit a transform) (visit b transform)))]
+    [(x86:vpmuludq-vs a imm32)
+      (transform (x86:vpmuludq-vs (visit a transform) (visit imm32 transform)))]
     [(x86:vpor a b)
       (transform (x86:vpor (visit a transform) (visit b transform)))]
     [(x86:vpsadbw a b)
@@ -289,6 +423,134 @@
     [(x86:reinterpret Vn) (transform (x86:reinterpret (visit-shallow Vn transform)))]
     [(x86:concat-tiles exprs) (transform (x86:concat-tiles (for/list ([expr exprs]) (visit expr transform))))]
 
+    [(x86:packssdw a b)
+      (transform (x86:packssdw (visit a transform) (visit b transform)))]
+    [(x86:packsswb a b)
+      (transform (x86:packsswb (visit a transform) (visit b transform)))]
+    [(x86:packuswb a b)
+      (transform (x86:packuswb (visit a transform) (visit b transform)))]
+    [(x86:paddb a b)
+      (transform (x86:paddb (visit a transform) (visit b transform)))]
+    [(x86:paddd a b)
+      (transform (x86:paddd (visit a transform) (visit b transform)))]
+    [(x86:paddq a b)
+      (transform (x86:paddq (visit a transform) (visit b transform)))]
+    [(x86:paddsb a b)
+      (transform (x86:paddsb (visit a transform) (visit b transform)))]
+    [(x86:paddsw a b)
+      (transform (x86:paddsw (visit a transform) (visit b transform)))]
+    [(x86:paddusb a b)
+      (transform (x86:paddusb (visit a transform) (visit b transform)))]
+    [(x86:paddusw a b)
+      (transform (x86:paddusw (visit a transform) (visit b transform)))]
+    [(x86:paddw a b)
+      (transform (x86:paddw (visit a transform) (visit b transform)))]
+    [(x86:pand a b)
+      (transform (x86:pand (visit a transform) (visit b transform)))]
+    [(x86:pandn a)
+      (transform (x86:pandn (visit a transform)))]
+    [(x86:pavgb a b)
+      (transform (x86:pavgb (visit a transform) (visit b transform)))]
+    [(x86:pavgw a b)
+      (transform (x86:pavgw (visit a transform) (visit b transform)))]
+    [(x86:pcmpeqb a b)
+      (transform (x86:pcmpeqb (visit a transform) (visit b transform)))]
+    [(x86:pcmpeqd a b)
+      (transform (x86:pcmpeqd (visit a transform) (visit b transform)))]
+    [(x86:pcmpeqw a b)
+      (transform (x86:pcmpeqw (visit a transform) (visit b transform)))]
+    [(x86:pcmpgtb a b)
+      (transform (x86:pcmpgtb (visit a transform) (visit b transform)))]
+    [(x86:pcmpgtd a b)
+      (transform (x86:pcmpgtd (visit a transform) (visit b transform)))]
+    [(x86:pcmpgtw a b)
+      (transform (x86:pcmpgtw (visit a transform) (visit b transform)))]
+    [(x86:pmaddwd a b)
+      (transform (x86:pmaddwd (visit a transform) (visit b transform)))]
+    [(x86:pmaxsw a b)
+      (transform (x86:pmaxsw (visit a transform) (visit b transform)))]
+    [(x86:pmaxub a b)
+      (transform (x86:pmaxub (visit a transform) (visit b transform)))]
+    [(x86:pminsw a b)
+      (transform (x86:pminsw (visit a transform) (visit b transform)))]
+    [(x86:pminub a b)
+      (transform (x86:pminub (visit a transform) (visit b transform)))]
+    [(x86:pmulhuw a b)
+      (transform (x86:pmulhuw (visit a transform) (visit b transform)))]
+    [(x86:pmulhw a b)
+      (transform (x86:pmulhw (visit a transform) (visit b transform)))]
+    [(x86:pmullw a b)
+      (transform (x86:pmullw (visit a transform) (visit b transform)))]
+    [(x86:pmullw-vs a imm16)
+      (transform (x86:pmullw-vs (visit a transform) (visit imm16 transform)))]
+    [(x86:pmuludq a b)
+      (transform (x86:pmuludq (visit a transform) (visit b transform)))]
+    [(x86:pmuludq-vs a imm32)
+      (transform (x86:pmuludq-vs (visit a transform) (visit imm32 transform)))]
+    [(x86:por a b)
+      (transform (x86:por (visit a transform) (visit b transform)))]
+    [(x86:psadbw a b)
+      (transform (x86:psadbw (visit a transform) (visit b transform)))]
+    [(x86:pshufd a imm8)
+      (transform (x86:pshufd (visit a transform) (visit imm8 transform)))]
+    [(x86:pshufhw a imm8)
+      (transform (x86:pshufhw (visit a transform) (visit imm8 transform)))]
+    [(x86:pshuflw a imm8)
+      (transform (x86:pshuflw (visit a transform) (visit imm8 transform)))]
+    [(x86:pslld a imm8)
+      (transform (x86:pslld (visit a transform) (visit imm8 transform)))]
+    [(x86:pslldq a imm8)
+      (transform (x86:pslldq (visit a transform) (visit imm8 transform)))]
+    [(x86:psllq a imm8)
+      (transform (x86:psllq (visit a transform) (visit imm8 transform)))]
+    [(x86:psllw a imm8)
+      (transform (x86:psllw (visit a transform) (visit imm8 transform)))]
+    [(x86:psrad a imm8)
+      (transform (x86:psrad (visit a transform) (visit imm8 transform)))]
+    [(x86:psraw a imm8)
+      (transform (x86:psraw (visit a transform) (visit imm8 transform)))]
+    [(x86:psrld a imm8)
+      (transform (x86:psrld (visit a transform) (visit imm8 transform)))]
+    [(x86:psrldq a imm8)
+      (transform (x86:psrldq (visit a transform) (visit imm8 transform)))]
+    [(x86:psrlq a imm8)
+      (transform (x86:psrlq (visit a transform) (visit imm8 transform)))]
+    [(x86:psrlw a imm8)
+      (transform (x86:psrlw (visit a transform) (visit imm8 transform)))]
+    [(x86:psubb a b)
+      (transform (x86:psubb (visit a transform) (visit b transform)))]
+    [(x86:psubd a b)
+      (transform (x86:psubd (visit a transform) (visit b transform)))]
+    [(x86:psubq a b)
+      (transform (x86:psubq (visit a transform) (visit b transform)))]
+    [(x86:psubsb a b)
+      (transform (x86:psubsb (visit a transform) (visit b transform)))]
+    [(x86:psubsw a b)
+      (transform (x86:psubsw (visit a transform) (visit b transform)))]
+    [(x86:psubusb a b)
+      (transform (x86:psubusb (visit a transform) (visit b transform)))]
+    [(x86:psubusw a b)
+      (transform (x86:psubusw (visit a transform) (visit b transform)))]
+    [(x86:psubw a b)
+      (transform (x86:psubw (visit a transform) (visit b transform)))]
+    [(x86:punpckhbw a b)
+      (transform (x86:punpckhbw (visit a transform) (visit b transform)))]
+    [(x86:punpckhdq a b)
+      (transform (x86:punpckhdq (visit a transform) (visit b transform)))]
+    [(x86:punpckhqdq a b)
+      (transform (x86:punpckhqdq (visit a transform) (visit b transform)))]
+    [(x86:punpckhwd a b)
+      (transform (x86:punpckhwd (visit a transform) (visit b transform)))]
+    [(x86:punpcklbw a b)
+      (transform (x86:punpcklbw (visit a transform) (visit b transform)))]
+    [(x86:punpckldq a b)
+      (transform (x86:punpckldq (visit a transform) (visit b transform)))]
+    [(x86:punpcklqdq a b)
+      (transform (x86:punpcklqdq (visit a transform) (visit b transform)))]
+    [(x86:punpcklwd a b)
+      (transform (x86:punpcklwd (visit a transform) (visit b transform)))]
+    [(x86:pxor a b)
+      (transform (x86:pxor (visit a transform) (visit b transform)))]
     [(x86:resize a)
       (transform (x86:resize (visit a transform)))]
     [(x86:vbroadcasti128 a)
@@ -449,6 +711,8 @@
       (transform (x86:vpmovzxwq (visit a transform)))]
     [(x86:vpmuldq a b)
       (transform (x86:vpmuldq (visit a transform) (visit b transform)))]
+    [(x86:vpmuldq-vs a imm32)
+      (transform (x86:vpmuldq-vs (visit a transform) (visit imm32 transform)))]
     [(x86:vpmulhrsw a b)
       (transform (x86:vpmulhrsw (visit a transform) (visit b transform)))]
     [(x86:vpmulhuw a b)
@@ -457,12 +721,16 @@
       (transform (x86:vpmulhw (visit a transform) (visit b transform)))]
     [(x86:vpmulld a b)
       (transform (x86:vpmulld (visit a transform) (visit b transform)))]
+    [(x86:vpmulld-vs a imm32)
+      (transform (x86:vpmulld-vs (visit a transform) (visit imm32 transform)))]
     [(x86:vpmullw a b)
       (transform (x86:vpmullw (visit a transform) (visit b transform)))]
     [(x86:vpmullw-vs a imm16)
       (transform (x86:vpmullw-vs (visit a transform) (visit imm16 transform)))]
     [(x86:vpmuludq a b)
       (transform (x86:vpmuludq (visit a transform) (visit b transform)))]
+    [(x86:vpmuludq-vs a imm32)
+      (transform (x86:vpmuludq-vs (visit a transform) (visit imm32 transform)))]
     [(x86:vpor a b)
       (transform (x86:vpor (visit a transform) (visit b transform)))]
     [(x86:vpsadbw a b)
@@ -547,4 +815,3 @@
       (transform (x86:vpxor (visit a transform) (visit b transform)))]
 
     [_ (transform expr)]))
-
