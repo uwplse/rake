@@ -230,7 +230,8 @@
              (vector_reduce 'add 2
               v0)
              (vector_reduce 'add 2
-              v1))))]
+              v1)
+4)))]
         [((arm:i8x16 v0) (arm:i8x16 v1))
           (arm:i8x16
            (halide:interpret
@@ -238,7 +239,8 @@
              (vector_reduce 'add 2
               v0)
              (vector_reduce 'add 2
-              v1))))]
+              v1)
+8)))]
         [((arm:u8x8 v0) (arm:u8x8 v1))
           (arm:u8x8
            (halide:interpret
@@ -246,7 +248,8 @@
              (vector_reduce 'add 2
               v0)
              (vector_reduce 'add 2
-              v1))))]
+              v1)
+4)))]
         [((arm:u8x16 v0) (arm:u8x16 v1))
           (arm:u8x16
            (halide:interpret
@@ -254,7 +257,8 @@
              (vector_reduce 'add 2
               v0)
              (vector_reduce 'add 2
-              v1))))]
+              v1)
+8)))]
         [((arm:i16x4 v0) (arm:i16x4 v1))
           (arm:i16x4
            (halide:interpret
@@ -262,7 +266,8 @@
              (vector_reduce 'add 2
               v0)
              (vector_reduce 'add 2
-              v1))))]
+              v1)
+2)))]
         [((arm:i16x8 v0) (arm:i16x8 v1))
           (arm:i16x8
            (halide:interpret
@@ -270,7 +275,8 @@
              (vector_reduce 'add 2
               v0)
              (vector_reduce 'add 2
-              v1))))]
+              v1)
+4)))]
         [((arm:u16x4 v0) (arm:u16x4 v1))
           (arm:u16x4
            (halide:interpret
@@ -278,7 +284,8 @@
              (vector_reduce 'add 2
               v0)
              (vector_reduce 'add 2
-              v1))))]
+              v1)
+2)))]
         [((arm:u16x8 v0) (arm:u16x8 v1))
           (arm:u16x8
            (halide:interpret
@@ -286,7 +293,8 @@
              (vector_reduce 'add 2
               v0)
              (vector_reduce 'add 2
-              v1))))]
+              v1)
+4)))]
         [((arm:i32x2 v0) (arm:i32x2 v1))
           (arm:i32x2
            (halide:interpret
@@ -294,7 +302,8 @@
              (vector_reduce 'add 2
               v0)
              (vector_reduce 'add 2
-              v1))))]
+              v1)
+1)))]
         [((arm:i32x4 v0) (arm:i32x4 v1))
           (arm:i32x4
            (halide:interpret
@@ -302,7 +311,8 @@
              (vector_reduce 'add 2
               v0)
              (vector_reduce 'add 2
-              v1))))]
+              v1)
+2)))]
         [((arm:u32x2 v0) (arm:u32x2 v1))
           (arm:u32x2
            (halide:interpret
@@ -310,7 +320,8 @@
              (vector_reduce 'add 2
               v0)
              (vector_reduce 'add 2
-              v1))))]
+              v1)
+1)))]
         [((arm:u32x4 v0) (arm:u32x4 v1))
           (arm:u32x4
            (halide:interpret
@@ -318,7 +329,8 @@
              (vector_reduce 'add 2
               v0)
              (vector_reduce 'add 2
-              v1))))]
+              v1)
+2)))]
         [(_ _) (assert #f "infeasible")])]
 
     [(arm:addv Vn)
@@ -476,7 +488,8 @@
              (slice_vectors
               v0 1 1 15)
              (slice_vectors
-              v1 0 1 1))))]
+              v1 0 1 1)
+15)))]
         [((arm:u8x16 v0) (arm:u8x16 v1))
           (arm:u8x16
            (halide:interpret
@@ -484,7 +497,8 @@
              (slice_vectors
               v0 1 1 15)
              (slice_vectors
-              v1 0 1 1))))]
+              v1 0 1 1)
+15)))]
         [(_ _) (assert #f "infeasible")])]
 
     [(arm:ext16i10 Vn Vm)
@@ -496,7 +510,8 @@
              (slice_vectors
               v0 10 1 6)
              (slice_vectors
-              v1 0 1 10))))]
+              v1 0 1 10)
+6)))]
         [((arm:u8x16 v0) (arm:u8x16 v1))
           (arm:u8x16
            (halide:interpret
@@ -504,7 +519,8 @@
              (slice_vectors
               v0 10 1 6)
              (slice_vectors
-              v1 0 1 10))))]
+              v1 0 1 10)
+6)))]
         [(_ _) (assert #f "infeasible")])]
 
     [(arm:ext16i11 Vn Vm)
@@ -516,7 +532,8 @@
              (slice_vectors
               v0 11 1 5)
              (slice_vectors
-              v1 0 1 11))))]
+              v1 0 1 11)
+5)))]
         [((arm:u8x16 v0) (arm:u8x16 v1))
           (arm:u8x16
            (halide:interpret
@@ -524,7 +541,8 @@
              (slice_vectors
               v0 11 1 5)
              (slice_vectors
-              v1 0 1 11))))]
+              v1 0 1 11)
+5)))]
         [(_ _) (assert #f "infeasible")])]
 
     [(arm:ext16i12 Vn Vm)
@@ -536,7 +554,8 @@
              (slice_vectors
               v0 12 1 4)
              (slice_vectors
-              v1 0 1 12))))]
+              v1 0 1 12)
+4)))]
         [((arm:u8x16 v0) (arm:u8x16 v1))
           (arm:u8x16
            (halide:interpret
@@ -544,7 +563,8 @@
              (slice_vectors
               v0 12 1 4)
              (slice_vectors
-              v1 0 1 12))))]
+              v1 0 1 12)
+4)))]
         [(_ _) (assert #f "infeasible")])]
 
     [(arm:ext16i13 Vn Vm)
@@ -556,7 +576,8 @@
              (slice_vectors
               v0 13 1 3)
              (slice_vectors
-              v1 0 1 13))))]
+              v1 0 1 13)
+3)))]
         [((arm:u8x16 v0) (arm:u8x16 v1))
           (arm:u8x16
            (halide:interpret
@@ -564,7 +585,8 @@
              (slice_vectors
               v0 13 1 3)
              (slice_vectors
-              v1 0 1 13))))]
+              v1 0 1 13)
+3)))]
         [(_ _) (assert #f "infeasible")])]
 
     [(arm:ext16i14 Vn Vm)
@@ -576,7 +598,8 @@
              (slice_vectors
               v0 14 1 2)
              (slice_vectors
-              v1 0 1 14))))]
+              v1 0 1 14)
+2)))]
         [((arm:u8x16 v0) (arm:u8x16 v1))
           (arm:u8x16
            (halide:interpret
@@ -584,7 +607,8 @@
              (slice_vectors
               v0 14 1 2)
              (slice_vectors
-              v1 0 1 14))))]
+              v1 0 1 14)
+2)))]
         [(_ _) (assert #f "infeasible")])]
 
     [(arm:ext16i15 Vn Vm)
@@ -596,7 +620,8 @@
              (slice_vectors
               v0 15 1 1)
              (slice_vectors
-              v1 0 1 15))))]
+              v1 0 1 15)
+1)))]
         [((arm:u8x16 v0) (arm:u8x16 v1))
           (arm:u8x16
            (halide:interpret
@@ -604,7 +629,8 @@
              (slice_vectors
               v0 15 1 1)
              (slice_vectors
-              v1 0 1 15))))]
+              v1 0 1 15)
+1)))]
         [(_ _) (assert #f "infeasible")])]
 
     [(arm:ext16i2 Vn Vm)
@@ -616,7 +642,8 @@
              (slice_vectors
               v0 2 1 14)
              (slice_vectors
-              v1 0 1 2))))]
+              v1 0 1 2)
+14)))]
         [((arm:u8x16 v0) (arm:u8x16 v1))
           (arm:u8x16
            (halide:interpret
@@ -624,7 +651,8 @@
              (slice_vectors
               v0 2 1 14)
              (slice_vectors
-              v1 0 1 2))))]
+              v1 0 1 2)
+14)))]
         [(_ _) (assert #f "infeasible")])]
 
     [(arm:ext16i3 Vn Vm)
@@ -636,7 +664,8 @@
              (slice_vectors
               v0 3 1 13)
              (slice_vectors
-              v1 0 1 3))))]
+              v1 0 1 3)
+13)))]
         [((arm:u8x16 v0) (arm:u8x16 v1))
           (arm:u8x16
            (halide:interpret
@@ -644,7 +673,8 @@
              (slice_vectors
               v0 3 1 13)
              (slice_vectors
-              v1 0 1 3))))]
+              v1 0 1 3)
+13)))]
         [(_ _) (assert #f "infeasible")])]
 
     [(arm:ext16i4 Vn Vm)
@@ -656,7 +686,8 @@
              (slice_vectors
               v0 4 1 12)
              (slice_vectors
-              v1 0 1 4))))]
+              v1 0 1 4)
+12)))]
         [((arm:u8x16 v0) (arm:u8x16 v1))
           (arm:u8x16
            (halide:interpret
@@ -664,7 +695,8 @@
              (slice_vectors
               v0 4 1 12)
              (slice_vectors
-              v1 0 1 4))))]
+              v1 0 1 4)
+12)))]
         [(_ _) (assert #f "infeasible")])]
 
     [(arm:ext16i5 Vn Vm)
@@ -676,7 +708,8 @@
              (slice_vectors
               v0 5 1 11)
              (slice_vectors
-              v1 0 1 5))))]
+              v1 0 1 5)
+11)))]
         [((arm:u8x16 v0) (arm:u8x16 v1))
           (arm:u8x16
            (halide:interpret
@@ -684,7 +717,8 @@
              (slice_vectors
               v0 5 1 11)
              (slice_vectors
-              v1 0 1 5))))]
+              v1 0 1 5)
+11)))]
         [(_ _) (assert #f "infeasible")])]
 
     [(arm:ext16i6 Vn Vm)
@@ -696,7 +730,8 @@
              (slice_vectors
               v0 6 1 10)
              (slice_vectors
-              v1 0 1 6))))]
+              v1 0 1 6)
+10)))]
         [((arm:u8x16 v0) (arm:u8x16 v1))
           (arm:u8x16
            (halide:interpret
@@ -704,7 +739,8 @@
              (slice_vectors
               v0 6 1 10)
              (slice_vectors
-              v1 0 1 6))))]
+              v1 0 1 6)
+10)))]
         [(_ _) (assert #f "infeasible")])]
 
     [(arm:ext16i7 Vn Vm)
@@ -716,7 +752,8 @@
              (slice_vectors
               v0 7 1 9)
              (slice_vectors
-              v1 0 1 7))))]
+              v1 0 1 7)
+9)))]
         [((arm:u8x16 v0) (arm:u8x16 v1))
           (arm:u8x16
            (halide:interpret
@@ -724,7 +761,8 @@
              (slice_vectors
               v0 7 1 9)
              (slice_vectors
-              v1 0 1 7))))]
+              v1 0 1 7)
+9)))]
         [(_ _) (assert #f "infeasible")])]
 
     [(arm:ext16i8 Vn Vm)
@@ -736,7 +774,8 @@
              (slice_vectors
               v0 8 1 8)
              (slice_vectors
-              v1 0 1 8))))]
+              v1 0 1 8)
+8)))]
         [((arm:u8x16 v0) (arm:u8x16 v1))
           (arm:u8x16
            (halide:interpret
@@ -744,7 +783,8 @@
              (slice_vectors
               v0 8 1 8)
              (slice_vectors
-              v1 0 1 8))))]
+              v1 0 1 8)
+8)))]
         [(_ _) (assert #f "infeasible")])]
 
     [(arm:ext16i9 Vn Vm)
@@ -756,7 +796,8 @@
              (slice_vectors
               v0 9 1 7)
              (slice_vectors
-              v1 0 1 9))))]
+              v1 0 1 9)
+7)))]
         [((arm:u8x16 v0) (arm:u8x16 v1))
           (arm:u8x16
            (halide:interpret
@@ -764,7 +805,8 @@
              (slice_vectors
               v0 9 1 7)
              (slice_vectors
-              v1 0 1 9))))]
+              v1 0 1 9)
+7)))]
         [(_ _) (assert #f "infeasible")])]
 
     [(arm:ext8i1 Vn Vm)
@@ -776,7 +818,8 @@
              (slice_vectors
               v0 1 1 7)
              (slice_vectors
-              v1 0 1 1))))]
+              v1 0 1 1)
+7)))]
         [((arm:u8x8 v0) (arm:u8x8 v1))
           (arm:u8x8
            (halide:interpret
@@ -784,7 +827,8 @@
              (slice_vectors
               v0 1 1 7)
              (slice_vectors
-              v1 0 1 1))))]
+              v1 0 1 1)
+7)))]
         [(_ _) (assert #f "infeasible")])]
 
     [(arm:ext8i2 Vn Vm)
@@ -796,7 +840,8 @@
              (slice_vectors
               v0 2 1 6)
              (slice_vectors
-              v1 0 1 2))))]
+              v1 0 1 2)
+6)))]
         [((arm:u8x8 v0) (arm:u8x8 v1))
           (arm:u8x8
            (halide:interpret
@@ -804,7 +849,8 @@
              (slice_vectors
               v0 2 1 6)
              (slice_vectors
-              v1 0 1 2))))]
+              v1 0 1 2)
+6)))]
         [(_ _) (assert #f "infeasible")])]
 
     [(arm:ext8i3 Vn Vm)
@@ -816,7 +862,8 @@
              (slice_vectors
               v0 3 1 5)
              (slice_vectors
-              v1 0 1 3))))]
+              v1 0 1 3)
+5)))]
         [((arm:u8x8 v0) (arm:u8x8 v1))
           (arm:u8x8
            (halide:interpret
@@ -824,7 +871,8 @@
              (slice_vectors
               v0 3 1 5)
              (slice_vectors
-              v1 0 1 3))))]
+              v1 0 1 3)
+5)))]
         [(_ _) (assert #f "infeasible")])]
 
     [(arm:ext8i4 Vn Vm)
@@ -836,7 +884,8 @@
              (slice_vectors
               v0 4 1 4)
              (slice_vectors
-              v1 0 1 4))))]
+              v1 0 1 4)
+4)))]
         [((arm:u8x8 v0) (arm:u8x8 v1))
           (arm:u8x8
            (halide:interpret
@@ -844,7 +893,8 @@
              (slice_vectors
               v0 4 1 4)
              (slice_vectors
-              v1 0 1 4))))]
+              v1 0 1 4)
+4)))]
         [(_ _) (assert #f "infeasible")])]
 
     [(arm:ext8i5 Vn Vm)
@@ -856,7 +906,8 @@
              (slice_vectors
               v0 5 1 3)
              (slice_vectors
-              v1 0 1 5))))]
+              v1 0 1 5)
+3)))]
         [((arm:u8x8 v0) (arm:u8x8 v1))
           (arm:u8x8
            (halide:interpret
@@ -864,7 +915,8 @@
              (slice_vectors
               v0 5 1 3)
              (slice_vectors
-              v1 0 1 5))))]
+              v1 0 1 5)
+3)))]
         [(_ _) (assert #f "infeasible")])]
 
     [(arm:ext8i6 Vn Vm)
@@ -876,7 +928,8 @@
              (slice_vectors
               v0 6 1 2)
              (slice_vectors
-              v1 0 1 6))))]
+              v1 0 1 6)
+2)))]
         [((arm:u8x8 v0) (arm:u8x8 v1))
           (arm:u8x8
            (halide:interpret
@@ -884,7 +937,8 @@
              (slice_vectors
               v0 6 1 2)
              (slice_vectors
-              v1 0 1 6))))]
+              v1 0 1 6)
+2)))]
         [(_ _) (assert #f "infeasible")])]
 
     [(arm:ext8i7 Vn Vm)
@@ -896,7 +950,8 @@
              (slice_vectors
               v0 7 1 1)
              (slice_vectors
-              v1 0 1 7))))]
+              v1 0 1 7)
+1)))]
         [((arm:u8x8 v0) (arm:u8x8 v1))
           (arm:u8x8
            (halide:interpret
@@ -904,7 +959,8 @@
              (slice_vectors
               v0 7 1 1)
              (slice_vectors
-              v1 0 1 7))))]
+              v1 0 1 7)
+1)))]
         [(_ _) (assert #f "infeasible")])]
 
     [(arm:mla-vs Vd Vn Vm)
@@ -2073,7 +2129,8 @@
                 (int16x8
                  (concat_vectors
                   v2
-                  v2))))))))]
+                  v2
+4))))))))]
         [(_ _ _) (assert #f "infeasible")])]
 
     [(arm:sdot.v2i32.v8i8 Vd Vn Vm)
@@ -2108,10 +2165,13 @@
                  (concat_vectors
                   (concat_vectors
                    v2
-                   v2)
+                   v2
+4)
                   (concat_vectors
                    v2
-                   v2)))))))))]
+                   v2
+4)
+4))))))))]
         [(_ _ _) (assert #f "infeasible")])]
 
     [(arm:sdot.v4i32.v16i8 Vd Vn Vm)
@@ -2563,7 +2623,8 @@
              (vector_reduce 'max 2
               v0)
              (vector_reduce 'max 2
-              v1))))]
+              v1)
+4)))]
         [((arm:i8x16 v0) (arm:i8x16 v1))
           (arm:i8x16
            (halide:interpret
@@ -2571,7 +2632,8 @@
              (vector_reduce 'max 2
               v0)
              (vector_reduce 'max 2
-              v1))))]
+              v1)
+8)))]
         [((arm:i16x4 v0) (arm:i16x4 v1))
           (arm:i16x4
            (halide:interpret
@@ -2579,7 +2641,8 @@
              (vector_reduce 'max 2
               v0)
              (vector_reduce 'max 2
-              v1))))]
+              v1)
+2)))]
         [((arm:i16x8 v0) (arm:i16x8 v1))
           (arm:i16x8
            (halide:interpret
@@ -2587,7 +2650,8 @@
              (vector_reduce 'max 2
               v0)
              (vector_reduce 'max 2
-              v1))))]
+              v1)
+4)))]
         [((arm:i32x2 v0) (arm:i32x2 v1))
           (arm:i32x2
            (halide:interpret
@@ -2595,7 +2659,8 @@
              (vector_reduce 'max 2
               v0)
              (vector_reduce 'max 2
-              v1))))]
+              v1)
+1)))]
         [((arm:i32x4 v0) (arm:i32x4 v1))
           (arm:i32x4
            (halide:interpret
@@ -2603,7 +2668,8 @@
              (vector_reduce 'max 2
               v0)
              (vector_reduce 'max 2
-              v1))))]
+              v1)
+2)))]
         [(_ _) (assert #f "infeasible")])]
 
     [(arm:smaxv Vn)
@@ -2684,7 +2750,8 @@
              (vector_reduce 'min 2
               v0)
              (vector_reduce 'min 2
-              v1))))]
+              v1)
+4)))]
         [((arm:i8x16 v0) (arm:i8x16 v1))
           (arm:i8x16
            (halide:interpret
@@ -2692,7 +2759,8 @@
              (vector_reduce 'min 2
               v0)
              (vector_reduce 'min 2
-              v1))))]
+              v1)
+8)))]
         [((arm:i16x4 v0) (arm:i16x4 v1))
           (arm:i16x4
            (halide:interpret
@@ -2700,7 +2768,8 @@
              (vector_reduce 'min 2
               v0)
              (vector_reduce 'min 2
-              v1))))]
+              v1)
+2)))]
         [((arm:i16x8 v0) (arm:i16x8 v1))
           (arm:i16x8
            (halide:interpret
@@ -2708,7 +2777,8 @@
              (vector_reduce 'min 2
               v0)
              (vector_reduce 'min 2
-              v1))))]
+              v1)
+4)))]
         [((arm:i32x2 v0) (arm:i32x2 v1))
           (arm:i32x2
            (halide:interpret
@@ -2716,7 +2786,8 @@
              (vector_reduce 'min 2
               v0)
              (vector_reduce 'min 2
-              v1))))]
+              v1)
+1)))]
         [((arm:i32x4 v0) (arm:i32x4 v1))
           (arm:i32x4
            (halide:interpret
@@ -2724,7 +2795,8 @@
              (vector_reduce 'min 2
               v0)
              (vector_reduce 'min 2
-              v1))))]
+              v1)
+2)))]
         [(_ _) (assert #f "infeasible")])]
 
     [(arm:sminv Vn)
@@ -5552,7 +5624,8 @@
              (slice_vectors
               v1 1 1 1)
              (slice_vectors
-              v0 1 1 1))))]
+              v0 1 1 1)
+1)))]
         [((arm:i32x4 v0) (arm:i32x4 v1))
           (arm:i32x4
            (halide:interpret
@@ -5568,7 +5641,8 @@
              (slice_vectors
               v1 1 1 1)
              (slice_vectors
-              v0 1 1 1))))]
+              v0 1 1 1)
+1)))]
         [((arm:u8x8 v0) (arm:u8x8 v1))
           (arm:u8x8
            (halide:interpret
@@ -5608,7 +5682,8 @@
              (slice_vectors
               v1 1 1 1)
              (slice_vectors
-              v0 1 1 1))))]
+              v0 1 1 1)
+1)))]
         [((arm:u32x4 v0) (arm:u32x4 v1))
           (arm:u32x4
            (halide:interpret
@@ -5624,7 +5699,8 @@
              (slice_vectors
               v1 1 1 1)
              (slice_vectors
-              v0 1 1 1))))]
+              v0 1 1 1)
+1)))]
         [(_ _) (assert #f "infeasible")])]
 
     [(arm:trn2 Vn Vm)
@@ -5668,7 +5744,8 @@
              (slice_vectors
               v1 0 1 1)
              (slice_vectors
-              v0 0 1 1))))]
+              v0 0 1 1)
+1)))]
         [((arm:i32x4 v0) (arm:i32x4 v1))
           (arm:i32x4
            (halide:interpret
@@ -5684,7 +5761,8 @@
              (slice_vectors
               v1 0 1 1)
              (slice_vectors
-              v0 0 1 1))))]
+              v0 0 1 1)
+1)))]
         [((arm:u8x8 v0) (arm:u8x8 v1))
           (arm:u8x8
            (halide:interpret
@@ -5724,7 +5802,8 @@
              (slice_vectors
               v1 0 1 1)
              (slice_vectors
-              v0 0 1 1))))]
+              v0 0 1 1)
+1)))]
         [((arm:u32x4 v0) (arm:u32x4 v1))
           (arm:u32x4
            (halide:interpret
@@ -5740,7 +5819,8 @@
              (slice_vectors
               v1 0 1 1)
              (slice_vectors
-              v0 0 1 1))))]
+              v0 0 1 1)
+1)))]
         [(_ _) (assert #f "infeasible")])]
 
     [(arm:uabd Vn Vm)
@@ -6031,7 +6111,8 @@
                 (uint16x8
                  (concat_vectors
                   v2
-                  v2))))))))]
+                  v2
+4))))))))]
         [((arm:u32x2 v0) (arm:u8x8 v1) (arm:u8x4 v2))
           (arm:u32x2
            (halide:interpret
@@ -6045,7 +6126,8 @@
                 (uint16x8
                  (concat_vectors
                   v2
-                  v2))))))))]
+                  v2
+4))))))))]
         [(_ _ _) (assert #f "infeasible")])]
 
     [(arm:udot.v2i32.v8i8 Vd Vn Vm)
@@ -6092,10 +6174,13 @@
                  (concat_vectors
                   (concat_vectors
                    v2
-                   v2)
+                   v2
+4)
                   (concat_vectors
                    v2
-                   v2)))))))))]
+                   v2
+4)
+4))))))))]
         [((arm:u32x4 v0) (arm:u8x16 v1) (arm:u8x4 v2))
           (arm:u32x4
            (halide:interpret
@@ -6110,10 +6195,13 @@
                  (concat_vectors
                   (concat_vectors
                    v2
-                   v2)
+                   v2
+4)
                   (concat_vectors
                    v2
-                   v2)))))))))]
+                   v2
+4)
+4))))))))]
         [(_ _ _) (assert #f "infeasible")])]
 
     [(arm:udot.v4i32.v16i8 Vd Vn Vm)
@@ -6405,7 +6493,8 @@
              (vector_reduce 'max 2
               v0)
              (vector_reduce 'max 2
-              v1))))]
+              v1)
+4)))]
         [((arm:u8x16 v0) (arm:u8x16 v1))
           (arm:u8x16
            (halide:interpret
@@ -6413,7 +6502,8 @@
              (vector_reduce 'max 2
               v0)
              (vector_reduce 'max 2
-              v1))))]
+              v1)
+8)))]
         [((arm:u16x4 v0) (arm:u16x4 v1))
           (arm:u16x4
            (halide:interpret
@@ -6421,7 +6511,8 @@
              (vector_reduce 'max 2
               v0)
              (vector_reduce 'max 2
-              v1))))]
+              v1)
+2)))]
         [((arm:u16x8 v0) (arm:u16x8 v1))
           (arm:u16x8
            (halide:interpret
@@ -6429,7 +6520,8 @@
              (vector_reduce 'max 2
               v0)
              (vector_reduce 'max 2
-              v1))))]
+              v1)
+4)))]
         [((arm:u32x2 v0) (arm:u32x2 v1))
           (arm:u32x2
            (halide:interpret
@@ -6437,7 +6529,8 @@
              (vector_reduce 'max 2
               v0)
              (vector_reduce 'max 2
-              v1))))]
+              v1)
+1)))]
         [((arm:u32x4 v0) (arm:u32x4 v1))
           (arm:u32x4
            (halide:interpret
@@ -6445,7 +6538,8 @@
              (vector_reduce 'max 2
               v0)
              (vector_reduce 'max 2
-              v1))))]
+              v1)
+2)))]
         [(_ _) (assert #f "infeasible")])]
 
     [(arm:umaxv Vn)
@@ -6526,7 +6620,8 @@
              (vector_reduce 'min 2
               v0)
              (vector_reduce 'min 2
-              v1))))]
+              v1)
+4)))]
         [((arm:u8x16 v0) (arm:u8x16 v1))
           (arm:u8x16
            (halide:interpret
@@ -6534,7 +6629,8 @@
              (vector_reduce 'min 2
               v0)
              (vector_reduce 'min 2
-              v1))))]
+              v1)
+8)))]
         [((arm:u16x4 v0) (arm:u16x4 v1))
           (arm:u16x4
            (halide:interpret
@@ -6542,7 +6638,8 @@
              (vector_reduce 'min 2
               v0)
              (vector_reduce 'min 2
-              v1))))]
+              v1)
+2)))]
         [((arm:u16x8 v0) (arm:u16x8 v1))
           (arm:u16x8
            (halide:interpret
@@ -6550,7 +6647,8 @@
              (vector_reduce 'min 2
               v0)
              (vector_reduce 'min 2
-              v1))))]
+              v1)
+4)))]
         [((arm:u32x2 v0) (arm:u32x2 v1))
           (arm:u32x2
            (halide:interpret
@@ -6558,7 +6656,8 @@
              (vector_reduce 'min 2
               v0)
              (vector_reduce 'min 2
-              v1))))]
+              v1)
+1)))]
         [((arm:u32x4 v0) (arm:u32x4 v1))
           (arm:u32x4
            (halide:interpret
@@ -6566,7 +6665,8 @@
              (vector_reduce 'min 2
               v0)
              (vector_reduce 'min 2
-              v1))))]
+              v1)
+2)))]
         [(_ _) (assert #f "infeasible")])]
 
     [(arm:uminv Vn)
@@ -8221,7 +8321,8 @@
              (slice_vectors
               v0 0 2 4)
              (slice_vectors
-              v1 0 2 4))))]
+              v1 0 2 4)
+4)))]
         [((arm:i8x16 v0) (arm:i8x16 v1))
           (arm:i8x16
            (halide:interpret
@@ -8229,7 +8330,8 @@
              (slice_vectors
               v0 0 2 8)
              (slice_vectors
-              v1 0 2 8))))]
+              v1 0 2 8)
+8)))]
         [((arm:i16x4 v0) (arm:i16x4 v1))
           (arm:i16x4
            (halide:interpret
@@ -8237,7 +8339,8 @@
              (slice_vectors
               v0 0 2 2)
              (slice_vectors
-              v1 0 2 2))))]
+              v1 0 2 2)
+2)))]
         [((arm:i16x8 v0) (arm:i16x8 v1))
           (arm:i16x8
            (halide:interpret
@@ -8245,7 +8348,8 @@
              (slice_vectors
               v0 0 2 4)
              (slice_vectors
-              v1 0 2 4))))]
+              v1 0 2 4)
+4)))]
         [((arm:i32x2 v0) (arm:i32x2 v1))
           (arm:i32x2
            (halide:interpret
@@ -8253,7 +8357,8 @@
              (slice_vectors
               v0 0 1 1)
              (slice_vectors
-              v1 0 1 1))))]
+              v1 0 1 1)
+1)))]
         [((arm:i32x4 v0) (arm:i32x4 v1))
           (arm:i32x4
            (halide:interpret
@@ -8261,7 +8366,8 @@
              (slice_vectors
               v0 0 2 2)
              (slice_vectors
-              v1 0 2 2))))]
+              v1 0 2 2)
+2)))]
         [((arm:i64x2 v0) (arm:i64x2 v1))
           (arm:i64x2
            (halide:interpret
@@ -8269,7 +8375,8 @@
              (slice_vectors
               v0 0 1 1)
              (slice_vectors
-              v1 0 1 1))))]
+              v1 0 1 1)
+1)))]
         [((arm:u8x8 v0) (arm:u8x8 v1))
           (arm:u8x8
            (halide:interpret
@@ -8277,7 +8384,8 @@
              (slice_vectors
               v0 0 2 4)
              (slice_vectors
-              v1 0 2 4))))]
+              v1 0 2 4)
+4)))]
         [((arm:u8x16 v0) (arm:u8x16 v1))
           (arm:u8x16
            (halide:interpret
@@ -8285,7 +8393,8 @@
              (slice_vectors
               v0 0 2 8)
              (slice_vectors
-              v1 0 2 8))))]
+              v1 0 2 8)
+8)))]
         [((arm:u16x4 v0) (arm:u16x4 v1))
           (arm:u16x4
            (halide:interpret
@@ -8293,7 +8402,8 @@
              (slice_vectors
               v0 0 2 2)
              (slice_vectors
-              v1 0 2 2))))]
+              v1 0 2 2)
+2)))]
         [((arm:u16x8 v0) (arm:u16x8 v1))
           (arm:u16x8
            (halide:interpret
@@ -8301,7 +8411,8 @@
              (slice_vectors
               v0 0 2 4)
              (slice_vectors
-              v1 0 2 4))))]
+              v1 0 2 4)
+4)))]
         [((arm:u32x2 v0) (arm:u32x2 v1))
           (arm:u32x2
            (halide:interpret
@@ -8309,7 +8420,8 @@
              (slice_vectors
               v0 0 1 1)
              (slice_vectors
-              v1 0 1 1))))]
+              v1 0 1 1)
+1)))]
         [((arm:u32x4 v0) (arm:u32x4 v1))
           (arm:u32x4
            (halide:interpret
@@ -8317,7 +8429,8 @@
              (slice_vectors
               v0 0 2 2)
              (slice_vectors
-              v1 0 2 2))))]
+              v1 0 2 2)
+2)))]
         [((arm:u64x2 v0) (arm:u64x2 v1))
           (arm:u64x2
            (halide:interpret
@@ -8325,7 +8438,8 @@
              (slice_vectors
               v0 0 1 1)
              (slice_vectors
-              v1 0 1 1))))]
+              v1 0 1 1)
+1)))]
         [(_ _) (assert #f "infeasible")])]
 
     [(arm:uzip2 Vn Vm)
@@ -8337,7 +8451,8 @@
              (slice_vectors
               v0 1 2 4)
              (slice_vectors
-              v1 1 2 4))))]
+              v1 1 2 4)
+4)))]
         [((arm:i8x16 v0) (arm:i8x16 v1))
           (arm:i8x16
            (halide:interpret
@@ -8345,7 +8460,8 @@
              (slice_vectors
               v0 1 2 8)
              (slice_vectors
-              v1 1 2 8))))]
+              v1 1 2 8)
+8)))]
         [((arm:i16x4 v0) (arm:i16x4 v1))
           (arm:i16x4
            (halide:interpret
@@ -8353,7 +8469,8 @@
              (slice_vectors
               v0 1 2 2)
              (slice_vectors
-              v1 1 2 2))))]
+              v1 1 2 2)
+2)))]
         [((arm:i16x8 v0) (arm:i16x8 v1))
           (arm:i16x8
            (halide:interpret
@@ -8361,7 +8478,8 @@
              (slice_vectors
               v0 1 2 4)
              (slice_vectors
-              v1 1 2 4))))]
+              v1 1 2 4)
+4)))]
         [((arm:i32x2 v0) (arm:i32x2 v1))
           (arm:i32x2
            (halide:interpret
@@ -8369,7 +8487,8 @@
              (slice_vectors
               v0 1 1 1)
              (slice_vectors
-              v1 1 1 1))))]
+              v1 1 1 1)
+1)))]
         [((arm:i32x4 v0) (arm:i32x4 v1))
           (arm:i32x4
            (halide:interpret
@@ -8377,7 +8496,8 @@
              (slice_vectors
               v0 1 2 2)
              (slice_vectors
-              v1 1 2 2))))]
+              v1 1 2 2)
+2)))]
         [((arm:i64x2 v0) (arm:i64x2 v1))
           (arm:i64x2
            (halide:interpret
@@ -8385,7 +8505,8 @@
              (slice_vectors
               v0 1 1 1)
              (slice_vectors
-              v1 1 1 1))))]
+              v1 1 1 1)
+1)))]
         [((arm:u8x8 v0) (arm:u8x8 v1))
           (arm:u8x8
            (halide:interpret
@@ -8393,7 +8514,8 @@
              (slice_vectors
               v0 1 2 4)
              (slice_vectors
-              v1 1 2 4))))]
+              v1 1 2 4)
+4)))]
         [((arm:u8x16 v0) (arm:u8x16 v1))
           (arm:u8x16
            (halide:interpret
@@ -8401,7 +8523,8 @@
              (slice_vectors
               v0 1 2 8)
              (slice_vectors
-              v1 1 2 8))))]
+              v1 1 2 8)
+8)))]
         [((arm:u16x4 v0) (arm:u16x4 v1))
           (arm:u16x4
            (halide:interpret
@@ -8409,7 +8532,8 @@
              (slice_vectors
               v0 1 2 2)
              (slice_vectors
-              v1 1 2 2))))]
+              v1 1 2 2)
+2)))]
         [((arm:u16x8 v0) (arm:u16x8 v1))
           (arm:u16x8
            (halide:interpret
@@ -8417,7 +8541,8 @@
              (slice_vectors
               v0 1 2 4)
              (slice_vectors
-              v1 1 2 4))))]
+              v1 1 2 4)
+4)))]
         [((arm:u32x2 v0) (arm:u32x2 v1))
           (arm:u32x2
            (halide:interpret
@@ -8425,7 +8550,8 @@
              (slice_vectors
               v0 1 1 1)
              (slice_vectors
-              v1 1 1 1))))]
+              v1 1 1 1)
+1)))]
         [((arm:u32x4 v0) (arm:u32x4 v1))
           (arm:u32x4
            (halide:interpret
@@ -8433,7 +8559,8 @@
              (slice_vectors
               v0 1 2 2)
              (slice_vectors
-              v1 1 2 2))))]
+              v1 1 2 2)
+2)))]
         [((arm:u64x2 v0) (arm:u64x2 v1))
           (arm:u64x2
            (halide:interpret
@@ -8441,7 +8568,8 @@
              (slice_vectors
               v0 1 1 1)
              (slice_vectors
-              v1 1 1 1))))]
+              v1 1 1 1)
+1)))]
         [(_ _) (assert #f "infeasible")])]
 
     [(arm:vabdl_i16x4 Vn Vm)
