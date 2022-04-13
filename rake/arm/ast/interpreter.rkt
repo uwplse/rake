@@ -8722,7 +8722,20 @@
       (let ([vecType (arm:get-type-struct output-type)])
         (vecType
           (lambda (i) (halide:buffer-ref buf (+ (interpret loc) i)))))]
-
+    
     [(arm:??sub-expr exprs c) (interpret (list-ref exprs c))]
-
+    
+    [(ramp base stride len)
+     (define intr-base (interpret base))
+     (define intr-stride (interpret stride))
+     ((arm:get-type-struct 'i32x4)
+      (lambda (i)
+        (mk-cpp-expr
+         (bvadd
+          (cpp:eval intr-base)
+          (bvmul
+           (integer->bitvector i (bitvector (cpp:expr-bw intr-stride)))
+           (cpp:eval intr-stride)))
+         (cpp:type intr-base))))]
+    
     [_ p]))
