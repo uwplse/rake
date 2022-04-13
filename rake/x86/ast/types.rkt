@@ -56,7 +56,9 @@
 (struct pmulhuw (a b) #:transparent)                        ;; _mm_mulhi_epu16 | multiply_keep_high_half
 (struct pmulhw (a b) #:transparent)                         ;; _mm_mulhi_epi16 | multiply_keep_high_half
 (struct pmullw (a b) #:transparent)                         ;; _mm_mullo_epi16 | multiply_keep_low_half
+(struct pmullw-vs (a imm16) #:transparent)                  ;; _mm_mullo_epi16 | multiply_keep_low_half
 (struct pmuludq (a b) #:transparent)                        ;; _mm_mul_epu32 | multiply_evens
+(struct pmuludq-vs (a imm32) #:transparent)                 ;; _mm_mul_epu32 | multiply_evens
 (struct por (a b) #:transparent)                            ;; _mm_or_si128 | bitwise_or
 (struct psadbw (a b) #:transparent)                         ;; _mm_sad_epu8 | unsigned_absd_sum
 (struct pshufd (a imm8) #:transparent)                      ;; _mm_shuffle_epi32 | shuffle_vpshufd
@@ -169,13 +171,16 @@
 (struct vpmovzxwd (a) #:transparent)                        ;; _mm256_cvtepu16_epi32 | widen
 (struct vpmovzxwq (a) #:transparent)                        ;; _mm256_cvtepu16_epi64 | double_widen
 (struct vpmuldq (a b) #:transparent)                        ;; _mm256_mul_epi32 | multiply_evens
+(struct vpmuldq-vs (a imm32) #:transparent)                 ;; _mm256_mul_epi32 | multiply_evens
 (struct vpmulhrsw (a b) #:transparent)                      ;; _mm256_mulhrs_epi16 | multiply_keep_high_half_rounding
 (struct vpmulhuw (a b) #:transparent)                       ;; _mm256_mulhi_epu16 | multiply_keep_high_half
 (struct vpmulhw (a b) #:transparent)                        ;; _mm256_mulhi_epi16 | multiply_keep_high_half
 (struct vpmulld (a b) #:transparent)                        ;; _mm256_mullo_epi32 | multiply_keep_low_half
+(struct vpmulld-vs (a imm32) #:transparent)                 ;; _mm256_mullo_epi32 | multiply_keep_low_half
 (struct vpmullw (a b) #:transparent)                        ;; _mm256_mullo_epi16 | multiply_keep_low_half
 (struct vpmullw-vs (a imm16) #:transparent)                 ;; _mm256_mullo_epi16 | multiply_keep_low_half
 (struct vpmuludq (a b) #:transparent)                       ;; _mm256_mul_epu32 | multiply_evens
+(struct vpmuludq-vs (a imm32) #:transparent)                ;; _mm256_mul_epu32 | multiply_evens
 (struct vpor (a b) #:transparent)                           ;; _mm256_or_si256 | bitwise_or
 (struct vpsadbw (a b) #:transparent)                        ;; _mm256_sad_epu8 | unsigned_absd_sum
 (struct vpshufb (a b) #:transparent)                        ;; _mm256_shuffle_epi8 | shuffle_vpshufb
@@ -286,6 +291,7 @@
       (lambda (obj) (if (concrete? (??sub-expr-c obj))
                         (list (list-ref (??sub-expr-exprs obj) (??sub-expr-c obj)))
                         (list (length (??sub-expr-exprs obj)) (??sub-expr-c obj))))))])
+
 
 (struct instr-sig (ret-val args) #:transparent)
 
@@ -437,8 +443,16 @@
                          (instr-sig 'i16x8 (list 'i16x8 'i16x8))
                         )]
 
+    [(eq? pmullw-vs instr) (list
+                         (instr-sig 'i16x8 (list 'i16x8 'int16))
+                        )]
+
     [(eq? pmuludq instr) (list
                          (instr-sig 'u64x2 (list 'u32x4 'u32x4))
+                        )]
+
+    [(eq? pmuludq-vs instr) (list
+                         (instr-sig 'u64x2 (list 'u32x4 'uint32))
                         )]
 
     [(eq? por instr) (list
@@ -1073,6 +1087,10 @@
                          (instr-sig 'i64x4 (list 'i32x8 'i32x8))
                         )]
 
+    [(eq? vpmuldq-vs instr) (list
+                         (instr-sig 'i64x4 (list 'i32x8 'int32))
+                        )]
+
     [(eq? vpmulhrsw instr) (list
                          (instr-sig 'i16x16 (list 'i16x16 'i16x16))
                         )]
@@ -1089,6 +1107,10 @@
                          (instr-sig 'i32x8 (list 'i32x8 'i32x8))
                         )]
 
+    [(eq? vpmulld-vs instr) (list
+                         (instr-sig 'i32x8 (list 'i32x8 'int32))
+                        )]
+
     [(eq? vpmullw instr) (list
                          (instr-sig 'i16x16 (list 'i16x16 'i16x16))
                         )]
@@ -1099,6 +1121,10 @@
 
     [(eq? vpmuludq instr) (list
                          (instr-sig 'u64x4 (list 'u32x8 'u32x8))
+                        )]
+
+    [(eq? vpmuludq-vs instr) (list
+                         (instr-sig 'u64x4 (list 'u32x8 'uint32))
                         )]
 
     [(eq? vpor instr) (list
@@ -1373,7 +1399,7 @@
                          (instr-sig 'u64x4 (list 'i64x4))
                          )]
 
-    [else (error "Unknown instruction:" instr)]))
+    [else (error "(x86:instr-form) Unknown instruction:" instr)]))
 
 ;; TODO: need to auto-generate these...
 (define (elem-type expr)

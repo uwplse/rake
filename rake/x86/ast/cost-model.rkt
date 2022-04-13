@@ -11,7 +11,7 @@
 (provide (prefix-out x86: (all-defined-out)))
 
 ;; Auto-generated cost model of Skylake throughput (CPI).
-(define (instr-cost instr sig)
+(define (instr-cost instr)
   (cond
     [(eq? instr x86:reinterpret) 0]
     [(eq? instr x86:packssdw) 1]
@@ -43,7 +43,9 @@
     [(eq? instr x86:pmulhuw) 0.5]
     [(eq? instr x86:pmulhw) 0.5]
     [(eq? instr x86:pmullw) 0.5]
+    [(eq? instr x86:pmullw-vs) 1.5]
     [(eq? instr x86:pmuludq) 0.5]
+    [(eq? instr x86:pmuludq-vs) 1.5]
     [(eq? instr x86:por) 0.33]
     [(eq? instr x86:psadbw) 1]
     [(eq? instr x86:pshufd) 1]
@@ -151,17 +153,21 @@
     [(eq? instr x86:vpmovzxbd) 1]
     [(eq? instr x86:vpmovzxbq) 1]
     [(eq? instr x86:vpmovzxbw) 1]
+    [(eq? instr x86:vpmovzxbw_s) 1]
     [(eq? instr x86:vpmovzxdq) 1]
     [(eq? instr x86:vpmovzxwd) 1]
     [(eq? instr x86:vpmovzxwq) 1]
     [(eq? instr x86:vpmuldq) 0.5]
+    [(eq? instr x86:vpmuldq-vs) 0.5]
     [(eq? instr x86:vpmulhrsw) 0.5]
     [(eq? instr x86:vpmulhuw) 0.5]
     [(eq? instr x86:vpmulhw) 0.5]
     [(eq? instr x86:vpmulld) 0.66]
+    [(eq? instr x86:vpmulld-vs) 1.66]
     [(eq? instr x86:vpmullw) 0.5]
     [(eq? instr x86:vpmullw-vs) 1.5]
     [(eq? instr x86:vpmuludq) 0.5]
+    [(eq? instr x86:vpmuludq-vs) 0.5]
     [(eq? instr x86:vpor) 0.33]
     [(eq? instr x86:vpsadbw) 1]
     [(eq? instr x86:vpshufb) 1]
@@ -204,4 +210,3 @@
     [(eq? instr x86:vpunpcklwd) 1]
     [(eq? instr x86:vpxor) 0.33]
     [else (error "Unknown instruction (x86:instr-cost):" instr)]))
-

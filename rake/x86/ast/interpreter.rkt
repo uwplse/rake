@@ -608,6 +608,18 @@
 
         [(_ _) (assert #f "infeasible in interpreting pmullw")])]
 
+    [(x86:pmullw-vs a imm16)
+      (destruct* ((interpret a) (interpret imm16))
+        [((x86:i16x8 a) (int16_t imm16))
+            (x86:i16x8
+             (halide:interpret
+              (vec-mul
+               a
+               (x8 (int16_t
+ imm16)))))]
+
+        [(_ _) (assert #f "infeasible in interpreting pmullw-vs")])]
+
     [(x86:pmuludq a b)
       (destruct* ((interpret a) (interpret b))
         [((x86:u32x4 a) (x86:u32x4 b))
@@ -622,6 +634,21 @@
                  b 0 2 2)))))]
 
         [(_ _) (assert #f "infeasible in interpreting pmuludq")])]
+
+    [(x86:pmuludq-vs a imm32)
+      (destruct* ((interpret a) (interpret imm32))
+        [((x86:u32x4 a) (uint32_t imm32))
+            (x86:u64x2
+             (halide:interpret
+              (vec-mul
+               (uint64x2
+                (slice_vectors
+                 a 0 2 2))
+               (uint64x2
+                (x2 (uint32_t
+ imm32))))))]
+
+        [(_ _) (assert #f "infeasible in interpreting pmuludq-vs")])]
 
     [(x86:por a b)
       (destruct* ((interpret a) (interpret b))
@@ -15889,6 +15916,17 @@
 
         [(_) (assert #f "infeasible in interpreting vpmovzxbw")])]
 
+    ;; TODO: auto-generate all of these
+    [(x86:vpmovzxbw_s a)
+      (destruct* ((interpret a))
+        [((x86:u8x16 a))
+            (x86:i16x16
+             (halide:interpret
+              (uint16x16
+               a)))]
+
+        [(_) (assert #f "infeasible in interpreting vpmovzxbw_s")])]
+
     [(x86:vpmovzxdq a)
       (destruct* ((interpret a))
         [((x86:u32x4 a))
@@ -15934,6 +15972,21 @@
                  b 0 2 4)))))]
 
         [(_ _) (assert #f "infeasible in interpreting vpmuldq")])]
+
+    [(x86:vpmuldq-vs a imm32)
+      (destruct* ((interpret a) (interpret imm32))
+        [((x86:i32x8 a) (int32_t imm32))
+            (x86:i64x4
+             (halide:interpret
+              (vec-mul
+               (int64x4
+                (slice_vectors
+                 a 0 2 4))
+               (int64x4
+                (x4 (int32_t
+ imm32))))))]
+
+        [(_ _) (assert #f "infeasible in interpreting vpmuldq-vs")])]
 
     [(x86:vpmulhrsw a b)
       (destruct* ((interpret a) (interpret b))
@@ -16004,6 +16057,18 @@
 
         [(_ _) (assert #f "infeasible in interpreting vpmulld")])]
 
+    [(x86:vpmulld-vs a imm32)
+      (destruct* ((interpret a) (interpret imm32))
+        [((x86:i32x8 a) (int32_t imm32))
+            (x86:i32x8
+             (halide:interpret
+              (vec-mul
+               a
+               (x8 (int32_t
+ imm32)))))]
+
+        [(_ _) (assert #f "infeasible in interpreting vpmulld-vs")])]
+
     [(x86:vpmullw a b)
       (destruct* ((interpret a) (interpret b))
         [((x86:i16x16 a) (x86:i16x16 b))
@@ -16041,6 +16106,21 @@
                  b 0 2 4)))))]
 
         [(_ _) (assert #f "infeasible in interpreting vpmuludq")])]
+
+    [(x86:vpmuludq-vs a imm32)
+      (destruct* ((interpret a) (interpret imm32))
+        [((x86:u32x8 a) (uint32_t imm32))
+            (x86:u64x4
+             (halide:interpret
+              (vec-mul
+               (uint64x4
+                (slice_vectors
+                 a 0 2 4))
+               (uint64x4
+                (x4 (uint32_t
+ imm32))))))]
+
+        [(_ _) (assert #f "infeasible in interpreting vpmuludq-vs")])]
 
     [(x86:vpor a b)
       (destruct* ((interpret a) (interpret b))
