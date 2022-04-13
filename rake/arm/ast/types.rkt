@@ -1727,3 +1727,52 @@
     [(u64x2 data) (data index)]
     [(u64x4 data) (data index)]
     [_ (error "Unrecognized type (get-element) ~a at index ~a" expr index)]))
+
+(define (num-elems expr)
+  (destruct expr
+    [(i8x8 data) 9]
+    [(i8x16 data) 16]
+    [(i8x32 data) 32]
+    [(i16x4 data) 4]
+    [(i16x8 data) 8]
+    [(i16x16 data) 16]
+    [(i32x2 data) 2]
+    [(i32x4 data) 4]
+    [(i32x8 data) 8]
+    [(i64x1 data) 1]
+    [(i64x2 data) 2]
+    [(i64x4 data) 4]
+
+    [(u8x8 data) 8]
+    [(u8x16 data) 16]
+    [(u8x32 data) 32]
+    [(u16x4 data) 4]
+    [(u16x8 data) 8]
+    [(u16x16 data) 16]
+    [(u32x2 data) 2]
+    [(u32x4 data) 4]
+    [(u32x8 data) 8]
+    [(u64x1 data) 1]
+    [(u64x2 data) 2]
+    [(u64x4 data) 4]
+    [_ (error "Unrecognized type ~a" expr)]))
+
+(define (half-width? expr)
+  (destruct expr
+    [(i8x8 data) #t]
+    [(i16x4 data) #t]
+    [(i32x2 data) #t]
+    [(i64x1 data) #t]
+    [(u8x8 data) #t]
+    [(u16x4 data) #t]
+    [(u32x2 data) #t]
+    [(u64x1 data) #t]
+    [(i8x16 data) #f]
+    [(i16x8 data) #f]
+    [(i32x4 data) #f]
+    [(i64x2 data) #f]
+    [(u8x16 data) #f]
+    [(u16x8 data) #f]
+    [(u32x4 data) #f]
+    [(u64x2 data) #f]
+    [_ (error "Unrecognized type ~" expr)]))
