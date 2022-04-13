@@ -90,7 +90,7 @@
      ;; Inline sub-expr nodes
      (define (inline-subexprs node [pos -1])
        (destruct node
-         [(x86:??sub-expr exprs c) (list-ref exprs (if (concrete? c) c (evaluate c (complete-solution (sat) (list c)))))]
+         [(x86:??sub-expr exprs c type) (list-ref exprs (if (concrete? c) c (evaluate c (complete-solution (sat) (list c)))))]
          [_ node]))
      (set! updated-template (cons (x86:visit (car updated-template) inline-subexprs) (cdr updated-template)))
      

@@ -5035,14 +5035,14 @@
 
     [(x86:vbroadcasti128 a)
       (destruct* ((interpret a))
-        [((x86:i8x16 v))   (concat_vectors v v)]
-        [((x86:i16x8 v))   (concat_vectors v v)]
-        [((x86:i32x4 v))   (concat_vectors v v)]
-        [((x86:i64x2 v))   (concat_vectors v v)]
-        [((x86:u8x16 v))   (concat_vectors v v)]
-        [((x86:u16x8 v))   (concat_vectors v v)]
-        [((x86:u32x4 v))   (concat_vectors v v)]
-        [((x86:u64x2 v))   (concat_vectors v v)]
+        [((x86:i8x16 v))   (x86:i8x32 (halide:interpret (concat_vectors v v)))]
+        [((x86:i16x8 v))   (x86:i16x16 (halide:interpret (concat_vectors v v)))]
+        [((x86:i32x4 v))   (x86:i32x8 (halide:interpret (concat_vectors v v)))]
+        [((x86:i64x2 v))   (x86:i64x4 (halide:interpret (concat_vectors v v)))]
+        [((x86:u8x16 v))   (x86:u8x32 (halide:interpret (concat_vectors v v)))]
+        [((x86:u16x8 v))   (x86:u16x16 (halide:interpret (concat_vectors v v)))]
+        [((x86:u32x4 v))   (x86:u32x8 (halide:interpret (concat_vectors v v)))]
+        [((x86:u64x2 v))   (x86:u64x4 (halide:interpret (concat_vectors v v)))]
 
 
         [(_) (assert #f "infeasible in interpreting vbroadcasti128")])]
@@ -15925,7 +15925,10 @@
               (uint16x16
                a)))]
 
-        [(_) (assert #f "infeasible in interpreting vpmovzxbw_s")])]
+        [(_)
+          (pretty-print a)
+          (pretty-print (interpret a))
+          (assert #f (format "infeasible in interpreting vpmovzxbw_s: ~a" a))])]
 
     [(x86:vpmovzxdq a)
       (destruct* ((interpret a))
@@ -28863,7 +28866,7 @@
         (vecType
           (lambda (i) (list-ref (list-ref live-data curr-cn) (list-ref idx-tbl i)))))]
 
-    [(x86:??sub-expr exprs c) (interpret (list-ref exprs c))]
+    [(x86:??sub-expr exprs c t) (interpret (list-ref exprs c))]
 
     [(x86:reinterpret Vn)
       (destruct (interpret Vn)

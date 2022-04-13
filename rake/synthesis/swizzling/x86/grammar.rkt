@@ -10,6 +10,7 @@
   rake/x86/ast/cost-model
   rake/x86/ast/interpreter
   rake/x86/ast/types
+  rake/x86/ast/type_utils
   rake/x86/ast/visitor
   rake/synthesis/lowering/x86/layouts
   rake/synthesis/lowering/x86/utils
@@ -27,19 +28,6 @@
       (define candidates (get-x86-swizzle-grammar-gen ir-expr halide-expr x86-template swizzle-budget swizzle-node starting-vecs x86-sub-exprs translation-history))
       (hash-set! grammar-lib (list halide-expr x86-template swizzle-node output-layout starting-vecs x86-sub-exprs) candidates)
       candidates]))
-
-(define (get-vec-type elemT)
-  (cond
-    ;; TODO: could these ever be __m128i?
-    [(eq? elemT 'uint1)  (error "get-vec-type on boolean?")]
-    [(eq? elemT 'int8)   'i8x32]
-    [(eq? elemT 'int16)  'i16x16]
-    [(eq? elemT 'int32)  'i32x8]
-    [(eq? elemT 'int64)  'i64x4]
-    [(eq? elemT 'uint8)  'u8x32]
-    [(eq? elemT 'uint16) 'u16x16]
-    [(eq? elemT 'uint32) 'u32x8]
-    [(eq? elemT 'uint64) 'u64x4]))
 
 (define (get-x86-swizzle-grammar-gen ir-expr halide-expr x86-template swizzle-budget swizzle-node starting-vecs x86-sub-exprs translation-history)
   ;(pretty-print starting-vecs)
@@ -106,11 +94,9 @@
   (println "define-values (target-node-id base-exprs) succeeded")
   (pretty-print base-exprs)
 
-  (define intr_expr (x86:interpret swizzle-node))
-  (define elemT (x86:elem-type intr_expr))
-  (define out-type (get-vec-type elemT))
+  (define out-type (x86:get-interpreted-type swizzle-node))
 
-  (println "got types")
+  (display (format "Swizzle-node is of type: ~a\n" out-type))
 
   (define isa
     (list
@@ -131,7 +117,7 @@
   (for ([(t bes) grouped-base-exprs])
     (define-symbolic* c integer?)
     (define beC (if (x86:??swizzle? swizzle-node) 0 0))
-    (hash-set! grouped-base-exprs t (list (cons (x86:??sub-expr bes c) beC))))
+    (hash-set! grouped-base-exprs t (list (cons (x86:??sub-expr bes c t) beC))))
 
   (println "grouped-base-exprs")
   (pretty-print grouped-base-exprs)
@@ -143,6 +129,9 @@
 
   (println "candidates-swizzles")
   (println (length candidate-swizzles))
+  (pretty-print candidate-swizzles)
+  (pretty-print (map (lambda (e) (x86:get-interpreted-type (car e))) candidate-swizzles))
+  ; (error "swizzles")
 
   ;; TODO: understandd the scalar swizzling?
   (define (swizzle-node? n)
@@ -171,7 +160,7 @@
      (for/list ([candidate-swizzle candidate-swizzles])
        (define (uniquify-sub-exprs node [pos -1])
          (destruct node
-           [(x86:??sub-expr exprs c) (define-symbolic* ch integer?) (x86:??sub-expr exprs ch)]
+           [(x86:??sub-expr exprs c t) (define-symbolic* ch integer?) (x86:??sub-expr exprs ch t)]
            [_ node]))
        
        ;; Update template: Replace target swizzle node with swizzle grammar

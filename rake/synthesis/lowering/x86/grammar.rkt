@@ -91,22 +91,31 @@
               ;; zext/sext
               (if widening? (get-widen-isa) '())
               ;; rounding_halving_adds
-              (if (or half? round?) (list x86:vpavgw x86:vpavgb) '())
+              (if (or half? round?) (list x86:vpavgw x86:vpavgb x86:pavgb x86:pavgw) '())
               ;; regular adds/subs (and horizontal adds/subs)
               (list x86:vpaddb x86:vpaddw x86:vpaddd x86:vpaddq
                     x86:vphaddw x86:vphaddd x86:vphsubw x86:vphsubd
-                    x86:vpsubb x86:vpsubw x86:vpsubd x86:vpsubq)
+                    x86:vpsubb x86:vpsubw x86:vpsubd x86:vpsubq
+                    ;; SSE2 versions:
+                    x86:paddb x86:paddw x86:paddd x86:paddq
+                    x86:psubb x86:psubw x86:psubd x86:psubq
+              )
               ;; TODO: should we have conditions on including dot_products?
               (list x86:vpmaddwd x86:vpmaddubsw)
-              ;; TODO: need more vector-scalar variants of multiply instructions.
-              (list x86:vpmullw-vs)
+              ;; vector-scalar versions of multiply instructions
+              (list x86:vpmuldq-vs x86:vpmuludq-vs x86:vpmullw-vs x86:vpmulld-vs
+                    x86:pmuludq-vs x86:pmullw-vs)
               ;; TODO: should we include the shift-left variants? I think we need to.
               (list x86:vpsllw x86:vpslld x86:vpsllq)
               ;; TODO: should we include saturating adds even if not sat?
               (if sat?
                 (list x86:vpaddsb x86:vpaddsw x86:vpaddusb x86:vpaddusw
                       x86:vphaddsw x86:vphsubsw
-                      x86:vpsubsw x86:vpsubsb x86:vpsubusw x86:vpsubusb)
+                      x86:vpsubsw x86:vpsubsb x86:vpsubusw x86:vpsubusb
+                      ;; SSE2 versions:
+                      x86:paddsb x86:paddsw x86:paddusb x86:paddusw
+                      x86:psubsw x86:psubsb x86:psubusw x86:psubusb
+                )
                 '())))]
          ; TODO: better pruning and more isa options
          ; TODO: are there better depth/cost combos?

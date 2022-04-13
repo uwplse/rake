@@ -282,15 +282,15 @@
       (lambda (obj) `x86:abstr-expr)
       (lambda (obj) (list (abstr-expr-type obj)))))])
 
-(struct ??sub-expr (exprs c)
+(struct ??sub-expr (exprs c type)
   #:transparent
   #:methods gen:custom-write
   [(define write-proc
      (make-constructor-style-printer
       (lambda (obj) `??sub-expr)
       (lambda (obj) (if (concrete? (??sub-expr-c obj))
-                        (list (list-ref (??sub-expr-exprs obj) (??sub-expr-c obj)))
-                        (list (length (??sub-expr-exprs obj)) (??sub-expr-c obj))))))])
+                        (list (list-ref (??sub-expr-exprs obj) (??sub-expr-c obj)) (??sub-expr-type obj))
+                        (list (length (??sub-expr-exprs obj)) (??sub-expr-c obj) (??sub-expr-type obj))))))])
 
 
 (struct instr-sig (ret-val args) #:transparent)
