@@ -1,6 +1,7 @@
-#lang rosette/safe
+#lang rosette
 
 (require
+  (only-in rosette/base/core/term @app)
   (only-in racket/base for/list values for)
   (only-in racket/base make-hash hash-set! hash-has-key? hash-ref hash-ref!)
   (only-in racket/set list->set set->list set-subtract)
@@ -9,15 +10,16 @@
   rake/internal/error
   rake/internal/log
   rosette/lib/destruct
-  rosette/lib/match
+  ;rosette/lib/match
   ; rake/synthesis/swizzling/grammar
   ; rake/synthesis/swizzling/synthesizer
-  rake/halide/ir/interpreter
-  rake/halide/ir/analysis
+  rake/cpp
+  rake/halide
   rake/arm/ast/types
   rake/arm/ast/visitor
   rake/arm/ast/interpreter
   rake/arm/ast/analysis
+  rake/synthesis/lowering/arm/util
 )
 
 (provide synthesize-arm-swizzles)
@@ -31,10 +33,10 @@
       ; (display (format "Target output layout: ~a\n\n"))
       
       (define starting-vecs (halide:extract-arm-loads halide-expr))
-      (display (format "Halide Expr: ~a\n\n" halide-expr))
-      (display "with loads:\n")
-      (pretty-print starting-vecs)
-      (display "\n\n\n\n")
+      ;(display (format "Halide Expr: ~a\n\n" halide-expr))
+      ;(display "with loads:\n")
+      ;(pretty-print starting-vecs)
+      ;(display "\n\n\n\n")
 
       ;; Extract set of swizzle nodes to be synthesized
       (define swizzle-nodes (list))
@@ -90,8 +92,8 @@
   ;; Get swizzle grammar
   (define candidates (get-arm-swizzle-grammar halide-expr arm-template swizzle-budget swizzle-node starting-vecs arm-sub-exprs translation-history))
 
-  (display "Candidates\n")
-  (pretty-print candidates)
+  ;(display "Candidates\n")
+  ;(pretty-print candidates)
   ;; Run synthesizer
   (define-values (successful? updated-template) (synthesize-arm-translation candidates halide-expr arm-sub-exprs value-bounds translation-history))
   
@@ -162,23 +164,23 @@
       (hash-ref grammar-lib (list halide-expr arm-template swizzle-node starting-vecs arm-sub-exprs))]
     [else
       (define candidates (get-arm-swizzle-grammar-gen halide-expr arm-template swizzle-budget swizzle-node starting-vecs arm-sub-exprs translation-history))
-      (display (format "Got this far: ~a\n\n" (length candidates)))
+      ;(display (format "Got this far: ~a\n\n" (length candidates)))
       (hash-set! grammar-lib (list halide-expr arm-template swizzle-node starting-vecs arm-sub-exprs) candidates)
       candidates]))
 
 (define enumeration-database (make-hash))
 
 (define (get-arm-swizzle-grammar-gen halide-expr arm-template swizzle-budget swizzle-node starting-vecs arm-sub-exprs translation-history)
-  (display (format "get-arm-swizzle-grammar-gen ~a ~a ~a ~a ~a ~a ~a\n\n" halide-expr arm-template swizzle-budget swizzle-node starting-vecs arm-sub-exprs translation-history))
+  ;(display (format "get-arm-swizzle-grammar-gen ~a ~a ~a ~a ~a ~a ~a\n\n" halide-expr arm-template swizzle-budget swizzle-node starting-vecs arm-sub-exprs translation-history))
   ; (pretty-print swizzle-node)
   ; (display "hello?\n")
   (define-values (target-node-id base-exprs)
     (extract-swizzle-information swizzle-node starting-vecs))
-  (display (format "\n\nextracted information ~a\n" target-node-id))
-  (pretty-print base-exprs)
+  ;(display (format "\n\nextracted information ~a\n" target-node-id))
+  ;(pretty-print base-exprs)
   ; (display "here?\n\n")
-  (pretty-print starting-vecs)
-  (display "\nEnd information extraction\n\n")
+  ;(pretty-print starting-vecs)
+  ;(display "\nEnd information extraction\n\n")
   (let* ([intr-expr (arm:interpret swizzle-node)]
          [elem-type (arm:elem-type intr-expr)]
          [output-type (get-output-type swizzle-node)]
@@ -197,22 +199,63 @@
     (set! enumeration-database (make-hash))
     (define candidate-swizzles (enumerate-arm isa output-type grouped-base-exprs 2 (min swizzle-budget 5)))
 
-  (println (length candidate-swizzles))
+    ;(println (length candidate-swizzles))
 
-  ;; TODO: there is a bunch of updating that I do not understand in the hvx version (grammar.rkt)
-  (define updated-template arm-template)
-
-  (define tmpl-type (arm:get-interpreted-type arm-template))
-  (define tmpl-elem-type (arm:elem-type tmpl-type))
-  (define candidates (construct-candidates updated-template candidate-swizzles target-node-id))
-  (define sorted-candidates (sort candidates (lambda (v1 v2) (<= (cdr v1) (cdr v2)))))
-
-  (define (fill-arg-grammars node [pos -1])
-    (match node
-      ; TODO: need to fix arm-instr-forms to allow for 'const
-      ['const (define-symbolic* c integer?) c]
+    ;; TODO: there is a bunch of updating that I do not understand in the hvx version (grammar.rkt)
+    (define target-node-id (get-swizzle-node-id swizzle-node))
+    (define (update-swizzle-nodes node [pos -1])
+    (destruct node
+      [(arm:??load id live-data buffer gather-tbl output-type)
+       (if (not (equal? id target-node-id)) (update-swizzle-data node halide-expr arm-sub-exprs translation-history) node)]
       [_ node]))
-  (for/list ([candidate sorted-candidates]) (cons (arm:visit (car candidate) fill-arg-grammars) (cdr candidate)))))
+    (define updated-template (arm:visit arm-template update-swizzle-nodes))
+
+    (define tmpl-type (arm:get-interpreted-type arm-template))
+    (define tmpl-elem-type (arm:elem-type tmpl-type))
+    (define candidates (construct-candidates updated-template candidate-swizzles target-node-id))
+    (define sorted-candidates (sort candidates (lambda (v1 v2) (<= (cdr v1) (cdr v2)))))
+
+    (define (fill-arg-grammars node [pos -1])
+      (match node
+        ; TODO: need to fix arm-instr-forms to allow for 'const
+        ['const (define-symbolic* c integer?) c]
+        [_ node]))
+    (for/list ([candidate sorted-candidates]) (cons (arm:visit (car candidate) fill-arg-grammars) (cdr candidate)))))
+
+(define (update-swizzle-data swizzle-node halide-expr arm-sub-exprs translation-history)
+  (define (update-swizzle-node node [pos -1])
+    (destruct node
+      [(arm:??load id live-data buffer gather-tbl output-type)
+        (define tbl (map (lambda (i) (define-symbolic* idx integer?) idx) (range 64)))
+        (arm:??load id (halide:extract-buffer-reads halide-expr) buffer tbl output-type)]
+      [(arm:??swizzle id live-data exprs gather-tbl output-type)
+        ;; Abstract out common sub-expressions
+        (define-values (abstr-halide-expr abstr-template _) (arm:optimize-query halide-expr node arm-sub-exprs (make-hash) translation-history))
+        ;; Extract the reads from this expression, essentially representing each "read" from the sub-expressions as a symbolic constant
+        (define new-data (halide:extract-buffer-reads abstr-halide-expr))
+        ;; Now we replace the symbolic constants with the original expressions they represent. This gives us the set of sub-expression accesses
+        ;; to consider. There is certainly a cleaner way to do this, but the following way re-uses existing code.
+        (define abstr-exprs (make-hash))
+        (define (extract-abstr-exprs node)
+          (cond
+            [(abstr-halide-expr? node) (hash-set! abstr-exprs (buffer-data (abstr-halide-expr-abstr-vals node)) (abstr-halide-expr-orig-expr node)) node]
+            [else node]))
+        (halide:visit abstr-halide-expr extract-abstr-exprs)
+        (define (unwrap-reads data exprs)
+          (for/list ([lane-reads data])
+            (for/list ([lane-read lane-reads])
+              (match (cpp:eval lane-read)
+                [(expression (== @app) xs ...)
+                 (cond
+                   [(hash-has-key? abstr-exprs (list-ref xs 0)) ((halide:interpret (hash-ref abstr-exprs (list-ref xs 0))) (list-ref xs 1))]
+                   [else lane-read])]
+                [_ (error "Extracted read from the Halide expression does not match any expected patterns.")]))))
+        ;; Finally create the swizzle node
+        ;(define-symbolic* tbl (~> integer? integer?))
+        (define tbl (map (lambda (i) (define-symbolic* idx integer?) idx) (range 256)))
+        (arm:??swizzle id (unwrap-reads new-data abstr-exprs) exprs tbl output-type)]
+      [_ node]))
+  (arm:visit swizzle-node update-swizzle-node))
 
 (define (construct-candidates updated-template candidate-swizzles target-node-id)
   ;; This could just me a `map`, right?
