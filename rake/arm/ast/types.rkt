@@ -1776,3 +1776,23 @@
     [(u32x4 data) #f]
     [(u64x2 data) #f]
     [_ (error "Unrecognized type ~" expr)]))
+
+(define (vec-length expr)
+  (destruct expr
+    [(i8x8 data) 64]
+    [(i16x4 data) 64]
+    [(i32x2 data) 64]
+    [(i64x1 data) 64]
+    [(u8x8 data) 64]
+    [(u16x4 data) 64]
+    [(u32x2 data) 64]
+    [(u64x1 data) 64]
+    [(i8x16 data) 128]
+    [(i16x8 data) 128]
+    [(i32x4 data) 128]
+    [(i64x2 data) 128]
+    [(u8x16 data) 128]
+    [(u16x8 data) 128]
+    [(u32x4 data) 128]
+    [(u64x2 data) 128]
+    [_ (error "Unrecognized type ~" expr)]))
