@@ -62,7 +62,8 @@
                 (vec-min
                  (concat_vectors
                   a
-                  b)
+                  b
+4)
                  (x8 (int32_t (bv 32767 32))))
                 (x8 (int32_t (bv -32768 32)))))))]
 
@@ -78,7 +79,8 @@
                 (vec-min
                  (concat_vectors
                   a
-                  b)
+                  b
+8)
                  (x16 (int16_t (bv 127 16))))
                 (x16 (int16_t (bv -128 16)))))))]
 
@@ -94,7 +96,8 @@
                 (vec-min
                  (concat_vectors
                   a
-                  b)
+                  b
+8)
                  (x16 (int16_t (bv 255 16))))
                 (x16 (int16_t (bv 0 16)))))))]
 
@@ -775,7 +778,8 @@
                   (slice_vectors
                    a 2 1 1)
                   (slice_vectors
-                   a 0 1 1))))
+                   a 0 1 1)))
+1)
                (concat_vectors
                 (sca-if
                  (slice_vectors
@@ -828,7 +832,9 @@
                   (slice_vectors
                    a 2 1 1)
                   (slice_vectors
-                   a 0 1 1)))))))]
+                   a 0 1 1)))
+1)
+1)))]
         [((x86:u32x4 a) (uint8_t imm8))
             (x86:u32x4
              (halide:interpret
@@ -885,7 +891,8 @@
                   (slice_vectors
                    a 2 1 1)
                   (slice_vectors
-                   a 0 1 1))))
+                   a 0 1 1)))
+1)
                (concat_vectors
                 (sca-if
                  (slice_vectors
@@ -938,7 +945,9 @@
                   (slice_vectors
                    a 2 1 1)
                   (slice_vectors
-                   a 0 1 1)))))))]
+                   a 0 1 1)))
+1)
+1)))]
 
         [(_ _) (assert #f "infeasible in interpreting pshufd")])]
 
@@ -1023,7 +1032,8 @@
                       a 1 1 4) 2 1 1)
                     (slice_vectors
                      (slice_vectors
-                      a 1 1 4) 3 1 1)))))
+                      a 1 1 4) 3 1 1))))
+1)
                 (concat_vectors
                  (sca-if
                   (sca-eq
@@ -1102,7 +1112,10 @@
                       a 1 1 4) 2 1 1)
                     (slice_vectors
                      (slice_vectors
-                      a 1 1 4) 3 1 1)))))))))]
+                      a 1 1 4) 3 1 1))))
+1)
+1)
+4)))]
         [((x86:u16x8 a) (uint8_t imm8))
             (x86:u16x8
              (halide:interpret
@@ -1182,7 +1195,8 @@
                       a 1 1 4) 2 1 1)
                     (slice_vectors
                      (slice_vectors
-                      a 1 1 4) 3 1 1)))))
+                      a 1 1 4) 3 1 1))))
+1)
                 (concat_vectors
                  (sca-if
                   (sca-eq
@@ -1261,7 +1275,10 @@
                       a 1 1 4) 2 1 1)
                     (slice_vectors
                      (slice_vectors
-                      a 1 1 4) 3 1 1)))))))))]
+                      a 1 1 4) 3 1 1))))
+1)
+1)
+4)))]
 
         [(_ _) (assert #f "infeasible in interpreting pshufhw")])]
 
@@ -1344,7 +1361,8 @@
                       a 0 1 4) 2 1 1)
                     (slice_vectors
                      (slice_vectors
-                      a 0 1 4) 3 1 1)))))
+                      a 0 1 4) 3 1 1))))
+1)
                 (concat_vectors
                  (sca-if
                   (sca-eq
@@ -1423,9 +1441,12 @@
                       a 0 1 4) 2 1 1)
                     (slice_vectors
                      (slice_vectors
-                      a 0 1 4) 3 1 1))))))
+                      a 0 1 4) 3 1 1))))
+1)
+1)
                (slice_vectors
-                a 1 1 4))))]
+                a 1 1 4)
+4)))]
         [((x86:u16x8 a) (uint8_t imm8))
             (x86:u16x8
              (halide:interpret
@@ -1503,7 +1524,8 @@
                       a 0 1 4) 2 1 1)
                     (slice_vectors
                      (slice_vectors
-                      a 0 1 4) 3 1 1)))))
+                      a 0 1 4) 3 1 1))))
+1)
                 (concat_vectors
                  (sca-if
                   (sca-eq
@@ -1582,9 +1604,12 @@
                       a 0 1 4) 2 1 1)
                     (slice_vectors
                      (slice_vectors
-                      a 0 1 4) 3 1 1))))))
+                      a 0 1 4) 3 1 1))))
+1)
+1)
                (slice_vectors
-                a 1 1 4))))]
+                a 1 1 4)
+4)))]
 
         [(_ _) (assert #f "infeasible in interpreting pshuflw")])]
 
@@ -1623,7 +1648,8 @@
                  (slice_vectors
                   (vec-reinterpret
                    a
-                   'uint8 16) 0 1 1))
+                   'uint8 16) 0 1 1)
+15)
                                (vec-if
                  (x16 (sca-eq
  (uint8_t
@@ -1634,7 +1660,8 @@
                   (slice_vectors
                    (vec-reinterpret
                     a
-                    'uint8 16) 0 1 2))
+                    'uint8 16) 0 1 2)
+14)
                                (vec-if
                   (x16 (sca-eq
  (uint8_t
@@ -1645,7 +1672,8 @@
                    (slice_vectors
                     (vec-reinterpret
                      a
-                     'uint8 16) 0 1 3))
+                     'uint8 16) 0 1 3)
+13)
                                (vec-if
                    (x16 (sca-eq
  (uint8_t
@@ -1656,7 +1684,8 @@
                     (slice_vectors
                      (vec-reinterpret
                       a
-                      'uint8 16) 0 1 4))
+                      'uint8 16) 0 1 4)
+12)
                                (vec-if
                     (x16 (sca-eq
  (uint8_t
@@ -1667,7 +1696,8 @@
                      (slice_vectors
                       (vec-reinterpret
                        a
-                       'uint8 16) 0 1 5))
+                       'uint8 16) 0 1 5)
+11)
                                (vec-if
                      (x16 (sca-eq
  (uint8_t
@@ -1678,7 +1708,8 @@
                       (slice_vectors
                        (vec-reinterpret
                         a
-                        'uint8 16) 0 1 6))
+                        'uint8 16) 0 1 6)
+10)
                                (vec-if
                       (x16 (sca-eq
  (uint8_t
@@ -1689,7 +1720,8 @@
                        (slice_vectors
                         (vec-reinterpret
                          a
-                         'uint8 16) 0 1 7))
+                         'uint8 16) 0 1 7)
+9)
                                (vec-if
                        (x16 (sca-eq
  (uint8_t
@@ -1700,7 +1732,8 @@
                         (slice_vectors
                          (vec-reinterpret
                           a
-                          'uint8 16) 0 1 8))
+                          'uint8 16) 0 1 8)
+8)
                                (vec-if
                         (x16 (sca-eq
  (uint8_t
@@ -1711,7 +1744,8 @@
                          (slice_vectors
                           (vec-reinterpret
                            a
-                           'uint8 16) 0 1 9))
+                           'uint8 16) 0 1 9)
+7)
                                (vec-if
                          (x16 (sca-eq
  (uint8_t
@@ -1722,7 +1756,8 @@
                           (slice_vectors
                            (vec-reinterpret
                             a
-                            'uint8 16) 0 1 10))
+                            'uint8 16) 0 1 10)
+6)
                                (vec-if
                           (x16 (sca-eq
  (uint8_t
@@ -1733,7 +1768,8 @@
                            (slice_vectors
                             (vec-reinterpret
                              a
-                             'uint8 16) 0 1 11))
+                             'uint8 16) 0 1 11)
+5)
                                (vec-if
                            (x16 (sca-eq
  (uint8_t
@@ -1744,7 +1780,8 @@
                             (slice_vectors
                              (vec-reinterpret
                               a
-                              'uint8 16) 0 1 12))
+                              'uint8 16) 0 1 12)
+4)
                                (vec-if
                             (x16 (sca-eq
  (uint8_t
@@ -1755,7 +1792,8 @@
                              (slice_vectors
                               (vec-reinterpret
                                a
-                               'uint8 16) 0 1 13))
+                               'uint8 16) 0 1 13)
+3)
                                (vec-if
                              (x16 (sca-eq
  (uint8_t
@@ -1766,7 +1804,8 @@
                               (slice_vectors
                                (vec-reinterpret
                                 a
-                                'uint8 16) 0 1 14))
+                                'uint8 16) 0 1 14)
+2)
                                (vec-if
                               (x16 (sca-eq
  (uint8_t
@@ -1777,7 +1816,8 @@
                                (slice_vectors
                                 (vec-reinterpret
                                  a
-                                 'uint8 16) 0 1 15))
+                                 'uint8 16) 0 1 15)
+1)
                                (vec-if
                                (x16 (sca-eq
  (uint8_t
@@ -1802,7 +1842,8 @@
                  (slice_vectors
                   (vec-reinterpret
                    a
-                   'uint8 16) 0 1 1))
+                   'uint8 16) 0 1 1)
+15)
                                (vec-if
                  (x16 (sca-eq
  (uint8_t
@@ -1813,7 +1854,8 @@
                   (slice_vectors
                    (vec-reinterpret
                     a
-                    'uint8 16) 0 1 2))
+                    'uint8 16) 0 1 2)
+14)
                                (vec-if
                   (x16 (sca-eq
  (uint8_t
@@ -1824,7 +1866,8 @@
                    (slice_vectors
                     (vec-reinterpret
                      a
-                     'uint8 16) 0 1 3))
+                     'uint8 16) 0 1 3)
+13)
                                (vec-if
                    (x16 (sca-eq
  (uint8_t
@@ -1835,7 +1878,8 @@
                     (slice_vectors
                      (vec-reinterpret
                       a
-                      'uint8 16) 0 1 4))
+                      'uint8 16) 0 1 4)
+12)
                                (vec-if
                     (x16 (sca-eq
  (uint8_t
@@ -1846,7 +1890,8 @@
                      (slice_vectors
                       (vec-reinterpret
                        a
-                       'uint8 16) 0 1 5))
+                       'uint8 16) 0 1 5)
+11)
                                (vec-if
                      (x16 (sca-eq
  (uint8_t
@@ -1857,7 +1902,8 @@
                       (slice_vectors
                        (vec-reinterpret
                         a
-                        'uint8 16) 0 1 6))
+                        'uint8 16) 0 1 6)
+10)
                                (vec-if
                       (x16 (sca-eq
  (uint8_t
@@ -1868,7 +1914,8 @@
                        (slice_vectors
                         (vec-reinterpret
                          a
-                         'uint8 16) 0 1 7))
+                         'uint8 16) 0 1 7)
+9)
                                (vec-if
                        (x16 (sca-eq
  (uint8_t
@@ -1879,7 +1926,8 @@
                         (slice_vectors
                          (vec-reinterpret
                           a
-                          'uint8 16) 0 1 8))
+                          'uint8 16) 0 1 8)
+8)
                                (vec-if
                         (x16 (sca-eq
  (uint8_t
@@ -1890,7 +1938,8 @@
                          (slice_vectors
                           (vec-reinterpret
                            a
-                           'uint8 16) 0 1 9))
+                           'uint8 16) 0 1 9)
+7)
                                (vec-if
                          (x16 (sca-eq
  (uint8_t
@@ -1901,7 +1950,8 @@
                           (slice_vectors
                            (vec-reinterpret
                             a
-                            'uint8 16) 0 1 10))
+                            'uint8 16) 0 1 10)
+6)
                                (vec-if
                           (x16 (sca-eq
  (uint8_t
@@ -1912,7 +1962,8 @@
                            (slice_vectors
                             (vec-reinterpret
                              a
-                             'uint8 16) 0 1 11))
+                             'uint8 16) 0 1 11)
+5)
                                (vec-if
                            (x16 (sca-eq
  (uint8_t
@@ -1923,7 +1974,8 @@
                             (slice_vectors
                              (vec-reinterpret
                               a
-                              'uint8 16) 0 1 12))
+                              'uint8 16) 0 1 12)
+4)
                                (vec-if
                             (x16 (sca-eq
  (uint8_t
@@ -1934,7 +1986,8 @@
                              (slice_vectors
                               (vec-reinterpret
                                a
-                               'uint8 16) 0 1 13))
+                               'uint8 16) 0 1 13)
+3)
                                (vec-if
                              (x16 (sca-eq
  (uint8_t
@@ -1945,7 +1998,8 @@
                               (slice_vectors
                                (vec-reinterpret
                                 a
-                                'uint8 16) 0 1 14))
+                                'uint8 16) 0 1 14)
+2)
                                (vec-if
                               (x16 (sca-eq
  (uint8_t
@@ -1956,7 +2010,8 @@
                                (slice_vectors
                                 (vec-reinterpret
                                  a
-                                 'uint8 16) 0 1 15))
+                                 'uint8 16) 0 1 15)
+1)
                                (vec-if
                                (x16 (sca-eq
  (uint8_t
@@ -1981,7 +2036,8 @@
                  (slice_vectors
                   (vec-reinterpret
                    a
-                   'uint8 16) 0 1 1))
+                   'uint8 16) 0 1 1)
+15)
                                (vec-if
                  (x16 (sca-eq
  (uint8_t
@@ -1992,7 +2048,8 @@
                   (slice_vectors
                    (vec-reinterpret
                     a
-                    'uint8 16) 0 1 2))
+                    'uint8 16) 0 1 2)
+14)
                                (vec-if
                   (x16 (sca-eq
  (uint8_t
@@ -2003,7 +2060,8 @@
                    (slice_vectors
                     (vec-reinterpret
                      a
-                     'uint8 16) 0 1 3))
+                     'uint8 16) 0 1 3)
+13)
                                (vec-if
                    (x16 (sca-eq
  (uint8_t
@@ -2014,7 +2072,8 @@
                     (slice_vectors
                      (vec-reinterpret
                       a
-                      'uint8 16) 0 1 4))
+                      'uint8 16) 0 1 4)
+12)
                                (vec-if
                     (x16 (sca-eq
  (uint8_t
@@ -2025,7 +2084,8 @@
                      (slice_vectors
                       (vec-reinterpret
                        a
-                       'uint8 16) 0 1 5))
+                       'uint8 16) 0 1 5)
+11)
                                (vec-if
                      (x16 (sca-eq
  (uint8_t
@@ -2036,7 +2096,8 @@
                       (slice_vectors
                        (vec-reinterpret
                         a
-                        'uint8 16) 0 1 6))
+                        'uint8 16) 0 1 6)
+10)
                                (vec-if
                       (x16 (sca-eq
  (uint8_t
@@ -2047,7 +2108,8 @@
                        (slice_vectors
                         (vec-reinterpret
                          a
-                         'uint8 16) 0 1 7))
+                         'uint8 16) 0 1 7)
+9)
                                (vec-if
                        (x16 (sca-eq
  (uint8_t
@@ -2058,7 +2120,8 @@
                         (slice_vectors
                          (vec-reinterpret
                           a
-                          'uint8 16) 0 1 8))
+                          'uint8 16) 0 1 8)
+8)
                                (vec-if
                         (x16 (sca-eq
  (uint8_t
@@ -2069,7 +2132,8 @@
                          (slice_vectors
                           (vec-reinterpret
                            a
-                           'uint8 16) 0 1 9))
+                           'uint8 16) 0 1 9)
+7)
                                (vec-if
                          (x16 (sca-eq
  (uint8_t
@@ -2080,7 +2144,8 @@
                           (slice_vectors
                            (vec-reinterpret
                             a
-                            'uint8 16) 0 1 10))
+                            'uint8 16) 0 1 10)
+6)
                                (vec-if
                           (x16 (sca-eq
  (uint8_t
@@ -2091,7 +2156,8 @@
                            (slice_vectors
                             (vec-reinterpret
                              a
-                             'uint8 16) 0 1 11))
+                             'uint8 16) 0 1 11)
+5)
                                (vec-if
                            (x16 (sca-eq
  (uint8_t
@@ -2102,7 +2168,8 @@
                             (slice_vectors
                              (vec-reinterpret
                               a
-                              'uint8 16) 0 1 12))
+                              'uint8 16) 0 1 12)
+4)
                                (vec-if
                             (x16 (sca-eq
  (uint8_t
@@ -2113,7 +2180,8 @@
                              (slice_vectors
                               (vec-reinterpret
                                a
-                               'uint8 16) 0 1 13))
+                               'uint8 16) 0 1 13)
+3)
                                (vec-if
                              (x16 (sca-eq
  (uint8_t
@@ -2124,7 +2192,8 @@
                               (slice_vectors
                                (vec-reinterpret
                                 a
-                                'uint8 16) 0 1 14))
+                                'uint8 16) 0 1 14)
+2)
                                (vec-if
                               (x16 (sca-eq
  (uint8_t
@@ -2135,7 +2204,8 @@
                                (slice_vectors
                                 (vec-reinterpret
                                  a
-                                 'uint8 16) 0 1 15))
+                                 'uint8 16) 0 1 15)
+1)
                                (vec-if
                                (x16 (sca-eq
  (uint8_t
@@ -2160,7 +2230,8 @@
                  (slice_vectors
                   (vec-reinterpret
                    a
-                   'uint8 16) 0 1 1))
+                   'uint8 16) 0 1 1)
+15)
                                (vec-if
                  (x16 (sca-eq
  (uint8_t
@@ -2171,7 +2242,8 @@
                   (slice_vectors
                    (vec-reinterpret
                     a
-                    'uint8 16) 0 1 2))
+                    'uint8 16) 0 1 2)
+14)
                                (vec-if
                   (x16 (sca-eq
  (uint8_t
@@ -2182,7 +2254,8 @@
                    (slice_vectors
                     (vec-reinterpret
                      a
-                     'uint8 16) 0 1 3))
+                     'uint8 16) 0 1 3)
+13)
                                (vec-if
                    (x16 (sca-eq
  (uint8_t
@@ -2193,7 +2266,8 @@
                     (slice_vectors
                      (vec-reinterpret
                       a
-                      'uint8 16) 0 1 4))
+                      'uint8 16) 0 1 4)
+12)
                                (vec-if
                     (x16 (sca-eq
  (uint8_t
@@ -2204,7 +2278,8 @@
                      (slice_vectors
                       (vec-reinterpret
                        a
-                       'uint8 16) 0 1 5))
+                       'uint8 16) 0 1 5)
+11)
                                (vec-if
                      (x16 (sca-eq
  (uint8_t
@@ -2215,7 +2290,8 @@
                       (slice_vectors
                        (vec-reinterpret
                         a
-                        'uint8 16) 0 1 6))
+                        'uint8 16) 0 1 6)
+10)
                                (vec-if
                       (x16 (sca-eq
  (uint8_t
@@ -2226,7 +2302,8 @@
                        (slice_vectors
                         (vec-reinterpret
                          a
-                         'uint8 16) 0 1 7))
+                         'uint8 16) 0 1 7)
+9)
                                (vec-if
                        (x16 (sca-eq
  (uint8_t
@@ -2237,7 +2314,8 @@
                         (slice_vectors
                          (vec-reinterpret
                           a
-                          'uint8 16) 0 1 8))
+                          'uint8 16) 0 1 8)
+8)
                                (vec-if
                         (x16 (sca-eq
  (uint8_t
@@ -2248,7 +2326,8 @@
                          (slice_vectors
                           (vec-reinterpret
                            a
-                           'uint8 16) 0 1 9))
+                           'uint8 16) 0 1 9)
+7)
                                (vec-if
                          (x16 (sca-eq
  (uint8_t
@@ -2259,7 +2338,8 @@
                           (slice_vectors
                            (vec-reinterpret
                             a
-                            'uint8 16) 0 1 10))
+                            'uint8 16) 0 1 10)
+6)
                                (vec-if
                           (x16 (sca-eq
  (uint8_t
@@ -2270,7 +2350,8 @@
                            (slice_vectors
                             (vec-reinterpret
                              a
-                             'uint8 16) 0 1 11))
+                             'uint8 16) 0 1 11)
+5)
                                (vec-if
                            (x16 (sca-eq
  (uint8_t
@@ -2281,7 +2362,8 @@
                             (slice_vectors
                              (vec-reinterpret
                               a
-                              'uint8 16) 0 1 12))
+                              'uint8 16) 0 1 12)
+4)
                                (vec-if
                             (x16 (sca-eq
  (uint8_t
@@ -2292,7 +2374,8 @@
                              (slice_vectors
                               (vec-reinterpret
                                a
-                               'uint8 16) 0 1 13))
+                               'uint8 16) 0 1 13)
+3)
                                (vec-if
                              (x16 (sca-eq
  (uint8_t
@@ -2303,7 +2386,8 @@
                               (slice_vectors
                                (vec-reinterpret
                                 a
-                                'uint8 16) 0 1 14))
+                                'uint8 16) 0 1 14)
+2)
                                (vec-if
                               (x16 (sca-eq
  (uint8_t
@@ -2314,7 +2398,8 @@
                                (slice_vectors
                                 (vec-reinterpret
                                  a
-                                 'uint8 16) 0 1 15))
+                                 'uint8 16) 0 1 15)
+1)
                                (vec-if
                                (x16 (sca-eq
  (uint8_t
@@ -2339,7 +2424,8 @@
                  (slice_vectors
                   (vec-reinterpret
                    a
-                   'uint8 16) 0 1 1))
+                   'uint8 16) 0 1 1)
+15)
                                (vec-if
                  (x16 (sca-eq
  (uint8_t
@@ -2350,7 +2436,8 @@
                   (slice_vectors
                    (vec-reinterpret
                     a
-                    'uint8 16) 0 1 2))
+                    'uint8 16) 0 1 2)
+14)
                                (vec-if
                   (x16 (sca-eq
  (uint8_t
@@ -2361,7 +2448,8 @@
                    (slice_vectors
                     (vec-reinterpret
                      a
-                     'uint8 16) 0 1 3))
+                     'uint8 16) 0 1 3)
+13)
                                (vec-if
                    (x16 (sca-eq
  (uint8_t
@@ -2372,7 +2460,8 @@
                     (slice_vectors
                      (vec-reinterpret
                       a
-                      'uint8 16) 0 1 4))
+                      'uint8 16) 0 1 4)
+12)
                                (vec-if
                     (x16 (sca-eq
  (uint8_t
@@ -2383,7 +2472,8 @@
                      (slice_vectors
                       (vec-reinterpret
                        a
-                       'uint8 16) 0 1 5))
+                       'uint8 16) 0 1 5)
+11)
                                (vec-if
                      (x16 (sca-eq
  (uint8_t
@@ -2394,7 +2484,8 @@
                       (slice_vectors
                        (vec-reinterpret
                         a
-                        'uint8 16) 0 1 6))
+                        'uint8 16) 0 1 6)
+10)
                                (vec-if
                       (x16 (sca-eq
  (uint8_t
@@ -2405,7 +2496,8 @@
                        (slice_vectors
                         (vec-reinterpret
                          a
-                         'uint8 16) 0 1 7))
+                         'uint8 16) 0 1 7)
+9)
                                (vec-if
                        (x16 (sca-eq
  (uint8_t
@@ -2416,7 +2508,8 @@
                         (slice_vectors
                          (vec-reinterpret
                           a
-                          'uint8 16) 0 1 8))
+                          'uint8 16) 0 1 8)
+8)
                                (vec-if
                         (x16 (sca-eq
  (uint8_t
@@ -2427,7 +2520,8 @@
                          (slice_vectors
                           (vec-reinterpret
                            a
-                           'uint8 16) 0 1 9))
+                           'uint8 16) 0 1 9)
+7)
                                (vec-if
                          (x16 (sca-eq
  (uint8_t
@@ -2438,7 +2532,8 @@
                           (slice_vectors
                            (vec-reinterpret
                             a
-                            'uint8 16) 0 1 10))
+                            'uint8 16) 0 1 10)
+6)
                                (vec-if
                           (x16 (sca-eq
  (uint8_t
@@ -2449,7 +2544,8 @@
                            (slice_vectors
                             (vec-reinterpret
                              a
-                             'uint8 16) 0 1 11))
+                             'uint8 16) 0 1 11)
+5)
                                (vec-if
                            (x16 (sca-eq
  (uint8_t
@@ -2460,7 +2556,8 @@
                             (slice_vectors
                              (vec-reinterpret
                               a
-                              'uint8 16) 0 1 12))
+                              'uint8 16) 0 1 12)
+4)
                                (vec-if
                             (x16 (sca-eq
  (uint8_t
@@ -2471,7 +2568,8 @@
                              (slice_vectors
                               (vec-reinterpret
                                a
-                               'uint8 16) 0 1 13))
+                               'uint8 16) 0 1 13)
+3)
                                (vec-if
                              (x16 (sca-eq
  (uint8_t
@@ -2482,7 +2580,8 @@
                               (slice_vectors
                                (vec-reinterpret
                                 a
-                                'uint8 16) 0 1 14))
+                                'uint8 16) 0 1 14)
+2)
                                (vec-if
                               (x16 (sca-eq
  (uint8_t
@@ -2493,7 +2592,8 @@
                                (slice_vectors
                                 (vec-reinterpret
                                  a
-                                 'uint8 16) 0 1 15))
+                                 'uint8 16) 0 1 15)
+1)
                                (vec-if
                                (x16 (sca-eq
  (uint8_t
@@ -2518,7 +2618,8 @@
                  (slice_vectors
                   (vec-reinterpret
                    a
-                   'uint8 16) 0 1 1))
+                   'uint8 16) 0 1 1)
+15)
                                (vec-if
                  (x16 (sca-eq
  (uint8_t
@@ -2529,7 +2630,8 @@
                   (slice_vectors
                    (vec-reinterpret
                     a
-                    'uint8 16) 0 1 2))
+                    'uint8 16) 0 1 2)
+14)
                                (vec-if
                   (x16 (sca-eq
  (uint8_t
@@ -2540,7 +2642,8 @@
                    (slice_vectors
                     (vec-reinterpret
                      a
-                     'uint8 16) 0 1 3))
+                     'uint8 16) 0 1 3)
+13)
                                (vec-if
                    (x16 (sca-eq
  (uint8_t
@@ -2551,7 +2654,8 @@
                     (slice_vectors
                      (vec-reinterpret
                       a
-                      'uint8 16) 0 1 4))
+                      'uint8 16) 0 1 4)
+12)
                                (vec-if
                     (x16 (sca-eq
  (uint8_t
@@ -2562,7 +2666,8 @@
                      (slice_vectors
                       (vec-reinterpret
                        a
-                       'uint8 16) 0 1 5))
+                       'uint8 16) 0 1 5)
+11)
                                (vec-if
                      (x16 (sca-eq
  (uint8_t
@@ -2573,7 +2678,8 @@
                       (slice_vectors
                        (vec-reinterpret
                         a
-                        'uint8 16) 0 1 6))
+                        'uint8 16) 0 1 6)
+10)
                                (vec-if
                       (x16 (sca-eq
  (uint8_t
@@ -2584,7 +2690,8 @@
                        (slice_vectors
                         (vec-reinterpret
                          a
-                         'uint8 16) 0 1 7))
+                         'uint8 16) 0 1 7)
+9)
                                (vec-if
                        (x16 (sca-eq
  (uint8_t
@@ -2595,7 +2702,8 @@
                         (slice_vectors
                          (vec-reinterpret
                           a
-                          'uint8 16) 0 1 8))
+                          'uint8 16) 0 1 8)
+8)
                                (vec-if
                         (x16 (sca-eq
  (uint8_t
@@ -2606,7 +2714,8 @@
                          (slice_vectors
                           (vec-reinterpret
                            a
-                           'uint8 16) 0 1 9))
+                           'uint8 16) 0 1 9)
+7)
                                (vec-if
                          (x16 (sca-eq
  (uint8_t
@@ -2617,7 +2726,8 @@
                           (slice_vectors
                            (vec-reinterpret
                             a
-                            'uint8 16) 0 1 10))
+                            'uint8 16) 0 1 10)
+6)
                                (vec-if
                           (x16 (sca-eq
  (uint8_t
@@ -2628,7 +2738,8 @@
                            (slice_vectors
                             (vec-reinterpret
                              a
-                             'uint8 16) 0 1 11))
+                             'uint8 16) 0 1 11)
+5)
                                (vec-if
                            (x16 (sca-eq
  (uint8_t
@@ -2639,7 +2750,8 @@
                             (slice_vectors
                              (vec-reinterpret
                               a
-                              'uint8 16) 0 1 12))
+                              'uint8 16) 0 1 12)
+4)
                                (vec-if
                             (x16 (sca-eq
  (uint8_t
@@ -2650,7 +2762,8 @@
                              (slice_vectors
                               (vec-reinterpret
                                a
-                               'uint8 16) 0 1 13))
+                               'uint8 16) 0 1 13)
+3)
                                (vec-if
                              (x16 (sca-eq
  (uint8_t
@@ -2661,7 +2774,8 @@
                               (slice_vectors
                                (vec-reinterpret
                                 a
-                                'uint8 16) 0 1 14))
+                                'uint8 16) 0 1 14)
+2)
                                (vec-if
                               (x16 (sca-eq
  (uint8_t
@@ -2672,7 +2786,8 @@
                                (slice_vectors
                                 (vec-reinterpret
                                  a
-                                 'uint8 16) 0 1 15))
+                                 'uint8 16) 0 1 15)
+1)
                                (vec-if
                                (x16 (sca-eq
  (uint8_t
@@ -2697,7 +2812,8 @@
                  (slice_vectors
                   (vec-reinterpret
                    a
-                   'uint8 16) 0 1 1))
+                   'uint8 16) 0 1 1)
+15)
                                (vec-if
                  (x16 (sca-eq
  (uint8_t
@@ -2708,7 +2824,8 @@
                   (slice_vectors
                    (vec-reinterpret
                     a
-                    'uint8 16) 0 1 2))
+                    'uint8 16) 0 1 2)
+14)
                                (vec-if
                   (x16 (sca-eq
  (uint8_t
@@ -2719,7 +2836,8 @@
                    (slice_vectors
                     (vec-reinterpret
                      a
-                     'uint8 16) 0 1 3))
+                     'uint8 16) 0 1 3)
+13)
                                (vec-if
                    (x16 (sca-eq
  (uint8_t
@@ -2730,7 +2848,8 @@
                     (slice_vectors
                      (vec-reinterpret
                       a
-                      'uint8 16) 0 1 4))
+                      'uint8 16) 0 1 4)
+12)
                                (vec-if
                     (x16 (sca-eq
  (uint8_t
@@ -2741,7 +2860,8 @@
                      (slice_vectors
                       (vec-reinterpret
                        a
-                       'uint8 16) 0 1 5))
+                       'uint8 16) 0 1 5)
+11)
                                (vec-if
                      (x16 (sca-eq
  (uint8_t
@@ -2752,7 +2872,8 @@
                       (slice_vectors
                        (vec-reinterpret
                         a
-                        'uint8 16) 0 1 6))
+                        'uint8 16) 0 1 6)
+10)
                                (vec-if
                       (x16 (sca-eq
  (uint8_t
@@ -2763,7 +2884,8 @@
                        (slice_vectors
                         (vec-reinterpret
                          a
-                         'uint8 16) 0 1 7))
+                         'uint8 16) 0 1 7)
+9)
                                (vec-if
                        (x16 (sca-eq
  (uint8_t
@@ -2774,7 +2896,8 @@
                         (slice_vectors
                          (vec-reinterpret
                           a
-                          'uint8 16) 0 1 8))
+                          'uint8 16) 0 1 8)
+8)
                                (vec-if
                         (x16 (sca-eq
  (uint8_t
@@ -2785,7 +2908,8 @@
                          (slice_vectors
                           (vec-reinterpret
                            a
-                           'uint8 16) 0 1 9))
+                           'uint8 16) 0 1 9)
+7)
                                (vec-if
                          (x16 (sca-eq
  (uint8_t
@@ -2796,7 +2920,8 @@
                           (slice_vectors
                            (vec-reinterpret
                             a
-                            'uint8 16) 0 1 10))
+                            'uint8 16) 0 1 10)
+6)
                                (vec-if
                           (x16 (sca-eq
  (uint8_t
@@ -2807,7 +2932,8 @@
                            (slice_vectors
                             (vec-reinterpret
                              a
-                             'uint8 16) 0 1 11))
+                             'uint8 16) 0 1 11)
+5)
                                (vec-if
                            (x16 (sca-eq
  (uint8_t
@@ -2818,7 +2944,8 @@
                             (slice_vectors
                              (vec-reinterpret
                               a
-                              'uint8 16) 0 1 12))
+                              'uint8 16) 0 1 12)
+4)
                                (vec-if
                             (x16 (sca-eq
  (uint8_t
@@ -2829,7 +2956,8 @@
                              (slice_vectors
                               (vec-reinterpret
                                a
-                               'uint8 16) 0 1 13))
+                               'uint8 16) 0 1 13)
+3)
                                (vec-if
                              (x16 (sca-eq
  (uint8_t
@@ -2840,7 +2968,8 @@
                               (slice_vectors
                                (vec-reinterpret
                                 a
-                                'uint8 16) 0 1 14))
+                                'uint8 16) 0 1 14)
+2)
                                (vec-if
                               (x16 (sca-eq
  (uint8_t
@@ -2851,7 +2980,8 @@
                                (slice_vectors
                                 (vec-reinterpret
                                  a
-                                 'uint8 16) 0 1 15))
+                                 'uint8 16) 0 1 15)
+1)
                                (vec-if
                                (x16 (sca-eq
  (uint8_t
@@ -2876,7 +3006,8 @@
                  (slice_vectors
                   (vec-reinterpret
                    a
-                   'uint8 16) 0 1 1))
+                   'uint8 16) 0 1 1)
+15)
                                (vec-if
                  (x16 (sca-eq
  (uint8_t
@@ -2887,7 +3018,8 @@
                   (slice_vectors
                    (vec-reinterpret
                     a
-                    'uint8 16) 0 1 2))
+                    'uint8 16) 0 1 2)
+14)
                                (vec-if
                   (x16 (sca-eq
  (uint8_t
@@ -2898,7 +3030,8 @@
                    (slice_vectors
                     (vec-reinterpret
                      a
-                     'uint8 16) 0 1 3))
+                     'uint8 16) 0 1 3)
+13)
                                (vec-if
                    (x16 (sca-eq
  (uint8_t
@@ -2909,7 +3042,8 @@
                     (slice_vectors
                      (vec-reinterpret
                       a
-                      'uint8 16) 0 1 4))
+                      'uint8 16) 0 1 4)
+12)
                                (vec-if
                     (x16 (sca-eq
  (uint8_t
@@ -2920,7 +3054,8 @@
                      (slice_vectors
                       (vec-reinterpret
                        a
-                       'uint8 16) 0 1 5))
+                       'uint8 16) 0 1 5)
+11)
                                (vec-if
                      (x16 (sca-eq
  (uint8_t
@@ -2931,7 +3066,8 @@
                       (slice_vectors
                        (vec-reinterpret
                         a
-                        'uint8 16) 0 1 6))
+                        'uint8 16) 0 1 6)
+10)
                                (vec-if
                       (x16 (sca-eq
  (uint8_t
@@ -2942,7 +3078,8 @@
                        (slice_vectors
                         (vec-reinterpret
                          a
-                         'uint8 16) 0 1 7))
+                         'uint8 16) 0 1 7)
+9)
                                (vec-if
                        (x16 (sca-eq
  (uint8_t
@@ -2953,7 +3090,8 @@
                         (slice_vectors
                          (vec-reinterpret
                           a
-                          'uint8 16) 0 1 8))
+                          'uint8 16) 0 1 8)
+8)
                                (vec-if
                         (x16 (sca-eq
  (uint8_t
@@ -2964,7 +3102,8 @@
                          (slice_vectors
                           (vec-reinterpret
                            a
-                           'uint8 16) 0 1 9))
+                           'uint8 16) 0 1 9)
+7)
                                (vec-if
                          (x16 (sca-eq
  (uint8_t
@@ -2975,7 +3114,8 @@
                           (slice_vectors
                            (vec-reinterpret
                             a
-                            'uint8 16) 0 1 10))
+                            'uint8 16) 0 1 10)
+6)
                                (vec-if
                           (x16 (sca-eq
  (uint8_t
@@ -2986,7 +3126,8 @@
                            (slice_vectors
                             (vec-reinterpret
                              a
-                             'uint8 16) 0 1 11))
+                             'uint8 16) 0 1 11)
+5)
                                (vec-if
                            (x16 (sca-eq
  (uint8_t
@@ -2997,7 +3138,8 @@
                             (slice_vectors
                              (vec-reinterpret
                               a
-                              'uint8 16) 0 1 12))
+                              'uint8 16) 0 1 12)
+4)
                                (vec-if
                             (x16 (sca-eq
  (uint8_t
@@ -3008,7 +3150,8 @@
                              (slice_vectors
                               (vec-reinterpret
                                a
-                               'uint8 16) 0 1 13))
+                               'uint8 16) 0 1 13)
+3)
                                (vec-if
                              (x16 (sca-eq
  (uint8_t
@@ -3019,7 +3162,8 @@
                               (slice_vectors
                                (vec-reinterpret
                                 a
-                                'uint8 16) 0 1 14))
+                                'uint8 16) 0 1 14)
+2)
                                (vec-if
                               (x16 (sca-eq
  (uint8_t
@@ -3030,7 +3174,8 @@
                                (slice_vectors
                                 (vec-reinterpret
                                  a
-                                 'uint8 16) 0 1 15))
+                                 'uint8 16) 0 1 15)
+1)
                                (vec-if
                                (x16 (sca-eq
  (uint8_t
@@ -3134,7 +3279,8 @@
                   (vec-reinterpret
                    a
                    'uint8 16) 15 1 1)
-                 (x15 (uint8_t (bv 0 8))))
+                 (x15 (uint8_t (bv 0 8)))
+1)
                                (vec-if
                  (x16 (sca-eq
  (uint8_t
@@ -3145,7 +3291,8 @@
                    (vec-reinterpret
                     a
                     'uint8 16) 14 1 2)
-                  (x14 (uint8_t (bv 0 8))))
+                  (x14 (uint8_t (bv 0 8)))
+2)
                                (vec-if
                   (x16 (sca-eq
  (uint8_t
@@ -3156,7 +3303,8 @@
                     (vec-reinterpret
                      a
                      'uint8 16) 13 1 3)
-                   (x13 (uint8_t (bv 0 8))))
+                   (x13 (uint8_t (bv 0 8)))
+3)
                                (vec-if
                    (x16 (sca-eq
  (uint8_t
@@ -3167,7 +3315,8 @@
                      (vec-reinterpret
                       a
                       'uint8 16) 12 1 4)
-                    (x12 (uint8_t (bv 0 8))))
+                    (x12 (uint8_t (bv 0 8)))
+4)
                                (vec-if
                     (x16 (sca-eq
  (uint8_t
@@ -3178,7 +3327,8 @@
                       (vec-reinterpret
                        a
                        'uint8 16) 11 1 5)
-                     (x11 (uint8_t (bv 0 8))))
+                     (x11 (uint8_t (bv 0 8)))
+5)
                                (vec-if
                      (x16 (sca-eq
  (uint8_t
@@ -3189,7 +3339,8 @@
                        (vec-reinterpret
                         a
                         'uint8 16) 10 1 6)
-                      (x10 (uint8_t (bv 0 8))))
+                      (x10 (uint8_t (bv 0 8)))
+6)
                                (vec-if
                       (x16 (sca-eq
  (uint8_t
@@ -3200,7 +3351,8 @@
                         (vec-reinterpret
                          a
                          'uint8 16) 9 1 7)
-                       (x9 (uint8_t (bv 0 8))))
+                       (x9 (uint8_t (bv 0 8)))
+7)
                                (vec-if
                        (x16 (sca-eq
  (uint8_t
@@ -3211,7 +3363,8 @@
                          (vec-reinterpret
                           a
                           'uint8 16) 8 1 8)
-                        (x8 (uint8_t (bv 0 8))))
+                        (x8 (uint8_t (bv 0 8)))
+8)
                                (vec-if
                         (x16 (sca-eq
  (uint8_t
@@ -3222,7 +3375,8 @@
                           (vec-reinterpret
                            a
                            'uint8 16) 7 1 9)
-                         (x7 (uint8_t (bv 0 8))))
+                         (x7 (uint8_t (bv 0 8)))
+9)
                                (vec-if
                          (x16 (sca-eq
  (uint8_t
@@ -3233,7 +3387,8 @@
                            (vec-reinterpret
                             a
                             'uint8 16) 6 1 10)
-                          (x6 (uint8_t (bv 0 8))))
+                          (x6 (uint8_t (bv 0 8)))
+10)
                                (vec-if
                           (x16 (sca-eq
  (uint8_t
@@ -3244,7 +3399,8 @@
                             (vec-reinterpret
                              a
                              'uint8 16) 5 1 11)
-                           (x5 (uint8_t (bv 0 8))))
+                           (x5 (uint8_t (bv 0 8)))
+11)
                                (vec-if
                            (x16 (sca-eq
  (uint8_t
@@ -3255,7 +3411,8 @@
                              (vec-reinterpret
                               a
                               'uint8 16) 4 1 12)
-                            (x4 (uint8_t (bv 0 8))))
+                            (x4 (uint8_t (bv 0 8)))
+12)
                                (vec-if
                             (x16 (sca-eq
  (uint8_t
@@ -3266,7 +3423,8 @@
                               (vec-reinterpret
                                a
                                'uint8 16) 3 1 13)
-                             (x3 (uint8_t (bv 0 8))))
+                             (x3 (uint8_t (bv 0 8)))
+13)
                                (vec-if
                              (x16 (sca-eq
  (uint8_t
@@ -3277,7 +3435,8 @@
                                (vec-reinterpret
                                 a
                                 'uint8 16) 2 1 14)
-                              (x2 (uint8_t (bv 0 8))))
+                              (x2 (uint8_t (bv 0 8)))
+14)
                                (vec-if
                               (x16 (sca-eq
  (uint8_t
@@ -3288,7 +3447,8 @@
                                 (vec-reinterpret
                                  a
                                  'uint8 16) 1 1 15)
-                               (uint8_t (bv 0 8)))
+                               (uint8_t (bv 0 8))
+15)
                                (vec-if
                                (x16 (sca-eq
  (uint8_t
@@ -3313,7 +3473,8 @@
                   (vec-reinterpret
                    a
                    'uint8 16) 15 1 1)
-                 (x15 (uint8_t (bv 0 8))))
+                 (x15 (uint8_t (bv 0 8)))
+1)
                                (vec-if
                  (x16 (sca-eq
  (uint8_t
@@ -3324,7 +3485,8 @@
                    (vec-reinterpret
                     a
                     'uint8 16) 14 1 2)
-                  (x14 (uint8_t (bv 0 8))))
+                  (x14 (uint8_t (bv 0 8)))
+2)
                                (vec-if
                   (x16 (sca-eq
  (uint8_t
@@ -3335,7 +3497,8 @@
                     (vec-reinterpret
                      a
                      'uint8 16) 13 1 3)
-                   (x13 (uint8_t (bv 0 8))))
+                   (x13 (uint8_t (bv 0 8)))
+3)
                                (vec-if
                    (x16 (sca-eq
  (uint8_t
@@ -3346,7 +3509,8 @@
                      (vec-reinterpret
                       a
                       'uint8 16) 12 1 4)
-                    (x12 (uint8_t (bv 0 8))))
+                    (x12 (uint8_t (bv 0 8)))
+4)
                                (vec-if
                     (x16 (sca-eq
  (uint8_t
@@ -3357,7 +3521,8 @@
                       (vec-reinterpret
                        a
                        'uint8 16) 11 1 5)
-                     (x11 (uint8_t (bv 0 8))))
+                     (x11 (uint8_t (bv 0 8)))
+5)
                                (vec-if
                      (x16 (sca-eq
  (uint8_t
@@ -3368,7 +3533,8 @@
                        (vec-reinterpret
                         a
                         'uint8 16) 10 1 6)
-                      (x10 (uint8_t (bv 0 8))))
+                      (x10 (uint8_t (bv 0 8)))
+6)
                                (vec-if
                       (x16 (sca-eq
  (uint8_t
@@ -3379,7 +3545,8 @@
                         (vec-reinterpret
                          a
                          'uint8 16) 9 1 7)
-                       (x9 (uint8_t (bv 0 8))))
+                       (x9 (uint8_t (bv 0 8)))
+7)
                                (vec-if
                        (x16 (sca-eq
  (uint8_t
@@ -3390,7 +3557,8 @@
                          (vec-reinterpret
                           a
                           'uint8 16) 8 1 8)
-                        (x8 (uint8_t (bv 0 8))))
+                        (x8 (uint8_t (bv 0 8)))
+8)
                                (vec-if
                         (x16 (sca-eq
  (uint8_t
@@ -3401,7 +3569,8 @@
                           (vec-reinterpret
                            a
                            'uint8 16) 7 1 9)
-                         (x7 (uint8_t (bv 0 8))))
+                         (x7 (uint8_t (bv 0 8)))
+9)
                                (vec-if
                          (x16 (sca-eq
  (uint8_t
@@ -3412,7 +3581,8 @@
                            (vec-reinterpret
                             a
                             'uint8 16) 6 1 10)
-                          (x6 (uint8_t (bv 0 8))))
+                          (x6 (uint8_t (bv 0 8)))
+10)
                                (vec-if
                           (x16 (sca-eq
  (uint8_t
@@ -3423,7 +3593,8 @@
                             (vec-reinterpret
                              a
                              'uint8 16) 5 1 11)
-                           (x5 (uint8_t (bv 0 8))))
+                           (x5 (uint8_t (bv 0 8)))
+11)
                                (vec-if
                            (x16 (sca-eq
  (uint8_t
@@ -3434,7 +3605,8 @@
                              (vec-reinterpret
                               a
                               'uint8 16) 4 1 12)
-                            (x4 (uint8_t (bv 0 8))))
+                            (x4 (uint8_t (bv 0 8)))
+12)
                                (vec-if
                             (x16 (sca-eq
  (uint8_t
@@ -3445,7 +3617,8 @@
                               (vec-reinterpret
                                a
                                'uint8 16) 3 1 13)
-                             (x3 (uint8_t (bv 0 8))))
+                             (x3 (uint8_t (bv 0 8)))
+13)
                                (vec-if
                              (x16 (sca-eq
  (uint8_t
@@ -3456,7 +3629,8 @@
                                (vec-reinterpret
                                 a
                                 'uint8 16) 2 1 14)
-                              (x2 (uint8_t (bv 0 8))))
+                              (x2 (uint8_t (bv 0 8)))
+14)
                                (vec-if
                               (x16 (sca-eq
  (uint8_t
@@ -3467,7 +3641,8 @@
                                 (vec-reinterpret
                                  a
                                  'uint8 16) 1 1 15)
-                               (uint8_t (bv 0 8)))
+                               (uint8_t (bv 0 8))
+15)
                                (vec-if
                                (x16 (sca-eq
  (uint8_t
@@ -3492,7 +3667,8 @@
                   (vec-reinterpret
                    a
                    'uint8 16) 15 1 1)
-                 (x15 (uint8_t (bv 0 8))))
+                 (x15 (uint8_t (bv 0 8)))
+1)
                                (vec-if
                  (x16 (sca-eq
  (uint8_t
@@ -3503,7 +3679,8 @@
                    (vec-reinterpret
                     a
                     'uint8 16) 14 1 2)
-                  (x14 (uint8_t (bv 0 8))))
+                  (x14 (uint8_t (bv 0 8)))
+2)
                                (vec-if
                   (x16 (sca-eq
  (uint8_t
@@ -3514,7 +3691,8 @@
                     (vec-reinterpret
                      a
                      'uint8 16) 13 1 3)
-                   (x13 (uint8_t (bv 0 8))))
+                   (x13 (uint8_t (bv 0 8)))
+3)
                                (vec-if
                    (x16 (sca-eq
  (uint8_t
@@ -3525,7 +3703,8 @@
                      (vec-reinterpret
                       a
                       'uint8 16) 12 1 4)
-                    (x12 (uint8_t (bv 0 8))))
+                    (x12 (uint8_t (bv 0 8)))
+4)
                                (vec-if
                     (x16 (sca-eq
  (uint8_t
@@ -3536,7 +3715,8 @@
                       (vec-reinterpret
                        a
                        'uint8 16) 11 1 5)
-                     (x11 (uint8_t (bv 0 8))))
+                     (x11 (uint8_t (bv 0 8)))
+5)
                                (vec-if
                      (x16 (sca-eq
  (uint8_t
@@ -3547,7 +3727,8 @@
                        (vec-reinterpret
                         a
                         'uint8 16) 10 1 6)
-                      (x10 (uint8_t (bv 0 8))))
+                      (x10 (uint8_t (bv 0 8)))
+6)
                                (vec-if
                       (x16 (sca-eq
  (uint8_t
@@ -3558,7 +3739,8 @@
                         (vec-reinterpret
                          a
                          'uint8 16) 9 1 7)
-                       (x9 (uint8_t (bv 0 8))))
+                       (x9 (uint8_t (bv 0 8)))
+7)
                                (vec-if
                        (x16 (sca-eq
  (uint8_t
@@ -3569,7 +3751,8 @@
                          (vec-reinterpret
                           a
                           'uint8 16) 8 1 8)
-                        (x8 (uint8_t (bv 0 8))))
+                        (x8 (uint8_t (bv 0 8)))
+8)
                                (vec-if
                         (x16 (sca-eq
  (uint8_t
@@ -3580,7 +3763,8 @@
                           (vec-reinterpret
                            a
                            'uint8 16) 7 1 9)
-                         (x7 (uint8_t (bv 0 8))))
+                         (x7 (uint8_t (bv 0 8)))
+9)
                                (vec-if
                          (x16 (sca-eq
  (uint8_t
@@ -3591,7 +3775,8 @@
                            (vec-reinterpret
                             a
                             'uint8 16) 6 1 10)
-                          (x6 (uint8_t (bv 0 8))))
+                          (x6 (uint8_t (bv 0 8)))
+10)
                                (vec-if
                           (x16 (sca-eq
  (uint8_t
@@ -3602,7 +3787,8 @@
                             (vec-reinterpret
                              a
                              'uint8 16) 5 1 11)
-                           (x5 (uint8_t (bv 0 8))))
+                           (x5 (uint8_t (bv 0 8)))
+11)
                                (vec-if
                            (x16 (sca-eq
  (uint8_t
@@ -3613,7 +3799,8 @@
                              (vec-reinterpret
                               a
                               'uint8 16) 4 1 12)
-                            (x4 (uint8_t (bv 0 8))))
+                            (x4 (uint8_t (bv 0 8)))
+12)
                                (vec-if
                             (x16 (sca-eq
  (uint8_t
@@ -3624,7 +3811,8 @@
                               (vec-reinterpret
                                a
                                'uint8 16) 3 1 13)
-                             (x3 (uint8_t (bv 0 8))))
+                             (x3 (uint8_t (bv 0 8)))
+13)
                                (vec-if
                              (x16 (sca-eq
  (uint8_t
@@ -3635,7 +3823,8 @@
                                (vec-reinterpret
                                 a
                                 'uint8 16) 2 1 14)
-                              (x2 (uint8_t (bv 0 8))))
+                              (x2 (uint8_t (bv 0 8)))
+14)
                                (vec-if
                               (x16 (sca-eq
  (uint8_t
@@ -3646,7 +3835,8 @@
                                 (vec-reinterpret
                                  a
                                  'uint8 16) 1 1 15)
-                               (uint8_t (bv 0 8)))
+                               (uint8_t (bv 0 8))
+15)
                                (vec-if
                                (x16 (sca-eq
  (uint8_t
@@ -3671,7 +3861,8 @@
                   (vec-reinterpret
                    a
                    'uint8 16) 15 1 1)
-                 (x15 (uint8_t (bv 0 8))))
+                 (x15 (uint8_t (bv 0 8)))
+1)
                                (vec-if
                  (x16 (sca-eq
  (uint8_t
@@ -3682,7 +3873,8 @@
                    (vec-reinterpret
                     a
                     'uint8 16) 14 1 2)
-                  (x14 (uint8_t (bv 0 8))))
+                  (x14 (uint8_t (bv 0 8)))
+2)
                                (vec-if
                   (x16 (sca-eq
  (uint8_t
@@ -3693,7 +3885,8 @@
                     (vec-reinterpret
                      a
                      'uint8 16) 13 1 3)
-                   (x13 (uint8_t (bv 0 8))))
+                   (x13 (uint8_t (bv 0 8)))
+3)
                                (vec-if
                    (x16 (sca-eq
  (uint8_t
@@ -3704,7 +3897,8 @@
                      (vec-reinterpret
                       a
                       'uint8 16) 12 1 4)
-                    (x12 (uint8_t (bv 0 8))))
+                    (x12 (uint8_t (bv 0 8)))
+4)
                                (vec-if
                     (x16 (sca-eq
  (uint8_t
@@ -3715,7 +3909,8 @@
                       (vec-reinterpret
                        a
                        'uint8 16) 11 1 5)
-                     (x11 (uint8_t (bv 0 8))))
+                     (x11 (uint8_t (bv 0 8)))
+5)
                                (vec-if
                      (x16 (sca-eq
  (uint8_t
@@ -3726,7 +3921,8 @@
                        (vec-reinterpret
                         a
                         'uint8 16) 10 1 6)
-                      (x10 (uint8_t (bv 0 8))))
+                      (x10 (uint8_t (bv 0 8)))
+6)
                                (vec-if
                       (x16 (sca-eq
  (uint8_t
@@ -3737,7 +3933,8 @@
                         (vec-reinterpret
                          a
                          'uint8 16) 9 1 7)
-                       (x9 (uint8_t (bv 0 8))))
+                       (x9 (uint8_t (bv 0 8)))
+7)
                                (vec-if
                        (x16 (sca-eq
  (uint8_t
@@ -3748,7 +3945,8 @@
                          (vec-reinterpret
                           a
                           'uint8 16) 8 1 8)
-                        (x8 (uint8_t (bv 0 8))))
+                        (x8 (uint8_t (bv 0 8)))
+8)
                                (vec-if
                         (x16 (sca-eq
  (uint8_t
@@ -3759,7 +3957,8 @@
                           (vec-reinterpret
                            a
                            'uint8 16) 7 1 9)
-                         (x7 (uint8_t (bv 0 8))))
+                         (x7 (uint8_t (bv 0 8)))
+9)
                                (vec-if
                          (x16 (sca-eq
  (uint8_t
@@ -3770,7 +3969,8 @@
                            (vec-reinterpret
                             a
                             'uint8 16) 6 1 10)
-                          (x6 (uint8_t (bv 0 8))))
+                          (x6 (uint8_t (bv 0 8)))
+10)
                                (vec-if
                           (x16 (sca-eq
  (uint8_t
@@ -3781,7 +3981,8 @@
                             (vec-reinterpret
                              a
                              'uint8 16) 5 1 11)
-                           (x5 (uint8_t (bv 0 8))))
+                           (x5 (uint8_t (bv 0 8)))
+11)
                                (vec-if
                            (x16 (sca-eq
  (uint8_t
@@ -3792,7 +3993,8 @@
                              (vec-reinterpret
                               a
                               'uint8 16) 4 1 12)
-                            (x4 (uint8_t (bv 0 8))))
+                            (x4 (uint8_t (bv 0 8)))
+12)
                                (vec-if
                             (x16 (sca-eq
  (uint8_t
@@ -3803,7 +4005,8 @@
                               (vec-reinterpret
                                a
                                'uint8 16) 3 1 13)
-                             (x3 (uint8_t (bv 0 8))))
+                             (x3 (uint8_t (bv 0 8)))
+13)
                                (vec-if
                              (x16 (sca-eq
  (uint8_t
@@ -3814,7 +4017,8 @@
                                (vec-reinterpret
                                 a
                                 'uint8 16) 2 1 14)
-                              (x2 (uint8_t (bv 0 8))))
+                              (x2 (uint8_t (bv 0 8)))
+14)
                                (vec-if
                               (x16 (sca-eq
  (uint8_t
@@ -3825,7 +4029,8 @@
                                 (vec-reinterpret
                                  a
                                  'uint8 16) 1 1 15)
-                               (uint8_t (bv 0 8)))
+                               (uint8_t (bv 0 8))
+15)
                                (vec-if
                                (x16 (sca-eq
  (uint8_t
@@ -3850,7 +4055,8 @@
                   (vec-reinterpret
                    a
                    'uint8 16) 15 1 1)
-                 (x15 (uint8_t (bv 0 8))))
+                 (x15 (uint8_t (bv 0 8)))
+1)
                                (vec-if
                  (x16 (sca-eq
  (uint8_t
@@ -3861,7 +4067,8 @@
                    (vec-reinterpret
                     a
                     'uint8 16) 14 1 2)
-                  (x14 (uint8_t (bv 0 8))))
+                  (x14 (uint8_t (bv 0 8)))
+2)
                                (vec-if
                   (x16 (sca-eq
  (uint8_t
@@ -3872,7 +4079,8 @@
                     (vec-reinterpret
                      a
                      'uint8 16) 13 1 3)
-                   (x13 (uint8_t (bv 0 8))))
+                   (x13 (uint8_t (bv 0 8)))
+3)
                                (vec-if
                    (x16 (sca-eq
  (uint8_t
@@ -3883,7 +4091,8 @@
                      (vec-reinterpret
                       a
                       'uint8 16) 12 1 4)
-                    (x12 (uint8_t (bv 0 8))))
+                    (x12 (uint8_t (bv 0 8)))
+4)
                                (vec-if
                     (x16 (sca-eq
  (uint8_t
@@ -3894,7 +4103,8 @@
                       (vec-reinterpret
                        a
                        'uint8 16) 11 1 5)
-                     (x11 (uint8_t (bv 0 8))))
+                     (x11 (uint8_t (bv 0 8)))
+5)
                                (vec-if
                      (x16 (sca-eq
  (uint8_t
@@ -3905,7 +4115,8 @@
                        (vec-reinterpret
                         a
                         'uint8 16) 10 1 6)
-                      (x10 (uint8_t (bv 0 8))))
+                      (x10 (uint8_t (bv 0 8)))
+6)
                                (vec-if
                       (x16 (sca-eq
  (uint8_t
@@ -3916,7 +4127,8 @@
                         (vec-reinterpret
                          a
                          'uint8 16) 9 1 7)
-                       (x9 (uint8_t (bv 0 8))))
+                       (x9 (uint8_t (bv 0 8)))
+7)
                                (vec-if
                        (x16 (sca-eq
  (uint8_t
@@ -3927,7 +4139,8 @@
                          (vec-reinterpret
                           a
                           'uint8 16) 8 1 8)
-                        (x8 (uint8_t (bv 0 8))))
+                        (x8 (uint8_t (bv 0 8)))
+8)
                                (vec-if
                         (x16 (sca-eq
  (uint8_t
@@ -3938,7 +4151,8 @@
                           (vec-reinterpret
                            a
                            'uint8 16) 7 1 9)
-                         (x7 (uint8_t (bv 0 8))))
+                         (x7 (uint8_t (bv 0 8)))
+9)
                                (vec-if
                          (x16 (sca-eq
  (uint8_t
@@ -3949,7 +4163,8 @@
                            (vec-reinterpret
                             a
                             'uint8 16) 6 1 10)
-                          (x6 (uint8_t (bv 0 8))))
+                          (x6 (uint8_t (bv 0 8)))
+10)
                                (vec-if
                           (x16 (sca-eq
  (uint8_t
@@ -3960,7 +4175,8 @@
                             (vec-reinterpret
                              a
                              'uint8 16) 5 1 11)
-                           (x5 (uint8_t (bv 0 8))))
+                           (x5 (uint8_t (bv 0 8)))
+11)
                                (vec-if
                            (x16 (sca-eq
  (uint8_t
@@ -3971,7 +4187,8 @@
                              (vec-reinterpret
                               a
                               'uint8 16) 4 1 12)
-                            (x4 (uint8_t (bv 0 8))))
+                            (x4 (uint8_t (bv 0 8)))
+12)
                                (vec-if
                             (x16 (sca-eq
  (uint8_t
@@ -3982,7 +4199,8 @@
                               (vec-reinterpret
                                a
                                'uint8 16) 3 1 13)
-                             (x3 (uint8_t (bv 0 8))))
+                             (x3 (uint8_t (bv 0 8)))
+13)
                                (vec-if
                              (x16 (sca-eq
  (uint8_t
@@ -3993,7 +4211,8 @@
                                (vec-reinterpret
                                 a
                                 'uint8 16) 2 1 14)
-                              (x2 (uint8_t (bv 0 8))))
+                              (x2 (uint8_t (bv 0 8)))
+14)
                                (vec-if
                               (x16 (sca-eq
  (uint8_t
@@ -4004,7 +4223,8 @@
                                 (vec-reinterpret
                                  a
                                  'uint8 16) 1 1 15)
-                               (uint8_t (bv 0 8)))
+                               (uint8_t (bv 0 8))
+15)
                                (vec-if
                                (x16 (sca-eq
  (uint8_t
@@ -4029,7 +4249,8 @@
                   (vec-reinterpret
                    a
                    'uint8 16) 15 1 1)
-                 (x15 (uint8_t (bv 0 8))))
+                 (x15 (uint8_t (bv 0 8)))
+1)
                                (vec-if
                  (x16 (sca-eq
  (uint8_t
@@ -4040,7 +4261,8 @@
                    (vec-reinterpret
                     a
                     'uint8 16) 14 1 2)
-                  (x14 (uint8_t (bv 0 8))))
+                  (x14 (uint8_t (bv 0 8)))
+2)
                                (vec-if
                   (x16 (sca-eq
  (uint8_t
@@ -4051,7 +4273,8 @@
                     (vec-reinterpret
                      a
                      'uint8 16) 13 1 3)
-                   (x13 (uint8_t (bv 0 8))))
+                   (x13 (uint8_t (bv 0 8)))
+3)
                                (vec-if
                    (x16 (sca-eq
  (uint8_t
@@ -4062,7 +4285,8 @@
                      (vec-reinterpret
                       a
                       'uint8 16) 12 1 4)
-                    (x12 (uint8_t (bv 0 8))))
+                    (x12 (uint8_t (bv 0 8)))
+4)
                                (vec-if
                     (x16 (sca-eq
  (uint8_t
@@ -4073,7 +4297,8 @@
                       (vec-reinterpret
                        a
                        'uint8 16) 11 1 5)
-                     (x11 (uint8_t (bv 0 8))))
+                     (x11 (uint8_t (bv 0 8)))
+5)
                                (vec-if
                      (x16 (sca-eq
  (uint8_t
@@ -4084,7 +4309,8 @@
                        (vec-reinterpret
                         a
                         'uint8 16) 10 1 6)
-                      (x10 (uint8_t (bv 0 8))))
+                      (x10 (uint8_t (bv 0 8)))
+6)
                                (vec-if
                       (x16 (sca-eq
  (uint8_t
@@ -4095,7 +4321,8 @@
                         (vec-reinterpret
                          a
                          'uint8 16) 9 1 7)
-                       (x9 (uint8_t (bv 0 8))))
+                       (x9 (uint8_t (bv 0 8)))
+7)
                                (vec-if
                        (x16 (sca-eq
  (uint8_t
@@ -4106,7 +4333,8 @@
                          (vec-reinterpret
                           a
                           'uint8 16) 8 1 8)
-                        (x8 (uint8_t (bv 0 8))))
+                        (x8 (uint8_t (bv 0 8)))
+8)
                                (vec-if
                         (x16 (sca-eq
  (uint8_t
@@ -4117,7 +4345,8 @@
                           (vec-reinterpret
                            a
                            'uint8 16) 7 1 9)
-                         (x7 (uint8_t (bv 0 8))))
+                         (x7 (uint8_t (bv 0 8)))
+9)
                                (vec-if
                          (x16 (sca-eq
  (uint8_t
@@ -4128,7 +4357,8 @@
                            (vec-reinterpret
                             a
                             'uint8 16) 6 1 10)
-                          (x6 (uint8_t (bv 0 8))))
+                          (x6 (uint8_t (bv 0 8)))
+10)
                                (vec-if
                           (x16 (sca-eq
  (uint8_t
@@ -4139,7 +4369,8 @@
                             (vec-reinterpret
                              a
                              'uint8 16) 5 1 11)
-                           (x5 (uint8_t (bv 0 8))))
+                           (x5 (uint8_t (bv 0 8)))
+11)
                                (vec-if
                            (x16 (sca-eq
  (uint8_t
@@ -4150,7 +4381,8 @@
                              (vec-reinterpret
                               a
                               'uint8 16) 4 1 12)
-                            (x4 (uint8_t (bv 0 8))))
+                            (x4 (uint8_t (bv 0 8)))
+12)
                                (vec-if
                             (x16 (sca-eq
  (uint8_t
@@ -4161,7 +4393,8 @@
                               (vec-reinterpret
                                a
                                'uint8 16) 3 1 13)
-                             (x3 (uint8_t (bv 0 8))))
+                             (x3 (uint8_t (bv 0 8)))
+13)
                                (vec-if
                              (x16 (sca-eq
  (uint8_t
@@ -4172,7 +4405,8 @@
                                (vec-reinterpret
                                 a
                                 'uint8 16) 2 1 14)
-                              (x2 (uint8_t (bv 0 8))))
+                              (x2 (uint8_t (bv 0 8)))
+14)
                                (vec-if
                               (x16 (sca-eq
  (uint8_t
@@ -4183,7 +4417,8 @@
                                 (vec-reinterpret
                                  a
                                  'uint8 16) 1 1 15)
-                               (uint8_t (bv 0 8)))
+                               (uint8_t (bv 0 8))
+15)
                                (vec-if
                                (x16 (sca-eq
  (uint8_t
@@ -4208,7 +4443,8 @@
                   (vec-reinterpret
                    a
                    'uint8 16) 15 1 1)
-                 (x15 (uint8_t (bv 0 8))))
+                 (x15 (uint8_t (bv 0 8)))
+1)
                                (vec-if
                  (x16 (sca-eq
  (uint8_t
@@ -4219,7 +4455,8 @@
                    (vec-reinterpret
                     a
                     'uint8 16) 14 1 2)
-                  (x14 (uint8_t (bv 0 8))))
+                  (x14 (uint8_t (bv 0 8)))
+2)
                                (vec-if
                   (x16 (sca-eq
  (uint8_t
@@ -4230,7 +4467,8 @@
                     (vec-reinterpret
                      a
                      'uint8 16) 13 1 3)
-                   (x13 (uint8_t (bv 0 8))))
+                   (x13 (uint8_t (bv 0 8)))
+3)
                                (vec-if
                    (x16 (sca-eq
  (uint8_t
@@ -4241,7 +4479,8 @@
                      (vec-reinterpret
                       a
                       'uint8 16) 12 1 4)
-                    (x12 (uint8_t (bv 0 8))))
+                    (x12 (uint8_t (bv 0 8)))
+4)
                                (vec-if
                     (x16 (sca-eq
  (uint8_t
@@ -4252,7 +4491,8 @@
                       (vec-reinterpret
                        a
                        'uint8 16) 11 1 5)
-                     (x11 (uint8_t (bv 0 8))))
+                     (x11 (uint8_t (bv 0 8)))
+5)
                                (vec-if
                      (x16 (sca-eq
  (uint8_t
@@ -4263,7 +4503,8 @@
                        (vec-reinterpret
                         a
                         'uint8 16) 10 1 6)
-                      (x10 (uint8_t (bv 0 8))))
+                      (x10 (uint8_t (bv 0 8)))
+6)
                                (vec-if
                       (x16 (sca-eq
  (uint8_t
@@ -4274,7 +4515,8 @@
                         (vec-reinterpret
                          a
                          'uint8 16) 9 1 7)
-                       (x9 (uint8_t (bv 0 8))))
+                       (x9 (uint8_t (bv 0 8)))
+7)
                                (vec-if
                        (x16 (sca-eq
  (uint8_t
@@ -4285,7 +4527,8 @@
                          (vec-reinterpret
                           a
                           'uint8 16) 8 1 8)
-                        (x8 (uint8_t (bv 0 8))))
+                        (x8 (uint8_t (bv 0 8)))
+8)
                                (vec-if
                         (x16 (sca-eq
  (uint8_t
@@ -4296,7 +4539,8 @@
                           (vec-reinterpret
                            a
                            'uint8 16) 7 1 9)
-                         (x7 (uint8_t (bv 0 8))))
+                         (x7 (uint8_t (bv 0 8)))
+9)
                                (vec-if
                          (x16 (sca-eq
  (uint8_t
@@ -4307,7 +4551,8 @@
                            (vec-reinterpret
                             a
                             'uint8 16) 6 1 10)
-                          (x6 (uint8_t (bv 0 8))))
+                          (x6 (uint8_t (bv 0 8)))
+10)
                                (vec-if
                           (x16 (sca-eq
  (uint8_t
@@ -4318,7 +4563,8 @@
                             (vec-reinterpret
                              a
                              'uint8 16) 5 1 11)
-                           (x5 (uint8_t (bv 0 8))))
+                           (x5 (uint8_t (bv 0 8)))
+11)
                                (vec-if
                            (x16 (sca-eq
  (uint8_t
@@ -4329,7 +4575,8 @@
                              (vec-reinterpret
                               a
                               'uint8 16) 4 1 12)
-                            (x4 (uint8_t (bv 0 8))))
+                            (x4 (uint8_t (bv 0 8)))
+12)
                                (vec-if
                             (x16 (sca-eq
  (uint8_t
@@ -4340,7 +4587,8 @@
                               (vec-reinterpret
                                a
                                'uint8 16) 3 1 13)
-                             (x3 (uint8_t (bv 0 8))))
+                             (x3 (uint8_t (bv 0 8)))
+13)
                                (vec-if
                              (x16 (sca-eq
  (uint8_t
@@ -4351,7 +4599,8 @@
                                (vec-reinterpret
                                 a
                                 'uint8 16) 2 1 14)
-                              (x2 (uint8_t (bv 0 8))))
+                              (x2 (uint8_t (bv 0 8)))
+14)
                                (vec-if
                               (x16 (sca-eq
  (uint8_t
@@ -4362,7 +4611,8 @@
                                 (vec-reinterpret
                                  a
                                  'uint8 16) 1 1 15)
-                               (uint8_t (bv 0 8)))
+                               (uint8_t (bv 0 8))
+15)
                                (vec-if
                                (x16 (sca-eq
  (uint8_t
@@ -4387,7 +4637,8 @@
                   (vec-reinterpret
                    a
                    'uint8 16) 15 1 1)
-                 (x15 (uint8_t (bv 0 8))))
+                 (x15 (uint8_t (bv 0 8)))
+1)
                                (vec-if
                  (x16 (sca-eq
  (uint8_t
@@ -4398,7 +4649,8 @@
                    (vec-reinterpret
                     a
                     'uint8 16) 14 1 2)
-                  (x14 (uint8_t (bv 0 8))))
+                  (x14 (uint8_t (bv 0 8)))
+2)
                                (vec-if
                   (x16 (sca-eq
  (uint8_t
@@ -4409,7 +4661,8 @@
                     (vec-reinterpret
                      a
                      'uint8 16) 13 1 3)
-                   (x13 (uint8_t (bv 0 8))))
+                   (x13 (uint8_t (bv 0 8)))
+3)
                                (vec-if
                    (x16 (sca-eq
  (uint8_t
@@ -4420,7 +4673,8 @@
                      (vec-reinterpret
                       a
                       'uint8 16) 12 1 4)
-                    (x12 (uint8_t (bv 0 8))))
+                    (x12 (uint8_t (bv 0 8)))
+4)
                                (vec-if
                     (x16 (sca-eq
  (uint8_t
@@ -4431,7 +4685,8 @@
                       (vec-reinterpret
                        a
                        'uint8 16) 11 1 5)
-                     (x11 (uint8_t (bv 0 8))))
+                     (x11 (uint8_t (bv 0 8)))
+5)
                                (vec-if
                      (x16 (sca-eq
  (uint8_t
@@ -4442,7 +4697,8 @@
                        (vec-reinterpret
                         a
                         'uint8 16) 10 1 6)
-                      (x10 (uint8_t (bv 0 8))))
+                      (x10 (uint8_t (bv 0 8)))
+6)
                                (vec-if
                       (x16 (sca-eq
  (uint8_t
@@ -4453,7 +4709,8 @@
                         (vec-reinterpret
                          a
                          'uint8 16) 9 1 7)
-                       (x9 (uint8_t (bv 0 8))))
+                       (x9 (uint8_t (bv 0 8)))
+7)
                                (vec-if
                        (x16 (sca-eq
  (uint8_t
@@ -4464,7 +4721,8 @@
                          (vec-reinterpret
                           a
                           'uint8 16) 8 1 8)
-                        (x8 (uint8_t (bv 0 8))))
+                        (x8 (uint8_t (bv 0 8)))
+8)
                                (vec-if
                         (x16 (sca-eq
  (uint8_t
@@ -4475,7 +4733,8 @@
                           (vec-reinterpret
                            a
                            'uint8 16) 7 1 9)
-                         (x7 (uint8_t (bv 0 8))))
+                         (x7 (uint8_t (bv 0 8)))
+9)
                                (vec-if
                          (x16 (sca-eq
  (uint8_t
@@ -4486,7 +4745,8 @@
                            (vec-reinterpret
                             a
                             'uint8 16) 6 1 10)
-                          (x6 (uint8_t (bv 0 8))))
+                          (x6 (uint8_t (bv 0 8)))
+10)
                                (vec-if
                           (x16 (sca-eq
  (uint8_t
@@ -4497,7 +4757,8 @@
                             (vec-reinterpret
                              a
                              'uint8 16) 5 1 11)
-                           (x5 (uint8_t (bv 0 8))))
+                           (x5 (uint8_t (bv 0 8)))
+11)
                                (vec-if
                            (x16 (sca-eq
  (uint8_t
@@ -4508,7 +4769,8 @@
                              (vec-reinterpret
                               a
                               'uint8 16) 4 1 12)
-                            (x4 (uint8_t (bv 0 8))))
+                            (x4 (uint8_t (bv 0 8)))
+12)
                                (vec-if
                             (x16 (sca-eq
  (uint8_t
@@ -4519,7 +4781,8 @@
                               (vec-reinterpret
                                a
                                'uint8 16) 3 1 13)
-                             (x3 (uint8_t (bv 0 8))))
+                             (x3 (uint8_t (bv 0 8)))
+13)
                                (vec-if
                              (x16 (sca-eq
  (uint8_t
@@ -4530,7 +4793,8 @@
                                (vec-reinterpret
                                 a
                                 'uint8 16) 2 1 14)
-                              (x2 (uint8_t (bv 0 8))))
+                              (x2 (uint8_t (bv 0 8)))
+14)
                                (vec-if
                               (x16 (sca-eq
  (uint8_t
@@ -4541,7 +4805,8 @@
                                 (vec-reinterpret
                                  a
                                  'uint8 16) 1 1 15)
-                               (uint8_t (bv 0 8)))
+                               (uint8_t (bv 0 8))
+15)
                                (vec-if
                                (x16 (sca-eq
  (uint8_t
@@ -4770,7 +5035,8 @@
                (slice_vectors
                 a 1 1 1)
                (slice_vectors
-                b 1 1 1))))]
+                b 1 1 1)
+1)))]
         [((x86:u64x2 a) (x86:u64x2 b))
             (x86:u64x2
              (halide:interpret
@@ -4778,7 +5044,8 @@
                (slice_vectors
                 a 1 1 1)
                (slice_vectors
-                b 1 1 1))))]
+                b 1 1 1)
+1)))]
 
         [(_ _) (assert #f "infeasible in interpreting punpckhqdq")])]
 
@@ -4854,7 +5121,8 @@
                (slice_vectors
                 a 0 1 1)
                (slice_vectors
-                b 0 1 1))))]
+                b 0 1 1)
+1)))]
         [((x86:u64x2 a) (x86:u64x2 b))
             (x86:u64x2
              (halide:interpret
@@ -4862,7 +5130,8 @@
                (slice_vectors
                 a 0 1 1)
                (slice_vectors
-                b 0 1 1))))]
+                b 0 1 1)
+1)))]
 
         [(_ _) (assert #f "infeasible in interpreting punpcklqdq")])]
 
@@ -4947,49 +5216,57 @@
              (halide:interpret
               (concat_vectors
                a
-               (x16 (uint8_t (bv 0 8))))))]
+               (x16 (uint8_t (bv 0 8)))
+16)))]
         [((x86:u16x8 a))
             (x86:u16x16
              (halide:interpret
               (concat_vectors
                a
-               (x8 (uint16_t (bv 0 16))))))]
+               (x8 (uint16_t (bv 0 16)))
+8)))]
         [((x86:u32x4 a))
             (x86:u32x8
              (halide:interpret
               (concat_vectors
                a
-               (x4 (uint32_t (bv 0 32))))))]
+               (x4 (uint32_t (bv 0 32)))
+4)))]
         [((x86:u64x2 a))
             (x86:u64x4
              (halide:interpret
               (concat_vectors
                a
-               (x2 (uint64_t (bv 0 64))))))]
+               (x2 (uint64_t (bv 0 64)))
+2)))]
         [((x86:i8x16 a))
             (x86:i8x32
              (halide:interpret
               (concat_vectors
                a
-               (x16 (int8_t (bv 0 8))))))]
+               (x16 (int8_t (bv 0 8)))
+16)))]
         [((x86:i16x8 a))
             (x86:i16x16
              (halide:interpret
               (concat_vectors
                a
-               (x8 (int16_t (bv 0 16))))))]
+               (x8 (int16_t (bv 0 16)))
+8)))]
         [((x86:i32x4 a))
             (x86:i32x8
              (halide:interpret
               (concat_vectors
                a
-               (x4 (int32_t (bv 0 32))))))]
+               (x4 (int32_t (bv 0 32)))
+4)))]
         [((x86:i64x2 a))
             (x86:i64x4
              (halide:interpret
               (concat_vectors
                a
-               (x2 (int64_t (bv 0 64))))))]
+               (x2 (int64_t (bv 0 64)))
+2)))]
         [((x86:u8x32 a))
             (x86:u8x16
              (halide:interpret
@@ -5035,14 +5312,14 @@
 
     [(x86:vbroadcasti128 a)
       (destruct* ((interpret a))
-        [((x86:i8x16 v))   (x86:i8x32 (halide:interpret (concat_vectors v v)))]
-        [((x86:i16x8 v))   (x86:i16x16 (halide:interpret (concat_vectors v v)))]
-        [((x86:i32x4 v))   (x86:i32x8 (halide:interpret (concat_vectors v v)))]
-        [((x86:i64x2 v))   (x86:i64x4 (halide:interpret (concat_vectors v v)))]
-        [((x86:u8x16 v))   (x86:u8x32 (halide:interpret (concat_vectors v v)))]
-        [((x86:u16x8 v))   (x86:u16x16 (halide:interpret (concat_vectors v v)))]
-        [((x86:u32x4 v))   (x86:u32x8 (halide:interpret (concat_vectors v v)))]
-        [((x86:u64x2 v))   (x86:u64x4 (halide:interpret (concat_vectors v v)))]
+        [((x86:i8x16 v))   (concat_vectors v v)]
+        [((x86:i16x8 v))   (concat_vectors v v)]
+        [((x86:i32x4 v))   (concat_vectors v v)]
+        [((x86:i64x2 v))   (concat_vectors v v)]
+        [((x86:u8x16 v))   (concat_vectors v v)]
+        [((x86:u16x8 v))   (concat_vectors v v)]
+        [((x86:u32x4 v))   (concat_vectors v v)]
+        [((x86:u64x2 v))   (concat_vectors v v)]
 
 
         [(_) (assert #f "infeasible in interpreting vbroadcasti128")])]
@@ -5090,12 +5367,15 @@
                    (slice_vectors
                     a 0 1 4)
                    (slice_vectors
-                    b 0 1 4))
+                    b 0 1 4)
+4)
                   (concat_vectors
                    (slice_vectors
                     b 0 1 4)
                    (slice_vectors
-                    a 1 1 4)))
+                    a 1 1 4)
+4)
+4)
                  (x16 (int32_t (bv 32767 32))))
                 (x16 (int32_t (bv -32768 32)))))))]
 
@@ -5114,12 +5394,15 @@
                    (slice_vectors
                     a 0 1 8)
                    (slice_vectors
-                    b 0 1 8))
+                    b 0 1 8)
+8)
                   (concat_vectors
                    (slice_vectors
                     b 0 1 8)
                    (slice_vectors
-                    a 1 1 8)))
+                    a 1 1 8)
+8)
+8)
                  (x32 (int16_t (bv 127 16))))
                 (x32 (int16_t (bv -128 16)))))))]
 
@@ -5138,12 +5421,15 @@
                    (slice_vectors
                     a 0 1 4)
                    (slice_vectors
-                    b 0 1 4))
+                    b 0 1 4)
+4)
                   (concat_vectors
                    (slice_vectors
                     b 0 1 4)
                    (slice_vectors
-                    a 1 1 4)))
+                    a 1 1 4)
+4)
+4)
                  (x16 (int32_t (bv 65535 32))))
                 (x16 (int32_t (bv 0 32)))))))]
 
@@ -5162,12 +5448,15 @@
                    (slice_vectors
                     a 0 1 8)
                    (slice_vectors
-                    b 0 1 8))
+                    b 0 1 8)
+8)
                   (concat_vectors
                    (slice_vectors
                     b 0 1 8)
                    (slice_vectors
-                    a 1 1 8)))
+                    a 1 1 8)
+8)
+8)
                  (x32 (int16_t (bv 255 16))))
                 (x32 (int16_t (bv 0 16)))))))]
 
@@ -5335,14 +5624,17 @@
                     (slice_vectors
                      a 0 1 16)
                     'uint8 16) 14 1 2)
-                  (x14 (uint8_t (bv 0 8))))
+                  (x14 (uint8_t (bv 0 8)))
+2)
                  (concat_vectors
                   (x14 (uint8_t (bv 0 8)))
                   (slice_vectors
                    (vec-reinterpret
                     (slice_vectors
                      a 1 1 16)
-                    'uint8 16) 14 1 2)))
+                    'uint8 16) 14 1 2)
+14)
+2)
                 'int8 32)
                                              (vec-if
                 (x32 (sca-eq
@@ -5357,14 +5649,17 @@
                      (slice_vectors
                       a 0 1 16)
                      'uint8 16) 13 1 3)
-                   (x13 (uint8_t (bv 0 8))))
+                   (x13 (uint8_t (bv 0 8)))
+3)
                   (concat_vectors
                    (x13 (uint8_t (bv 0 8)))
                    (slice_vectors
                     (vec-reinterpret
                      (slice_vectors
                       a 1 1 16)
-                     'uint8 16) 13 1 3)))
+                     'uint8 16) 13 1 3)
+13)
+3)
                  'int8 32)
                                              (vec-if
                  (x32 (sca-eq
@@ -5379,14 +5674,17 @@
                       (slice_vectors
                        a 0 1 16)
                       'uint8 16) 12 1 4)
-                    (x12 (uint8_t (bv 0 8))))
+                    (x12 (uint8_t (bv 0 8)))
+4)
                    (concat_vectors
                     (x12 (uint8_t (bv 0 8)))
                     (slice_vectors
                      (vec-reinterpret
                       (slice_vectors
                        a 1 1 16)
-                      'uint8 16) 12 1 4)))
+                      'uint8 16) 12 1 4)
+12)
+4)
                   'int8 32)
                                              (vec-if
                   (x32 (sca-eq
@@ -5401,14 +5699,17 @@
                        (slice_vectors
                         a 0 1 16)
                        'uint8 16) 11 1 5)
-                     (x11 (uint8_t (bv 0 8))))
+                     (x11 (uint8_t (bv 0 8)))
+5)
                     (concat_vectors
                      (x11 (uint8_t (bv 0 8)))
                      (slice_vectors
                       (vec-reinterpret
                        (slice_vectors
                         a 1 1 16)
-                       'uint8 16) 11 1 5)))
+                       'uint8 16) 11 1 5)
+11)
+5)
                    'int8 32)
                                              (vec-if
                    (x32 (sca-eq
@@ -5423,14 +5724,17 @@
                         (slice_vectors
                          a 0 1 16)
                         'uint8 16) 10 1 6)
-                      (x10 (uint8_t (bv 0 8))))
+                      (x10 (uint8_t (bv 0 8)))
+6)
                      (concat_vectors
                       (x10 (uint8_t (bv 0 8)))
                       (slice_vectors
                        (vec-reinterpret
                         (slice_vectors
                          a 1 1 16)
-                        'uint8 16) 10 1 6)))
+                        'uint8 16) 10 1 6)
+10)
+6)
                     'int8 32)
                                              (vec-if
                     (x32 (sca-eq
@@ -5445,14 +5749,17 @@
                          (slice_vectors
                           a 0 1 16)
                          'uint8 16) 9 1 7)
-                       (x9 (uint8_t (bv 0 8))))
+                       (x9 (uint8_t (bv 0 8)))
+7)
                       (concat_vectors
                        (x9 (uint8_t (bv 0 8)))
                        (slice_vectors
                         (vec-reinterpret
                          (slice_vectors
                           a 1 1 16)
-                         'uint8 16) 9 1 7)))
+                         'uint8 16) 9 1 7)
+9)
+7)
                      'int8 32)
                                              (vec-if
                      (x32 (sca-eq
@@ -5467,14 +5774,17 @@
                           (slice_vectors
                            a 0 1 16)
                           'uint8 16) 8 1 8)
-                        (x8 (uint8_t (bv 0 8))))
+                        (x8 (uint8_t (bv 0 8)))
+8)
                        (concat_vectors
                         (x8 (uint8_t (bv 0 8)))
                         (slice_vectors
                          (vec-reinterpret
                           (slice_vectors
                            a 1 1 16)
-                          'uint8 16) 8 1 8)))
+                          'uint8 16) 8 1 8)
+8)
+8)
                       'int8 32)
                                              (vec-if
                       (x32 (sca-eq
@@ -5489,14 +5799,17 @@
                            (slice_vectors
                             a 0 1 16)
                            'uint8 16) 7 1 9)
-                         (x7 (uint8_t (bv 0 8))))
+                         (x7 (uint8_t (bv 0 8)))
+9)
                         (concat_vectors
                          (x7 (uint8_t (bv 0 8)))
                          (slice_vectors
                           (vec-reinterpret
                            (slice_vectors
                             a 1 1 16)
-                           'uint8 16) 7 1 9)))
+                           'uint8 16) 7 1 9)
+7)
+9)
                        'int8 32)
                                              (vec-if
                        (x32 (sca-eq
@@ -5511,14 +5824,17 @@
                             (slice_vectors
                              a 0 1 16)
                             'uint8 16) 6 1 10)
-                          (x6 (uint8_t (bv 0 8))))
+                          (x6 (uint8_t (bv 0 8)))
+10)
                          (concat_vectors
                           (x6 (uint8_t (bv 0 8)))
                           (slice_vectors
                            (vec-reinterpret
                             (slice_vectors
                              a 1 1 16)
-                            'uint8 16) 6 1 10)))
+                            'uint8 16) 6 1 10)
+6)
+10)
                         'int8 32)
                                              (vec-if
                         (x32 (sca-eq
@@ -5533,14 +5849,17 @@
                              (slice_vectors
                               a 0 1 16)
                              'uint8 16) 5 1 11)
-                           (x5 (uint8_t (bv 0 8))))
+                           (x5 (uint8_t (bv 0 8)))
+11)
                           (concat_vectors
                            (x5 (uint8_t (bv 0 8)))
                            (slice_vectors
                             (vec-reinterpret
                              (slice_vectors
                               a 1 1 16)
-                             'uint8 16) 5 1 11)))
+                             'uint8 16) 5 1 11)
+5)
+11)
                          'int8 32)
                                              (vec-if
                          (x32 (sca-eq
@@ -5555,14 +5874,17 @@
                               (slice_vectors
                                a 0 1 16)
                               'uint8 16) 4 1 12)
-                            (x4 (uint8_t (bv 0 8))))
+                            (x4 (uint8_t (bv 0 8)))
+12)
                            (concat_vectors
                             (x4 (uint8_t (bv 0 8)))
                             (slice_vectors
                              (vec-reinterpret
                               (slice_vectors
                                a 1 1 16)
-                              'uint8 16) 4 1 12)))
+                              'uint8 16) 4 1 12)
+4)
+12)
                           'int8 32)
                                              (vec-if
                           (x32 (sca-eq
@@ -5577,14 +5899,17 @@
                                (slice_vectors
                                 a 0 1 16)
                                'uint8 16) 3 1 13)
-                             (x3 (uint8_t (bv 0 8))))
+                             (x3 (uint8_t (bv 0 8)))
+13)
                             (concat_vectors
                              (x3 (uint8_t (bv 0 8)))
                              (slice_vectors
                               (vec-reinterpret
                                (slice_vectors
                                 a 1 1 16)
-                               'uint8 16) 3 1 13)))
+                               'uint8 16) 3 1 13)
+3)
+13)
                            'int8 32)
                                              (vec-if
                            (x32 (sca-eq
@@ -5599,14 +5924,17 @@
                                 (slice_vectors
                                  a 0 1 16)
                                 'uint8 16) 2 1 14)
-                              (x2 (uint8_t (bv 0 8))))
+                              (x2 (uint8_t (bv 0 8)))
+14)
                              (concat_vectors
                               (x2 (uint8_t (bv 0 8)))
                               (slice_vectors
                                (vec-reinterpret
                                 (slice_vectors
                                  a 1 1 16)
-                                'uint8 16) 2 1 14)))
+                                'uint8 16) 2 1 14)
+2)
+14)
                             'int8 32)
                                              (vec-if
                             (x32 (sca-eq
@@ -5621,14 +5949,17 @@
                                  (slice_vectors
                                   a 0 1 16)
                                  'uint8 16) 1 1 15)
-                               (uint8_t (bv 0 8)))
+                               (uint8_t (bv 0 8))
+15)
                               (concat_vectors
                                (uint8_t (bv 0 8))
                                (slice_vectors
                                 (vec-reinterpret
                                  (slice_vectors
                                   a 1 1 16)
-                                 'uint8 16) 1 1 15)))
+                                 'uint8 16) 1 1 15)
+1)
+15)
                              'int8 32)
                                              (vec-if
                              (x32 (sca-eq
@@ -5642,13 +5973,16 @@
                                  (slice_vectors
                                   a 0 1 16)
                                  'uint8 16)
-                                (x0 (uint8_t (bv 0 8))))
+                                (x0 (uint8_t (bv 0 8)))
+16)
                                (concat_vectors
                                 (x0 (uint8_t (bv 0 8)))
                                 (vec-reinterpret
                                  (slice_vectors
                                   a 1 1 16)
-                                 'uint8 16)))
+                                 'uint8 16)
+0)
+16)
                               'int8 32)
                                              (vec-if
                               (x32 (sca-eq
@@ -5667,7 +6001,8 @@
                                   (vec-reinterpret
                                    (slice_vectors
                                     a 0 1 16)
-                                   'uint8 16) 0 1 15))
+                                   'uint8 16) 0 1 15)
+1)
                                 (concat_vectors
                                  (slice_vectors
                                   (vec-reinterpret
@@ -5678,7 +6013,9 @@
                                   (vec-reinterpret
                                    (slice_vectors
                                     b 1 1 16)
-                                   'uint8 16) 15 1 1)))
+                                   'uint8 16) 15 1 1)
+15)
+1)
                                'int8 32)
                                              (vec-if
                                (x32 (sca-eq
@@ -5697,7 +6034,8 @@
                                    (vec-reinterpret
                                     (slice_vectors
                                      a 0 1 16)
-                                    'uint8 16) 0 1 14))
+                                    'uint8 16) 0 1 14)
+2)
                                  (concat_vectors
                                   (slice_vectors
                                    (vec-reinterpret
@@ -5708,7 +6046,9 @@
                                    (vec-reinterpret
                                     (slice_vectors
                                      b 1 1 16)
-                                    'uint8 16) 14 1 2)))
+                                    'uint8 16) 14 1 2)
+14)
+2)
                                 'int8 32)
                                              (vec-if
                                 (x32 (sca-eq
@@ -5727,7 +6067,8 @@
                                     (vec-reinterpret
                                      (slice_vectors
                                       a 0 1 16)
-                                     'uint8 16) 0 1 13))
+                                     'uint8 16) 0 1 13)
+3)
                                   (concat_vectors
                                    (slice_vectors
                                     (vec-reinterpret
@@ -5738,7 +6079,9 @@
                                     (vec-reinterpret
                                      (slice_vectors
                                       b 1 1 16)
-                                     'uint8 16) 13 1 3)))
+                                     'uint8 16) 13 1 3)
+13)
+3)
                                  'int8 32)
                                              (vec-if
                                  (x32 (sca-eq
@@ -5757,7 +6100,8 @@
                                      (vec-reinterpret
                                       (slice_vectors
                                        a 0 1 16)
-                                      'uint8 16) 0 1 12))
+                                      'uint8 16) 0 1 12)
+4)
                                    (concat_vectors
                                     (slice_vectors
                                      (vec-reinterpret
@@ -5768,7 +6112,9 @@
                                      (vec-reinterpret
                                       (slice_vectors
                                        b 1 1 16)
-                                      'uint8 16) 12 1 4)))
+                                      'uint8 16) 12 1 4)
+12)
+4)
                                   'int8 32)
                                              (vec-if
                                   (x32 (sca-eq
@@ -5787,7 +6133,8 @@
                                       (vec-reinterpret
                                        (slice_vectors
                                         a 0 1 16)
-                                       'uint8 16) 0 1 11))
+                                       'uint8 16) 0 1 11)
+5)
                                     (concat_vectors
                                      (slice_vectors
                                       (vec-reinterpret
@@ -5798,7 +6145,9 @@
                                       (vec-reinterpret
                                        (slice_vectors
                                         b 1 1 16)
-                                       'uint8 16) 11 1 5)))
+                                       'uint8 16) 11 1 5)
+11)
+5)
                                    'int8 32)
                                              (vec-if
                                    (x32 (sca-eq
@@ -5817,7 +6166,8 @@
                                        (vec-reinterpret
                                         (slice_vectors
                                          a 0 1 16)
-                                        'uint8 16) 0 1 10))
+                                        'uint8 16) 0 1 10)
+6)
                                      (concat_vectors
                                       (slice_vectors
                                        (vec-reinterpret
@@ -5828,7 +6178,9 @@
                                        (vec-reinterpret
                                         (slice_vectors
                                          b 1 1 16)
-                                        'uint8 16) 10 1 6)))
+                                        'uint8 16) 10 1 6)
+10)
+6)
                                     'int8 32)
                                              (vec-if
                                     (x32 (sca-eq
@@ -5847,7 +6199,8 @@
                                         (vec-reinterpret
                                          (slice_vectors
                                           a 0 1 16)
-                                         'uint8 16) 0 1 9))
+                                         'uint8 16) 0 1 9)
+7)
                                       (concat_vectors
                                        (slice_vectors
                                         (vec-reinterpret
@@ -5858,7 +6211,9 @@
                                         (vec-reinterpret
                                          (slice_vectors
                                           b 1 1 16)
-                                         'uint8 16) 9 1 7)))
+                                         'uint8 16) 9 1 7)
+9)
+7)
                                      'int8 32)
                                              (vec-if
                                      (x32 (sca-eq
@@ -5877,7 +6232,8 @@
                                          (vec-reinterpret
                                           (slice_vectors
                                            a 0 1 16)
-                                          'uint8 16) 0 1 8))
+                                          'uint8 16) 0 1 8)
+8)
                                        (concat_vectors
                                         (slice_vectors
                                          (vec-reinterpret
@@ -5888,7 +6244,9 @@
                                          (vec-reinterpret
                                           (slice_vectors
                                            b 1 1 16)
-                                          'uint8 16) 8 1 8)))
+                                          'uint8 16) 8 1 8)
+8)
+8)
                                       'int8 32)
                                              (vec-if
                                       (x32 (sca-eq
@@ -5907,7 +6265,8 @@
                                           (vec-reinterpret
                                            (slice_vectors
                                             a 0 1 16)
-                                           'uint8 16) 0 1 7))
+                                           'uint8 16) 0 1 7)
+9)
                                         (concat_vectors
                                          (slice_vectors
                                           (vec-reinterpret
@@ -5918,7 +6277,9 @@
                                           (vec-reinterpret
                                            (slice_vectors
                                             b 1 1 16)
-                                           'uint8 16) 7 1 9)))
+                                           'uint8 16) 7 1 9)
+7)
+9)
                                        'int8 32)
                                              (vec-if
                                        (x32 (sca-eq
@@ -5937,7 +6298,8 @@
                                            (vec-reinterpret
                                             (slice_vectors
                                              a 0 1 16)
-                                            'uint8 16) 0 1 6))
+                                            'uint8 16) 0 1 6)
+10)
                                          (concat_vectors
                                           (slice_vectors
                                            (vec-reinterpret
@@ -5948,7 +6310,9 @@
                                            (vec-reinterpret
                                             (slice_vectors
                                              b 1 1 16)
-                                            'uint8 16) 6 1 10)))
+                                            'uint8 16) 6 1 10)
+6)
+10)
                                         'int8 32)
                                              (vec-if
                                         (x32 (sca-eq
@@ -5967,7 +6331,8 @@
                                             (vec-reinterpret
                                              (slice_vectors
                                               a 0 1 16)
-                                             'uint8 16) 0 1 5))
+                                             'uint8 16) 0 1 5)
+11)
                                           (concat_vectors
                                            (slice_vectors
                                             (vec-reinterpret
@@ -5978,7 +6343,9 @@
                                             (vec-reinterpret
                                              (slice_vectors
                                               b 1 1 16)
-                                             'uint8 16) 5 1 11)))
+                                             'uint8 16) 5 1 11)
+5)
+11)
                                          'int8 32)
                                              (vec-if
                                          (x32 (sca-eq
@@ -5997,7 +6364,8 @@
                                              (vec-reinterpret
                                               (slice_vectors
                                                a 0 1 16)
-                                              'uint8 16) 0 1 4))
+                                              'uint8 16) 0 1 4)
+12)
                                            (concat_vectors
                                             (slice_vectors
                                              (vec-reinterpret
@@ -6008,7 +6376,9 @@
                                              (vec-reinterpret
                                               (slice_vectors
                                                b 1 1 16)
-                                              'uint8 16) 4 1 12)))
+                                              'uint8 16) 4 1 12)
+4)
+12)
                                           'int8 32)
                                              (vec-if
                                           (x32 (sca-eq
@@ -6027,7 +6397,8 @@
                                               (vec-reinterpret
                                                (slice_vectors
                                                 a 0 1 16)
-                                               'uint8 16) 0 1 3))
+                                               'uint8 16) 0 1 3)
+13)
                                             (concat_vectors
                                              (slice_vectors
                                               (vec-reinterpret
@@ -6038,7 +6409,9 @@
                                               (vec-reinterpret
                                                (slice_vectors
                                                 b 1 1 16)
-                                               'uint8 16) 3 1 13)))
+                                               'uint8 16) 3 1 13)
+3)
+13)
                                            'int8 32)
                                              (vec-if
                                            (x32 (sca-eq
@@ -6057,7 +6430,8 @@
                                                (vec-reinterpret
                                                 (slice_vectors
                                                  a 0 1 16)
-                                                'uint8 16) 0 1 2))
+                                                'uint8 16) 0 1 2)
+14)
                                              (concat_vectors
                                               (slice_vectors
                                                (vec-reinterpret
@@ -6068,7 +6442,9 @@
                                                (vec-reinterpret
                                                 (slice_vectors
                                                  b 1 1 16)
-                                                'uint8 16) 2 1 14)))
+                                                'uint8 16) 2 1 14)
+2)
+14)
                                             'int8 32)
                                              (vec-if
                                             (x32 (sca-eq
@@ -6087,7 +6463,8 @@
                                                 (vec-reinterpret
                                                  (slice_vectors
                                                   a 0 1 16)
-                                                 'uint8 16) 0 1 1))
+                                                 'uint8 16) 0 1 1)
+15)
                                               (concat_vectors
                                                (slice_vectors
                                                 (vec-reinterpret
@@ -6098,7 +6475,9 @@
                                                 (vec-reinterpret
                                                  (slice_vectors
                                                   b 1 1 16)
-                                                 'uint8 16) 1 1 15)))
+                                                 'uint8 16) 1 1 15)
+1)
+15)
                                              'int8 32)
                                              (vec-if
                                              (x32 (sca-eq
@@ -6123,14 +6502,17 @@
                     (slice_vectors
                      a 0 1 16)
                     'uint8 16) 14 1 2)
-                  (x14 (uint8_t (bv 0 8))))
+                  (x14 (uint8_t (bv 0 8)))
+2)
                  (concat_vectors
                   (x14 (uint8_t (bv 0 8)))
                   (slice_vectors
                    (vec-reinterpret
                     (slice_vectors
                      a 1 1 16)
-                    'uint8 16) 14 1 2)))
+                    'uint8 16) 14 1 2)
+14)
+2)
                 'uint8 32)
                                              (vec-if
                 (x32 (sca-eq
@@ -6145,14 +6527,17 @@
                      (slice_vectors
                       a 0 1 16)
                      'uint8 16) 13 1 3)
-                   (x13 (uint8_t (bv 0 8))))
+                   (x13 (uint8_t (bv 0 8)))
+3)
                   (concat_vectors
                    (x13 (uint8_t (bv 0 8)))
                    (slice_vectors
                     (vec-reinterpret
                      (slice_vectors
                       a 1 1 16)
-                     'uint8 16) 13 1 3)))
+                     'uint8 16) 13 1 3)
+13)
+3)
                  'uint8 32)
                                              (vec-if
                  (x32 (sca-eq
@@ -6167,14 +6552,17 @@
                       (slice_vectors
                        a 0 1 16)
                       'uint8 16) 12 1 4)
-                    (x12 (uint8_t (bv 0 8))))
+                    (x12 (uint8_t (bv 0 8)))
+4)
                    (concat_vectors
                     (x12 (uint8_t (bv 0 8)))
                     (slice_vectors
                      (vec-reinterpret
                       (slice_vectors
                        a 1 1 16)
-                      'uint8 16) 12 1 4)))
+                      'uint8 16) 12 1 4)
+12)
+4)
                   'uint8 32)
                                              (vec-if
                   (x32 (sca-eq
@@ -6189,14 +6577,17 @@
                        (slice_vectors
                         a 0 1 16)
                        'uint8 16) 11 1 5)
-                     (x11 (uint8_t (bv 0 8))))
+                     (x11 (uint8_t (bv 0 8)))
+5)
                     (concat_vectors
                      (x11 (uint8_t (bv 0 8)))
                      (slice_vectors
                       (vec-reinterpret
                        (slice_vectors
                         a 1 1 16)
-                       'uint8 16) 11 1 5)))
+                       'uint8 16) 11 1 5)
+11)
+5)
                    'uint8 32)
                                              (vec-if
                    (x32 (sca-eq
@@ -6211,14 +6602,17 @@
                         (slice_vectors
                          a 0 1 16)
                         'uint8 16) 10 1 6)
-                      (x10 (uint8_t (bv 0 8))))
+                      (x10 (uint8_t (bv 0 8)))
+6)
                      (concat_vectors
                       (x10 (uint8_t (bv 0 8)))
                       (slice_vectors
                        (vec-reinterpret
                         (slice_vectors
                          a 1 1 16)
-                        'uint8 16) 10 1 6)))
+                        'uint8 16) 10 1 6)
+10)
+6)
                     'uint8 32)
                                              (vec-if
                     (x32 (sca-eq
@@ -6233,14 +6627,17 @@
                          (slice_vectors
                           a 0 1 16)
                          'uint8 16) 9 1 7)
-                       (x9 (uint8_t (bv 0 8))))
+                       (x9 (uint8_t (bv 0 8)))
+7)
                       (concat_vectors
                        (x9 (uint8_t (bv 0 8)))
                        (slice_vectors
                         (vec-reinterpret
                          (slice_vectors
                           a 1 1 16)
-                         'uint8 16) 9 1 7)))
+                         'uint8 16) 9 1 7)
+9)
+7)
                      'uint8 32)
                                              (vec-if
                      (x32 (sca-eq
@@ -6255,14 +6652,17 @@
                           (slice_vectors
                            a 0 1 16)
                           'uint8 16) 8 1 8)
-                        (x8 (uint8_t (bv 0 8))))
+                        (x8 (uint8_t (bv 0 8)))
+8)
                        (concat_vectors
                         (x8 (uint8_t (bv 0 8)))
                         (slice_vectors
                          (vec-reinterpret
                           (slice_vectors
                            a 1 1 16)
-                          'uint8 16) 8 1 8)))
+                          'uint8 16) 8 1 8)
+8)
+8)
                       'uint8 32)
                                              (vec-if
                       (x32 (sca-eq
@@ -6277,14 +6677,17 @@
                            (slice_vectors
                             a 0 1 16)
                            'uint8 16) 7 1 9)
-                         (x7 (uint8_t (bv 0 8))))
+                         (x7 (uint8_t (bv 0 8)))
+9)
                         (concat_vectors
                          (x7 (uint8_t (bv 0 8)))
                          (slice_vectors
                           (vec-reinterpret
                            (slice_vectors
                             a 1 1 16)
-                           'uint8 16) 7 1 9)))
+                           'uint8 16) 7 1 9)
+7)
+9)
                        'uint8 32)
                                              (vec-if
                        (x32 (sca-eq
@@ -6299,14 +6702,17 @@
                             (slice_vectors
                              a 0 1 16)
                             'uint8 16) 6 1 10)
-                          (x6 (uint8_t (bv 0 8))))
+                          (x6 (uint8_t (bv 0 8)))
+10)
                          (concat_vectors
                           (x6 (uint8_t (bv 0 8)))
                           (slice_vectors
                            (vec-reinterpret
                             (slice_vectors
                              a 1 1 16)
-                            'uint8 16) 6 1 10)))
+                            'uint8 16) 6 1 10)
+6)
+10)
                         'uint8 32)
                                              (vec-if
                         (x32 (sca-eq
@@ -6321,14 +6727,17 @@
                              (slice_vectors
                               a 0 1 16)
                              'uint8 16) 5 1 11)
-                           (x5 (uint8_t (bv 0 8))))
+                           (x5 (uint8_t (bv 0 8)))
+11)
                           (concat_vectors
                            (x5 (uint8_t (bv 0 8)))
                            (slice_vectors
                             (vec-reinterpret
                              (slice_vectors
                               a 1 1 16)
-                             'uint8 16) 5 1 11)))
+                             'uint8 16) 5 1 11)
+5)
+11)
                          'uint8 32)
                                              (vec-if
                          (x32 (sca-eq
@@ -6343,14 +6752,17 @@
                               (slice_vectors
                                a 0 1 16)
                               'uint8 16) 4 1 12)
-                            (x4 (uint8_t (bv 0 8))))
+                            (x4 (uint8_t (bv 0 8)))
+12)
                            (concat_vectors
                             (x4 (uint8_t (bv 0 8)))
                             (slice_vectors
                              (vec-reinterpret
                               (slice_vectors
                                a 1 1 16)
-                              'uint8 16) 4 1 12)))
+                              'uint8 16) 4 1 12)
+4)
+12)
                           'uint8 32)
                                              (vec-if
                           (x32 (sca-eq
@@ -6365,14 +6777,17 @@
                                (slice_vectors
                                 a 0 1 16)
                                'uint8 16) 3 1 13)
-                             (x3 (uint8_t (bv 0 8))))
+                             (x3 (uint8_t (bv 0 8)))
+13)
                             (concat_vectors
                              (x3 (uint8_t (bv 0 8)))
                              (slice_vectors
                               (vec-reinterpret
                                (slice_vectors
                                 a 1 1 16)
-                               'uint8 16) 3 1 13)))
+                               'uint8 16) 3 1 13)
+3)
+13)
                            'uint8 32)
                                              (vec-if
                            (x32 (sca-eq
@@ -6387,14 +6802,17 @@
                                 (slice_vectors
                                  a 0 1 16)
                                 'uint8 16) 2 1 14)
-                              (x2 (uint8_t (bv 0 8))))
+                              (x2 (uint8_t (bv 0 8)))
+14)
                              (concat_vectors
                               (x2 (uint8_t (bv 0 8)))
                               (slice_vectors
                                (vec-reinterpret
                                 (slice_vectors
                                  a 1 1 16)
-                                'uint8 16) 2 1 14)))
+                                'uint8 16) 2 1 14)
+2)
+14)
                             'uint8 32)
                                              (vec-if
                             (x32 (sca-eq
@@ -6409,14 +6827,17 @@
                                  (slice_vectors
                                   a 0 1 16)
                                  'uint8 16) 1 1 15)
-                               (uint8_t (bv 0 8)))
+                               (uint8_t (bv 0 8))
+15)
                               (concat_vectors
                                (uint8_t (bv 0 8))
                                (slice_vectors
                                 (vec-reinterpret
                                  (slice_vectors
                                   a 1 1 16)
-                                 'uint8 16) 1 1 15)))
+                                 'uint8 16) 1 1 15)
+1)
+15)
                              'uint8 32)
                                              (vec-if
                              (x32 (sca-eq
@@ -6430,13 +6851,16 @@
                                  (slice_vectors
                                   a 0 1 16)
                                  'uint8 16)
-                                (x0 (uint8_t (bv 0 8))))
+                                (x0 (uint8_t (bv 0 8)))
+16)
                                (concat_vectors
                                 (x0 (uint8_t (bv 0 8)))
                                 (vec-reinterpret
                                  (slice_vectors
                                   a 1 1 16)
-                                 'uint8 16)))
+                                 'uint8 16)
+0)
+16)
                               'uint8 32)
                                              (vec-if
                               (x32 (sca-eq
@@ -6455,7 +6879,8 @@
                                   (vec-reinterpret
                                    (slice_vectors
                                     a 0 1 16)
-                                   'uint8 16) 0 1 15))
+                                   'uint8 16) 0 1 15)
+1)
                                 (concat_vectors
                                  (slice_vectors
                                   (vec-reinterpret
@@ -6466,7 +6891,9 @@
                                   (vec-reinterpret
                                    (slice_vectors
                                     b 1 1 16)
-                                   'uint8 16) 15 1 1)))
+                                   'uint8 16) 15 1 1)
+15)
+1)
                                'uint8 32)
                                              (vec-if
                                (x32 (sca-eq
@@ -6485,7 +6912,8 @@
                                    (vec-reinterpret
                                     (slice_vectors
                                      a 0 1 16)
-                                    'uint8 16) 0 1 14))
+                                    'uint8 16) 0 1 14)
+2)
                                  (concat_vectors
                                   (slice_vectors
                                    (vec-reinterpret
@@ -6496,7 +6924,9 @@
                                    (vec-reinterpret
                                     (slice_vectors
                                      b 1 1 16)
-                                    'uint8 16) 14 1 2)))
+                                    'uint8 16) 14 1 2)
+14)
+2)
                                 'uint8 32)
                                              (vec-if
                                 (x32 (sca-eq
@@ -6515,7 +6945,8 @@
                                     (vec-reinterpret
                                      (slice_vectors
                                       a 0 1 16)
-                                     'uint8 16) 0 1 13))
+                                     'uint8 16) 0 1 13)
+3)
                                   (concat_vectors
                                    (slice_vectors
                                     (vec-reinterpret
@@ -6526,7 +6957,9 @@
                                     (vec-reinterpret
                                      (slice_vectors
                                       b 1 1 16)
-                                     'uint8 16) 13 1 3)))
+                                     'uint8 16) 13 1 3)
+13)
+3)
                                  'uint8 32)
                                              (vec-if
                                  (x32 (sca-eq
@@ -6545,7 +6978,8 @@
                                      (vec-reinterpret
                                       (slice_vectors
                                        a 0 1 16)
-                                      'uint8 16) 0 1 12))
+                                      'uint8 16) 0 1 12)
+4)
                                    (concat_vectors
                                     (slice_vectors
                                      (vec-reinterpret
@@ -6556,7 +6990,9 @@
                                      (vec-reinterpret
                                       (slice_vectors
                                        b 1 1 16)
-                                      'uint8 16) 12 1 4)))
+                                      'uint8 16) 12 1 4)
+12)
+4)
                                   'uint8 32)
                                              (vec-if
                                   (x32 (sca-eq
@@ -6575,7 +7011,8 @@
                                       (vec-reinterpret
                                        (slice_vectors
                                         a 0 1 16)
-                                       'uint8 16) 0 1 11))
+                                       'uint8 16) 0 1 11)
+5)
                                     (concat_vectors
                                      (slice_vectors
                                       (vec-reinterpret
@@ -6586,7 +7023,9 @@
                                       (vec-reinterpret
                                        (slice_vectors
                                         b 1 1 16)
-                                       'uint8 16) 11 1 5)))
+                                       'uint8 16) 11 1 5)
+11)
+5)
                                    'uint8 32)
                                              (vec-if
                                    (x32 (sca-eq
@@ -6605,7 +7044,8 @@
                                        (vec-reinterpret
                                         (slice_vectors
                                          a 0 1 16)
-                                        'uint8 16) 0 1 10))
+                                        'uint8 16) 0 1 10)
+6)
                                      (concat_vectors
                                       (slice_vectors
                                        (vec-reinterpret
@@ -6616,7 +7056,9 @@
                                        (vec-reinterpret
                                         (slice_vectors
                                          b 1 1 16)
-                                        'uint8 16) 10 1 6)))
+                                        'uint8 16) 10 1 6)
+10)
+6)
                                     'uint8 32)
                                              (vec-if
                                     (x32 (sca-eq
@@ -6635,7 +7077,8 @@
                                         (vec-reinterpret
                                          (slice_vectors
                                           a 0 1 16)
-                                         'uint8 16) 0 1 9))
+                                         'uint8 16) 0 1 9)
+7)
                                       (concat_vectors
                                        (slice_vectors
                                         (vec-reinterpret
@@ -6646,7 +7089,9 @@
                                         (vec-reinterpret
                                          (slice_vectors
                                           b 1 1 16)
-                                         'uint8 16) 9 1 7)))
+                                         'uint8 16) 9 1 7)
+9)
+7)
                                      'uint8 32)
                                              (vec-if
                                      (x32 (sca-eq
@@ -6665,7 +7110,8 @@
                                          (vec-reinterpret
                                           (slice_vectors
                                            a 0 1 16)
-                                          'uint8 16) 0 1 8))
+                                          'uint8 16) 0 1 8)
+8)
                                        (concat_vectors
                                         (slice_vectors
                                          (vec-reinterpret
@@ -6676,7 +7122,9 @@
                                          (vec-reinterpret
                                           (slice_vectors
                                            b 1 1 16)
-                                          'uint8 16) 8 1 8)))
+                                          'uint8 16) 8 1 8)
+8)
+8)
                                       'uint8 32)
                                              (vec-if
                                       (x32 (sca-eq
@@ -6695,7 +7143,8 @@
                                           (vec-reinterpret
                                            (slice_vectors
                                             a 0 1 16)
-                                           'uint8 16) 0 1 7))
+                                           'uint8 16) 0 1 7)
+9)
                                         (concat_vectors
                                          (slice_vectors
                                           (vec-reinterpret
@@ -6706,7 +7155,9 @@
                                           (vec-reinterpret
                                            (slice_vectors
                                             b 1 1 16)
-                                           'uint8 16) 7 1 9)))
+                                           'uint8 16) 7 1 9)
+7)
+9)
                                        'uint8 32)
                                              (vec-if
                                        (x32 (sca-eq
@@ -6725,7 +7176,8 @@
                                            (vec-reinterpret
                                             (slice_vectors
                                              a 0 1 16)
-                                            'uint8 16) 0 1 6))
+                                            'uint8 16) 0 1 6)
+10)
                                          (concat_vectors
                                           (slice_vectors
                                            (vec-reinterpret
@@ -6736,7 +7188,9 @@
                                            (vec-reinterpret
                                             (slice_vectors
                                              b 1 1 16)
-                                            'uint8 16) 6 1 10)))
+                                            'uint8 16) 6 1 10)
+6)
+10)
                                         'uint8 32)
                                              (vec-if
                                         (x32 (sca-eq
@@ -6755,7 +7209,8 @@
                                             (vec-reinterpret
                                              (slice_vectors
                                               a 0 1 16)
-                                             'uint8 16) 0 1 5))
+                                             'uint8 16) 0 1 5)
+11)
                                           (concat_vectors
                                            (slice_vectors
                                             (vec-reinterpret
@@ -6766,7 +7221,9 @@
                                             (vec-reinterpret
                                              (slice_vectors
                                               b 1 1 16)
-                                             'uint8 16) 5 1 11)))
+                                             'uint8 16) 5 1 11)
+5)
+11)
                                          'uint8 32)
                                              (vec-if
                                          (x32 (sca-eq
@@ -6785,7 +7242,8 @@
                                              (vec-reinterpret
                                               (slice_vectors
                                                a 0 1 16)
-                                              'uint8 16) 0 1 4))
+                                              'uint8 16) 0 1 4)
+12)
                                            (concat_vectors
                                             (slice_vectors
                                              (vec-reinterpret
@@ -6796,7 +7254,9 @@
                                              (vec-reinterpret
                                               (slice_vectors
                                                b 1 1 16)
-                                              'uint8 16) 4 1 12)))
+                                              'uint8 16) 4 1 12)
+4)
+12)
                                           'uint8 32)
                                              (vec-if
                                           (x32 (sca-eq
@@ -6815,7 +7275,8 @@
                                               (vec-reinterpret
                                                (slice_vectors
                                                 a 0 1 16)
-                                               'uint8 16) 0 1 3))
+                                               'uint8 16) 0 1 3)
+13)
                                             (concat_vectors
                                              (slice_vectors
                                               (vec-reinterpret
@@ -6826,7 +7287,9 @@
                                               (vec-reinterpret
                                                (slice_vectors
                                                 b 1 1 16)
-                                               'uint8 16) 3 1 13)))
+                                               'uint8 16) 3 1 13)
+3)
+13)
                                            'uint8 32)
                                              (vec-if
                                            (x32 (sca-eq
@@ -6845,7 +7308,8 @@
                                                (vec-reinterpret
                                                 (slice_vectors
                                                  a 0 1 16)
-                                                'uint8 16) 0 1 2))
+                                                'uint8 16) 0 1 2)
+14)
                                              (concat_vectors
                                               (slice_vectors
                                                (vec-reinterpret
@@ -6856,7 +7320,9 @@
                                                (vec-reinterpret
                                                 (slice_vectors
                                                  b 1 1 16)
-                                                'uint8 16) 2 1 14)))
+                                                'uint8 16) 2 1 14)
+2)
+14)
                                             'uint8 32)
                                              (vec-if
                                             (x32 (sca-eq
@@ -6875,7 +7341,8 @@
                                                 (vec-reinterpret
                                                  (slice_vectors
                                                   a 0 1 16)
-                                                 'uint8 16) 0 1 1))
+                                                 'uint8 16) 0 1 1)
+15)
                                               (concat_vectors
                                                (slice_vectors
                                                 (vec-reinterpret
@@ -6886,7 +7353,9 @@
                                                 (vec-reinterpret
                                                  (slice_vectors
                                                   b 1 1 16)
-                                                 'uint8 16) 1 1 15)))
+                                                 'uint8 16) 1 1 15)
+1)
+15)
                                              'uint8 32)
                                              (vec-if
                                              (x32 (sca-eq
@@ -6911,14 +7380,17 @@
                     (slice_vectors
                      a 0 1 8)
                     'uint8 16) 14 1 2)
-                  (x14 (uint8_t (bv 0 8))))
+                  (x14 (uint8_t (bv 0 8)))
+2)
                  (concat_vectors
                   (x14 (uint8_t (bv 0 8)))
                   (slice_vectors
                    (vec-reinterpret
                     (slice_vectors
                      a 1 1 8)
-                    'uint8 16) 14 1 2)))
+                    'uint8 16) 14 1 2)
+14)
+2)
                 'int16 16)
                                              (vec-if
                 (x16 (sca-eq
@@ -6933,14 +7405,17 @@
                      (slice_vectors
                       a 0 1 8)
                      'uint8 16) 13 1 3)
-                   (x13 (uint8_t (bv 0 8))))
+                   (x13 (uint8_t (bv 0 8)))
+3)
                   (concat_vectors
                    (x13 (uint8_t (bv 0 8)))
                    (slice_vectors
                     (vec-reinterpret
                      (slice_vectors
                       a 1 1 8)
-                     'uint8 16) 13 1 3)))
+                     'uint8 16) 13 1 3)
+13)
+3)
                  'int16 16)
                                              (vec-if
                  (x16 (sca-eq
@@ -6955,14 +7430,17 @@
                       (slice_vectors
                        a 0 1 8)
                       'uint8 16) 12 1 4)
-                    (x12 (uint8_t (bv 0 8))))
+                    (x12 (uint8_t (bv 0 8)))
+4)
                    (concat_vectors
                     (x12 (uint8_t (bv 0 8)))
                     (slice_vectors
                      (vec-reinterpret
                       (slice_vectors
                        a 1 1 8)
-                      'uint8 16) 12 1 4)))
+                      'uint8 16) 12 1 4)
+12)
+4)
                   'int16 16)
                                              (vec-if
                   (x16 (sca-eq
@@ -6977,14 +7455,17 @@
                        (slice_vectors
                         a 0 1 8)
                        'uint8 16) 11 1 5)
-                     (x11 (uint8_t (bv 0 8))))
+                     (x11 (uint8_t (bv 0 8)))
+5)
                     (concat_vectors
                      (x11 (uint8_t (bv 0 8)))
                      (slice_vectors
                       (vec-reinterpret
                        (slice_vectors
                         a 1 1 8)
-                       'uint8 16) 11 1 5)))
+                       'uint8 16) 11 1 5)
+11)
+5)
                    'int16 16)
                                              (vec-if
                    (x16 (sca-eq
@@ -6999,14 +7480,17 @@
                         (slice_vectors
                          a 0 1 8)
                         'uint8 16) 10 1 6)
-                      (x10 (uint8_t (bv 0 8))))
+                      (x10 (uint8_t (bv 0 8)))
+6)
                      (concat_vectors
                       (x10 (uint8_t (bv 0 8)))
                       (slice_vectors
                        (vec-reinterpret
                         (slice_vectors
                          a 1 1 8)
-                        'uint8 16) 10 1 6)))
+                        'uint8 16) 10 1 6)
+10)
+6)
                     'int16 16)
                                              (vec-if
                     (x16 (sca-eq
@@ -7021,14 +7505,17 @@
                          (slice_vectors
                           a 0 1 8)
                          'uint8 16) 9 1 7)
-                       (x9 (uint8_t (bv 0 8))))
+                       (x9 (uint8_t (bv 0 8)))
+7)
                       (concat_vectors
                        (x9 (uint8_t (bv 0 8)))
                        (slice_vectors
                         (vec-reinterpret
                          (slice_vectors
                           a 1 1 8)
-                         'uint8 16) 9 1 7)))
+                         'uint8 16) 9 1 7)
+9)
+7)
                      'int16 16)
                                              (vec-if
                      (x16 (sca-eq
@@ -7043,14 +7530,17 @@
                           (slice_vectors
                            a 0 1 8)
                           'uint8 16) 8 1 8)
-                        (x8 (uint8_t (bv 0 8))))
+                        (x8 (uint8_t (bv 0 8)))
+8)
                        (concat_vectors
                         (x8 (uint8_t (bv 0 8)))
                         (slice_vectors
                          (vec-reinterpret
                           (slice_vectors
                            a 1 1 8)
-                          'uint8 16) 8 1 8)))
+                          'uint8 16) 8 1 8)
+8)
+8)
                       'int16 16)
                                              (vec-if
                       (x16 (sca-eq
@@ -7065,14 +7555,17 @@
                            (slice_vectors
                             a 0 1 8)
                            'uint8 16) 7 1 9)
-                         (x7 (uint8_t (bv 0 8))))
+                         (x7 (uint8_t (bv 0 8)))
+9)
                         (concat_vectors
                          (x7 (uint8_t (bv 0 8)))
                          (slice_vectors
                           (vec-reinterpret
                            (slice_vectors
                             a 1 1 8)
-                           'uint8 16) 7 1 9)))
+                           'uint8 16) 7 1 9)
+7)
+9)
                        'int16 16)
                                              (vec-if
                        (x16 (sca-eq
@@ -7087,14 +7580,17 @@
                             (slice_vectors
                              a 0 1 8)
                             'uint8 16) 6 1 10)
-                          (x6 (uint8_t (bv 0 8))))
+                          (x6 (uint8_t (bv 0 8)))
+10)
                          (concat_vectors
                           (x6 (uint8_t (bv 0 8)))
                           (slice_vectors
                            (vec-reinterpret
                             (slice_vectors
                              a 1 1 8)
-                            'uint8 16) 6 1 10)))
+                            'uint8 16) 6 1 10)
+6)
+10)
                         'int16 16)
                                              (vec-if
                         (x16 (sca-eq
@@ -7109,14 +7605,17 @@
                              (slice_vectors
                               a 0 1 8)
                              'uint8 16) 5 1 11)
-                           (x5 (uint8_t (bv 0 8))))
+                           (x5 (uint8_t (bv 0 8)))
+11)
                           (concat_vectors
                            (x5 (uint8_t (bv 0 8)))
                            (slice_vectors
                             (vec-reinterpret
                              (slice_vectors
                               a 1 1 8)
-                             'uint8 16) 5 1 11)))
+                             'uint8 16) 5 1 11)
+5)
+11)
                          'int16 16)
                                              (vec-if
                          (x16 (sca-eq
@@ -7131,14 +7630,17 @@
                               (slice_vectors
                                a 0 1 8)
                               'uint8 16) 4 1 12)
-                            (x4 (uint8_t (bv 0 8))))
+                            (x4 (uint8_t (bv 0 8)))
+12)
                            (concat_vectors
                             (x4 (uint8_t (bv 0 8)))
                             (slice_vectors
                              (vec-reinterpret
                               (slice_vectors
                                a 1 1 8)
-                              'uint8 16) 4 1 12)))
+                              'uint8 16) 4 1 12)
+4)
+12)
                           'int16 16)
                                              (vec-if
                           (x16 (sca-eq
@@ -7153,14 +7655,17 @@
                                (slice_vectors
                                 a 0 1 8)
                                'uint8 16) 3 1 13)
-                             (x3 (uint8_t (bv 0 8))))
+                             (x3 (uint8_t (bv 0 8)))
+13)
                             (concat_vectors
                              (x3 (uint8_t (bv 0 8)))
                              (slice_vectors
                               (vec-reinterpret
                                (slice_vectors
                                 a 1 1 8)
-                               'uint8 16) 3 1 13)))
+                               'uint8 16) 3 1 13)
+3)
+13)
                            'int16 16)
                                              (vec-if
                            (x16 (sca-eq
@@ -7175,14 +7680,17 @@
                                 (slice_vectors
                                  a 0 1 8)
                                 'uint8 16) 2 1 14)
-                              (x2 (uint8_t (bv 0 8))))
+                              (x2 (uint8_t (bv 0 8)))
+14)
                              (concat_vectors
                               (x2 (uint8_t (bv 0 8)))
                               (slice_vectors
                                (vec-reinterpret
                                 (slice_vectors
                                  a 1 1 8)
-                                'uint8 16) 2 1 14)))
+                                'uint8 16) 2 1 14)
+2)
+14)
                             'int16 16)
                                              (vec-if
                             (x16 (sca-eq
@@ -7197,14 +7705,17 @@
                                  (slice_vectors
                                   a 0 1 8)
                                  'uint8 16) 1 1 15)
-                               (uint8_t (bv 0 8)))
+                               (uint8_t (bv 0 8))
+15)
                               (concat_vectors
                                (uint8_t (bv 0 8))
                                (slice_vectors
                                 (vec-reinterpret
                                  (slice_vectors
                                   a 1 1 8)
-                                 'uint8 16) 1 1 15)))
+                                 'uint8 16) 1 1 15)
+1)
+15)
                              'int16 16)
                                              (vec-if
                              (x16 (sca-eq
@@ -7218,13 +7729,16 @@
                                  (slice_vectors
                                   a 0 1 8)
                                  'uint8 16)
-                                (x0 (uint8_t (bv 0 8))))
+                                (x0 (uint8_t (bv 0 8)))
+16)
                                (concat_vectors
                                 (x0 (uint8_t (bv 0 8)))
                                 (vec-reinterpret
                                  (slice_vectors
                                   a 1 1 8)
-                                 'uint8 16)))
+                                 'uint8 16)
+0)
+16)
                               'int16 16)
                                              (vec-if
                               (x16 (sca-eq
@@ -7243,7 +7757,8 @@
                                   (vec-reinterpret
                                    (slice_vectors
                                     a 0 1 8)
-                                   'uint8 16) 0 1 15))
+                                   'uint8 16) 0 1 15)
+1)
                                 (concat_vectors
                                  (slice_vectors
                                   (vec-reinterpret
@@ -7254,7 +7769,9 @@
                                   (vec-reinterpret
                                    (slice_vectors
                                     b 1 1 8)
-                                   'uint8 16) 15 1 1)))
+                                   'uint8 16) 15 1 1)
+15)
+1)
                                'int16 16)
                                              (vec-if
                                (x16 (sca-eq
@@ -7273,7 +7790,8 @@
                                    (vec-reinterpret
                                     (slice_vectors
                                      a 0 1 8)
-                                    'uint8 16) 0 1 14))
+                                    'uint8 16) 0 1 14)
+2)
                                  (concat_vectors
                                   (slice_vectors
                                    (vec-reinterpret
@@ -7284,7 +7802,9 @@
                                    (vec-reinterpret
                                     (slice_vectors
                                      b 1 1 8)
-                                    'uint8 16) 14 1 2)))
+                                    'uint8 16) 14 1 2)
+14)
+2)
                                 'int16 16)
                                              (vec-if
                                 (x16 (sca-eq
@@ -7303,7 +7823,8 @@
                                     (vec-reinterpret
                                      (slice_vectors
                                       a 0 1 8)
-                                     'uint8 16) 0 1 13))
+                                     'uint8 16) 0 1 13)
+3)
                                   (concat_vectors
                                    (slice_vectors
                                     (vec-reinterpret
@@ -7314,7 +7835,9 @@
                                     (vec-reinterpret
                                      (slice_vectors
                                       b 1 1 8)
-                                     'uint8 16) 13 1 3)))
+                                     'uint8 16) 13 1 3)
+13)
+3)
                                  'int16 16)
                                              (vec-if
                                  (x16 (sca-eq
@@ -7333,7 +7856,8 @@
                                      (vec-reinterpret
                                       (slice_vectors
                                        a 0 1 8)
-                                      'uint8 16) 0 1 12))
+                                      'uint8 16) 0 1 12)
+4)
                                    (concat_vectors
                                     (slice_vectors
                                      (vec-reinterpret
@@ -7344,7 +7868,9 @@
                                      (vec-reinterpret
                                       (slice_vectors
                                        b 1 1 8)
-                                      'uint8 16) 12 1 4)))
+                                      'uint8 16) 12 1 4)
+12)
+4)
                                   'int16 16)
                                              (vec-if
                                   (x16 (sca-eq
@@ -7363,7 +7889,8 @@
                                       (vec-reinterpret
                                        (slice_vectors
                                         a 0 1 8)
-                                       'uint8 16) 0 1 11))
+                                       'uint8 16) 0 1 11)
+5)
                                     (concat_vectors
                                      (slice_vectors
                                       (vec-reinterpret
@@ -7374,7 +7901,9 @@
                                       (vec-reinterpret
                                        (slice_vectors
                                         b 1 1 8)
-                                       'uint8 16) 11 1 5)))
+                                       'uint8 16) 11 1 5)
+11)
+5)
                                    'int16 16)
                                              (vec-if
                                    (x16 (sca-eq
@@ -7393,7 +7922,8 @@
                                        (vec-reinterpret
                                         (slice_vectors
                                          a 0 1 8)
-                                        'uint8 16) 0 1 10))
+                                        'uint8 16) 0 1 10)
+6)
                                      (concat_vectors
                                       (slice_vectors
                                        (vec-reinterpret
@@ -7404,7 +7934,9 @@
                                        (vec-reinterpret
                                         (slice_vectors
                                          b 1 1 8)
-                                        'uint8 16) 10 1 6)))
+                                        'uint8 16) 10 1 6)
+10)
+6)
                                     'int16 16)
                                              (vec-if
                                     (x16 (sca-eq
@@ -7423,7 +7955,8 @@
                                         (vec-reinterpret
                                          (slice_vectors
                                           a 0 1 8)
-                                         'uint8 16) 0 1 9))
+                                         'uint8 16) 0 1 9)
+7)
                                       (concat_vectors
                                        (slice_vectors
                                         (vec-reinterpret
@@ -7434,7 +7967,9 @@
                                         (vec-reinterpret
                                          (slice_vectors
                                           b 1 1 8)
-                                         'uint8 16) 9 1 7)))
+                                         'uint8 16) 9 1 7)
+9)
+7)
                                      'int16 16)
                                              (vec-if
                                      (x16 (sca-eq
@@ -7453,7 +7988,8 @@
                                          (vec-reinterpret
                                           (slice_vectors
                                            a 0 1 8)
-                                          'uint8 16) 0 1 8))
+                                          'uint8 16) 0 1 8)
+8)
                                        (concat_vectors
                                         (slice_vectors
                                          (vec-reinterpret
@@ -7464,7 +8000,9 @@
                                          (vec-reinterpret
                                           (slice_vectors
                                            b 1 1 8)
-                                          'uint8 16) 8 1 8)))
+                                          'uint8 16) 8 1 8)
+8)
+8)
                                       'int16 16)
                                              (vec-if
                                       (x16 (sca-eq
@@ -7483,7 +8021,8 @@
                                           (vec-reinterpret
                                            (slice_vectors
                                             a 0 1 8)
-                                           'uint8 16) 0 1 7))
+                                           'uint8 16) 0 1 7)
+9)
                                         (concat_vectors
                                          (slice_vectors
                                           (vec-reinterpret
@@ -7494,7 +8033,9 @@
                                           (vec-reinterpret
                                            (slice_vectors
                                             b 1 1 8)
-                                           'uint8 16) 7 1 9)))
+                                           'uint8 16) 7 1 9)
+7)
+9)
                                        'int16 16)
                                              (vec-if
                                        (x16 (sca-eq
@@ -7513,7 +8054,8 @@
                                            (vec-reinterpret
                                             (slice_vectors
                                              a 0 1 8)
-                                            'uint8 16) 0 1 6))
+                                            'uint8 16) 0 1 6)
+10)
                                          (concat_vectors
                                           (slice_vectors
                                            (vec-reinterpret
@@ -7524,7 +8066,9 @@
                                            (vec-reinterpret
                                             (slice_vectors
                                              b 1 1 8)
-                                            'uint8 16) 6 1 10)))
+                                            'uint8 16) 6 1 10)
+6)
+10)
                                         'int16 16)
                                              (vec-if
                                         (x16 (sca-eq
@@ -7543,7 +8087,8 @@
                                             (vec-reinterpret
                                              (slice_vectors
                                               a 0 1 8)
-                                             'uint8 16) 0 1 5))
+                                             'uint8 16) 0 1 5)
+11)
                                           (concat_vectors
                                            (slice_vectors
                                             (vec-reinterpret
@@ -7554,7 +8099,9 @@
                                             (vec-reinterpret
                                              (slice_vectors
                                               b 1 1 8)
-                                             'uint8 16) 5 1 11)))
+                                             'uint8 16) 5 1 11)
+5)
+11)
                                          'int16 16)
                                              (vec-if
                                          (x16 (sca-eq
@@ -7573,7 +8120,8 @@
                                              (vec-reinterpret
                                               (slice_vectors
                                                a 0 1 8)
-                                              'uint8 16) 0 1 4))
+                                              'uint8 16) 0 1 4)
+12)
                                            (concat_vectors
                                             (slice_vectors
                                              (vec-reinterpret
@@ -7584,7 +8132,9 @@
                                              (vec-reinterpret
                                               (slice_vectors
                                                b 1 1 8)
-                                              'uint8 16) 4 1 12)))
+                                              'uint8 16) 4 1 12)
+4)
+12)
                                           'int16 16)
                                              (vec-if
                                           (x16 (sca-eq
@@ -7603,7 +8153,8 @@
                                               (vec-reinterpret
                                                (slice_vectors
                                                 a 0 1 8)
-                                               'uint8 16) 0 1 3))
+                                               'uint8 16) 0 1 3)
+13)
                                             (concat_vectors
                                              (slice_vectors
                                               (vec-reinterpret
@@ -7614,7 +8165,9 @@
                                               (vec-reinterpret
                                                (slice_vectors
                                                 b 1 1 8)
-                                               'uint8 16) 3 1 13)))
+                                               'uint8 16) 3 1 13)
+3)
+13)
                                            'int16 16)
                                              (vec-if
                                            (x16 (sca-eq
@@ -7633,7 +8186,8 @@
                                                (vec-reinterpret
                                                 (slice_vectors
                                                  a 0 1 8)
-                                                'uint8 16) 0 1 2))
+                                                'uint8 16) 0 1 2)
+14)
                                              (concat_vectors
                                               (slice_vectors
                                                (vec-reinterpret
@@ -7644,7 +8198,9 @@
                                                (vec-reinterpret
                                                 (slice_vectors
                                                  b 1 1 8)
-                                                'uint8 16) 2 1 14)))
+                                                'uint8 16) 2 1 14)
+2)
+14)
                                             'int16 16)
                                              (vec-if
                                             (x16 (sca-eq
@@ -7663,7 +8219,8 @@
                                                 (vec-reinterpret
                                                  (slice_vectors
                                                   a 0 1 8)
-                                                 'uint8 16) 0 1 1))
+                                                 'uint8 16) 0 1 1)
+15)
                                               (concat_vectors
                                                (slice_vectors
                                                 (vec-reinterpret
@@ -7674,7 +8231,9 @@
                                                 (vec-reinterpret
                                                  (slice_vectors
                                                   b 1 1 8)
-                                                 'uint8 16) 1 1 15)))
+                                                 'uint8 16) 1 1 15)
+1)
+15)
                                              'int16 16)
                                              (vec-if
                                              (x16 (sca-eq
@@ -7699,14 +8258,17 @@
                     (slice_vectors
                      a 0 1 8)
                     'uint8 16) 14 1 2)
-                  (x14 (uint8_t (bv 0 8))))
+                  (x14 (uint8_t (bv 0 8)))
+2)
                  (concat_vectors
                   (x14 (uint8_t (bv 0 8)))
                   (slice_vectors
                    (vec-reinterpret
                     (slice_vectors
                      a 1 1 8)
-                    'uint8 16) 14 1 2)))
+                    'uint8 16) 14 1 2)
+14)
+2)
                 'uint16 16)
                                              (vec-if
                 (x16 (sca-eq
@@ -7721,14 +8283,17 @@
                      (slice_vectors
                       a 0 1 8)
                      'uint8 16) 13 1 3)
-                   (x13 (uint8_t (bv 0 8))))
+                   (x13 (uint8_t (bv 0 8)))
+3)
                   (concat_vectors
                    (x13 (uint8_t (bv 0 8)))
                    (slice_vectors
                     (vec-reinterpret
                      (slice_vectors
                       a 1 1 8)
-                     'uint8 16) 13 1 3)))
+                     'uint8 16) 13 1 3)
+13)
+3)
                  'uint16 16)
                                              (vec-if
                  (x16 (sca-eq
@@ -7743,14 +8308,17 @@
                       (slice_vectors
                        a 0 1 8)
                       'uint8 16) 12 1 4)
-                    (x12 (uint8_t (bv 0 8))))
+                    (x12 (uint8_t (bv 0 8)))
+4)
                    (concat_vectors
                     (x12 (uint8_t (bv 0 8)))
                     (slice_vectors
                      (vec-reinterpret
                       (slice_vectors
                        a 1 1 8)
-                      'uint8 16) 12 1 4)))
+                      'uint8 16) 12 1 4)
+12)
+4)
                   'uint16 16)
                                              (vec-if
                   (x16 (sca-eq
@@ -7765,14 +8333,17 @@
                        (slice_vectors
                         a 0 1 8)
                        'uint8 16) 11 1 5)
-                     (x11 (uint8_t (bv 0 8))))
+                     (x11 (uint8_t (bv 0 8)))
+5)
                     (concat_vectors
                      (x11 (uint8_t (bv 0 8)))
                      (slice_vectors
                       (vec-reinterpret
                        (slice_vectors
                         a 1 1 8)
-                       'uint8 16) 11 1 5)))
+                       'uint8 16) 11 1 5)
+11)
+5)
                    'uint16 16)
                                              (vec-if
                    (x16 (sca-eq
@@ -7787,14 +8358,17 @@
                         (slice_vectors
                          a 0 1 8)
                         'uint8 16) 10 1 6)
-                      (x10 (uint8_t (bv 0 8))))
+                      (x10 (uint8_t (bv 0 8)))
+6)
                      (concat_vectors
                       (x10 (uint8_t (bv 0 8)))
                       (slice_vectors
                        (vec-reinterpret
                         (slice_vectors
                          a 1 1 8)
-                        'uint8 16) 10 1 6)))
+                        'uint8 16) 10 1 6)
+10)
+6)
                     'uint16 16)
                                              (vec-if
                     (x16 (sca-eq
@@ -7809,14 +8383,17 @@
                          (slice_vectors
                           a 0 1 8)
                          'uint8 16) 9 1 7)
-                       (x9 (uint8_t (bv 0 8))))
+                       (x9 (uint8_t (bv 0 8)))
+7)
                       (concat_vectors
                        (x9 (uint8_t (bv 0 8)))
                        (slice_vectors
                         (vec-reinterpret
                          (slice_vectors
                           a 1 1 8)
-                         'uint8 16) 9 1 7)))
+                         'uint8 16) 9 1 7)
+9)
+7)
                      'uint16 16)
                                              (vec-if
                      (x16 (sca-eq
@@ -7831,14 +8408,17 @@
                           (slice_vectors
                            a 0 1 8)
                           'uint8 16) 8 1 8)
-                        (x8 (uint8_t (bv 0 8))))
+                        (x8 (uint8_t (bv 0 8)))
+8)
                        (concat_vectors
                         (x8 (uint8_t (bv 0 8)))
                         (slice_vectors
                          (vec-reinterpret
                           (slice_vectors
                            a 1 1 8)
-                          'uint8 16) 8 1 8)))
+                          'uint8 16) 8 1 8)
+8)
+8)
                       'uint16 16)
                                              (vec-if
                       (x16 (sca-eq
@@ -7853,14 +8433,17 @@
                            (slice_vectors
                             a 0 1 8)
                            'uint8 16) 7 1 9)
-                         (x7 (uint8_t (bv 0 8))))
+                         (x7 (uint8_t (bv 0 8)))
+9)
                         (concat_vectors
                          (x7 (uint8_t (bv 0 8)))
                          (slice_vectors
                           (vec-reinterpret
                            (slice_vectors
                             a 1 1 8)
-                           'uint8 16) 7 1 9)))
+                           'uint8 16) 7 1 9)
+7)
+9)
                        'uint16 16)
                                              (vec-if
                        (x16 (sca-eq
@@ -7875,14 +8458,17 @@
                             (slice_vectors
                              a 0 1 8)
                             'uint8 16) 6 1 10)
-                          (x6 (uint8_t (bv 0 8))))
+                          (x6 (uint8_t (bv 0 8)))
+10)
                          (concat_vectors
                           (x6 (uint8_t (bv 0 8)))
                           (slice_vectors
                            (vec-reinterpret
                             (slice_vectors
                              a 1 1 8)
-                            'uint8 16) 6 1 10)))
+                            'uint8 16) 6 1 10)
+6)
+10)
                         'uint16 16)
                                              (vec-if
                         (x16 (sca-eq
@@ -7897,14 +8483,17 @@
                              (slice_vectors
                               a 0 1 8)
                              'uint8 16) 5 1 11)
-                           (x5 (uint8_t (bv 0 8))))
+                           (x5 (uint8_t (bv 0 8)))
+11)
                           (concat_vectors
                            (x5 (uint8_t (bv 0 8)))
                            (slice_vectors
                             (vec-reinterpret
                              (slice_vectors
                               a 1 1 8)
-                             'uint8 16) 5 1 11)))
+                             'uint8 16) 5 1 11)
+5)
+11)
                          'uint16 16)
                                              (vec-if
                          (x16 (sca-eq
@@ -7919,14 +8508,17 @@
                               (slice_vectors
                                a 0 1 8)
                               'uint8 16) 4 1 12)
-                            (x4 (uint8_t (bv 0 8))))
+                            (x4 (uint8_t (bv 0 8)))
+12)
                            (concat_vectors
                             (x4 (uint8_t (bv 0 8)))
                             (slice_vectors
                              (vec-reinterpret
                               (slice_vectors
                                a 1 1 8)
-                              'uint8 16) 4 1 12)))
+                              'uint8 16) 4 1 12)
+4)
+12)
                           'uint16 16)
                                              (vec-if
                           (x16 (sca-eq
@@ -7941,14 +8533,17 @@
                                (slice_vectors
                                 a 0 1 8)
                                'uint8 16) 3 1 13)
-                             (x3 (uint8_t (bv 0 8))))
+                             (x3 (uint8_t (bv 0 8)))
+13)
                             (concat_vectors
                              (x3 (uint8_t (bv 0 8)))
                              (slice_vectors
                               (vec-reinterpret
                                (slice_vectors
                                 a 1 1 8)
-                               'uint8 16) 3 1 13)))
+                               'uint8 16) 3 1 13)
+3)
+13)
                            'uint16 16)
                                              (vec-if
                            (x16 (sca-eq
@@ -7963,14 +8558,17 @@
                                 (slice_vectors
                                  a 0 1 8)
                                 'uint8 16) 2 1 14)
-                              (x2 (uint8_t (bv 0 8))))
+                              (x2 (uint8_t (bv 0 8)))
+14)
                              (concat_vectors
                               (x2 (uint8_t (bv 0 8)))
                               (slice_vectors
                                (vec-reinterpret
                                 (slice_vectors
                                  a 1 1 8)
-                                'uint8 16) 2 1 14)))
+                                'uint8 16) 2 1 14)
+2)
+14)
                             'uint16 16)
                                              (vec-if
                             (x16 (sca-eq
@@ -7985,14 +8583,17 @@
                                  (slice_vectors
                                   a 0 1 8)
                                  'uint8 16) 1 1 15)
-                               (uint8_t (bv 0 8)))
+                               (uint8_t (bv 0 8))
+15)
                               (concat_vectors
                                (uint8_t (bv 0 8))
                                (slice_vectors
                                 (vec-reinterpret
                                  (slice_vectors
                                   a 1 1 8)
-                                 'uint8 16) 1 1 15)))
+                                 'uint8 16) 1 1 15)
+1)
+15)
                              'uint16 16)
                                              (vec-if
                              (x16 (sca-eq
@@ -8006,13 +8607,16 @@
                                  (slice_vectors
                                   a 0 1 8)
                                  'uint8 16)
-                                (x0 (uint8_t (bv 0 8))))
+                                (x0 (uint8_t (bv 0 8)))
+16)
                                (concat_vectors
                                 (x0 (uint8_t (bv 0 8)))
                                 (vec-reinterpret
                                  (slice_vectors
                                   a 1 1 8)
-                                 'uint8 16)))
+                                 'uint8 16)
+0)
+16)
                               'uint16 16)
                                              (vec-if
                               (x16 (sca-eq
@@ -8031,7 +8635,8 @@
                                   (vec-reinterpret
                                    (slice_vectors
                                     a 0 1 8)
-                                   'uint8 16) 0 1 15))
+                                   'uint8 16) 0 1 15)
+1)
                                 (concat_vectors
                                  (slice_vectors
                                   (vec-reinterpret
@@ -8042,7 +8647,9 @@
                                   (vec-reinterpret
                                    (slice_vectors
                                     b 1 1 8)
-                                   'uint8 16) 15 1 1)))
+                                   'uint8 16) 15 1 1)
+15)
+1)
                                'uint16 16)
                                              (vec-if
                                (x16 (sca-eq
@@ -8061,7 +8668,8 @@
                                    (vec-reinterpret
                                     (slice_vectors
                                      a 0 1 8)
-                                    'uint8 16) 0 1 14))
+                                    'uint8 16) 0 1 14)
+2)
                                  (concat_vectors
                                   (slice_vectors
                                    (vec-reinterpret
@@ -8072,7 +8680,9 @@
                                    (vec-reinterpret
                                     (slice_vectors
                                      b 1 1 8)
-                                    'uint8 16) 14 1 2)))
+                                    'uint8 16) 14 1 2)
+14)
+2)
                                 'uint16 16)
                                              (vec-if
                                 (x16 (sca-eq
@@ -8091,7 +8701,8 @@
                                     (vec-reinterpret
                                      (slice_vectors
                                       a 0 1 8)
-                                     'uint8 16) 0 1 13))
+                                     'uint8 16) 0 1 13)
+3)
                                   (concat_vectors
                                    (slice_vectors
                                     (vec-reinterpret
@@ -8102,7 +8713,9 @@
                                     (vec-reinterpret
                                      (slice_vectors
                                       b 1 1 8)
-                                     'uint8 16) 13 1 3)))
+                                     'uint8 16) 13 1 3)
+13)
+3)
                                  'uint16 16)
                                              (vec-if
                                  (x16 (sca-eq
@@ -8121,7 +8734,8 @@
                                      (vec-reinterpret
                                       (slice_vectors
                                        a 0 1 8)
-                                      'uint8 16) 0 1 12))
+                                      'uint8 16) 0 1 12)
+4)
                                    (concat_vectors
                                     (slice_vectors
                                      (vec-reinterpret
@@ -8132,7 +8746,9 @@
                                      (vec-reinterpret
                                       (slice_vectors
                                        b 1 1 8)
-                                      'uint8 16) 12 1 4)))
+                                      'uint8 16) 12 1 4)
+12)
+4)
                                   'uint16 16)
                                              (vec-if
                                   (x16 (sca-eq
@@ -8151,7 +8767,8 @@
                                       (vec-reinterpret
                                        (slice_vectors
                                         a 0 1 8)
-                                       'uint8 16) 0 1 11))
+                                       'uint8 16) 0 1 11)
+5)
                                     (concat_vectors
                                      (slice_vectors
                                       (vec-reinterpret
@@ -8162,7 +8779,9 @@
                                       (vec-reinterpret
                                        (slice_vectors
                                         b 1 1 8)
-                                       'uint8 16) 11 1 5)))
+                                       'uint8 16) 11 1 5)
+11)
+5)
                                    'uint16 16)
                                              (vec-if
                                    (x16 (sca-eq
@@ -8181,7 +8800,8 @@
                                        (vec-reinterpret
                                         (slice_vectors
                                          a 0 1 8)
-                                        'uint8 16) 0 1 10))
+                                        'uint8 16) 0 1 10)
+6)
                                      (concat_vectors
                                       (slice_vectors
                                        (vec-reinterpret
@@ -8192,7 +8812,9 @@
                                        (vec-reinterpret
                                         (slice_vectors
                                          b 1 1 8)
-                                        'uint8 16) 10 1 6)))
+                                        'uint8 16) 10 1 6)
+10)
+6)
                                     'uint16 16)
                                              (vec-if
                                     (x16 (sca-eq
@@ -8211,7 +8833,8 @@
                                         (vec-reinterpret
                                          (slice_vectors
                                           a 0 1 8)
-                                         'uint8 16) 0 1 9))
+                                         'uint8 16) 0 1 9)
+7)
                                       (concat_vectors
                                        (slice_vectors
                                         (vec-reinterpret
@@ -8222,7 +8845,9 @@
                                         (vec-reinterpret
                                          (slice_vectors
                                           b 1 1 8)
-                                         'uint8 16) 9 1 7)))
+                                         'uint8 16) 9 1 7)
+9)
+7)
                                      'uint16 16)
                                              (vec-if
                                      (x16 (sca-eq
@@ -8241,7 +8866,8 @@
                                          (vec-reinterpret
                                           (slice_vectors
                                            a 0 1 8)
-                                          'uint8 16) 0 1 8))
+                                          'uint8 16) 0 1 8)
+8)
                                        (concat_vectors
                                         (slice_vectors
                                          (vec-reinterpret
@@ -8252,7 +8878,9 @@
                                          (vec-reinterpret
                                           (slice_vectors
                                            b 1 1 8)
-                                          'uint8 16) 8 1 8)))
+                                          'uint8 16) 8 1 8)
+8)
+8)
                                       'uint16 16)
                                              (vec-if
                                       (x16 (sca-eq
@@ -8271,7 +8899,8 @@
                                           (vec-reinterpret
                                            (slice_vectors
                                             a 0 1 8)
-                                           'uint8 16) 0 1 7))
+                                           'uint8 16) 0 1 7)
+9)
                                         (concat_vectors
                                          (slice_vectors
                                           (vec-reinterpret
@@ -8282,7 +8911,9 @@
                                           (vec-reinterpret
                                            (slice_vectors
                                             b 1 1 8)
-                                           'uint8 16) 7 1 9)))
+                                           'uint8 16) 7 1 9)
+7)
+9)
                                        'uint16 16)
                                              (vec-if
                                        (x16 (sca-eq
@@ -8301,7 +8932,8 @@
                                            (vec-reinterpret
                                             (slice_vectors
                                              a 0 1 8)
-                                            'uint8 16) 0 1 6))
+                                            'uint8 16) 0 1 6)
+10)
                                          (concat_vectors
                                           (slice_vectors
                                            (vec-reinterpret
@@ -8312,7 +8944,9 @@
                                            (vec-reinterpret
                                             (slice_vectors
                                              b 1 1 8)
-                                            'uint8 16) 6 1 10)))
+                                            'uint8 16) 6 1 10)
+6)
+10)
                                         'uint16 16)
                                              (vec-if
                                         (x16 (sca-eq
@@ -8331,7 +8965,8 @@
                                             (vec-reinterpret
                                              (slice_vectors
                                               a 0 1 8)
-                                             'uint8 16) 0 1 5))
+                                             'uint8 16) 0 1 5)
+11)
                                           (concat_vectors
                                            (slice_vectors
                                             (vec-reinterpret
@@ -8342,7 +8977,9 @@
                                             (vec-reinterpret
                                              (slice_vectors
                                               b 1 1 8)
-                                             'uint8 16) 5 1 11)))
+                                             'uint8 16) 5 1 11)
+5)
+11)
                                          'uint16 16)
                                              (vec-if
                                          (x16 (sca-eq
@@ -8361,7 +8998,8 @@
                                              (vec-reinterpret
                                               (slice_vectors
                                                a 0 1 8)
-                                              'uint8 16) 0 1 4))
+                                              'uint8 16) 0 1 4)
+12)
                                            (concat_vectors
                                             (slice_vectors
                                              (vec-reinterpret
@@ -8372,7 +9010,9 @@
                                              (vec-reinterpret
                                               (slice_vectors
                                                b 1 1 8)
-                                              'uint8 16) 4 1 12)))
+                                              'uint8 16) 4 1 12)
+4)
+12)
                                           'uint16 16)
                                              (vec-if
                                           (x16 (sca-eq
@@ -8391,7 +9031,8 @@
                                               (vec-reinterpret
                                                (slice_vectors
                                                 a 0 1 8)
-                                               'uint8 16) 0 1 3))
+                                               'uint8 16) 0 1 3)
+13)
                                             (concat_vectors
                                              (slice_vectors
                                               (vec-reinterpret
@@ -8402,7 +9043,9 @@
                                               (vec-reinterpret
                                                (slice_vectors
                                                 b 1 1 8)
-                                               'uint8 16) 3 1 13)))
+                                               'uint8 16) 3 1 13)
+3)
+13)
                                            'uint16 16)
                                              (vec-if
                                            (x16 (sca-eq
@@ -8421,7 +9064,8 @@
                                                (vec-reinterpret
                                                 (slice_vectors
                                                  a 0 1 8)
-                                                'uint8 16) 0 1 2))
+                                                'uint8 16) 0 1 2)
+14)
                                              (concat_vectors
                                               (slice_vectors
                                                (vec-reinterpret
@@ -8432,7 +9076,9 @@
                                                (vec-reinterpret
                                                 (slice_vectors
                                                  b 1 1 8)
-                                                'uint8 16) 2 1 14)))
+                                                'uint8 16) 2 1 14)
+2)
+14)
                                             'uint16 16)
                                              (vec-if
                                             (x16 (sca-eq
@@ -8451,7 +9097,8 @@
                                                 (vec-reinterpret
                                                  (slice_vectors
                                                   a 0 1 8)
-                                                 'uint8 16) 0 1 1))
+                                                 'uint8 16) 0 1 1)
+15)
                                               (concat_vectors
                                                (slice_vectors
                                                 (vec-reinterpret
@@ -8462,7 +9109,9 @@
                                                 (vec-reinterpret
                                                  (slice_vectors
                                                   b 1 1 8)
-                                                 'uint8 16) 1 1 15)))
+                                                 'uint8 16) 1 1 15)
+1)
+15)
                                              'uint16 16)
                                              (vec-if
                                              (x16 (sca-eq
@@ -8487,14 +9136,17 @@
                     (slice_vectors
                      a 0 1 4)
                     'uint8 16) 14 1 2)
-                  (x14 (uint8_t (bv 0 8))))
+                  (x14 (uint8_t (bv 0 8)))
+2)
                  (concat_vectors
                   (x14 (uint8_t (bv 0 8)))
                   (slice_vectors
                    (vec-reinterpret
                     (slice_vectors
                      a 1 1 4)
-                    'uint8 16) 14 1 2)))
+                    'uint8 16) 14 1 2)
+14)
+2)
                 'int32 8)
                                              (vec-if
                 (x8 (sca-eq
@@ -8509,14 +9161,17 @@
                      (slice_vectors
                       a 0 1 4)
                      'uint8 16) 13 1 3)
-                   (x13 (uint8_t (bv 0 8))))
+                   (x13 (uint8_t (bv 0 8)))
+3)
                   (concat_vectors
                    (x13 (uint8_t (bv 0 8)))
                    (slice_vectors
                     (vec-reinterpret
                      (slice_vectors
                       a 1 1 4)
-                     'uint8 16) 13 1 3)))
+                     'uint8 16) 13 1 3)
+13)
+3)
                  'int32 8)
                                              (vec-if
                  (x8 (sca-eq
@@ -8531,14 +9186,17 @@
                       (slice_vectors
                        a 0 1 4)
                       'uint8 16) 12 1 4)
-                    (x12 (uint8_t (bv 0 8))))
+                    (x12 (uint8_t (bv 0 8)))
+4)
                    (concat_vectors
                     (x12 (uint8_t (bv 0 8)))
                     (slice_vectors
                      (vec-reinterpret
                       (slice_vectors
                        a 1 1 4)
-                      'uint8 16) 12 1 4)))
+                      'uint8 16) 12 1 4)
+12)
+4)
                   'int32 8)
                                              (vec-if
                   (x8 (sca-eq
@@ -8553,14 +9211,17 @@
                        (slice_vectors
                         a 0 1 4)
                        'uint8 16) 11 1 5)
-                     (x11 (uint8_t (bv 0 8))))
+                     (x11 (uint8_t (bv 0 8)))
+5)
                     (concat_vectors
                      (x11 (uint8_t (bv 0 8)))
                      (slice_vectors
                       (vec-reinterpret
                        (slice_vectors
                         a 1 1 4)
-                       'uint8 16) 11 1 5)))
+                       'uint8 16) 11 1 5)
+11)
+5)
                    'int32 8)
                                              (vec-if
                    (x8 (sca-eq
@@ -8575,14 +9236,17 @@
                         (slice_vectors
                          a 0 1 4)
                         'uint8 16) 10 1 6)
-                      (x10 (uint8_t (bv 0 8))))
+                      (x10 (uint8_t (bv 0 8)))
+6)
                      (concat_vectors
                       (x10 (uint8_t (bv 0 8)))
                       (slice_vectors
                        (vec-reinterpret
                         (slice_vectors
                          a 1 1 4)
-                        'uint8 16) 10 1 6)))
+                        'uint8 16) 10 1 6)
+10)
+6)
                     'int32 8)
                                              (vec-if
                     (x8 (sca-eq
@@ -8597,14 +9261,17 @@
                          (slice_vectors
                           a 0 1 4)
                          'uint8 16) 9 1 7)
-                       (x9 (uint8_t (bv 0 8))))
+                       (x9 (uint8_t (bv 0 8)))
+7)
                       (concat_vectors
                        (x9 (uint8_t (bv 0 8)))
                        (slice_vectors
                         (vec-reinterpret
                          (slice_vectors
                           a 1 1 4)
-                         'uint8 16) 9 1 7)))
+                         'uint8 16) 9 1 7)
+9)
+7)
                      'int32 8)
                                              (vec-if
                      (x8 (sca-eq
@@ -8619,14 +9286,17 @@
                           (slice_vectors
                            a 0 1 4)
                           'uint8 16) 8 1 8)
-                        (x8 (uint8_t (bv 0 8))))
+                        (x8 (uint8_t (bv 0 8)))
+8)
                        (concat_vectors
                         (x8 (uint8_t (bv 0 8)))
                         (slice_vectors
                          (vec-reinterpret
                           (slice_vectors
                            a 1 1 4)
-                          'uint8 16) 8 1 8)))
+                          'uint8 16) 8 1 8)
+8)
+8)
                       'int32 8)
                                              (vec-if
                       (x8 (sca-eq
@@ -8641,14 +9311,17 @@
                            (slice_vectors
                             a 0 1 4)
                            'uint8 16) 7 1 9)
-                         (x7 (uint8_t (bv 0 8))))
+                         (x7 (uint8_t (bv 0 8)))
+9)
                         (concat_vectors
                          (x7 (uint8_t (bv 0 8)))
                          (slice_vectors
                           (vec-reinterpret
                            (slice_vectors
                             a 1 1 4)
-                           'uint8 16) 7 1 9)))
+                           'uint8 16) 7 1 9)
+7)
+9)
                        'int32 8)
                                              (vec-if
                        (x8 (sca-eq
@@ -8663,14 +9336,17 @@
                             (slice_vectors
                              a 0 1 4)
                             'uint8 16) 6 1 10)
-                          (x6 (uint8_t (bv 0 8))))
+                          (x6 (uint8_t (bv 0 8)))
+10)
                          (concat_vectors
                           (x6 (uint8_t (bv 0 8)))
                           (slice_vectors
                            (vec-reinterpret
                             (slice_vectors
                              a 1 1 4)
-                            'uint8 16) 6 1 10)))
+                            'uint8 16) 6 1 10)
+6)
+10)
                         'int32 8)
                                              (vec-if
                         (x8 (sca-eq
@@ -8685,14 +9361,17 @@
                              (slice_vectors
                               a 0 1 4)
                              'uint8 16) 5 1 11)
-                           (x5 (uint8_t (bv 0 8))))
+                           (x5 (uint8_t (bv 0 8)))
+11)
                           (concat_vectors
                            (x5 (uint8_t (bv 0 8)))
                            (slice_vectors
                             (vec-reinterpret
                              (slice_vectors
                               a 1 1 4)
-                             'uint8 16) 5 1 11)))
+                             'uint8 16) 5 1 11)
+5)
+11)
                          'int32 8)
                                              (vec-if
                          (x8 (sca-eq
@@ -8707,14 +9386,17 @@
                               (slice_vectors
                                a 0 1 4)
                               'uint8 16) 4 1 12)
-                            (x4 (uint8_t (bv 0 8))))
+                            (x4 (uint8_t (bv 0 8)))
+12)
                            (concat_vectors
                             (x4 (uint8_t (bv 0 8)))
                             (slice_vectors
                              (vec-reinterpret
                               (slice_vectors
                                a 1 1 4)
-                              'uint8 16) 4 1 12)))
+                              'uint8 16) 4 1 12)
+4)
+12)
                           'int32 8)
                                              (vec-if
                           (x8 (sca-eq
@@ -8729,14 +9411,17 @@
                                (slice_vectors
                                 a 0 1 4)
                                'uint8 16) 3 1 13)
-                             (x3 (uint8_t (bv 0 8))))
+                             (x3 (uint8_t (bv 0 8)))
+13)
                             (concat_vectors
                              (x3 (uint8_t (bv 0 8)))
                              (slice_vectors
                               (vec-reinterpret
                                (slice_vectors
                                 a 1 1 4)
-                               'uint8 16) 3 1 13)))
+                               'uint8 16) 3 1 13)
+3)
+13)
                            'int32 8)
                                              (vec-if
                            (x8 (sca-eq
@@ -8751,14 +9436,17 @@
                                 (slice_vectors
                                  a 0 1 4)
                                 'uint8 16) 2 1 14)
-                              (x2 (uint8_t (bv 0 8))))
+                              (x2 (uint8_t (bv 0 8)))
+14)
                              (concat_vectors
                               (x2 (uint8_t (bv 0 8)))
                               (slice_vectors
                                (vec-reinterpret
                                 (slice_vectors
                                  a 1 1 4)
-                                'uint8 16) 2 1 14)))
+                                'uint8 16) 2 1 14)
+2)
+14)
                             'int32 8)
                                              (vec-if
                             (x8 (sca-eq
@@ -8773,14 +9461,17 @@
                                  (slice_vectors
                                   a 0 1 4)
                                  'uint8 16) 1 1 15)
-                               (uint8_t (bv 0 8)))
+                               (uint8_t (bv 0 8))
+15)
                               (concat_vectors
                                (uint8_t (bv 0 8))
                                (slice_vectors
                                 (vec-reinterpret
                                  (slice_vectors
                                   a 1 1 4)
-                                 'uint8 16) 1 1 15)))
+                                 'uint8 16) 1 1 15)
+1)
+15)
                              'int32 8)
                                              (vec-if
                              (x8 (sca-eq
@@ -8794,13 +9485,16 @@
                                  (slice_vectors
                                   a 0 1 4)
                                  'uint8 16)
-                                (x0 (uint8_t (bv 0 8))))
+                                (x0 (uint8_t (bv 0 8)))
+16)
                                (concat_vectors
                                 (x0 (uint8_t (bv 0 8)))
                                 (vec-reinterpret
                                  (slice_vectors
                                   a 1 1 4)
-                                 'uint8 16)))
+                                 'uint8 16)
+0)
+16)
                               'int32 8)
                                              (vec-if
                               (x8 (sca-eq
@@ -8819,7 +9513,8 @@
                                   (vec-reinterpret
                                    (slice_vectors
                                     a 0 1 4)
-                                   'uint8 16) 0 1 15))
+                                   'uint8 16) 0 1 15)
+1)
                                 (concat_vectors
                                  (slice_vectors
                                   (vec-reinterpret
@@ -8830,7 +9525,9 @@
                                   (vec-reinterpret
                                    (slice_vectors
                                     b 1 1 4)
-                                   'uint8 16) 15 1 1)))
+                                   'uint8 16) 15 1 1)
+15)
+1)
                                'int32 8)
                                              (vec-if
                                (x8 (sca-eq
@@ -8849,7 +9546,8 @@
                                    (vec-reinterpret
                                     (slice_vectors
                                      a 0 1 4)
-                                    'uint8 16) 0 1 14))
+                                    'uint8 16) 0 1 14)
+2)
                                  (concat_vectors
                                   (slice_vectors
                                    (vec-reinterpret
@@ -8860,7 +9558,9 @@
                                    (vec-reinterpret
                                     (slice_vectors
                                      b 1 1 4)
-                                    'uint8 16) 14 1 2)))
+                                    'uint8 16) 14 1 2)
+14)
+2)
                                 'int32 8)
                                              (vec-if
                                 (x8 (sca-eq
@@ -8879,7 +9579,8 @@
                                     (vec-reinterpret
                                      (slice_vectors
                                       a 0 1 4)
-                                     'uint8 16) 0 1 13))
+                                     'uint8 16) 0 1 13)
+3)
                                   (concat_vectors
                                    (slice_vectors
                                     (vec-reinterpret
@@ -8890,7 +9591,9 @@
                                     (vec-reinterpret
                                      (slice_vectors
                                       b 1 1 4)
-                                     'uint8 16) 13 1 3)))
+                                     'uint8 16) 13 1 3)
+13)
+3)
                                  'int32 8)
                                              (vec-if
                                  (x8 (sca-eq
@@ -8909,7 +9612,8 @@
                                      (vec-reinterpret
                                       (slice_vectors
                                        a 0 1 4)
-                                      'uint8 16) 0 1 12))
+                                      'uint8 16) 0 1 12)
+4)
                                    (concat_vectors
                                     (slice_vectors
                                      (vec-reinterpret
@@ -8920,7 +9624,9 @@
                                      (vec-reinterpret
                                       (slice_vectors
                                        b 1 1 4)
-                                      'uint8 16) 12 1 4)))
+                                      'uint8 16) 12 1 4)
+12)
+4)
                                   'int32 8)
                                              (vec-if
                                   (x8 (sca-eq
@@ -8939,7 +9645,8 @@
                                       (vec-reinterpret
                                        (slice_vectors
                                         a 0 1 4)
-                                       'uint8 16) 0 1 11))
+                                       'uint8 16) 0 1 11)
+5)
                                     (concat_vectors
                                      (slice_vectors
                                       (vec-reinterpret
@@ -8950,7 +9657,9 @@
                                       (vec-reinterpret
                                        (slice_vectors
                                         b 1 1 4)
-                                       'uint8 16) 11 1 5)))
+                                       'uint8 16) 11 1 5)
+11)
+5)
                                    'int32 8)
                                              (vec-if
                                    (x8 (sca-eq
@@ -8969,7 +9678,8 @@
                                        (vec-reinterpret
                                         (slice_vectors
                                          a 0 1 4)
-                                        'uint8 16) 0 1 10))
+                                        'uint8 16) 0 1 10)
+6)
                                      (concat_vectors
                                       (slice_vectors
                                        (vec-reinterpret
@@ -8980,7 +9690,9 @@
                                        (vec-reinterpret
                                         (slice_vectors
                                          b 1 1 4)
-                                        'uint8 16) 10 1 6)))
+                                        'uint8 16) 10 1 6)
+10)
+6)
                                     'int32 8)
                                              (vec-if
                                     (x8 (sca-eq
@@ -8999,7 +9711,8 @@
                                         (vec-reinterpret
                                          (slice_vectors
                                           a 0 1 4)
-                                         'uint8 16) 0 1 9))
+                                         'uint8 16) 0 1 9)
+7)
                                       (concat_vectors
                                        (slice_vectors
                                         (vec-reinterpret
@@ -9010,7 +9723,9 @@
                                         (vec-reinterpret
                                          (slice_vectors
                                           b 1 1 4)
-                                         'uint8 16) 9 1 7)))
+                                         'uint8 16) 9 1 7)
+9)
+7)
                                      'int32 8)
                                              (vec-if
                                      (x8 (sca-eq
@@ -9029,7 +9744,8 @@
                                          (vec-reinterpret
                                           (slice_vectors
                                            a 0 1 4)
-                                          'uint8 16) 0 1 8))
+                                          'uint8 16) 0 1 8)
+8)
                                        (concat_vectors
                                         (slice_vectors
                                          (vec-reinterpret
@@ -9040,7 +9756,9 @@
                                          (vec-reinterpret
                                           (slice_vectors
                                            b 1 1 4)
-                                          'uint8 16) 8 1 8)))
+                                          'uint8 16) 8 1 8)
+8)
+8)
                                       'int32 8)
                                              (vec-if
                                       (x8 (sca-eq
@@ -9059,7 +9777,8 @@
                                           (vec-reinterpret
                                            (slice_vectors
                                             a 0 1 4)
-                                           'uint8 16) 0 1 7))
+                                           'uint8 16) 0 1 7)
+9)
                                         (concat_vectors
                                          (slice_vectors
                                           (vec-reinterpret
@@ -9070,7 +9789,9 @@
                                           (vec-reinterpret
                                            (slice_vectors
                                             b 1 1 4)
-                                           'uint8 16) 7 1 9)))
+                                           'uint8 16) 7 1 9)
+7)
+9)
                                        'int32 8)
                                              (vec-if
                                        (x8 (sca-eq
@@ -9089,7 +9810,8 @@
                                            (vec-reinterpret
                                             (slice_vectors
                                              a 0 1 4)
-                                            'uint8 16) 0 1 6))
+                                            'uint8 16) 0 1 6)
+10)
                                          (concat_vectors
                                           (slice_vectors
                                            (vec-reinterpret
@@ -9100,7 +9822,9 @@
                                            (vec-reinterpret
                                             (slice_vectors
                                              b 1 1 4)
-                                            'uint8 16) 6 1 10)))
+                                            'uint8 16) 6 1 10)
+6)
+10)
                                         'int32 8)
                                              (vec-if
                                         (x8 (sca-eq
@@ -9119,7 +9843,8 @@
                                             (vec-reinterpret
                                              (slice_vectors
                                               a 0 1 4)
-                                             'uint8 16) 0 1 5))
+                                             'uint8 16) 0 1 5)
+11)
                                           (concat_vectors
                                            (slice_vectors
                                             (vec-reinterpret
@@ -9130,7 +9855,9 @@
                                             (vec-reinterpret
                                              (slice_vectors
                                               b 1 1 4)
-                                             'uint8 16) 5 1 11)))
+                                             'uint8 16) 5 1 11)
+5)
+11)
                                          'int32 8)
                                              (vec-if
                                          (x8 (sca-eq
@@ -9149,7 +9876,8 @@
                                              (vec-reinterpret
                                               (slice_vectors
                                                a 0 1 4)
-                                              'uint8 16) 0 1 4))
+                                              'uint8 16) 0 1 4)
+12)
                                            (concat_vectors
                                             (slice_vectors
                                              (vec-reinterpret
@@ -9160,7 +9888,9 @@
                                              (vec-reinterpret
                                               (slice_vectors
                                                b 1 1 4)
-                                              'uint8 16) 4 1 12)))
+                                              'uint8 16) 4 1 12)
+4)
+12)
                                           'int32 8)
                                              (vec-if
                                           (x8 (sca-eq
@@ -9179,7 +9909,8 @@
                                               (vec-reinterpret
                                                (slice_vectors
                                                 a 0 1 4)
-                                               'uint8 16) 0 1 3))
+                                               'uint8 16) 0 1 3)
+13)
                                             (concat_vectors
                                              (slice_vectors
                                               (vec-reinterpret
@@ -9190,7 +9921,9 @@
                                               (vec-reinterpret
                                                (slice_vectors
                                                 b 1 1 4)
-                                               'uint8 16) 3 1 13)))
+                                               'uint8 16) 3 1 13)
+3)
+13)
                                            'int32 8)
                                              (vec-if
                                            (x8 (sca-eq
@@ -9209,7 +9942,8 @@
                                                (vec-reinterpret
                                                 (slice_vectors
                                                  a 0 1 4)
-                                                'uint8 16) 0 1 2))
+                                                'uint8 16) 0 1 2)
+14)
                                              (concat_vectors
                                               (slice_vectors
                                                (vec-reinterpret
@@ -9220,7 +9954,9 @@
                                                (vec-reinterpret
                                                 (slice_vectors
                                                  b 1 1 4)
-                                                'uint8 16) 2 1 14)))
+                                                'uint8 16) 2 1 14)
+2)
+14)
                                             'int32 8)
                                              (vec-if
                                             (x8 (sca-eq
@@ -9239,7 +9975,8 @@
                                                 (vec-reinterpret
                                                  (slice_vectors
                                                   a 0 1 4)
-                                                 'uint8 16) 0 1 1))
+                                                 'uint8 16) 0 1 1)
+15)
                                               (concat_vectors
                                                (slice_vectors
                                                 (vec-reinterpret
@@ -9250,7 +9987,9 @@
                                                 (vec-reinterpret
                                                  (slice_vectors
                                                   b 1 1 4)
-                                                 'uint8 16) 1 1 15)))
+                                                 'uint8 16) 1 1 15)
+1)
+15)
                                              'int32 8)
                                              (vec-if
                                              (x8 (sca-eq
@@ -9275,14 +10014,17 @@
                     (slice_vectors
                      a 0 1 4)
                     'uint8 16) 14 1 2)
-                  (x14 (uint8_t (bv 0 8))))
+                  (x14 (uint8_t (bv 0 8)))
+2)
                  (concat_vectors
                   (x14 (uint8_t (bv 0 8)))
                   (slice_vectors
                    (vec-reinterpret
                     (slice_vectors
                      a 1 1 4)
-                    'uint8 16) 14 1 2)))
+                    'uint8 16) 14 1 2)
+14)
+2)
                 'uint32 8)
                                              (vec-if
                 (x8 (sca-eq
@@ -9297,14 +10039,17 @@
                      (slice_vectors
                       a 0 1 4)
                      'uint8 16) 13 1 3)
-                   (x13 (uint8_t (bv 0 8))))
+                   (x13 (uint8_t (bv 0 8)))
+3)
                   (concat_vectors
                    (x13 (uint8_t (bv 0 8)))
                    (slice_vectors
                     (vec-reinterpret
                      (slice_vectors
                       a 1 1 4)
-                     'uint8 16) 13 1 3)))
+                     'uint8 16) 13 1 3)
+13)
+3)
                  'uint32 8)
                                              (vec-if
                  (x8 (sca-eq
@@ -9319,14 +10064,17 @@
                       (slice_vectors
                        a 0 1 4)
                       'uint8 16) 12 1 4)
-                    (x12 (uint8_t (bv 0 8))))
+                    (x12 (uint8_t (bv 0 8)))
+4)
                    (concat_vectors
                     (x12 (uint8_t (bv 0 8)))
                     (slice_vectors
                      (vec-reinterpret
                       (slice_vectors
                        a 1 1 4)
-                      'uint8 16) 12 1 4)))
+                      'uint8 16) 12 1 4)
+12)
+4)
                   'uint32 8)
                                              (vec-if
                   (x8 (sca-eq
@@ -9341,14 +10089,17 @@
                        (slice_vectors
                         a 0 1 4)
                        'uint8 16) 11 1 5)
-                     (x11 (uint8_t (bv 0 8))))
+                     (x11 (uint8_t (bv 0 8)))
+5)
                     (concat_vectors
                      (x11 (uint8_t (bv 0 8)))
                      (slice_vectors
                       (vec-reinterpret
                        (slice_vectors
                         a 1 1 4)
-                       'uint8 16) 11 1 5)))
+                       'uint8 16) 11 1 5)
+11)
+5)
                    'uint32 8)
                                              (vec-if
                    (x8 (sca-eq
@@ -9363,14 +10114,17 @@
                         (slice_vectors
                          a 0 1 4)
                         'uint8 16) 10 1 6)
-                      (x10 (uint8_t (bv 0 8))))
+                      (x10 (uint8_t (bv 0 8)))
+6)
                      (concat_vectors
                       (x10 (uint8_t (bv 0 8)))
                       (slice_vectors
                        (vec-reinterpret
                         (slice_vectors
                          a 1 1 4)
-                        'uint8 16) 10 1 6)))
+                        'uint8 16) 10 1 6)
+10)
+6)
                     'uint32 8)
                                              (vec-if
                     (x8 (sca-eq
@@ -9385,14 +10139,17 @@
                          (slice_vectors
                           a 0 1 4)
                          'uint8 16) 9 1 7)
-                       (x9 (uint8_t (bv 0 8))))
+                       (x9 (uint8_t (bv 0 8)))
+7)
                       (concat_vectors
                        (x9 (uint8_t (bv 0 8)))
                        (slice_vectors
                         (vec-reinterpret
                          (slice_vectors
                           a 1 1 4)
-                         'uint8 16) 9 1 7)))
+                         'uint8 16) 9 1 7)
+9)
+7)
                      'uint32 8)
                                              (vec-if
                      (x8 (sca-eq
@@ -9407,14 +10164,17 @@
                           (slice_vectors
                            a 0 1 4)
                           'uint8 16) 8 1 8)
-                        (x8 (uint8_t (bv 0 8))))
+                        (x8 (uint8_t (bv 0 8)))
+8)
                        (concat_vectors
                         (x8 (uint8_t (bv 0 8)))
                         (slice_vectors
                          (vec-reinterpret
                           (slice_vectors
                            a 1 1 4)
-                          'uint8 16) 8 1 8)))
+                          'uint8 16) 8 1 8)
+8)
+8)
                       'uint32 8)
                                              (vec-if
                       (x8 (sca-eq
@@ -9429,14 +10189,17 @@
                            (slice_vectors
                             a 0 1 4)
                            'uint8 16) 7 1 9)
-                         (x7 (uint8_t (bv 0 8))))
+                         (x7 (uint8_t (bv 0 8)))
+9)
                         (concat_vectors
                          (x7 (uint8_t (bv 0 8)))
                          (slice_vectors
                           (vec-reinterpret
                            (slice_vectors
                             a 1 1 4)
-                           'uint8 16) 7 1 9)))
+                           'uint8 16) 7 1 9)
+7)
+9)
                        'uint32 8)
                                              (vec-if
                        (x8 (sca-eq
@@ -9451,14 +10214,17 @@
                             (slice_vectors
                              a 0 1 4)
                             'uint8 16) 6 1 10)
-                          (x6 (uint8_t (bv 0 8))))
+                          (x6 (uint8_t (bv 0 8)))
+10)
                          (concat_vectors
                           (x6 (uint8_t (bv 0 8)))
                           (slice_vectors
                            (vec-reinterpret
                             (slice_vectors
                              a 1 1 4)
-                            'uint8 16) 6 1 10)))
+                            'uint8 16) 6 1 10)
+6)
+10)
                         'uint32 8)
                                              (vec-if
                         (x8 (sca-eq
@@ -9473,14 +10239,17 @@
                              (slice_vectors
                               a 0 1 4)
                              'uint8 16) 5 1 11)
-                           (x5 (uint8_t (bv 0 8))))
+                           (x5 (uint8_t (bv 0 8)))
+11)
                           (concat_vectors
                            (x5 (uint8_t (bv 0 8)))
                            (slice_vectors
                             (vec-reinterpret
                              (slice_vectors
                               a 1 1 4)
-                             'uint8 16) 5 1 11)))
+                             'uint8 16) 5 1 11)
+5)
+11)
                          'uint32 8)
                                              (vec-if
                          (x8 (sca-eq
@@ -9495,14 +10264,17 @@
                               (slice_vectors
                                a 0 1 4)
                               'uint8 16) 4 1 12)
-                            (x4 (uint8_t (bv 0 8))))
+                            (x4 (uint8_t (bv 0 8)))
+12)
                            (concat_vectors
                             (x4 (uint8_t (bv 0 8)))
                             (slice_vectors
                              (vec-reinterpret
                               (slice_vectors
                                a 1 1 4)
-                              'uint8 16) 4 1 12)))
+                              'uint8 16) 4 1 12)
+4)
+12)
                           'uint32 8)
                                              (vec-if
                           (x8 (sca-eq
@@ -9517,14 +10289,17 @@
                                (slice_vectors
                                 a 0 1 4)
                                'uint8 16) 3 1 13)
-                             (x3 (uint8_t (bv 0 8))))
+                             (x3 (uint8_t (bv 0 8)))
+13)
                             (concat_vectors
                              (x3 (uint8_t (bv 0 8)))
                              (slice_vectors
                               (vec-reinterpret
                                (slice_vectors
                                 a 1 1 4)
-                               'uint8 16) 3 1 13)))
+                               'uint8 16) 3 1 13)
+3)
+13)
                            'uint32 8)
                                              (vec-if
                            (x8 (sca-eq
@@ -9539,14 +10314,17 @@
                                 (slice_vectors
                                  a 0 1 4)
                                 'uint8 16) 2 1 14)
-                              (x2 (uint8_t (bv 0 8))))
+                              (x2 (uint8_t (bv 0 8)))
+14)
                              (concat_vectors
                               (x2 (uint8_t (bv 0 8)))
                               (slice_vectors
                                (vec-reinterpret
                                 (slice_vectors
                                  a 1 1 4)
-                                'uint8 16) 2 1 14)))
+                                'uint8 16) 2 1 14)
+2)
+14)
                             'uint32 8)
                                              (vec-if
                             (x8 (sca-eq
@@ -9561,14 +10339,17 @@
                                  (slice_vectors
                                   a 0 1 4)
                                  'uint8 16) 1 1 15)
-                               (uint8_t (bv 0 8)))
+                               (uint8_t (bv 0 8))
+15)
                               (concat_vectors
                                (uint8_t (bv 0 8))
                                (slice_vectors
                                 (vec-reinterpret
                                  (slice_vectors
                                   a 1 1 4)
-                                 'uint8 16) 1 1 15)))
+                                 'uint8 16) 1 1 15)
+1)
+15)
                              'uint32 8)
                                              (vec-if
                              (x8 (sca-eq
@@ -9582,13 +10363,16 @@
                                  (slice_vectors
                                   a 0 1 4)
                                  'uint8 16)
-                                (x0 (uint8_t (bv 0 8))))
+                                (x0 (uint8_t (bv 0 8)))
+16)
                                (concat_vectors
                                 (x0 (uint8_t (bv 0 8)))
                                 (vec-reinterpret
                                  (slice_vectors
                                   a 1 1 4)
-                                 'uint8 16)))
+                                 'uint8 16)
+0)
+16)
                               'uint32 8)
                                              (vec-if
                               (x8 (sca-eq
@@ -9607,7 +10391,8 @@
                                   (vec-reinterpret
                                    (slice_vectors
                                     a 0 1 4)
-                                   'uint8 16) 0 1 15))
+                                   'uint8 16) 0 1 15)
+1)
                                 (concat_vectors
                                  (slice_vectors
                                   (vec-reinterpret
@@ -9618,7 +10403,9 @@
                                   (vec-reinterpret
                                    (slice_vectors
                                     b 1 1 4)
-                                   'uint8 16) 15 1 1)))
+                                   'uint8 16) 15 1 1)
+15)
+1)
                                'uint32 8)
                                              (vec-if
                                (x8 (sca-eq
@@ -9637,7 +10424,8 @@
                                    (vec-reinterpret
                                     (slice_vectors
                                      a 0 1 4)
-                                    'uint8 16) 0 1 14))
+                                    'uint8 16) 0 1 14)
+2)
                                  (concat_vectors
                                   (slice_vectors
                                    (vec-reinterpret
@@ -9648,7 +10436,9 @@
                                    (vec-reinterpret
                                     (slice_vectors
                                      b 1 1 4)
-                                    'uint8 16) 14 1 2)))
+                                    'uint8 16) 14 1 2)
+14)
+2)
                                 'uint32 8)
                                              (vec-if
                                 (x8 (sca-eq
@@ -9667,7 +10457,8 @@
                                     (vec-reinterpret
                                      (slice_vectors
                                       a 0 1 4)
-                                     'uint8 16) 0 1 13))
+                                     'uint8 16) 0 1 13)
+3)
                                   (concat_vectors
                                    (slice_vectors
                                     (vec-reinterpret
@@ -9678,7 +10469,9 @@
                                     (vec-reinterpret
                                      (slice_vectors
                                       b 1 1 4)
-                                     'uint8 16) 13 1 3)))
+                                     'uint8 16) 13 1 3)
+13)
+3)
                                  'uint32 8)
                                              (vec-if
                                  (x8 (sca-eq
@@ -9697,7 +10490,8 @@
                                      (vec-reinterpret
                                       (slice_vectors
                                        a 0 1 4)
-                                      'uint8 16) 0 1 12))
+                                      'uint8 16) 0 1 12)
+4)
                                    (concat_vectors
                                     (slice_vectors
                                      (vec-reinterpret
@@ -9708,7 +10502,9 @@
                                      (vec-reinterpret
                                       (slice_vectors
                                        b 1 1 4)
-                                      'uint8 16) 12 1 4)))
+                                      'uint8 16) 12 1 4)
+12)
+4)
                                   'uint32 8)
                                              (vec-if
                                   (x8 (sca-eq
@@ -9727,7 +10523,8 @@
                                       (vec-reinterpret
                                        (slice_vectors
                                         a 0 1 4)
-                                       'uint8 16) 0 1 11))
+                                       'uint8 16) 0 1 11)
+5)
                                     (concat_vectors
                                      (slice_vectors
                                       (vec-reinterpret
@@ -9738,7 +10535,9 @@
                                       (vec-reinterpret
                                        (slice_vectors
                                         b 1 1 4)
-                                       'uint8 16) 11 1 5)))
+                                       'uint8 16) 11 1 5)
+11)
+5)
                                    'uint32 8)
                                              (vec-if
                                    (x8 (sca-eq
@@ -9757,7 +10556,8 @@
                                        (vec-reinterpret
                                         (slice_vectors
                                          a 0 1 4)
-                                        'uint8 16) 0 1 10))
+                                        'uint8 16) 0 1 10)
+6)
                                      (concat_vectors
                                       (slice_vectors
                                        (vec-reinterpret
@@ -9768,7 +10568,9 @@
                                        (vec-reinterpret
                                         (slice_vectors
                                          b 1 1 4)
-                                        'uint8 16) 10 1 6)))
+                                        'uint8 16) 10 1 6)
+10)
+6)
                                     'uint32 8)
                                              (vec-if
                                     (x8 (sca-eq
@@ -9787,7 +10589,8 @@
                                         (vec-reinterpret
                                          (slice_vectors
                                           a 0 1 4)
-                                         'uint8 16) 0 1 9))
+                                         'uint8 16) 0 1 9)
+7)
                                       (concat_vectors
                                        (slice_vectors
                                         (vec-reinterpret
@@ -9798,7 +10601,9 @@
                                         (vec-reinterpret
                                          (slice_vectors
                                           b 1 1 4)
-                                         'uint8 16) 9 1 7)))
+                                         'uint8 16) 9 1 7)
+9)
+7)
                                      'uint32 8)
                                              (vec-if
                                      (x8 (sca-eq
@@ -9817,7 +10622,8 @@
                                          (vec-reinterpret
                                           (slice_vectors
                                            a 0 1 4)
-                                          'uint8 16) 0 1 8))
+                                          'uint8 16) 0 1 8)
+8)
                                        (concat_vectors
                                         (slice_vectors
                                          (vec-reinterpret
@@ -9828,7 +10634,9 @@
                                          (vec-reinterpret
                                           (slice_vectors
                                            b 1 1 4)
-                                          'uint8 16) 8 1 8)))
+                                          'uint8 16) 8 1 8)
+8)
+8)
                                       'uint32 8)
                                              (vec-if
                                       (x8 (sca-eq
@@ -9847,7 +10655,8 @@
                                           (vec-reinterpret
                                            (slice_vectors
                                             a 0 1 4)
-                                           'uint8 16) 0 1 7))
+                                           'uint8 16) 0 1 7)
+9)
                                         (concat_vectors
                                          (slice_vectors
                                           (vec-reinterpret
@@ -9858,7 +10667,9 @@
                                           (vec-reinterpret
                                            (slice_vectors
                                             b 1 1 4)
-                                           'uint8 16) 7 1 9)))
+                                           'uint8 16) 7 1 9)
+7)
+9)
                                        'uint32 8)
                                              (vec-if
                                        (x8 (sca-eq
@@ -9877,7 +10688,8 @@
                                            (vec-reinterpret
                                             (slice_vectors
                                              a 0 1 4)
-                                            'uint8 16) 0 1 6))
+                                            'uint8 16) 0 1 6)
+10)
                                          (concat_vectors
                                           (slice_vectors
                                            (vec-reinterpret
@@ -9888,7 +10700,9 @@
                                            (vec-reinterpret
                                             (slice_vectors
                                              b 1 1 4)
-                                            'uint8 16) 6 1 10)))
+                                            'uint8 16) 6 1 10)
+6)
+10)
                                         'uint32 8)
                                              (vec-if
                                         (x8 (sca-eq
@@ -9907,7 +10721,8 @@
                                             (vec-reinterpret
                                              (slice_vectors
                                               a 0 1 4)
-                                             'uint8 16) 0 1 5))
+                                             'uint8 16) 0 1 5)
+11)
                                           (concat_vectors
                                            (slice_vectors
                                             (vec-reinterpret
@@ -9918,7 +10733,9 @@
                                             (vec-reinterpret
                                              (slice_vectors
                                               b 1 1 4)
-                                             'uint8 16) 5 1 11)))
+                                             'uint8 16) 5 1 11)
+5)
+11)
                                          'uint32 8)
                                              (vec-if
                                          (x8 (sca-eq
@@ -9937,7 +10754,8 @@
                                              (vec-reinterpret
                                               (slice_vectors
                                                a 0 1 4)
-                                              'uint8 16) 0 1 4))
+                                              'uint8 16) 0 1 4)
+12)
                                            (concat_vectors
                                             (slice_vectors
                                              (vec-reinterpret
@@ -9948,7 +10766,9 @@
                                              (vec-reinterpret
                                               (slice_vectors
                                                b 1 1 4)
-                                              'uint8 16) 4 1 12)))
+                                              'uint8 16) 4 1 12)
+4)
+12)
                                           'uint32 8)
                                              (vec-if
                                           (x8 (sca-eq
@@ -9967,7 +10787,8 @@
                                               (vec-reinterpret
                                                (slice_vectors
                                                 a 0 1 4)
-                                               'uint8 16) 0 1 3))
+                                               'uint8 16) 0 1 3)
+13)
                                             (concat_vectors
                                              (slice_vectors
                                               (vec-reinterpret
@@ -9978,7 +10799,9 @@
                                               (vec-reinterpret
                                                (slice_vectors
                                                 b 1 1 4)
-                                               'uint8 16) 3 1 13)))
+                                               'uint8 16) 3 1 13)
+3)
+13)
                                            'uint32 8)
                                              (vec-if
                                            (x8 (sca-eq
@@ -9997,7 +10820,8 @@
                                                (vec-reinterpret
                                                 (slice_vectors
                                                  a 0 1 4)
-                                                'uint8 16) 0 1 2))
+                                                'uint8 16) 0 1 2)
+14)
                                              (concat_vectors
                                               (slice_vectors
                                                (vec-reinterpret
@@ -10008,7 +10832,9 @@
                                                (vec-reinterpret
                                                 (slice_vectors
                                                  b 1 1 4)
-                                                'uint8 16) 2 1 14)))
+                                                'uint8 16) 2 1 14)
+2)
+14)
                                             'uint32 8)
                                              (vec-if
                                             (x8 (sca-eq
@@ -10027,7 +10853,8 @@
                                                 (vec-reinterpret
                                                  (slice_vectors
                                                   a 0 1 4)
-                                                 'uint8 16) 0 1 1))
+                                                 'uint8 16) 0 1 1)
+15)
                                               (concat_vectors
                                                (slice_vectors
                                                 (vec-reinterpret
@@ -10038,7 +10865,9 @@
                                                 (vec-reinterpret
                                                  (slice_vectors
                                                   b 1 1 4)
-                                                 'uint8 16) 1 1 15)))
+                                                 'uint8 16) 1 1 15)
+1)
+15)
                                              'uint32 8)
                                              (vec-if
                                              (x8 (sca-eq
@@ -10063,14 +10892,17 @@
                     (slice_vectors
                      a 0 1 2)
                     'uint8 16) 14 1 2)
-                  (x14 (uint8_t (bv 0 8))))
+                  (x14 (uint8_t (bv 0 8)))
+2)
                  (concat_vectors
                   (x14 (uint8_t (bv 0 8)))
                   (slice_vectors
                    (vec-reinterpret
                     (slice_vectors
                      a 1 1 2)
-                    'uint8 16) 14 1 2)))
+                    'uint8 16) 14 1 2)
+14)
+2)
                 'int64 4)
                                              (vec-if
                 (x4 (sca-eq
@@ -10085,14 +10917,17 @@
                      (slice_vectors
                       a 0 1 2)
                      'uint8 16) 13 1 3)
-                   (x13 (uint8_t (bv 0 8))))
+                   (x13 (uint8_t (bv 0 8)))
+3)
                   (concat_vectors
                    (x13 (uint8_t (bv 0 8)))
                    (slice_vectors
                     (vec-reinterpret
                      (slice_vectors
                       a 1 1 2)
-                     'uint8 16) 13 1 3)))
+                     'uint8 16) 13 1 3)
+13)
+3)
                  'int64 4)
                                              (vec-if
                  (x4 (sca-eq
@@ -10107,14 +10942,17 @@
                       (slice_vectors
                        a 0 1 2)
                       'uint8 16) 12 1 4)
-                    (x12 (uint8_t (bv 0 8))))
+                    (x12 (uint8_t (bv 0 8)))
+4)
                    (concat_vectors
                     (x12 (uint8_t (bv 0 8)))
                     (slice_vectors
                      (vec-reinterpret
                       (slice_vectors
                        a 1 1 2)
-                      'uint8 16) 12 1 4)))
+                      'uint8 16) 12 1 4)
+12)
+4)
                   'int64 4)
                                              (vec-if
                   (x4 (sca-eq
@@ -10129,14 +10967,17 @@
                        (slice_vectors
                         a 0 1 2)
                        'uint8 16) 11 1 5)
-                     (x11 (uint8_t (bv 0 8))))
+                     (x11 (uint8_t (bv 0 8)))
+5)
                     (concat_vectors
                      (x11 (uint8_t (bv 0 8)))
                      (slice_vectors
                       (vec-reinterpret
                        (slice_vectors
                         a 1 1 2)
-                       'uint8 16) 11 1 5)))
+                       'uint8 16) 11 1 5)
+11)
+5)
                    'int64 4)
                                              (vec-if
                    (x4 (sca-eq
@@ -10151,14 +10992,17 @@
                         (slice_vectors
                          a 0 1 2)
                         'uint8 16) 10 1 6)
-                      (x10 (uint8_t (bv 0 8))))
+                      (x10 (uint8_t (bv 0 8)))
+6)
                      (concat_vectors
                       (x10 (uint8_t (bv 0 8)))
                       (slice_vectors
                        (vec-reinterpret
                         (slice_vectors
                          a 1 1 2)
-                        'uint8 16) 10 1 6)))
+                        'uint8 16) 10 1 6)
+10)
+6)
                     'int64 4)
                                              (vec-if
                     (x4 (sca-eq
@@ -10173,14 +11017,17 @@
                          (slice_vectors
                           a 0 1 2)
                          'uint8 16) 9 1 7)
-                       (x9 (uint8_t (bv 0 8))))
+                       (x9 (uint8_t (bv 0 8)))
+7)
                       (concat_vectors
                        (x9 (uint8_t (bv 0 8)))
                        (slice_vectors
                         (vec-reinterpret
                          (slice_vectors
                           a 1 1 2)
-                         'uint8 16) 9 1 7)))
+                         'uint8 16) 9 1 7)
+9)
+7)
                      'int64 4)
                                              (vec-if
                      (x4 (sca-eq
@@ -10195,14 +11042,17 @@
                           (slice_vectors
                            a 0 1 2)
                           'uint8 16) 8 1 8)
-                        (x8 (uint8_t (bv 0 8))))
+                        (x8 (uint8_t (bv 0 8)))
+8)
                        (concat_vectors
                         (x8 (uint8_t (bv 0 8)))
                         (slice_vectors
                          (vec-reinterpret
                           (slice_vectors
                            a 1 1 2)
-                          'uint8 16) 8 1 8)))
+                          'uint8 16) 8 1 8)
+8)
+8)
                       'int64 4)
                                              (vec-if
                       (x4 (sca-eq
@@ -10217,14 +11067,17 @@
                            (slice_vectors
                             a 0 1 2)
                            'uint8 16) 7 1 9)
-                         (x7 (uint8_t (bv 0 8))))
+                         (x7 (uint8_t (bv 0 8)))
+9)
                         (concat_vectors
                          (x7 (uint8_t (bv 0 8)))
                          (slice_vectors
                           (vec-reinterpret
                            (slice_vectors
                             a 1 1 2)
-                           'uint8 16) 7 1 9)))
+                           'uint8 16) 7 1 9)
+7)
+9)
                        'int64 4)
                                              (vec-if
                        (x4 (sca-eq
@@ -10239,14 +11092,17 @@
                             (slice_vectors
                              a 0 1 2)
                             'uint8 16) 6 1 10)
-                          (x6 (uint8_t (bv 0 8))))
+                          (x6 (uint8_t (bv 0 8)))
+10)
                          (concat_vectors
                           (x6 (uint8_t (bv 0 8)))
                           (slice_vectors
                            (vec-reinterpret
                             (slice_vectors
                              a 1 1 2)
-                            'uint8 16) 6 1 10)))
+                            'uint8 16) 6 1 10)
+6)
+10)
                         'int64 4)
                                              (vec-if
                         (x4 (sca-eq
@@ -10261,14 +11117,17 @@
                              (slice_vectors
                               a 0 1 2)
                              'uint8 16) 5 1 11)
-                           (x5 (uint8_t (bv 0 8))))
+                           (x5 (uint8_t (bv 0 8)))
+11)
                           (concat_vectors
                            (x5 (uint8_t (bv 0 8)))
                            (slice_vectors
                             (vec-reinterpret
                              (slice_vectors
                               a 1 1 2)
-                             'uint8 16) 5 1 11)))
+                             'uint8 16) 5 1 11)
+5)
+11)
                          'int64 4)
                                              (vec-if
                          (x4 (sca-eq
@@ -10283,14 +11142,17 @@
                               (slice_vectors
                                a 0 1 2)
                               'uint8 16) 4 1 12)
-                            (x4 (uint8_t (bv 0 8))))
+                            (x4 (uint8_t (bv 0 8)))
+12)
                            (concat_vectors
                             (x4 (uint8_t (bv 0 8)))
                             (slice_vectors
                              (vec-reinterpret
                               (slice_vectors
                                a 1 1 2)
-                              'uint8 16) 4 1 12)))
+                              'uint8 16) 4 1 12)
+4)
+12)
                           'int64 4)
                                              (vec-if
                           (x4 (sca-eq
@@ -10305,14 +11167,17 @@
                                (slice_vectors
                                 a 0 1 2)
                                'uint8 16) 3 1 13)
-                             (x3 (uint8_t (bv 0 8))))
+                             (x3 (uint8_t (bv 0 8)))
+13)
                             (concat_vectors
                              (x3 (uint8_t (bv 0 8)))
                              (slice_vectors
                               (vec-reinterpret
                                (slice_vectors
                                 a 1 1 2)
-                               'uint8 16) 3 1 13)))
+                               'uint8 16) 3 1 13)
+3)
+13)
                            'int64 4)
                                              (vec-if
                            (x4 (sca-eq
@@ -10327,14 +11192,17 @@
                                 (slice_vectors
                                  a 0 1 2)
                                 'uint8 16) 2 1 14)
-                              (x2 (uint8_t (bv 0 8))))
+                              (x2 (uint8_t (bv 0 8)))
+14)
                              (concat_vectors
                               (x2 (uint8_t (bv 0 8)))
                               (slice_vectors
                                (vec-reinterpret
                                 (slice_vectors
                                  a 1 1 2)
-                                'uint8 16) 2 1 14)))
+                                'uint8 16) 2 1 14)
+2)
+14)
                             'int64 4)
                                              (vec-if
                             (x4 (sca-eq
@@ -10349,14 +11217,17 @@
                                  (slice_vectors
                                   a 0 1 2)
                                  'uint8 16) 1 1 15)
-                               (uint8_t (bv 0 8)))
+                               (uint8_t (bv 0 8))
+15)
                               (concat_vectors
                                (uint8_t (bv 0 8))
                                (slice_vectors
                                 (vec-reinterpret
                                  (slice_vectors
                                   a 1 1 2)
-                                 'uint8 16) 1 1 15)))
+                                 'uint8 16) 1 1 15)
+1)
+15)
                              'int64 4)
                                              (vec-if
                              (x4 (sca-eq
@@ -10370,13 +11241,16 @@
                                  (slice_vectors
                                   a 0 1 2)
                                  'uint8 16)
-                                (x0 (uint8_t (bv 0 8))))
+                                (x0 (uint8_t (bv 0 8)))
+16)
                                (concat_vectors
                                 (x0 (uint8_t (bv 0 8)))
                                 (vec-reinterpret
                                  (slice_vectors
                                   a 1 1 2)
-                                 'uint8 16)))
+                                 'uint8 16)
+0)
+16)
                               'int64 4)
                                              (vec-if
                               (x4 (sca-eq
@@ -10395,7 +11269,8 @@
                                   (vec-reinterpret
                                    (slice_vectors
                                     a 0 1 2)
-                                   'uint8 16) 0 1 15))
+                                   'uint8 16) 0 1 15)
+1)
                                 (concat_vectors
                                  (slice_vectors
                                   (vec-reinterpret
@@ -10406,7 +11281,9 @@
                                   (vec-reinterpret
                                    (slice_vectors
                                     b 1 1 2)
-                                   'uint8 16) 15 1 1)))
+                                   'uint8 16) 15 1 1)
+15)
+1)
                                'int64 4)
                                              (vec-if
                                (x4 (sca-eq
@@ -10425,7 +11302,8 @@
                                    (vec-reinterpret
                                     (slice_vectors
                                      a 0 1 2)
-                                    'uint8 16) 0 1 14))
+                                    'uint8 16) 0 1 14)
+2)
                                  (concat_vectors
                                   (slice_vectors
                                    (vec-reinterpret
@@ -10436,7 +11314,9 @@
                                    (vec-reinterpret
                                     (slice_vectors
                                      b 1 1 2)
-                                    'uint8 16) 14 1 2)))
+                                    'uint8 16) 14 1 2)
+14)
+2)
                                 'int64 4)
                                              (vec-if
                                 (x4 (sca-eq
@@ -10455,7 +11335,8 @@
                                     (vec-reinterpret
                                      (slice_vectors
                                       a 0 1 2)
-                                     'uint8 16) 0 1 13))
+                                     'uint8 16) 0 1 13)
+3)
                                   (concat_vectors
                                    (slice_vectors
                                     (vec-reinterpret
@@ -10466,7 +11347,9 @@
                                     (vec-reinterpret
                                      (slice_vectors
                                       b 1 1 2)
-                                     'uint8 16) 13 1 3)))
+                                     'uint8 16) 13 1 3)
+13)
+3)
                                  'int64 4)
                                              (vec-if
                                  (x4 (sca-eq
@@ -10485,7 +11368,8 @@
                                      (vec-reinterpret
                                       (slice_vectors
                                        a 0 1 2)
-                                      'uint8 16) 0 1 12))
+                                      'uint8 16) 0 1 12)
+4)
                                    (concat_vectors
                                     (slice_vectors
                                      (vec-reinterpret
@@ -10496,7 +11380,9 @@
                                      (vec-reinterpret
                                       (slice_vectors
                                        b 1 1 2)
-                                      'uint8 16) 12 1 4)))
+                                      'uint8 16) 12 1 4)
+12)
+4)
                                   'int64 4)
                                              (vec-if
                                   (x4 (sca-eq
@@ -10515,7 +11401,8 @@
                                       (vec-reinterpret
                                        (slice_vectors
                                         a 0 1 2)
-                                       'uint8 16) 0 1 11))
+                                       'uint8 16) 0 1 11)
+5)
                                     (concat_vectors
                                      (slice_vectors
                                       (vec-reinterpret
@@ -10526,7 +11413,9 @@
                                       (vec-reinterpret
                                        (slice_vectors
                                         b 1 1 2)
-                                       'uint8 16) 11 1 5)))
+                                       'uint8 16) 11 1 5)
+11)
+5)
                                    'int64 4)
                                              (vec-if
                                    (x4 (sca-eq
@@ -10545,7 +11434,8 @@
                                        (vec-reinterpret
                                         (slice_vectors
                                          a 0 1 2)
-                                        'uint8 16) 0 1 10))
+                                        'uint8 16) 0 1 10)
+6)
                                      (concat_vectors
                                       (slice_vectors
                                        (vec-reinterpret
@@ -10556,7 +11446,9 @@
                                        (vec-reinterpret
                                         (slice_vectors
                                          b 1 1 2)
-                                        'uint8 16) 10 1 6)))
+                                        'uint8 16) 10 1 6)
+10)
+6)
                                     'int64 4)
                                              (vec-if
                                     (x4 (sca-eq
@@ -10575,7 +11467,8 @@
                                         (vec-reinterpret
                                          (slice_vectors
                                           a 0 1 2)
-                                         'uint8 16) 0 1 9))
+                                         'uint8 16) 0 1 9)
+7)
                                       (concat_vectors
                                        (slice_vectors
                                         (vec-reinterpret
@@ -10586,7 +11479,9 @@
                                         (vec-reinterpret
                                          (slice_vectors
                                           b 1 1 2)
-                                         'uint8 16) 9 1 7)))
+                                         'uint8 16) 9 1 7)
+9)
+7)
                                      'int64 4)
                                              (vec-if
                                      (x4 (sca-eq
@@ -10605,7 +11500,8 @@
                                          (vec-reinterpret
                                           (slice_vectors
                                            a 0 1 2)
-                                          'uint8 16) 0 1 8))
+                                          'uint8 16) 0 1 8)
+8)
                                        (concat_vectors
                                         (slice_vectors
                                          (vec-reinterpret
@@ -10616,7 +11512,9 @@
                                          (vec-reinterpret
                                           (slice_vectors
                                            b 1 1 2)
-                                          'uint8 16) 8 1 8)))
+                                          'uint8 16) 8 1 8)
+8)
+8)
                                       'int64 4)
                                              (vec-if
                                       (x4 (sca-eq
@@ -10635,7 +11533,8 @@
                                           (vec-reinterpret
                                            (slice_vectors
                                             a 0 1 2)
-                                           'uint8 16) 0 1 7))
+                                           'uint8 16) 0 1 7)
+9)
                                         (concat_vectors
                                          (slice_vectors
                                           (vec-reinterpret
@@ -10646,7 +11545,9 @@
                                           (vec-reinterpret
                                            (slice_vectors
                                             b 1 1 2)
-                                           'uint8 16) 7 1 9)))
+                                           'uint8 16) 7 1 9)
+7)
+9)
                                        'int64 4)
                                              (vec-if
                                        (x4 (sca-eq
@@ -10665,7 +11566,8 @@
                                            (vec-reinterpret
                                             (slice_vectors
                                              a 0 1 2)
-                                            'uint8 16) 0 1 6))
+                                            'uint8 16) 0 1 6)
+10)
                                          (concat_vectors
                                           (slice_vectors
                                            (vec-reinterpret
@@ -10676,7 +11578,9 @@
                                            (vec-reinterpret
                                             (slice_vectors
                                              b 1 1 2)
-                                            'uint8 16) 6 1 10)))
+                                            'uint8 16) 6 1 10)
+6)
+10)
                                         'int64 4)
                                              (vec-if
                                         (x4 (sca-eq
@@ -10695,7 +11599,8 @@
                                             (vec-reinterpret
                                              (slice_vectors
                                               a 0 1 2)
-                                             'uint8 16) 0 1 5))
+                                             'uint8 16) 0 1 5)
+11)
                                           (concat_vectors
                                            (slice_vectors
                                             (vec-reinterpret
@@ -10706,7 +11611,9 @@
                                             (vec-reinterpret
                                              (slice_vectors
                                               b 1 1 2)
-                                             'uint8 16) 5 1 11)))
+                                             'uint8 16) 5 1 11)
+5)
+11)
                                          'int64 4)
                                              (vec-if
                                          (x4 (sca-eq
@@ -10725,7 +11632,8 @@
                                              (vec-reinterpret
                                               (slice_vectors
                                                a 0 1 2)
-                                              'uint8 16) 0 1 4))
+                                              'uint8 16) 0 1 4)
+12)
                                            (concat_vectors
                                             (slice_vectors
                                              (vec-reinterpret
@@ -10736,7 +11644,9 @@
                                              (vec-reinterpret
                                               (slice_vectors
                                                b 1 1 2)
-                                              'uint8 16) 4 1 12)))
+                                              'uint8 16) 4 1 12)
+4)
+12)
                                           'int64 4)
                                              (vec-if
                                           (x4 (sca-eq
@@ -10755,7 +11665,8 @@
                                               (vec-reinterpret
                                                (slice_vectors
                                                 a 0 1 2)
-                                               'uint8 16) 0 1 3))
+                                               'uint8 16) 0 1 3)
+13)
                                             (concat_vectors
                                              (slice_vectors
                                               (vec-reinterpret
@@ -10766,7 +11677,9 @@
                                               (vec-reinterpret
                                                (slice_vectors
                                                 b 1 1 2)
-                                               'uint8 16) 3 1 13)))
+                                               'uint8 16) 3 1 13)
+3)
+13)
                                            'int64 4)
                                              (vec-if
                                            (x4 (sca-eq
@@ -10785,7 +11698,8 @@
                                                (vec-reinterpret
                                                 (slice_vectors
                                                  a 0 1 2)
-                                                'uint8 16) 0 1 2))
+                                                'uint8 16) 0 1 2)
+14)
                                              (concat_vectors
                                               (slice_vectors
                                                (vec-reinterpret
@@ -10796,7 +11710,9 @@
                                                (vec-reinterpret
                                                 (slice_vectors
                                                  b 1 1 2)
-                                                'uint8 16) 2 1 14)))
+                                                'uint8 16) 2 1 14)
+2)
+14)
                                             'int64 4)
                                              (vec-if
                                             (x4 (sca-eq
@@ -10815,7 +11731,8 @@
                                                 (vec-reinterpret
                                                  (slice_vectors
                                                   a 0 1 2)
-                                                 'uint8 16) 0 1 1))
+                                                 'uint8 16) 0 1 1)
+15)
                                               (concat_vectors
                                                (slice_vectors
                                                 (vec-reinterpret
@@ -10826,7 +11743,9 @@
                                                 (vec-reinterpret
                                                  (slice_vectors
                                                   b 1 1 2)
-                                                 'uint8 16) 1 1 15)))
+                                                 'uint8 16) 1 1 15)
+1)
+15)
                                              'int64 4)
                                              (vec-if
                                              (x4 (sca-eq
@@ -10851,14 +11770,17 @@
                     (slice_vectors
                      a 0 1 2)
                     'uint8 16) 14 1 2)
-                  (x14 (uint8_t (bv 0 8))))
+                  (x14 (uint8_t (bv 0 8)))
+2)
                  (concat_vectors
                   (x14 (uint8_t (bv 0 8)))
                   (slice_vectors
                    (vec-reinterpret
                     (slice_vectors
                      a 1 1 2)
-                    'uint8 16) 14 1 2)))
+                    'uint8 16) 14 1 2)
+14)
+2)
                 'uint64 4)
                                              (vec-if
                 (x4 (sca-eq
@@ -10873,14 +11795,17 @@
                      (slice_vectors
                       a 0 1 2)
                      'uint8 16) 13 1 3)
-                   (x13 (uint8_t (bv 0 8))))
+                   (x13 (uint8_t (bv 0 8)))
+3)
                   (concat_vectors
                    (x13 (uint8_t (bv 0 8)))
                    (slice_vectors
                     (vec-reinterpret
                      (slice_vectors
                       a 1 1 2)
-                     'uint8 16) 13 1 3)))
+                     'uint8 16) 13 1 3)
+13)
+3)
                  'uint64 4)
                                              (vec-if
                  (x4 (sca-eq
@@ -10895,14 +11820,17 @@
                       (slice_vectors
                        a 0 1 2)
                       'uint8 16) 12 1 4)
-                    (x12 (uint8_t (bv 0 8))))
+                    (x12 (uint8_t (bv 0 8)))
+4)
                    (concat_vectors
                     (x12 (uint8_t (bv 0 8)))
                     (slice_vectors
                      (vec-reinterpret
                       (slice_vectors
                        a 1 1 2)
-                      'uint8 16) 12 1 4)))
+                      'uint8 16) 12 1 4)
+12)
+4)
                   'uint64 4)
                                              (vec-if
                   (x4 (sca-eq
@@ -10917,14 +11845,17 @@
                        (slice_vectors
                         a 0 1 2)
                        'uint8 16) 11 1 5)
-                     (x11 (uint8_t (bv 0 8))))
+                     (x11 (uint8_t (bv 0 8)))
+5)
                     (concat_vectors
                      (x11 (uint8_t (bv 0 8)))
                      (slice_vectors
                       (vec-reinterpret
                        (slice_vectors
                         a 1 1 2)
-                       'uint8 16) 11 1 5)))
+                       'uint8 16) 11 1 5)
+11)
+5)
                    'uint64 4)
                                              (vec-if
                    (x4 (sca-eq
@@ -10939,14 +11870,17 @@
                         (slice_vectors
                          a 0 1 2)
                         'uint8 16) 10 1 6)
-                      (x10 (uint8_t (bv 0 8))))
+                      (x10 (uint8_t (bv 0 8)))
+6)
                      (concat_vectors
                       (x10 (uint8_t (bv 0 8)))
                       (slice_vectors
                        (vec-reinterpret
                         (slice_vectors
                          a 1 1 2)
-                        'uint8 16) 10 1 6)))
+                        'uint8 16) 10 1 6)
+10)
+6)
                     'uint64 4)
                                              (vec-if
                     (x4 (sca-eq
@@ -10961,14 +11895,17 @@
                          (slice_vectors
                           a 0 1 2)
                          'uint8 16) 9 1 7)
-                       (x9 (uint8_t (bv 0 8))))
+                       (x9 (uint8_t (bv 0 8)))
+7)
                       (concat_vectors
                        (x9 (uint8_t (bv 0 8)))
                        (slice_vectors
                         (vec-reinterpret
                          (slice_vectors
                           a 1 1 2)
-                         'uint8 16) 9 1 7)))
+                         'uint8 16) 9 1 7)
+9)
+7)
                      'uint64 4)
                                              (vec-if
                      (x4 (sca-eq
@@ -10983,14 +11920,17 @@
                           (slice_vectors
                            a 0 1 2)
                           'uint8 16) 8 1 8)
-                        (x8 (uint8_t (bv 0 8))))
+                        (x8 (uint8_t (bv 0 8)))
+8)
                        (concat_vectors
                         (x8 (uint8_t (bv 0 8)))
                         (slice_vectors
                          (vec-reinterpret
                           (slice_vectors
                            a 1 1 2)
-                          'uint8 16) 8 1 8)))
+                          'uint8 16) 8 1 8)
+8)
+8)
                       'uint64 4)
                                              (vec-if
                       (x4 (sca-eq
@@ -11005,14 +11945,17 @@
                            (slice_vectors
                             a 0 1 2)
                            'uint8 16) 7 1 9)
-                         (x7 (uint8_t (bv 0 8))))
+                         (x7 (uint8_t (bv 0 8)))
+9)
                         (concat_vectors
                          (x7 (uint8_t (bv 0 8)))
                          (slice_vectors
                           (vec-reinterpret
                            (slice_vectors
                             a 1 1 2)
-                           'uint8 16) 7 1 9)))
+                           'uint8 16) 7 1 9)
+7)
+9)
                        'uint64 4)
                                              (vec-if
                        (x4 (sca-eq
@@ -11027,14 +11970,17 @@
                             (slice_vectors
                              a 0 1 2)
                             'uint8 16) 6 1 10)
-                          (x6 (uint8_t (bv 0 8))))
+                          (x6 (uint8_t (bv 0 8)))
+10)
                          (concat_vectors
                           (x6 (uint8_t (bv 0 8)))
                           (slice_vectors
                            (vec-reinterpret
                             (slice_vectors
                              a 1 1 2)
-                            'uint8 16) 6 1 10)))
+                            'uint8 16) 6 1 10)
+6)
+10)
                         'uint64 4)
                                              (vec-if
                         (x4 (sca-eq
@@ -11049,14 +11995,17 @@
                              (slice_vectors
                               a 0 1 2)
                              'uint8 16) 5 1 11)
-                           (x5 (uint8_t (bv 0 8))))
+                           (x5 (uint8_t (bv 0 8)))
+11)
                           (concat_vectors
                            (x5 (uint8_t (bv 0 8)))
                            (slice_vectors
                             (vec-reinterpret
                              (slice_vectors
                               a 1 1 2)
-                             'uint8 16) 5 1 11)))
+                             'uint8 16) 5 1 11)
+5)
+11)
                          'uint64 4)
                                              (vec-if
                          (x4 (sca-eq
@@ -11071,14 +12020,17 @@
                               (slice_vectors
                                a 0 1 2)
                               'uint8 16) 4 1 12)
-                            (x4 (uint8_t (bv 0 8))))
+                            (x4 (uint8_t (bv 0 8)))
+12)
                            (concat_vectors
                             (x4 (uint8_t (bv 0 8)))
                             (slice_vectors
                              (vec-reinterpret
                               (slice_vectors
                                a 1 1 2)
-                              'uint8 16) 4 1 12)))
+                              'uint8 16) 4 1 12)
+4)
+12)
                           'uint64 4)
                                              (vec-if
                           (x4 (sca-eq
@@ -11093,14 +12045,17 @@
                                (slice_vectors
                                 a 0 1 2)
                                'uint8 16) 3 1 13)
-                             (x3 (uint8_t (bv 0 8))))
+                             (x3 (uint8_t (bv 0 8)))
+13)
                             (concat_vectors
                              (x3 (uint8_t (bv 0 8)))
                              (slice_vectors
                               (vec-reinterpret
                                (slice_vectors
                                 a 1 1 2)
-                               'uint8 16) 3 1 13)))
+                               'uint8 16) 3 1 13)
+3)
+13)
                            'uint64 4)
                                              (vec-if
                            (x4 (sca-eq
@@ -11115,14 +12070,17 @@
                                 (slice_vectors
                                  a 0 1 2)
                                 'uint8 16) 2 1 14)
-                              (x2 (uint8_t (bv 0 8))))
+                              (x2 (uint8_t (bv 0 8)))
+14)
                              (concat_vectors
                               (x2 (uint8_t (bv 0 8)))
                               (slice_vectors
                                (vec-reinterpret
                                 (slice_vectors
                                  a 1 1 2)
-                                'uint8 16) 2 1 14)))
+                                'uint8 16) 2 1 14)
+2)
+14)
                             'uint64 4)
                                              (vec-if
                             (x4 (sca-eq
@@ -11137,14 +12095,17 @@
                                  (slice_vectors
                                   a 0 1 2)
                                  'uint8 16) 1 1 15)
-                               (uint8_t (bv 0 8)))
+                               (uint8_t (bv 0 8))
+15)
                               (concat_vectors
                                (uint8_t (bv 0 8))
                                (slice_vectors
                                 (vec-reinterpret
                                  (slice_vectors
                                   a 1 1 2)
-                                 'uint8 16) 1 1 15)))
+                                 'uint8 16) 1 1 15)
+1)
+15)
                              'uint64 4)
                                              (vec-if
                              (x4 (sca-eq
@@ -11158,13 +12119,16 @@
                                  (slice_vectors
                                   a 0 1 2)
                                  'uint8 16)
-                                (x0 (uint8_t (bv 0 8))))
+                                (x0 (uint8_t (bv 0 8)))
+16)
                                (concat_vectors
                                 (x0 (uint8_t (bv 0 8)))
                                 (vec-reinterpret
                                  (slice_vectors
                                   a 1 1 2)
-                                 'uint8 16)))
+                                 'uint8 16)
+0)
+16)
                               'uint64 4)
                                              (vec-if
                               (x4 (sca-eq
@@ -11183,7 +12147,8 @@
                                   (vec-reinterpret
                                    (slice_vectors
                                     a 0 1 2)
-                                   'uint8 16) 0 1 15))
+                                   'uint8 16) 0 1 15)
+1)
                                 (concat_vectors
                                  (slice_vectors
                                   (vec-reinterpret
@@ -11194,7 +12159,9 @@
                                   (vec-reinterpret
                                    (slice_vectors
                                     b 1 1 2)
-                                   'uint8 16) 15 1 1)))
+                                   'uint8 16) 15 1 1)
+15)
+1)
                                'uint64 4)
                                              (vec-if
                                (x4 (sca-eq
@@ -11213,7 +12180,8 @@
                                    (vec-reinterpret
                                     (slice_vectors
                                      a 0 1 2)
-                                    'uint8 16) 0 1 14))
+                                    'uint8 16) 0 1 14)
+2)
                                  (concat_vectors
                                   (slice_vectors
                                    (vec-reinterpret
@@ -11224,7 +12192,9 @@
                                    (vec-reinterpret
                                     (slice_vectors
                                      b 1 1 2)
-                                    'uint8 16) 14 1 2)))
+                                    'uint8 16) 14 1 2)
+14)
+2)
                                 'uint64 4)
                                              (vec-if
                                 (x4 (sca-eq
@@ -11243,7 +12213,8 @@
                                     (vec-reinterpret
                                      (slice_vectors
                                       a 0 1 2)
-                                     'uint8 16) 0 1 13))
+                                     'uint8 16) 0 1 13)
+3)
                                   (concat_vectors
                                    (slice_vectors
                                     (vec-reinterpret
@@ -11254,7 +12225,9 @@
                                     (vec-reinterpret
                                      (slice_vectors
                                       b 1 1 2)
-                                     'uint8 16) 13 1 3)))
+                                     'uint8 16) 13 1 3)
+13)
+3)
                                  'uint64 4)
                                              (vec-if
                                  (x4 (sca-eq
@@ -11273,7 +12246,8 @@
                                      (vec-reinterpret
                                       (slice_vectors
                                        a 0 1 2)
-                                      'uint8 16) 0 1 12))
+                                      'uint8 16) 0 1 12)
+4)
                                    (concat_vectors
                                     (slice_vectors
                                      (vec-reinterpret
@@ -11284,7 +12258,9 @@
                                      (vec-reinterpret
                                       (slice_vectors
                                        b 1 1 2)
-                                      'uint8 16) 12 1 4)))
+                                      'uint8 16) 12 1 4)
+12)
+4)
                                   'uint64 4)
                                              (vec-if
                                   (x4 (sca-eq
@@ -11303,7 +12279,8 @@
                                       (vec-reinterpret
                                        (slice_vectors
                                         a 0 1 2)
-                                       'uint8 16) 0 1 11))
+                                       'uint8 16) 0 1 11)
+5)
                                     (concat_vectors
                                      (slice_vectors
                                       (vec-reinterpret
@@ -11314,7 +12291,9 @@
                                       (vec-reinterpret
                                        (slice_vectors
                                         b 1 1 2)
-                                       'uint8 16) 11 1 5)))
+                                       'uint8 16) 11 1 5)
+11)
+5)
                                    'uint64 4)
                                              (vec-if
                                    (x4 (sca-eq
@@ -11333,7 +12312,8 @@
                                        (vec-reinterpret
                                         (slice_vectors
                                          a 0 1 2)
-                                        'uint8 16) 0 1 10))
+                                        'uint8 16) 0 1 10)
+6)
                                      (concat_vectors
                                       (slice_vectors
                                        (vec-reinterpret
@@ -11344,7 +12324,9 @@
                                        (vec-reinterpret
                                         (slice_vectors
                                          b 1 1 2)
-                                        'uint8 16) 10 1 6)))
+                                        'uint8 16) 10 1 6)
+10)
+6)
                                     'uint64 4)
                                              (vec-if
                                     (x4 (sca-eq
@@ -11363,7 +12345,8 @@
                                         (vec-reinterpret
                                          (slice_vectors
                                           a 0 1 2)
-                                         'uint8 16) 0 1 9))
+                                         'uint8 16) 0 1 9)
+7)
                                       (concat_vectors
                                        (slice_vectors
                                         (vec-reinterpret
@@ -11374,7 +12357,9 @@
                                         (vec-reinterpret
                                          (slice_vectors
                                           b 1 1 2)
-                                         'uint8 16) 9 1 7)))
+                                         'uint8 16) 9 1 7)
+9)
+7)
                                      'uint64 4)
                                              (vec-if
                                      (x4 (sca-eq
@@ -11393,7 +12378,8 @@
                                          (vec-reinterpret
                                           (slice_vectors
                                            a 0 1 2)
-                                          'uint8 16) 0 1 8))
+                                          'uint8 16) 0 1 8)
+8)
                                        (concat_vectors
                                         (slice_vectors
                                          (vec-reinterpret
@@ -11404,7 +12390,9 @@
                                          (vec-reinterpret
                                           (slice_vectors
                                            b 1 1 2)
-                                          'uint8 16) 8 1 8)))
+                                          'uint8 16) 8 1 8)
+8)
+8)
                                       'uint64 4)
                                              (vec-if
                                       (x4 (sca-eq
@@ -11423,7 +12411,8 @@
                                           (vec-reinterpret
                                            (slice_vectors
                                             a 0 1 2)
-                                           'uint8 16) 0 1 7))
+                                           'uint8 16) 0 1 7)
+9)
                                         (concat_vectors
                                          (slice_vectors
                                           (vec-reinterpret
@@ -11434,7 +12423,9 @@
                                           (vec-reinterpret
                                            (slice_vectors
                                             b 1 1 2)
-                                           'uint8 16) 7 1 9)))
+                                           'uint8 16) 7 1 9)
+7)
+9)
                                        'uint64 4)
                                              (vec-if
                                        (x4 (sca-eq
@@ -11453,7 +12444,8 @@
                                            (vec-reinterpret
                                             (slice_vectors
                                              a 0 1 2)
-                                            'uint8 16) 0 1 6))
+                                            'uint8 16) 0 1 6)
+10)
                                          (concat_vectors
                                           (slice_vectors
                                            (vec-reinterpret
@@ -11464,7 +12456,9 @@
                                            (vec-reinterpret
                                             (slice_vectors
                                              b 1 1 2)
-                                            'uint8 16) 6 1 10)))
+                                            'uint8 16) 6 1 10)
+6)
+10)
                                         'uint64 4)
                                              (vec-if
                                         (x4 (sca-eq
@@ -11483,7 +12477,8 @@
                                             (vec-reinterpret
                                              (slice_vectors
                                               a 0 1 2)
-                                             'uint8 16) 0 1 5))
+                                             'uint8 16) 0 1 5)
+11)
                                           (concat_vectors
                                            (slice_vectors
                                             (vec-reinterpret
@@ -11494,7 +12489,9 @@
                                             (vec-reinterpret
                                              (slice_vectors
                                               b 1 1 2)
-                                             'uint8 16) 5 1 11)))
+                                             'uint8 16) 5 1 11)
+5)
+11)
                                          'uint64 4)
                                              (vec-if
                                          (x4 (sca-eq
@@ -11513,7 +12510,8 @@
                                              (vec-reinterpret
                                               (slice_vectors
                                                a 0 1 2)
-                                              'uint8 16) 0 1 4))
+                                              'uint8 16) 0 1 4)
+12)
                                            (concat_vectors
                                             (slice_vectors
                                              (vec-reinterpret
@@ -11524,7 +12522,9 @@
                                              (vec-reinterpret
                                               (slice_vectors
                                                b 1 1 2)
-                                              'uint8 16) 4 1 12)))
+                                              'uint8 16) 4 1 12)
+4)
+12)
                                           'uint64 4)
                                              (vec-if
                                           (x4 (sca-eq
@@ -11543,7 +12543,8 @@
                                               (vec-reinterpret
                                                (slice_vectors
                                                 a 0 1 2)
-                                               'uint8 16) 0 1 3))
+                                               'uint8 16) 0 1 3)
+13)
                                             (concat_vectors
                                              (slice_vectors
                                               (vec-reinterpret
@@ -11554,7 +12555,9 @@
                                               (vec-reinterpret
                                                (slice_vectors
                                                 b 1 1 2)
-                                               'uint8 16) 3 1 13)))
+                                               'uint8 16) 3 1 13)
+3)
+13)
                                            'uint64 4)
                                              (vec-if
                                            (x4 (sca-eq
@@ -11573,7 +12576,8 @@
                                                (vec-reinterpret
                                                 (slice_vectors
                                                  a 0 1 2)
-                                                'uint8 16) 0 1 2))
+                                                'uint8 16) 0 1 2)
+14)
                                              (concat_vectors
                                               (slice_vectors
                                                (vec-reinterpret
@@ -11584,7 +12588,9 @@
                                                (vec-reinterpret
                                                 (slice_vectors
                                                  b 1 1 2)
-                                                'uint8 16) 2 1 14)))
+                                                'uint8 16) 2 1 14)
+2)
+14)
                                             'uint64 4)
                                              (vec-if
                                             (x4 (sca-eq
@@ -11603,7 +12609,8 @@
                                                 (vec-reinterpret
                                                  (slice_vectors
                                                   a 0 1 2)
-                                                 'uint8 16) 0 1 1))
+                                                 'uint8 16) 0 1 1)
+15)
                                               (concat_vectors
                                                (slice_vectors
                                                 (vec-reinterpret
@@ -11614,7 +12621,9 @@
                                                 (vec-reinterpret
                                                  (slice_vectors
                                                   b 1 1 2)
-                                                 'uint8 16) 1 1 15)))
+                                                 'uint8 16) 1 1 15)
+1)
+15)
                                              'uint64 4)
                                              (vec-if
                                              (x4 (sca-eq
@@ -11871,7 +12880,8 @@
                 (vec-reinterpret
                  (uint8_t
                   imm8)
-                 'uint1 8))
+                 'uint1 8)
+8)
                b
                a)))]
         [((x86:u16x16 a) (x86:u16x16 b) (uint8_t imm8))
@@ -11886,7 +12896,8 @@
                 (vec-reinterpret
                  (uint8_t
                   imm8)
-                 'uint1 8))
+                 'uint1 8)
+8)
                b
                a)))]
 
@@ -12203,7 +13214,8 @@
                        (slice_vectors
                         b 0 1 16)
                        (slice_vectors
-                        b 1 1 16))))))))]
+                        b 1 1 16)))))
+16)))]
         [((x86:i16x16 a) (x86:i16x16 b) (uint8_t imm8))
                     (x86:i16x16
                      (halide:interpret
@@ -12309,7 +13321,8 @@
                        (slice_vectors
                         b 0 1 8)
                        (slice_vectors
-                        b 1 1 8))))))))]
+                        b 1 1 8)))))
+8)))]
         [((x86:i32x8 a) (x86:i32x8 b) (uint8_t imm8))
                     (x86:i32x8
                      (halide:interpret
@@ -12415,7 +13428,8 @@
                        (slice_vectors
                         b 0 1 4)
                        (slice_vectors
-                        b 1 1 4))))))))]
+                        b 1 1 4)))))
+4)))]
         [((x86:i64x4 a) (x86:i64x4 b) (uint8_t imm8))
                     (x86:i64x4
                      (halide:interpret
@@ -12521,7 +13535,8 @@
                        (slice_vectors
                         b 0 1 2)
                        (slice_vectors
-                        b 1 1 2))))))))]
+                        b 1 1 2)))))
+2)))]
         [((x86:u8x32 a) (x86:u8x32 b) (uint8_t imm8))
                     (x86:u8x32
                      (halide:interpret
@@ -12627,7 +13642,8 @@
                        (slice_vectors
                         b 0 1 16)
                        (slice_vectors
-                        b 1 1 16))))))))]
+                        b 1 1 16)))))
+16)))]
         [((x86:u16x16 a) (x86:u16x16 b) (uint8_t imm8))
                     (x86:u16x16
                      (halide:interpret
@@ -12733,7 +13749,8 @@
                        (slice_vectors
                         b 0 1 8)
                        (slice_vectors
-                        b 1 1 8))))))))]
+                        b 1 1 8)))))
+8)))]
         [((x86:u32x8 a) (x86:u32x8 b) (uint8_t imm8))
                     (x86:u32x8
                      (halide:interpret
@@ -12839,7 +13856,8 @@
                        (slice_vectors
                         b 0 1 4)
                        (slice_vectors
-                        b 1 1 4))))))))]
+                        b 1 1 4)))))
+4)))]
         [((x86:u64x4 a) (x86:u64x4 b) (uint8_t imm8))
                     (x86:u64x4
                      (halide:interpret
@@ -12945,7 +13963,8 @@
                        (slice_vectors
                         b 0 1 2)
                        (slice_vectors
-                        b 1 1 2))))))))]
+                        b 1 1 2)))))
+2)))]
 
         [(_ _ _) (assert #f "infeasible in interpreting vperm2f128")])]
 
@@ -13056,7 +14075,8 @@
                        (slice_vectors
                         b 0 1 16)
                        (slice_vectors
-                        b 1 1 16))))))))]
+                        b 1 1 16)))))
+16)))]
         [((x86:i16x16 a) (x86:i16x16 b) (uint8_t imm8))
                     (x86:i16x16
                      (halide:interpret
@@ -13162,7 +14182,8 @@
                        (slice_vectors
                         b 0 1 8)
                        (slice_vectors
-                        b 1 1 8))))))))]
+                        b 1 1 8)))))
+8)))]
         [((x86:i32x8 a) (x86:i32x8 b) (uint8_t imm8))
                     (x86:i32x8
                      (halide:interpret
@@ -13268,7 +14289,8 @@
                        (slice_vectors
                         b 0 1 4)
                        (slice_vectors
-                        b 1 1 4))))))))]
+                        b 1 1 4)))))
+4)))]
         [((x86:i64x4 a) (x86:i64x4 b) (uint8_t imm8))
                     (x86:i64x4
                      (halide:interpret
@@ -13374,7 +14396,8 @@
                        (slice_vectors
                         b 0 1 2)
                        (slice_vectors
-                        b 1 1 2))))))))]
+                        b 1 1 2)))))
+2)))]
         [((x86:u8x32 a) (x86:u8x32 b) (uint8_t imm8))
                     (x86:u8x32
                      (halide:interpret
@@ -13480,7 +14503,8 @@
                        (slice_vectors
                         b 0 1 16)
                        (slice_vectors
-                        b 1 1 16))))))))]
+                        b 1 1 16)))))
+16)))]
         [((x86:u16x16 a) (x86:u16x16 b) (uint8_t imm8))
                     (x86:u16x16
                      (halide:interpret
@@ -13586,7 +14610,8 @@
                        (slice_vectors
                         b 0 1 8)
                        (slice_vectors
-                        b 1 1 8))))))))]
+                        b 1 1 8)))))
+8)))]
         [((x86:u32x8 a) (x86:u32x8 b) (uint8_t imm8))
                     (x86:u32x8
                      (halide:interpret
@@ -13692,7 +14717,8 @@
                        (slice_vectors
                         b 0 1 4)
                        (slice_vectors
-                        b 1 1 4))))))))]
+                        b 1 1 4)))))
+4)))]
         [((x86:u64x4 a) (x86:u64x4 b) (uint8_t imm8))
                     (x86:u64x4
                      (halide:interpret
@@ -13798,7 +14824,8 @@
                        (slice_vectors
                         b 0 1 2)
                        (slice_vectors
-                        b 1 1 2))))))))]
+                        b 1 1 2)))))
+2)))]
 
         [(_ _ _) (assert #f "infeasible in interpreting vperm2i128")])]
 
@@ -13967,7 +14994,8 @@
                         (slice_vectors
                          a 1 1 1)
                         (slice_vectors
-                         a 0 1 1)))))))))
+                         a 0 1 1))))))))
+1)
                 (concat_vectors
                  (sca-if
                   (sca-eq
@@ -14126,7 +15154,9 @@
                         (slice_vectors
                          a 1 1 1)
                         (slice_vectors
-                         a 0 1 1))))))))))
+                         a 0 1 1))))))))
+1)
+1)
                (concat_vectors
                 (concat_vectors
                  (sca-if
@@ -14286,7 +15316,8 @@
                         (slice_vectors
                          a 1 1 1)
                         (slice_vectors
-                         a 0 1 1)))))))))
+                         a 0 1 1))))))))
+1)
                 (concat_vectors
                  (sca-if
                   (sca-eq
@@ -14445,7 +15476,10 @@
                         (slice_vectors
                          a 1 1 1)
                         (slice_vectors
-                         a 0 1 1)))))))))))))]
+                         a 0 1 1))))))))
+1)
+1)
+1)))]
         [((x86:u32x8 a) (x86:u32x8 b))
             (x86:u32x8
              (halide:interpret
@@ -14609,7 +15643,8 @@
                         (slice_vectors
                          a 1 1 1)
                         (slice_vectors
-                         a 0 1 1)))))))))
+                         a 0 1 1))))))))
+1)
                 (concat_vectors
                  (sca-if
                   (sca-eq
@@ -14768,7 +15803,9 @@
                         (slice_vectors
                          a 1 1 1)
                         (slice_vectors
-                         a 0 1 1))))))))))
+                         a 0 1 1))))))))
+1)
+1)
                (concat_vectors
                 (concat_vectors
                  (sca-if
@@ -14928,7 +15965,8 @@
                         (slice_vectors
                          a 1 1 1)
                         (slice_vectors
-                         a 0 1 1)))))))))
+                         a 0 1 1))))))))
+1)
                 (concat_vectors
                  (sca-if
                   (sca-eq
@@ -15087,7 +16125,10 @@
                         (slice_vectors
                          a 1 1 1)
                         (slice_vectors
-                         a 0 1 1)))))))))))))]
+                         a 0 1 1))))))))
+1)
+1)
+1)))]
 
         [(_ _) (assert #f "infeasible in interpreting vpermd")])]
 
@@ -15167,7 +16208,8 @@
                    (slice_vectors
                     a 2 1 1)
                    (slice_vectors
-                    a 3 1 1)))))
+                    a 3 1 1))))
+1)
                (concat_vectors
                 (sca-if
                  (sca-eq
@@ -15238,7 +16280,9 @@
                    (slice_vectors
                     a 2 1 1)
                    (slice_vectors
-                    a 3 1 1))))))))]
+                    a 3 1 1))))
+1)
+1)))]
         [((x86:u64x4 a) (uint8_t imm8))
             (x86:u64x4
              (halide:interpret
@@ -15313,7 +16357,8 @@
                    (slice_vectors
                     a 2 1 1)
                    (slice_vectors
-                    a 3 1 1)))))
+                    a 3 1 1))))
+1)
                (concat_vectors
                 (sca-if
                  (sca-eq
@@ -15384,7 +16429,9 @@
                    (slice_vectors
                     a 2 1 1)
                    (slice_vectors
-                    a 3 1 1))))))))]
+                    a 3 1 1))))
+1)
+1)))]
 
         [(_ _) (assert #f "infeasible in interpreting vpermq")])]
 
@@ -15399,12 +16446,15 @@
                  (slice_vectors
                   a 0 1 4)
                  (slice_vectors
-                  b 0 1 4))
+                  b 0 1 4)
+4)
                 (concat_vectors
                  (slice_vectors
                   b 0 1 4)
                  (slice_vectors
-                  a 1 1 4))))))]
+                  a 1 1 4)
+4)
+4))))]
 
         [(_ _) (assert #f "infeasible in interpreting vphaddd")])]
 
@@ -15422,12 +16472,15 @@
                     (slice_vectors
                      a 0 1 8)
                     (slice_vectors
-                     b 0 1 8))
+                     b 0 1 8)
+8)
                    (concat_vectors
                     (slice_vectors
                      b 0 1 8)
                     (slice_vectors
-                     a 1 1 8))) 0 2 16)
+                     a 1 1 8)
+8)
+8) 0 2 16)
                  (vec-sub
                   (x16 (int16_t (bv 32767 16)))
                   (vec-max
@@ -15437,12 +16490,15 @@
                       (slice_vectors
                        a 0 1 8)
                       (slice_vectors
-                       b 0 1 8))
+                       b 0 1 8)
+8)
                      (concat_vectors
                       (slice_vectors
                        b 0 1 8)
                       (slice_vectors
-                       a 1 1 8))) 1 2 16)
+                       a 1 1 8)
+8)
+8) 1 2 16)
                    (x16 (int16_t (bv 0 16))))))
                 (vec-sub
                  (x16 (int16_t (bv -32768 16)))
@@ -15453,12 +16509,15 @@
                      (slice_vectors
                       a 0 1 8)
                      (slice_vectors
-                      b 0 1 8))
+                      b 0 1 8)
+8)
                     (concat_vectors
                      (slice_vectors
                       b 0 1 8)
                      (slice_vectors
-                      a 1 1 8))) 1 2 16)
+                      a 1 1 8)
+8)
+8) 1 2 16)
                   (x16 (int16_t (bv 0 16))))))
                (slice_vectors
                 (concat_vectors
@@ -15466,12 +16525,15 @@
                   (slice_vectors
                    a 0 1 8)
                   (slice_vectors
-                   b 0 1 8))
+                   b 0 1 8)
+8)
                  (concat_vectors
                   (slice_vectors
                    b 0 1 8)
                   (slice_vectors
-                   a 1 1 8))) 1 2 16))))]
+                   a 1 1 8)
+8)
+8) 1 2 16))))]
 
         [(_ _) (assert #f "infeasible in interpreting vphaddsw")])]
 
@@ -15486,12 +16548,15 @@
                  (slice_vectors
                   a 0 1 8)
                  (slice_vectors
-                  b 0 1 8))
+                  b 0 1 8)
+8)
                 (concat_vectors
                  (slice_vectors
                   b 0 1 8)
                  (slice_vectors
-                  a 1 1 8))))))]
+                  a 1 1 8)
+8)
+8))))]
 
         [(_ _) (assert #f "infeasible in interpreting vphaddw")])]
 
@@ -15507,24 +16572,30 @@
                   (slice_vectors
                    a 0 1 4)
                   (slice_vectors
-                   b 0 1 4))
+                   b 0 1 4)
+4)
                  (concat_vectors
                   (slice_vectors
                    b 0 1 4)
                   (slice_vectors
-                   a 1 1 4))) 0 2 8)
+                   a 1 1 4)
+4)
+4) 0 2 8)
                (slice_vectors
                 (concat_vectors
                  (concat_vectors
                   (slice_vectors
                    a 0 1 4)
                   (slice_vectors
-                   b 0 1 4))
+                   b 0 1 4)
+4)
                  (concat_vectors
                   (slice_vectors
                    b 0 1 4)
                   (slice_vectors
-                   a 1 1 4))) 1 2 8))))]
+                   a 1 1 4)
+4)
+4) 1 2 8))))]
 
         [(_ _) (assert #f "infeasible in interpreting vphsubd")])]
 
@@ -15542,12 +16613,15 @@
                     (slice_vectors
                      a 0 1 8)
                     (slice_vectors
-                     b 0 1 8))
+                     b 0 1 8)
+8)
                    (concat_vectors
                     (slice_vectors
                      b 0 1 8)
                     (slice_vectors
-                     a 1 1 8))) 0 2 16)
+                     a 1 1 8)
+8)
+8) 0 2 16)
                  (vec-add
                   (vec-min
                    (slice_vectors
@@ -15556,12 +16630,15 @@
                       (slice_vectors
                        a 0 1 8)
                       (slice_vectors
-                       b 0 1 8))
+                       b 0 1 8)
+8)
                      (concat_vectors
                       (slice_vectors
                        b 0 1 8)
                       (slice_vectors
-                       a 1 1 8))) 1 2 16)
+                       a 1 1 8)
+8)
+8) 1 2 16)
                    (x16 (int16_t (bv 0 16))))
                   (x16 (int16_t (bv 32767 16)))))
                 (vec-add
@@ -15572,12 +16649,15 @@
                      (slice_vectors
                       a 0 1 8)
                      (slice_vectors
-                      b 0 1 8))
+                      b 0 1 8)
+8)
                     (concat_vectors
                      (slice_vectors
                       b 0 1 8)
                      (slice_vectors
-                      a 1 1 8))) 1 2 16)
+                      a 1 1 8)
+8)
+8) 1 2 16)
                   (x16 (int16_t (bv 0 16))))
                  (x16 (int16_t (bv -32768 16)))))
                (slice_vectors
@@ -15586,12 +16666,15 @@
                   (slice_vectors
                    a 0 1 8)
                   (slice_vectors
-                   b 0 1 8))
+                   b 0 1 8)
+8)
                  (concat_vectors
                   (slice_vectors
                    b 0 1 8)
                   (slice_vectors
-                   a 1 1 8))) 1 2 16))))]
+                   a 1 1 8)
+8)
+8) 1 2 16))))]
 
         [(_ _) (assert #f "infeasible in interpreting vphsubsw")])]
 
@@ -15607,24 +16690,30 @@
                   (slice_vectors
                    a 0 1 8)
                   (slice_vectors
-                   b 0 1 8))
+                   b 0 1 8)
+8)
                  (concat_vectors
                   (slice_vectors
                    b 0 1 8)
                   (slice_vectors
-                   a 1 1 8))) 0 2 16)
+                   a 1 1 8)
+8)
+8) 0 2 16)
                (slice_vectors
                 (concat_vectors
                  (concat_vectors
                   (slice_vectors
                    a 0 1 8)
                   (slice_vectors
-                   b 0 1 8))
+                   b 0 1 8)
+8)
                  (concat_vectors
                   (slice_vectors
                    b 0 1 8)
                   (slice_vectors
-                   a 1 1 8))) 1 2 16))))]
+                   a 1 1 8)
+8)
+8) 1 2 16))))]
 
         [(_ _) (assert #f "infeasible in interpreting vphsubw")])]
 
@@ -15916,7 +17005,6 @@
 
         [(_) (assert #f "infeasible in interpreting vpmovzxbw")])]
 
-    ;; TODO: auto-generate all of these
     [(x86:vpmovzxbw_s a)
       (destruct* ((interpret a))
         [((x86:u8x16 a))
@@ -15925,10 +17013,7 @@
               (uint16x16
                a)))]
 
-        [(_)
-          (pretty-print a)
-          (pretty-print (interpret a))
-          (assert #f (format "infeasible in interpreting vpmovzxbw_s: ~a" a))])]
+        [(_) (assert #f "infeasible in interpreting vpmovzxbw")])]
 
     [(x86:vpmovzxdq a)
       (destruct* ((interpret a))
@@ -16351,7 +17436,8 @@
                            (slice_vectors
                             a 1 1 1)
                            (slice_vectors
-                            a 0 1 1))))))))))
+                            a 0 1 1)))))))))
+1)
                   (concat_vectors
                    (sca-if
                     (sca-eq
@@ -16502,7 +17588,9 @@
                            (slice_vectors
                             a 1 1 1)
                            (slice_vectors
-                            a 0 1 1)))))))))))
+                            a 0 1 1)))))))))
+1)
+1)
                  (concat_vectors
                   (concat_vectors
                    (sca-if
@@ -16654,7 +17742,8 @@
                            (slice_vectors
                             a 1 1 1)
                            (slice_vectors
-                            a 0 1 1))))))))))
+                            a 0 1 1)))))))))
+1)
                   (concat_vectors
                    (sca-if
                     (sca-eq
@@ -16805,7 +17894,10 @@
                            (slice_vectors
                             a 1 1 1)
                            (slice_vectors
-                            a 0 1 1))))))))))))
+                            a 0 1 1)))))))))
+1)
+1)
+1)
                 (concat_vectors
                  (concat_vectors
                   (concat_vectors
@@ -16958,7 +18050,8 @@
                            (slice_vectors
                             a 1 1 1)
                            (slice_vectors
-                            a 0 1 1))))))))))
+                            a 0 1 1)))))))))
+1)
                   (concat_vectors
                    (sca-if
                     (sca-eq
@@ -17109,7 +18202,9 @@
                            (slice_vectors
                             a 1 1 1)
                            (slice_vectors
-                            a 0 1 1)))))))))))
+                            a 0 1 1)))))))))
+1)
+1)
                  (concat_vectors
                   (concat_vectors
                    (sca-if
@@ -17261,7 +18356,8 @@
                            (slice_vectors
                             a 1 1 1)
                            (slice_vectors
-                            a 0 1 1))))))))))
+                            a 0 1 1)))))))))
+1)
                   (concat_vectors
                    (sca-if
                     (sca-eq
@@ -17412,7 +18508,11 @@
                            (slice_vectors
                             a 1 1 1)
                            (slice_vectors
-                            a 0 1 1)))))))))))))
+                            a 0 1 1)))))))))
+1)
+1)
+1)
+1)
                (concat_vectors
                 (concat_vectors
                  (concat_vectors
@@ -17566,7 +18666,8 @@
                            (slice_vectors
                             a 1 1 1)
                            (slice_vectors
-                            a 0 1 1))))))))))
+                            a 0 1 1)))))))))
+1)
                   (concat_vectors
                    (sca-if
                     (sca-eq
@@ -17717,7 +18818,9 @@
                            (slice_vectors
                             a 1 1 1)
                            (slice_vectors
-                            a 0 1 1)))))))))))
+                            a 0 1 1)))))))))
+1)
+1)
                  (concat_vectors
                   (concat_vectors
                    (sca-if
@@ -17869,7 +18972,8 @@
                            (slice_vectors
                             a 1 1 1)
                            (slice_vectors
-                            a 0 1 1))))))))))
+                            a 0 1 1)))))))))
+1)
                   (concat_vectors
                    (sca-if
                     (sca-eq
@@ -18020,7 +19124,10 @@
                            (slice_vectors
                             a 1 1 1)
                            (slice_vectors
-                            a 0 1 1))))))))))))
+                            a 0 1 1)))))))))
+1)
+1)
+1)
                 (concat_vectors
                  (concat_vectors
                   (concat_vectors
@@ -18173,7 +19280,8 @@
                            (slice_vectors
                             a 1 1 1)
                            (slice_vectors
-                            a 0 1 1))))))))))
+                            a 0 1 1)))))))))
+1)
                   (concat_vectors
                    (sca-if
                     (sca-eq
@@ -18324,7 +19432,9 @@
                            (slice_vectors
                             a 1 1 1)
                            (slice_vectors
-                            a 0 1 1)))))))))))
+                            a 0 1 1)))))))))
+1)
+1)
                  (concat_vectors
                   (concat_vectors
                    (sca-if
@@ -18476,7 +19586,8 @@
                            (slice_vectors
                             a 1 1 1)
                            (slice_vectors
-                            a 0 1 1))))))))))
+                            a 0 1 1)))))))))
+1)
                   (concat_vectors
                    (sca-if
                     (sca-eq
@@ -18627,7 +19738,12 @@
                            (slice_vectors
                             a 1 1 1)
                            (slice_vectors
-                            a 0 1 1))))))))))))))))]
+                            a 0 1 1)))))))))
+1)
+1)
+1)
+1)
+1)))]
         [((x86:u8x32 a) (x86:u8x32 b))
             (x86:u8x32
              (halide:interpret
@@ -18785,7 +19901,8 @@
                            (slice_vectors
                             a 1 1 1)
                            (slice_vectors
-                            a 0 1 1))))))))))
+                            a 0 1 1)))))))))
+1)
                   (concat_vectors
                    (sca-if
                     (sca-eq
@@ -18936,7 +20053,9 @@
                            (slice_vectors
                             a 1 1 1)
                            (slice_vectors
-                            a 0 1 1)))))))))))
+                            a 0 1 1)))))))))
+1)
+1)
                  (concat_vectors
                   (concat_vectors
                    (sca-if
@@ -19088,7 +20207,8 @@
                            (slice_vectors
                             a 1 1 1)
                            (slice_vectors
-                            a 0 1 1))))))))))
+                            a 0 1 1)))))))))
+1)
                   (concat_vectors
                    (sca-if
                     (sca-eq
@@ -19239,7 +20359,10 @@
                            (slice_vectors
                             a 1 1 1)
                            (slice_vectors
-                            a 0 1 1))))))))))))
+                            a 0 1 1)))))))))
+1)
+1)
+1)
                 (concat_vectors
                  (concat_vectors
                   (concat_vectors
@@ -19392,7 +20515,8 @@
                            (slice_vectors
                             a 1 1 1)
                            (slice_vectors
-                            a 0 1 1))))))))))
+                            a 0 1 1)))))))))
+1)
                   (concat_vectors
                    (sca-if
                     (sca-eq
@@ -19543,7 +20667,9 @@
                            (slice_vectors
                             a 1 1 1)
                            (slice_vectors
-                            a 0 1 1)))))))))))
+                            a 0 1 1)))))))))
+1)
+1)
                  (concat_vectors
                   (concat_vectors
                    (sca-if
@@ -19695,7 +20821,8 @@
                            (slice_vectors
                             a 1 1 1)
                            (slice_vectors
-                            a 0 1 1))))))))))
+                            a 0 1 1)))))))))
+1)
                   (concat_vectors
                    (sca-if
                     (sca-eq
@@ -19846,7 +20973,11 @@
                            (slice_vectors
                             a 1 1 1)
                            (slice_vectors
-                            a 0 1 1)))))))))))))
+                            a 0 1 1)))))))))
+1)
+1)
+1)
+1)
                (concat_vectors
                 (concat_vectors
                  (concat_vectors
@@ -20000,7 +21131,8 @@
                            (slice_vectors
                             a 1 1 1)
                            (slice_vectors
-                            a 0 1 1))))))))))
+                            a 0 1 1)))))))))
+1)
                   (concat_vectors
                    (sca-if
                     (sca-eq
@@ -20151,7 +21283,9 @@
                            (slice_vectors
                             a 1 1 1)
                            (slice_vectors
-                            a 0 1 1)))))))))))
+                            a 0 1 1)))))))))
+1)
+1)
                  (concat_vectors
                   (concat_vectors
                    (sca-if
@@ -20303,7 +21437,8 @@
                            (slice_vectors
                             a 1 1 1)
                            (slice_vectors
-                            a 0 1 1))))))))))
+                            a 0 1 1)))))))))
+1)
                   (concat_vectors
                    (sca-if
                     (sca-eq
@@ -20454,7 +21589,10 @@
                            (slice_vectors
                             a 1 1 1)
                            (slice_vectors
-                            a 0 1 1))))))))))))
+                            a 0 1 1)))))))))
+1)
+1)
+1)
                 (concat_vectors
                  (concat_vectors
                   (concat_vectors
@@ -20607,7 +21745,8 @@
                            (slice_vectors
                             a 1 1 1)
                            (slice_vectors
-                            a 0 1 1))))))))))
+                            a 0 1 1)))))))))
+1)
                   (concat_vectors
                    (sca-if
                     (sca-eq
@@ -20758,7 +21897,9 @@
                            (slice_vectors
                             a 1 1 1)
                            (slice_vectors
-                            a 0 1 1)))))))))))
+                            a 0 1 1)))))))))
+1)
+1)
                  (concat_vectors
                   (concat_vectors
                    (sca-if
@@ -20910,7 +22051,8 @@
                            (slice_vectors
                             a 1 1 1)
                            (slice_vectors
-                            a 0 1 1))))))))))
+                            a 0 1 1)))))))))
+1)
                   (concat_vectors
                    (sca-if
                     (sca-eq
@@ -21061,7 +22203,12 @@
                            (slice_vectors
                             a 1 1 1)
                            (slice_vectors
-                            a 0 1 1))))))))))))))))]
+                            a 0 1 1)))))))))
+1)
+1)
+1)
+1)
+1)))]
 
         [(_ _) (assert #f "infeasible in interpreting vpshufb")])]
 
@@ -21132,7 +22279,8 @@
                      a 0 1 4) 2 1 1)
                    (slice_vectors
                     (slice_vectors
-                     a 0 1 4) 0 1 1))))
+                     a 0 1 4) 0 1 1)))
+1)
                 (concat_vectors
                  (sca-if
                   (slice_vectors
@@ -21193,7 +22341,9 @@
                      a 0 1 4) 2 1 1)
                    (slice_vectors
                     (slice_vectors
-                     a 0 1 4) 0 1 1)))))
+                     a 0 1 4) 0 1 1)))
+1)
+1)
                (concat_vectors
                 (concat_vectors
                  (sca-if
@@ -21255,7 +22405,8 @@
                      a 0 1 4) 2 1 1)
                    (slice_vectors
                     (slice_vectors
-                     a 0 1 4) 0 1 1))))
+                     a 0 1 4) 0 1 1)))
+1)
                 (concat_vectors
                  (sca-if
                   (slice_vectors
@@ -21316,7 +22467,10 @@
                      a 0 1 4) 2 1 1)
                    (slice_vectors
                     (slice_vectors
-                     a 0 1 4) 0 1 1))))))))]
+                     a 0 1 4) 0 1 1)))
+1)
+1)
+1)))]
         [((x86:u32x8 a) (uint8_t imm8))
             (x86:u32x8
              (halide:interpret
@@ -21382,7 +22536,8 @@
                      a 0 1 4) 2 1 1)
                    (slice_vectors
                     (slice_vectors
-                     a 0 1 4) 0 1 1))))
+                     a 0 1 4) 0 1 1)))
+1)
                 (concat_vectors
                  (sca-if
                   (slice_vectors
@@ -21443,7 +22598,9 @@
                      a 0 1 4) 2 1 1)
                    (slice_vectors
                     (slice_vectors
-                     a 0 1 4) 0 1 1)))))
+                     a 0 1 4) 0 1 1)))
+1)
+1)
                (concat_vectors
                 (concat_vectors
                  (sca-if
@@ -21505,7 +22662,8 @@
                      a 0 1 4) 2 1 1)
                    (slice_vectors
                     (slice_vectors
-                     a 0 1 4) 0 1 1))))
+                     a 0 1 4) 0 1 1)))
+1)
                 (concat_vectors
                  (sca-if
                   (slice_vectors
@@ -21566,7 +22724,10 @@
                      a 0 1 4) 2 1 1)
                    (slice_vectors
                     (slice_vectors
-                     a 0 1 4) 0 1 1))))))))]
+                     a 0 1 4) 0 1 1)))
+1)
+1)
+1)))]
 
         [(_ _) (assert #f "infeasible in interpreting vpshufd")])]
 
@@ -21661,7 +22822,8 @@
                      (slice_vectors
                       (slice_vectors
                        (slice_vectors
-                        a 0 1 8) 1 1 4) 3 1 1)))))
+                        a 0 1 8) 1 1 4) 3 1 1))))
+1)
                  (concat_vectors
                   (sca-if
                    (sca-eq
@@ -21748,7 +22910,10 @@
                      (slice_vectors
                       (slice_vectors
                        (slice_vectors
-                        a 0 1 8) 1 1 4) 3 1 1)))))))
+                        a 0 1 8) 1 1 4) 3 1 1))))
+1)
+1)
+4)
                (concat_vectors
                 (concat_vectors
                  (concat_vectors
@@ -21831,7 +22996,8 @@
                      (slice_vectors
                       (slice_vectors
                        (slice_vectors
-                        a 0 1 8) 1 1 4) 3 1 1)))))
+                        a 0 1 8) 1 1 4) 3 1 1))))
+1)
                  (concat_vectors
                   (sca-if
                    (sca-eq
@@ -21918,10 +23084,14 @@
                      (slice_vectors
                       (slice_vectors
                        (slice_vectors
-                        a 0 1 8) 1 1 4) 3 1 1))))))
+                        a 0 1 8) 1 1 4) 3 1 1))))
+1)
+1)
                 (slice_vectors
                  (slice_vectors
-                  a 1 1 8) 0 1 4)))))]
+                  a 1 1 8) 0 1 4)
+4)
+4)))]
         [((x86:u16x16 a) (uint8_t imm8))
             (x86:u16x16
              (halide:interpret
@@ -22011,7 +23181,8 @@
                      (slice_vectors
                       (slice_vectors
                        (slice_vectors
-                        a 0 1 8) 1 1 4) 3 1 1)))))
+                        a 0 1 8) 1 1 4) 3 1 1))))
+1)
                  (concat_vectors
                   (sca-if
                    (sca-eq
@@ -22098,7 +23269,10 @@
                      (slice_vectors
                       (slice_vectors
                        (slice_vectors
-                        a 0 1 8) 1 1 4) 3 1 1)))))))
+                        a 0 1 8) 1 1 4) 3 1 1))))
+1)
+1)
+4)
                (concat_vectors
                 (concat_vectors
                  (concat_vectors
@@ -22181,7 +23355,8 @@
                      (slice_vectors
                       (slice_vectors
                        (slice_vectors
-                        a 0 1 8) 1 1 4) 3 1 1)))))
+                        a 0 1 8) 1 1 4) 3 1 1))))
+1)
                  (concat_vectors
                   (sca-if
                    (sca-eq
@@ -22268,10 +23443,14 @@
                      (slice_vectors
                       (slice_vectors
                        (slice_vectors
-                        a 0 1 8) 1 1 4) 3 1 1))))))
+                        a 0 1 8) 1 1 4) 3 1 1))))
+1)
+1)
                 (slice_vectors
                  (slice_vectors
-                  a 1 1 8) 0 1 4)))))]
+                  a 1 1 8) 0 1 4)
+4)
+4)))]
 
         [(_ _) (assert #f "infeasible in interpreting vpshufhw")])]
 
@@ -22363,7 +23542,8 @@
                      (slice_vectors
                       (slice_vectors
                        (slice_vectors
-                        a 0 1 8) 0 1 4) 3 1 1)))))
+                        a 0 1 8) 0 1 4) 3 1 1))))
+1)
                  (concat_vectors
                   (sca-if
                    (sca-eq
@@ -22450,10 +23630,13 @@
                      (slice_vectors
                       (slice_vectors
                        (slice_vectors
-                        a 0 1 8) 0 1 4) 3 1 1))))))
+                        a 0 1 8) 0 1 4) 3 1 1))))
+1)
+1)
                 (slice_vectors
                  (slice_vectors
-                  a 0 1 8) 1 1 4))
+                  a 0 1 8) 1 1 4)
+4)
                (concat_vectors
                 (slice_vectors
                  (slice_vectors
@@ -22539,7 +23722,8 @@
                      (slice_vectors
                       (slice_vectors
                        (slice_vectors
-                        a 1 1 8) 1 1 4) 3 1 1)))))
+                        a 1 1 8) 1 1 4) 3 1 1))))
+1)
                  (concat_vectors
                   (sca-if
                    (sca-eq
@@ -22626,7 +23810,11 @@
                      (slice_vectors
                       (slice_vectors
                        (slice_vectors
-                        a 1 1 8) 1 1 4) 3 1 1))))))))))]
+                        a 1 1 8) 1 1 4) 3 1 1))))
+1)
+1)
+4)
+4)))]
         [((x86:u16x16 a) (uint8_t imm8))
             (x86:u16x16
              (halide:interpret
@@ -22713,7 +23901,8 @@
                      (slice_vectors
                       (slice_vectors
                        (slice_vectors
-                        a 0 1 8) 0 1 4) 3 1 1)))))
+                        a 0 1 8) 0 1 4) 3 1 1))))
+1)
                  (concat_vectors
                   (sca-if
                    (sca-eq
@@ -22800,10 +23989,13 @@
                      (slice_vectors
                       (slice_vectors
                        (slice_vectors
-                        a 0 1 8) 0 1 4) 3 1 1))))))
+                        a 0 1 8) 0 1 4) 3 1 1))))
+1)
+1)
                 (slice_vectors
                  (slice_vectors
-                  a 0 1 8) 1 1 4))
+                  a 0 1 8) 1 1 4)
+4)
                (concat_vectors
                 (slice_vectors
                  (slice_vectors
@@ -22889,7 +24081,8 @@
                      (slice_vectors
                       (slice_vectors
                        (slice_vectors
-                        a 1 1 8) 1 1 4) 3 1 1)))))
+                        a 1 1 8) 1 1 4) 3 1 1))))
+1)
                  (concat_vectors
                   (sca-if
                    (sca-eq
@@ -22976,7 +24169,11 @@
                      (slice_vectors
                       (slice_vectors
                        (slice_vectors
-                        a 1 1 8) 1 1 4) 3 1 1))))))))))]
+                        a 1 1 8) 1 1 4) 3 1 1))))
+1)
+1)
+4)
+4)))]
 
         [(_ _) (assert #f "infeasible in interpreting vpshuflw")])]
 
@@ -23080,14 +24277,17 @@
                    (slice_vectors
                     (vec-reinterpret
                      a
-                     'uint8 32) 0 1 16) 0 1 1))
+                     'uint8 32) 0 1 16) 0 1 1)
+15)
                  (concat_vectors
                   (slice_vectors
                    (slice_vectors
                     (vec-reinterpret
                      a
                      'uint8 32) 0 1 16) 0 1 1)
-                  (x15 (uint8_t (bv 0 8)))))
+                  (x15 (uint8_t (bv 0 8)))
+1)
+15)
                                (vec-if
                  (x32 (sca-eq
  (uint8_t
@@ -23100,14 +24300,17 @@
                     (slice_vectors
                      (vec-reinterpret
                       a
-                      'uint8 32) 0 1 16) 0 1 2))
+                      'uint8 32) 0 1 16) 0 1 2)
+14)
                   (concat_vectors
                    (slice_vectors
                     (slice_vectors
                      (vec-reinterpret
                       a
                       'uint8 32) 0 1 16) 0 1 2)
-                   (x14 (uint8_t (bv 0 8)))))
+                   (x14 (uint8_t (bv 0 8)))
+2)
+14)
                                (vec-if
                   (x32 (sca-eq
  (uint8_t
@@ -23120,14 +24323,17 @@
                      (slice_vectors
                       (vec-reinterpret
                        a
-                       'uint8 32) 0 1 16) 0 1 3))
+                       'uint8 32) 0 1 16) 0 1 3)
+13)
                    (concat_vectors
                     (slice_vectors
                      (slice_vectors
                       (vec-reinterpret
                        a
                        'uint8 32) 0 1 16) 0 1 3)
-                    (x13 (uint8_t (bv 0 8)))))
+                    (x13 (uint8_t (bv 0 8)))
+3)
+13)
                                (vec-if
                    (x32 (sca-eq
  (uint8_t
@@ -23140,14 +24346,17 @@
                       (slice_vectors
                        (vec-reinterpret
                         a
-                        'uint8 32) 0 1 16) 0 1 4))
+                        'uint8 32) 0 1 16) 0 1 4)
+12)
                     (concat_vectors
                      (slice_vectors
                       (slice_vectors
                        (vec-reinterpret
                         a
                         'uint8 32) 0 1 16) 0 1 4)
-                     (x12 (uint8_t (bv 0 8)))))
+                     (x12 (uint8_t (bv 0 8)))
+4)
+12)
                                (vec-if
                     (x32 (sca-eq
  (uint8_t
@@ -23160,14 +24369,17 @@
                        (slice_vectors
                         (vec-reinterpret
                          a
-                         'uint8 32) 0 1 16) 0 1 5))
+                         'uint8 32) 0 1 16) 0 1 5)
+11)
                      (concat_vectors
                       (slice_vectors
                        (slice_vectors
                         (vec-reinterpret
                          a
                          'uint8 32) 0 1 16) 0 1 5)
-                      (x11 (uint8_t (bv 0 8)))))
+                      (x11 (uint8_t (bv 0 8)))
+5)
+11)
                                (vec-if
                      (x32 (sca-eq
  (uint8_t
@@ -23180,14 +24392,17 @@
                         (slice_vectors
                          (vec-reinterpret
                           a
-                          'uint8 32) 0 1 16) 0 1 6))
+                          'uint8 32) 0 1 16) 0 1 6)
+10)
                       (concat_vectors
                        (slice_vectors
                         (slice_vectors
                          (vec-reinterpret
                           a
                           'uint8 32) 0 1 16) 0 1 6)
-                       (x10 (uint8_t (bv 0 8)))))
+                       (x10 (uint8_t (bv 0 8)))
+6)
+10)
                                (vec-if
                       (x32 (sca-eq
  (uint8_t
@@ -23200,14 +24415,17 @@
                          (slice_vectors
                           (vec-reinterpret
                            a
-                           'uint8 32) 0 1 16) 0 1 7))
+                           'uint8 32) 0 1 16) 0 1 7)
+9)
                        (concat_vectors
                         (slice_vectors
                          (slice_vectors
                           (vec-reinterpret
                            a
                            'uint8 32) 0 1 16) 0 1 7)
-                        (x9 (uint8_t (bv 0 8)))))
+                        (x9 (uint8_t (bv 0 8)))
+7)
+9)
                                (vec-if
                        (x32 (sca-eq
  (uint8_t
@@ -23220,14 +24438,17 @@
                           (slice_vectors
                            (vec-reinterpret
                             a
-                            'uint8 32) 0 1 16) 0 1 8))
+                            'uint8 32) 0 1 16) 0 1 8)
+8)
                         (concat_vectors
                          (slice_vectors
                           (slice_vectors
                            (vec-reinterpret
                             a
                             'uint8 32) 0 1 16) 0 1 8)
-                         (x8 (uint8_t (bv 0 8)))))
+                         (x8 (uint8_t (bv 0 8)))
+8)
+8)
                                (vec-if
                         (x32 (sca-eq
  (uint8_t
@@ -23240,14 +24461,17 @@
                            (slice_vectors
                             (vec-reinterpret
                              a
-                             'uint8 32) 0 1 16) 0 1 9))
+                             'uint8 32) 0 1 16) 0 1 9)
+7)
                          (concat_vectors
                           (slice_vectors
                            (slice_vectors
                             (vec-reinterpret
                              a
                              'uint8 32) 0 1 16) 0 1 9)
-                          (x7 (uint8_t (bv 0 8)))))
+                          (x7 (uint8_t (bv 0 8)))
+9)
+7)
                                (vec-if
                          (x32 (sca-eq
  (uint8_t
@@ -23260,14 +24484,17 @@
                             (slice_vectors
                              (vec-reinterpret
                               a
-                              'uint8 32) 0 1 16) 0 1 10))
+                              'uint8 32) 0 1 16) 0 1 10)
+6)
                           (concat_vectors
                            (slice_vectors
                             (slice_vectors
                              (vec-reinterpret
                               a
                               'uint8 32) 0 1 16) 0 1 10)
-                           (x6 (uint8_t (bv 0 8)))))
+                           (x6 (uint8_t (bv 0 8)))
+10)
+6)
                                (vec-if
                           (x32 (sca-eq
  (uint8_t
@@ -23280,14 +24507,17 @@
                              (slice_vectors
                               (vec-reinterpret
                                a
-                               'uint8 32) 0 1 16) 0 1 11))
+                               'uint8 32) 0 1 16) 0 1 11)
+5)
                            (concat_vectors
                             (slice_vectors
                              (slice_vectors
                               (vec-reinterpret
                                a
                                'uint8 32) 0 1 16) 0 1 11)
-                            (x5 (uint8_t (bv 0 8)))))
+                            (x5 (uint8_t (bv 0 8)))
+11)
+5)
                                (vec-if
                            (x32 (sca-eq
  (uint8_t
@@ -23300,14 +24530,17 @@
                               (slice_vectors
                                (vec-reinterpret
                                 a
-                                'uint8 32) 0 1 16) 0 1 12))
+                                'uint8 32) 0 1 16) 0 1 12)
+4)
                             (concat_vectors
                              (slice_vectors
                               (slice_vectors
                                (vec-reinterpret
                                 a
                                 'uint8 32) 0 1 16) 0 1 12)
-                             (x4 (uint8_t (bv 0 8)))))
+                             (x4 (uint8_t (bv 0 8)))
+12)
+4)
                                (vec-if
                             (x32 (sca-eq
  (uint8_t
@@ -23320,14 +24553,17 @@
                                (slice_vectors
                                 (vec-reinterpret
                                  a
-                                 'uint8 32) 0 1 16) 0 1 13))
+                                 'uint8 32) 0 1 16) 0 1 13)
+3)
                              (concat_vectors
                               (slice_vectors
                                (slice_vectors
                                 (vec-reinterpret
                                  a
                                  'uint8 32) 0 1 16) 0 1 13)
-                              (x3 (uint8_t (bv 0 8)))))
+                              (x3 (uint8_t (bv 0 8)))
+13)
+3)
                                (vec-if
                              (x32 (sca-eq
  (uint8_t
@@ -23340,14 +24576,17 @@
                                 (slice_vectors
                                  (vec-reinterpret
                                   a
-                                  'uint8 32) 0 1 16) 0 1 14))
+                                  'uint8 32) 0 1 16) 0 1 14)
+2)
                               (concat_vectors
                                (slice_vectors
                                 (slice_vectors
                                  (vec-reinterpret
                                   a
                                   'uint8 32) 0 1 16) 0 1 14)
-                               (x2 (uint8_t (bv 0 8)))))
+                               (x2 (uint8_t (bv 0 8)))
+14)
+2)
                                (vec-if
                               (x32 (sca-eq
  (uint8_t
@@ -23360,14 +24599,17 @@
                                  (slice_vectors
                                   (vec-reinterpret
                                    a
-                                   'uint8 32) 0 1 16) 0 1 15))
+                                   'uint8 32) 0 1 16) 0 1 15)
+1)
                                (concat_vectors
                                 (slice_vectors
                                  (slice_vectors
                                   (vec-reinterpret
                                    a
                                    'uint8 32) 0 1 16) 0 1 15)
-                                (uint8_t (bv 0 8))))
+                                (uint8_t (bv 0 8))
+15)
+1)
                                (vec-if
                                (x32 (sca-eq
  (uint8_t
@@ -23394,14 +24636,17 @@
                    (slice_vectors
                     (vec-reinterpret
                      a
-                     'uint8 32) 0 1 16) 0 1 1))
+                     'uint8 32) 0 1 16) 0 1 1)
+15)
                  (concat_vectors
                   (slice_vectors
                    (slice_vectors
                     (vec-reinterpret
                      a
                      'uint8 32) 0 1 16) 0 1 1)
-                  (x15 (uint8_t (bv 0 8)))))
+                  (x15 (uint8_t (bv 0 8)))
+1)
+15)
                                (vec-if
                  (x32 (sca-eq
  (uint8_t
@@ -23414,14 +24659,17 @@
                     (slice_vectors
                      (vec-reinterpret
                       a
-                      'uint8 32) 0 1 16) 0 1 2))
+                      'uint8 32) 0 1 16) 0 1 2)
+14)
                   (concat_vectors
                    (slice_vectors
                     (slice_vectors
                      (vec-reinterpret
                       a
                       'uint8 32) 0 1 16) 0 1 2)
-                   (x14 (uint8_t (bv 0 8)))))
+                   (x14 (uint8_t (bv 0 8)))
+2)
+14)
                                (vec-if
                   (x32 (sca-eq
  (uint8_t
@@ -23434,14 +24682,17 @@
                      (slice_vectors
                       (vec-reinterpret
                        a
-                       'uint8 32) 0 1 16) 0 1 3))
+                       'uint8 32) 0 1 16) 0 1 3)
+13)
                    (concat_vectors
                     (slice_vectors
                      (slice_vectors
                       (vec-reinterpret
                        a
                        'uint8 32) 0 1 16) 0 1 3)
-                    (x13 (uint8_t (bv 0 8)))))
+                    (x13 (uint8_t (bv 0 8)))
+3)
+13)
                                (vec-if
                    (x32 (sca-eq
  (uint8_t
@@ -23454,14 +24705,17 @@
                       (slice_vectors
                        (vec-reinterpret
                         a
-                        'uint8 32) 0 1 16) 0 1 4))
+                        'uint8 32) 0 1 16) 0 1 4)
+12)
                     (concat_vectors
                      (slice_vectors
                       (slice_vectors
                        (vec-reinterpret
                         a
                         'uint8 32) 0 1 16) 0 1 4)
-                     (x12 (uint8_t (bv 0 8)))))
+                     (x12 (uint8_t (bv 0 8)))
+4)
+12)
                                (vec-if
                     (x32 (sca-eq
  (uint8_t
@@ -23474,14 +24728,17 @@
                        (slice_vectors
                         (vec-reinterpret
                          a
-                         'uint8 32) 0 1 16) 0 1 5))
+                         'uint8 32) 0 1 16) 0 1 5)
+11)
                      (concat_vectors
                       (slice_vectors
                        (slice_vectors
                         (vec-reinterpret
                          a
                          'uint8 32) 0 1 16) 0 1 5)
-                      (x11 (uint8_t (bv 0 8)))))
+                      (x11 (uint8_t (bv 0 8)))
+5)
+11)
                                (vec-if
                      (x32 (sca-eq
  (uint8_t
@@ -23494,14 +24751,17 @@
                         (slice_vectors
                          (vec-reinterpret
                           a
-                          'uint8 32) 0 1 16) 0 1 6))
+                          'uint8 32) 0 1 16) 0 1 6)
+10)
                       (concat_vectors
                        (slice_vectors
                         (slice_vectors
                          (vec-reinterpret
                           a
                           'uint8 32) 0 1 16) 0 1 6)
-                       (x10 (uint8_t (bv 0 8)))))
+                       (x10 (uint8_t (bv 0 8)))
+6)
+10)
                                (vec-if
                       (x32 (sca-eq
  (uint8_t
@@ -23514,14 +24774,17 @@
                          (slice_vectors
                           (vec-reinterpret
                            a
-                           'uint8 32) 0 1 16) 0 1 7))
+                           'uint8 32) 0 1 16) 0 1 7)
+9)
                        (concat_vectors
                         (slice_vectors
                          (slice_vectors
                           (vec-reinterpret
                            a
                            'uint8 32) 0 1 16) 0 1 7)
-                        (x9 (uint8_t (bv 0 8)))))
+                        (x9 (uint8_t (bv 0 8)))
+7)
+9)
                                (vec-if
                        (x32 (sca-eq
  (uint8_t
@@ -23534,14 +24797,17 @@
                           (slice_vectors
                            (vec-reinterpret
                             a
-                            'uint8 32) 0 1 16) 0 1 8))
+                            'uint8 32) 0 1 16) 0 1 8)
+8)
                         (concat_vectors
                          (slice_vectors
                           (slice_vectors
                            (vec-reinterpret
                             a
                             'uint8 32) 0 1 16) 0 1 8)
-                         (x8 (uint8_t (bv 0 8)))))
+                         (x8 (uint8_t (bv 0 8)))
+8)
+8)
                                (vec-if
                         (x32 (sca-eq
  (uint8_t
@@ -23554,14 +24820,17 @@
                            (slice_vectors
                             (vec-reinterpret
                              a
-                             'uint8 32) 0 1 16) 0 1 9))
+                             'uint8 32) 0 1 16) 0 1 9)
+7)
                          (concat_vectors
                           (slice_vectors
                            (slice_vectors
                             (vec-reinterpret
                              a
                              'uint8 32) 0 1 16) 0 1 9)
-                          (x7 (uint8_t (bv 0 8)))))
+                          (x7 (uint8_t (bv 0 8)))
+9)
+7)
                                (vec-if
                          (x32 (sca-eq
  (uint8_t
@@ -23574,14 +24843,17 @@
                             (slice_vectors
                              (vec-reinterpret
                               a
-                              'uint8 32) 0 1 16) 0 1 10))
+                              'uint8 32) 0 1 16) 0 1 10)
+6)
                           (concat_vectors
                            (slice_vectors
                             (slice_vectors
                              (vec-reinterpret
                               a
                               'uint8 32) 0 1 16) 0 1 10)
-                           (x6 (uint8_t (bv 0 8)))))
+                           (x6 (uint8_t (bv 0 8)))
+10)
+6)
                                (vec-if
                           (x32 (sca-eq
  (uint8_t
@@ -23594,14 +24866,17 @@
                              (slice_vectors
                               (vec-reinterpret
                                a
-                               'uint8 32) 0 1 16) 0 1 11))
+                               'uint8 32) 0 1 16) 0 1 11)
+5)
                            (concat_vectors
                             (slice_vectors
                              (slice_vectors
                               (vec-reinterpret
                                a
                                'uint8 32) 0 1 16) 0 1 11)
-                            (x5 (uint8_t (bv 0 8)))))
+                            (x5 (uint8_t (bv 0 8)))
+11)
+5)
                                (vec-if
                            (x32 (sca-eq
  (uint8_t
@@ -23614,14 +24889,17 @@
                               (slice_vectors
                                (vec-reinterpret
                                 a
-                                'uint8 32) 0 1 16) 0 1 12))
+                                'uint8 32) 0 1 16) 0 1 12)
+4)
                             (concat_vectors
                              (slice_vectors
                               (slice_vectors
                                (vec-reinterpret
                                 a
                                 'uint8 32) 0 1 16) 0 1 12)
-                             (x4 (uint8_t (bv 0 8)))))
+                             (x4 (uint8_t (bv 0 8)))
+12)
+4)
                                (vec-if
                             (x32 (sca-eq
  (uint8_t
@@ -23634,14 +24912,17 @@
                                (slice_vectors
                                 (vec-reinterpret
                                  a
-                                 'uint8 32) 0 1 16) 0 1 13))
+                                 'uint8 32) 0 1 16) 0 1 13)
+3)
                              (concat_vectors
                               (slice_vectors
                                (slice_vectors
                                 (vec-reinterpret
                                  a
                                  'uint8 32) 0 1 16) 0 1 13)
-                              (x3 (uint8_t (bv 0 8)))))
+                              (x3 (uint8_t (bv 0 8)))
+13)
+3)
                                (vec-if
                              (x32 (sca-eq
  (uint8_t
@@ -23654,14 +24935,17 @@
                                 (slice_vectors
                                  (vec-reinterpret
                                   a
-                                  'uint8 32) 0 1 16) 0 1 14))
+                                  'uint8 32) 0 1 16) 0 1 14)
+2)
                               (concat_vectors
                                (slice_vectors
                                 (slice_vectors
                                  (vec-reinterpret
                                   a
                                   'uint8 32) 0 1 16) 0 1 14)
-                               (x2 (uint8_t (bv 0 8)))))
+                               (x2 (uint8_t (bv 0 8)))
+14)
+2)
                                (vec-if
                               (x32 (sca-eq
  (uint8_t
@@ -23674,14 +24958,17 @@
                                  (slice_vectors
                                   (vec-reinterpret
                                    a
-                                   'uint8 32) 0 1 16) 0 1 15))
+                                   'uint8 32) 0 1 16) 0 1 15)
+1)
                                (concat_vectors
                                 (slice_vectors
                                  (slice_vectors
                                   (vec-reinterpret
                                    a
                                    'uint8 32) 0 1 16) 0 1 15)
-                                (uint8_t (bv 0 8))))
+                                (uint8_t (bv 0 8))
+15)
+1)
                                (vec-if
                                (x32 (sca-eq
  (uint8_t
@@ -23708,14 +24995,17 @@
                    (slice_vectors
                     (vec-reinterpret
                      a
-                     'uint8 32) 0 1 16) 0 1 1))
+                     'uint8 32) 0 1 16) 0 1 1)
+15)
                  (concat_vectors
                   (slice_vectors
                    (slice_vectors
                     (vec-reinterpret
                      a
                      'uint8 32) 0 1 16) 0 1 1)
-                  (x15 (uint8_t (bv 0 8)))))
+                  (x15 (uint8_t (bv 0 8)))
+1)
+15)
                                (vec-if
                  (x32 (sca-eq
  (uint8_t
@@ -23728,14 +25018,17 @@
                     (slice_vectors
                      (vec-reinterpret
                       a
-                      'uint8 32) 0 1 16) 0 1 2))
+                      'uint8 32) 0 1 16) 0 1 2)
+14)
                   (concat_vectors
                    (slice_vectors
                     (slice_vectors
                      (vec-reinterpret
                       a
                       'uint8 32) 0 1 16) 0 1 2)
-                   (x14 (uint8_t (bv 0 8)))))
+                   (x14 (uint8_t (bv 0 8)))
+2)
+14)
                                (vec-if
                   (x32 (sca-eq
  (uint8_t
@@ -23748,14 +25041,17 @@
                      (slice_vectors
                       (vec-reinterpret
                        a
-                       'uint8 32) 0 1 16) 0 1 3))
+                       'uint8 32) 0 1 16) 0 1 3)
+13)
                    (concat_vectors
                     (slice_vectors
                      (slice_vectors
                       (vec-reinterpret
                        a
                        'uint8 32) 0 1 16) 0 1 3)
-                    (x13 (uint8_t (bv 0 8)))))
+                    (x13 (uint8_t (bv 0 8)))
+3)
+13)
                                (vec-if
                    (x32 (sca-eq
  (uint8_t
@@ -23768,14 +25064,17 @@
                       (slice_vectors
                        (vec-reinterpret
                         a
-                        'uint8 32) 0 1 16) 0 1 4))
+                        'uint8 32) 0 1 16) 0 1 4)
+12)
                     (concat_vectors
                      (slice_vectors
                       (slice_vectors
                        (vec-reinterpret
                         a
                         'uint8 32) 0 1 16) 0 1 4)
-                     (x12 (uint8_t (bv 0 8)))))
+                     (x12 (uint8_t (bv 0 8)))
+4)
+12)
                                (vec-if
                     (x32 (sca-eq
  (uint8_t
@@ -23788,14 +25087,17 @@
                        (slice_vectors
                         (vec-reinterpret
                          a
-                         'uint8 32) 0 1 16) 0 1 5))
+                         'uint8 32) 0 1 16) 0 1 5)
+11)
                      (concat_vectors
                       (slice_vectors
                        (slice_vectors
                         (vec-reinterpret
                          a
                          'uint8 32) 0 1 16) 0 1 5)
-                      (x11 (uint8_t (bv 0 8)))))
+                      (x11 (uint8_t (bv 0 8)))
+5)
+11)
                                (vec-if
                      (x32 (sca-eq
  (uint8_t
@@ -23808,14 +25110,17 @@
                         (slice_vectors
                          (vec-reinterpret
                           a
-                          'uint8 32) 0 1 16) 0 1 6))
+                          'uint8 32) 0 1 16) 0 1 6)
+10)
                       (concat_vectors
                        (slice_vectors
                         (slice_vectors
                          (vec-reinterpret
                           a
                           'uint8 32) 0 1 16) 0 1 6)
-                       (x10 (uint8_t (bv 0 8)))))
+                       (x10 (uint8_t (bv 0 8)))
+6)
+10)
                                (vec-if
                       (x32 (sca-eq
  (uint8_t
@@ -23828,14 +25133,17 @@
                          (slice_vectors
                           (vec-reinterpret
                            a
-                           'uint8 32) 0 1 16) 0 1 7))
+                           'uint8 32) 0 1 16) 0 1 7)
+9)
                        (concat_vectors
                         (slice_vectors
                          (slice_vectors
                           (vec-reinterpret
                            a
                            'uint8 32) 0 1 16) 0 1 7)
-                        (x9 (uint8_t (bv 0 8)))))
+                        (x9 (uint8_t (bv 0 8)))
+7)
+9)
                                (vec-if
                        (x32 (sca-eq
  (uint8_t
@@ -23848,14 +25156,17 @@
                           (slice_vectors
                            (vec-reinterpret
                             a
-                            'uint8 32) 0 1 16) 0 1 8))
+                            'uint8 32) 0 1 16) 0 1 8)
+8)
                         (concat_vectors
                          (slice_vectors
                           (slice_vectors
                            (vec-reinterpret
                             a
                             'uint8 32) 0 1 16) 0 1 8)
-                         (x8 (uint8_t (bv 0 8)))))
+                         (x8 (uint8_t (bv 0 8)))
+8)
+8)
                                (vec-if
                         (x32 (sca-eq
  (uint8_t
@@ -23868,14 +25179,17 @@
                            (slice_vectors
                             (vec-reinterpret
                              a
-                             'uint8 32) 0 1 16) 0 1 9))
+                             'uint8 32) 0 1 16) 0 1 9)
+7)
                          (concat_vectors
                           (slice_vectors
                            (slice_vectors
                             (vec-reinterpret
                              a
                              'uint8 32) 0 1 16) 0 1 9)
-                          (x7 (uint8_t (bv 0 8)))))
+                          (x7 (uint8_t (bv 0 8)))
+9)
+7)
                                (vec-if
                          (x32 (sca-eq
  (uint8_t
@@ -23888,14 +25202,17 @@
                             (slice_vectors
                              (vec-reinterpret
                               a
-                              'uint8 32) 0 1 16) 0 1 10))
+                              'uint8 32) 0 1 16) 0 1 10)
+6)
                           (concat_vectors
                            (slice_vectors
                             (slice_vectors
                              (vec-reinterpret
                               a
                               'uint8 32) 0 1 16) 0 1 10)
-                           (x6 (uint8_t (bv 0 8)))))
+                           (x6 (uint8_t (bv 0 8)))
+10)
+6)
                                (vec-if
                           (x32 (sca-eq
  (uint8_t
@@ -23908,14 +25225,17 @@
                              (slice_vectors
                               (vec-reinterpret
                                a
-                               'uint8 32) 0 1 16) 0 1 11))
+                               'uint8 32) 0 1 16) 0 1 11)
+5)
                            (concat_vectors
                             (slice_vectors
                              (slice_vectors
                               (vec-reinterpret
                                a
                                'uint8 32) 0 1 16) 0 1 11)
-                            (x5 (uint8_t (bv 0 8)))))
+                            (x5 (uint8_t (bv 0 8)))
+11)
+5)
                                (vec-if
                            (x32 (sca-eq
  (uint8_t
@@ -23928,14 +25248,17 @@
                               (slice_vectors
                                (vec-reinterpret
                                 a
-                                'uint8 32) 0 1 16) 0 1 12))
+                                'uint8 32) 0 1 16) 0 1 12)
+4)
                             (concat_vectors
                              (slice_vectors
                               (slice_vectors
                                (vec-reinterpret
                                 a
                                 'uint8 32) 0 1 16) 0 1 12)
-                             (x4 (uint8_t (bv 0 8)))))
+                             (x4 (uint8_t (bv 0 8)))
+12)
+4)
                                (vec-if
                             (x32 (sca-eq
  (uint8_t
@@ -23948,14 +25271,17 @@
                                (slice_vectors
                                 (vec-reinterpret
                                  a
-                                 'uint8 32) 0 1 16) 0 1 13))
+                                 'uint8 32) 0 1 16) 0 1 13)
+3)
                              (concat_vectors
                               (slice_vectors
                                (slice_vectors
                                 (vec-reinterpret
                                  a
                                  'uint8 32) 0 1 16) 0 1 13)
-                              (x3 (uint8_t (bv 0 8)))))
+                              (x3 (uint8_t (bv 0 8)))
+13)
+3)
                                (vec-if
                              (x32 (sca-eq
  (uint8_t
@@ -23968,14 +25294,17 @@
                                 (slice_vectors
                                  (vec-reinterpret
                                   a
-                                  'uint8 32) 0 1 16) 0 1 14))
+                                  'uint8 32) 0 1 16) 0 1 14)
+2)
                               (concat_vectors
                                (slice_vectors
                                 (slice_vectors
                                  (vec-reinterpret
                                   a
                                   'uint8 32) 0 1 16) 0 1 14)
-                               (x2 (uint8_t (bv 0 8)))))
+                               (x2 (uint8_t (bv 0 8)))
+14)
+2)
                                (vec-if
                               (x32 (sca-eq
  (uint8_t
@@ -23988,14 +25317,17 @@
                                  (slice_vectors
                                   (vec-reinterpret
                                    a
-                                   'uint8 32) 0 1 16) 0 1 15))
+                                   'uint8 32) 0 1 16) 0 1 15)
+1)
                                (concat_vectors
                                 (slice_vectors
                                  (slice_vectors
                                   (vec-reinterpret
                                    a
                                    'uint8 32) 0 1 16) 0 1 15)
-                                (uint8_t (bv 0 8))))
+                                (uint8_t (bv 0 8))
+15)
+1)
                                (vec-if
                                (x32 (sca-eq
  (uint8_t
@@ -24022,14 +25354,17 @@
                    (slice_vectors
                     (vec-reinterpret
                      a
-                     'uint8 32) 0 1 16) 0 1 1))
+                     'uint8 32) 0 1 16) 0 1 1)
+15)
                  (concat_vectors
                   (slice_vectors
                    (slice_vectors
                     (vec-reinterpret
                      a
                      'uint8 32) 0 1 16) 0 1 1)
-                  (x15 (uint8_t (bv 0 8)))))
+                  (x15 (uint8_t (bv 0 8)))
+1)
+15)
                                (vec-if
                  (x32 (sca-eq
  (uint8_t
@@ -24042,14 +25377,17 @@
                     (slice_vectors
                      (vec-reinterpret
                       a
-                      'uint8 32) 0 1 16) 0 1 2))
+                      'uint8 32) 0 1 16) 0 1 2)
+14)
                   (concat_vectors
                    (slice_vectors
                     (slice_vectors
                      (vec-reinterpret
                       a
                       'uint8 32) 0 1 16) 0 1 2)
-                   (x14 (uint8_t (bv 0 8)))))
+                   (x14 (uint8_t (bv 0 8)))
+2)
+14)
                                (vec-if
                   (x32 (sca-eq
  (uint8_t
@@ -24062,14 +25400,17 @@
                      (slice_vectors
                       (vec-reinterpret
                        a
-                       'uint8 32) 0 1 16) 0 1 3))
+                       'uint8 32) 0 1 16) 0 1 3)
+13)
                    (concat_vectors
                     (slice_vectors
                      (slice_vectors
                       (vec-reinterpret
                        a
                        'uint8 32) 0 1 16) 0 1 3)
-                    (x13 (uint8_t (bv 0 8)))))
+                    (x13 (uint8_t (bv 0 8)))
+3)
+13)
                                (vec-if
                    (x32 (sca-eq
  (uint8_t
@@ -24082,14 +25423,17 @@
                       (slice_vectors
                        (vec-reinterpret
                         a
-                        'uint8 32) 0 1 16) 0 1 4))
+                        'uint8 32) 0 1 16) 0 1 4)
+12)
                     (concat_vectors
                      (slice_vectors
                       (slice_vectors
                        (vec-reinterpret
                         a
                         'uint8 32) 0 1 16) 0 1 4)
-                     (x12 (uint8_t (bv 0 8)))))
+                     (x12 (uint8_t (bv 0 8)))
+4)
+12)
                                (vec-if
                     (x32 (sca-eq
  (uint8_t
@@ -24102,14 +25446,17 @@
                        (slice_vectors
                         (vec-reinterpret
                          a
-                         'uint8 32) 0 1 16) 0 1 5))
+                         'uint8 32) 0 1 16) 0 1 5)
+11)
                      (concat_vectors
                       (slice_vectors
                        (slice_vectors
                         (vec-reinterpret
                          a
                          'uint8 32) 0 1 16) 0 1 5)
-                      (x11 (uint8_t (bv 0 8)))))
+                      (x11 (uint8_t (bv 0 8)))
+5)
+11)
                                (vec-if
                      (x32 (sca-eq
  (uint8_t
@@ -24122,14 +25469,17 @@
                         (slice_vectors
                          (vec-reinterpret
                           a
-                          'uint8 32) 0 1 16) 0 1 6))
+                          'uint8 32) 0 1 16) 0 1 6)
+10)
                       (concat_vectors
                        (slice_vectors
                         (slice_vectors
                          (vec-reinterpret
                           a
                           'uint8 32) 0 1 16) 0 1 6)
-                       (x10 (uint8_t (bv 0 8)))))
+                       (x10 (uint8_t (bv 0 8)))
+6)
+10)
                                (vec-if
                       (x32 (sca-eq
  (uint8_t
@@ -24142,14 +25492,17 @@
                          (slice_vectors
                           (vec-reinterpret
                            a
-                           'uint8 32) 0 1 16) 0 1 7))
+                           'uint8 32) 0 1 16) 0 1 7)
+9)
                        (concat_vectors
                         (slice_vectors
                          (slice_vectors
                           (vec-reinterpret
                            a
                            'uint8 32) 0 1 16) 0 1 7)
-                        (x9 (uint8_t (bv 0 8)))))
+                        (x9 (uint8_t (bv 0 8)))
+7)
+9)
                                (vec-if
                        (x32 (sca-eq
  (uint8_t
@@ -24162,14 +25515,17 @@
                           (slice_vectors
                            (vec-reinterpret
                             a
-                            'uint8 32) 0 1 16) 0 1 8))
+                            'uint8 32) 0 1 16) 0 1 8)
+8)
                         (concat_vectors
                          (slice_vectors
                           (slice_vectors
                            (vec-reinterpret
                             a
                             'uint8 32) 0 1 16) 0 1 8)
-                         (x8 (uint8_t (bv 0 8)))))
+                         (x8 (uint8_t (bv 0 8)))
+8)
+8)
                                (vec-if
                         (x32 (sca-eq
  (uint8_t
@@ -24182,14 +25538,17 @@
                            (slice_vectors
                             (vec-reinterpret
                              a
-                             'uint8 32) 0 1 16) 0 1 9))
+                             'uint8 32) 0 1 16) 0 1 9)
+7)
                          (concat_vectors
                           (slice_vectors
                            (slice_vectors
                             (vec-reinterpret
                              a
                              'uint8 32) 0 1 16) 0 1 9)
-                          (x7 (uint8_t (bv 0 8)))))
+                          (x7 (uint8_t (bv 0 8)))
+9)
+7)
                                (vec-if
                          (x32 (sca-eq
  (uint8_t
@@ -24202,14 +25561,17 @@
                             (slice_vectors
                              (vec-reinterpret
                               a
-                              'uint8 32) 0 1 16) 0 1 10))
+                              'uint8 32) 0 1 16) 0 1 10)
+6)
                           (concat_vectors
                            (slice_vectors
                             (slice_vectors
                              (vec-reinterpret
                               a
                               'uint8 32) 0 1 16) 0 1 10)
-                           (x6 (uint8_t (bv 0 8)))))
+                           (x6 (uint8_t (bv 0 8)))
+10)
+6)
                                (vec-if
                           (x32 (sca-eq
  (uint8_t
@@ -24222,14 +25584,17 @@
                              (slice_vectors
                               (vec-reinterpret
                                a
-                               'uint8 32) 0 1 16) 0 1 11))
+                               'uint8 32) 0 1 16) 0 1 11)
+5)
                            (concat_vectors
                             (slice_vectors
                              (slice_vectors
                               (vec-reinterpret
                                a
                                'uint8 32) 0 1 16) 0 1 11)
-                            (x5 (uint8_t (bv 0 8)))))
+                            (x5 (uint8_t (bv 0 8)))
+11)
+5)
                                (vec-if
                            (x32 (sca-eq
  (uint8_t
@@ -24242,14 +25607,17 @@
                               (slice_vectors
                                (vec-reinterpret
                                 a
-                                'uint8 32) 0 1 16) 0 1 12))
+                                'uint8 32) 0 1 16) 0 1 12)
+4)
                             (concat_vectors
                              (slice_vectors
                               (slice_vectors
                                (vec-reinterpret
                                 a
                                 'uint8 32) 0 1 16) 0 1 12)
-                             (x4 (uint8_t (bv 0 8)))))
+                             (x4 (uint8_t (bv 0 8)))
+12)
+4)
                                (vec-if
                             (x32 (sca-eq
  (uint8_t
@@ -24262,14 +25630,17 @@
                                (slice_vectors
                                 (vec-reinterpret
                                  a
-                                 'uint8 32) 0 1 16) 0 1 13))
+                                 'uint8 32) 0 1 16) 0 1 13)
+3)
                              (concat_vectors
                               (slice_vectors
                                (slice_vectors
                                 (vec-reinterpret
                                  a
                                  'uint8 32) 0 1 16) 0 1 13)
-                              (x3 (uint8_t (bv 0 8)))))
+                              (x3 (uint8_t (bv 0 8)))
+13)
+3)
                                (vec-if
                              (x32 (sca-eq
  (uint8_t
@@ -24282,14 +25653,17 @@
                                 (slice_vectors
                                  (vec-reinterpret
                                   a
-                                  'uint8 32) 0 1 16) 0 1 14))
+                                  'uint8 32) 0 1 16) 0 1 14)
+2)
                               (concat_vectors
                                (slice_vectors
                                 (slice_vectors
                                  (vec-reinterpret
                                   a
                                   'uint8 32) 0 1 16) 0 1 14)
-                               (x2 (uint8_t (bv 0 8)))))
+                               (x2 (uint8_t (bv 0 8)))
+14)
+2)
                                (vec-if
                               (x32 (sca-eq
  (uint8_t
@@ -24302,14 +25676,17 @@
                                  (slice_vectors
                                   (vec-reinterpret
                                    a
-                                   'uint8 32) 0 1 16) 0 1 15))
+                                   'uint8 32) 0 1 16) 0 1 15)
+1)
                                (concat_vectors
                                 (slice_vectors
                                  (slice_vectors
                                   (vec-reinterpret
                                    a
                                    'uint8 32) 0 1 16) 0 1 15)
-                                (uint8_t (bv 0 8))))
+                                (uint8_t (bv 0 8))
+15)
+1)
                                (vec-if
                                (x32 (sca-eq
  (uint8_t
@@ -24336,14 +25713,17 @@
                    (slice_vectors
                     (vec-reinterpret
                      a
-                     'uint8 32) 0 1 16) 0 1 1))
+                     'uint8 32) 0 1 16) 0 1 1)
+15)
                  (concat_vectors
                   (slice_vectors
                    (slice_vectors
                     (vec-reinterpret
                      a
                      'uint8 32) 0 1 16) 0 1 1)
-                  (x15 (uint8_t (bv 0 8)))))
+                  (x15 (uint8_t (bv 0 8)))
+1)
+15)
                                (vec-if
                  (x32 (sca-eq
  (uint8_t
@@ -24356,14 +25736,17 @@
                     (slice_vectors
                      (vec-reinterpret
                       a
-                      'uint8 32) 0 1 16) 0 1 2))
+                      'uint8 32) 0 1 16) 0 1 2)
+14)
                   (concat_vectors
                    (slice_vectors
                     (slice_vectors
                      (vec-reinterpret
                       a
                       'uint8 32) 0 1 16) 0 1 2)
-                   (x14 (uint8_t (bv 0 8)))))
+                   (x14 (uint8_t (bv 0 8)))
+2)
+14)
                                (vec-if
                   (x32 (sca-eq
  (uint8_t
@@ -24376,14 +25759,17 @@
                      (slice_vectors
                       (vec-reinterpret
                        a
-                       'uint8 32) 0 1 16) 0 1 3))
+                       'uint8 32) 0 1 16) 0 1 3)
+13)
                    (concat_vectors
                     (slice_vectors
                      (slice_vectors
                       (vec-reinterpret
                        a
                        'uint8 32) 0 1 16) 0 1 3)
-                    (x13 (uint8_t (bv 0 8)))))
+                    (x13 (uint8_t (bv 0 8)))
+3)
+13)
                                (vec-if
                    (x32 (sca-eq
  (uint8_t
@@ -24396,14 +25782,17 @@
                       (slice_vectors
                        (vec-reinterpret
                         a
-                        'uint8 32) 0 1 16) 0 1 4))
+                        'uint8 32) 0 1 16) 0 1 4)
+12)
                     (concat_vectors
                      (slice_vectors
                       (slice_vectors
                        (vec-reinterpret
                         a
                         'uint8 32) 0 1 16) 0 1 4)
-                     (x12 (uint8_t (bv 0 8)))))
+                     (x12 (uint8_t (bv 0 8)))
+4)
+12)
                                (vec-if
                     (x32 (sca-eq
  (uint8_t
@@ -24416,14 +25805,17 @@
                        (slice_vectors
                         (vec-reinterpret
                          a
-                         'uint8 32) 0 1 16) 0 1 5))
+                         'uint8 32) 0 1 16) 0 1 5)
+11)
                      (concat_vectors
                       (slice_vectors
                        (slice_vectors
                         (vec-reinterpret
                          a
                          'uint8 32) 0 1 16) 0 1 5)
-                      (x11 (uint8_t (bv 0 8)))))
+                      (x11 (uint8_t (bv 0 8)))
+5)
+11)
                                (vec-if
                      (x32 (sca-eq
  (uint8_t
@@ -24436,14 +25828,17 @@
                         (slice_vectors
                          (vec-reinterpret
                           a
-                          'uint8 32) 0 1 16) 0 1 6))
+                          'uint8 32) 0 1 16) 0 1 6)
+10)
                       (concat_vectors
                        (slice_vectors
                         (slice_vectors
                          (vec-reinterpret
                           a
                           'uint8 32) 0 1 16) 0 1 6)
-                       (x10 (uint8_t (bv 0 8)))))
+                       (x10 (uint8_t (bv 0 8)))
+6)
+10)
                                (vec-if
                       (x32 (sca-eq
  (uint8_t
@@ -24456,14 +25851,17 @@
                          (slice_vectors
                           (vec-reinterpret
                            a
-                           'uint8 32) 0 1 16) 0 1 7))
+                           'uint8 32) 0 1 16) 0 1 7)
+9)
                        (concat_vectors
                         (slice_vectors
                          (slice_vectors
                           (vec-reinterpret
                            a
                            'uint8 32) 0 1 16) 0 1 7)
-                        (x9 (uint8_t (bv 0 8)))))
+                        (x9 (uint8_t (bv 0 8)))
+7)
+9)
                                (vec-if
                        (x32 (sca-eq
  (uint8_t
@@ -24476,14 +25874,17 @@
                           (slice_vectors
                            (vec-reinterpret
                             a
-                            'uint8 32) 0 1 16) 0 1 8))
+                            'uint8 32) 0 1 16) 0 1 8)
+8)
                         (concat_vectors
                          (slice_vectors
                           (slice_vectors
                            (vec-reinterpret
                             a
                             'uint8 32) 0 1 16) 0 1 8)
-                         (x8 (uint8_t (bv 0 8)))))
+                         (x8 (uint8_t (bv 0 8)))
+8)
+8)
                                (vec-if
                         (x32 (sca-eq
  (uint8_t
@@ -24496,14 +25897,17 @@
                            (slice_vectors
                             (vec-reinterpret
                              a
-                             'uint8 32) 0 1 16) 0 1 9))
+                             'uint8 32) 0 1 16) 0 1 9)
+7)
                          (concat_vectors
                           (slice_vectors
                            (slice_vectors
                             (vec-reinterpret
                              a
                              'uint8 32) 0 1 16) 0 1 9)
-                          (x7 (uint8_t (bv 0 8)))))
+                          (x7 (uint8_t (bv 0 8)))
+9)
+7)
                                (vec-if
                          (x32 (sca-eq
  (uint8_t
@@ -24516,14 +25920,17 @@
                             (slice_vectors
                              (vec-reinterpret
                               a
-                              'uint8 32) 0 1 16) 0 1 10))
+                              'uint8 32) 0 1 16) 0 1 10)
+6)
                           (concat_vectors
                            (slice_vectors
                             (slice_vectors
                              (vec-reinterpret
                               a
                               'uint8 32) 0 1 16) 0 1 10)
-                           (x6 (uint8_t (bv 0 8)))))
+                           (x6 (uint8_t (bv 0 8)))
+10)
+6)
                                (vec-if
                           (x32 (sca-eq
  (uint8_t
@@ -24536,14 +25943,17 @@
                              (slice_vectors
                               (vec-reinterpret
                                a
-                               'uint8 32) 0 1 16) 0 1 11))
+                               'uint8 32) 0 1 16) 0 1 11)
+5)
                            (concat_vectors
                             (slice_vectors
                              (slice_vectors
                               (vec-reinterpret
                                a
                                'uint8 32) 0 1 16) 0 1 11)
-                            (x5 (uint8_t (bv 0 8)))))
+                            (x5 (uint8_t (bv 0 8)))
+11)
+5)
                                (vec-if
                            (x32 (sca-eq
  (uint8_t
@@ -24556,14 +25966,17 @@
                               (slice_vectors
                                (vec-reinterpret
                                 a
-                                'uint8 32) 0 1 16) 0 1 12))
+                                'uint8 32) 0 1 16) 0 1 12)
+4)
                             (concat_vectors
                              (slice_vectors
                               (slice_vectors
                                (vec-reinterpret
                                 a
                                 'uint8 32) 0 1 16) 0 1 12)
-                             (x4 (uint8_t (bv 0 8)))))
+                             (x4 (uint8_t (bv 0 8)))
+12)
+4)
                                (vec-if
                             (x32 (sca-eq
  (uint8_t
@@ -24576,14 +25989,17 @@
                                (slice_vectors
                                 (vec-reinterpret
                                  a
-                                 'uint8 32) 0 1 16) 0 1 13))
+                                 'uint8 32) 0 1 16) 0 1 13)
+3)
                              (concat_vectors
                               (slice_vectors
                                (slice_vectors
                                 (vec-reinterpret
                                  a
                                  'uint8 32) 0 1 16) 0 1 13)
-                              (x3 (uint8_t (bv 0 8)))))
+                              (x3 (uint8_t (bv 0 8)))
+13)
+3)
                                (vec-if
                              (x32 (sca-eq
  (uint8_t
@@ -24596,14 +26012,17 @@
                                 (slice_vectors
                                  (vec-reinterpret
                                   a
-                                  'uint8 32) 0 1 16) 0 1 14))
+                                  'uint8 32) 0 1 16) 0 1 14)
+2)
                               (concat_vectors
                                (slice_vectors
                                 (slice_vectors
                                  (vec-reinterpret
                                   a
                                   'uint8 32) 0 1 16) 0 1 14)
-                               (x2 (uint8_t (bv 0 8)))))
+                               (x2 (uint8_t (bv 0 8)))
+14)
+2)
                                (vec-if
                               (x32 (sca-eq
  (uint8_t
@@ -24616,14 +26035,17 @@
                                  (slice_vectors
                                   (vec-reinterpret
                                    a
-                                   'uint8 32) 0 1 16) 0 1 15))
+                                   'uint8 32) 0 1 16) 0 1 15)
+1)
                                (concat_vectors
                                 (slice_vectors
                                  (slice_vectors
                                   (vec-reinterpret
                                    a
                                    'uint8 32) 0 1 16) 0 1 15)
-                                (uint8_t (bv 0 8))))
+                                (uint8_t (bv 0 8))
+15)
+1)
                                (vec-if
                                (x32 (sca-eq
  (uint8_t
@@ -24650,14 +26072,17 @@
                    (slice_vectors
                     (vec-reinterpret
                      a
-                     'uint8 32) 0 1 16) 0 1 1))
+                     'uint8 32) 0 1 16) 0 1 1)
+15)
                  (concat_vectors
                   (slice_vectors
                    (slice_vectors
                     (vec-reinterpret
                      a
                      'uint8 32) 0 1 16) 0 1 1)
-                  (x15 (uint8_t (bv 0 8)))))
+                  (x15 (uint8_t (bv 0 8)))
+1)
+15)
                                (vec-if
                  (x32 (sca-eq
  (uint8_t
@@ -24670,14 +26095,17 @@
                     (slice_vectors
                      (vec-reinterpret
                       a
-                      'uint8 32) 0 1 16) 0 1 2))
+                      'uint8 32) 0 1 16) 0 1 2)
+14)
                   (concat_vectors
                    (slice_vectors
                     (slice_vectors
                      (vec-reinterpret
                       a
                       'uint8 32) 0 1 16) 0 1 2)
-                   (x14 (uint8_t (bv 0 8)))))
+                   (x14 (uint8_t (bv 0 8)))
+2)
+14)
                                (vec-if
                   (x32 (sca-eq
  (uint8_t
@@ -24690,14 +26118,17 @@
                      (slice_vectors
                       (vec-reinterpret
                        a
-                       'uint8 32) 0 1 16) 0 1 3))
+                       'uint8 32) 0 1 16) 0 1 3)
+13)
                    (concat_vectors
                     (slice_vectors
                      (slice_vectors
                       (vec-reinterpret
                        a
                        'uint8 32) 0 1 16) 0 1 3)
-                    (x13 (uint8_t (bv 0 8)))))
+                    (x13 (uint8_t (bv 0 8)))
+3)
+13)
                                (vec-if
                    (x32 (sca-eq
  (uint8_t
@@ -24710,14 +26141,17 @@
                       (slice_vectors
                        (vec-reinterpret
                         a
-                        'uint8 32) 0 1 16) 0 1 4))
+                        'uint8 32) 0 1 16) 0 1 4)
+12)
                     (concat_vectors
                      (slice_vectors
                       (slice_vectors
                        (vec-reinterpret
                         a
                         'uint8 32) 0 1 16) 0 1 4)
-                     (x12 (uint8_t (bv 0 8)))))
+                     (x12 (uint8_t (bv 0 8)))
+4)
+12)
                                (vec-if
                     (x32 (sca-eq
  (uint8_t
@@ -24730,14 +26164,17 @@
                        (slice_vectors
                         (vec-reinterpret
                          a
-                         'uint8 32) 0 1 16) 0 1 5))
+                         'uint8 32) 0 1 16) 0 1 5)
+11)
                      (concat_vectors
                       (slice_vectors
                        (slice_vectors
                         (vec-reinterpret
                          a
                          'uint8 32) 0 1 16) 0 1 5)
-                      (x11 (uint8_t (bv 0 8)))))
+                      (x11 (uint8_t (bv 0 8)))
+5)
+11)
                                (vec-if
                      (x32 (sca-eq
  (uint8_t
@@ -24750,14 +26187,17 @@
                         (slice_vectors
                          (vec-reinterpret
                           a
-                          'uint8 32) 0 1 16) 0 1 6))
+                          'uint8 32) 0 1 16) 0 1 6)
+10)
                       (concat_vectors
                        (slice_vectors
                         (slice_vectors
                          (vec-reinterpret
                           a
                           'uint8 32) 0 1 16) 0 1 6)
-                       (x10 (uint8_t (bv 0 8)))))
+                       (x10 (uint8_t (bv 0 8)))
+6)
+10)
                                (vec-if
                       (x32 (sca-eq
  (uint8_t
@@ -24770,14 +26210,17 @@
                          (slice_vectors
                           (vec-reinterpret
                            a
-                           'uint8 32) 0 1 16) 0 1 7))
+                           'uint8 32) 0 1 16) 0 1 7)
+9)
                        (concat_vectors
                         (slice_vectors
                          (slice_vectors
                           (vec-reinterpret
                            a
                            'uint8 32) 0 1 16) 0 1 7)
-                        (x9 (uint8_t (bv 0 8)))))
+                        (x9 (uint8_t (bv 0 8)))
+7)
+9)
                                (vec-if
                        (x32 (sca-eq
  (uint8_t
@@ -24790,14 +26233,17 @@
                           (slice_vectors
                            (vec-reinterpret
                             a
-                            'uint8 32) 0 1 16) 0 1 8))
+                            'uint8 32) 0 1 16) 0 1 8)
+8)
                         (concat_vectors
                          (slice_vectors
                           (slice_vectors
                            (vec-reinterpret
                             a
                             'uint8 32) 0 1 16) 0 1 8)
-                         (x8 (uint8_t (bv 0 8)))))
+                         (x8 (uint8_t (bv 0 8)))
+8)
+8)
                                (vec-if
                         (x32 (sca-eq
  (uint8_t
@@ -24810,14 +26256,17 @@
                            (slice_vectors
                             (vec-reinterpret
                              a
-                             'uint8 32) 0 1 16) 0 1 9))
+                             'uint8 32) 0 1 16) 0 1 9)
+7)
                          (concat_vectors
                           (slice_vectors
                            (slice_vectors
                             (vec-reinterpret
                              a
                              'uint8 32) 0 1 16) 0 1 9)
-                          (x7 (uint8_t (bv 0 8)))))
+                          (x7 (uint8_t (bv 0 8)))
+9)
+7)
                                (vec-if
                          (x32 (sca-eq
  (uint8_t
@@ -24830,14 +26279,17 @@
                             (slice_vectors
                              (vec-reinterpret
                               a
-                              'uint8 32) 0 1 16) 0 1 10))
+                              'uint8 32) 0 1 16) 0 1 10)
+6)
                           (concat_vectors
                            (slice_vectors
                             (slice_vectors
                              (vec-reinterpret
                               a
                               'uint8 32) 0 1 16) 0 1 10)
-                           (x6 (uint8_t (bv 0 8)))))
+                           (x6 (uint8_t (bv 0 8)))
+10)
+6)
                                (vec-if
                           (x32 (sca-eq
  (uint8_t
@@ -24850,14 +26302,17 @@
                              (slice_vectors
                               (vec-reinterpret
                                a
-                               'uint8 32) 0 1 16) 0 1 11))
+                               'uint8 32) 0 1 16) 0 1 11)
+5)
                            (concat_vectors
                             (slice_vectors
                              (slice_vectors
                               (vec-reinterpret
                                a
                                'uint8 32) 0 1 16) 0 1 11)
-                            (x5 (uint8_t (bv 0 8)))))
+                            (x5 (uint8_t (bv 0 8)))
+11)
+5)
                                (vec-if
                            (x32 (sca-eq
  (uint8_t
@@ -24870,14 +26325,17 @@
                               (slice_vectors
                                (vec-reinterpret
                                 a
-                                'uint8 32) 0 1 16) 0 1 12))
+                                'uint8 32) 0 1 16) 0 1 12)
+4)
                             (concat_vectors
                              (slice_vectors
                               (slice_vectors
                                (vec-reinterpret
                                 a
                                 'uint8 32) 0 1 16) 0 1 12)
-                             (x4 (uint8_t (bv 0 8)))))
+                             (x4 (uint8_t (bv 0 8)))
+12)
+4)
                                (vec-if
                             (x32 (sca-eq
  (uint8_t
@@ -24890,14 +26348,17 @@
                                (slice_vectors
                                 (vec-reinterpret
                                  a
-                                 'uint8 32) 0 1 16) 0 1 13))
+                                 'uint8 32) 0 1 16) 0 1 13)
+3)
                              (concat_vectors
                               (slice_vectors
                                (slice_vectors
                                 (vec-reinterpret
                                  a
                                  'uint8 32) 0 1 16) 0 1 13)
-                              (x3 (uint8_t (bv 0 8)))))
+                              (x3 (uint8_t (bv 0 8)))
+13)
+3)
                                (vec-if
                              (x32 (sca-eq
  (uint8_t
@@ -24910,14 +26371,17 @@
                                 (slice_vectors
                                  (vec-reinterpret
                                   a
-                                  'uint8 32) 0 1 16) 0 1 14))
+                                  'uint8 32) 0 1 16) 0 1 14)
+2)
                               (concat_vectors
                                (slice_vectors
                                 (slice_vectors
                                  (vec-reinterpret
                                   a
                                   'uint8 32) 0 1 16) 0 1 14)
-                               (x2 (uint8_t (bv 0 8)))))
+                               (x2 (uint8_t (bv 0 8)))
+14)
+2)
                                (vec-if
                               (x32 (sca-eq
  (uint8_t
@@ -24930,14 +26394,17 @@
                                  (slice_vectors
                                   (vec-reinterpret
                                    a
-                                   'uint8 32) 0 1 16) 0 1 15))
+                                   'uint8 32) 0 1 16) 0 1 15)
+1)
                                (concat_vectors
                                 (slice_vectors
                                  (slice_vectors
                                   (vec-reinterpret
                                    a
                                    'uint8 32) 0 1 16) 0 1 15)
-                                (uint8_t (bv 0 8))))
+                                (uint8_t (bv 0 8))
+15)
+1)
                                (vec-if
                                (x32 (sca-eq
  (uint8_t
@@ -24964,14 +26431,17 @@
                    (slice_vectors
                     (vec-reinterpret
                      a
-                     'uint8 32) 0 1 16) 0 1 1))
+                     'uint8 32) 0 1 16) 0 1 1)
+15)
                  (concat_vectors
                   (slice_vectors
                    (slice_vectors
                     (vec-reinterpret
                      a
                      'uint8 32) 0 1 16) 0 1 1)
-                  (x15 (uint8_t (bv 0 8)))))
+                  (x15 (uint8_t (bv 0 8)))
+1)
+15)
                                (vec-if
                  (x32 (sca-eq
  (uint8_t
@@ -24984,14 +26454,17 @@
                     (slice_vectors
                      (vec-reinterpret
                       a
-                      'uint8 32) 0 1 16) 0 1 2))
+                      'uint8 32) 0 1 16) 0 1 2)
+14)
                   (concat_vectors
                    (slice_vectors
                     (slice_vectors
                      (vec-reinterpret
                       a
                       'uint8 32) 0 1 16) 0 1 2)
-                   (x14 (uint8_t (bv 0 8)))))
+                   (x14 (uint8_t (bv 0 8)))
+2)
+14)
                                (vec-if
                   (x32 (sca-eq
  (uint8_t
@@ -25004,14 +26477,17 @@
                      (slice_vectors
                       (vec-reinterpret
                        a
-                       'uint8 32) 0 1 16) 0 1 3))
+                       'uint8 32) 0 1 16) 0 1 3)
+13)
                    (concat_vectors
                     (slice_vectors
                      (slice_vectors
                       (vec-reinterpret
                        a
                        'uint8 32) 0 1 16) 0 1 3)
-                    (x13 (uint8_t (bv 0 8)))))
+                    (x13 (uint8_t (bv 0 8)))
+3)
+13)
                                (vec-if
                    (x32 (sca-eq
  (uint8_t
@@ -25024,14 +26500,17 @@
                       (slice_vectors
                        (vec-reinterpret
                         a
-                        'uint8 32) 0 1 16) 0 1 4))
+                        'uint8 32) 0 1 16) 0 1 4)
+12)
                     (concat_vectors
                      (slice_vectors
                       (slice_vectors
                        (vec-reinterpret
                         a
                         'uint8 32) 0 1 16) 0 1 4)
-                     (x12 (uint8_t (bv 0 8)))))
+                     (x12 (uint8_t (bv 0 8)))
+4)
+12)
                                (vec-if
                     (x32 (sca-eq
  (uint8_t
@@ -25044,14 +26523,17 @@
                        (slice_vectors
                         (vec-reinterpret
                          a
-                         'uint8 32) 0 1 16) 0 1 5))
+                         'uint8 32) 0 1 16) 0 1 5)
+11)
                      (concat_vectors
                       (slice_vectors
                        (slice_vectors
                         (vec-reinterpret
                          a
                          'uint8 32) 0 1 16) 0 1 5)
-                      (x11 (uint8_t (bv 0 8)))))
+                      (x11 (uint8_t (bv 0 8)))
+5)
+11)
                                (vec-if
                      (x32 (sca-eq
  (uint8_t
@@ -25064,14 +26546,17 @@
                         (slice_vectors
                          (vec-reinterpret
                           a
-                          'uint8 32) 0 1 16) 0 1 6))
+                          'uint8 32) 0 1 16) 0 1 6)
+10)
                       (concat_vectors
                        (slice_vectors
                         (slice_vectors
                          (vec-reinterpret
                           a
                           'uint8 32) 0 1 16) 0 1 6)
-                       (x10 (uint8_t (bv 0 8)))))
+                       (x10 (uint8_t (bv 0 8)))
+6)
+10)
                                (vec-if
                       (x32 (sca-eq
  (uint8_t
@@ -25084,14 +26569,17 @@
                          (slice_vectors
                           (vec-reinterpret
                            a
-                           'uint8 32) 0 1 16) 0 1 7))
+                           'uint8 32) 0 1 16) 0 1 7)
+9)
                        (concat_vectors
                         (slice_vectors
                          (slice_vectors
                           (vec-reinterpret
                            a
                            'uint8 32) 0 1 16) 0 1 7)
-                        (x9 (uint8_t (bv 0 8)))))
+                        (x9 (uint8_t (bv 0 8)))
+7)
+9)
                                (vec-if
                        (x32 (sca-eq
  (uint8_t
@@ -25104,14 +26592,17 @@
                           (slice_vectors
                            (vec-reinterpret
                             a
-                            'uint8 32) 0 1 16) 0 1 8))
+                            'uint8 32) 0 1 16) 0 1 8)
+8)
                         (concat_vectors
                          (slice_vectors
                           (slice_vectors
                            (vec-reinterpret
                             a
                             'uint8 32) 0 1 16) 0 1 8)
-                         (x8 (uint8_t (bv 0 8)))))
+                         (x8 (uint8_t (bv 0 8)))
+8)
+8)
                                (vec-if
                         (x32 (sca-eq
  (uint8_t
@@ -25124,14 +26615,17 @@
                            (slice_vectors
                             (vec-reinterpret
                              a
-                             'uint8 32) 0 1 16) 0 1 9))
+                             'uint8 32) 0 1 16) 0 1 9)
+7)
                          (concat_vectors
                           (slice_vectors
                            (slice_vectors
                             (vec-reinterpret
                              a
                              'uint8 32) 0 1 16) 0 1 9)
-                          (x7 (uint8_t (bv 0 8)))))
+                          (x7 (uint8_t (bv 0 8)))
+9)
+7)
                                (vec-if
                          (x32 (sca-eq
  (uint8_t
@@ -25144,14 +26638,17 @@
                             (slice_vectors
                              (vec-reinterpret
                               a
-                              'uint8 32) 0 1 16) 0 1 10))
+                              'uint8 32) 0 1 16) 0 1 10)
+6)
                           (concat_vectors
                            (slice_vectors
                             (slice_vectors
                              (vec-reinterpret
                               a
                               'uint8 32) 0 1 16) 0 1 10)
-                           (x6 (uint8_t (bv 0 8)))))
+                           (x6 (uint8_t (bv 0 8)))
+10)
+6)
                                (vec-if
                           (x32 (sca-eq
  (uint8_t
@@ -25164,14 +26661,17 @@
                              (slice_vectors
                               (vec-reinterpret
                                a
-                               'uint8 32) 0 1 16) 0 1 11))
+                               'uint8 32) 0 1 16) 0 1 11)
+5)
                            (concat_vectors
                             (slice_vectors
                              (slice_vectors
                               (vec-reinterpret
                                a
                                'uint8 32) 0 1 16) 0 1 11)
-                            (x5 (uint8_t (bv 0 8)))))
+                            (x5 (uint8_t (bv 0 8)))
+11)
+5)
                                (vec-if
                            (x32 (sca-eq
  (uint8_t
@@ -25184,14 +26684,17 @@
                               (slice_vectors
                                (vec-reinterpret
                                 a
-                                'uint8 32) 0 1 16) 0 1 12))
+                                'uint8 32) 0 1 16) 0 1 12)
+4)
                             (concat_vectors
                              (slice_vectors
                               (slice_vectors
                                (vec-reinterpret
                                 a
                                 'uint8 32) 0 1 16) 0 1 12)
-                             (x4 (uint8_t (bv 0 8)))))
+                             (x4 (uint8_t (bv 0 8)))
+12)
+4)
                                (vec-if
                             (x32 (sca-eq
  (uint8_t
@@ -25204,14 +26707,17 @@
                                (slice_vectors
                                 (vec-reinterpret
                                  a
-                                 'uint8 32) 0 1 16) 0 1 13))
+                                 'uint8 32) 0 1 16) 0 1 13)
+3)
                              (concat_vectors
                               (slice_vectors
                                (slice_vectors
                                 (vec-reinterpret
                                  a
                                  'uint8 32) 0 1 16) 0 1 13)
-                              (x3 (uint8_t (bv 0 8)))))
+                              (x3 (uint8_t (bv 0 8)))
+13)
+3)
                                (vec-if
                              (x32 (sca-eq
  (uint8_t
@@ -25224,14 +26730,17 @@
                                 (slice_vectors
                                  (vec-reinterpret
                                   a
-                                  'uint8 32) 0 1 16) 0 1 14))
+                                  'uint8 32) 0 1 16) 0 1 14)
+2)
                               (concat_vectors
                                (slice_vectors
                                 (slice_vectors
                                  (vec-reinterpret
                                   a
                                   'uint8 32) 0 1 16) 0 1 14)
-                               (x2 (uint8_t (bv 0 8)))))
+                               (x2 (uint8_t (bv 0 8)))
+14)
+2)
                                (vec-if
                               (x32 (sca-eq
  (uint8_t
@@ -25244,14 +26753,17 @@
                                  (slice_vectors
                                   (vec-reinterpret
                                    a
-                                   'uint8 32) 0 1 16) 0 1 15))
+                                   'uint8 32) 0 1 16) 0 1 15)
+1)
                                (concat_vectors
                                 (slice_vectors
                                  (slice_vectors
                                   (vec-reinterpret
                                    a
                                    'uint8 32) 0 1 16) 0 1 15)
-                                (uint8_t (bv 0 8))))
+                                (uint8_t (bv 0 8))
+15)
+1)
                                (vec-if
                                (x32 (sca-eq
  (uint8_t
@@ -25278,14 +26790,17 @@
                    (slice_vectors
                     (vec-reinterpret
                      a
-                     'uint8 32) 0 1 16) 0 1 1))
+                     'uint8 32) 0 1 16) 0 1 1)
+15)
                  (concat_vectors
                   (slice_vectors
                    (slice_vectors
                     (vec-reinterpret
                      a
                      'uint8 32) 0 1 16) 0 1 1)
-                  (x15 (uint8_t (bv 0 8)))))
+                  (x15 (uint8_t (bv 0 8)))
+1)
+15)
                                (vec-if
                  (x32 (sca-eq
  (uint8_t
@@ -25298,14 +26813,17 @@
                     (slice_vectors
                      (vec-reinterpret
                       a
-                      'uint8 32) 0 1 16) 0 1 2))
+                      'uint8 32) 0 1 16) 0 1 2)
+14)
                   (concat_vectors
                    (slice_vectors
                     (slice_vectors
                      (vec-reinterpret
                       a
                       'uint8 32) 0 1 16) 0 1 2)
-                   (x14 (uint8_t (bv 0 8)))))
+                   (x14 (uint8_t (bv 0 8)))
+2)
+14)
                                (vec-if
                   (x32 (sca-eq
  (uint8_t
@@ -25318,14 +26836,17 @@
                      (slice_vectors
                       (vec-reinterpret
                        a
-                       'uint8 32) 0 1 16) 0 1 3))
+                       'uint8 32) 0 1 16) 0 1 3)
+13)
                    (concat_vectors
                     (slice_vectors
                      (slice_vectors
                       (vec-reinterpret
                        a
                        'uint8 32) 0 1 16) 0 1 3)
-                    (x13 (uint8_t (bv 0 8)))))
+                    (x13 (uint8_t (bv 0 8)))
+3)
+13)
                                (vec-if
                    (x32 (sca-eq
  (uint8_t
@@ -25338,14 +26859,17 @@
                       (slice_vectors
                        (vec-reinterpret
                         a
-                        'uint8 32) 0 1 16) 0 1 4))
+                        'uint8 32) 0 1 16) 0 1 4)
+12)
                     (concat_vectors
                      (slice_vectors
                       (slice_vectors
                        (vec-reinterpret
                         a
                         'uint8 32) 0 1 16) 0 1 4)
-                     (x12 (uint8_t (bv 0 8)))))
+                     (x12 (uint8_t (bv 0 8)))
+4)
+12)
                                (vec-if
                     (x32 (sca-eq
  (uint8_t
@@ -25358,14 +26882,17 @@
                        (slice_vectors
                         (vec-reinterpret
                          a
-                         'uint8 32) 0 1 16) 0 1 5))
+                         'uint8 32) 0 1 16) 0 1 5)
+11)
                      (concat_vectors
                       (slice_vectors
                        (slice_vectors
                         (vec-reinterpret
                          a
                          'uint8 32) 0 1 16) 0 1 5)
-                      (x11 (uint8_t (bv 0 8)))))
+                      (x11 (uint8_t (bv 0 8)))
+5)
+11)
                                (vec-if
                      (x32 (sca-eq
  (uint8_t
@@ -25378,14 +26905,17 @@
                         (slice_vectors
                          (vec-reinterpret
                           a
-                          'uint8 32) 0 1 16) 0 1 6))
+                          'uint8 32) 0 1 16) 0 1 6)
+10)
                       (concat_vectors
                        (slice_vectors
                         (slice_vectors
                          (vec-reinterpret
                           a
                           'uint8 32) 0 1 16) 0 1 6)
-                       (x10 (uint8_t (bv 0 8)))))
+                       (x10 (uint8_t (bv 0 8)))
+6)
+10)
                                (vec-if
                       (x32 (sca-eq
  (uint8_t
@@ -25398,14 +26928,17 @@
                          (slice_vectors
                           (vec-reinterpret
                            a
-                           'uint8 32) 0 1 16) 0 1 7))
+                           'uint8 32) 0 1 16) 0 1 7)
+9)
                        (concat_vectors
                         (slice_vectors
                          (slice_vectors
                           (vec-reinterpret
                            a
                            'uint8 32) 0 1 16) 0 1 7)
-                        (x9 (uint8_t (bv 0 8)))))
+                        (x9 (uint8_t (bv 0 8)))
+7)
+9)
                                (vec-if
                        (x32 (sca-eq
  (uint8_t
@@ -25418,14 +26951,17 @@
                           (slice_vectors
                            (vec-reinterpret
                             a
-                            'uint8 32) 0 1 16) 0 1 8))
+                            'uint8 32) 0 1 16) 0 1 8)
+8)
                         (concat_vectors
                          (slice_vectors
                           (slice_vectors
                            (vec-reinterpret
                             a
                             'uint8 32) 0 1 16) 0 1 8)
-                         (x8 (uint8_t (bv 0 8)))))
+                         (x8 (uint8_t (bv 0 8)))
+8)
+8)
                                (vec-if
                         (x32 (sca-eq
  (uint8_t
@@ -25438,14 +26974,17 @@
                            (slice_vectors
                             (vec-reinterpret
                              a
-                             'uint8 32) 0 1 16) 0 1 9))
+                             'uint8 32) 0 1 16) 0 1 9)
+7)
                          (concat_vectors
                           (slice_vectors
                            (slice_vectors
                             (vec-reinterpret
                              a
                              'uint8 32) 0 1 16) 0 1 9)
-                          (x7 (uint8_t (bv 0 8)))))
+                          (x7 (uint8_t (bv 0 8)))
+9)
+7)
                                (vec-if
                          (x32 (sca-eq
  (uint8_t
@@ -25458,14 +26997,17 @@
                             (slice_vectors
                              (vec-reinterpret
                               a
-                              'uint8 32) 0 1 16) 0 1 10))
+                              'uint8 32) 0 1 16) 0 1 10)
+6)
                           (concat_vectors
                            (slice_vectors
                             (slice_vectors
                              (vec-reinterpret
                               a
                               'uint8 32) 0 1 16) 0 1 10)
-                           (x6 (uint8_t (bv 0 8)))))
+                           (x6 (uint8_t (bv 0 8)))
+10)
+6)
                                (vec-if
                           (x32 (sca-eq
  (uint8_t
@@ -25478,14 +27020,17 @@
                              (slice_vectors
                               (vec-reinterpret
                                a
-                               'uint8 32) 0 1 16) 0 1 11))
+                               'uint8 32) 0 1 16) 0 1 11)
+5)
                            (concat_vectors
                             (slice_vectors
                              (slice_vectors
                               (vec-reinterpret
                                a
                                'uint8 32) 0 1 16) 0 1 11)
-                            (x5 (uint8_t (bv 0 8)))))
+                            (x5 (uint8_t (bv 0 8)))
+11)
+5)
                                (vec-if
                            (x32 (sca-eq
  (uint8_t
@@ -25498,14 +27043,17 @@
                               (slice_vectors
                                (vec-reinterpret
                                 a
-                                'uint8 32) 0 1 16) 0 1 12))
+                                'uint8 32) 0 1 16) 0 1 12)
+4)
                             (concat_vectors
                              (slice_vectors
                               (slice_vectors
                                (vec-reinterpret
                                 a
                                 'uint8 32) 0 1 16) 0 1 12)
-                             (x4 (uint8_t (bv 0 8)))))
+                             (x4 (uint8_t (bv 0 8)))
+12)
+4)
                                (vec-if
                             (x32 (sca-eq
  (uint8_t
@@ -25518,14 +27066,17 @@
                                (slice_vectors
                                 (vec-reinterpret
                                  a
-                                 'uint8 32) 0 1 16) 0 1 13))
+                                 'uint8 32) 0 1 16) 0 1 13)
+3)
                              (concat_vectors
                               (slice_vectors
                                (slice_vectors
                                 (vec-reinterpret
                                  a
                                  'uint8 32) 0 1 16) 0 1 13)
-                              (x3 (uint8_t (bv 0 8)))))
+                              (x3 (uint8_t (bv 0 8)))
+13)
+3)
                                (vec-if
                              (x32 (sca-eq
  (uint8_t
@@ -25538,14 +27089,17 @@
                                 (slice_vectors
                                  (vec-reinterpret
                                   a
-                                  'uint8 32) 0 1 16) 0 1 14))
+                                  'uint8 32) 0 1 16) 0 1 14)
+2)
                               (concat_vectors
                                (slice_vectors
                                 (slice_vectors
                                  (vec-reinterpret
                                   a
                                   'uint8 32) 0 1 16) 0 1 14)
-                               (x2 (uint8_t (bv 0 8)))))
+                               (x2 (uint8_t (bv 0 8)))
+14)
+2)
                                (vec-if
                               (x32 (sca-eq
  (uint8_t
@@ -25558,14 +27112,17 @@
                                  (slice_vectors
                                   (vec-reinterpret
                                    a
-                                   'uint8 32) 0 1 16) 0 1 15))
+                                   'uint8 32) 0 1 16) 0 1 15)
+1)
                                (concat_vectors
                                 (slice_vectors
                                  (slice_vectors
                                   (vec-reinterpret
                                    a
                                    'uint8 32) 0 1 16) 0 1 15)
-                                (uint8_t (bv 0 8))))
+                                (uint8_t (bv 0 8))
+15)
+1)
                                (vec-if
                                (x32 (sca-eq
  (uint8_t
@@ -25746,14 +27303,17 @@
                     (vec-reinterpret
                      a
                      'uint8 32) 0 1 16) 15 1 1)
-                  (x15 (uint8_t (bv 0 8))))
+                  (x15 (uint8_t (bv 0 8)))
+1)
                  (concat_vectors
                   (x15 (uint8_t (bv 0 8)))
                   (slice_vectors
                    (slice_vectors
                     (vec-reinterpret
                      a
-                     'uint8 32) 1 1 16) 15 1 1)))
+                     'uint8 32) 1 1 16) 15 1 1)
+15)
+1)
                                (vec-if
                  (x32 (sca-eq
  (uint8_t
@@ -25766,14 +27326,17 @@
                      (vec-reinterpret
                       a
                       'uint8 32) 0 1 16) 14 1 2)
-                   (x14 (uint8_t (bv 0 8))))
+                   (x14 (uint8_t (bv 0 8)))
+2)
                   (concat_vectors
                    (x14 (uint8_t (bv 0 8)))
                    (slice_vectors
                     (slice_vectors
                      (vec-reinterpret
                       a
-                      'uint8 32) 1 1 16) 14 1 2)))
+                      'uint8 32) 1 1 16) 14 1 2)
+14)
+2)
                                (vec-if
                   (x32 (sca-eq
  (uint8_t
@@ -25786,14 +27349,17 @@
                       (vec-reinterpret
                        a
                        'uint8 32) 0 1 16) 13 1 3)
-                    (x13 (uint8_t (bv 0 8))))
+                    (x13 (uint8_t (bv 0 8)))
+3)
                    (concat_vectors
                     (x13 (uint8_t (bv 0 8)))
                     (slice_vectors
                      (slice_vectors
                       (vec-reinterpret
                        a
-                       'uint8 32) 1 1 16) 13 1 3)))
+                       'uint8 32) 1 1 16) 13 1 3)
+13)
+3)
                                (vec-if
                    (x32 (sca-eq
  (uint8_t
@@ -25806,14 +27372,17 @@
                        (vec-reinterpret
                         a
                         'uint8 32) 0 1 16) 12 1 4)
-                     (x12 (uint8_t (bv 0 8))))
+                     (x12 (uint8_t (bv 0 8)))
+4)
                     (concat_vectors
                      (x12 (uint8_t (bv 0 8)))
                      (slice_vectors
                       (slice_vectors
                        (vec-reinterpret
                         a
-                        'uint8 32) 1 1 16) 12 1 4)))
+                        'uint8 32) 1 1 16) 12 1 4)
+12)
+4)
                                (vec-if
                     (x32 (sca-eq
  (uint8_t
@@ -25826,14 +27395,17 @@
                         (vec-reinterpret
                          a
                          'uint8 32) 0 1 16) 11 1 5)
-                      (x11 (uint8_t (bv 0 8))))
+                      (x11 (uint8_t (bv 0 8)))
+5)
                      (concat_vectors
                       (x11 (uint8_t (bv 0 8)))
                       (slice_vectors
                        (slice_vectors
                         (vec-reinterpret
                          a
-                         'uint8 32) 1 1 16) 11 1 5)))
+                         'uint8 32) 1 1 16) 11 1 5)
+11)
+5)
                                (vec-if
                      (x32 (sca-eq
  (uint8_t
@@ -25846,14 +27418,17 @@
                          (vec-reinterpret
                           a
                           'uint8 32) 0 1 16) 10 1 6)
-                       (x10 (uint8_t (bv 0 8))))
+                       (x10 (uint8_t (bv 0 8)))
+6)
                       (concat_vectors
                        (x10 (uint8_t (bv 0 8)))
                        (slice_vectors
                         (slice_vectors
                          (vec-reinterpret
                           a
-                          'uint8 32) 1 1 16) 10 1 6)))
+                          'uint8 32) 1 1 16) 10 1 6)
+10)
+6)
                                (vec-if
                       (x32 (sca-eq
  (uint8_t
@@ -25866,14 +27441,17 @@
                           (vec-reinterpret
                            a
                            'uint8 32) 0 1 16) 9 1 7)
-                        (x9 (uint8_t (bv 0 8))))
+                        (x9 (uint8_t (bv 0 8)))
+7)
                        (concat_vectors
                         (x9 (uint8_t (bv 0 8)))
                         (slice_vectors
                          (slice_vectors
                           (vec-reinterpret
                            a
-                           'uint8 32) 1 1 16) 9 1 7)))
+                           'uint8 32) 1 1 16) 9 1 7)
+9)
+7)
                                (vec-if
                        (x32 (sca-eq
  (uint8_t
@@ -25886,14 +27464,17 @@
                            (vec-reinterpret
                             a
                             'uint8 32) 0 1 16) 8 1 8)
-                         (x8 (uint8_t (bv 0 8))))
+                         (x8 (uint8_t (bv 0 8)))
+8)
                         (concat_vectors
                          (x8 (uint8_t (bv 0 8)))
                          (slice_vectors
                           (slice_vectors
                            (vec-reinterpret
                             a
-                            'uint8 32) 1 1 16) 8 1 8)))
+                            'uint8 32) 1 1 16) 8 1 8)
+8)
+8)
                                (vec-if
                         (x32 (sca-eq
  (uint8_t
@@ -25906,14 +27487,17 @@
                             (vec-reinterpret
                              a
                              'uint8 32) 0 1 16) 7 1 9)
-                          (x7 (uint8_t (bv 0 8))))
+                          (x7 (uint8_t (bv 0 8)))
+9)
                          (concat_vectors
                           (x7 (uint8_t (bv 0 8)))
                           (slice_vectors
                            (slice_vectors
                             (vec-reinterpret
                              a
-                             'uint8 32) 1 1 16) 7 1 9)))
+                             'uint8 32) 1 1 16) 7 1 9)
+7)
+9)
                                (vec-if
                          (x32 (sca-eq
  (uint8_t
@@ -25926,14 +27510,17 @@
                              (vec-reinterpret
                               a
                               'uint8 32) 0 1 16) 6 1 10)
-                           (x6 (uint8_t (bv 0 8))))
+                           (x6 (uint8_t (bv 0 8)))
+10)
                           (concat_vectors
                            (x6 (uint8_t (bv 0 8)))
                            (slice_vectors
                             (slice_vectors
                              (vec-reinterpret
                               a
-                              'uint8 32) 1 1 16) 6 1 10)))
+                              'uint8 32) 1 1 16) 6 1 10)
+6)
+10)
                                (vec-if
                           (x32 (sca-eq
  (uint8_t
@@ -25946,14 +27533,17 @@
                               (vec-reinterpret
                                a
                                'uint8 32) 0 1 16) 5 1 11)
-                            (x5 (uint8_t (bv 0 8))))
+                            (x5 (uint8_t (bv 0 8)))
+11)
                            (concat_vectors
                             (x5 (uint8_t (bv 0 8)))
                             (slice_vectors
                              (slice_vectors
                               (vec-reinterpret
                                a
-                               'uint8 32) 1 1 16) 5 1 11)))
+                               'uint8 32) 1 1 16) 5 1 11)
+5)
+11)
                                (vec-if
                            (x32 (sca-eq
  (uint8_t
@@ -25966,14 +27556,17 @@
                                (vec-reinterpret
                                 a
                                 'uint8 32) 0 1 16) 4 1 12)
-                             (x4 (uint8_t (bv 0 8))))
+                             (x4 (uint8_t (bv 0 8)))
+12)
                             (concat_vectors
                              (x4 (uint8_t (bv 0 8)))
                              (slice_vectors
                               (slice_vectors
                                (vec-reinterpret
                                 a
-                                'uint8 32) 1 1 16) 4 1 12)))
+                                'uint8 32) 1 1 16) 4 1 12)
+4)
+12)
                                (vec-if
                             (x32 (sca-eq
  (uint8_t
@@ -25986,14 +27579,17 @@
                                 (vec-reinterpret
                                  a
                                  'uint8 32) 0 1 16) 3 1 13)
-                              (x3 (uint8_t (bv 0 8))))
+                              (x3 (uint8_t (bv 0 8)))
+13)
                              (concat_vectors
                               (x3 (uint8_t (bv 0 8)))
                               (slice_vectors
                                (slice_vectors
                                 (vec-reinterpret
                                  a
-                                 'uint8 32) 1 1 16) 3 1 13)))
+                                 'uint8 32) 1 1 16) 3 1 13)
+3)
+13)
                                (vec-if
                              (x32 (sca-eq
  (uint8_t
@@ -26006,14 +27602,17 @@
                                  (vec-reinterpret
                                   a
                                   'uint8 32) 0 1 16) 2 1 14)
-                               (x2 (uint8_t (bv 0 8))))
+                               (x2 (uint8_t (bv 0 8)))
+14)
                               (concat_vectors
                                (x2 (uint8_t (bv 0 8)))
                                (slice_vectors
                                 (slice_vectors
                                  (vec-reinterpret
                                   a
-                                  'uint8 32) 1 1 16) 2 1 14)))
+                                  'uint8 32) 1 1 16) 2 1 14)
+2)
+14)
                                (vec-if
                               (x32 (sca-eq
  (uint8_t
@@ -26026,14 +27625,17 @@
                                   (vec-reinterpret
                                    a
                                    'uint8 32) 0 1 16) 1 1 15)
-                                (uint8_t (bv 0 8)))
+                                (uint8_t (bv 0 8))
+15)
                                (concat_vectors
                                 (uint8_t (bv 0 8))
                                 (slice_vectors
                                  (slice_vectors
                                   (vec-reinterpret
                                    a
-                                   'uint8 32) 1 1 16) 1 1 15)))
+                                   'uint8 32) 1 1 16) 1 1 15)
+1)
+15)
                                (vec-if
                                (x32 (sca-eq
  (uint8_t
@@ -26060,14 +27662,17 @@
                     (vec-reinterpret
                      a
                      'uint8 32) 0 1 16) 15 1 1)
-                  (x15 (uint8_t (bv 0 8))))
+                  (x15 (uint8_t (bv 0 8)))
+1)
                  (concat_vectors
                   (x15 (uint8_t (bv 0 8)))
                   (slice_vectors
                    (slice_vectors
                     (vec-reinterpret
                      a
-                     'uint8 32) 1 1 16) 15 1 1)))
+                     'uint8 32) 1 1 16) 15 1 1)
+15)
+1)
                                (vec-if
                  (x32 (sca-eq
  (uint8_t
@@ -26080,14 +27685,17 @@
                      (vec-reinterpret
                       a
                       'uint8 32) 0 1 16) 14 1 2)
-                   (x14 (uint8_t (bv 0 8))))
+                   (x14 (uint8_t (bv 0 8)))
+2)
                   (concat_vectors
                    (x14 (uint8_t (bv 0 8)))
                    (slice_vectors
                     (slice_vectors
                      (vec-reinterpret
                       a
-                      'uint8 32) 1 1 16) 14 1 2)))
+                      'uint8 32) 1 1 16) 14 1 2)
+14)
+2)
                                (vec-if
                   (x32 (sca-eq
  (uint8_t
@@ -26100,14 +27708,17 @@
                       (vec-reinterpret
                        a
                        'uint8 32) 0 1 16) 13 1 3)
-                    (x13 (uint8_t (bv 0 8))))
+                    (x13 (uint8_t (bv 0 8)))
+3)
                    (concat_vectors
                     (x13 (uint8_t (bv 0 8)))
                     (slice_vectors
                      (slice_vectors
                       (vec-reinterpret
                        a
-                       'uint8 32) 1 1 16) 13 1 3)))
+                       'uint8 32) 1 1 16) 13 1 3)
+13)
+3)
                                (vec-if
                    (x32 (sca-eq
  (uint8_t
@@ -26120,14 +27731,17 @@
                        (vec-reinterpret
                         a
                         'uint8 32) 0 1 16) 12 1 4)
-                     (x12 (uint8_t (bv 0 8))))
+                     (x12 (uint8_t (bv 0 8)))
+4)
                     (concat_vectors
                      (x12 (uint8_t (bv 0 8)))
                      (slice_vectors
                       (slice_vectors
                        (vec-reinterpret
                         a
-                        'uint8 32) 1 1 16) 12 1 4)))
+                        'uint8 32) 1 1 16) 12 1 4)
+12)
+4)
                                (vec-if
                     (x32 (sca-eq
  (uint8_t
@@ -26140,14 +27754,17 @@
                         (vec-reinterpret
                          a
                          'uint8 32) 0 1 16) 11 1 5)
-                      (x11 (uint8_t (bv 0 8))))
+                      (x11 (uint8_t (bv 0 8)))
+5)
                      (concat_vectors
                       (x11 (uint8_t (bv 0 8)))
                       (slice_vectors
                        (slice_vectors
                         (vec-reinterpret
                          a
-                         'uint8 32) 1 1 16) 11 1 5)))
+                         'uint8 32) 1 1 16) 11 1 5)
+11)
+5)
                                (vec-if
                      (x32 (sca-eq
  (uint8_t
@@ -26160,14 +27777,17 @@
                          (vec-reinterpret
                           a
                           'uint8 32) 0 1 16) 10 1 6)
-                       (x10 (uint8_t (bv 0 8))))
+                       (x10 (uint8_t (bv 0 8)))
+6)
                       (concat_vectors
                        (x10 (uint8_t (bv 0 8)))
                        (slice_vectors
                         (slice_vectors
                          (vec-reinterpret
                           a
-                          'uint8 32) 1 1 16) 10 1 6)))
+                          'uint8 32) 1 1 16) 10 1 6)
+10)
+6)
                                (vec-if
                       (x32 (sca-eq
  (uint8_t
@@ -26180,14 +27800,17 @@
                           (vec-reinterpret
                            a
                            'uint8 32) 0 1 16) 9 1 7)
-                        (x9 (uint8_t (bv 0 8))))
+                        (x9 (uint8_t (bv 0 8)))
+7)
                        (concat_vectors
                         (x9 (uint8_t (bv 0 8)))
                         (slice_vectors
                          (slice_vectors
                           (vec-reinterpret
                            a
-                           'uint8 32) 1 1 16) 9 1 7)))
+                           'uint8 32) 1 1 16) 9 1 7)
+9)
+7)
                                (vec-if
                        (x32 (sca-eq
  (uint8_t
@@ -26200,14 +27823,17 @@
                            (vec-reinterpret
                             a
                             'uint8 32) 0 1 16) 8 1 8)
-                         (x8 (uint8_t (bv 0 8))))
+                         (x8 (uint8_t (bv 0 8)))
+8)
                         (concat_vectors
                          (x8 (uint8_t (bv 0 8)))
                          (slice_vectors
                           (slice_vectors
                            (vec-reinterpret
                             a
-                            'uint8 32) 1 1 16) 8 1 8)))
+                            'uint8 32) 1 1 16) 8 1 8)
+8)
+8)
                                (vec-if
                         (x32 (sca-eq
  (uint8_t
@@ -26220,14 +27846,17 @@
                             (vec-reinterpret
                              a
                              'uint8 32) 0 1 16) 7 1 9)
-                          (x7 (uint8_t (bv 0 8))))
+                          (x7 (uint8_t (bv 0 8)))
+9)
                          (concat_vectors
                           (x7 (uint8_t (bv 0 8)))
                           (slice_vectors
                            (slice_vectors
                             (vec-reinterpret
                              a
-                             'uint8 32) 1 1 16) 7 1 9)))
+                             'uint8 32) 1 1 16) 7 1 9)
+7)
+9)
                                (vec-if
                          (x32 (sca-eq
  (uint8_t
@@ -26240,14 +27869,17 @@
                              (vec-reinterpret
                               a
                               'uint8 32) 0 1 16) 6 1 10)
-                           (x6 (uint8_t (bv 0 8))))
+                           (x6 (uint8_t (bv 0 8)))
+10)
                           (concat_vectors
                            (x6 (uint8_t (bv 0 8)))
                            (slice_vectors
                             (slice_vectors
                              (vec-reinterpret
                               a
-                              'uint8 32) 1 1 16) 6 1 10)))
+                              'uint8 32) 1 1 16) 6 1 10)
+6)
+10)
                                (vec-if
                           (x32 (sca-eq
  (uint8_t
@@ -26260,14 +27892,17 @@
                               (vec-reinterpret
                                a
                                'uint8 32) 0 1 16) 5 1 11)
-                            (x5 (uint8_t (bv 0 8))))
+                            (x5 (uint8_t (bv 0 8)))
+11)
                            (concat_vectors
                             (x5 (uint8_t (bv 0 8)))
                             (slice_vectors
                              (slice_vectors
                               (vec-reinterpret
                                a
-                               'uint8 32) 1 1 16) 5 1 11)))
+                               'uint8 32) 1 1 16) 5 1 11)
+5)
+11)
                                (vec-if
                            (x32 (sca-eq
  (uint8_t
@@ -26280,14 +27915,17 @@
                                (vec-reinterpret
                                 a
                                 'uint8 32) 0 1 16) 4 1 12)
-                             (x4 (uint8_t (bv 0 8))))
+                             (x4 (uint8_t (bv 0 8)))
+12)
                             (concat_vectors
                              (x4 (uint8_t (bv 0 8)))
                              (slice_vectors
                               (slice_vectors
                                (vec-reinterpret
                                 a
-                                'uint8 32) 1 1 16) 4 1 12)))
+                                'uint8 32) 1 1 16) 4 1 12)
+4)
+12)
                                (vec-if
                             (x32 (sca-eq
  (uint8_t
@@ -26300,14 +27938,17 @@
                                 (vec-reinterpret
                                  a
                                  'uint8 32) 0 1 16) 3 1 13)
-                              (x3 (uint8_t (bv 0 8))))
+                              (x3 (uint8_t (bv 0 8)))
+13)
                              (concat_vectors
                               (x3 (uint8_t (bv 0 8)))
                               (slice_vectors
                                (slice_vectors
                                 (vec-reinterpret
                                  a
-                                 'uint8 32) 1 1 16) 3 1 13)))
+                                 'uint8 32) 1 1 16) 3 1 13)
+3)
+13)
                                (vec-if
                              (x32 (sca-eq
  (uint8_t
@@ -26320,14 +27961,17 @@
                                  (vec-reinterpret
                                   a
                                   'uint8 32) 0 1 16) 2 1 14)
-                               (x2 (uint8_t (bv 0 8))))
+                               (x2 (uint8_t (bv 0 8)))
+14)
                               (concat_vectors
                                (x2 (uint8_t (bv 0 8)))
                                (slice_vectors
                                 (slice_vectors
                                  (vec-reinterpret
                                   a
-                                  'uint8 32) 1 1 16) 2 1 14)))
+                                  'uint8 32) 1 1 16) 2 1 14)
+2)
+14)
                                (vec-if
                               (x32 (sca-eq
  (uint8_t
@@ -26340,14 +27984,17 @@
                                   (vec-reinterpret
                                    a
                                    'uint8 32) 0 1 16) 1 1 15)
-                                (uint8_t (bv 0 8)))
+                                (uint8_t (bv 0 8))
+15)
                                (concat_vectors
                                 (uint8_t (bv 0 8))
                                 (slice_vectors
                                  (slice_vectors
                                   (vec-reinterpret
                                    a
-                                   'uint8 32) 1 1 16) 1 1 15)))
+                                   'uint8 32) 1 1 16) 1 1 15)
+1)
+15)
                                (vec-if
                                (x32 (sca-eq
  (uint8_t
@@ -26374,14 +28021,17 @@
                     (vec-reinterpret
                      a
                      'uint8 32) 0 1 16) 15 1 1)
-                  (x15 (uint8_t (bv 0 8))))
+                  (x15 (uint8_t (bv 0 8)))
+1)
                  (concat_vectors
                   (x15 (uint8_t (bv 0 8)))
                   (slice_vectors
                    (slice_vectors
                     (vec-reinterpret
                      a
-                     'uint8 32) 1 1 16) 15 1 1)))
+                     'uint8 32) 1 1 16) 15 1 1)
+15)
+1)
                                (vec-if
                  (x32 (sca-eq
  (uint8_t
@@ -26394,14 +28044,17 @@
                      (vec-reinterpret
                       a
                       'uint8 32) 0 1 16) 14 1 2)
-                   (x14 (uint8_t (bv 0 8))))
+                   (x14 (uint8_t (bv 0 8)))
+2)
                   (concat_vectors
                    (x14 (uint8_t (bv 0 8)))
                    (slice_vectors
                     (slice_vectors
                      (vec-reinterpret
                       a
-                      'uint8 32) 1 1 16) 14 1 2)))
+                      'uint8 32) 1 1 16) 14 1 2)
+14)
+2)
                                (vec-if
                   (x32 (sca-eq
  (uint8_t
@@ -26414,14 +28067,17 @@
                       (vec-reinterpret
                        a
                        'uint8 32) 0 1 16) 13 1 3)
-                    (x13 (uint8_t (bv 0 8))))
+                    (x13 (uint8_t (bv 0 8)))
+3)
                    (concat_vectors
                     (x13 (uint8_t (bv 0 8)))
                     (slice_vectors
                      (slice_vectors
                       (vec-reinterpret
                        a
-                       'uint8 32) 1 1 16) 13 1 3)))
+                       'uint8 32) 1 1 16) 13 1 3)
+13)
+3)
                                (vec-if
                    (x32 (sca-eq
  (uint8_t
@@ -26434,14 +28090,17 @@
                        (vec-reinterpret
                         a
                         'uint8 32) 0 1 16) 12 1 4)
-                     (x12 (uint8_t (bv 0 8))))
+                     (x12 (uint8_t (bv 0 8)))
+4)
                     (concat_vectors
                      (x12 (uint8_t (bv 0 8)))
                      (slice_vectors
                       (slice_vectors
                        (vec-reinterpret
                         a
-                        'uint8 32) 1 1 16) 12 1 4)))
+                        'uint8 32) 1 1 16) 12 1 4)
+12)
+4)
                                (vec-if
                     (x32 (sca-eq
  (uint8_t
@@ -26454,14 +28113,17 @@
                         (vec-reinterpret
                          a
                          'uint8 32) 0 1 16) 11 1 5)
-                      (x11 (uint8_t (bv 0 8))))
+                      (x11 (uint8_t (bv 0 8)))
+5)
                      (concat_vectors
                       (x11 (uint8_t (bv 0 8)))
                       (slice_vectors
                        (slice_vectors
                         (vec-reinterpret
                          a
-                         'uint8 32) 1 1 16) 11 1 5)))
+                         'uint8 32) 1 1 16) 11 1 5)
+11)
+5)
                                (vec-if
                      (x32 (sca-eq
  (uint8_t
@@ -26474,14 +28136,17 @@
                          (vec-reinterpret
                           a
                           'uint8 32) 0 1 16) 10 1 6)
-                       (x10 (uint8_t (bv 0 8))))
+                       (x10 (uint8_t (bv 0 8)))
+6)
                       (concat_vectors
                        (x10 (uint8_t (bv 0 8)))
                        (slice_vectors
                         (slice_vectors
                          (vec-reinterpret
                           a
-                          'uint8 32) 1 1 16) 10 1 6)))
+                          'uint8 32) 1 1 16) 10 1 6)
+10)
+6)
                                (vec-if
                       (x32 (sca-eq
  (uint8_t
@@ -26494,14 +28159,17 @@
                           (vec-reinterpret
                            a
                            'uint8 32) 0 1 16) 9 1 7)
-                        (x9 (uint8_t (bv 0 8))))
+                        (x9 (uint8_t (bv 0 8)))
+7)
                        (concat_vectors
                         (x9 (uint8_t (bv 0 8)))
                         (slice_vectors
                          (slice_vectors
                           (vec-reinterpret
                            a
-                           'uint8 32) 1 1 16) 9 1 7)))
+                           'uint8 32) 1 1 16) 9 1 7)
+9)
+7)
                                (vec-if
                        (x32 (sca-eq
  (uint8_t
@@ -26514,14 +28182,17 @@
                            (vec-reinterpret
                             a
                             'uint8 32) 0 1 16) 8 1 8)
-                         (x8 (uint8_t (bv 0 8))))
+                         (x8 (uint8_t (bv 0 8)))
+8)
                         (concat_vectors
                          (x8 (uint8_t (bv 0 8)))
                          (slice_vectors
                           (slice_vectors
                            (vec-reinterpret
                             a
-                            'uint8 32) 1 1 16) 8 1 8)))
+                            'uint8 32) 1 1 16) 8 1 8)
+8)
+8)
                                (vec-if
                         (x32 (sca-eq
  (uint8_t
@@ -26534,14 +28205,17 @@
                             (vec-reinterpret
                              a
                              'uint8 32) 0 1 16) 7 1 9)
-                          (x7 (uint8_t (bv 0 8))))
+                          (x7 (uint8_t (bv 0 8)))
+9)
                          (concat_vectors
                           (x7 (uint8_t (bv 0 8)))
                           (slice_vectors
                            (slice_vectors
                             (vec-reinterpret
                              a
-                             'uint8 32) 1 1 16) 7 1 9)))
+                             'uint8 32) 1 1 16) 7 1 9)
+7)
+9)
                                (vec-if
                          (x32 (sca-eq
  (uint8_t
@@ -26554,14 +28228,17 @@
                              (vec-reinterpret
                               a
                               'uint8 32) 0 1 16) 6 1 10)
-                           (x6 (uint8_t (bv 0 8))))
+                           (x6 (uint8_t (bv 0 8)))
+10)
                           (concat_vectors
                            (x6 (uint8_t (bv 0 8)))
                            (slice_vectors
                             (slice_vectors
                              (vec-reinterpret
                               a
-                              'uint8 32) 1 1 16) 6 1 10)))
+                              'uint8 32) 1 1 16) 6 1 10)
+6)
+10)
                                (vec-if
                           (x32 (sca-eq
  (uint8_t
@@ -26574,14 +28251,17 @@
                               (vec-reinterpret
                                a
                                'uint8 32) 0 1 16) 5 1 11)
-                            (x5 (uint8_t (bv 0 8))))
+                            (x5 (uint8_t (bv 0 8)))
+11)
                            (concat_vectors
                             (x5 (uint8_t (bv 0 8)))
                             (slice_vectors
                              (slice_vectors
                               (vec-reinterpret
                                a
-                               'uint8 32) 1 1 16) 5 1 11)))
+                               'uint8 32) 1 1 16) 5 1 11)
+5)
+11)
                                (vec-if
                            (x32 (sca-eq
  (uint8_t
@@ -26594,14 +28274,17 @@
                                (vec-reinterpret
                                 a
                                 'uint8 32) 0 1 16) 4 1 12)
-                             (x4 (uint8_t (bv 0 8))))
+                             (x4 (uint8_t (bv 0 8)))
+12)
                             (concat_vectors
                              (x4 (uint8_t (bv 0 8)))
                              (slice_vectors
                               (slice_vectors
                                (vec-reinterpret
                                 a
-                                'uint8 32) 1 1 16) 4 1 12)))
+                                'uint8 32) 1 1 16) 4 1 12)
+4)
+12)
                                (vec-if
                             (x32 (sca-eq
  (uint8_t
@@ -26614,14 +28297,17 @@
                                 (vec-reinterpret
                                  a
                                  'uint8 32) 0 1 16) 3 1 13)
-                              (x3 (uint8_t (bv 0 8))))
+                              (x3 (uint8_t (bv 0 8)))
+13)
                              (concat_vectors
                               (x3 (uint8_t (bv 0 8)))
                               (slice_vectors
                                (slice_vectors
                                 (vec-reinterpret
                                  a
-                                 'uint8 32) 1 1 16) 3 1 13)))
+                                 'uint8 32) 1 1 16) 3 1 13)
+3)
+13)
                                (vec-if
                              (x32 (sca-eq
  (uint8_t
@@ -26634,14 +28320,17 @@
                                  (vec-reinterpret
                                   a
                                   'uint8 32) 0 1 16) 2 1 14)
-                               (x2 (uint8_t (bv 0 8))))
+                               (x2 (uint8_t (bv 0 8)))
+14)
                               (concat_vectors
                                (x2 (uint8_t (bv 0 8)))
                                (slice_vectors
                                 (slice_vectors
                                  (vec-reinterpret
                                   a
-                                  'uint8 32) 1 1 16) 2 1 14)))
+                                  'uint8 32) 1 1 16) 2 1 14)
+2)
+14)
                                (vec-if
                               (x32 (sca-eq
  (uint8_t
@@ -26654,14 +28343,17 @@
                                   (vec-reinterpret
                                    a
                                    'uint8 32) 0 1 16) 1 1 15)
-                                (uint8_t (bv 0 8)))
+                                (uint8_t (bv 0 8))
+15)
                                (concat_vectors
                                 (uint8_t (bv 0 8))
                                 (slice_vectors
                                  (slice_vectors
                                   (vec-reinterpret
                                    a
-                                   'uint8 32) 1 1 16) 1 1 15)))
+                                   'uint8 32) 1 1 16) 1 1 15)
+1)
+15)
                                (vec-if
                                (x32 (sca-eq
  (uint8_t
@@ -26688,14 +28380,17 @@
                     (vec-reinterpret
                      a
                      'uint8 32) 0 1 16) 15 1 1)
-                  (x15 (uint8_t (bv 0 8))))
+                  (x15 (uint8_t (bv 0 8)))
+1)
                  (concat_vectors
                   (x15 (uint8_t (bv 0 8)))
                   (slice_vectors
                    (slice_vectors
                     (vec-reinterpret
                      a
-                     'uint8 32) 1 1 16) 15 1 1)))
+                     'uint8 32) 1 1 16) 15 1 1)
+15)
+1)
                                (vec-if
                  (x32 (sca-eq
  (uint8_t
@@ -26708,14 +28403,17 @@
                      (vec-reinterpret
                       a
                       'uint8 32) 0 1 16) 14 1 2)
-                   (x14 (uint8_t (bv 0 8))))
+                   (x14 (uint8_t (bv 0 8)))
+2)
                   (concat_vectors
                    (x14 (uint8_t (bv 0 8)))
                    (slice_vectors
                     (slice_vectors
                      (vec-reinterpret
                       a
-                      'uint8 32) 1 1 16) 14 1 2)))
+                      'uint8 32) 1 1 16) 14 1 2)
+14)
+2)
                                (vec-if
                   (x32 (sca-eq
  (uint8_t
@@ -26728,14 +28426,17 @@
                       (vec-reinterpret
                        a
                        'uint8 32) 0 1 16) 13 1 3)
-                    (x13 (uint8_t (bv 0 8))))
+                    (x13 (uint8_t (bv 0 8)))
+3)
                    (concat_vectors
                     (x13 (uint8_t (bv 0 8)))
                     (slice_vectors
                      (slice_vectors
                       (vec-reinterpret
                        a
-                       'uint8 32) 1 1 16) 13 1 3)))
+                       'uint8 32) 1 1 16) 13 1 3)
+13)
+3)
                                (vec-if
                    (x32 (sca-eq
  (uint8_t
@@ -26748,14 +28449,17 @@
                        (vec-reinterpret
                         a
                         'uint8 32) 0 1 16) 12 1 4)
-                     (x12 (uint8_t (bv 0 8))))
+                     (x12 (uint8_t (bv 0 8)))
+4)
                     (concat_vectors
                      (x12 (uint8_t (bv 0 8)))
                      (slice_vectors
                       (slice_vectors
                        (vec-reinterpret
                         a
-                        'uint8 32) 1 1 16) 12 1 4)))
+                        'uint8 32) 1 1 16) 12 1 4)
+12)
+4)
                                (vec-if
                     (x32 (sca-eq
  (uint8_t
@@ -26768,14 +28472,17 @@
                         (vec-reinterpret
                          a
                          'uint8 32) 0 1 16) 11 1 5)
-                      (x11 (uint8_t (bv 0 8))))
+                      (x11 (uint8_t (bv 0 8)))
+5)
                      (concat_vectors
                       (x11 (uint8_t (bv 0 8)))
                       (slice_vectors
                        (slice_vectors
                         (vec-reinterpret
                          a
-                         'uint8 32) 1 1 16) 11 1 5)))
+                         'uint8 32) 1 1 16) 11 1 5)
+11)
+5)
                                (vec-if
                      (x32 (sca-eq
  (uint8_t
@@ -26788,14 +28495,17 @@
                          (vec-reinterpret
                           a
                           'uint8 32) 0 1 16) 10 1 6)
-                       (x10 (uint8_t (bv 0 8))))
+                       (x10 (uint8_t (bv 0 8)))
+6)
                       (concat_vectors
                        (x10 (uint8_t (bv 0 8)))
                        (slice_vectors
                         (slice_vectors
                          (vec-reinterpret
                           a
-                          'uint8 32) 1 1 16) 10 1 6)))
+                          'uint8 32) 1 1 16) 10 1 6)
+10)
+6)
                                (vec-if
                       (x32 (sca-eq
  (uint8_t
@@ -26808,14 +28518,17 @@
                           (vec-reinterpret
                            a
                            'uint8 32) 0 1 16) 9 1 7)
-                        (x9 (uint8_t (bv 0 8))))
+                        (x9 (uint8_t (bv 0 8)))
+7)
                        (concat_vectors
                         (x9 (uint8_t (bv 0 8)))
                         (slice_vectors
                          (slice_vectors
                           (vec-reinterpret
                            a
-                           'uint8 32) 1 1 16) 9 1 7)))
+                           'uint8 32) 1 1 16) 9 1 7)
+9)
+7)
                                (vec-if
                        (x32 (sca-eq
  (uint8_t
@@ -26828,14 +28541,17 @@
                            (vec-reinterpret
                             a
                             'uint8 32) 0 1 16) 8 1 8)
-                         (x8 (uint8_t (bv 0 8))))
+                         (x8 (uint8_t (bv 0 8)))
+8)
                         (concat_vectors
                          (x8 (uint8_t (bv 0 8)))
                          (slice_vectors
                           (slice_vectors
                            (vec-reinterpret
                             a
-                            'uint8 32) 1 1 16) 8 1 8)))
+                            'uint8 32) 1 1 16) 8 1 8)
+8)
+8)
                                (vec-if
                         (x32 (sca-eq
  (uint8_t
@@ -26848,14 +28564,17 @@
                             (vec-reinterpret
                              a
                              'uint8 32) 0 1 16) 7 1 9)
-                          (x7 (uint8_t (bv 0 8))))
+                          (x7 (uint8_t (bv 0 8)))
+9)
                          (concat_vectors
                           (x7 (uint8_t (bv 0 8)))
                           (slice_vectors
                            (slice_vectors
                             (vec-reinterpret
                              a
-                             'uint8 32) 1 1 16) 7 1 9)))
+                             'uint8 32) 1 1 16) 7 1 9)
+7)
+9)
                                (vec-if
                          (x32 (sca-eq
  (uint8_t
@@ -26868,14 +28587,17 @@
                              (vec-reinterpret
                               a
                               'uint8 32) 0 1 16) 6 1 10)
-                           (x6 (uint8_t (bv 0 8))))
+                           (x6 (uint8_t (bv 0 8)))
+10)
                           (concat_vectors
                            (x6 (uint8_t (bv 0 8)))
                            (slice_vectors
                             (slice_vectors
                              (vec-reinterpret
                               a
-                              'uint8 32) 1 1 16) 6 1 10)))
+                              'uint8 32) 1 1 16) 6 1 10)
+6)
+10)
                                (vec-if
                           (x32 (sca-eq
  (uint8_t
@@ -26888,14 +28610,17 @@
                               (vec-reinterpret
                                a
                                'uint8 32) 0 1 16) 5 1 11)
-                            (x5 (uint8_t (bv 0 8))))
+                            (x5 (uint8_t (bv 0 8)))
+11)
                            (concat_vectors
                             (x5 (uint8_t (bv 0 8)))
                             (slice_vectors
                              (slice_vectors
                               (vec-reinterpret
                                a
-                               'uint8 32) 1 1 16) 5 1 11)))
+                               'uint8 32) 1 1 16) 5 1 11)
+5)
+11)
                                (vec-if
                            (x32 (sca-eq
  (uint8_t
@@ -26908,14 +28633,17 @@
                                (vec-reinterpret
                                 a
                                 'uint8 32) 0 1 16) 4 1 12)
-                             (x4 (uint8_t (bv 0 8))))
+                             (x4 (uint8_t (bv 0 8)))
+12)
                             (concat_vectors
                              (x4 (uint8_t (bv 0 8)))
                              (slice_vectors
                               (slice_vectors
                                (vec-reinterpret
                                 a
-                                'uint8 32) 1 1 16) 4 1 12)))
+                                'uint8 32) 1 1 16) 4 1 12)
+4)
+12)
                                (vec-if
                             (x32 (sca-eq
  (uint8_t
@@ -26928,14 +28656,17 @@
                                 (vec-reinterpret
                                  a
                                  'uint8 32) 0 1 16) 3 1 13)
-                              (x3 (uint8_t (bv 0 8))))
+                              (x3 (uint8_t (bv 0 8)))
+13)
                              (concat_vectors
                               (x3 (uint8_t (bv 0 8)))
                               (slice_vectors
                                (slice_vectors
                                 (vec-reinterpret
                                  a
-                                 'uint8 32) 1 1 16) 3 1 13)))
+                                 'uint8 32) 1 1 16) 3 1 13)
+3)
+13)
                                (vec-if
                              (x32 (sca-eq
  (uint8_t
@@ -26948,14 +28679,17 @@
                                  (vec-reinterpret
                                   a
                                   'uint8 32) 0 1 16) 2 1 14)
-                               (x2 (uint8_t (bv 0 8))))
+                               (x2 (uint8_t (bv 0 8)))
+14)
                               (concat_vectors
                                (x2 (uint8_t (bv 0 8)))
                                (slice_vectors
                                 (slice_vectors
                                  (vec-reinterpret
                                   a
-                                  'uint8 32) 1 1 16) 2 1 14)))
+                                  'uint8 32) 1 1 16) 2 1 14)
+2)
+14)
                                (vec-if
                               (x32 (sca-eq
  (uint8_t
@@ -26968,14 +28702,17 @@
                                   (vec-reinterpret
                                    a
                                    'uint8 32) 0 1 16) 1 1 15)
-                                (uint8_t (bv 0 8)))
+                                (uint8_t (bv 0 8))
+15)
                                (concat_vectors
                                 (uint8_t (bv 0 8))
                                 (slice_vectors
                                  (slice_vectors
                                   (vec-reinterpret
                                    a
-                                   'uint8 32) 1 1 16) 1 1 15)))
+                                   'uint8 32) 1 1 16) 1 1 15)
+1)
+15)
                                (vec-if
                                (x32 (sca-eq
  (uint8_t
@@ -27002,14 +28739,17 @@
                     (vec-reinterpret
                      a
                      'uint8 32) 0 1 16) 15 1 1)
-                  (x15 (uint8_t (bv 0 8))))
+                  (x15 (uint8_t (bv 0 8)))
+1)
                  (concat_vectors
                   (x15 (uint8_t (bv 0 8)))
                   (slice_vectors
                    (slice_vectors
                     (vec-reinterpret
                      a
-                     'uint8 32) 1 1 16) 15 1 1)))
+                     'uint8 32) 1 1 16) 15 1 1)
+15)
+1)
                                (vec-if
                  (x32 (sca-eq
  (uint8_t
@@ -27022,14 +28762,17 @@
                      (vec-reinterpret
                       a
                       'uint8 32) 0 1 16) 14 1 2)
-                   (x14 (uint8_t (bv 0 8))))
+                   (x14 (uint8_t (bv 0 8)))
+2)
                   (concat_vectors
                    (x14 (uint8_t (bv 0 8)))
                    (slice_vectors
                     (slice_vectors
                      (vec-reinterpret
                       a
-                      'uint8 32) 1 1 16) 14 1 2)))
+                      'uint8 32) 1 1 16) 14 1 2)
+14)
+2)
                                (vec-if
                   (x32 (sca-eq
  (uint8_t
@@ -27042,14 +28785,17 @@
                       (vec-reinterpret
                        a
                        'uint8 32) 0 1 16) 13 1 3)
-                    (x13 (uint8_t (bv 0 8))))
+                    (x13 (uint8_t (bv 0 8)))
+3)
                    (concat_vectors
                     (x13 (uint8_t (bv 0 8)))
                     (slice_vectors
                      (slice_vectors
                       (vec-reinterpret
                        a
-                       'uint8 32) 1 1 16) 13 1 3)))
+                       'uint8 32) 1 1 16) 13 1 3)
+13)
+3)
                                (vec-if
                    (x32 (sca-eq
  (uint8_t
@@ -27062,14 +28808,17 @@
                        (vec-reinterpret
                         a
                         'uint8 32) 0 1 16) 12 1 4)
-                     (x12 (uint8_t (bv 0 8))))
+                     (x12 (uint8_t (bv 0 8)))
+4)
                     (concat_vectors
                      (x12 (uint8_t (bv 0 8)))
                      (slice_vectors
                       (slice_vectors
                        (vec-reinterpret
                         a
-                        'uint8 32) 1 1 16) 12 1 4)))
+                        'uint8 32) 1 1 16) 12 1 4)
+12)
+4)
                                (vec-if
                     (x32 (sca-eq
  (uint8_t
@@ -27082,14 +28831,17 @@
                         (vec-reinterpret
                          a
                          'uint8 32) 0 1 16) 11 1 5)
-                      (x11 (uint8_t (bv 0 8))))
+                      (x11 (uint8_t (bv 0 8)))
+5)
                      (concat_vectors
                       (x11 (uint8_t (bv 0 8)))
                       (slice_vectors
                        (slice_vectors
                         (vec-reinterpret
                          a
-                         'uint8 32) 1 1 16) 11 1 5)))
+                         'uint8 32) 1 1 16) 11 1 5)
+11)
+5)
                                (vec-if
                      (x32 (sca-eq
  (uint8_t
@@ -27102,14 +28854,17 @@
                          (vec-reinterpret
                           a
                           'uint8 32) 0 1 16) 10 1 6)
-                       (x10 (uint8_t (bv 0 8))))
+                       (x10 (uint8_t (bv 0 8)))
+6)
                       (concat_vectors
                        (x10 (uint8_t (bv 0 8)))
                        (slice_vectors
                         (slice_vectors
                          (vec-reinterpret
                           a
-                          'uint8 32) 1 1 16) 10 1 6)))
+                          'uint8 32) 1 1 16) 10 1 6)
+10)
+6)
                                (vec-if
                       (x32 (sca-eq
  (uint8_t
@@ -27122,14 +28877,17 @@
                           (vec-reinterpret
                            a
                            'uint8 32) 0 1 16) 9 1 7)
-                        (x9 (uint8_t (bv 0 8))))
+                        (x9 (uint8_t (bv 0 8)))
+7)
                        (concat_vectors
                         (x9 (uint8_t (bv 0 8)))
                         (slice_vectors
                          (slice_vectors
                           (vec-reinterpret
                            a
-                           'uint8 32) 1 1 16) 9 1 7)))
+                           'uint8 32) 1 1 16) 9 1 7)
+9)
+7)
                                (vec-if
                        (x32 (sca-eq
  (uint8_t
@@ -27142,14 +28900,17 @@
                            (vec-reinterpret
                             a
                             'uint8 32) 0 1 16) 8 1 8)
-                         (x8 (uint8_t (bv 0 8))))
+                         (x8 (uint8_t (bv 0 8)))
+8)
                         (concat_vectors
                          (x8 (uint8_t (bv 0 8)))
                          (slice_vectors
                           (slice_vectors
                            (vec-reinterpret
                             a
-                            'uint8 32) 1 1 16) 8 1 8)))
+                            'uint8 32) 1 1 16) 8 1 8)
+8)
+8)
                                (vec-if
                         (x32 (sca-eq
  (uint8_t
@@ -27162,14 +28923,17 @@
                             (vec-reinterpret
                              a
                              'uint8 32) 0 1 16) 7 1 9)
-                          (x7 (uint8_t (bv 0 8))))
+                          (x7 (uint8_t (bv 0 8)))
+9)
                          (concat_vectors
                           (x7 (uint8_t (bv 0 8)))
                           (slice_vectors
                            (slice_vectors
                             (vec-reinterpret
                              a
-                             'uint8 32) 1 1 16) 7 1 9)))
+                             'uint8 32) 1 1 16) 7 1 9)
+7)
+9)
                                (vec-if
                          (x32 (sca-eq
  (uint8_t
@@ -27182,14 +28946,17 @@
                              (vec-reinterpret
                               a
                               'uint8 32) 0 1 16) 6 1 10)
-                           (x6 (uint8_t (bv 0 8))))
+                           (x6 (uint8_t (bv 0 8)))
+10)
                           (concat_vectors
                            (x6 (uint8_t (bv 0 8)))
                            (slice_vectors
                             (slice_vectors
                              (vec-reinterpret
                               a
-                              'uint8 32) 1 1 16) 6 1 10)))
+                              'uint8 32) 1 1 16) 6 1 10)
+6)
+10)
                                (vec-if
                           (x32 (sca-eq
  (uint8_t
@@ -27202,14 +28969,17 @@
                               (vec-reinterpret
                                a
                                'uint8 32) 0 1 16) 5 1 11)
-                            (x5 (uint8_t (bv 0 8))))
+                            (x5 (uint8_t (bv 0 8)))
+11)
                            (concat_vectors
                             (x5 (uint8_t (bv 0 8)))
                             (slice_vectors
                              (slice_vectors
                               (vec-reinterpret
                                a
-                               'uint8 32) 1 1 16) 5 1 11)))
+                               'uint8 32) 1 1 16) 5 1 11)
+5)
+11)
                                (vec-if
                            (x32 (sca-eq
  (uint8_t
@@ -27222,14 +28992,17 @@
                                (vec-reinterpret
                                 a
                                 'uint8 32) 0 1 16) 4 1 12)
-                             (x4 (uint8_t (bv 0 8))))
+                             (x4 (uint8_t (bv 0 8)))
+12)
                             (concat_vectors
                              (x4 (uint8_t (bv 0 8)))
                              (slice_vectors
                               (slice_vectors
                                (vec-reinterpret
                                 a
-                                'uint8 32) 1 1 16) 4 1 12)))
+                                'uint8 32) 1 1 16) 4 1 12)
+4)
+12)
                                (vec-if
                             (x32 (sca-eq
  (uint8_t
@@ -27242,14 +29015,17 @@
                                 (vec-reinterpret
                                  a
                                  'uint8 32) 0 1 16) 3 1 13)
-                              (x3 (uint8_t (bv 0 8))))
+                              (x3 (uint8_t (bv 0 8)))
+13)
                              (concat_vectors
                               (x3 (uint8_t (bv 0 8)))
                               (slice_vectors
                                (slice_vectors
                                 (vec-reinterpret
                                  a
-                                 'uint8 32) 1 1 16) 3 1 13)))
+                                 'uint8 32) 1 1 16) 3 1 13)
+3)
+13)
                                (vec-if
                              (x32 (sca-eq
  (uint8_t
@@ -27262,14 +29038,17 @@
                                  (vec-reinterpret
                                   a
                                   'uint8 32) 0 1 16) 2 1 14)
-                               (x2 (uint8_t (bv 0 8))))
+                               (x2 (uint8_t (bv 0 8)))
+14)
                               (concat_vectors
                                (x2 (uint8_t (bv 0 8)))
                                (slice_vectors
                                 (slice_vectors
                                  (vec-reinterpret
                                   a
-                                  'uint8 32) 1 1 16) 2 1 14)))
+                                  'uint8 32) 1 1 16) 2 1 14)
+2)
+14)
                                (vec-if
                               (x32 (sca-eq
  (uint8_t
@@ -27282,14 +29061,17 @@
                                   (vec-reinterpret
                                    a
                                    'uint8 32) 0 1 16) 1 1 15)
-                                (uint8_t (bv 0 8)))
+                                (uint8_t (bv 0 8))
+15)
                                (concat_vectors
                                 (uint8_t (bv 0 8))
                                 (slice_vectors
                                  (slice_vectors
                                   (vec-reinterpret
                                    a
-                                   'uint8 32) 1 1 16) 1 1 15)))
+                                   'uint8 32) 1 1 16) 1 1 15)
+1)
+15)
                                (vec-if
                                (x32 (sca-eq
  (uint8_t
@@ -27316,14 +29098,17 @@
                     (vec-reinterpret
                      a
                      'uint8 32) 0 1 16) 15 1 1)
-                  (x15 (uint8_t (bv 0 8))))
+                  (x15 (uint8_t (bv 0 8)))
+1)
                  (concat_vectors
                   (x15 (uint8_t (bv 0 8)))
                   (slice_vectors
                    (slice_vectors
                     (vec-reinterpret
                      a
-                     'uint8 32) 1 1 16) 15 1 1)))
+                     'uint8 32) 1 1 16) 15 1 1)
+15)
+1)
                                (vec-if
                  (x32 (sca-eq
  (uint8_t
@@ -27336,14 +29121,17 @@
                      (vec-reinterpret
                       a
                       'uint8 32) 0 1 16) 14 1 2)
-                   (x14 (uint8_t (bv 0 8))))
+                   (x14 (uint8_t (bv 0 8)))
+2)
                   (concat_vectors
                    (x14 (uint8_t (bv 0 8)))
                    (slice_vectors
                     (slice_vectors
                      (vec-reinterpret
                       a
-                      'uint8 32) 1 1 16) 14 1 2)))
+                      'uint8 32) 1 1 16) 14 1 2)
+14)
+2)
                                (vec-if
                   (x32 (sca-eq
  (uint8_t
@@ -27356,14 +29144,17 @@
                       (vec-reinterpret
                        a
                        'uint8 32) 0 1 16) 13 1 3)
-                    (x13 (uint8_t (bv 0 8))))
+                    (x13 (uint8_t (bv 0 8)))
+3)
                    (concat_vectors
                     (x13 (uint8_t (bv 0 8)))
                     (slice_vectors
                      (slice_vectors
                       (vec-reinterpret
                        a
-                       'uint8 32) 1 1 16) 13 1 3)))
+                       'uint8 32) 1 1 16) 13 1 3)
+13)
+3)
                                (vec-if
                    (x32 (sca-eq
  (uint8_t
@@ -27376,14 +29167,17 @@
                        (vec-reinterpret
                         a
                         'uint8 32) 0 1 16) 12 1 4)
-                     (x12 (uint8_t (bv 0 8))))
+                     (x12 (uint8_t (bv 0 8)))
+4)
                     (concat_vectors
                      (x12 (uint8_t (bv 0 8)))
                      (slice_vectors
                       (slice_vectors
                        (vec-reinterpret
                         a
-                        'uint8 32) 1 1 16) 12 1 4)))
+                        'uint8 32) 1 1 16) 12 1 4)
+12)
+4)
                                (vec-if
                     (x32 (sca-eq
  (uint8_t
@@ -27396,14 +29190,17 @@
                         (vec-reinterpret
                          a
                          'uint8 32) 0 1 16) 11 1 5)
-                      (x11 (uint8_t (bv 0 8))))
+                      (x11 (uint8_t (bv 0 8)))
+5)
                      (concat_vectors
                       (x11 (uint8_t (bv 0 8)))
                       (slice_vectors
                        (slice_vectors
                         (vec-reinterpret
                          a
-                         'uint8 32) 1 1 16) 11 1 5)))
+                         'uint8 32) 1 1 16) 11 1 5)
+11)
+5)
                                (vec-if
                      (x32 (sca-eq
  (uint8_t
@@ -27416,14 +29213,17 @@
                          (vec-reinterpret
                           a
                           'uint8 32) 0 1 16) 10 1 6)
-                       (x10 (uint8_t (bv 0 8))))
+                       (x10 (uint8_t (bv 0 8)))
+6)
                       (concat_vectors
                        (x10 (uint8_t (bv 0 8)))
                        (slice_vectors
                         (slice_vectors
                          (vec-reinterpret
                           a
-                          'uint8 32) 1 1 16) 10 1 6)))
+                          'uint8 32) 1 1 16) 10 1 6)
+10)
+6)
                                (vec-if
                       (x32 (sca-eq
  (uint8_t
@@ -27436,14 +29236,17 @@
                           (vec-reinterpret
                            a
                            'uint8 32) 0 1 16) 9 1 7)
-                        (x9 (uint8_t (bv 0 8))))
+                        (x9 (uint8_t (bv 0 8)))
+7)
                        (concat_vectors
                         (x9 (uint8_t (bv 0 8)))
                         (slice_vectors
                          (slice_vectors
                           (vec-reinterpret
                            a
-                           'uint8 32) 1 1 16) 9 1 7)))
+                           'uint8 32) 1 1 16) 9 1 7)
+9)
+7)
                                (vec-if
                        (x32 (sca-eq
  (uint8_t
@@ -27456,14 +29259,17 @@
                            (vec-reinterpret
                             a
                             'uint8 32) 0 1 16) 8 1 8)
-                         (x8 (uint8_t (bv 0 8))))
+                         (x8 (uint8_t (bv 0 8)))
+8)
                         (concat_vectors
                          (x8 (uint8_t (bv 0 8)))
                          (slice_vectors
                           (slice_vectors
                            (vec-reinterpret
                             a
-                            'uint8 32) 1 1 16) 8 1 8)))
+                            'uint8 32) 1 1 16) 8 1 8)
+8)
+8)
                                (vec-if
                         (x32 (sca-eq
  (uint8_t
@@ -27476,14 +29282,17 @@
                             (vec-reinterpret
                              a
                              'uint8 32) 0 1 16) 7 1 9)
-                          (x7 (uint8_t (bv 0 8))))
+                          (x7 (uint8_t (bv 0 8)))
+9)
                          (concat_vectors
                           (x7 (uint8_t (bv 0 8)))
                           (slice_vectors
                            (slice_vectors
                             (vec-reinterpret
                              a
-                             'uint8 32) 1 1 16) 7 1 9)))
+                             'uint8 32) 1 1 16) 7 1 9)
+7)
+9)
                                (vec-if
                          (x32 (sca-eq
  (uint8_t
@@ -27496,14 +29305,17 @@
                              (vec-reinterpret
                               a
                               'uint8 32) 0 1 16) 6 1 10)
-                           (x6 (uint8_t (bv 0 8))))
+                           (x6 (uint8_t (bv 0 8)))
+10)
                           (concat_vectors
                            (x6 (uint8_t (bv 0 8)))
                            (slice_vectors
                             (slice_vectors
                              (vec-reinterpret
                               a
-                              'uint8 32) 1 1 16) 6 1 10)))
+                              'uint8 32) 1 1 16) 6 1 10)
+6)
+10)
                                (vec-if
                           (x32 (sca-eq
  (uint8_t
@@ -27516,14 +29328,17 @@
                               (vec-reinterpret
                                a
                                'uint8 32) 0 1 16) 5 1 11)
-                            (x5 (uint8_t (bv 0 8))))
+                            (x5 (uint8_t (bv 0 8)))
+11)
                            (concat_vectors
                             (x5 (uint8_t (bv 0 8)))
                             (slice_vectors
                              (slice_vectors
                               (vec-reinterpret
                                a
-                               'uint8 32) 1 1 16) 5 1 11)))
+                               'uint8 32) 1 1 16) 5 1 11)
+5)
+11)
                                (vec-if
                            (x32 (sca-eq
  (uint8_t
@@ -27536,14 +29351,17 @@
                                (vec-reinterpret
                                 a
                                 'uint8 32) 0 1 16) 4 1 12)
-                             (x4 (uint8_t (bv 0 8))))
+                             (x4 (uint8_t (bv 0 8)))
+12)
                             (concat_vectors
                              (x4 (uint8_t (bv 0 8)))
                              (slice_vectors
                               (slice_vectors
                                (vec-reinterpret
                                 a
-                                'uint8 32) 1 1 16) 4 1 12)))
+                                'uint8 32) 1 1 16) 4 1 12)
+4)
+12)
                                (vec-if
                             (x32 (sca-eq
  (uint8_t
@@ -27556,14 +29374,17 @@
                                 (vec-reinterpret
                                  a
                                  'uint8 32) 0 1 16) 3 1 13)
-                              (x3 (uint8_t (bv 0 8))))
+                              (x3 (uint8_t (bv 0 8)))
+13)
                              (concat_vectors
                               (x3 (uint8_t (bv 0 8)))
                               (slice_vectors
                                (slice_vectors
                                 (vec-reinterpret
                                  a
-                                 'uint8 32) 1 1 16) 3 1 13)))
+                                 'uint8 32) 1 1 16) 3 1 13)
+3)
+13)
                                (vec-if
                              (x32 (sca-eq
  (uint8_t
@@ -27576,14 +29397,17 @@
                                  (vec-reinterpret
                                   a
                                   'uint8 32) 0 1 16) 2 1 14)
-                               (x2 (uint8_t (bv 0 8))))
+                               (x2 (uint8_t (bv 0 8)))
+14)
                               (concat_vectors
                                (x2 (uint8_t (bv 0 8)))
                                (slice_vectors
                                 (slice_vectors
                                  (vec-reinterpret
                                   a
-                                  'uint8 32) 1 1 16) 2 1 14)))
+                                  'uint8 32) 1 1 16) 2 1 14)
+2)
+14)
                                (vec-if
                               (x32 (sca-eq
  (uint8_t
@@ -27596,14 +29420,17 @@
                                   (vec-reinterpret
                                    a
                                    'uint8 32) 0 1 16) 1 1 15)
-                                (uint8_t (bv 0 8)))
+                                (uint8_t (bv 0 8))
+15)
                                (concat_vectors
                                 (uint8_t (bv 0 8))
                                 (slice_vectors
                                  (slice_vectors
                                   (vec-reinterpret
                                    a
-                                   'uint8 32) 1 1 16) 1 1 15)))
+                                   'uint8 32) 1 1 16) 1 1 15)
+1)
+15)
                                (vec-if
                                (x32 (sca-eq
  (uint8_t
@@ -27630,14 +29457,17 @@
                     (vec-reinterpret
                      a
                      'uint8 32) 0 1 16) 15 1 1)
-                  (x15 (uint8_t (bv 0 8))))
+                  (x15 (uint8_t (bv 0 8)))
+1)
                  (concat_vectors
                   (x15 (uint8_t (bv 0 8)))
                   (slice_vectors
                    (slice_vectors
                     (vec-reinterpret
                      a
-                     'uint8 32) 1 1 16) 15 1 1)))
+                     'uint8 32) 1 1 16) 15 1 1)
+15)
+1)
                                (vec-if
                  (x32 (sca-eq
  (uint8_t
@@ -27650,14 +29480,17 @@
                      (vec-reinterpret
                       a
                       'uint8 32) 0 1 16) 14 1 2)
-                   (x14 (uint8_t (bv 0 8))))
+                   (x14 (uint8_t (bv 0 8)))
+2)
                   (concat_vectors
                    (x14 (uint8_t (bv 0 8)))
                    (slice_vectors
                     (slice_vectors
                      (vec-reinterpret
                       a
-                      'uint8 32) 1 1 16) 14 1 2)))
+                      'uint8 32) 1 1 16) 14 1 2)
+14)
+2)
                                (vec-if
                   (x32 (sca-eq
  (uint8_t
@@ -27670,14 +29503,17 @@
                       (vec-reinterpret
                        a
                        'uint8 32) 0 1 16) 13 1 3)
-                    (x13 (uint8_t (bv 0 8))))
+                    (x13 (uint8_t (bv 0 8)))
+3)
                    (concat_vectors
                     (x13 (uint8_t (bv 0 8)))
                     (slice_vectors
                      (slice_vectors
                       (vec-reinterpret
                        a
-                       'uint8 32) 1 1 16) 13 1 3)))
+                       'uint8 32) 1 1 16) 13 1 3)
+13)
+3)
                                (vec-if
                    (x32 (sca-eq
  (uint8_t
@@ -27690,14 +29526,17 @@
                        (vec-reinterpret
                         a
                         'uint8 32) 0 1 16) 12 1 4)
-                     (x12 (uint8_t (bv 0 8))))
+                     (x12 (uint8_t (bv 0 8)))
+4)
                     (concat_vectors
                      (x12 (uint8_t (bv 0 8)))
                      (slice_vectors
                       (slice_vectors
                        (vec-reinterpret
                         a
-                        'uint8 32) 1 1 16) 12 1 4)))
+                        'uint8 32) 1 1 16) 12 1 4)
+12)
+4)
                                (vec-if
                     (x32 (sca-eq
  (uint8_t
@@ -27710,14 +29549,17 @@
                         (vec-reinterpret
                          a
                          'uint8 32) 0 1 16) 11 1 5)
-                      (x11 (uint8_t (bv 0 8))))
+                      (x11 (uint8_t (bv 0 8)))
+5)
                      (concat_vectors
                       (x11 (uint8_t (bv 0 8)))
                       (slice_vectors
                        (slice_vectors
                         (vec-reinterpret
                          a
-                         'uint8 32) 1 1 16) 11 1 5)))
+                         'uint8 32) 1 1 16) 11 1 5)
+11)
+5)
                                (vec-if
                      (x32 (sca-eq
  (uint8_t
@@ -27730,14 +29572,17 @@
                          (vec-reinterpret
                           a
                           'uint8 32) 0 1 16) 10 1 6)
-                       (x10 (uint8_t (bv 0 8))))
+                       (x10 (uint8_t (bv 0 8)))
+6)
                       (concat_vectors
                        (x10 (uint8_t (bv 0 8)))
                        (slice_vectors
                         (slice_vectors
                          (vec-reinterpret
                           a
-                          'uint8 32) 1 1 16) 10 1 6)))
+                          'uint8 32) 1 1 16) 10 1 6)
+10)
+6)
                                (vec-if
                       (x32 (sca-eq
  (uint8_t
@@ -27750,14 +29595,17 @@
                           (vec-reinterpret
                            a
                            'uint8 32) 0 1 16) 9 1 7)
-                        (x9 (uint8_t (bv 0 8))))
+                        (x9 (uint8_t (bv 0 8)))
+7)
                        (concat_vectors
                         (x9 (uint8_t (bv 0 8)))
                         (slice_vectors
                          (slice_vectors
                           (vec-reinterpret
                            a
-                           'uint8 32) 1 1 16) 9 1 7)))
+                           'uint8 32) 1 1 16) 9 1 7)
+9)
+7)
                                (vec-if
                        (x32 (sca-eq
  (uint8_t
@@ -27770,14 +29618,17 @@
                            (vec-reinterpret
                             a
                             'uint8 32) 0 1 16) 8 1 8)
-                         (x8 (uint8_t (bv 0 8))))
+                         (x8 (uint8_t (bv 0 8)))
+8)
                         (concat_vectors
                          (x8 (uint8_t (bv 0 8)))
                          (slice_vectors
                           (slice_vectors
                            (vec-reinterpret
                             a
-                            'uint8 32) 1 1 16) 8 1 8)))
+                            'uint8 32) 1 1 16) 8 1 8)
+8)
+8)
                                (vec-if
                         (x32 (sca-eq
  (uint8_t
@@ -27790,14 +29641,17 @@
                             (vec-reinterpret
                              a
                              'uint8 32) 0 1 16) 7 1 9)
-                          (x7 (uint8_t (bv 0 8))))
+                          (x7 (uint8_t (bv 0 8)))
+9)
                          (concat_vectors
                           (x7 (uint8_t (bv 0 8)))
                           (slice_vectors
                            (slice_vectors
                             (vec-reinterpret
                              a
-                             'uint8 32) 1 1 16) 7 1 9)))
+                             'uint8 32) 1 1 16) 7 1 9)
+7)
+9)
                                (vec-if
                          (x32 (sca-eq
  (uint8_t
@@ -27810,14 +29664,17 @@
                              (vec-reinterpret
                               a
                               'uint8 32) 0 1 16) 6 1 10)
-                           (x6 (uint8_t (bv 0 8))))
+                           (x6 (uint8_t (bv 0 8)))
+10)
                           (concat_vectors
                            (x6 (uint8_t (bv 0 8)))
                            (slice_vectors
                             (slice_vectors
                              (vec-reinterpret
                               a
-                              'uint8 32) 1 1 16) 6 1 10)))
+                              'uint8 32) 1 1 16) 6 1 10)
+6)
+10)
                                (vec-if
                           (x32 (sca-eq
  (uint8_t
@@ -27830,14 +29687,17 @@
                               (vec-reinterpret
                                a
                                'uint8 32) 0 1 16) 5 1 11)
-                            (x5 (uint8_t (bv 0 8))))
+                            (x5 (uint8_t (bv 0 8)))
+11)
                            (concat_vectors
                             (x5 (uint8_t (bv 0 8)))
                             (slice_vectors
                              (slice_vectors
                               (vec-reinterpret
                                a
-                               'uint8 32) 1 1 16) 5 1 11)))
+                               'uint8 32) 1 1 16) 5 1 11)
+5)
+11)
                                (vec-if
                            (x32 (sca-eq
  (uint8_t
@@ -27850,14 +29710,17 @@
                                (vec-reinterpret
                                 a
                                 'uint8 32) 0 1 16) 4 1 12)
-                             (x4 (uint8_t (bv 0 8))))
+                             (x4 (uint8_t (bv 0 8)))
+12)
                             (concat_vectors
                              (x4 (uint8_t (bv 0 8)))
                              (slice_vectors
                               (slice_vectors
                                (vec-reinterpret
                                 a
-                                'uint8 32) 1 1 16) 4 1 12)))
+                                'uint8 32) 1 1 16) 4 1 12)
+4)
+12)
                                (vec-if
                             (x32 (sca-eq
  (uint8_t
@@ -27870,14 +29733,17 @@
                                 (vec-reinterpret
                                  a
                                  'uint8 32) 0 1 16) 3 1 13)
-                              (x3 (uint8_t (bv 0 8))))
+                              (x3 (uint8_t (bv 0 8)))
+13)
                              (concat_vectors
                               (x3 (uint8_t (bv 0 8)))
                               (slice_vectors
                                (slice_vectors
                                 (vec-reinterpret
                                  a
-                                 'uint8 32) 1 1 16) 3 1 13)))
+                                 'uint8 32) 1 1 16) 3 1 13)
+3)
+13)
                                (vec-if
                              (x32 (sca-eq
  (uint8_t
@@ -27890,14 +29756,17 @@
                                  (vec-reinterpret
                                   a
                                   'uint8 32) 0 1 16) 2 1 14)
-                               (x2 (uint8_t (bv 0 8))))
+                               (x2 (uint8_t (bv 0 8)))
+14)
                               (concat_vectors
                                (x2 (uint8_t (bv 0 8)))
                                (slice_vectors
                                 (slice_vectors
                                  (vec-reinterpret
                                   a
-                                  'uint8 32) 1 1 16) 2 1 14)))
+                                  'uint8 32) 1 1 16) 2 1 14)
+2)
+14)
                                (vec-if
                               (x32 (sca-eq
  (uint8_t
@@ -27910,14 +29779,17 @@
                                   (vec-reinterpret
                                    a
                                    'uint8 32) 0 1 16) 1 1 15)
-                                (uint8_t (bv 0 8)))
+                                (uint8_t (bv 0 8))
+15)
                                (concat_vectors
                                 (uint8_t (bv 0 8))
                                 (slice_vectors
                                  (slice_vectors
                                   (vec-reinterpret
                                    a
-                                   'uint8 32) 1 1 16) 1 1 15)))
+                                   'uint8 32) 1 1 16) 1 1 15)
+1)
+15)
                                (vec-if
                                (x32 (sca-eq
  (uint8_t
@@ -27944,14 +29816,17 @@
                     (vec-reinterpret
                      a
                      'uint8 32) 0 1 16) 15 1 1)
-                  (x15 (uint8_t (bv 0 8))))
+                  (x15 (uint8_t (bv 0 8)))
+1)
                  (concat_vectors
                   (x15 (uint8_t (bv 0 8)))
                   (slice_vectors
                    (slice_vectors
                     (vec-reinterpret
                      a
-                     'uint8 32) 1 1 16) 15 1 1)))
+                     'uint8 32) 1 1 16) 15 1 1)
+15)
+1)
                                (vec-if
                  (x32 (sca-eq
  (uint8_t
@@ -27964,14 +29839,17 @@
                      (vec-reinterpret
                       a
                       'uint8 32) 0 1 16) 14 1 2)
-                   (x14 (uint8_t (bv 0 8))))
+                   (x14 (uint8_t (bv 0 8)))
+2)
                   (concat_vectors
                    (x14 (uint8_t (bv 0 8)))
                    (slice_vectors
                     (slice_vectors
                      (vec-reinterpret
                       a
-                      'uint8 32) 1 1 16) 14 1 2)))
+                      'uint8 32) 1 1 16) 14 1 2)
+14)
+2)
                                (vec-if
                   (x32 (sca-eq
  (uint8_t
@@ -27984,14 +29862,17 @@
                       (vec-reinterpret
                        a
                        'uint8 32) 0 1 16) 13 1 3)
-                    (x13 (uint8_t (bv 0 8))))
+                    (x13 (uint8_t (bv 0 8)))
+3)
                    (concat_vectors
                     (x13 (uint8_t (bv 0 8)))
                     (slice_vectors
                      (slice_vectors
                       (vec-reinterpret
                        a
-                       'uint8 32) 1 1 16) 13 1 3)))
+                       'uint8 32) 1 1 16) 13 1 3)
+13)
+3)
                                (vec-if
                    (x32 (sca-eq
  (uint8_t
@@ -28004,14 +29885,17 @@
                        (vec-reinterpret
                         a
                         'uint8 32) 0 1 16) 12 1 4)
-                     (x12 (uint8_t (bv 0 8))))
+                     (x12 (uint8_t (bv 0 8)))
+4)
                     (concat_vectors
                      (x12 (uint8_t (bv 0 8)))
                      (slice_vectors
                       (slice_vectors
                        (vec-reinterpret
                         a
-                        'uint8 32) 1 1 16) 12 1 4)))
+                        'uint8 32) 1 1 16) 12 1 4)
+12)
+4)
                                (vec-if
                     (x32 (sca-eq
  (uint8_t
@@ -28024,14 +29908,17 @@
                         (vec-reinterpret
                          a
                          'uint8 32) 0 1 16) 11 1 5)
-                      (x11 (uint8_t (bv 0 8))))
+                      (x11 (uint8_t (bv 0 8)))
+5)
                      (concat_vectors
                       (x11 (uint8_t (bv 0 8)))
                       (slice_vectors
                        (slice_vectors
                         (vec-reinterpret
                          a
-                         'uint8 32) 1 1 16) 11 1 5)))
+                         'uint8 32) 1 1 16) 11 1 5)
+11)
+5)
                                (vec-if
                      (x32 (sca-eq
  (uint8_t
@@ -28044,14 +29931,17 @@
                          (vec-reinterpret
                           a
                           'uint8 32) 0 1 16) 10 1 6)
-                       (x10 (uint8_t (bv 0 8))))
+                       (x10 (uint8_t (bv 0 8)))
+6)
                       (concat_vectors
                        (x10 (uint8_t (bv 0 8)))
                        (slice_vectors
                         (slice_vectors
                          (vec-reinterpret
                           a
-                          'uint8 32) 1 1 16) 10 1 6)))
+                          'uint8 32) 1 1 16) 10 1 6)
+10)
+6)
                                (vec-if
                       (x32 (sca-eq
  (uint8_t
@@ -28064,14 +29954,17 @@
                           (vec-reinterpret
                            a
                            'uint8 32) 0 1 16) 9 1 7)
-                        (x9 (uint8_t (bv 0 8))))
+                        (x9 (uint8_t (bv 0 8)))
+7)
                        (concat_vectors
                         (x9 (uint8_t (bv 0 8)))
                         (slice_vectors
                          (slice_vectors
                           (vec-reinterpret
                            a
-                           'uint8 32) 1 1 16) 9 1 7)))
+                           'uint8 32) 1 1 16) 9 1 7)
+9)
+7)
                                (vec-if
                        (x32 (sca-eq
  (uint8_t
@@ -28084,14 +29977,17 @@
                            (vec-reinterpret
                             a
                             'uint8 32) 0 1 16) 8 1 8)
-                         (x8 (uint8_t (bv 0 8))))
+                         (x8 (uint8_t (bv 0 8)))
+8)
                         (concat_vectors
                          (x8 (uint8_t (bv 0 8)))
                          (slice_vectors
                           (slice_vectors
                            (vec-reinterpret
                             a
-                            'uint8 32) 1 1 16) 8 1 8)))
+                            'uint8 32) 1 1 16) 8 1 8)
+8)
+8)
                                (vec-if
                         (x32 (sca-eq
  (uint8_t
@@ -28104,14 +30000,17 @@
                             (vec-reinterpret
                              a
                              'uint8 32) 0 1 16) 7 1 9)
-                          (x7 (uint8_t (bv 0 8))))
+                          (x7 (uint8_t (bv 0 8)))
+9)
                          (concat_vectors
                           (x7 (uint8_t (bv 0 8)))
                           (slice_vectors
                            (slice_vectors
                             (vec-reinterpret
                              a
-                             'uint8 32) 1 1 16) 7 1 9)))
+                             'uint8 32) 1 1 16) 7 1 9)
+7)
+9)
                                (vec-if
                          (x32 (sca-eq
  (uint8_t
@@ -28124,14 +30023,17 @@
                              (vec-reinterpret
                               a
                               'uint8 32) 0 1 16) 6 1 10)
-                           (x6 (uint8_t (bv 0 8))))
+                           (x6 (uint8_t (bv 0 8)))
+10)
                           (concat_vectors
                            (x6 (uint8_t (bv 0 8)))
                            (slice_vectors
                             (slice_vectors
                              (vec-reinterpret
                               a
-                              'uint8 32) 1 1 16) 6 1 10)))
+                              'uint8 32) 1 1 16) 6 1 10)
+6)
+10)
                                (vec-if
                           (x32 (sca-eq
  (uint8_t
@@ -28144,14 +30046,17 @@
                               (vec-reinterpret
                                a
                                'uint8 32) 0 1 16) 5 1 11)
-                            (x5 (uint8_t (bv 0 8))))
+                            (x5 (uint8_t (bv 0 8)))
+11)
                            (concat_vectors
                             (x5 (uint8_t (bv 0 8)))
                             (slice_vectors
                              (slice_vectors
                               (vec-reinterpret
                                a
-                               'uint8 32) 1 1 16) 5 1 11)))
+                               'uint8 32) 1 1 16) 5 1 11)
+5)
+11)
                                (vec-if
                            (x32 (sca-eq
  (uint8_t
@@ -28164,14 +30069,17 @@
                                (vec-reinterpret
                                 a
                                 'uint8 32) 0 1 16) 4 1 12)
-                             (x4 (uint8_t (bv 0 8))))
+                             (x4 (uint8_t (bv 0 8)))
+12)
                             (concat_vectors
                              (x4 (uint8_t (bv 0 8)))
                              (slice_vectors
                               (slice_vectors
                                (vec-reinterpret
                                 a
-                                'uint8 32) 1 1 16) 4 1 12)))
+                                'uint8 32) 1 1 16) 4 1 12)
+4)
+12)
                                (vec-if
                             (x32 (sca-eq
  (uint8_t
@@ -28184,14 +30092,17 @@
                                 (vec-reinterpret
                                  a
                                  'uint8 32) 0 1 16) 3 1 13)
-                              (x3 (uint8_t (bv 0 8))))
+                              (x3 (uint8_t (bv 0 8)))
+13)
                              (concat_vectors
                               (x3 (uint8_t (bv 0 8)))
                               (slice_vectors
                                (slice_vectors
                                 (vec-reinterpret
                                  a
-                                 'uint8 32) 1 1 16) 3 1 13)))
+                                 'uint8 32) 1 1 16) 3 1 13)
+3)
+13)
                                (vec-if
                              (x32 (sca-eq
  (uint8_t
@@ -28204,14 +30115,17 @@
                                  (vec-reinterpret
                                   a
                                   'uint8 32) 0 1 16) 2 1 14)
-                               (x2 (uint8_t (bv 0 8))))
+                               (x2 (uint8_t (bv 0 8)))
+14)
                               (concat_vectors
                                (x2 (uint8_t (bv 0 8)))
                                (slice_vectors
                                 (slice_vectors
                                  (vec-reinterpret
                                   a
-                                  'uint8 32) 1 1 16) 2 1 14)))
+                                  'uint8 32) 1 1 16) 2 1 14)
+2)
+14)
                                (vec-if
                               (x32 (sca-eq
  (uint8_t
@@ -28224,14 +30138,17 @@
                                   (vec-reinterpret
                                    a
                                    'uint8 32) 0 1 16) 1 1 15)
-                                (uint8_t (bv 0 8)))
+                                (uint8_t (bv 0 8))
+15)
                                (concat_vectors
                                 (uint8_t (bv 0 8))
                                 (slice_vectors
                                  (slice_vectors
                                   (vec-reinterpret
                                    a
-                                   'uint8 32) 1 1 16) 1 1 15)))
+                                   'uint8 32) 1 1 16) 1 1 15)
+1)
+15)
                                (vec-if
                                (x32 (sca-eq
  (uint8_t
@@ -28462,7 +30379,8 @@
                   a 1 1 16) 1 1 8)
                 (slice_vectors
                  (slice_vectors
-                  b 1 1 16) 1 1 8)))))]
+                  b 1 1 16) 1 1 8))
+16)))]
         [((x86:u8x32 a) (x86:u8x32 b))
             (x86:u8x32
              (halide:interpret
@@ -28480,7 +30398,8 @@
                   a 1 1 16) 1 1 8)
                 (slice_vectors
                  (slice_vectors
-                  b 1 1 16) 1 1 8)))))]
+                  b 1 1 16) 1 1 8))
+16)))]
 
         [(_ _) (assert #f "infeasible in interpreting vpunpckhbw")])]
 
@@ -28503,7 +30422,8 @@
                   a 1 1 4) 1 1 2)
                 (slice_vectors
                  (slice_vectors
-                  b 1 1 4) 1 1 2)))))]
+                  b 1 1 4) 1 1 2))
+4)))]
         [((x86:u32x8 a) (x86:u32x8 b))
             (x86:u32x8
              (halide:interpret
@@ -28521,7 +30441,8 @@
                   a 1 1 4) 1 1 2)
                 (slice_vectors
                  (slice_vectors
-                  b 1 1 4) 1 1 2)))))]
+                  b 1 1 4) 1 1 2))
+4)))]
 
         [(_ _) (assert #f "infeasible in interpreting vpunpckhdq")])]
 
@@ -28537,14 +30458,17 @@
                   a 0 1 2) 1 1 1)
                 (slice_vectors
                  (slice_vectors
-                  b 0 1 2) 1 1 1))
+                  b 0 1 2) 1 1 1)
+1)
                (concat_vectors
                 (slice_vectors
                  (slice_vectors
                   a 1 1 2) 1 1 1)
                 (slice_vectors
                  (slice_vectors
-                  b 1 1 2) 1 1 1)))))]
+                  b 1 1 2) 1 1 1)
+1)
+2)))]
         [((x86:u64x4 a) (x86:u64x4 b))
             (x86:u64x4
              (halide:interpret
@@ -28555,14 +30479,17 @@
                   a 0 1 2) 1 1 1)
                 (slice_vectors
                  (slice_vectors
-                  b 0 1 2) 1 1 1))
+                  b 0 1 2) 1 1 1)
+1)
                (concat_vectors
                 (slice_vectors
                  (slice_vectors
                   a 1 1 2) 1 1 1)
                 (slice_vectors
                  (slice_vectors
-                  b 1 1 2) 1 1 1)))))]
+                  b 1 1 2) 1 1 1)
+1)
+2)))]
 
         [(_ _) (assert #f "infeasible in interpreting vpunpckhqdq")])]
 
@@ -28585,7 +30512,8 @@
                   a 1 1 8) 1 1 4)
                 (slice_vectors
                  (slice_vectors
-                  b 1 1 8) 1 1 4)))))]
+                  b 1 1 8) 1 1 4))
+8)))]
         [((x86:u16x16 a) (x86:u16x16 b))
             (x86:u16x16
              (halide:interpret
@@ -28603,7 +30531,8 @@
                   a 1 1 8) 1 1 4)
                 (slice_vectors
                  (slice_vectors
-                  b 1 1 8) 1 1 4)))))]
+                  b 1 1 8) 1 1 4))
+8)))]
 
         [(_ _) (assert #f "infeasible in interpreting vpunpckhwd")])]
 
@@ -28626,7 +30555,8 @@
                   a 1 1 16) 0 1 8)
                 (slice_vectors
                  (slice_vectors
-                  b 1 1 16) 0 1 8)))))]
+                  b 1 1 16) 0 1 8))
+16)))]
         [((x86:u8x32 a) (x86:u8x32 b))
             (x86:u8x32
              (halide:interpret
@@ -28644,7 +30574,8 @@
                   a 1 1 16) 0 1 8)
                 (slice_vectors
                  (slice_vectors
-                  b 1 1 16) 0 1 8)))))]
+                  b 1 1 16) 0 1 8))
+16)))]
 
         [(_ _) (assert #f "infeasible in interpreting vpunpcklbw")])]
 
@@ -28667,7 +30598,8 @@
                   a 1 1 4) 0 1 2)
                 (slice_vectors
                  (slice_vectors
-                  b 1 1 4) 0 1 2)))))]
+                  b 1 1 4) 0 1 2))
+4)))]
         [((x86:u32x8 a) (x86:u32x8 b))
             (x86:u32x8
              (halide:interpret
@@ -28685,7 +30617,8 @@
                   a 1 1 4) 0 1 2)
                 (slice_vectors
                  (slice_vectors
-                  b 1 1 4) 0 1 2)))))]
+                  b 1 1 4) 0 1 2))
+4)))]
 
         [(_ _) (assert #f "infeasible in interpreting vpunpckldq")])]
 
@@ -28701,14 +30634,17 @@
                   a 0 1 2) 0 1 1)
                 (slice_vectors
                  (slice_vectors
-                  b 0 1 2) 0 1 1))
+                  b 0 1 2) 0 1 1)
+1)
                (concat_vectors
                 (slice_vectors
                  (slice_vectors
                   a 1 1 2) 0 1 1)
                 (slice_vectors
                  (slice_vectors
-                  b 1 1 2) 0 1 1)))))]
+                  b 1 1 2) 0 1 1)
+1)
+2)))]
         [((x86:u64x4 a) (x86:u64x4 b))
             (x86:u64x4
              (halide:interpret
@@ -28719,14 +30655,17 @@
                   a 0 1 2) 0 1 1)
                 (slice_vectors
                  (slice_vectors
-                  b 0 1 2) 0 1 1))
+                  b 0 1 2) 0 1 1)
+1)
                (concat_vectors
                 (slice_vectors
                  (slice_vectors
                   a 1 1 2) 0 1 1)
                 (slice_vectors
                  (slice_vectors
-                  b 1 1 2) 0 1 1)))))]
+                  b 1 1 2) 0 1 1)
+1)
+2)))]
 
         [(_ _) (assert #f "infeasible in interpreting vpunpcklqdq")])]
 
@@ -28749,7 +30688,8 @@
                   a 1 1 8) 0 1 4)
                 (slice_vectors
                  (slice_vectors
-                  b 1 1 8) 0 1 4)))))]
+                  b 1 1 8) 0 1 4))
+8)))]
         [((x86:u16x16 a) (x86:u16x16 b))
             (x86:u16x16
              (halide:interpret
@@ -28767,7 +30707,8 @@
                   a 1 1 8) 0 1 4)
                 (slice_vectors
                  (slice_vectors
-                  b 1 1 8) 0 1 4)))))]
+                  b 1 1 8) 0 1 4))
+8)))]
 
         [(_ _) (assert #f "infeasible in interpreting vpunpcklwd")])]
 
@@ -28911,5 +30852,4 @@
 
     ;; TODO: check that it is a scalar value, not a forgotten instruction.
     [_ p]
-    ; [_ (error "x86:interpreter does not recognize instruction: " p)]
 ))
