@@ -11,6 +11,7 @@
 (require rake/synthesis/algorithm)
 
 (require rake/hvx/codegen/llvm)
+(require rake/arm/codegen/llvm)
 
 (provide
  (all-from-out rake/internal/log)
@@ -23,4 +24,6 @@
  (all-from-out rake/synthesis/axioms)
  (all-from-out rake/synthesis/algorithm)
  
- (all-from-out rake/hvx/codegen/llvm))
+ (all-from-out rake/hvx/codegen/llvm)
+ (all-from-out rake/arm/codegen/llvm)
+)
