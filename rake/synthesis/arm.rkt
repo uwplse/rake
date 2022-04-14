@@ -69,7 +69,7 @@
         (define-values (successful? lowered-exprs)
           (lower-sub-exprs ir-expr (rest ir-sub-exprs) ir-annotations ir-bounds lowering-algo swizzling-algo sub-expr?))
         (cond
-          [successful? (values #t (append (list arm-subexpr-impl) lowered-exprs))]
+          [successful? (values #t (append arm-subexpr-impl lowered-exprs))]
           [else (values #f '())])]
        [else (values #f '())])]))
 
@@ -87,7 +87,7 @@
        (lower-to-optimal-arm halide-spec ir-expr arm-sub-exprs lowering-algo swizzling-algo sub-expr?))
      (when successful? (hash-set! translation-history arm-expr halide-spec))
      (cond
-       [successful? (values #t arm-expr)]
+       [successful? (values #t (list arm-expr))]
        [else (values #f (void))])]
 
     ;; TODO: Refactor the code below

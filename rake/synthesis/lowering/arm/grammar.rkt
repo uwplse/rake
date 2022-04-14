@@ -364,13 +364,17 @@
     [_ (error "Not implemented yet ~a" ir-expr)]))
 
 
-
+(define (arm:is-broadcast? arm-template)
+  (or
+    (arm:dup? arm-template)
+    (arm:dupw? arm-template)
+    (arm:dupn? arm-template)))
 
 ;; Taken directly from hvx.rkt
 (define (prepare-sub-exprs arm-sub-exprs)
   (define grouped-sub-exprs (make-hash))
   (define swizzle-node-id -1)
-  (define arm-sub-exprs-untiled (set->list (list->set (flatten (map (lambda (expr) (if (arm:concat-tiles? expr) (arm:concat-tiles-vecs expr) expr)) (set->list (list->set arm-sub-exprs)))))))
+  (define arm-sub-exprs-untiled (flatten (map (lambda (expr) (if (arm:concat-tiles? expr) (arm:concat-tiles-vecs expr) expr)) (set->list (list->set arm-sub-exprs)))))
   (for ([arm-sub-expr arm-sub-exprs-untiled])
     (cond
       [(arm:??abstr-load? arm-sub-expr)
@@ -390,7 +394,11 @@
          (define base-load-expr (arm:??shuffle swizzle-node-id (arm:??shuffle-lds arm-sub-expr) out-type))
          (define exprs (hash-ref! grouped-sub-exprs out-type (set)))
          (hash-set! grouped-sub-exprs out-type (set-add exprs base-load-expr)))]
-      ; TODO: ask Maaz about the vspalt cond here from the HVX code
+      [(arm:is-broadcast? arm-sub-expr)
+       (define elemT (arm:elem-type (arm:interpret arm-sub-expr)))
+       (for ([out-type (arm:get-vector-types elemT)])
+         (define exprs (hash-ref! grouped-sub-exprs out-type (set)))
+         (hash-set! grouped-sub-exprs out-type (set-add exprs arm-sub-expr)))]
       [else
        (define sub-expr-type (arm:get-interpreted-type arm-sub-expr))
        (define exprs (hash-ref! grouped-sub-exprs sub-expr-type (set)))
