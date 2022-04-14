@@ -54,17 +54,25 @@
     [(arm:umax Vn Vm)
      (destruct* ((arm:interpret Vn) (arm:interpret Vm))
        [((arm:u8x8 v0) (arm:u8x8 v1)) (generate `umax.v8i8 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
+       [((arm:u8x16 v0) (arm:u8x16 v1)) (generate `umax.v16i8 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
       )]
     
     [(arm:umin Vn Vm)
      (destruct* ((arm:interpret Vn) (arm:interpret Vm))
        [((arm:u8x8 v0) (arm:u8x8 v1)) (generate `umin.v8i8 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
+       [((arm:u8x16 v0) (arm:u8x16 v1)) (generate `umin.v16i8 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
       )]
-    
+
     [(arm:dup Vn)
      (destruct (arm:interpret Vn)
-       ;; TODO: there are no llvm halide.ir.x128
-       [(uint8_t _) `(halide.ir.x18, (to-llvm-type arm-expr), `(list, (compile-scalar Vn)))]
+       ;; TODO: there are no llvm intrinsics for these...
+       [(uint8_t _) `(halide.ir.x8, (to-llvm-type arm-expr), `(list, (compile-scalar Vn)))]
+      )]
+
+    [(arm:dupw Vn)
+     (destruct (arm:interpret Vn)
+       ;; TODO: there are no llvm intrinsics for these...
+       [(uint8_t _) `(halide.ir.x16, (to-llvm-type arm-expr), `(list, (compile-scalar Vn)))]
       )]
 
     ; [(vsplat Rt)
@@ -112,6 +120,8 @@
     [(uint64_t v) (string->sexp "uint64")]
     [(arm:i8x8 data) (string->sexp "int8x8")]
     [(arm:u8x8 data) (string->sexp "uint8x8")]
+    [(arm:i8x16 data) (string->sexp "int8x16")]
+    [(arm:u8x16 data) (string->sexp "uint8x16")]
     [_ (error "implement the rest of the arm types")]))
 
 (define (compile-idx idx)
