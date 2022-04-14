@@ -53,8 +53,8 @@
          [isa (if widening?
                 (list arm:reinterpret arm:add arm:addv arm:saddlv arm:uaddlv arm:saddl arm:saddw arm:saddlp arm:sadalp arm:smlal-vs arm:smlsl-vs arm:sdot.v2i32.v8i8 arm:udot.v2i32.v8i8 arm:sdot.v4i32.v16i8 arm:udot.v4i32.v16i8 arm:shll arm:ssubl arm:sub arm:uadalp arm:uaddl arm:uaddlp arm:uaddw arm:umlal-vs arm:umlsl-vs arm:usubl arm:usubw arm:smull-vs arm:umull-vs)
                 ;(list arm:reinterpret arm:umull-vs arm:add)
-                (list arm:reinterpret arm:add arm:sub arm:addp arm:mla-vs arm:mls-vs arm:mul-vs arm:shl arm:neg))]
-         [depth (if widening? 4 4)]
+                (list arm:reinterpret arm:add ))] ;arm:sub arm:addp arm:mla-vs arm:mls-vs arm:mul-vs arm:shl arm:neg
+         [depth (if widening? 2 2)]
          [grouped-sub-exprs (prepare-sub-exprs arm-sub-exprs)]
          [number-reads (length weights)]
          [desired-types (arm:get-vector-types output-type)]
@@ -67,7 +67,7 @@
                                [extract-buffer (lambda (node [pos -1])
                                                   (destruct node
                                                     [(buffer data elemT) (set-add! live-bufs node) node]
-                                                    [(arm:??swizzle id live-data exprs idx-tbl output-type) (display (format "checking: (arm:??swizzle ~a ~a ~a ~a ~a)\n" id live-data exprs idx-tbl output-type))]
+                                                    ;[(arm:??swizzle id live-data exprs idx-tbl output-type) (display (format "checking: (arm:??swizzle ~a ~a ~a ~a ~a)\n" id live-data exprs idx-tbl output-type))]
                                                     [_ node]))])
                             (arm:visit expr extract-buffer)
                             live-bufs))])
@@ -287,11 +287,11 @@
 (define (get-arm-grammar-helper halide-expr ir-expr arm-sub-exprs)
   ; TODO: what is the enumeration-database?
   (destruct ir-expr
-
+            
     ;; Data loading/shuffling
     [(arm-ir:load-data live-data gather-tbl)
      (define buffers (set->list (halide:extract-live-buffers halide-expr)))
-     (define candidates (for/list ([buffer buffers]) (cons (arm:??abstr-load 0 live-data buffer) 1)))
+     ;(define candidates (for/list ([buffer buffers]) (cons (arm:??abstr-load 0 live-data buffer) 1)))
      (define buf-elemTypes (map buffer-elemT buffers))
      (define (label-cost value)
         (cons value (if (arm:half-width? (arm:interpret value)) 2 1)))

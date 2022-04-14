@@ -40,7 +40,7 @@
   ;; Lower sub-expressions first
   (define-values (successful? arm-sub-exprs)
     (lower-sub-exprs ir-expr (arm-ir:get-subexprs ir-expr) ir-annotations ir-bounds lowering-algo swizzling-algo sub-expr?))
-
+  
   ;; Pop node from trace
   (set! trace (rest trace))
 
