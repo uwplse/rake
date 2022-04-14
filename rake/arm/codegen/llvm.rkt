@@ -22,6 +22,28 @@
 (define (compile arm-expr)
   (match arm-expr
 
+    [(arm:add Vn Vm)
+     (destruct* ((arm:interpret Vn) (arm:interpret Vm))
+      ;; There are no intrinsics for add
+      [((arm:u8x8 v0) (arm:u8x8 v1)) `(halide.ir.add, (to-llvm-type arm-expr), `(list ,(input-arg Vn) ,(input-arg Vm)))]
+      [((arm:u16x4 v0) (arm:u16x4 v1)) `(halide.ir.add, (to-llvm-type arm-expr), `(list ,(input-arg Vn) ,(input-arg Vm)))]
+      [((arm:u32x2 v0) (arm:u32x2 v1)) `(halide.ir.add, (to-llvm-type arm-expr), `(list ,(input-arg Vn) ,(input-arg Vm)))]
+      [((arm:u8x16 v0) (arm:u8x16 v1)) `(halide.ir.add, (to-llvm-type arm-expr), `(list ,(input-arg Vn) ,(input-arg Vm)))]
+      [((arm:u16x8 v0) (arm:u16x8 v1)) `(halide.ir.add, (to-llvm-type arm-expr), `(list ,(input-arg Vn) ,(input-arg Vm)))]
+      [((arm:u32x2 v0) (arm:u32x2 v1)) `(halide.ir.add, (to-llvm-type arm-expr), `(list ,(input-arg Vn) ,(input-arg Vm)))]
+      [((arm:u32x4 v0) (arm:u32x4 v1)) `(halide.ir.add, (to-llvm-type arm-expr), `(list ,(input-arg Vn) ,(input-arg Vm)))]
+      [((arm:u64x2 v0) (arm:u64x2 v1)) `(halide.ir.add, (to-llvm-type arm-expr), `(list ,(input-arg Vn) ,(input-arg Vm)))]
+      ;; Signed variants
+      [((arm:i8x8 v0) (arm:i8x8 v1)) `(halide.ir.add, (to-llvm-type arm-expr), `(list ,(input-arg Vn) ,(input-arg Vm)))]
+      [((arm:i16x4 v0) (arm:i16x4 v1)) `(halide.ir.add, (to-llvm-type arm-expr), `(list ,(input-arg Vn) ,(input-arg Vm)))]
+      [((arm:i32x2 v0) (arm:i32x2 v1)) `(halide.ir.add, (to-llvm-type arm-expr), `(list ,(input-arg Vn) ,(input-arg Vm)))]
+      [((arm:i8x16 v0) (arm:i8x16 v1)) `(halide.ir.add, (to-llvm-type arm-expr), `(list ,(input-arg Vn) ,(input-arg Vm)))]
+      [((arm:i16x8 v0) (arm:i16x8 v1)) `(halide.ir.add, (to-llvm-type arm-expr), `(list ,(input-arg Vn) ,(input-arg Vm)))]
+      [((arm:i32x2 v0) (arm:i32x2 v1)) `(halide.ir.add, (to-llvm-type arm-expr), `(list ,(input-arg Vn) ,(input-arg Vm)))]
+      [((arm:i32x4 v0) (arm:i32x4 v1)) `(halide.ir.add, (to-llvm-type arm-expr), `(list ,(input-arg Vn) ,(input-arg Vm)))]
+      [((arm:i64x2 v0) (arm:i64x2 v1)) `(halide.ir.add, (to-llvm-type arm-expr), `(list ,(input-arg Vn) ,(input-arg Vm)))]
+      [(_ _) (error (format "arm:add variant not understood: ~a" arm-expr))])]
+
     ;;;;;;;;;;;;;;;;;;;;;;; Concatenate Tiles ;;;;;;;;;;;;;;;;;;;;;;;;
 
     [(arm:concat-tiles tiles)
@@ -69,7 +91,7 @@
        [(int32_t _)  `(halide.ir.x4, (to-llvm-type arm-expr), `(list, (compile-scalar Vn)))]
        [(uint64_t _) `(halide.ir.x2, (to-llvm-type arm-expr), `(list, (compile-scalar Vn)))]
        [(int64_t _)  `(halide.ir.x2, (to-llvm-type arm-expr), `(list, (compile-scalar Vn)))]
-       [_ (error (format "dupw variant not understood: ~a" arm-expr))])]
+       [_ (error (format "arm:dupw variant not understood: ~a" arm-expr))])]
 
     ;;;;;;;;;;;;;;;;; Instructions for vector creation ;;;;;;;;;;;;;;;
     
@@ -94,7 +116,7 @@
        [((arm:i16x8 v0) (arm:i16x8 v1)) (generate `smax.v8i16 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
        [((arm:i32x2 v0) (arm:i32x2 v1)) (generate `smax.v2i32 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
        [((arm:i32x4 v0) (arm:i32x4 v1)) (generate `smax.v4i32 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
-       [(_ _) (error (format "arm:smax variant not understood: ~a\n~a\n~a\n\n" arm-expr (arm:interpret Vn) (arm:interpret Vm)))])]
+       [(_ _) (error (format "arm:smax variant not understood: ~a" arm-expr))])]
 
     [(arm:smin Vn Vm)
      (destruct* ((arm:interpret Vn) (arm:interpret Vm))
