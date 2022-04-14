@@ -69,7 +69,7 @@
      ;; TODO: design this method.
      (define ideal-subexpr-layout (x86:infer-ideal-subexpr-layouts ir-expr ir-sub-expr output-layout))
 
-     (define-values (successful? x86-subexpr-impls)
+     (define-values (successful? x86-subexpr-impl)
        (synthesize-x86-expr ir-sub-expr ir-annotations ir-bounds lowering-algo swizzling-algo (or sub-expr? (not (x86-ir:combine? ir-expr))) ideal-subexpr-layout))
 
     ;  (assert (or (and (not successful?) (void? x86-subexpr-impl)) (and successful? (list? x86-subexpr-impl))))
@@ -79,13 +79,13 @@
         ;; Save bounds information
         (define key (x86-ir:ast-node-id ir-sub-expr))
         (when (hash-has-key? ir-bounds key)
-          (hash-set! value-bounds x86-subexpr-impls (hash-ref ir-bounds key)))
+          (hash-set! value-bounds x86-subexpr-impl (hash-ref ir-bounds key)))
 
         ;; Lower remaining subexprs
         (define-values (successful? lowered-exprs)
           (lower-sub-exprs ir-expr (rest ir-sub-exprs) ir-annotations ir-bounds lowering-algo swizzling-algo sub-expr? output-layout))
         (cond
-          [successful? (values #t (append x86-subexpr-impls lowered-exprs))]
+          [successful? (values #t (append (flatten (list x86-subexpr-impl)) lowered-exprs))]
           [else (values #f '())])]
        [else (values #f '())])]))
 

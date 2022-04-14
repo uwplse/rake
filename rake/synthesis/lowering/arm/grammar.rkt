@@ -352,7 +352,7 @@
       (handle-vs-shift-right expr shift round? saturate? signed? outputT arm-sub-exprs halide-expr)]
 
     [(arm-ir:abs-diff expr0 expr1 widening? output-type)
-      (handle-abs-diff expr0 expr1 widening? arm-sub-exprs halide-expr)]
+      (handle-abs-diff expr0 expr1 widening? output-type arm-sub-exprs halide-expr)]
 
     ; (struct abs-diff-acc (acc expr0 expr1 widening?) #:super struct:ast-node #:transparent)      ;; Instructions: saba, sabal, uaba, uabal
 

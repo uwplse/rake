@@ -5216,36 +5216,31 @@
              (halide:interpret
               (concat_vectors
                a
-               (x16 (uint8_t (bv 0 8)))
-16)))]
+               (x16 (uint8_t (bv 0 8))) 16)))]
         [((x86:u16x8 a))
             (x86:u16x16
              (halide:interpret
               (concat_vectors
                a
-               (x8 (uint16_t (bv 0 16)))
-8)))]
+               (x8 (uint16_t (bv 0 16))) 8)))]
         [((x86:u32x4 a))
             (x86:u32x8
              (halide:interpret
               (concat_vectors
                a
-               (x4 (uint32_t (bv 0 32)))
-4)))]
+               (x4 (uint32_t (bv 0 32))) 4)))]
         [((x86:u64x2 a))
             (x86:u64x4
              (halide:interpret
               (concat_vectors
                a
-               (x2 (uint64_t (bv 0 64)))
-2)))]
+               (x2 (uint64_t (bv 0 64))) 2)))]
         [((x86:i8x16 a))
             (x86:i8x32
              (halide:interpret
               (concat_vectors
                a
-               (x16 (int8_t (bv 0 8)))
-16)))]
+               (x16 (int8_t (bv 0 8))) 16)))]
         [((x86:i16x8 a))
             (x86:i16x16
              (halide:interpret

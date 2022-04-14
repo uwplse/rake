@@ -54,7 +54,7 @@
     [(x86:??shuffle? x86-sub-expr) (values spec template)]
     [else
       (define abstracted-x86-subexpr (make-x86-abstr-sub-expr x86-sub-expr abstracted-halide-subexpr offset sub-expr-bounds))
-       
+
       (define (abstract-sub-expr-halide node)
         (cond
           [(rkt-equal? (unpack-abstr-exprs node) halide-sub-expr) abstracted-halide-subexpr]
