@@ -12,6 +12,7 @@
 
 (require rake/hvx/codegen/llvm)
 (require rake/arm/codegen/llvm)
+(require rake/x86/codegen/llvm)
 
 (provide
  (all-from-out rake/internal/log)
@@ -26,4 +27,5 @@
  
  (all-from-out rake/hvx/codegen/llvm)
  (all-from-out rake/arm/codegen/llvm)
+ (all-from-out rake/x86/codegen/llvm)
 )

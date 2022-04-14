@@ -80,6 +80,7 @@
     [(eq? instr x86:pxor) 0.33]
     [(eq? instr x86:resize) 0]
     [(eq? instr x86:vbroadcasti128) 0.5]
+    [(eq? instr x86:vinserti128) 1]
     [(eq? instr x86:vpabsb) 0.5]
     [(eq? instr x86:vpabsd) 0.5]
     [(eq? instr x86:vpabsw) 0.5]

@@ -49,10 +49,9 @@
 
 (define (sort-and-uniquify candidates)
   ;; Sort them
-  (set! candidates (sort candidates (lambda (v1 v2) (<= (cdr v1) (cdr v2)))))
+  (define sorted (sort candidates (lambda (v1 v2) (<= (cdr v1) (cdr v2)))))
 
-  ;; Fill in param grammars
-  (for/list ([candidate candidates]) (cons (uniquify-swizzles candidate) (cdr candidate))))
+  (map (lambda (candidate) (cons (uniquify-swizzles (car candidate)) (cdr candidate))) sorted))
 
 (define (make-scalar-broadcast scalar x86-instr)
   (cons (x86-instr scalar) (x86:instr-cost x86-instr)))
@@ -202,6 +201,52 @@
 
       (time (for/list ([candidate candidates]) (cons (uniquify-swizzles (x86:visit (car candidate) fill-arg-grammars)) (car (cdr candidate))))))))
 
+(define (handle-cast expr output-type saturate? arm-sub-exprs halide-expr)
+  (let* ([input-type (get-input-type expr)]
+         [narrowing? (< (cpp:type-bw output-type) (cpp:type-bw input-type))]
+         [widening? (> (cpp:type-bw output-type) (cpp:type-bw input-type))]
+         [isa (cond
+                ;; TODO: narrowing is difficult... may need bitwise and with a constant?
+                [narrowing? (error "x86:handle-cast doesn't have narrowing implemented yet!")]
+                [widening? (append (get-widen-isa) (list x86:resize x86:vinserti128))]
+                ; TODO: what if it's just a saturate call?
+                [else (error "x86:handle-cast doesn't have reinterpreting implemented yet!")])]
+         [grouped-sub-exprs (prepare-sub-exprs arm-sub-exprs)]
+         [desired-types (x86:get-vector-types output-type)]
+         ; TODO: should this be the depth and the cost?
+         [depth 3]
+         [max-cost 5]
+         [candidates (enumerate-x86 isa desired-types grouped-sub-exprs depth max-cost)])
+
+    ; (println "handle-cast")
+    ; (println "input-type")
+    ; (pretty-print input-type)
+    ; (println "output-type")
+    ; (pretty-print output-type)
+    ; (println "narrowing?")
+    ; (pretty-print narrowing?)
+    ; (println "widening?")
+    ; (pretty-print widening?)
+    ; (println "isa")
+    ; (pretty-print isa)
+    ; (println "grouped-sub-exprs")
+    ; (pretty-print grouped-sub-exprs)
+    ; (println "desired-types")
+    ; (pretty-print desired-types)
+    ; (println "candidates")
+    ; (pretty-print candidates)
+
+    ;; Need imm8 for vinserti128
+    (define (uint8-const) (define-symbolic* imm8 (bitvector 8)) imm8)
+    (define (fill-arg-grammars node [pos -1])
+      (match node
+        ;; TODO: need to fill imm8 values
+        ['uint8 (uint8_t (uint8-const))]
+        [_ node]))
+    ; (for/list ([candidate sorted-candidates]) (cons (x86:visit (car candidate) fill-arg-grammars) (cdr candidate))))
+
+    (for/list ([candidate candidates]) (cons (uniquify-swizzles (x86:visit (car candidate) fill-arg-grammars)) (cdr candidate)))))
+
 (define (get-x86-grammar-helper halide-expr ir-expr x86-sub-exprs output-layout)
   ;; TODO: figure out which operations should use output-layout...
   (destruct ir-expr
@@ -228,6 +273,9 @@
 
     [(x86-ir:vs-mpy-add expr weights sat? round? half? output-type)
       (handle-vs-mpy-add expr weights sat? round? half? output-type x86-sub-exprs halide-expr)]
+
+    [(x86-ir:cast expr type saturate?)
+      (handle-cast expr type saturate? x86-sub-exprs halide-expr)]
 
     ;; TODO: load-data, broadcast, build-vec
     ;; TODO: cast, abs, abs-diff,

@@ -93,6 +93,7 @@
 (struct pxor (a b) #:transparent)                           ;; _mm_xor_si128 | bitwise_xor
 (struct resize (a) #:transparent)                           ;; _mm256_castsi128_si256 | resize
 (struct vbroadcasti128 (a) #:transparent)                   ;; _mm_broadcastsi128_si256 | duplicate
+(struct vinserti128 (a b imm8) #:transparent)               ;; _mm256_inserti128_si256 | concat_vectors
 (struct vpabsb (a) #:transparent)                           ;; _mm256_abs_epi8 | abs
 (struct vpabsd (a) #:transparent)                           ;; _mm256_abs_epi32 | abs
 (struct vpabsw (a) #:transparent)                           ;; _mm256_abs_epi16 | abs
@@ -686,6 +687,17 @@
                          (instr-sig 'u32x8 (list 'u32x4))
                          (instr-sig 'u64x4 (list 'u64x2))
 
+                        )]
+
+    [(eq? vinserti128 instr) (list
+                         (instr-sig 'u8x32 (list 'u8x32 'u8x16 'uint8_t))
+                         (instr-sig 'u16x16 (list 'u16x16 'u16x8 'uint8_t))
+                         (instr-sig 'u32x8 (list 'u32x8 'u32x4 'uint8_t))
+                         (instr-sig 'u64x4 (list 'u64x4 'u64x2 'uint8_t))
+                         (instr-sig 'i8x32 (list 'i8x32 'i8x16 'uint8_t))
+                         (instr-sig 'i16x16 (list 'i16x16 'i16x8 'uint8_t))
+                         (instr-sig 'i32x8 (list 'i32x8 'i32x4 'uint8_t))
+                         (instr-sig 'i64x4 (list 'i64x4 'i64x2 'uint8_t))
                         )]
 
     [(eq? vpabsb instr) (list
