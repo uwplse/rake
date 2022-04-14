@@ -84,11 +84,11 @@
       [(x86:??swizzle id live-data exprs idx-table output-type)
        (define trimmed-exprs
         (set->list (list->set
-          (map (lambda (e)
-            ; (if (lo? e) (lo-Vuu e) (if (hi? e) (hi-Vuu e) e)))
-            (error "What is the x86 equivalent of lo/hi???")
-          )
-           exprs))))
+          ; (map (lambda (e)
+          ;   ; (if (lo? e) (lo-Vuu e) (if (hi? e) (hi-Vuu e) e)))
+          ;   (error "What is the x86 equivalent of lo/hi???")
+          ; )
+           exprs)))
        (values id trimmed-exprs)]))
 
   (println "define-values (target-node-id base-exprs) succeeded")
@@ -193,7 +193,7 @@
   (define (fill-arg-grammars node [pos -1])
     (match node
       ;; TODO: need to fill imm8 values
-      ['uint8 (uint8-const)]
+      ['uint8 (uint8_t (uint8-const))]
       [_ node]))
   (for/list ([candidate sorted-candidates]) (cons (x86:visit (car candidate) fill-arg-grammars) (cdr candidate))))
 

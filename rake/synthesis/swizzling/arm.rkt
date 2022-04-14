@@ -33,10 +33,13 @@
       ; (display (format "Target output layout: ~a\n\n"))
       
       (define starting-vecs (halide:extract-arm-loads halide-expr))
-      ;(display (format "Halide Expr: ~a\n\n" halide-expr))
-      ;(display "with loads:\n")
-      ;(pretty-print starting-vecs)
-      ;(display "\n\n\n\n")
+      ; (display "Halide Expr:\n")
+      ; (pretty-print halide-expr)
+      ; (display "\n\nwith loads:\n")
+      ; (pretty-print starting-vecs)
+      ; (display "And arm template:\n")
+      ; (pretty-print arm-template)
+      ; (display "\n\n\n\n")
 
       ;; Extract set of swizzle nodes to be synthesized
       (define swizzle-nodes (list))
@@ -139,7 +142,7 @@
 
 (define (run-synthesizer template halide-expr arm-sub-exprs value-bounds translation-history)
   ; (display "run-synthesizer\n")
-  ; (println halide-expr)
+  ; (pretty-print halide-expr)
   ; (pretty-print template)
 
   ;(define-values (optimized-halide-expr optimized-template inferred-axioms)
@@ -176,8 +179,8 @@
   ; (display "hello?\n")
   (define-values (target-node-id base-exprs)
     (extract-swizzle-information swizzle-node starting-vecs))
-  ;(display (format "\n\nextracted information ~a\n" target-node-id))
-  ;(pretty-print base-exprs)
+  ; (display (format "\n\nget-arm-swizzle-grammar-gen ~a\n" target-node-id))
+  (pretty-print base-exprs)
   ; (display "here?\n\n")
   ;(pretty-print starting-vecs)
   ;(display "\nEnd information extraction\n\n")

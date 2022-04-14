@@ -208,7 +208,7 @@
          [isa (cond
                 ;; TODO: narrowing is difficult... may need bitwise and with a constant?
                 [narrowing? (error "x86:handle-cast doesn't have narrowing implemented yet!")]
-                [widening? (append (get-widen-isa) (list x86:resize))]
+                [widening? (append (get-widen-isa) (list x86:resize x86:vinserti128))]
                 ; TODO: what if it's just a saturate call?
                 [else (error "x86:handle-cast doesn't have reinterpreting implemented yet!")])]
          [grouped-sub-exprs (prepare-sub-exprs arm-sub-exprs)]
@@ -236,7 +236,16 @@
     ; (println "candidates")
     ; (pretty-print candidates)
 
-    (sort-and-uniquify candidates)))
+    ;; Need imm8 for vinserti128
+    (define (uint8-const) (define-symbolic* imm8 (bitvector 8)) imm8)
+    (define (fill-arg-grammars node [pos -1])
+      (match node
+        ;; TODO: need to fill imm8 values
+        ['uint8 (uint8_t (uint8-const))]
+        [_ node]))
+    ; (for/list ([candidate sorted-candidates]) (cons (x86:visit (car candidate) fill-arg-grammars) (cdr candidate))))
+
+    (for/list ([candidate candidates]) (cons (uniquify-swizzles (x86:visit (car candidate) fill-arg-grammars)) (cdr candidate)))))
 
 (define (get-x86-grammar-helper halide-expr ir-expr x86-sub-exprs output-layout)
   ;; TODO: figure out which operations should use output-layout...

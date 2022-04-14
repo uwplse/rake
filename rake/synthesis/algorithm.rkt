@@ -61,7 +61,7 @@
 
         ;; Full verification of the synthesized expression
         ;(define correct? (verify-equivalence-arm (spec-expr spec) arm-expr (spec-axioms spec)))
- 
+
         (cond
           [lowering-success?
             (pretty-print arm-expr)
@@ -94,31 +94,26 @@
         (define-values (lowering-success? x86-exprs)
           (synthesize-x86-expr ir-expr ir-annotations ir-bounds lowering-algo swizzling-algo))
 
-        (display "synthesize-x86 output:\n")
-        (pretty-print x86-exprs)
-        (display lowering-success?)
-        (newline)
+        ; (display "synthesize-x86 output:\n")
+        ; (pretty-print x86-exprs)
+        ; (display lowering-success?)
+        ; (newline)
 
-        (error "here")
+        (define x86-expr (if lowering-success? (list-ref x86-exprs 0) void))
 
-        ;; TODO: NEED x86 full verification check.
         ;; Full verification of the synthesized expression
-        ; (define correct? (verify-equivalence (spec-expr spec) (first hvx-expr) (spec-axioms spec)))
+        ;(define correct? (verify-equivalence-x86 (spec-expr spec) x86-expr (spec-axioms spec)))
 
-        ;; For now, just return the lowered x86 template
-        ir-expr]
-        ;; Full verification of the synthesized expression
-;        (define correct? (verify-equivalence (spec-expr spec) (first hvx-expr) (spec-axioms spec)))
-;
-;        (cond
-;          [correct?
-;            (pretty-print (first hvx-expr))
-;            (display "Synthesized solution is correct.\n\n")
-;            (first hvx-expr)]
-;          [else
-;            (display "Synthesized solution is incorrect.\n\n")
-;            (exit 1)])]
-;       
+        (cond
+          [lowering-success?
+            (pretty-print x86-expr)
+            (display "(x86) Synthesized solution is correct.\n\n")
+            x86-expr]
+          [else
+            (pretty-print x86-expr)
+            (display "(x86) Synthesized solution is incorrect.\n\n")
+            x86-expr])]
+       
        [else (error (format "Could not lift Halide expression to x86 IR."))])]
 
     [else (error (format "Input specification is provided in a language Rake currently does not support: '~a. Supported IRs: ['halide-ir]" spec-lang))]))
