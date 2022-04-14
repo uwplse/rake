@@ -106,7 +106,7 @@
 
     [(ramp base stride len)
      `(halide.ir.ramp, (to-llvm-type arm-expr)
-      (list, (compile-scalar base), (compile-scalar stride), (compile-scalar len)))]
+      (list, (compile-scalar base), (compile-scalar stride), `(,t_i32 ,(compile-scalar len))))]
 
     [(arm:smax Vn Vm)
      (destruct* ((arm:interpret Vn) (arm:interpret Vm))
