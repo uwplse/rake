@@ -8841,6 +8841,8 @@
       (vecType load-body))]
 
     [(arm:??swizzle id live-data exprs idx-tbl output-type)
+      ;(println live-data)
+      ;(println (take live-data 1))
       (let ([vecType (arm:get-type-struct output-type)])
         ;; TODO: it is probably much more complicated than this...
         (vecType

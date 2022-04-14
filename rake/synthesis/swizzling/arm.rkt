@@ -150,9 +150,9 @@
   
   ;; Incrementally checks the template for more and more lanes
   (define sym-consts (set->list (set-subtract (list->set (symbolics template)) (list->set (symbolics halide-expr)))))
-  ; (display "\n\nrunning synthesizer on...\n\n")
-  ; (pretty-print (arm:interpret template))
-  ; (pretty-print halide-expr)
+   ;(display "\n\nrunning synthesizer on...\n\n")
+   ;(pretty-print template)
+   ;(pretty-print halide-expr)
   (define lanes-to-verify (verification-lanes (arm:get-interpreted-type template)))
   (synthesize-incremental halide-expr template sym-consts lanes-to-verify '()))
 
@@ -206,6 +206,8 @@
     (define (update-swizzle-nodes node [pos -1])
     (destruct node
       [(arm:??load id live-data buffer gather-tbl output-type)
+       (if (not (equal? id target-node-id)) (update-swizzle-data node halide-expr arm-sub-exprs translation-history) node)]
+      [(arm:??swizzle id live-data expr gather-tbl output-type)
        (if (not (equal? id target-node-id)) (update-swizzle-data node halide-expr arm-sub-exprs translation-history) node)]
       [_ node]))
     (define updated-template (arm:visit arm-template update-swizzle-nodes))
@@ -333,10 +335,10 @@
     [else
      (define curr-lane (first lanes-to-verify))
      
-    ;  (display (format "Verifying lane: ~a\n" curr-lane))
-    ;  (set-curr-cn! curr-lane)
-    ;  (println ((halide:interpret halide-expr) curr-lane))
-    ;  (println (arm:get-element (arm:interpret template) curr-lane))
+      ;(display (format "Verifying lane: ~a\n" curr-lane))
+      ;(set-curr-cn! curr-lane)
+      ;(println ((halide:interpret halide-expr) curr-lane))
+      ;(println (arm:get-element (arm:interpret template) curr-lane))
      
      (define st (current-milliseconds))
      (clear-vc!)
