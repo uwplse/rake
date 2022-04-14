@@ -39,7 +39,37 @@
      (match (length tiles)
        [1 (compile (first tiles))]
        [_ `(halide.concat_vectors, (string->sexp output-type), (string->sexp (format "(list ~a)" (tiles->compiled-str tiles))))])]
-    
+
+
+    [(arm:dup Vn)
+     (destruct (arm:interpret Vn)
+       ;; TODO: there are no llvm intrinsics for these...
+       [(uint8_t _)  `(halide.ir.x8, (to-llvm-type arm-expr), `(list, (compile-scalar Vn)))]
+       [(int8_t _)   `(halide.ir.x8, (to-llvm-type arm-expr), `(list, (compile-scalar Vn)))]
+       [(uint16_t _) `(halide.ir.x4, (to-llvm-type arm-expr), `(list, (compile-scalar Vn)))]
+       [(int16_t _)  `(halide.ir.x4, (to-llvm-type arm-expr), `(list, (compile-scalar Vn)))]
+       ;; TODO: there are 2S and 4S variants of this instruction
+       [(uint32_t _) `(halide.ir.x2, (to-llvm-type arm-expr), `(list, (compile-scalar Vn)))]
+       [(int32_t _)  `(halide.ir.x2, (to-llvm-type arm-expr), `(list, (compile-scalar Vn)))]
+       ;; Yes, the instruction type is 2D for 64-bit
+       [(uint64_t _) `(halide.ir.x2, (to-llvm-type arm-expr), `(list, (compile-scalar Vn)))]
+       [(int64_t _)  `(halide.ir.x2, (to-llvm-type arm-expr), `(list, (compile-scalar Vn)))]
+       [_ (error (format "arm:dup variant not understood: ~a" arm-expr))])]
+
+    ;; TODO: this doesn't exist anymore??
+    [(arm:dupw Vn)
+     (destruct (arm:interpret Vn)
+       ;; TODO: there are no llvm intrinsics for these...
+       [(uint8_t _)  `(halide.ir.x16, (to-llvm-type arm-expr), `(list, (compile-scalar Vn)))]
+       [(int8_t _)   `(halide.ir.x16, (to-llvm-type arm-expr), `(list, (compile-scalar Vn)))]
+       [(uint16_t _) `(halide.ir.x8, (to-llvm-type arm-expr), `(list, (compile-scalar Vn)))]
+       [(int16_t _)  `(halide.ir.x8, (to-llvm-type arm-expr), `(list, (compile-scalar Vn)))]
+       [(uint32_t _) `(halide.ir.x4, (to-llvm-type arm-expr), `(list, (compile-scalar Vn)))]
+       [(int32_t _)  `(halide.ir.x4, (to-llvm-type arm-expr), `(list, (compile-scalar Vn)))]
+       [(uint64_t _) `(halide.ir.x2, (to-llvm-type arm-expr), `(list, (compile-scalar Vn)))]
+       [(int64_t _)  `(halide.ir.x2, (to-llvm-type arm-expr), `(list, (compile-scalar Vn)))]
+       [_ (error (format "dupw variant not understood: ~a" arm-expr))])]
+
     ;;;;;;;;;;;;;;;;; Instructions for vector creation ;;;;;;;;;;;;;;;
     
     [(arm:ld buf loc align output-type)
@@ -51,40 +81,49 @@
         (,t_i32 ,(string->sexp (aligned-mod align)))
         (,t_i32 ,(string->sexp (aligned-rem align)))))]
 
+    [(ramp base stride len)
+     `(halide.ir.ramp, (to-llvm-type arm-expr)
+      (list, (compile-scalar base), (compile-scalar stride), (compile-scalar len)))]
+
+    [(arm:smax Vn Vm)
+     (destruct* ((arm:interpret Vn) (arm:interpret Vm))
+       [((arm:i8x8 v0) (arm:i8x8 v1)) (generate `smax.v8i8 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
+       [((arm:i8x16 v0) (arm:i8x16 v1)) (generate `smax.v16i8 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
+       [((arm:i16x4 v0) (arm:i16x4 v1)) (generate `smax.v4i16 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
+       [((arm:i16x8 v0) (arm:i16x8 v1)) (generate `smax.v8i16 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
+       [((arm:i32x2 v0) (arm:i32x2 v1)) (generate `smax.v2i32 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
+       [((arm:i32x4 v0) (arm:i32x4 v1)) (generate `smax.v4i32 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
+       [(_ _) (error (format "arm:smax variant not understood: ~a\n~a\n~a\n\n" arm-expr (arm:interpret Vn) (arm:interpret Vm)))])]
+
+    [(arm:smin Vn Vm)
+     (destruct* ((arm:interpret Vn) (arm:interpret Vm))
+       [((arm:i8x8 v0) (arm:i8x8 v1)) (generate `smin.v8i8 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
+       [((arm:i8x16 v0) (arm:i8x16 v1)) (generate `smin.v16i8 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
+       [((arm:i16x4 v0) (arm:i16x4 v1)) (generate `smin.v4i16 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
+       [((arm:i16x8 v0) (arm:i16x8 v1)) (generate `smin.v8i16 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
+       [((arm:i32x2 v0) (arm:i32x2 v1)) (generate `smin.v2i32 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
+       [((arm:i32x4 v0) (arm:i32x4 v1)) (generate `smin.v4i32 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
+       [(_ _) (error (format "arm:smin variant not understood: ~a" arm-expr))])]
+
     [(arm:umax Vn Vm)
      (destruct* ((arm:interpret Vn) (arm:interpret Vm))
        [((arm:u8x8 v0) (arm:u8x8 v1)) (generate `umax.v8i8 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
        [((arm:u8x16 v0) (arm:u8x16 v1)) (generate `umax.v16i8 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
-      )]
-    
+       [((arm:u16x4 v0) (arm:u16x4 v1)) (generate `umax.v4i16 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
+       [((arm:u16x8 v0) (arm:u16x8 v1)) (generate `umax.v8i16 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
+       [((arm:u32x2 v0) (arm:u32x2 v1)) (generate `umax.v2i32 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
+       [((arm:u32x4 v0) (arm:u32x4 v1)) (generate `umax.v4i32 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
+       [(_ _) (error (format "arm:umax variant not understood: ~a" arm-expr))])]
+
     [(arm:umin Vn Vm)
      (destruct* ((arm:interpret Vn) (arm:interpret Vm))
        [((arm:u8x8 v0) (arm:u8x8 v1)) (generate `umin.v8i8 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
        [((arm:u8x16 v0) (arm:u8x16 v1)) (generate `umin.v16i8 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
-      )]
-
-    [(arm:dup Vn)
-     (destruct (arm:interpret Vn)
-       ;; TODO: there are no llvm intrinsics for these...
-       [(uint8_t _) `(halide.ir.x8, (to-llvm-type arm-expr), `(list, (compile-scalar Vn)))]
-      )]
-
-    [(arm:dupw Vn)
-     (destruct (arm:interpret Vn)
-       ;; TODO: there are no llvm intrinsics for these...
-       [(uint8_t _) `(halide.ir.x16, (to-llvm-type arm-expr), `(list, (compile-scalar Vn)))]
-      )]
-
-    ; [(vsplat Rt)
-    ;  (destruct (hvx:interpret Rt)
-    ;    [(uint8_t _) `(halide.ir.x128, (to-llvm-type hvx-expr), `(list, (compile-scalar Rt)))]
-    ;    [(int16_t _) `(halide.ir.x64, (to-llvm-type hvx-expr), `(list, (compile-scalar Rt)))]
-    ;    [(int8_t _) (generate `lvsplatw (to-llvm-type hvx-expr) `(list (,t_i32 ,(string->sexp (format "(halide.hexagon.dup4.b int32 (list ~a))" (compile-scalar Rt))))))]
-    ;    [(uint8_t _) (generate `lvsplatw (to-llvm-type hvx-expr) `(list (,t_i32 ,(string->sexp (format "(halide.hexagon.dup4.b int32 (list ~a))" (compile-scalar Rt))))))]
-    ;    [(int16_t _) (generate `lvsplatw (to-llvm-type hvx-expr) `(list (,t_i32 ,(string->sexp (format "(halide.hexagon.dup2.h int32 (list ~a))" (compile-scalar Rt))))))]
-    ;    [(uint16_t _) (generate `lvsplatw (to-llvm-type hvx-expr) `(list (,t_i32 ,(string->sexp (format "(halide.hexagon.dup2.h int32 (list ~a))" (compile-scalar Rt))))))]
-    ;    [(int32_t _) (generate `lvsplatw (to-llvm-type hvx-expr) `(list ,(compile-scalar Rt)))]
-    ;    [(uint32_t _) (generate `lvsplatw (to-llvm-type hvx-expr) `(list ,(compile-scalar Rt)))])]
+       [((arm:u16x4 v0) (arm:u16x4 v1)) (generate `umin.v4i16 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
+       [((arm:u16x8 v0) (arm:u16x8 v1)) (generate `umin.v8i16 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
+       [((arm:u32x2 v0) (arm:u32x2 v1)) (generate `umin.v2i32 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
+       [((arm:u32x4 v0) (arm:u32x4 v1)) (generate `umin.v4i32 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
+       [(_ _) (error (format "arm:umin variant not understood: ~a" arm-expr))])]
 
     [_ (string->sexp (format "~a" arm-expr))]))
 
@@ -101,12 +140,6 @@
   (read (open-input-string (format "~a" s))))
 
 (define t_i32 `int32)
-(define t_i16 `int16)
-(define t_i8 `int8)
-(define t_16xi32 `int32x16)
-(define t_32xi32 `int32x32)
-(define t_64xi32 `int32x64)
-(define t_128xi1 `int1x128)
 
 (define (to-llvm-type arm-expr)
   (match (arm:interpret arm-expr)
@@ -122,7 +155,17 @@
     [(arm:u8x8 data) (string->sexp "uint8x8")]
     [(arm:i8x16 data) (string->sexp "int8x16")]
     [(arm:u8x16 data) (string->sexp "uint8x16")]
-    [_ (error "implement the rest of the arm types")]))
+    [(arm:i16x4 data) (string->sexp "int16x4")]
+    [(arm:u16x4 data) (string->sexp "uint16x4")]
+    [(arm:i16x8 data) (string->sexp "int16x8")]
+    [(arm:u16x8 data) (string->sexp "uint16x8")]
+    [(arm:i32x2 data) (string->sexp "int32x2")]
+    [(arm:u32x2 data) (string->sexp "uint32x2")]
+    [(arm:i32x4 data) (string->sexp "int32x4")]
+    [(arm:u32x4 data) (string->sexp "uint32x4")]
+    [(arm:i64x2 data) (string->sexp "int64x2")]
+    [(arm:u64x2 data) (string->sexp "uint64x2")]
+    [_ (error (format "implement the rest of the arm types: ~a" arm-expr))]))
 
 (define (compile-idx idx)
   (cond
