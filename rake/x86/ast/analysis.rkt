@@ -82,6 +82,7 @@
     [(x86:pxor a b) (+ (max-unique-inputs a) (max-unique-inputs b))]
     [(x86:resize a) (max-unique-inputs a)]
     [(x86:vbroadcasti128 a) (max-unique-inputs a)]
+    [(x86:vinserti128 a b imm8) (+ (max-unique-inputs a) (max-unique-inputs b))]
     [(x86:vpabsb a) (max-unique-inputs a)]
     [(x86:vpabsd a) (max-unique-inputs a)]
     [(x86:vpabsw a) (max-unique-inputs a)]

@@ -5246,22 +5246,19 @@
              (halide:interpret
               (concat_vectors
                a
-               (x8 (int16_t (bv 0 16)))
-8)))]
+               (x8 (int16_t (bv 0 16))) 8)))]
         [((x86:i32x4 a))
             (x86:i32x8
              (halide:interpret
               (concat_vectors
                a
-               (x4 (int32_t (bv 0 32)))
-4)))]
+               (x4 (int32_t (bv 0 32))) 4)))]
         [((x86:i64x2 a))
             (x86:i64x4
              (halide:interpret
               (concat_vectors
                a
-               (x2 (int64_t (bv 0 64)))
-2)))]
+               (x2 (int64_t (bv 0 64))) 2)))]
         [((x86:u8x32 a))
             (x86:u8x16
              (halide:interpret
@@ -5318,6 +5315,115 @@
 
 
         [(_) (assert #f "infeasible in interpreting vbroadcasti128")])]
+
+    [(x86:vinserti128 a b imm8)
+      (destruct* ((interpret a) (interpret b) (interpret imm8))
+        [((x86:u8x32 a) (x86:u8x16 b) (uint8_t imm8))
+             (x86:u8x32
+              (halide:interpret
+               (vec-if
+               (x32 (sca-eq (sca-bwand (uint8_t imm8) (uint8_t (bv 1 8)))  (uint8_t (bv 1 8))))
+               (concat_vectors
+                (slice_vectors
+                 a 0 1 16)
+                b 16)
+               (concat_vectors
+                b
+                (slice_vectors
+                 a 1 1 16) 16))))]
+        [((x86:u16x16 a) (x86:u16x8 b) (uint8_t imm8))
+             (x86:u16x16
+              (halide:interpret
+               (vec-if
+               (x16 (sca-eq (sca-bwand (uint8_t imm8) (uint8_t (bv 1 8)))  (uint8_t (bv 1 8))))
+               (concat_vectors
+                (slice_vectors
+                 a 0 1 8)
+                b 8)
+               (concat_vectors
+                b
+                (slice_vectors
+                 a 1 1 8) 8))))]
+        [((x86:u32x8 a) (x86:u32x4 b) (uint8_t imm8))
+             (x86:u32x8
+              (halide:interpret
+               (vec-if
+               (x8 (sca-eq (sca-bwand (uint8_t imm8) (uint8_t (bv 1 8)))  (uint8_t (bv 1 8))))
+               (concat_vectors
+                (slice_vectors
+                 a 0 1 4)
+                b 4)
+               (concat_vectors
+                b
+                (slice_vectors
+                 a 1 1 4) 4))))]
+        [((x86:u64x4 a) (x86:u64x2 b) (uint8_t imm8))
+             (x86:u64x4
+              (halide:interpret
+               (vec-if
+               (x4 (sca-eq (sca-bwand (uint8_t imm8) (uint8_t (bv 1 8)))  (uint8_t (bv 1 8))))
+               (concat_vectors
+                (slice_vectors
+                 a 0 1 2)
+                b 2)
+               (concat_vectors
+                b
+                (slice_vectors
+                 a 1 1 2) 2))))]
+        [((x86:i8x32 a) (x86:i8x16 b) (uint8_t imm8))
+             (x86:i8x32
+              (halide:interpret
+               (vec-if
+               (x32 (sca-eq (sca-bwand (uint8_t imm8) (uint8_t (bv 1 8)))  (uint8_t (bv 1 8))))
+               (concat_vectors
+                (slice_vectors
+                 a 0 1 16)
+                b 16)
+               (concat_vectors
+                b
+                (slice_vectors
+                 a 1 1 16) 16))))]
+        [((x86:i16x16 a) (x86:i16x8 b) (uint8_t imm8))
+             (x86:i16x16
+              (halide:interpret
+               (vec-if
+               (x16 (sca-eq (sca-bwand (uint8_t imm8) (uint8_t (bv 1 8)))  (uint8_t (bv 1 8))))
+               (concat_vectors
+                (slice_vectors
+                 a 0 1 8)
+                b 8)
+               (concat_vectors
+                b
+                (slice_vectors
+                 a 1 1 8) 8))))]
+        [((x86:i32x8 a) (x86:i32x4 b) (uint8_t imm8))
+             (x86:i32x8
+              (halide:interpret
+               (vec-if
+               (x8 (sca-eq (sca-bwand (uint8_t imm8) (uint8_t (bv 1 8)))  (uint8_t (bv 1 8))))
+               (concat_vectors
+                (slice_vectors
+                 a 0 1 4)
+                b 4)
+               (concat_vectors
+                b
+                (slice_vectors
+                 a 1 1 4) 4))))]
+        [((x86:i64x4 a) (x86:i64x2 b) (uint8_t imm8))
+             (x86:i64x4
+              (halide:interpret
+               (vec-if
+               (x4 (sca-eq (sca-bwand (uint8_t imm8) (uint8_t (bv 1 8)))  (uint8_t (bv 1 8))))
+               (concat_vectors
+                (slice_vectors
+                 a 0 1 2)
+                b 2)
+               (concat_vectors
+                b
+                (slice_vectors
+                 a 1 1 2) 2))))]
+
+        [(_ _ _) (assert #f "infeasible in interpreting vinserti128")])]
 
     [(x86:vpabsb a)
       (destruct* ((interpret a))
@@ -12628,7 +12734,7 @@
                                              b
                                              (x4 (uint64_t (bv 0 64))))))))))))))))))))))))))))))))))))]
 
-        [(_ _ _) (assert #f "infeasible in interpreting vpalignr")])]
+        [(_ _ _) (assert #f (format "infeasible in interpreting vpalignr \n~a\n~a\n~a\n\n~a\n~a\n~a\n\n" a b imm8 (interpret a) (interpret b) (interpret imm8)))])]
 
     [(x86:vpand a b)
       (destruct* ((interpret a) (interpret b))
@@ -30795,10 +30901,10 @@
     [(x86:??swizzle id live-data exprs idx-tbl output-type)
       (let ([vecType (x86:get-type-struct output-type)])
         ;; TODO: it is probably much more complicated than this...
-        (println (format "Interpreting x86:??swizzle ~a ~a \n" id output-type))
-        (pretty-print live-data)
-        (pretty-print exprs)
-        (println (format "vectype: ~a\n" vecType))
+        ; (println (format "Interpreting x86:??swizzle ~a ~a \n" id output-type))
+        ; (pretty-print live-data)
+        ; (pretty-print exprs)
+        ; (println (format "vectype: ~a\n" vecType))
         (vecType
           (lambda (i) (list-ref (list-ref live-data curr-cn) (list-ref idx-tbl i)))))]
 

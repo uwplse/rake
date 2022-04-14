@@ -153,6 +153,8 @@
       (transform (x86:resize (visit a transform)))]
     [(x86:vbroadcasti128 a)
       (transform (x86:vbroadcasti128 (visit a transform)))]
+    [(x86:vinserti128 a b imm8)
+      (transform (x86:vinserti128 (visit a transform) (visit b transform) (visit imm8 transform)))]
     [(x86:vpabsb a)
       (transform (x86:vpabsb (visit a transform)))]
     [(x86:vpabsd a)
@@ -555,6 +557,8 @@
       (transform (x86:resize (visit a transform)))]
     [(x86:vbroadcasti128 a)
       (transform (x86:vbroadcasti128 (visit a transform)))]
+    [(x86:vinserti128 a b imm8)
+      (transform (x86:vinserti128 (visit a transform) (visit b transform) (visit imm8 transform)))]
     [(x86:vpabsb a)
       (transform (x86:vpabsb (visit a transform)))]
     [(x86:vpabsd a)
