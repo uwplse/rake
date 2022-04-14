@@ -53,7 +53,7 @@
          [isa (if widening?
                 (list arm:reinterpret arm:add arm:addv arm:saddlv arm:uaddlv arm:saddl arm:saddw arm:saddlp arm:sadalp arm:smlal-vs arm:smlsl-vs arm:sdot.v2i32.v8i8 arm:udot.v2i32.v8i8 arm:sdot.v4i32.v16i8 arm:udot.v4i32.v16i8 arm:shll arm:ssubl arm:sub arm:uadalp arm:uaddl arm:uaddlp arm:uaddw arm:umlal-vs arm:umlsl-vs arm:usubl arm:usubw arm:smull-vs arm:umull-vs)
                 ;(list arm:reinterpret arm:umull-vs arm:add)
-                (list arm:reinterpret arm:add ))] ;arm:sub arm:addp arm:mla-vs arm:mls-vs arm:mul-vs arm:shl arm:neg
+                (list arm:reinterpret arm:add arm:sub arm:addp arm:mla-vs arm:mls-vs arm:mul-vs arm:shl arm:neg))]
          [depth (if widening? 2 2)]
          [grouped-sub-exprs (prepare-sub-exprs arm-sub-exprs)]
          [number-reads (length weights)]
