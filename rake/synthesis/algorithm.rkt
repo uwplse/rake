@@ -54,8 +54,10 @@
      (cond
        [lifting-success?
         ;; Lower the super-instructions to an expression template (in ARM ISA)
-        (define-values (lowering-success? arm-expr)
+        (define-values (lowering-success? arm-exprs)
           (synthesize-arm-expr ir-expr ir-annotations ir-bounds lowering-algo swizzling-algo))
+
+        (define arm-expr (if lowering-success? (list-ref arm-exprs 0) void))
 
         ;; Full verification of the synthesized expression
         ;(define correct? (verify-equivalence-arm (spec-expr spec) arm-expr (spec-axioms spec)))
@@ -66,6 +68,7 @@
             (display "Synthesized solution is correct.\n\n")
             arm-expr]
           [else
+            (pretty-print arm-expr)
             (display "Synthesized solution is incorrect.\n\n")
             arm-expr])]
        

@@ -69,7 +69,7 @@
         (define-values (successful? lowered-exprs)
           (lower-sub-exprs ir-expr (rest ir-sub-exprs) ir-annotations ir-bounds lowering-algo swizzling-algo sub-expr?))
         (cond
-          [successful? (values #t (append arm-subexpr-impl lowered-exprs))]
+          [successful? (values #t (append (flatten (list arm-subexpr-impl)) lowered-exprs))]
           [else (values #f '())])]
        [else (values #f '())])]))
 

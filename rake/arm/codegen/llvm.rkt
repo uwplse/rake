@@ -9,7 +9,8 @@
   rake/cpp
   rake/halide
   rake/arm/ast/interpreter
-  rake/arm/ast/types)
+  rake/arm/ast/types
+)
 
 (provide (rename-out [codegen arm:llvm-codegen]))
 
@@ -22,7 +23,7 @@
   (match arm-expr
 
     ;;;;;;;;;;;;;;;;;;;;;;; Concatenate Tiles ;;;;;;;;;;;;;;;;;;;;;;;;
-    
+
     [(arm:concat-tiles tiles)
      (define tile-cnt (length tiles))
      (define tile-elems (arm:num-elems (arm:interpret (list-ref tiles 0))))

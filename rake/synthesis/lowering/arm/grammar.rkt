@@ -374,7 +374,7 @@
 (define (prepare-sub-exprs arm-sub-exprs)
   (define grouped-sub-exprs (make-hash))
   (define swizzle-node-id -1)
-  (define arm-sub-exprs-untiled (flatten (map (lambda (expr) (if (arm:concat-tiles? expr) (arm:concat-tiles-vecs expr) expr)) (set->list (list->set arm-sub-exprs)))))
+  (define arm-sub-exprs-untiled (set->list (list->set (flatten (map (lambda (expr) (if (arm:concat-tiles? expr) (arm:concat-tiles-vecs expr) expr)) (set->list (list->set arm-sub-exprs)))))))
   (for ([arm-sub-expr arm-sub-exprs-untiled])
     (cond
       [(arm:??abstr-load? arm-sub-expr)
