@@ -40,7 +40,7 @@
   ;; Lower sub-expressions first
   (define-values (successful? arm-sub-exprs)
     (lower-sub-exprs ir-expr (arm-ir:get-subexprs ir-expr) ir-annotations ir-bounds lowering-algo swizzling-algo sub-expr?))
-
+  
   ;; Pop node from trace
   (set! trace (rest trace))
 
@@ -69,7 +69,7 @@
         (define-values (successful? lowered-exprs)
           (lower-sub-exprs ir-expr (rest ir-sub-exprs) ir-annotations ir-bounds lowering-algo swizzling-algo sub-expr?))
         (cond
-          [successful? (values #t (append (list arm-subexpr-impl) lowered-exprs))]
+          [successful? (values #t (append (flatten (list arm-subexpr-impl)) lowered-exprs))]
           [else (values #f '())])]
        [else (values #f '())])]))
 
