@@ -221,6 +221,8 @@
       [else
         (let ([swizzle-budget (- cost-ub template-cost 0.01)]
               [halide-expr-tiles (generate-halide-tiles halide-expr x86-template output-layout)])
+          (display "halide-expr-tiles:\n")
+          (pretty-print halide-expr-tiles)
           (cond
             [(> (length halide-expr-tiles) 1)
               (let ([incremental-swizzle (construct-incremental-swizzle ir-expr x86-template output-layout swizzle-budget swizzling-algo x86-sub-exprs value-bounds translation-history (length halide-expr-tiles))])
@@ -269,7 +271,7 @@
 
 (define (generate-halide-tiles halide-expr x86-template output-layout)
   ;; TODO: could this ever be 128?
-  (let ([x86-tile-size 256]
+  (let ([x86-tile-size (if (x86:is-256-expr? x86-template) 256 128)]
         [halide-tile-elem-cnt (halide:vec-len halide-expr)]
         [halide-tile-elem-bits (cpp:type-bw (halide:elem-type halide-expr))])
     (let* ([halide-tile-size (* halide-tile-elem-cnt halide-tile-elem-bits)]

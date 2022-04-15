@@ -34,6 +34,7 @@
     ;(println (get-x86-grammar-helper halide-expr ir-expr x86-sub-exprs))
     ;(println (if check-cache (hash-ref grammar-cache key) (get-x86-grammar-helper halide-expr ir-expr x86-sub-exprs)))
     (display (format "get-x86-grammar received ~a candidates\n" (length candidates)))
+    ; (pretty-print candidates)
     ;(println (filter (lambda (c) (<= (cdr c) cost-ub)) candidates))
     (let ([filtered (filter (lambda (c) (<= (cdr c) cost-ub)) candidates)])
       (display (format "And ~a of them pass the cost filtering\n" (length filtered)))
@@ -213,7 +214,7 @@
 
       (time (for/list ([candidate candidates]) (cons (uniquify-swizzles (x86:visit (car candidate) fill-arg-grammars)) (car (cdr candidate))))))))
 
-(define (handle-cast expr output-type saturate? arm-sub-exprs halide-expr)
+(define (handle-cast expr output-type saturate? x86-sub-exprs halide-expr)
   (let* ([input-type (get-input-type expr)]
          [narrowing? (< (cpp:type-bw output-type) (cpp:type-bw input-type))]
          [widening? (> (cpp:type-bw output-type) (cpp:type-bw input-type))]
@@ -223,7 +224,7 @@
                 [widening? (append (get-widen-isa) (list x86:resize x86:vinserti128))]
                 ; TODO: what if it's just a saturate call?
                 [else (error "x86:handle-cast doesn't have reinterpreting implemented yet!")])]
-         [grouped-sub-exprs (prepare-sub-exprs arm-sub-exprs)]
+         [grouped-sub-exprs (prepare-sub-exprs x86-sub-exprs)]
          [desired-types (x86:get-vector-types output-type)]
          ; TODO: should this be the depth and the cost?
          [depth 3]
@@ -259,7 +260,7 @@
 
     (for/list ([candidate candidates]) (cons (uniquify-swizzles (x86:visit (car candidate) fill-arg-grammars)) (cdr candidate)))))
 
-(define (handle-minimum a b arm-sub-exprs halide-expr)
+(define (handle-minimum a b x86-sub-exprs halide-expr)
   (let* ([output-type (halide:elem-type halide-expr)]
          ; TODO: which conditionals do we want to use?
          ; TODO: do we need `reinterpret`?
@@ -272,7 +273,7 @@
                 (get-broadcast-isa)
                 ;; TODO: what else might be needed?
             )]
-         [grouped-sub-exprs (prepare-sub-exprs arm-sub-exprs)]
+         [grouped-sub-exprs (prepare-sub-exprs x86-sub-exprs)]
          [desired-types (x86:get-vector-types output-type)]
          ; TODO: is this a good depth / cost??
          [depth 2]
@@ -284,7 +285,7 @@
     ;; TODO: how do we handle conditionals?
     (time (for/list ([candidate candidates]) (cons (uniquify-swizzles (x86:visit (car candidate) fill-arg-grammars)) (cdr candidate))))))
 
-(define (handle-maximum a b arm-sub-exprs halide-expr)
+(define (handle-maximum a b x86-sub-exprs halide-expr)
   (let* ([output-type (halide:elem-type halide-expr)]
          ; TODO: which conditionals do we want to use?
          ; TODO: do we need `reinterpret`?
@@ -293,7 +294,7 @@
                     ;; TODO: should have 128-bit versions of the AVX2
                     ;; SSE2
                     x86:pmaxsw x86:pmaxub)]
-         [grouped-sub-exprs (prepare-sub-exprs arm-sub-exprs)]
+         [grouped-sub-exprs (prepare-sub-exprs x86-sub-exprs)]
          [desired-types (x86:get-vector-types output-type)]
          ; TODO: is this a good depth / cost??
          [depth 2]
@@ -310,13 +311,14 @@
   ;; TODO: figure out which operations should use output-layout...
   (destruct ir-expr
 
-    ; Data loading/shuffling
+    ;; Data loading/shuffling
     [(x86-ir:load-data live-data gather-tbl)
      (define buffers (set->list (halide:extract-live-buffers halide-expr)))
-     (define candidates (for/list ([buffer buffers]) (cons (x86:??abstr-load 0 live-data buffer) 1)))
      (define buf-elemTypes (map buffer-elemT buffers))
+     (display "x86-ir:load-data:\n")
+     (pretty-print buf-elemTypes)
      (define (label-cost value)
-        (cons value 2))
+        (cons value (if (x86:is-256-expr? value) 1 2)))
      (define (generate-shuffles type)
         (define (construct-loads b)
           (define tbl (map (lambda (i) (define-symbolic* idx integer?) idx) (range 256)))
@@ -324,7 +326,7 @@
           (map make-load (x86:get-vector-types (buffer-elemT b))))
         (define actual-loads (flatten (map construct-loads buffers)))
         (x86:make-shuffles-list actual-loads type))
-     (map label-cost (flatten (map generate-shuffles buf-elemTypes)))]
+     (sort (map label-cost (flatten (map generate-shuffles buf-elemTypes))) (lambda (v1 v2) (<= (cdr v1) (cdr v2))))]
 
     [(x86-ir:broadcast scalar-expr)
       ;; TODO: is this correct?

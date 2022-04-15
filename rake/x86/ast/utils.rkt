@@ -52,7 +52,7 @@
     (cond
       [(eq? 0 (length filtered-loads)) (error "x86:simplify-shuffle removed all loads ~a" shuffle)]
       ; Just make a load if not actually shuffling anything
-      [(eq? 1 (length filtered-loads)) (list-ref loads 0)]
+      [(eq? 1 (length filtered-loads)) (list-ref filtered-loads 0)]
       ; We didn't filter anything
       [(eq? (length loads) (length filtered-loads)) shuffle]
       ; We filtered some stuff

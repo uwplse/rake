@@ -53,3 +53,27 @@
     [(eq? 'u32x8 type) 'u32x4]
     [(eq? 'u64x4 type) 'u64x2]
     [else (error (format "x86:get-128-type failed on type: ~a\n" type))]))
+
+(define (is-256-expr? x86-expr)
+  (let ([type (get-interpreted-type x86-expr)])
+    (cond
+      [(eq? 'i8x32 type) #t]
+      [(eq? 'i16x16 type) #t]
+      [(eq? 'i32x8 type) #t]
+      [(eq? 'i64x4 type) #t]
+
+      [(eq? 'u8x32 type) #t]
+      [(eq? 'u16x16 type) #t]
+      [(eq? 'u32x8 type) #t]
+      [(eq? 'u64x4 type) #t]
+
+      [(eq? 'i8x16 type) #f]
+      [(eq? 'i16x8 type) #f]
+      [(eq? 'i32x4 type) #f]
+      [(eq? 'i64x2 type) #f]
+
+      [(eq? 'u8x16 type) #f]
+      [(eq? 'u16x8 type) #f]
+      [(eq? 'u32x4 type) #f]
+      [(eq? 'u64x2 type) #f]
+      [else (error (format "x86:is-256-expr? failed on type: ~a\n" type))])))
