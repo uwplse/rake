@@ -75,6 +75,7 @@
       (display "Lowering IR to x86...\n")
       (display "====================\n\n")
       (display (format "IR Operation: \n\n~a\n\n" (pretty-format ir-expr)))
+      ; (display (format "sub-exprs: \n\n~a\n\n" (pretty-format x86-sub-exprs)))
 
       (define start-time (current-seconds))
       (define candidates (get-x86-grammar halide-expr ir-expr x86-sub-exprs output-layout cost-ub))

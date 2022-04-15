@@ -106,6 +106,8 @@
                     x86:pmuludq-vs x86:pmullw-vs)
               ;; TODO: should we include the shift-left variants? I think we need to.
               (list x86:vpsllw x86:vpslld x86:vpsllq)
+              ;; TODO: are these useful?
+              (list x86:resize x86:vinserti128)
               ;; TODO: should we include saturating adds even if not sat?
               (if sat?
                 (list x86:vpaddsb x86:vpaddsw x86:vpaddusb x86:vpaddusw
@@ -118,8 +120,8 @@
                 '())))]
          ; TODO: better pruning and more isa options
          ; TODO: are there better depth/cost combos?
-         [depth 3]
-         [max-cost 15]
+         [depth 4]
+         [max-cost 10]
          [grouped-sub-exprs (prepare-sub-exprs x86-sub-exprs)]
          [number-reads (length weights)]
          [desired-types (x86:get-vector-types output-type)]
@@ -145,11 +147,11 @@
     ; (display "grouped sub exprs!\n")
     ; (pretty-print grouped-sub-exprs)
     ; (pretty-print candidates)
-    ; (display (format "~a ~a ~a\n" isa desired-types grouped-sub-exprs))
+    ; (pretty-print isa)
     ; (pretty-print grouped-sub-exprs)
-    ; (display (format "Types; ~a ~a \n" input-type output-type))
+    ; (display (format "Types: ~a ~a ~a \n" desired-types input-type output-type))
 
-    ;; Filter out templates that read too much or too little data
+    ; ; Filter out templates that read too much or too little data
     ; (display (format "Before filtering reads: ~a\n" (length candidates)))
     ; (display (format "Number of reads: ~a\n" number-reads))
 
@@ -168,7 +170,7 @@
     ;; Sort them (I am ashamed of this line below)
     (set! candidates (time (sort candidates (lambda (v1 v2) (if (eq? (car (cdr v1)) (car (cdr v2))) (< (cdr (cdr v1)) (cdr (cdr v2))) (< (car (cdr v1)) (car (cdr v2))))))))
 
-    ; (println "candidates!")
+    ; (println "x86:vs-mpy-add sorted candidates!")
     ; (pretty-print candidates)
 
     (let* ([add-scalars (halide:extract-add-scalars halide-expr)]
@@ -247,6 +249,42 @@
 
     (for/list ([candidate candidates]) (cons (uniquify-swizzles (x86:visit (car candidate) fill-arg-grammars)) (cdr candidate)))))
 
+(define (handle-minimum a b arm-sub-exprs halide-expr)
+  (let* ([output-type (halide:elem-type halide-expr)]
+         ; TODO: which conditionals do we want to use?
+         ; TODO: do we need `reinterpret`?
+         [isa (list x86:vpminsw x86:vpminsd x86:vpminsb x86:vpminuw
+                    x86:vpminud x86:vpminub
+                    ;; TODO: should have 128-bit versions of the AVX2
+                    ;; SSE2
+                    x86:pminsw x86:pminub)]
+         [grouped-sub-exprs (prepare-sub-exprs arm-sub-exprs)]
+         [desired-types (x86:get-vector-types output-type)]
+         ; TODO: is this a good depth / cost??
+         [depth 2]
+         [max-cost 7]
+         [candidates (enumerate-x86 isa desired-types grouped-sub-exprs depth max-cost)])
+    ;; TODO: how do we handle conditionals?
+    (sort-and-uniquify candidates)))
+
+(define (handle-maximum a b arm-sub-exprs halide-expr)
+  (let* ([output-type (halide:elem-type halide-expr)]
+         ; TODO: which conditionals do we want to use?
+         ; TODO: do we need `reinterpret`?
+         [isa (list x86:vpmaxsw x86:vpmaxsd x86:vpmaxsb x86:vpmaxuw
+                    x86:vpmaxud x86:vpmaxub
+                    ;; TODO: should have 128-bit versions of the AVX2
+                    ;; SSE2
+                    x86:pmaxsw x86:pmaxub)]
+         [grouped-sub-exprs (prepare-sub-exprs arm-sub-exprs)]
+         [desired-types (x86:get-vector-types output-type)]
+         ; TODO: is this a good depth / cost??
+         [depth 2]
+         [max-cost 7]
+         [candidates (enumerate-x86 isa desired-types grouped-sub-exprs depth max-cost)])
+    ;; TODO: how do we handle conditionals?
+    (sort-and-uniquify candidates)))
+
 (define (get-x86-grammar-helper halide-expr ir-expr x86-sub-exprs output-layout)
   ;; TODO: figure out which operations should use output-layout...
   (destruct ir-expr
@@ -276,6 +314,12 @@
 
     [(x86-ir:cast expr type saturate?)
       (handle-cast expr type saturate? x86-sub-exprs halide-expr)]
+
+    [(x86-ir:minimum expr0 expr1)
+      (handle-minimum expr0 expr1 x86-sub-exprs halide-expr)]
+
+    [(x86-ir:maximum expr0 expr1)
+      (handle-maximum expr0 expr1 x86-sub-exprs halide-expr)]
 
     ;; TODO: load-data, broadcast, build-vec
     ;; TODO: cast, abs, abs-diff,
@@ -446,11 +490,6 @@
          (define exprs (hash-ref! grouped-sub-exprs out-type (set)))
          (hash-set! grouped-sub-exprs out-type (set-add exprs base-load-expr)))]
       ; TODO: ask Maaz about the vsplat cond here from the HVX code
-      [(x86:is-broadcast? x86-sub-expr)
-       (define elemT (x86:elem-type (x86:interpret x86-sub-expr)))
-       (for ([out-type (x86:get-vector-types elemT)])
-         (define exprs (hash-ref! grouped-sub-exprs out-type (set)))
-         (hash-set! grouped-sub-exprs out-type (set-add exprs x86-sub-expr)))]
       [else
        (define sub-expr-type (x86:get-interpreted-type x86-sub-expr))
        (define exprs (hash-ref! grouped-sub-exprs sub-expr-type (set)))
