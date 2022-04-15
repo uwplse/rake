@@ -21,6 +21,13 @@
   (set! axioms (list))
   (define updated-spec halide-expr)
   (define updated-template x86-template)
+  ; (display "x86:optimize-query\n")
+  ; (pretty-print translation-history)
+  ; (pretty-print x86-sub-exprs)
+  ; (pretty-print updated-spec)
+  ; (pretty-print updated-template)
+  ; (newline)
+  ; (newline)
   (for-each
    (lambda (sub-expr)
      ;; If we know of an equivalence between a sub-expr in the spec and the x86-template
@@ -45,6 +52,11 @@
             [else
              (set!-values (updated-spec updated-template) (abstr-equiv-subexprs updated-spec updated-template sub-expr halide-sub-expr abstracted-halide-subexpr 0))])])))
    x86-sub-exprs)
+  ; (display "end x86:optimize-query\n")
+  ; (pretty-print updated-spec)
+  ; (pretty-print updated-template)
+  ; (newline)
+  ; (newline)
   (values updated-spec (if (not (empty? x86-sub-exprs)) (fix-swizzle-reads updated-spec updated-template) updated-template) axioms))
 
 (define (abstr-equiv-subexprs spec template x86-sub-expr halide-sub-expr abstracted-halide-subexpr offset [sub-expr-bounds (void)])
@@ -52,6 +64,7 @@
     ;; Don't bother if the sub-expr is just a load or a broadcast (leaf nodes anyways)
     [(x86:??load? x86-sub-expr) (values spec template)]
     [(x86:??shuffle? x86-sub-expr) (values spec template)]
+    [(x86:is-broadcast? x86-sub-expr) (values spec template)]
     [else
       (define abstracted-x86-subexpr (make-x86-abstr-sub-expr x86-sub-expr abstracted-halide-subexpr offset sub-expr-bounds))
 

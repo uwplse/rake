@@ -121,17 +121,19 @@
      (define live-data (halide:extract-buffer-reads parent-spec))
      (define live-buffers (set->list (halide:extract-live-buffers parent-spec)))
      (define buf-elemTypes (map buffer-elemT live-buffers))
-     (values #t (set->list (list->set (flatten
-                            (map
-                             (lambda (t)
-                               (define lds
-                                 (flatten (map
-                                  (lambda (b)
-                                    (define tbl (map (lambda (i) (define-symbolic* idx integer?) idx) (range 256)))
-                                    (map (lambda (type) (x86:??load 1 live-data b tbl type)) (x86:get-vector-types t)))
-                                  (filter (lambda (b) (eq? t (buffer-elemT b))) live-buffers))))
-                               (x86:make-shuffles-list lds t))
-                             buf-elemTypes)))))]
+     (define loads (set->list (list->set (flatten
+                     (map
+                       (lambda (t)
+                        (define lds
+                          (flatten
+                           (map
+                            (lambda (b)
+                              (define tbl (map (lambda (i) (define-symbolic* idx integer?) idx) (range 256)))
+                              (map (lambda (type) (x86:??load 1 live-data b tbl type)) (x86:get-vector-types t)))
+                            (filter (lambda (b) (eq? t (buffer-elemT b))) live-buffers))))
+                        (x86:make-shuffles-list lds t))
+                      buf-elemTypes)))))
+     (values #t loads)]
 
     [else
      (error "Unexpected: Did not find Halide IR mapping for expression ~a" ir-expr)]))

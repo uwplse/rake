@@ -26,6 +26,14 @@
      (destruct (x86:interpret imm16)
        ;; TODO: there are no llvm intrinsics for these...
        [(int16_t _)  `(halide.ir.x16, (to-llvm-type x86-expr), `(list, (compile-scalar imm16)))]
+       [(uint16_t _)  `(halide.ir.x16, (to-llvm-type x86-expr), `(list, (compile-scalar imm16)))]
+       [_ (error (format "x86:vpbroadcastw variant not understood: ~a" x86-expr))])]
+
+    [(x86:vpbroadcastb_128 imm8)
+     (destruct (x86:interpret imm8)
+       ;; TODO: there are no llvm intrinsics for these...
+       [(int8_t _)  `(halide.ir.x16, (to-llvm-type x86-expr), `(list, (compile-scalar imm8)))]
+       [(uint8_t _)  `(halide.ir.x16, (to-llvm-type x86-expr), `(list, (compile-scalar imm8)))]
        [_ (error (format "x86:vpbroadcastw variant not understood: ~a" x86-expr))])]
 
     [(x86:vpmovzxbw_s a)
@@ -47,6 +55,18 @@
        [((x86:i16x16 _) (x86:i16x16 _)) `(halide.ir.add, (to-llvm-type x86-expr), `(list ,(input-arg a) ,(input-arg b)))]
        [((x86:u16x16 _) (x86:u16x16 _)) `(halide.ir.add, (to-llvm-type x86-expr), `(list ,(input-arg a) ,(input-arg b)))]
        [(_ _) (error (format "x86:vpaddw variant not understood: ~a" x86-expr))])]
+
+    ;;;;;;;;;;;;;;;;;;;;;;; SSE2 ;;;;;;;;;;;;;;;;;;;;;;;;
+
+    [(x86:pminub a b)
+     (destruct* ((x86:interpret a) (x86:interpret b))
+       [((x86:u8x16 _) (x86:u8x16 _)) (generate-sse2 `pminu.b (to-llvm-type x86-expr) `(list ,(input-arg a) ,(input-arg b)))]
+       [(_ _) (error (format "x86:pminub variant not understood: ~a" x86-expr))])]
+
+    [(x86:pmaxub a b)
+     (destruct* ((x86:interpret a) (x86:interpret b))
+       [((x86:u8x16 _) (x86:u8x16 _)) (generate-sse2 `pmaxu.b (to-llvm-type x86-expr) `(list ,(input-arg a) ,(input-arg b)))]
+       [(_ _) (error (format "x86:pmaxub variant not understood: ~a" x86-expr))])]
 
     ;;;;;;;;;;;;;;;;;;;;;;; Concatenate Tiles ;;;;;;;;;;;;;;;;;;;;;;;;
 

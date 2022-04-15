@@ -77,6 +77,38 @@
         x86:vpmovzxbw_s
   ))
 
+(define (get-broadcast-isa)
+  (list x86:vpbroadcastb x86:vpbroadcastw x86:vpbroadcastd x86:vpbroadcastq
+        x86:vpbroadcastb_128 x86:vpbroadcastw_128 x86:vpbroadcastd_128 x86:vpbroadcastq_128
+  ))
+
+(define (make-fill-arg-grammars scalars)
+  (define (bool-const) (define-symbolic* b boolean?) b)
+  (define (int8-const) (cpp:cast (apply choose* scalars) 'int8))
+  (define (uint8-const) (cpp:cast (apply choose* scalars) 'uint8))
+  (define (int16-const) (cpp:cast (apply choose* scalars) 'int16))
+  (define (uint16-const) (cpp:cast (apply choose* scalars) 'uint16))
+  (define (int32-const) (cpp:cast (apply choose* scalars) 'int32))
+  (define (uint32-const) (cpp:cast (apply choose* scalars) 'uint32))
+  (define (int64-const) (cpp:cast (apply choose* scalars) 'int64))
+  (define (uint64-const) (cpp:cast (apply choose* scalars) 'uint64))
+  (define (fill-arg-grammars node [pos -1])
+    (match node
+      ['bool (bool-const)]
+      ['int8 (int8-const)]
+      ['uint8 (uint8-const)]
+      ['uint8_t (uint8-const)]
+      ['int16 (int16-const)]
+      ['uint16 (uint16-const)]
+      ['int32 (int32-const)]
+      ['uint32 (uint32-const)]
+      ['int64 (int64-const)]
+      ['uint64 (uint64-const)]
+      ; TODO: HVX has some weird types here, for scalar registers?
+      [_ node]))
+  fill-arg-grammars)
+
+
 (define (handle-vs-mpy-add expr weights sat? round? half? output-type x86-sub-exprs halide-expr)
   (let* ([input-type (get-input-type expr)]
          [widening? (> (cpp:type-bw output-type) (cpp:type-bw  input-type))]
@@ -177,29 +209,7 @@
            [mpy-add-scalars (set->list (list->set (append weights add-scalars)))]
            [shl-scalars (halide:make-scalar-log2s mpy-add-scalars)]
            [int-consts (set->list (list->set (append shl-scalars mpy-add-scalars)))])
-      (define (bool-const) (define-symbolic* b boolean?) b)
-      (define (int8-const) (cpp:cast (apply choose* int-consts) 'int8))
-      (define (uint8-const) (cpp:cast (apply choose* int-consts) 'uint8))
-      (define (int16-const) (cpp:cast (apply choose* int-consts) 'int16))
-      (define (uint16-const) (cpp:cast (apply choose* int-consts) 'uint16))
-      (define (int32-const) (cpp:cast (apply choose* int-consts) 'int32))
-      (define (uint32-const) (cpp:cast (apply choose* int-consts) 'uint32))
-      (define (int64-const) (cpp:cast (apply choose* int-consts) 'int64))
-      (define (uint64-const) (cpp:cast (apply choose* int-consts) 'uint64))
-      (define (fill-arg-grammars node [pos -1])
-       (match node
-         ['bool (bool-const)]
-         ['int8 (int8-const)]
-         ['uint8 (uint8-const)]
-         ['uint8_t (uint8-const)]
-         ['int16 (int16-const)]
-         ['uint16 (uint16-const)]
-         ['int32 (int32-const)]
-         ['uint32 (uint32-const)]
-         ['int64 (int64-const)]
-         ['uint64 (uint64-const)]
-         ; TODO: HVX has some weird types here, for scalar registers?
-         [_ node]))
+      (define fill-arg-grammars (make-fill-arg-grammars int-consts))
 
       (time (for/list ([candidate candidates]) (cons (uniquify-swizzles (x86:visit (car candidate) fill-arg-grammars)) (car (cdr candidate))))))))
 
@@ -253,19 +263,26 @@
   (let* ([output-type (halide:elem-type halide-expr)]
          ; TODO: which conditionals do we want to use?
          ; TODO: do we need `reinterpret`?
-         [isa (list x86:vpminsw x86:vpminsd x86:vpminsb x86:vpminuw
-                    x86:vpminud x86:vpminub
-                    ;; TODO: should have 128-bit versions of the AVX2
-                    ;; SSE2
-                    x86:pminsw x86:pminub)]
+         [isa (append
+                (list x86:vpminsw x86:vpminsd x86:vpminsb x86:vpminuw
+                      x86:vpminud x86:vpminub
+                      ;; TODO: should have 128-bit versions of the AVX2
+                      ;; SSE2
+                      x86:pminsw x86:pminub)
+                (get-broadcast-isa)
+                ;; TODO: what else might be needed?
+            )]
          [grouped-sub-exprs (prepare-sub-exprs arm-sub-exprs)]
          [desired-types (x86:get-vector-types output-type)]
          ; TODO: is this a good depth / cost??
          [depth 2]
          [max-cost 7]
-         [candidates (enumerate-x86 isa desired-types grouped-sub-exprs depth max-cost)])
+         [candidates (enumerate-x86 isa desired-types grouped-sub-exprs depth max-cost)]
+         [scalars (halide:extract-minmax-scalars halide-expr)]
+         [fill-arg-grammars (make-fill-arg-grammars scalars)])
+
     ;; TODO: how do we handle conditionals?
-    (sort-and-uniquify candidates)))
+    (time (for/list ([candidate candidates]) (cons (uniquify-swizzles (x86:visit (car candidate) fill-arg-grammars)) (cdr candidate))))))
 
 (define (handle-maximum a b arm-sub-exprs halide-expr)
   (let* ([output-type (halide:elem-type halide-expr)]
@@ -281,9 +298,13 @@
          ; TODO: is this a good depth / cost??
          [depth 2]
          [max-cost 7]
-         [candidates (enumerate-x86 isa desired-types grouped-sub-exprs depth max-cost)])
+         [candidates (enumerate-x86 isa desired-types grouped-sub-exprs depth max-cost)]
+         [scalars (halide:extract-minmax-scalars halide-expr)]
+         [fill-arg-grammars (make-fill-arg-grammars scalars)])
+
     ;; TODO: how do we handle conditionals?
-    (sort-and-uniquify candidates)))
+    (time (for/list ([candidate candidates]) (cons (uniquify-swizzles (x86:visit (car candidate) fill-arg-grammars)) (cdr candidate))))))
+
 
 (define (get-x86-grammar-helper halide-expr ir-expr x86-sub-exprs output-layout)
   ;; TODO: figure out which operations should use output-layout...
@@ -490,6 +511,15 @@
          (define exprs (hash-ref! grouped-sub-exprs out-type (set)))
          (hash-set! grouped-sub-exprs out-type (set-add exprs base-load-expr)))]
       ; TODO: ask Maaz about the vsplat cond here from the HVX code
+      [(x86:is-broadcast? x86-sub-expr)
+        (define out-type (x86:get-interpreted-type x86-sub-expr))
+        (define exprs (hash-ref! grouped-sub-exprs out-type (set)))
+        (hash-set! grouped-sub-exprs out-type (set-add exprs x86-sub-expr))
+        (when (x86:is-256-broadcast? x86-sub-expr)
+          (define out-type-128 (x86:get-128-type out-type))
+          (define exprs-128 (hash-ref! grouped-sub-exprs out-type-128 (set)))
+          (define x86-sub-expr-128 (x86:get-128-broadcast x86-sub-expr))
+          (hash-set! grouped-sub-exprs out-type-128 (set-add exprs-128 x86-sub-expr-128)))]
       [else
        (define sub-expr-type (x86:get-interpreted-type x86-sub-expr))
        (define exprs (hash-ref! grouped-sub-exprs sub-expr-type (set)))
