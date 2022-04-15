@@ -479,8 +479,16 @@
      (define outT (infer-out-type lhs lhs))
      (mk-cpp-expr (bvnot (cpp:eval lhs)) outT)]))
 
-(define (do-reinterpret-extract vec index type lanes)
-  (error "TODO: implement do-reinterpret-extract as needed\n"))
+;; TODO: test this!!
+(define (do-reinterpret-extract vec index type lanes input-bits output-bits)
+  (let* ([k (quotient input-bits output-bits)] ;; Always non-zero because input-bits > output-bits
+         [input-index (quotient index k)]
+         [sub-index (modulo index k)]
+         [start-index (* sub-index k)]
+         [end-index (- (+ start-index output-bits) 1)]
+         [input-value (cpp:eval (vec index))]
+         [bits (extract end-index start-index input-value)])
+    ((get-cast-type type) bits)))
 
 (define (get-cast-type type)
   (cond
@@ -530,7 +538,7 @@
         (cond
           [(eq? input-bits output-bits) (do-reinterpret-scalar (vec index) type)]
           [(< input-bits output-bits) (do-reinterpret-concat vec index type lanes input-bits output-bits)]
-          [else (do-reinterpret-extract vec index type lanes)])))
+          [else (do-reinterpret-extract vec index type lanes input-bits output-bits)])))
 
 (define (do-reduce vec op base width)
   (define outT (cpp:type (vec 0)))
