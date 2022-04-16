@@ -108,6 +108,16 @@
        [((x86:u8x32 _) (x86:u8x32 _)) (generate-avx2 `pmaxu.b (to-llvm-type x86-expr) `(list ,(input-arg a) ,(input-arg b)))]
        [(_ _) (error (format "x86:vpmaxub variant not understood: ~a" x86-expr))])]
 
+    [(x86:vpmaxsd a b)
+     (destruct* ((x86:interpret a) (x86:interpret b))
+       [((x86:i32x8 _) (x86:i32x8 _)) (generate-avx2 `pmaxs.d (to-llvm-type x86-expr) `(list ,(input-arg a) ,(input-arg b)))]
+       [(_ _) (error (format "x86:vpmaxsd variant not understood: ~a" x86-expr))])]
+
+    [(x86:vpminsd a b)
+     (destruct* ((x86:interpret a) (x86:interpret b))
+       [((x86:i32x8 _) (x86:i32x8 _)) (generate-avx2 `pmins.d (to-llvm-type x86-expr) `(list ,(input-arg a) ,(input-arg b)))]
+       [(_ _) (error (format "x86:vpminsd variant not understood: ~a" x86-expr))])]
+
     ;;;;;;;;;;;;;;;;;;;;;;; SSE2 ;;;;;;;;;;;;;;;;;;;;;;;;
 
     [(x86:pminub a b)
