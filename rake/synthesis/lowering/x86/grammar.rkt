@@ -54,6 +54,20 @@
 
   (map (lambda (candidate) (cons (uniquify-swizzles (car candidate)) (cdr candidate))) sorted))
 
+(define (handle-build-vec base stride len x86-sub-exprs halide-expr)
+  (cond
+    ;; TODO: handle arbitrary logical vector lengths.
+    [(and (int32_t? stride) (eq? len 32))
+      (let ([output-type 'i32x8]
+            [exprs (list (ramp base stride 8)
+                         (ramp (sca-add base (int32_t (bv 8 32))) stride 8)
+                         (ramp (sca-add base (int32_t (bv 16 32))) stride 8)
+                         (ramp (sca-add base (int32_t (bv 24 32))) stride 8))]
+            [ihal (halide:interpret halide-expr)]
+            [tbl (map (lambda (i) (define-symbolic* idx integer?) idx) (range 256))])
+        (list (cons (x86:??swizzle 0 (for/list ([i (range 16)]) (list (ihal i))) exprs tbl output-type) 1)))]
+    [else (error "Unimplemented: handle-build-vec base stride len x86-sub-exprs halide-expr")]))
+
 (define (make-scalar-broadcast scalar x86-instr)
   (cons (x86-instr scalar) (x86:instr-cost x86-instr)))
 
@@ -84,15 +98,17 @@
   ))
 
 (define (make-fill-arg-grammars scalars)
+  (display "make-fill-arg-grammars\n")
+  (pretty-print scalars)
   (define (bool-const) (define-symbolic* b boolean?) b)
-  (define (int8-const) (cpp:cast (apply choose* scalars) 'int8))
-  (define (uint8-const) (cpp:cast (apply choose* scalars) 'uint8))
-  (define (int16-const) (cpp:cast (apply choose* scalars) 'int16))
-  (define (uint16-const) (cpp:cast (apply choose* scalars) 'uint16))
-  (define (int32-const) (cpp:cast (apply choose* scalars) 'int32))
-  (define (uint32-const) (cpp:cast (apply choose* scalars) 'uint32))
-  (define (int64-const) (cpp:cast (apply choose* scalars) 'int64))
-  (define (uint64-const) (cpp:cast (apply choose* scalars) 'uint64))
+  (define (int8-const) (int8x1 (apply choose* scalars)))
+  (define (uint8-const) (uint8x1 (apply choose* scalars)))
+  (define (int16-const) (int16x1 (apply choose* scalars)))
+  (define (uint16-const) (uint16x1 (apply choose* scalars)))
+  (define (int32-const) (int32x1 (apply choose* scalars)))
+  (define (uint32-const) (uint32x1 (apply choose* scalars)))
+  (define (int64-const) (int64x1 (apply choose* scalars)))
+  (define (uint64-const) (uint64x1 (apply choose* scalars)))
   (define (fill-arg-grammars node [pos -1])
     (match node
       ['bool (bool-const)]
@@ -250,11 +266,11 @@
     ; (pretty-print candidates)
 
     ;; Need imm8 for vinserti128
-    (define (uint8-const) (define-symbolic* imm8 (bitvector 8)) imm8)
+    (define (uint8-const) (define-symbolic* imm8 (bitvector 8)) (uint8_t imm8))
     (define (fill-arg-grammars node [pos -1])
       (match node
         ;; TODO: need to fill imm8 values
-        ['uint8 (uint8_t (uint8-const))]
+        ['uint8 (uint8-const)]
         [_ node]))
     ; (for/list ([candidate sorted-candidates]) (cons (x86:visit (car candidate) fill-arg-grammars) (cdr candidate))))
 
@@ -327,6 +343,10 @@
         (define actual-loads (flatten (map construct-loads buffers)))
         (x86:make-shuffles-list actual-loads type))
      (sort (map label-cost (flatten (map generate-shuffles buf-elemTypes))) (lambda (v1 v2) (<= (cdr v1) (cdr v2))))]
+
+    ;; Vector creation
+    [(x86-ir:build-vec base stride len)
+      (handle-build-vec base stride len x86-sub-exprs halide-expr)]
 
     [(x86-ir:broadcast scalar-expr)
       ;; TODO: is this correct?
