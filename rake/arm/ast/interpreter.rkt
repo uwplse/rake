@@ -1741,13 +1741,13 @@
 
     [(arm:sabal Vd Vn Vm b)
       (destruct* ((interpret Vd) (interpret Vn) (interpret Vm) (interpret b))
-        [((arm:i16x8 v0) (arm:i8x16 v1) (arm:i8x16 v2) (bool v3))
+        [((arm:i16x8 v0) (arm:i8x16 v1) (arm:i8x16 v2) (uint1_t v3))
            (arm:i16x8
             (halide:interpret
              (vec-add
              v0
               (vec-if
-              (x8 (sca-bool
+              (x8 (uint1_t
  v3))
               (int16x8
                (vec-absd
@@ -1761,13 +1761,13 @@
                  v1 0 1 8)
                 (slice_vectors
                  v2 0 1 8)))))))]
-        [((arm:i32x4 v0) (arm:i16x8 v1) (arm:i16x8 v2) (bool v3))
+        [((arm:i32x4 v0) (arm:i16x8 v1) (arm:i16x8 v2) (uint1_t v3))
            (arm:i32x4
             (halide:interpret
              (vec-add
              v0
               (vec-if
-              (x4 (sca-bool
+              (x4 (uint1_t
  v3))
               (int32x4
                (vec-absd
@@ -1781,13 +1781,13 @@
                  v1 0 1 4)
                 (slice_vectors
                  v2 0 1 4)))))))]
-        [((arm:i64x2 v0) (arm:i32x4 v1) (arm:i32x4 v2) (bool v3))
+        [((arm:i64x2 v0) (arm:i32x4 v1) (arm:i32x4 v2) (uint1_t v3))
            (arm:i64x2
             (halide:interpret
              (vec-add
              v0
               (vec-if
-              (x2 (sca-bool
+              (x2 (uint1_t
  v3))
               (int64x2
                (vec-absd
@@ -1896,11 +1896,11 @@
 
     [(arm:saddl Vd Vn Vm)
       (destruct* ((interpret Vd) (interpret Vn) (interpret Vm))
-        [((arm:i8x16 v0) (arm:i8x16 v1) (bool v2))
+        [((arm:i8x16 v0) (arm:i8x16 v1) (uint1_t v2))
            (arm:i16x8
             (halide:interpret
              (vec-if
-             (x8 (sca-bool
+             (x8 (uint1_t
  v2))
              (vec-add
               (int16x8
@@ -1916,11 +1916,11 @@
               (int16x8
                (slice_vectors
                 v1 0 1 8))))))]
-        [((arm:i16x8 v0) (arm:i16x8 v1) (bool v2))
+        [((arm:i16x8 v0) (arm:i16x8 v1) (uint1_t v2))
            (arm:i32x4
             (halide:interpret
              (vec-if
-             (x4 (sca-bool
+             (x4 (uint1_t
  v2))
              (vec-add
               (int32x4
@@ -1936,11 +1936,11 @@
               (int32x4
                (slice_vectors
                 v1 0 1 4))))))]
-        [((arm:i32x4 v0) (arm:i32x4 v1) (bool v2))
+        [((arm:i32x4 v0) (arm:i32x4 v1) (uint1_t v2))
            (arm:i64x2
             (halide:interpret
              (vec-if
-             (x2 (sca-bool
+             (x2 (uint1_t
  v2))
              (vec-add
               (int64x2
@@ -2034,13 +2034,13 @@
 
     [(arm:saddw Vd Vn Vm)
       (destruct* ((interpret Vd) (interpret Vn) (interpret Vm))
-        [((arm:i16x8 v0) (arm:i8x16 v1) (bool v2))
+        [((arm:i16x8 v0) (arm:i8x16 v1) (uint1_t v2))
            (arm:i16x8
             (halide:interpret
              (vec-add
              v0
               (vec-if
-              (x8 (sca-bool
+              (x8 (uint1_t
  v2))
               (int16x8
                (slice_vectors
@@ -2048,13 +2048,13 @@
               (int16x8
                (slice_vectors
                 v1 0 1 8))))))]
-        [((arm:i32x4 v0) (arm:i16x8 v1) (bool v2))
+        [((arm:i32x4 v0) (arm:i16x8 v1) (uint1_t v2))
            (arm:i32x4
             (halide:interpret
              (vec-add
              v0
               (vec-if
-              (x4 (sca-bool
+              (x4 (uint1_t
  v2))
               (int32x4
                (slice_vectors
@@ -2062,13 +2062,13 @@
               (int32x4
                (slice_vectors
                 v1 0 1 4))))))]
-        [((arm:i64x2 v0) (arm:i32x4 v1) (bool v2))
+        [((arm:i64x2 v0) (arm:i32x4 v1) (uint1_t v2))
            (arm:i64x2
             (halide:interpret
              (vec-add
              v0
               (vec-if
-              (x2 (sca-bool
+              (x2 (uint1_t
  v2))
               (int64x2
                (slice_vectors
@@ -2302,78 +2302,78 @@
 
     [(arm:shll Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
-        [((arm:i8x16 v0) (bool v1))
+        [((arm:i8x16 v0) (uint1_t v1))
            (arm:i16x8
             (halide:interpret
              (vec-shl
               (int16x8
                (vec-if
-               (x8 (sca-bool
+               (x8 (uint1_t
  v1))
                (slice_vectors
                 v0 8 1 8)
                (slice_vectors
                 v0 0 1 8)))
               (x8 (int16_t (bv 8 16))))))]
-        [((arm:i16x8 v0) (bool v1))
+        [((arm:i16x8 v0) (uint1_t v1))
            (arm:i32x4
             (halide:interpret
              (vec-shl
               (int32x4
                (vec-if
-               (x4 (sca-bool
+               (x4 (uint1_t
  v1))
                (slice_vectors
                 v0 4 1 4)
                (slice_vectors
                 v0 0 1 4)))
               (x4 (int32_t (bv 16 32))))))]
-        [((arm:i32x4 v0) (bool v1))
+        [((arm:i32x4 v0) (uint1_t v1))
            (arm:i64x2
             (halide:interpret
              (vec-shl
               (int64x2
                (vec-if
-               (x2 (sca-bool
+               (x2 (uint1_t
  v1))
                (slice_vectors
                 v0 2 1 2)
                (slice_vectors
                 v0 0 1 2)))
               (x2 (int64_t (bv 32 64))))))]
-        [((arm:u8x16 v0) (bool v1))
+        [((arm:u8x16 v0) (uint1_t v1))
            (arm:u16x8
             (halide:interpret
              (vec-shl
               (uint16x8
                (vec-if
-               (x8 (sca-bool
+               (x8 (uint1_t
  v1))
                (slice_vectors
                 v0 8 1 8)
                (slice_vectors
                 v0 0 1 8)))
               (x8 (uint16_t (bv 8 16))))))]
-        [((arm:u16x8 v0) (bool v1))
+        [((arm:u16x8 v0) (uint1_t v1))
            (arm:u32x4
             (halide:interpret
              (vec-shl
               (uint32x4
                (vec-if
-               (x4 (sca-bool
+               (x4 (uint1_t
  v1))
                (slice_vectors
                 v0 4 1 4)
                (slice_vectors
                 v0 0 1 4)))
               (x4 (uint32_t (bv 16 32))))))]
-        [((arm:u32x4 v0) (bool v1))
+        [((arm:u32x4 v0) (uint1_t v1))
            (arm:u64x2
             (halide:interpret
              (vec-shl
               (uint64x2
                (vec-if
-               (x2 (sca-bool
+               (x2 (uint1_t
  v1))
                (slice_vectors
                 v0 2 1 2)
@@ -2814,13 +2814,13 @@
 
     [(arm:smlal-vs Vd Vn Vm b)
       (destruct* ((interpret Vd) (interpret Vn) (interpret Vm) (interpret b))
-        [((arm:i32x4 v0) (arm:i16x8 v1) (int16_t v2) (bool v3))
+        [((arm:i32x4 v0) (arm:i16x8 v1) (int16_t v2) (uint1_t v3))
            (arm:i32x4
             (halide:interpret
              (vec-add
              v0
               (vec-if
-              (x4 (sca-bool
+              (x4 (uint1_t
  v3))
               (vec-mul
                (int32x4
@@ -2834,13 +2834,13 @@
                  v1 0 1 4))
                (x4 (int32x1 (int16_t
  v2))))))))]
-        [((arm:i64x2 v0) (arm:i32x4 v1) (int32_t v2) (bool v3))
+        [((arm:i64x2 v0) (arm:i32x4 v1) (int32_t v2) (uint1_t v3))
            (arm:i64x2
             (halide:interpret
              (vec-add
              v0
               (vec-if
-              (x2 (sca-bool
+              (x2 (uint1_t
  v3))
               (vec-mul
                (int64x2
@@ -2858,13 +2858,13 @@
 
     [(arm:smlal-vv Vd Vn Vm b)
       (destruct* ((interpret Vd) (interpret Vn) (interpret Vm) (interpret b))
-        [((arm:i16x8 v0) (arm:i8x16 v1) (arm:i8x16 v2) (bool v3))
+        [((arm:i16x8 v0) (arm:i8x16 v1) (arm:i8x16 v2) (uint1_t v3))
            (arm:i16x8
             (halide:interpret
              (vec-add
              v0
               (vec-if
-              (x8 (sca-bool
+              (x8 (uint1_t
  v3))
               (vec-mul
                (int16x8
@@ -2880,13 +2880,13 @@
                (int16x8
                 (slice_vectors
                  v2 0 1 8)))))))]
-        [((arm:i32x4 v0) (arm:i16x8 v1) (arm:i16x8 v2) (bool v3))
+        [((arm:i32x4 v0) (arm:i16x8 v1) (arm:i16x8 v2) (uint1_t v3))
            (arm:i32x4
             (halide:interpret
              (vec-add
              v0
               (vec-if
-              (x4 (sca-bool
+              (x4 (uint1_t
  v3))
               (vec-mul
                (int32x4
@@ -2902,13 +2902,13 @@
                (int32x4
                 (slice_vectors
                  v2 0 1 4)))))))]
-        [((arm:i64x2 v0) (arm:i32x4 v1) (arm:i32x4 v2) (bool v3))
+        [((arm:i64x2 v0) (arm:i32x4 v1) (arm:i32x4 v2) (uint1_t v3))
            (arm:i64x2
             (halide:interpret
              (vec-add
              v0
               (vec-if
-              (x2 (sca-bool
+              (x2 (uint1_t
  v3))
               (vec-mul
                (int64x2
@@ -2928,13 +2928,13 @@
 
     [(arm:smlsl-vs Vd Vn Vm b)
       (destruct* ((interpret Vd) (interpret Vn) (interpret Vm) (interpret b))
-        [((arm:i32x4 v0) (arm:i16x8 v1) (int16_t v2) (bool v3))
+        [((arm:i32x4 v0) (arm:i16x8 v1) (int16_t v2) (uint1_t v3))
            (arm:i32x4
             (halide:interpret
              (vec-sub
              v0
               (vec-if
-              (x4 (sca-bool
+              (x4 (uint1_t
  v3))
               (vec-mul
                (int32x4
@@ -2948,13 +2948,13 @@
                  v1 0 1 4))
                (x4 (int32x1 (int16_t
  v2))))))))]
-        [((arm:i64x2 v0) (arm:i32x4 v1) (int32_t v2) (bool v3))
+        [((arm:i64x2 v0) (arm:i32x4 v1) (int32_t v2) (uint1_t v3))
            (arm:i64x2
             (halide:interpret
              (vec-sub
              v0
               (vec-if
-              (x2 (sca-bool
+              (x2 (uint1_t
  v3))
               (vec-mul
                (int64x2
@@ -2972,13 +2972,13 @@
 
     [(arm:smlsl-vv Vd Vn Vm b)
       (destruct* ((interpret Vd) (interpret Vn) (interpret Vm) (interpret b))
-        [((arm:i16x8 v0) (arm:i8x16 v1) (arm:i8x16 v2) (bool v3))
+        [((arm:i16x8 v0) (arm:i8x16 v1) (arm:i8x16 v2) (uint1_t v3))
            (arm:i16x8
             (halide:interpret
              (vec-sub
              v0
               (vec-if
-              (x8 (sca-bool
+              (x8 (uint1_t
  v3))
               (vec-mul
                (int16x8
@@ -2994,13 +2994,13 @@
                (int16x8
                 (slice_vectors
                  v2 0 1 8)))))))]
-        [((arm:i32x4 v0) (arm:i16x8 v1) (arm:i16x8 v2) (bool v3))
+        [((arm:i32x4 v0) (arm:i16x8 v1) (arm:i16x8 v2) (uint1_t v3))
            (arm:i32x4
             (halide:interpret
              (vec-sub
              v0
               (vec-if
-              (x4 (sca-bool
+              (x4 (uint1_t
  v3))
               (vec-mul
                (int32x4
@@ -3016,13 +3016,13 @@
                (int32x4
                 (slice_vectors
                  v2 0 1 4)))))))]
-        [((arm:i64x2 v0) (arm:i32x4 v1) (arm:i32x4 v2) (bool v3))
+        [((arm:i64x2 v0) (arm:i32x4 v1) (arm:i32x4 v2) (uint1_t v3))
            (arm:i64x2
             (halide:interpret
              (vec-sub
              v0
               (vec-if
-              (x2 (sca-bool
+              (x2 (uint1_t
  v3))
               (vec-mul
                (int64x2
@@ -5880,11 +5880,11 @@
 
     [(arm:uaddl Vd Vn Vm)
       (destruct* ((interpret Vd) (interpret Vn) (interpret Vm))
-        [((arm:u8x16 v0) (arm:u8x16 v1) (bool v2))
+        [((arm:u8x16 v0) (arm:u8x16 v1) (uint1_t v2))
            (arm:u16x8
             (halide:interpret
              (vec-if
-             (x8 (sca-bool
+             (x8 (uint1_t
  v2))
              (vec-add
               (uint16x8
@@ -5900,11 +5900,11 @@
               (uint16x8
                (slice_vectors
                 v1 0 1 8))))))]
-        [((arm:i16x8 v0) (arm:u16x8 v1) (bool v2))
+        [((arm:i16x8 v0) (arm:u16x8 v1) (uint1_t v2))
            (arm:u32x4
             (halide:interpret
              (vec-if
-             (x4 (sca-bool
+             (x4 (uint1_t
  v2))
              (vec-add
               (int32x4
@@ -5922,11 +5922,11 @@
                (uint32x4
                 (slice_vectors
                  v1 0 1 4)))))))]
-        [((arm:u32x4 v0) (arm:u32x4 v1) (bool v2))
+        [((arm:u32x4 v0) (arm:u32x4 v1) (uint1_t v2))
            (arm:u64x2
             (halide:interpret
              (vec-if
-             (x2 (sca-bool
+             (x2 (uint1_t
  v2))
              (vec-add
               (uint64x2
@@ -6056,13 +6056,13 @@
 
     [(arm:uaddw Vd Vn Vm)
       (destruct* ((interpret Vd) (interpret Vn) (interpret Vm))
-        [((arm:u16x8 v0) (arm:u8x16 v1) (bool v2))
+        [((arm:u16x8 v0) (arm:u8x16 v1) (uint1_t v2))
            (arm:u16x8
             (halide:interpret
              (vec-add
              v0
               (vec-if
-              (x8 (sca-bool
+              (x8 (uint1_t
  v2))
               (uint16x8
                (slice_vectors
@@ -6070,13 +6070,13 @@
               (uint16x8
                (slice_vectors
                 v1 0 1 8))))))]
-        [((arm:u32x4 v0) (arm:u16x8 v1) (bool v2))
+        [((arm:u32x4 v0) (arm:u16x8 v1) (uint1_t v2))
            (arm:u32x4
             (halide:interpret
              (vec-add
              v0
               (vec-if
-              (x4 (sca-bool
+              (x4 (uint1_t
  v2))
               (uint32x4
                (slice_vectors
@@ -6084,13 +6084,13 @@
               (uint32x4
                (slice_vectors
                 v1 0 1 4))))))]
-        [((arm:u64x2 v0) (arm:u32x4 v1) (bool v2))
+        [((arm:u64x2 v0) (arm:u32x4 v1) (uint1_t v2))
            (arm:u64x2
             (halide:interpret
              (vec-add
              v0
               (vec-if
-              (x2 (sca-bool
+              (x2 (uint1_t
  v2))
               (uint64x2
                (slice_vectors
@@ -6684,13 +6684,13 @@
 
     [(arm:umlal-vs Vd Vn Vm b)
       (destruct* ((interpret Vd) (interpret Vn) (interpret Vm) (interpret b))
-        [((arm:u32x4 v0) (arm:u16x8 v1) (uint16_t v2) (bool v3))
+        [((arm:u32x4 v0) (arm:u16x8 v1) (uint16_t v2) (uint1_t v3))
            (arm:u32x4
             (halide:interpret
              (vec-add
              v0
               (vec-if
-              (x4 (sca-bool
+              (x4 (uint1_t
  v3))
               (vec-mul
                (uint32x4
@@ -6704,13 +6704,13 @@
                  v1 0 1 4))
                (x4 (uint32x1 (uint16_t
  v2))))))))]
-        [((arm:u64x2 v0) (arm:u32x4 v1) (uint32_t v2) (bool v3))
+        [((arm:u64x2 v0) (arm:u32x4 v1) (uint32_t v2) (uint1_t v3))
            (arm:u64x2
             (halide:interpret
              (vec-add
              v0
               (vec-if
-              (x2 (sca-bool
+              (x2 (uint1_t
  v3))
               (vec-mul
                (uint64x2
@@ -6728,13 +6728,13 @@
 
     [(arm:umlal-vv Vd Vn Vm b)
       (destruct* ((interpret Vd) (interpret Vn) (interpret Vm) (interpret b))
-        [((arm:u16x8 v0) (arm:u8x16 v1) (arm:u8x16 v2) (bool v3))
+        [((arm:u16x8 v0) (arm:u8x16 v1) (arm:u8x16 v2) (uint1_t v3))
            (arm:u16x8
             (halide:interpret
              (vec-add
              v0
               (vec-if
-              (x8 (sca-bool
+              (x8 (uint1_t
  v3))
               (vec-mul
                (uint16x8
@@ -6750,13 +6750,13 @@
                (uint16x8
                 (slice_vectors
                  v2 0 1 8)))))))]
-        [((arm:u32x4 v0) (arm:u16x8 v1) (arm:u16x8 v2) (bool v3))
+        [((arm:u32x4 v0) (arm:u16x8 v1) (arm:u16x8 v2) (uint1_t v3))
            (arm:u32x4
             (halide:interpret
              (vec-add
              v0
               (vec-if
-              (x4 (sca-bool
+              (x4 (uint1_t
  v3))
               (vec-mul
                (uint32x4
@@ -6772,13 +6772,13 @@
                (uint32x4
                 (slice_vectors
                  v2 0 1 4)))))))]
-        [((arm:u64x2 v0) (arm:u32x4 v1) (arm:u32x4 v2) (bool v3))
+        [((arm:u64x2 v0) (arm:u32x4 v1) (arm:u32x4 v2) (uint1_t v3))
            (arm:u64x2
             (halide:interpret
              (vec-add
              v0
               (vec-if
-              (x2 (sca-bool
+              (x2 (uint1_t
  v3))
               (vec-mul
                (uint64x2
@@ -6798,13 +6798,13 @@
 
     [(arm:umlsl-vs Vd Vn Vm b)
       (destruct* ((interpret Vd) (interpret Vn) (interpret Vm) (interpret b))
-        [((arm:u32x4 v0) (arm:u16x8 v1) (uint16_t v2) (bool v3))
+        [((arm:u32x4 v0) (arm:u16x8 v1) (uint16_t v2) (uint1_t v3))
            (arm:u32x4
             (halide:interpret
              (vec-sub
              v0
               (vec-if
-              (x4 (sca-bool
+              (x4 (uint1_t
  v3))
               (vec-mul
                (uint32x4
@@ -6818,13 +6818,13 @@
                  v1 0 1 4))
                (x4 (uint32x1 (uint16_t
  v2))))))))]
-        [((arm:u64x2 v0) (arm:u32x4 v1) (uint32_t v2) (bool v3))
+        [((arm:u64x2 v0) (arm:u32x4 v1) (uint32_t v2) (uint1_t v3))
            (arm:u64x2
             (halide:interpret
              (vec-sub
              v0
               (vec-if
-              (x2 (sca-bool
+              (x2 (uint1_t
  v3))
               (vec-mul
                (uint64x2
@@ -6842,13 +6842,13 @@
 
     [(arm:umlsl-vv Vd Vn Vm b)
       (destruct* ((interpret Vd) (interpret Vn) (interpret Vm) (interpret b))
-        [((arm:u16x8 v0) (arm:u8x16 v1) (arm:u8x16 v2) (bool v3))
+        [((arm:u16x8 v0) (arm:u8x16 v1) (arm:u8x16 v2) (uint1_t v3))
            (arm:u16x8
             (halide:interpret
              (vec-sub
              v0
               (vec-if
-              (x8 (sca-bool
+              (x8 (uint1_t
  v3))
               (vec-mul
                (uint16x8
@@ -6864,13 +6864,13 @@
                (uint16x8
                 (slice_vectors
                  v2 0 1 8)))))))]
-        [((arm:u32x4 v0) (arm:u16x8 v1) (arm:u16x8 v2) (bool v3))
+        [((arm:u32x4 v0) (arm:u16x8 v1) (arm:u16x8 v2) (uint1_t v3))
            (arm:u32x4
             (halide:interpret
              (vec-sub
              v0
               (vec-if
-              (x4 (sca-bool
+              (x4 (uint1_t
  v3))
               (vec-mul
                (uint32x4
@@ -6886,13 +6886,13 @@
                (uint32x4
                 (slice_vectors
                  v2 0 1 4)))))))]
-        [((arm:u64x2 v0) (arm:u32x4 v1) (arm:u32x4 v2) (bool v3))
+        [((arm:u64x2 v0) (arm:u32x4 v1) (arm:u32x4 v2) (uint1_t v3))
            (arm:u64x2
             (halide:interpret
              (vec-sub
              v0
               (vec-if
-              (x2 (sca-bool
+              (x2 (uint1_t
  v3))
               (vec-mul
                (uint64x2

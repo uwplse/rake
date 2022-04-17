@@ -16,7 +16,7 @@
 
     [(arm:??load _ _ _ _ _) 1]
     [(arm:??shuffle _ _ _) 1]
-    [(arm:??swizzle _ _ _ _) 1]
+    [(arm:??swizzle _ _ _ _ _) 1]
     [(arm:reinterpret Vn) (max-unique-inputs Vn)]
 
     [(arm:abs Vn) (max-unique-inputs Vn)]
