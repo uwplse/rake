@@ -1747,8 +1747,7 @@
              (vec-add
              v0
               (vec-if
-              (x8 (uint1_t
- v3))
+              (x8 (uint1_t v3))
               (int16x8
                (vec-absd
                 (slice_vectors
@@ -1767,8 +1766,7 @@
              (vec-add
              v0
               (vec-if
-              (x4 (uint1_t
- v3))
+              (x4 (uint1_t v3))
               (int32x4
                (vec-absd
                 (slice_vectors
@@ -1787,8 +1785,7 @@
              (vec-add
              v0
               (vec-if
-              (x2 (uint1_t
- v3))
+              (x2 (uint1_t v3))
               (int64x2
                (vec-absd
                 (slice_vectors
@@ -1900,8 +1897,7 @@
            (arm:i16x8
             (halide:interpret
              (vec-if
-             (x8 (uint1_t
- v2))
+             (x8 (uint1_t v2))
              (vec-add
               (int16x8
                (slice_vectors
@@ -1920,8 +1916,7 @@
            (arm:i32x4
             (halide:interpret
              (vec-if
-             (x4 (uint1_t
- v2))
+             (x4 (uint1_t v2))
              (vec-add
               (int32x4
                (slice_vectors
@@ -1940,8 +1935,7 @@
            (arm:i64x2
             (halide:interpret
              (vec-if
-             (x2 (uint1_t
- v2))
+             (x2 (uint1_t v2))
              (vec-add
               (int64x2
                (slice_vectors
@@ -2040,8 +2034,7 @@
              (vec-add
              v0
               (vec-if
-              (x8 (uint1_t
- v2))
+              (x8 (uint1_t v2))
               (int16x8
                (slice_vectors
                 v1 8 1 8))
@@ -2054,8 +2047,7 @@
              (vec-add
              v0
               (vec-if
-              (x4 (uint1_t
- v2))
+              (x4 (uint1_t v2))
               (int32x4
                (slice_vectors
                 v1 4 1 4))
@@ -2068,8 +2060,7 @@
              (vec-add
              v0
               (vec-if
-              (x2 (uint1_t
- v2))
+              (x2 (uint1_t v2))
               (int64x2
                (slice_vectors
                 v1 2 1 2))
@@ -2308,8 +2299,7 @@
              (vec-shl
               (int16x8
                (vec-if
-               (x8 (uint1_t
- v1))
+               (x8 (uint1_t v1))
                (slice_vectors
                 v0 8 1 8)
                (slice_vectors
@@ -2321,8 +2311,7 @@
              (vec-shl
               (int32x4
                (vec-if
-               (x4 (uint1_t
- v1))
+               (x4 (uint1_t v1))
                (slice_vectors
                 v0 4 1 4)
                (slice_vectors
@@ -2334,8 +2323,7 @@
              (vec-shl
               (int64x2
                (vec-if
-               (x2 (uint1_t
- v1))
+               (x2 (uint1_t v1))
                (slice_vectors
                 v0 2 1 2)
                (slice_vectors
@@ -2347,8 +2335,7 @@
              (vec-shl
               (uint16x8
                (vec-if
-               (x8 (uint1_t
- v1))
+               (x8 (uint1_t v1))
                (slice_vectors
                 v0 8 1 8)
                (slice_vectors
@@ -2360,8 +2347,7 @@
              (vec-shl
               (uint32x4
                (vec-if
-               (x4 (uint1_t
- v1))
+               (x4 (uint1_t v1))
                (slice_vectors
                 v0 4 1 4)
                (slice_vectors
@@ -2373,8 +2359,7 @@
              (vec-shl
               (uint64x2
                (vec-if
-               (x2 (uint1_t
- v1))
+               (x2 (uint1_t v1))
                (slice_vectors
                 v0 2 1 2)
                (slice_vectors
@@ -2820,8 +2805,7 @@
              (vec-add
              v0
               (vec-if
-              (x4 (uint1_t
- v3))
+              (x4 (uint1_t v3))
               (vec-mul
                (int32x4
                 (slice_vectors
@@ -2840,8 +2824,7 @@
              (vec-add
              v0
               (vec-if
-              (x2 (uint1_t
- v3))
+              (x2 (uint1_t v3))
               (vec-mul
                (int64x2
                 (slice_vectors
@@ -2864,8 +2847,7 @@
              (vec-add
              v0
               (vec-if
-              (x8 (uint1_t
- v3))
+              (x8 (uint1_t v3))
               (vec-mul
                (int16x8
                 (slice_vectors
@@ -2886,8 +2868,7 @@
              (vec-add
              v0
               (vec-if
-              (x4 (uint1_t
- v3))
+              (x4 (uint1_t v3))
               (vec-mul
                (int32x4
                 (slice_vectors
@@ -2908,8 +2889,7 @@
              (vec-add
              v0
               (vec-if
-              (x2 (uint1_t
- v3))
+              (x2 (uint1_t v3))
               (vec-mul
                (int64x2
                 (slice_vectors
@@ -2934,8 +2914,7 @@
              (vec-sub
              v0
               (vec-if
-              (x4 (uint1_t
- v3))
+              (x4 (uint1_t v3))
               (vec-mul
                (int32x4
                 (slice_vectors
@@ -2954,8 +2933,7 @@
              (vec-sub
              v0
               (vec-if
-              (x2 (uint1_t
- v3))
+              (x2 (uint1_t v3))
               (vec-mul
                (int64x2
                 (slice_vectors
@@ -2978,8 +2956,7 @@
              (vec-sub
              v0
               (vec-if
-              (x8 (uint1_t
- v3))
+              (x8 (uint1_t v3))
               (vec-mul
                (int16x8
                 (slice_vectors
@@ -3000,8 +2977,7 @@
              (vec-sub
              v0
               (vec-if
-              (x4 (uint1_t
- v3))
+              (x4 (uint1_t v3))
               (vec-mul
                (int32x4
                 (slice_vectors
@@ -3022,8 +2998,7 @@
              (vec-sub
              v0
               (vec-if
-              (x2 (uint1_t
- v3))
+              (x2 (uint1_t v3))
               (vec-mul
                (int64x2
                 (slice_vectors
@@ -3040,61 +3015,127 @@
                  v2 0 1 2)))))))]
         [(_ _ _ _) (assert #f "infeasible")])]
 
-    [(arm:smull-vs Vn Vm)
-      (destruct* ((interpret Vn) (interpret Vm))
-        [((arm:i8x8 v0) (int8_t v1))
-          (arm:i16x8
-           (halide:interpret
-            (vec-mul
-             (int16x8
-              v0)
-             (x8 (int16x1 (int8_t
- v1))))))]
-        [((arm:i16x4 v0) (int16_t v1))
-          (arm:i32x4
-           (halide:interpret
-            (vec-mul
-             (int32x4
-              v0)
-             (x4 (int32x1 (int16_t
- v1))))))]
-        [((arm:i32x2 v0) (int32_t v1))
-          (arm:i64x2
-           (halide:interpret
-            (vec-mul
-             (int64x2
-              v0)
-             (x2 (int64x1 (int32_t
- v1))))))]
-        [(_ _) (assert #f "infeasible")])]
+    [(arm:smull-vs Vd Vn Vm)
+      (destruct* ((interpret Vd) (interpret Vn) (interpret Vm))
+        [((arm:i8x16 v0) (int8_t v1) (uint1_t v2))
+           (arm:i16x8
+            (halide:interpret
+             (vec-if
+             (x8 (uint1_t v2))
+             (vec-mul
+              (int16x8
+               (slice_vectors
+                v0 8 1 8))
+              (int16x8
+               (x8 (int8_t
+ v1))))
+             (vec-mul
+              (int16x8
+               (slice_vectors
+                v0 0 1 8))
+              (int16x8
+               (x8 (int8_t
+ v1)))))))]
+        [((arm:i16x8 v0) (int16_t v1) (uint1_t v2))
+           (arm:i32x4
+            (halide:interpret
+             (vec-if
+             (x4 (uint1_t v2))
+             (vec-mul
+              (int32x4
+               (slice_vectors
+                v0 4 1 4))
+              (int32x4
+               (x4 (int16_t
+ v1))))
+             (vec-mul
+              (int32x4
+               (slice_vectors
+                v0 0 1 4))
+              (int32x4
+               (x4 (int16_t
+ v1)))))))]
+        [((arm:i32x4 v0) (int32_t v1) (uint1_t v2))
+           (arm:i64x2
+            (halide:interpret
+             (vec-if
+             (x2 (uint1_t v2))
+             (vec-mul
+              (int64x2
+               (slice_vectors
+                v0 2 1 2))
+              (int64x2
+               (x2 (int32_t
+ v1))))
+             (vec-mul
+              (int64x2
+               (slice_vectors
+                v0 0 1 2))
+              (int64x2
+               (x2 (int32_t
+ v1)))))))]
+        [(_ _ _) (assert #f "infeasible")])]
 
-    [(arm:smull-vv Vn Vm)
-      (destruct* ((interpret Vn) (interpret Vm))
-        [((arm:i8x8 v0) (arm:i8x8 v1))
-          (arm:i16x8
-           (halide:interpret
-            (vec-mul
-             (int16x8
-              v0)
-             (int16x8
-              v1))))]
-        [((arm:i16x4 v0) (arm:i16x4 v1))
-          (arm:i32x4
-           (halide:interpret
-            (vec-mul
-             (int32x4
-              v0)
-             (int32x4
-              v1))))]
-        [((arm:i32x2 v0) (arm:i32x2 v1))
-          (arm:i64x2
-           (halide:interpret
-            (vec-mul
-             (int64x2
-              v0)
-             (int64x2
-              v1))))]
-        [(_ _) (assert #f "infeasible")])]
+    [(arm:smull-vv Vd Vn Vm)
+      (destruct* ((interpret Vd) (interpret Vn) (interpret Vm))
+        [((arm:i8x16 v0) (arm:i8x16 v1) (uint1_t v2))
+           (arm:i16x8
+            (halide:interpret
+             (vec-if
+             (x8 (uint1_t v2))
+             (vec-mul
+              (int16x8
+               (slice_vectors
+                v0 8 1 8))
+              (int16x8
+               (slice_vectors
+                v1 8 1 8)))
+             (vec-mul
+              (int16x8
+               (slice_vectors
+                v0 0 1 8))
+              (int16x8
+               (slice_vectors
+                v1 0 1 8))))))]
+        [((arm:i16x8 v0) (arm:i16x8 v1) (uint1_t v2))
+           (arm:i32x4
+            (halide:interpret
+             (vec-if
+             (x4 (uint1_t v2))
+             (vec-mul
+              (int32x4
+               (slice_vectors
+                v0 4 1 4))
+              (int32x4
+               (slice_vectors
+                v1 4 1 4)))
+             (vec-mul
+              (int32x4
+               (slice_vectors
+                v0 0 1 4))
+              (int32x4
+               (slice_vectors
+                v1 0 1 4))))))]
+        [((arm:i32x4 v0) (arm:i32x4 v1) (uint1_t v2))
+           (arm:i64x2
+            (halide:interpret
+             (vec-if
+             (x2 (uint1_t v2))
+             (vec-mul
+              (int64x2
+               (slice_vectors
+                v0 2 1 2))
+              (int64x2
+               (slice_vectors
+                v1 2 1 2)))
+             (vec-mul
+              (int64x2
+               (slice_vectors
+                v0 0 1 2))
+              (int64x2
+               (slice_vectors
+                v1 0 1 2))))))]
+        [(_ _ _) (assert #f "infeasible")])]
 
     [(arm:sqabs Vn)
       (destruct* ((interpret Vn))
@@ -3303,6 +3344,670 @@
              v1)))]
         [(_ _) (assert #f "infeasible")])]
 
+    [(arm:sqdmlal-vs Vd Vn Vm b)
+      (destruct* ((interpret Vd) (interpret Vn) (interpret Vm) (interpret b))
+        [((arm:i32x4 v0) (arm:i16x8 v1) (int16_t v2) (uint1_t v3))
+                 (arm:i32x4
+                  (halide:interpret
+                   (vec-add
+             v0
+                    (vec-if
+                 (vec-lt
+                  (vec-if
+                 (vec-gt
+                  (vec-mul
+                   (int32x4
+                    (vec-if
+                    (x4 (uint1_t v3))
+                    (slice_vectors
+                     v1 4 1 4)
+                    (slice_vectors
+                     v1 0 1 4)))
+                   (int32x4
+                    (x4 (int16_t
+ v2))))
+                  (vec-div
+                   (x4 (int32_t (bv 2147483647 32)))
+                   (x4 (int32_t (bv 2 32)))))
+                 (x4 (int32_t (bv 2147483647 32)))
+                  (vec-mul
+                   (vec-mul
+                    (int32x4
+                     (vec-if
+                     (x4 (uint1_t v3))
+                     (slice_vectors
+                      v1 4 1 4)
+                     (slice_vectors
+                      v1 0 1 4)))
+                    (int32x4
+                     (x4 (int16_t
+ v2))))
+                   (x4 (int32_t (bv 2 32)))))
+                  (vec-div
+                   (x4 (int32_t (bv -2147483648 32)))
+                   (x4 (int32_t (bv 2 32)))))
+                 (x4 (int32_t (bv -2147483648 32)))
+                    (vec-mul
+                     (vec-if
+                    (vec-gt
+                     (vec-mul
+                      (int32x4
+                       (vec-if
+                       (x4 (uint1_t v3))
+                       (slice_vectors
+                        v1 4 1 4)
+                       (slice_vectors
+                        v1 0 1 4)))
+                      (int32x4
+                       (x4 (int16_t
+ v2))))
+                     (vec-div
+                      (x4 (int32_t (bv 2147483647 32)))
+                      (x4 (int32_t (bv 2 32)))))
+                    (x4 (int32_t (bv 2147483647 32)))
+                     (vec-mul
+                      (vec-mul
+                       (int32x4
+                        (vec-if
+                        (x4 (uint1_t v3))
+                        (slice_vectors
+                         v1 4 1 4)
+                        (slice_vectors
+                         v1 0 1 4)))
+                       (int32x4
+                        (x4 (int16_t
+ v2))))
+                      (x4 (int32_t (bv 2 32)))))
+                     (x4 (int32_t (bv 2 32))))))))]
+        [((arm:i64x2 v0) (arm:i32x4 v1) (int32_t v2) (uint1_t v3))
+                 (arm:i64x2
+                  (halide:interpret
+                   (vec-add
+             v0
+                    (vec-if
+                 (vec-lt
+                  (vec-if
+                 (vec-gt
+                  (vec-mul
+                   (int64x2
+                    (vec-if
+                    (x2 (uint1_t v3))
+                    (slice_vectors
+                     v1 2 1 2)
+                    (slice_vectors
+                     v1 0 1 2)))
+                   (int64x2
+                    (x2 (int32_t
+ v2))))
+                  (vec-div
+                   (x2 (int64_t (bv 9223372036854775807 64)))
+                   (x2 (int64_t (bv 2 64)))))
+                 (x2 (int64_t (bv 9223372036854775807 64)))
+                  (vec-mul
+                   (vec-mul
+                    (int64x2
+                     (vec-if
+                     (x2 (uint1_t v3))
+                     (slice_vectors
+                      v1 2 1 2)
+                     (slice_vectors
+                      v1 0 1 2)))
+                    (int64x2
+                     (x2 (int32_t
+ v2))))
+                   (x2 (int64_t (bv 2 64)))))
+                  (vec-div
+                   (x2 (int64_t (bv -9223372036854775808 64)))
+                   (x2 (int64_t (bv 2 64)))))
+                 (x2 (int64_t (bv -9223372036854775808 64)))
+                    (vec-mul
+                     (vec-if
+                    (vec-gt
+                     (vec-mul
+                      (int64x2
+                       (vec-if
+                       (x2 (uint1_t v3))
+                       (slice_vectors
+                        v1 2 1 2)
+                       (slice_vectors
+                        v1 0 1 2)))
+                      (int64x2
+                       (x2 (int32_t
+ v2))))
+                     (vec-div
+                      (x2 (int64_t (bv 9223372036854775807 64)))
+                      (x2 (int64_t (bv 2 64)))))
+                    (x2 (int64_t (bv 9223372036854775807 64)))
+                     (vec-mul
+                      (vec-mul
+                       (int64x2
+                        (vec-if
+                        (x2 (uint1_t v3))
+                        (slice_vectors
+                         v1 2 1 2)
+                        (slice_vectors
+                         v1 0 1 2)))
+                       (int64x2
+                        (x2 (int32_t
+ v2))))
+                      (x2 (int64_t (bv 2 64)))))
+                     (x2 (int64_t (bv 2 64))))))))]
+        [(_ _ _ _) (assert #f "infeasible")])]
+
+    [(arm:sqdmlal-vv Vd Vn Vm b)
+      (destruct* ((interpret Vd) (interpret Vn) (interpret Vm) (interpret b))
+        [((arm:i32x4 v0) (arm:i16x8 v1) (arm:i16x8 v2) (uint1_t v3))
+                     (arm:i32x4
+                      (halide:interpret
+                       (vec-add
+             v0
+                        (vec-if
+                   (vec-lt
+                    (vec-if
+                  (vec-gt
+                   (vec-mul
+                   (int32x4
+                    (vec-if
+                    (x4 (uint1_t v3))
+                    (slice_vectors
+                     v1 4 1 4)
+                    (slice_vectors
+                     v1 0 1 4)))
+                    (int32x4
+                     (vec-if
+                     (x4 (uint1_t v3))
+                     (slice_vectors
+                      v2 4 1 4)
+                     (slice_vectors
+                      v2 0 1 4))))
+                   (vec-div
+                    (x4 (int32_t (bv 2147483647 32)))
+                    (x4 (int32_t (bv 2 32)))))
+                  (x4 (int32_t (bv 2147483647 32)))
+                    (vec-mul
+                     (vec-mul
+                     (int32x4
+                      (vec-if
+                      (x4 (uint1_t v3))
+                      (slice_vectors
+                       v1 4 1 4)
+                      (slice_vectors
+                       v1 0 1 4)))
+                      (int32x4
+                       (vec-if
+                       (x4 (uint1_t v3))
+                       (slice_vectors
+                        v2 4 1 4)
+                       (slice_vectors
+                        v2 0 1 4))))
+                     (x4 (int32_t (bv 2 32)))))
+                    (vec-div
+                     (x4 (int32_t (bv -2147483648 32)))
+                     (x4 (int32_t (bv 2 32)))))
+                   (x4 (int32_t (bv -2147483648 32)))
+                        (vec-mul
+                         (vec-if
+                       (vec-gt
+                        (vec-mul
+                        (int32x4
+                         (vec-if
+                         (x4 (uint1_t v3))
+                         (slice_vectors
+                          v1 4 1 4)
+                         (slice_vectors
+                          v1 0 1 4)))
+                         (int32x4
+                          (vec-if
+                          (x4 (uint1_t v3))
+                          (slice_vectors
+                           v2 4 1 4)
+                          (slice_vectors
+                           v2 0 1 4))))
+                        (vec-div
+                         (x4 (int32_t (bv 2147483647 32)))
+                         (x4 (int32_t (bv 2 32)))))
+                       (x4 (int32_t (bv 2147483647 32)))
+                         (vec-mul
+                          (vec-mul
+                          (int32x4
+                           (vec-if
+                           (x4 (uint1_t v3))
+                           (slice_vectors
+                            v1 4 1 4)
+                           (slice_vectors
+                            v1 0 1 4)))
+                           (int32x4
+                            (vec-if
+                            (x4 (uint1_t v3))
+                            (slice_vectors
+                             v2 4 1 4)
+                            (slice_vectors
+                             v2 0 1 4))))
+                          (x4 (int32_t (bv 2 32)))))
+                         (x4 (int32_t (bv 2 32))))))))]
+        [((arm:i64x2 v0) (arm:i32x4 v1) (arm:i32x4 v2) (uint1_t v3))
+                     (arm:i64x2
+                      (halide:interpret
+                       (vec-add
+             v0
+                        (vec-if
+                   (vec-lt
+                    (vec-if
+                  (vec-gt
+                   (vec-mul
+                   (int64x2
+                    (vec-if
+                    (x2 (uint1_t v3))
+                    (slice_vectors
+                     v1 2 1 2)
+                    (slice_vectors
+                     v1 0 1 2)))
+                    (int64x2
+                     (vec-if
+                     (x2 (uint1_t v3))
+                     (slice_vectors
+                      v2 2 1 2)
+                     (slice_vectors
+                      v2 0 1 2))))
+                   (vec-div
+                    (x2 (int64_t (bv 9223372036854775807 64)))
+                    (x2 (int64_t (bv 2 64)))))
+                  (x2 (int64_t (bv 9223372036854775807 64)))
+                    (vec-mul
+                     (vec-mul
+                     (int64x2
+                      (vec-if
+                      (x2 (uint1_t v3))
+                      (slice_vectors
+                       v1 2 1 2)
+                      (slice_vectors
+                       v1 0 1 2)))
+                      (int64x2
+                       (vec-if
+                       (x2 (uint1_t v3))
+                       (slice_vectors
+                        v2 2 1 2)
+                       (slice_vectors
+                        v2 0 1 2))))
+                     (x2 (int64_t (bv 2 64)))))
+                    (vec-div
+                     (x2 (int64_t (bv -9223372036854775808 64)))
+                     (x2 (int64_t (bv 2 64)))))
+                   (x2 (int64_t (bv -9223372036854775808 64)))
+                        (vec-mul
+                         (vec-if
+                       (vec-gt
+                        (vec-mul
+                        (int64x2
+                         (vec-if
+                         (x2 (uint1_t v3))
+                         (slice_vectors
+                          v1 2 1 2)
+                         (slice_vectors
+                          v1 0 1 2)))
+                         (int64x2
+                          (vec-if
+                          (x2 (uint1_t v3))
+                          (slice_vectors
+                           v2 2 1 2)
+                          (slice_vectors
+                           v2 0 1 2))))
+                        (vec-div
+                         (x2 (int64_t (bv 9223372036854775807 64)))
+                         (x2 (int64_t (bv 2 64)))))
+                       (x2 (int64_t (bv 9223372036854775807 64)))
+                         (vec-mul
+                          (vec-mul
+                          (int64x2
+                           (vec-if
+                           (x2 (uint1_t v3))
+                           (slice_vectors
+                            v1 2 1 2)
+                           (slice_vectors
+                            v1 0 1 2)))
+                           (int64x2
+                            (vec-if
+                            (x2 (uint1_t v3))
+                            (slice_vectors
+                             v2 2 1 2)
+                            (slice_vectors
+                             v2 0 1 2))))
+                          (x2 (int64_t (bv 2 64)))))
+                         (x2 (int64_t (bv 2 64))))))))]
+        [(_ _ _ _) (assert #f "infeasible")])]
+
+    [(arm:sqdmlsl-vs Vd Vn Vm b)
+      (destruct* ((interpret Vd) (interpret Vn) (interpret Vm) (interpret b))
+        [((arm:i32x4 v0) (arm:i16x8 v1) (int16_t v2) (uint1_t v3))
+                 (arm:i32x4
+                  (halide:interpret
+                   (vec-sub
+             v0
+                    (vec-if
+                 (vec-lt
+                  (vec-if
+                 (vec-gt
+                  (vec-mul
+                   (int32x4
+                    (vec-if
+                    (x4 (uint1_t v3))
+                    (slice_vectors
+                     v1 4 1 4)
+                    (slice_vectors
+                     v1 0 1 4)))
+                   (int32x4
+                    (x4 (int16_t
+ v2))))
+                  (vec-div
+                   (x4 (int32_t (bv 2147483647 32)))
+                   (x4 (int32_t (bv 2 32)))))
+                 (x4 (int32_t (bv 2147483647 32)))
+                  (vec-mul
+                   (vec-mul
+                    (int32x4
+                     (vec-if
+                     (x4 (uint1_t v3))
+                     (slice_vectors
+                      v1 4 1 4)
+                     (slice_vectors
+                      v1 0 1 4)))
+                    (int32x4
+                     (x4 (int16_t
+ v2))))
+                   (x4 (int32_t (bv 2 32)))))
+                  (vec-div
+                   (x4 (int32_t (bv -2147483648 32)))
+                   (x4 (int32_t (bv 2 32)))))
+                 (x4 (int32_t (bv -2147483648 32)))
+                    (vec-mul
+                     (vec-if
+                    (vec-gt
+                     (vec-mul
+                      (int32x4
+                       (vec-if
+                       (x4 (uint1_t v3))
+                       (slice_vectors
+                        v1 4 1 4)
+                       (slice_vectors
+                        v1 0 1 4)))
+                      (int32x4
+                       (x4 (int16_t
+ v2))))
+                     (vec-div
+                      (x4 (int32_t (bv 2147483647 32)))
+                      (x4 (int32_t (bv 2 32)))))
+                    (x4 (int32_t (bv 2147483647 32)))
+                     (vec-mul
+                      (vec-mul
+                       (int32x4
+                        (vec-if
+                        (x4 (uint1_t v3))
+                        (slice_vectors
+                         v1 4 1 4)
+                        (slice_vectors
+                         v1 0 1 4)))
+                       (int32x4
+                        (x4 (int16_t
+ v2))))
+                      (x4 (int32_t (bv 2 32)))))
+                     (x4 (int32_t (bv 2 32))))))))]
+        [((arm:i64x2 v0) (arm:i32x4 v1) (int32_t v2) (uint1_t v3))
+                 (arm:i64x2
+                  (halide:interpret
+                   (vec-sub
+             v0
+                    (vec-if
+                 (vec-lt
+                  (vec-if
+                 (vec-gt
+                  (vec-mul
+                   (int64x2
+                    (vec-if
+                    (x2 (uint1_t v3))
+                    (slice_vectors
+                     v1 2 1 2)
+                    (slice_vectors
+                     v1 0 1 2)))
+                   (int64x2
+                    (x2 (int32_t
+ v2))))
+                  (vec-div
+                   (x2 (int64_t (bv 9223372036854775807 64)))
+                   (x2 (int64_t (bv 2 64)))))
+                 (x2 (int64_t (bv 9223372036854775807 64)))
+                  (vec-mul
+                   (vec-mul
+                    (int64x2
+                     (vec-if
+                     (x2 (uint1_t v3))
+                     (slice_vectors
+                      v1 2 1 2)
+                     (slice_vectors
+                      v1 0 1 2)))
+                    (int64x2
+                     (x2 (int32_t
+ v2))))
+                   (x2 (int64_t (bv 2 64)))))
+                  (vec-div
+                   (x2 (int64_t (bv -9223372036854775808 64)))
+                   (x2 (int64_t (bv 2 64)))))
+                 (x2 (int64_t (bv -9223372036854775808 64)))
+                    (vec-mul
+                     (vec-if
+                    (vec-gt
+                     (vec-mul
+                      (int64x2
+                       (vec-if
+                       (x2 (uint1_t v3))
+                       (slice_vectors
+                        v1 2 1 2)
+                       (slice_vectors
+                        v1 0 1 2)))
+                      (int64x2
+                       (x2 (int32_t
+ v2))))
+                     (vec-div
+                      (x2 (int64_t (bv 9223372036854775807 64)))
+                      (x2 (int64_t (bv 2 64)))))
+                    (x2 (int64_t (bv 9223372036854775807 64)))
+                     (vec-mul
+                      (vec-mul
+                       (int64x2
+                        (vec-if
+                        (x2 (uint1_t v3))
+                        (slice_vectors
+                         v1 2 1 2)
+                        (slice_vectors
+                         v1 0 1 2)))
+                       (int64x2
+                        (x2 (int32_t
+ v2))))
+                      (x2 (int64_t (bv 2 64)))))
+                     (x2 (int64_t (bv 2 64))))))))]
+        [(_ _ _ _) (assert #f "infeasible")])]
+
+    [(arm:sqdmlsl-vv Vd Vn Vm b)
+      (destruct* ((interpret Vd) (interpret Vn) (interpret Vm) (interpret b))
+        [((arm:i32x4 v0) (arm:i16x8 v1) (arm:i16x8 v2) (uint1_t v3))
+                     (arm:i32x4
+                      (halide:interpret
+                       (vec-sub
+             v0
+                        (vec-if
+                   (vec-lt
+                    (vec-if
+                  (vec-gt
+                   (vec-mul
+                   (int32x4
+                    (vec-if
+                    (x4 (uint1_t v3))
+                    (slice_vectors
+                     v1 4 1 4)
+                    (slice_vectors
+                     v1 0 1 4)))
+                    (int32x4
+                     (vec-if
+                     (x4 (uint1_t v3))
+                     (slice_vectors
+                      v2 4 1 4)
+                     (slice_vectors
+                      v2 0 1 4))))
+                   (vec-div
+                    (x4 (int32_t (bv 2147483647 32)))
+                    (x4 (int32_t (bv 2 32)))))
+                  (x4 (int32_t (bv 2147483647 32)))
+                    (vec-mul
+                     (vec-mul
+                     (int32x4
+                      (vec-if
+                      (x4 (uint1_t v3))
+                      (slice_vectors
+                       v1 4 1 4)
+                      (slice_vectors
+                       v1 0 1 4)))
+                      (int32x4
+                       (vec-if
+                       (x4 (uint1_t v3))
+                       (slice_vectors
+                        v2 4 1 4)
+                       (slice_vectors
+                        v2 0 1 4))))
+                     (x4 (int32_t (bv 2 32)))))
+                    (vec-div
+                     (x4 (int32_t (bv -2147483648 32)))
+                     (x4 (int32_t (bv 2 32)))))
+                   (x4 (int32_t (bv -2147483648 32)))
+                        (vec-mul
+                         (vec-if
+                       (vec-gt
+                        (vec-mul
+                        (int32x4
+                         (vec-if
+                         (x4 (uint1_t v3))
+                         (slice_vectors
+                          v1 4 1 4)
+                         (slice_vectors
+                          v1 0 1 4)))
+                         (int32x4
+                          (vec-if
+                          (x4 (uint1_t v3))
+                          (slice_vectors
+                           v2 4 1 4)
+                          (slice_vectors
+                           v2 0 1 4))))
+                        (vec-div
+                         (x4 (int32_t (bv 2147483647 32)))
+                         (x4 (int32_t (bv 2 32)))))
+                       (x4 (int32_t (bv 2147483647 32)))
+                         (vec-mul
+                          (vec-mul
+                          (int32x4
+                           (vec-if
+                           (x4 (uint1_t v3))
+                           (slice_vectors
+                            v1 4 1 4)
+                           (slice_vectors
+                            v1 0 1 4)))
+                           (int32x4
+                            (vec-if
+                            (x4 (uint1_t v3))
+                            (slice_vectors
+                             v2 4 1 4)
+                            (slice_vectors
+                             v2 0 1 4))))
+                          (x4 (int32_t (bv 2 32)))))
+                         (x4 (int32_t (bv 2 32))))))))]
+        [((arm:i64x2 v0) (arm:i32x4 v1) (arm:i32x4 v2) (uint1_t v3))
+                     (arm:i64x2
+                      (halide:interpret
+                       (vec-sub
+             v0
+                        (vec-if
+                   (vec-lt
+                    (vec-if
+                  (vec-gt
+                   (vec-mul
+                   (int64x2
+                    (vec-if
+                    (x2 (uint1_t v3))
+                    (slice_vectors
+                     v1 2 1 2)
+                    (slice_vectors
+                     v1 0 1 2)))
+                    (int64x2
+                     (vec-if
+                     (x2 (uint1_t v3))
+                     (slice_vectors
+                      v2 2 1 2)
+                     (slice_vectors
+                      v2 0 1 2))))
+                   (vec-div
+                    (x2 (int64_t (bv 9223372036854775807 64)))
+                    (x2 (int64_t (bv 2 64)))))
+                  (x2 (int64_t (bv 9223372036854775807 64)))
+                    (vec-mul
+                     (vec-mul
+                     (int64x2
+                      (vec-if
+                      (x2 (uint1_t v3))
+                      (slice_vectors
+                       v1 2 1 2)
+                      (slice_vectors
+                       v1 0 1 2)))
+                      (int64x2
+                       (vec-if
+                       (x2 (uint1_t v3))
+                       (slice_vectors
+                        v2 2 1 2)
+                       (slice_vectors
+                        v2 0 1 2))))
+                     (x2 (int64_t (bv 2 64)))))
+                    (vec-div
+                     (x2 (int64_t (bv -9223372036854775808 64)))
+                     (x2 (int64_t (bv 2 64)))))
+                   (x2 (int64_t (bv -9223372036854775808 64)))
+                        (vec-mul
+                         (vec-if
+                       (vec-gt
+                        (vec-mul
+                        (int64x2
+                         (vec-if
+                         (x2 (uint1_t v3))
+                         (slice_vectors
+                          v1 2 1 2)
+                         (slice_vectors
+                          v1 0 1 2)))
+                         (int64x2
+                          (vec-if
+                          (x2 (uint1_t v3))
+                          (slice_vectors
+                           v2 2 1 2)
+                          (slice_vectors
+                           v2 0 1 2))))
+                        (vec-div
+                         (x2 (int64_t (bv 9223372036854775807 64)))
+                         (x2 (int64_t (bv 2 64)))))
+                       (x2 (int64_t (bv 9223372036854775807 64)))
+                         (vec-mul
+                          (vec-mul
+                          (int64x2
+                           (vec-if
+                           (x2 (uint1_t v3))
+                           (slice_vectors
+                            v1 2 1 2)
+                           (slice_vectors
+                            v1 0 1 2)))
+                           (int64x2
+                            (vec-if
+                            (x2 (uint1_t v3))
+                            (slice_vectors
+                             v2 2 1 2)
+                            (slice_vectors
+                             v2 0 1 2))))
+                          (x2 (int64_t (bv 2 64)))))
+                         (x2 (int64_t (bv 2 64))))))))]
+        [(_ _ _ _) (assert #f "infeasible")])]
+
     [(arm:sqdmulh Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
         [((arm:i16x4 v0) (arm:i16x4 v1))
@@ -3367,197 +4072,329 @@
               (x4 (int64_t (bv -2147483648 64)))))))]
         [(_ _) (assert #f "infeasible")])]
 
-    [(arm:sqdmull-vs Vn Vm)
-      (destruct* ((interpret Vn) (interpret Vm))
-        [((arm:i16x4 v0) (int16_t v1))
-           (arm:i32x4
-            (halide:interpret
-             (vec-mul
-              (vec-max
-               (vec-if
-               (vec-lt
-                (x4 (int32_t (bv 1073741823 32)))
-                (vec-mul
-                 (int32x4
-                  v0)
-                 (x4 (int32x1 (int16_t
- v1)))))
-               (x4 (int32_t (bv 2147483647 32)))
-               (vec-mul
-                (vec-mul
-                 (int32x4
-                  v0)
-                 (x4 (int32x1 (int16_t
+    [(arm:sqdmull-vs Vd Vn Vm)
+      (destruct* ((interpret Vd) (interpret Vn) (interpret Vm))
+        [((arm:i16x8 v0) (int16_t v1) (uint1_t v2))
+                 (arm:i32x4
+                  (halide:interpret
+                   (vec-if
+                (vec-lt
+                 (vec-if
+                (vec-gt
+                 (vec-mul
+                  (int32x4
+                   (vec-if
+                   (x4 (uint1_t v2))
+                   (slice_vectors
+                    v0 4 1 4)
+                   (slice_vectors
+                    v0 0 1 4)))
+                  (int32x4
+                   (x4 (int16_t
  v1))))
-                (x4 (int32_t (bv 2 32)))))
-               (x4 (int32_t (bv -1073741824 32))))
-              (x4 (int32_t (bv 2 32))))))]
-        [((arm:i16x8 v0) (int16_t v1))
-           (arm:i32x8
-            (halide:interpret
-             (vec-mul
-              (vec-max
-               (vec-if
-               (vec-lt
-                (x8 (int32_t (bv 1073741823 32)))
-                (vec-mul
-                 (int32x8
-                  v0)
-                 (x8 (int32x1 (int16_t
- v1)))))
-               (x8 (int32_t (bv 2147483647 32)))
-               (vec-mul
-                (vec-mul
-                 (int32x8
-                  v0)
-                 (x8 (int32x1 (int16_t
+                 (vec-div
+                  (x4 (int32_t (bv 2147483647 32)))
+                  (x4 (int32_t (bv 2 32)))))
+                (x4 (int32_t (bv 2147483647 32)))
+                 (vec-mul
+                  (vec-mul
+                   (int32x4
+                    (vec-if
+                    (x4 (uint1_t v2))
+                    (slice_vectors
+                     v0 4 1 4)
+                    (slice_vectors
+                     v0 0 1 4)))
+                   (int32x4
+                    (x4 (int16_t
  v1))))
-                (x8 (int32_t (bv 2 32)))))
-               (x8 (int32_t (bv -1073741824 32))))
-              (x8 (int32_t (bv 2 32))))))]
-        [((arm:i32x2 v0) (int32_t v1))
-           (arm:i64x2
-            (halide:interpret
-             (vec-mul
-              (vec-max
-               (vec-if
-               (vec-lt
-                (x2 (int64_t (bv 4611686018427387903 64)))
-                (vec-mul
-                 (int64x2
-                  v0)
-                 (x2 (int64x1 (int32_t
- v1)))))
-               (x2 (int64_t (bv 9223372036854775807 64)))
-               (vec-mul
-                (vec-mul
-                 (int64x2
-                  v0)
-                 (x2 (int64x1 (int32_t
+                  (x4 (int32_t (bv 2 32)))))
+                 (vec-div
+                  (x4 (int32_t (bv -2147483648 32)))
+                  (x4 (int32_t (bv 2 32)))))
+                (x4 (int32_t (bv -2147483648 32)))
+                   (vec-mul
+                    (vec-if
+                   (vec-gt
+                    (vec-mul
+                     (int32x4
+                      (vec-if
+                      (x4 (uint1_t v2))
+                      (slice_vectors
+                       v0 4 1 4)
+                      (slice_vectors
+                       v0 0 1 4)))
+                     (int32x4
+                      (x4 (int16_t
  v1))))
-                (x2 (int64_t (bv 2 64)))))
-               (x2 (int64_t (bv -4611686018427387904 64))))
-              (x2 (int64_t (bv 2 64))))))]
-        [((arm:i32x4 v0) (int32_t v1))
-           (arm:i64x4
-            (halide:interpret
-             (vec-mul
-              (vec-max
-               (vec-if
-               (vec-lt
-                (x4 (int64_t (bv 4611686018427387903 64)))
-                (vec-mul
-                 (int64x4
-                  v0)
-                 (x4 (int64x1 (int32_t
- v1)))))
-               (x4 (int64_t (bv 9223372036854775807 64)))
-               (vec-mul
-                (vec-mul
-                 (int64x4
-                  v0)
-                 (x4 (int64x1 (int32_t
+                    (vec-div
+                     (x4 (int32_t (bv 2147483647 32)))
+                     (x4 (int32_t (bv 2 32)))))
+                   (x4 (int32_t (bv 2147483647 32)))
+                    (vec-mul
+                     (vec-mul
+                      (int32x4
+                       (vec-if
+                       (x4 (uint1_t v2))
+                       (slice_vectors
+                        v0 4 1 4)
+                       (slice_vectors
+                        v0 0 1 4)))
+                      (int32x4
+                       (x4 (int16_t
  v1))))
-                (x4 (int64_t (bv 2 64)))))
-               (x4 (int64_t (bv -4611686018427387904 64))))
-              (x4 (int64_t (bv 2 64))))))]
-        [(_ _) (assert #f "infeasible")])]
+                     (x4 (int32_t (bv 2 32)))))
+                    (x4 (int32_t (bv 2 32)))))))]
+        [((arm:i32x4 v0) (int32_t v1) (uint1_t v2))
+                 (arm:i64x2
+                  (halide:interpret
+                   (vec-if
+                (vec-lt
+                 (vec-if
+                (vec-gt
+                 (vec-mul
+                  (int64x2
+                   (vec-if
+                   (x2 (uint1_t v2))
+                   (slice_vectors
+                    v0 2 1 2)
+                   (slice_vectors
+                    v0 0 1 2)))
+                  (int64x2
+                   (x2 (int32_t
+ v1))))
+                 (vec-div
+                  (x2 (int64_t (bv 9223372036854775807 64)))
+                  (x2 (int64_t (bv 2 64)))))
+                (x2 (int64_t (bv 9223372036854775807 64)))
+                 (vec-mul
+                  (vec-mul
+                   (int64x2
+                    (vec-if
+                    (x2 (uint1_t v2))
+                    (slice_vectors
+                     v0 2 1 2)
+                    (slice_vectors
+                     v0 0 1 2)))
+                   (int64x2
+                    (x2 (int32_t
+ v1))))
+                  (x2 (int64_t (bv 2 64)))))
+                 (vec-div
+                  (x2 (int64_t (bv -9223372036854775808 64)))
+                  (x2 (int64_t (bv 2 64)))))
+                (x2 (int64_t (bv -9223372036854775808 64)))
+                   (vec-mul
+                    (vec-if
+                   (vec-gt
+                    (vec-mul
+                     (int64x2
+                      (vec-if
+                      (x2 (uint1_t v2))
+                      (slice_vectors
+                       v0 2 1 2)
+                      (slice_vectors
+                       v0 0 1 2)))
+                     (int64x2
+                      (x2 (int32_t
+ v1))))
+                    (vec-div
+                     (x2 (int64_t (bv 9223372036854775807 64)))
+                     (x2 (int64_t (bv 2 64)))))
+                   (x2 (int64_t (bv 9223372036854775807 64)))
+                    (vec-mul
+                     (vec-mul
+                      (int64x2
+                       (vec-if
+                       (x2 (uint1_t v2))
+                       (slice_vectors
+                        v0 2 1 2)
+                       (slice_vectors
+                        v0 0 1 2)))
+                      (int64x2
+                       (x2 (int32_t
+ v1))))
+                     (x2 (int64_t (bv 2 64)))))
+                    (x2 (int64_t (bv 2 64)))))))]
+        [(_ _ _) (assert #f "infeasible")])]
 
-    [(arm:sqdmull-vv Vn Vm)
-      (destruct* ((interpret Vn) (interpret Vm))
-        [((arm:i16x4 v0) (arm:i16x4 v1))
-           (arm:i32x4
-            (halide:interpret
-             (vec-mul
-              (vec-max
-               (vec-if
-               (vec-lt
-                (x4 (int32_t (bv 1073741823 32)))
-                (vec-mul
-                 (int32x4
-                  v0)
-                 (int32x4
-                  v1)))
-               (x4 (int32_t (bv 2147483647 32)))
-               (vec-mul
-                (vec-mul
-                 (int32x4
-                  v0)
-                 (int32x4
-                  v1))
-                (x4 (int32_t (bv 2 32)))))
-               (x4 (int32_t (bv -1073741824 32))))
-              (x4 (int32_t (bv 2 32))))))]
-        [((arm:i16x8 v0) (arm:i16x8 v1))
-           (arm:i32x8
-            (halide:interpret
-             (vec-mul
-              (vec-max
-               (vec-if
-               (vec-lt
-                (x8 (int32_t (bv 1073741823 32)))
-                (vec-mul
-                 (int32x8
-                  v0)
-                 (int32x8
-                  v1)))
-               (x8 (int32_t (bv 2147483647 32)))
-               (vec-mul
-                (vec-mul
-                 (int32x8
-                  v0)
-                 (int32x8
-                  v1))
-                (x8 (int32_t (bv 2 32)))))
-               (x8 (int32_t (bv -1073741824 32))))
-              (x8 (int32_t (bv 2 32))))))]
-        [((arm:i32x2 v0) (arm:i32x2 v1))
-           (arm:i64x2
-            (halide:interpret
-             (vec-mul
-              (vec-max
-               (vec-if
-               (vec-lt
-                (x2 (int64_t (bv 4611686018427387903 64)))
-                (vec-mul
-                 (int64x2
-                  v0)
-                 (int64x2
-                  v1)))
-               (x2 (int64_t (bv 9223372036854775807 64)))
-               (vec-mul
-                (vec-mul
-                 (int64x2
-                  v0)
-                 (int64x2
-                  v1))
-                (x2 (int64_t (bv 2 64)))))
-               (x2 (int64_t (bv -4611686018427387904 64))))
-              (x2 (int64_t (bv 2 64))))))]
-        [((arm:i32x4 v0) (arm:i32x4 v1))
-           (arm:i64x4
-            (halide:interpret
-             (vec-mul
-              (vec-max
-               (vec-if
-               (vec-lt
-                (x4 (int64_t (bv 4611686018427387903 64)))
-                (vec-mul
-                 (int64x4
-                  v0)
-                 (int64x4
-                  v1)))
-               (x4 (int64_t (bv 9223372036854775807 64)))
-               (vec-mul
-                (vec-mul
-                 (int64x4
-                  v0)
-                 (int64x4
-                  v1))
-                (x4 (int64_t (bv 2 64)))))
-               (x4 (int64_t (bv -4611686018427387904 64))))
-              (x4 (int64_t (bv 2 64))))))]
-        [(_ _) (assert #f "infeasible")])]
+    [(arm:sqdmull-vv Vd Vn Vm)
+      (destruct* ((interpret Vd) (interpret Vn) (interpret Vm))
+        [((arm:i16x8 v0) (arm:i16x8 v1) (uint1_t v2))
+                     (arm:i32x4
+                      (halide:interpret
+                       (vec-if
+                  (vec-lt
+                   (vec-if
+                 (vec-gt
+                  (vec-mul
+                  (int32x4
+                   (vec-if
+                   (x4 (uint1_t v2))
+                   (slice_vectors
+                    v0 4 1 4)
+                   (slice_vectors
+                    v0 0 1 4)))
+                   (int32x4
+                    (vec-if
+                    (x4 (uint1_t v2))
+                    (slice_vectors
+                     v1 4 1 4)
+                    (slice_vectors
+                     v1 0 1 4))))
+                  (vec-div
+                   (x4 (int32_t (bv 2147483647 32)))
+                   (x4 (int32_t (bv 2 32)))))
+                 (x4 (int32_t (bv 2147483647 32)))
+                   (vec-mul
+                    (vec-mul
+                    (int32x4
+                     (vec-if
+                     (x4 (uint1_t v2))
+                     (slice_vectors
+                      v0 4 1 4)
+                     (slice_vectors
+                      v0 0 1 4)))
+                     (int32x4
+                      (vec-if
+                      (x4 (uint1_t v2))
+                      (slice_vectors
+                       v1 4 1 4)
+                      (slice_vectors
+                       v1 0 1 4))))
+                    (x4 (int32_t (bv 2 32)))))
+                   (vec-div
+                    (x4 (int32_t (bv -2147483648 32)))
+                    (x4 (int32_t (bv 2 32)))))
+                  (x4 (int32_t (bv -2147483648 32)))
+                       (vec-mul
+                        (vec-if
+                      (vec-gt
+                       (vec-mul
+                       (int32x4
+                        (vec-if
+                        (x4 (uint1_t v2))
+                        (slice_vectors
+                         v0 4 1 4)
+                        (slice_vectors
+                         v0 0 1 4)))
+                        (int32x4
+                         (vec-if
+                         (x4 (uint1_t v2))
+                         (slice_vectors
+                          v1 4 1 4)
+                         (slice_vectors
+                          v1 0 1 4))))
+                       (vec-div
+                        (x4 (int32_t (bv 2147483647 32)))
+                        (x4 (int32_t (bv 2 32)))))
+                      (x4 (int32_t (bv 2147483647 32)))
+                        (vec-mul
+                         (vec-mul
+                         (int32x4
+                          (vec-if
+                          (x4 (uint1_t v2))
+                          (slice_vectors
+                           v0 4 1 4)
+                          (slice_vectors
+                           v0 0 1 4)))
+                          (int32x4
+                           (vec-if
+                           (x4 (uint1_t v2))
+                           (slice_vectors
+                            v1 4 1 4)
+                           (slice_vectors
+                            v1 0 1 4))))
+                         (x4 (int32_t (bv 2 32)))))
+                        (x4 (int32_t (bv 2 32)))))))]
+        [((arm:i32x4 v0) (arm:i32x4 v1) (uint1_t v2))
+                     (arm:i64x2
+                      (halide:interpret
+                       (vec-if
+                  (vec-lt
+                   (vec-if
+                 (vec-gt
+                  (vec-mul
+                  (int64x2
+                   (vec-if
+                   (x2 (uint1_t v2))
+                   (slice_vectors
+                    v0 2 1 2)
+                   (slice_vectors
+                    v0 0 1 2)))
+                   (int64x2
+                    (vec-if
+                    (x2 (uint1_t v2))
+                    (slice_vectors
+                     v1 2 1 2)
+                    (slice_vectors
+                     v1 0 1 2))))
+                  (vec-div
+                   (x2 (int64_t (bv 9223372036854775807 64)))
+                   (x2 (int64_t (bv 2 64)))))
+                 (x2 (int64_t (bv 9223372036854775807 64)))
+                   (vec-mul
+                    (vec-mul
+                    (int64x2
+                     (vec-if
+                     (x2 (uint1_t v2))
+                     (slice_vectors
+                      v0 2 1 2)
+                     (slice_vectors
+                      v0 0 1 2)))
+                     (int64x2
+                      (vec-if
+                      (x2 (uint1_t v2))
+                      (slice_vectors
+                       v1 2 1 2)
+                      (slice_vectors
+                       v1 0 1 2))))
+                    (x2 (int64_t (bv 2 64)))))
+                   (vec-div
+                    (x2 (int64_t (bv -9223372036854775808 64)))
+                    (x2 (int64_t (bv 2 64)))))
+                  (x2 (int64_t (bv -9223372036854775808 64)))
+                       (vec-mul
+                        (vec-if
+                      (vec-gt
+                       (vec-mul
+                       (int64x2
+                        (vec-if
+                        (x2 (uint1_t v2))
+                        (slice_vectors
+                         v0 2 1 2)
+                        (slice_vectors
+                         v0 0 1 2)))
+                        (int64x2
+                         (vec-if
+                         (x2 (uint1_t v2))
+                         (slice_vectors
+                          v1 2 1 2)
+                         (slice_vectors
+                          v1 0 1 2))))
+                       (vec-div
+                        (x2 (int64_t (bv 9223372036854775807 64)))
+                        (x2 (int64_t (bv 2 64)))))
+                      (x2 (int64_t (bv 9223372036854775807 64)))
+                        (vec-mul
+                         (vec-mul
+                         (int64x2
+                          (vec-if
+                          (x2 (uint1_t v2))
+                          (slice_vectors
+                           v0 2 1 2)
+                          (slice_vectors
+                           v0 0 1 2)))
+                          (int64x2
+                           (vec-if
+                           (x2 (uint1_t v2))
+                           (slice_vectors
+                            v1 2 1 2)
+                           (slice_vectors
+                            v1 0 1 2))))
+                         (x2 (int64_t (bv 2 64)))))
+                        (x2 (int64_t (bv 2 64)))))))]
+        [(_ _ _) (assert #f "infeasible")])]
 
     [(arm:sqneg Vn)
       (destruct* ((interpret Vn))
@@ -5207,127 +6044,149 @@
              v1)))]
         [(_ _) (assert #f "infeasible")])]
 
-    [(arm:sshll Vn Vm)
-      (destruct* ((interpret Vn) (interpret Vm))
-        [((arm:i8x8 v0) (uint8_t v1))
-          (arm:i16x8
-           (halide:interpret
-            (vec-shl
-             (int16x8
-              v0)
-             (x8 (uint16x1 (uint8_t
+    [(arm:sshll Vd Vn Vm)
+      (destruct* ((interpret Vd) (interpret Vn) (interpret Vm))
+        [((arm:i8x16 v0) (uint8_t v1) (uint1_t v2))
+           (arm:i16x8
+            (halide:interpret
+             (vec-shl
+              (int16x8
+               (vec-if
+               (x8 (uint1_t v2))
+               (slice_vectors
+                v0 8 1 8)
+               (slice_vectors
+                v0 0 1 8)))
+              (x8 (uint16x1 (uint8_t
  v1))))))]
-        [((arm:i8x16 v0) (uint8_t v1))
-          (arm:i16x16
-           (halide:interpret
-            (vec-shl
-             (int16x16
-              v0)
-             (x16 (uint16x1 (uint8_t
+        [((arm:i16x8 v0) (uint16_t v1) (uint1_t v2))
+           (arm:i32x4
+            (halide:interpret
+             (vec-shl
+              (int32x4
+               (vec-if
+               (x4 (uint1_t v2))
+               (slice_vectors
+                v0 4 1 4)
+               (slice_vectors
+                v0 0 1 4)))
+              (x4 (uint32x1 (uint16_t
  v1))))))]
-        [((arm:i16x4 v0) (uint16_t v1))
-          (arm:i32x4
-           (halide:interpret
-            (vec-shl
-             (int32x4
-              v0)
-             (x4 (uint32x1 (uint16_t
+        [((arm:i32x4 v0) (uint32_t v1) (uint1_t v2))
+           (arm:i64x2
+            (halide:interpret
+             (vec-shl
+              (int64x2
+               (vec-if
+               (x2 (uint1_t v2))
+               (slice_vectors
+                v0 2 1 2)
+               (slice_vectors
+                v0 0 1 2)))
+              (x2 (uint64x1 (uint32_t
  v1))))))]
-        [((arm:i16x8 v0) (uint16_t v1))
-          (arm:i32x8
-           (halide:interpret
-            (vec-shl
-             (int32x8
-              v0)
-             (x8 (uint32x1 (uint16_t
- v1))))))]
-        [((arm:i32x2 v0) (uint32_t v1))
-          (arm:i64x2
-           (halide:interpret
-            (vec-shl
-             (int64x2
-              v0)
-             (x2 (uint64x1 (uint32_t
- v1))))))]
-        [((arm:i32x4 v0) (uint32_t v1))
-          (arm:i64x4
-           (halide:interpret
-            (vec-shl
-             (int64x4
-              v0)
-             (x4 (uint64x1 (uint32_t
- v1))))))]
-        [(_ _) (assert #f "infeasible")])]
+        [(_ _ _) (assert #f "infeasible")])]
 
-    [(arm:ssubl Vn Vm)
-      (destruct* ((interpret Vn) (interpret Vm))
-        [((arm:i8x8 v0) (arm:i8x8 v1))
-          (arm:i16x8
-           (halide:interpret
-            (vec-sub
-             (int16x8
-              v0)
-             (int16x8
-              v1))))]
-        [((arm:i8x16 v0) (arm:i8x16 v1))
-          (arm:i16x16
-           (halide:interpret
-            (vec-sub
-             (int16x16
-              v0)
-             (int16x16
-              v1))))]
-        [((arm:i16x4 v0) (arm:i16x4 v1))
-          (arm:i32x4
-           (halide:interpret
-            (vec-sub
-             (int32x4
-              v0)
-             (int32x4
-              v1))))]
-        [((arm:i16x8 v0) (arm:i16x8 v1))
-          (arm:i32x8
-           (halide:interpret
-            (vec-sub
-             (int32x8
-              v0)
-             (int32x8
-              v1))))]
-        [((arm:i32x2 v0) (arm:i32x2 v1))
-          (arm:i64x2
-           (halide:interpret
-            (vec-sub
-             (int64x2
-              v0)
-             (int64x2
-              v1))))]
-        [((arm:i32x4 v0) (arm:i32x4 v1))
-          (arm:i64x4
-           (halide:interpret
-            (vec-sub
-             (int64x4
-              v0)
-             (int64x4
-              v1))))]
-        [(_ _) (assert #f "infeasible")])]
+    [(arm:ssubl Vd Vn Vm)
+      (destruct* ((interpret Vd) (interpret Vn) (interpret Vm))
+        [((arm:i8x16 v0) (arm:i8x16 v1) (uint1_t v2))
+           (arm:i16x8
+            (halide:interpret
+             (vec-if
+             (x8 (uint1_t v2))
+             (vec-sub
+              (int16x8
+               (slice_vectors
+                v0 8 1 8))
+              (int16x8
+               (slice_vectors
+                v1 8 1 8)))
+             (vec-sub
+              (int16x8
+               (slice_vectors
+                v0 0 1 8))
+              (int16x8
+               (slice_vectors
+                v1 0 1 8))))))]
+        [((arm:i16x8 v0) (arm:i16x8 v1) (uint1_t v2))
+           (arm:i32x4
+            (halide:interpret
+             (vec-if
+             (x4 (uint1_t v2))
+             (vec-sub
+              (int32x4
+               (slice_vectors
+                v0 4 1 4))
+              (int32x4
+               (slice_vectors
+                v1 4 1 4)))
+             (vec-sub
+              (int32x4
+               (slice_vectors
+                v0 0 1 4))
+              (int32x4
+               (slice_vectors
+                v1 0 1 4))))))]
+        [((arm:i32x4 v0) (arm:i32x4 v1) (uint1_t v2))
+           (arm:i64x2
+            (halide:interpret
+             (vec-if
+             (x2 (uint1_t v2))
+             (vec-sub
+              (int64x2
+               (slice_vectors
+                v0 2 1 2))
+              (int64x2
+               (slice_vectors
+                v1 2 1 2)))
+             (vec-sub
+              (int64x2
+               (slice_vectors
+                v0 0 1 2))
+              (int64x2
+               (slice_vectors
+                v1 0 1 2))))))]
+        [(_ _ _) (assert #f "infeasible")])]
 
-    [(arm:ssubw Vn Vm)
-      (destruct* ((interpret Vn) (interpret Vm))
-        [((arm:i16x8 v0) (arm:i8x8 v1))
-          (arm:i16x8
-           (halide:interpret
-            (vec-sub
+    [(arm:ssubw Vd Vn Vm)
+      (destruct* ((interpret Vd) (interpret Vn) (interpret Vm))
+        [((arm:i16x8 v0) (arm:i8x16 v1) (uint1_t v2))
+           (arm:i16x8
+            (halide:interpret
+             (vec-sub
              v0
-             (int16x8
-              v1))))]
-        [((arm:i16x16 v0) (arm:i8x16 v1))
-          (arm:i16x16
-           (halide:interpret
-            (vec-sub
+              (int16x8
+               (vec-if
+               (x8 (uint1_t v2))
+               (slice_vectors
+                v1 8 1 8)
+               (slice_vectors
+                v1 0 1 8))))))]
+        [((arm:i32x4 v0) (arm:i16x8 v1) (uint1_t v2))
+           (arm:i32x4
+            (halide:interpret
+             (vec-sub
              v0
-             (int16x16
-              v1))))]
-        [(_ _) (assert #f "infeasible")])]
+              (int32x4
+               (vec-if
+               (x4 (uint1_t v2))
+               (slice_vectors
+                v1 4 1 4)
+               (slice_vectors
+                v1 0 1 4))))))]
+        [((arm:i64x2 v0) (arm:i32x4 v1) (uint1_t v2))
+           (arm:i64x2
+            (halide:interpret
+             (vec-sub
+             v0
+              (int64x2
+               (vec-if
+               (x2 (uint1_t v2))
+               (slice_vectors
+                v1 2 1 2)
+               (slice_vectors
+                v1 0 1 2))))))]
+        [(_ _ _) (assert #f "infeasible")])]
 
     [(arm:sub Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
@@ -5521,39 +6380,39 @@
                v1)))))]
         [(_ _) (assert #f "infeasible")])]
 
-    [(arm:sxtl Vn)
-      (destruct* ((interpret Vn))
-        [((arm:i8x8 v0))
-          (arm:i16x8
-           (halide:interpret
-            (int16x8
-             v0)))]
-        [((arm:i8x16 v0))
-          (arm:i16x16
-           (halide:interpret
-            (int16x16
-             v0)))]
-        [((arm:i16x4 v0))
-          (arm:i32x4
-           (halide:interpret
-            (int32x4
-             v0)))]
-        [((arm:i16x8 v0))
-          (arm:i32x8
-           (halide:interpret
-            (int32x8
-             v0)))]
-        [((arm:i32x2 v0))
-          (arm:i64x2
-           (halide:interpret
-            (int64x2
-             v0)))]
-        [((arm:i32x4 v0))
-          (arm:i64x4
-           (halide:interpret
-            (int64x4
-             v0)))]
-        [(_) (assert #f "infeasible")])]
+    [(arm:sxtl Vn Vm)
+      (destruct* ((interpret Vn) (interpret Vm))
+        [((arm:i8x16 v0) (uint1_t v1))
+           (arm:i16x8
+            (halide:interpret
+             (int16x8
+              (vec-if
+              (x8 (uint1_t v1))
+              (slice_vectors
+               v0 8 1 8)
+              (slice_vectors
+               v0 0 1 8)))))]
+        [((arm:i16x8 v0) (uint1_t v1))
+           (arm:i32x4
+            (halide:interpret
+             (int32x4
+              (vec-if
+              (x4 (uint1_t v1))
+              (slice_vectors
+               v0 4 1 4)
+              (slice_vectors
+               v0 0 1 4)))))]
+        [((arm:i32x4 v0) (uint1_t v1))
+           (arm:i64x2
+            (halide:interpret
+             (int64x2
+              (vec-if
+              (x2 (uint1_t v1))
+              (slice_vectors
+               v0 2 1 2)
+              (slice_vectors
+               v0 0 1 2)))))]
+        [(_ _) (assert #f "infeasible")])]
 
     [(arm:trn1 Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
@@ -5884,8 +6743,7 @@
            (arm:u16x8
             (halide:interpret
              (vec-if
-             (x8 (uint1_t
- v2))
+             (x8 (uint1_t v2))
              (vec-add
               (uint16x8
                (slice_vectors
@@ -5904,8 +6762,7 @@
            (arm:u32x4
             (halide:interpret
              (vec-if
-             (x4 (uint1_t
- v2))
+             (x4 (uint1_t v2))
              (vec-add
               (int32x4
                (slice_vectors
@@ -5926,8 +6783,7 @@
            (arm:u64x2
             (halide:interpret
              (vec-if
-             (x2 (uint1_t
- v2))
+             (x2 (uint1_t v2))
              (vec-add
               (uint64x2
                (slice_vectors
@@ -6062,8 +6918,7 @@
              (vec-add
              v0
               (vec-if
-              (x8 (uint1_t
- v2))
+              (x8 (uint1_t v2))
               (uint16x8
                (slice_vectors
                 v1 8 1 8))
@@ -6076,8 +6931,7 @@
              (vec-add
              v0
               (vec-if
-              (x4 (uint1_t
- v2))
+              (x4 (uint1_t v2))
               (uint32x4
                (slice_vectors
                 v1 4 1 4))
@@ -6090,8 +6944,7 @@
              (vec-add
              v0
               (vec-if
-              (x2 (uint1_t
- v2))
+              (x2 (uint1_t v2))
               (uint64x2
                (slice_vectors
                 v1 2 1 2))
@@ -6690,8 +7543,7 @@
              (vec-add
              v0
               (vec-if
-              (x4 (uint1_t
- v3))
+              (x4 (uint1_t v3))
               (vec-mul
                (uint32x4
                 (slice_vectors
@@ -6710,8 +7562,7 @@
              (vec-add
              v0
               (vec-if
-              (x2 (uint1_t
- v3))
+              (x2 (uint1_t v3))
               (vec-mul
                (uint64x2
                 (slice_vectors
@@ -6734,8 +7585,7 @@
              (vec-add
              v0
               (vec-if
-              (x8 (uint1_t
- v3))
+              (x8 (uint1_t v3))
               (vec-mul
                (uint16x8
                 (slice_vectors
@@ -6756,8 +7606,7 @@
              (vec-add
              v0
               (vec-if
-              (x4 (uint1_t
- v3))
+              (x4 (uint1_t v3))
               (vec-mul
                (uint32x4
                 (slice_vectors
@@ -6778,8 +7627,7 @@
              (vec-add
              v0
               (vec-if
-              (x2 (uint1_t
- v3))
+              (x2 (uint1_t v3))
               (vec-mul
                (uint64x2
                 (slice_vectors
@@ -6804,8 +7652,7 @@
              (vec-sub
              v0
               (vec-if
-              (x4 (uint1_t
- v3))
+              (x4 (uint1_t v3))
               (vec-mul
                (uint32x4
                 (slice_vectors
@@ -6824,8 +7671,7 @@
              (vec-sub
              v0
               (vec-if
-              (x2 (uint1_t
- v3))
+              (x2 (uint1_t v3))
               (vec-mul
                (uint64x2
                 (slice_vectors
@@ -6848,8 +7694,7 @@
              (vec-sub
              v0
               (vec-if
-              (x8 (uint1_t
- v3))
+              (x8 (uint1_t v3))
               (vec-mul
                (uint16x8
                 (slice_vectors
@@ -6870,8 +7715,7 @@
              (vec-sub
              v0
               (vec-if
-              (x4 (uint1_t
- v3))
+              (x4 (uint1_t v3))
               (vec-mul
                (uint32x4
                 (slice_vectors
@@ -6892,8 +7736,7 @@
              (vec-sub
              v0
               (vec-if
-              (x2 (uint1_t
- v3))
+              (x2 (uint1_t v3))
               (vec-mul
                (uint64x2
                 (slice_vectors
@@ -6910,61 +7753,127 @@
                  v2 0 1 2)))))))]
         [(_ _ _ _) (assert #f "infeasible")])]
 
-    [(arm:umull-vs Vn Vm)
-      (destruct* ((interpret Vn) (interpret Vm))
-        [((arm:u8x8 v0) (uint8_t v1))
-          (arm:u16x8
-           (halide:interpret
-            (vec-mul
-             (uint16x8
-              v0)
-             (x8 (uint16x1 (uint8_t
- v1))))))]
-        [((arm:u16x4 v0) (uint16_t v1))
-          (arm:u32x4
-           (halide:interpret
-            (vec-mul
-             (uint32x4
-              v0)
-             (x4 (uint32x1 (uint16_t
- v1))))))]
-        [((arm:u32x2 v0) (uint32_t v1))
-          (arm:u64x2
-           (halide:interpret
-            (vec-mul
-             (uint64x2
-              v0)
-             (x2 (uint64x1 (uint32_t
- v1))))))]
-        [(_ _) (assert #f "infeasible")])]
+    [(arm:umull-vs Vd Vn Vm)
+      (destruct* ((interpret Vd) (interpret Vn) (interpret Vm))
+        [((arm:u8x16 v0) (uint8_t v1) (uint1_t v2))
+           (arm:u16x8
+            (halide:interpret
+             (vec-if
+             (x8 (uint1_t v2))
+             (vec-mul
+              (uint16x8
+               (slice_vectors
+                v0 8 1 8))
+              (uint16x8
+               (x8 (uint8_t
+ v1))))
+             (vec-mul
+              (uint16x8
+               (slice_vectors
+                v0 0 1 8))
+              (uint16x8
+               (x8 (uint8_t
+ v1)))))))]
+        [((arm:u16x8 v0) (uint16_t v1) (uint1_t v2))
+           (arm:u32x4
+            (halide:interpret
+             (vec-if
+             (x4 (uint1_t v2))
+             (vec-mul
+              (uint32x4
+               (slice_vectors
+                v0 4 1 4))
+              (uint32x4
+               (x4 (uint16_t
+ v1))))
+             (vec-mul
+              (uint32x4
+               (slice_vectors
+                v0 0 1 4))
+              (uint32x4
+               (x4 (uint16_t
+ v1)))))))]
+        [((arm:u32x4 v0) (uint32_t v1) (uint1_t v2))
+           (arm:u64x2
+            (halide:interpret
+             (vec-if
+             (x2 (uint1_t v2))
+             (vec-mul
+              (uint64x2
+               (slice_vectors
+                v0 2 1 2))
+              (uint64x2
+               (x2 (uint32_t
+ v1))))
+             (vec-mul
+              (uint64x2
+               (slice_vectors
+                v0 0 1 2))
+              (uint64x2
+               (x2 (uint32_t
+ v1)))))))]
+        [(_ _ _) (assert #f "infeasible")])]
 
-    [(arm:umull-vv Vn Vm)
-      (destruct* ((interpret Vn) (interpret Vm))
-        [((arm:u8x8 v0) (arm:u8x8 v1))
-          (arm:u16x8
-           (halide:interpret
-            (vec-mul
-             (uint16x8
-              v0)
-             (uint16x8
-              v1))))]
-        [((arm:u16x4 v0) (arm:u16x4 v1))
-          (arm:u32x4
-           (halide:interpret
-            (vec-mul
-             (uint32x4
-              v0)
-             (uint32x4
-              v1))))]
-        [((arm:u32x2 v0) (arm:u32x2 v1))
-          (arm:u64x2
-           (halide:interpret
-            (vec-mul
-             (uint64x2
-              v0)
-             (uint64x2
-              v1))))]
-        [(_ _) (assert #f "infeasible")])]
+    [(arm:umull-vv Vd Vn Vm)
+      (destruct* ((interpret Vd) (interpret Vn) (interpret Vm))
+        [((arm:u8x16 v0) (arm:u8x16 v1) (uint1_t v2))
+           (arm:u16x8
+            (halide:interpret
+             (vec-if
+             (x8 (uint1_t v2))
+             (vec-mul
+              (uint16x8
+               (slice_vectors
+                v0 8 1 8))
+              (uint16x8
+               (slice_vectors
+                v1 8 1 8)))
+             (vec-mul
+              (uint16x8
+               (slice_vectors
+                v0 0 1 8))
+              (uint16x8
+               (slice_vectors
+                v1 0 1 8))))))]
+        [((arm:u16x8 v0) (arm:u16x8 v1) (uint1_t v2))
+           (arm:u32x4
+            (halide:interpret
+             (vec-if
+             (x4 (uint1_t v2))
+             (vec-mul
+              (uint32x4
+               (slice_vectors
+                v0 4 1 4))
+              (uint32x4
+               (slice_vectors
+                v1 4 1 4)))
+             (vec-mul
+              (uint32x4
+               (slice_vectors
+                v0 0 1 4))
+              (uint32x4
+               (slice_vectors
+                v1 0 1 4))))))]
+        [((arm:u32x4 v0) (arm:u32x4 v1) (uint1_t v2))
+           (arm:u64x2
+            (halide:interpret
+             (vec-if
+             (x2 (uint1_t v2))
+             (vec-mul
+              (uint64x2
+               (slice_vectors
+                v0 2 1 2))
+              (uint64x2
+               (slice_vectors
+                v1 2 1 2)))
+             (vec-mul
+              (uint64x2
+               (slice_vectors
+                v0 0 1 2))
+              (uint64x2
+               (slice_vectors
+                v1 0 1 2))))))]
+        [(_ _ _) (assert #f "infeasible")])]
 
     [(arm:uqadd Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
@@ -8062,57 +8971,48 @@
              v1)))]
         [(_ _) (assert #f "infeasible")])]
 
-    [(arm:ushll Vn Vm)
-      (destruct* ((interpret Vn) (interpret Vm))
-        [((arm:u8x8 v0) (uint8_t v1))
-          (arm:u16x8
-           (halide:interpret
-            (uint16x8
+    [(arm:ushll Vd Vn Vm)
+      (destruct* ((interpret Vd) (interpret Vn) (interpret Vm))
+        [((arm:u8x16 v0) (uint8_t v1) (uint1_t v2))
+           (arm:u16x8
+            (halide:interpret
              (vec-shl
-              v0
-              (x8 (uint8_t
+              (uint16x8
+               (vec-if
+               (x8 (uint1_t v2))
+               (slice_vectors
+                v0 8 1 8)
+               (slice_vectors
+                v0 0 1 8)))
+              (x8 (uint16x1 (uint8_t
  v1))))))]
-        [((arm:u8x16 v0) (uint8_t v1))
-          (arm:u16x16
-           (halide:interpret
-            (uint16x16
+        [((arm:u16x8 v0) (uint16_t v1) (uint1_t v2))
+           (arm:u32x4
+            (halide:interpret
              (vec-shl
-              v0
-              (x16 (uint8_t
+              (uint32x4
+               (vec-if
+               (x4 (uint1_t v2))
+               (slice_vectors
+                v0 4 1 4)
+               (slice_vectors
+                v0 0 1 4)))
+              (x4 (uint32x1 (uint16_t
  v1))))))]
-        [((arm:u16x4 v0) (uint16_t v1))
-          (arm:u32x4
-           (halide:interpret
-            (uint32x4
+        [((arm:u32x4 v0) (uint32_t v1) (uint1_t v2))
+           (arm:u64x2
+            (halide:interpret
              (vec-shl
-              v0
-              (x4 (uint16_t
+              (uint64x2
+               (vec-if
+               (x2 (uint1_t v2))
+               (slice_vectors
+                v0 2 1 2)
+               (slice_vectors
+                v0 0 1 2)))
+              (x2 (uint64x1 (uint32_t
  v1))))))]
-        [((arm:u16x8 v0) (uint16_t v1))
-          (arm:u32x8
-           (halide:interpret
-            (uint32x8
-             (vec-shl
-              v0
-              (x8 (uint16_t
- v1))))))]
-        [((arm:u32x2 v0) (uint32_t v1))
-          (arm:u64x2
-           (halide:interpret
-            (uint64x2
-             (vec-shl
-              v0
-              (x2 (uint32_t
- v1))))))]
-        [((arm:u32x4 v0) (uint32_t v1))
-          (arm:u64x4
-           (halide:interpret
-            (uint64x4
-             (vec-shl
-              v0
-              (x4 (uint32_t
- v1))))))]
-        [(_ _) (assert #f "infeasible")])]
+        [(_ _ _) (assert #f "infeasible")])]
 
     [(arm:usqadd Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
@@ -8172,109 +9072,140 @@
                v1)))))]
         [(_ _) (assert #f "infeasible")])]
 
-    [(arm:usubl Vn Vm)
-      (destruct* ((interpret Vn) (interpret Vm))
-        [((arm:u8x8 v0) (arm:u8x8 v1))
-          (arm:u16x8
-           (halide:interpret
-            (vec-sub
-             (int16x8
-              v0)
-             (int16x8
-              v1))))]
-        [((arm:u8x16 v0) (arm:u8x16 v1))
-          (arm:u16x16
-           (halide:interpret
-            (vec-sub
-             (int16x16
-              v0)
-             (int16x16
-              v1))))]
-        [((arm:u16x4 v0) (arm:u16x4 v1))
-          (arm:u32x4
-           (halide:interpret
-            (vec-sub
-             (int32x4
-              v0)
-             (int32x4
-              v1))))]
-        [((arm:u16x8 v0) (arm:u16x8 v1))
-          (arm:u32x8
-           (halide:interpret
-            (vec-sub
-             (int32x8
-              v0)
-             (int32x8
-              v1))))]
-        [((arm:u32x2 v0) (arm:u32x2 v1))
-          (arm:u64x2
-           (halide:interpret
-            (vec-sub
-             (int64x2
-              v0)
-             (int64x2
-              v1))))]
-        [((arm:u32x4 v0) (arm:u32x4 v1))
-          (arm:u64x4
-           (halide:interpret
-            (vec-sub
-             (int64x4
-              v0)
-             (int64x4
-              v1))))]
-        [(_ _) (assert #f "infeasible")])]
+    [(arm:usubl Vd Vn Vm)
+      (destruct* ((interpret Vd) (interpret Vn) (interpret Vm))
+        [((arm:u8x16 v0) (arm:u8x16 v1) (uint1_t v2))
+           (arm:u16x8
+            (halide:interpret
+             (vec-if
+             (x8 (uint1_t v2))
+             (vec-sub
+              (int16x8
+               (slice_vectors
+                v0 8 1 8))
+              (int16x8
+               (slice_vectors
+                v1 8 1 8)))
+             (vec-sub
+              (int16x8
+               (slice_vectors
+                v0 0 1 8))
+              (int16x8
+               (slice_vectors
+                v1 0 1 8))))))]
+        [((arm:u16x8 v0) (arm:u16x8 v1) (uint1_t v2))
+           (arm:u32x4
+            (halide:interpret
+             (vec-if
+             (x4 (uint1_t v2))
+             (vec-sub
+              (int32x4
+               (slice_vectors
+                v0 4 1 4))
+              (int32x4
+               (slice_vectors
+                v1 4 1 4)))
+             (vec-sub
+              (int32x4
+               (slice_vectors
+                v0 0 1 4))
+              (int32x4
+               (slice_vectors
+                v1 0 1 4))))))]
+        [((arm:u32x4 v0) (arm:u32x4 v1) (uint1_t v2))
+           (arm:u64x2
+            (halide:interpret
+             (vec-if
+             (x2 (uint1_t v2))
+             (vec-sub
+              (int64x2
+               (slice_vectors
+                v0 2 1 2))
+              (int64x2
+               (slice_vectors
+                v1 2 1 2)))
+             (vec-sub
+              (int64x2
+               (slice_vectors
+                v0 0 1 2))
+              (int64x2
+               (slice_vectors
+                v1 0 1 2))))))]
+        [(_ _ _) (assert #f "infeasible")])]
 
-    [(arm:usubw Vn Vm)
-      (destruct* ((interpret Vn) (interpret Vm))
-        [((arm:u16x8 v0) (arm:u8x8 v1))
-          (arm:u16x8
-           (halide:interpret
-            (vec-sub
+    [(arm:usubw Vd Vn Vm)
+      (destruct* ((interpret Vd) (interpret Vn) (interpret Vm))
+        [((arm:u16x8 v0) (arm:u8x16 v1) (uint1_t v2))
+           (arm:u16x8
+            (halide:interpret
+             (vec-sub
              v0
+              (uint16x8
+               (vec-if
+               (x8 (uint1_t v2))
+               (slice_vectors
+                v1 8 1 8)
+               (slice_vectors
+                v1 0 1 8))))))]
+        [((arm:u32x4 v0) (arm:u16x8 v1) (uint1_t v2))
+           (arm:u32x4
+            (halide:interpret
+             (vec-sub
+             v0
+              (uint32x4
+               (vec-if
+               (x4 (uint1_t v2))
+               (slice_vectors
+                v1 4 1 4)
+               (slice_vectors
+                v1 0 1 4))))))]
+        [((arm:u64x2 v0) (arm:u32x4 v1) (uint1_t v2))
+           (arm:u64x2
+            (halide:interpret
+             (vec-sub
+             v0
+              (uint64x2
+               (vec-if
+               (x2 (uint1_t v2))
+               (slice_vectors
+                v1 2 1 2)
+               (slice_vectors
+                v1 0 1 2))))))]
+        [(_ _ _) (assert #f "infeasible")])]
+
+    [(arm:uxtl Vn Vm)
+      (destruct* ((interpret Vn) (interpret Vm))
+        [((arm:u8x16 v0) (uint1_t v1))
+           (arm:u16x8
+            (halide:interpret
              (uint16x8
-              v1))))]
-        [((arm:u16x16 v0) (arm:u8x16 v1))
-          (arm:u16x16
-           (halide:interpret
-            (vec-sub
-             v0
-             (uint16x16
-              v1))))]
+              (vec-if
+              (x8 (uint1_t v1))
+              (slice_vectors
+               v0 8 1 8)
+              (slice_vectors
+               v0 0 1 8)))))]
+        [((arm:u16x8 v0) (uint1_t v1))
+           (arm:u32x4
+            (halide:interpret
+             (uint32x4
+              (vec-if
+              (x4 (uint1_t v1))
+              (slice_vectors
+               v0 4 1 4)
+              (slice_vectors
+               v0 0 1 4)))))]
+        [((arm:u32x4 v0) (uint1_t v1))
+           (arm:u64x2
+            (halide:interpret
+             (uint64x2
+              (vec-if
+              (x2 (uint1_t v1))
+              (slice_vectors
+               v0 2 1 2)
+              (slice_vectors
+               v0 0 1 2)))))]
         [(_ _) (assert #f "infeasible")])]
-
-    [(arm:uxtl Vn)
-      (destruct* ((interpret Vn))
-        [((arm:u8x8 v0))
-          (arm:u16x8
-           (halide:interpret
-            (uint16x8
-             v0)))]
-        [((arm:u8x16 v0))
-          (arm:u16x16
-           (halide:interpret
-            (uint16x16
-             v0)))]
-        [((arm:u16x4 v0))
-          (arm:u32x4
-           (halide:interpret
-            (uint32x4
-             v0)))]
-        [((arm:u16x8 v0))
-          (arm:u32x8
-           (halide:interpret
-            (uint32x8
-             v0)))]
-        [((arm:u32x2 v0))
-          (arm:u64x2
-           (halide:interpret
-            (uint64x2
-             v0)))]
-        [((arm:u32x4 v0))
-          (arm:u64x4
-           (halide:interpret
-            (uint64x4
-             v0)))]
-        [(_) (assert #f "infeasible")])]
 
     [(arm:uzip1 Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
@@ -8716,6 +9647,36 @@
              v0
              v1)))]
         [(_ _) (assert #f "infeasible")])]
+    [(arm:??shuffle id loads output-type)
+      (let ([vecType (arm:get-type-struct output-type)]
+            [interpreted-loads (map interpret loads)])
+        (define (shuffle-body i)
+          (apply choose* (filter (lambda (r) (not (void? r)) (map (curryr arm:get-element i) interpreted-loads)))))
+        (vecType shuffle-body))]
+
+    [(arm:??load id live-data buffer idx-tbl output-type)
+      (let ([data (buffer-data buffer)]
+            [vecType (arm:get-type-struct output-type)])
+        ; TODO: understand what the heck this is doing...
+        (define (is-of-buffer? read)
+          (rs-match (cpp:eval read)
+            [(expression (== @app) xs ...) (equal? (list-ref xs 0) data)]
+            [_ #f]))
+
+        (define (filter-reads reads)
+          (filter is-of-buffer? reads))
+
+        (define filtered-reads (map filter-reads live-data))
+
+        (define read-history (make-hash))
+
+        (define (load-body i)
+          (let ([data (list-ref filtered-reads curr-cn)])
+            (if (empty? data)
+              (void)
+              (hash-ref! read-history i (apply choose* data)))))
+
+      (vecType load-body))]
 
     [(arm:reinterpret Vn)
       (destruct (interpret Vn)
