@@ -166,6 +166,7 @@
     [(x86:vpmulhuw a b) (+ (max-unique-inputs a) (max-unique-inputs b))]
     [(x86:vpmulhw a b) (+ (max-unique-inputs a) (max-unique-inputs b))]
     [(x86:vpmulld a b) (+ (max-unique-inputs a) (max-unique-inputs b))]
+    [(x86:vpmulld-vs a imm32) (max-unique-inputs a)]
     [(x86:vpmullw a b) (+ (max-unique-inputs a) (max-unique-inputs b))]
     [(x86:vpmullw-vs a imm16) (+ (max-unique-inputs a) 1)]
     [(x86:vpmuludq a b) (+ (max-unique-inputs a) (max-unique-inputs b))]

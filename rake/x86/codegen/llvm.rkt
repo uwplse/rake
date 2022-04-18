@@ -22,11 +22,61 @@
 (define (compile x86-expr)
   (match x86-expr
 
+    [(x86:vpbroadcastq imm64)
+     (destruct (x86:interpret imm64)
+       ;; TODO: there are no llvm intrinsics for these...
+       [(int64_t _)  `(halide.ir.x4, (to-llvm-type x86-expr), `(list, (compile-scalar imm64)))]
+       [(uint64_t _)  `(halide.ir.x4, (to-llvm-type x86-expr), `(list, (compile-scalar imm64)))]
+       [_ (error (format "x86:vpbroadcastq variant not understood: ~a" x86-expr))])]
+
+    [(x86:vpbroadcastd imm32)
+     (destruct (x86:interpret imm32)
+       ;; TODO: there are no llvm intrinsics for these...
+       [(int32_t _)  `(halide.ir.x8, (to-llvm-type x86-expr), `(list, (compile-scalar imm32)))]
+       [(uint32_t _)  `(halide.ir.x8, (to-llvm-type x86-expr), `(list, (compile-scalar imm32)))]
+       [_ (error (format "x86:vpbroadcastd variant not understood: ~a" x86-expr))])]
+
     [(x86:vpbroadcastw imm16)
      (destruct (x86:interpret imm16)
        ;; TODO: there are no llvm intrinsics for these...
        [(int16_t _)  `(halide.ir.x16, (to-llvm-type x86-expr), `(list, (compile-scalar imm16)))]
+       [(uint16_t _)  `(halide.ir.x16, (to-llvm-type x86-expr), `(list, (compile-scalar imm16)))]
        [_ (error (format "x86:vpbroadcastw variant not understood: ~a" x86-expr))])]
+
+    [(x86:vpbroadcastb imm8)
+     (destruct (x86:interpret imm8)
+       ;; TODO: there are no llvm intrinsics for these...
+       [(int8_t _)  `(halide.ir.x32, (to-llvm-type x86-expr), `(list, (compile-scalar imm8)))]
+       [(uint8_t _)  `(halide.ir.x32, (to-llvm-type x86-expr), `(list, (compile-scalar imm8)))]
+       [_ (error (format "x86:vpbroadcastb variant not understood: ~a" x86-expr))])]
+
+    [(x86:vpbroadcastq_128 imm64)
+     (destruct (x86:interpret imm64)
+       ;; TODO: there are no llvm intrinsics for these...
+       [(int64_t _)  `(halide.ir.x2, (to-llvm-type x86-expr), `(list, (compile-scalar imm64)))]
+       [(uint64_t _)  `(halide.ir.x2, (to-llvm-type x86-expr), `(list, (compile-scalar imm64)))]
+       [_ (error (format "x86:vpbroadcastq_128 variant not understood: ~a" x86-expr))])]
+
+    [(x86:vpbroadcastd_128 imm32)
+     (destruct (x86:interpret imm32)
+       ;; TODO: there are no llvm intrinsics for these...
+       [(int32_t _)  `(halide.ir.x4, (to-llvm-type x86-expr), `(list, (compile-scalar imm32)))]
+       [(uint32_t _)  `(halide.ir.x4, (to-llvm-type x86-expr), `(list, (compile-scalar imm32)))]
+       [_ (error (format "x86:vpbroadcastd_128 variant not understood: ~a" x86-expr))])]
+
+    [(x86:vpbroadcastw_128 imm16)
+     (destruct (x86:interpret imm16)
+       ;; TODO: there are no llvm intrinsics for these...
+       [(int16_t _)  `(halide.ir.x8, (to-llvm-type x86-expr), `(list, (compile-scalar imm16)))]
+       [(uint16_t _)  `(halide.ir.x8, (to-llvm-type x86-expr), `(list, (compile-scalar imm16)))]
+       [_ (error (format "x86:vpbroadcastw_128 variant not understood: ~a" x86-expr))])]
+
+    [(x86:vpbroadcastb_128 imm8)
+     (destruct (x86:interpret imm8)
+       ;; TODO: there are no llvm intrinsics for these...
+       [(int8_t _)  `(halide.ir.x16, (to-llvm-type x86-expr), `(list, (compile-scalar imm8)))]
+       [(uint8_t _)  `(halide.ir.x16, (to-llvm-type x86-expr), `(list, (compile-scalar imm8)))]
+       [_ (error (format "x86:vpbroadcastb_128 variant not understood: ~a" x86-expr))])]
 
     [(x86:vpmovzxbw_s a)
      (destruct (x86:interpret a)
@@ -47,6 +97,38 @@
        [((x86:i16x16 _) (x86:i16x16 _)) `(halide.ir.add, (to-llvm-type x86-expr), `(list ,(input-arg a) ,(input-arg b)))]
        [((x86:u16x16 _) (x86:u16x16 _)) `(halide.ir.add, (to-llvm-type x86-expr), `(list ,(input-arg a) ,(input-arg b)))]
        [(_ _) (error (format "x86:vpaddw variant not understood: ~a" x86-expr))])]
+
+    [(x86:vpminub a b)
+     (destruct* ((x86:interpret a) (x86:interpret b))
+       [((x86:u8x32 _) (x86:u8x32 _)) (generate-avx2 `pminu.b (to-llvm-type x86-expr) `(list ,(input-arg a) ,(input-arg b)))]
+       [(_ _) (error (format "x86:vpminub variant not understood: ~a" x86-expr))])]
+
+    [(x86:vpmaxub a b)
+     (destruct* ((x86:interpret a) (x86:interpret b))
+       [((x86:u8x32 _) (x86:u8x32 _)) (generate-avx2 `pmaxu.b (to-llvm-type x86-expr) `(list ,(input-arg a) ,(input-arg b)))]
+       [(_ _) (error (format "x86:vpmaxub variant not understood: ~a" x86-expr))])]
+
+    [(x86:vpmaxsd a b)
+     (destruct* ((x86:interpret a) (x86:interpret b))
+       [((x86:i32x8 _) (x86:i32x8 _)) (generate-avx2 `pmaxs.d (to-llvm-type x86-expr) `(list ,(input-arg a) ,(input-arg b)))]
+       [(_ _) (error (format "x86:vpmaxsd variant not understood: ~a" x86-expr))])]
+
+    [(x86:vpminsd a b)
+     (destruct* ((x86:interpret a) (x86:interpret b))
+       [((x86:i32x8 _) (x86:i32x8 _)) (generate-avx2 `pmins.d (to-llvm-type x86-expr) `(list ,(input-arg a) ,(input-arg b)))]
+       [(_ _) (error (format "x86:vpminsd variant not understood: ~a" x86-expr))])]
+
+    ;;;;;;;;;;;;;;;;;;;;;;; SSE2 ;;;;;;;;;;;;;;;;;;;;;;;;
+
+    [(x86:pminub a b)
+     (destruct* ((x86:interpret a) (x86:interpret b))
+       [((x86:u8x16 _) (x86:u8x16 _)) (generate-sse2 `pminu.b (to-llvm-type x86-expr) `(list ,(input-arg a) ,(input-arg b)))]
+       [(_ _) (error (format "x86:pminub variant not understood: ~a" x86-expr))])]
+
+    [(x86:pmaxub a b)
+     (destruct* ((x86:interpret a) (x86:interpret b))
+       [((x86:u8x16 _) (x86:u8x16 _)) (generate-sse2 `pmaxu.b (to-llvm-type x86-expr) `(list ,(input-arg a) ,(input-arg b)))]
+       [(_ _) (error (format "x86:pmaxub variant not understood: ~a" x86-expr))])]
 
     ;;;;;;;;;;;;;;;;;;;;;;; Concatenate Tiles ;;;;;;;;;;;;;;;;;;;;;;;;
 

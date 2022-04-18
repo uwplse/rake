@@ -30951,6 +30951,10 @@
         (vecType
           (lambda (i) (halide:buffer-ref buf (+ (interpret loc) i)))))]
 
+    [(ramp base stride len)
+      ;; TODO: change this if handle-build-vec changes base type
+      (x86:i32x8 (halide:interpret p))]
+
     ;; TODO: check that it is a scalar value, not a forgotten instruction.
     [_ p]
 ))

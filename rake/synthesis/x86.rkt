@@ -121,17 +121,19 @@
      (define live-data (halide:extract-buffer-reads parent-spec))
      (define live-buffers (set->list (halide:extract-live-buffers parent-spec)))
      (define buf-elemTypes (map buffer-elemT live-buffers))
-     (values #t (set->list (list->set (flatten
-                            (map
-                             (lambda (t)
-                               (define lds
-                                 (flatten (map
-                                  (lambda (b)
-                                    (define tbl (map (lambda (i) (define-symbolic* idx integer?) idx) (range 256)))
-                                    (map (lambda (type) (x86:??load 1 live-data b tbl type)) (x86:get-vector-types t)))
-                                  (filter (lambda (b) (eq? t (buffer-elemT b))) live-buffers))))
-                               (x86:make-shuffles-list lds t))
-                             buf-elemTypes)))))]
+     (define loads (set->list (list->set (flatten
+                     (map
+                       (lambda (t)
+                        (define lds
+                          (flatten
+                           (map
+                            (lambda (b)
+                              (define tbl (map (lambda (i) (define-symbolic* idx integer?) idx) (range 256)))
+                              (map (lambda (type) (x86:??load 1 live-data b tbl type)) (x86:get-vector-types t)))
+                            (filter (lambda (b) (eq? t (buffer-elemT b))) live-buffers))))
+                        (x86:make-shuffles-list lds t))
+                      buf-elemTypes)))))
+     (values #t loads)]
 
     [else
      (error "Unexpected: Did not find Halide IR mapping for expression ~a" ir-expr)]))
@@ -219,6 +221,8 @@
       [else
         (let ([swizzle-budget (- cost-ub template-cost 0.01)]
               [halide-expr-tiles (generate-halide-tiles halide-expr x86-template output-layout)])
+          (display "halide-expr-tiles:\n")
+          (pretty-print halide-expr-tiles)
           (cond
             [(> (length halide-expr-tiles) 1)
               (let ([incremental-swizzle (construct-incremental-swizzle ir-expr x86-template output-layout swizzle-budget swizzling-algo x86-sub-exprs value-bounds translation-history (length halide-expr-tiles))])
@@ -267,7 +271,7 @@
 
 (define (generate-halide-tiles halide-expr x86-template output-layout)
   ;; TODO: could this ever be 128?
-  (let ([x86-tile-size 256]
+  (let ([x86-tile-size (if (x86:is-256-expr? x86-template) 256 128)]
         [halide-tile-elem-cnt (halide:vec-len halide-expr)]
         [halide-tile-elem-bits (cpp:type-bw (halide:elem-type halide-expr))])
     (let* ([halide-tile-size (* halide-tile-elem-cnt halide-tile-elem-bits)]

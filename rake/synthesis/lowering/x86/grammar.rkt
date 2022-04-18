@@ -34,6 +34,7 @@
     ;(println (get-x86-grammar-helper halide-expr ir-expr x86-sub-exprs))
     ;(println (if check-cache (hash-ref grammar-cache key) (get-x86-grammar-helper halide-expr ir-expr x86-sub-exprs)))
     (display (format "get-x86-grammar received ~a candidates\n" (length candidates)))
+    ; (pretty-print candidates)
     ;(println (filter (lambda (c) (<= (cdr c) cost-ub)) candidates))
     (let ([filtered (filter (lambda (c) (<= (cdr c) cost-ub)) candidates)])
       (display (format "And ~a of them pass the cost filtering\n" (length filtered)))
@@ -52,6 +53,20 @@
   (define sorted (sort candidates (lambda (v1 v2) (<= (cdr v1) (cdr v2)))))
 
   (map (lambda (candidate) (cons (uniquify-swizzles (car candidate)) (cdr candidate))) sorted))
+
+(define (handle-build-vec base stride len x86-sub-exprs halide-expr)
+  (cond
+    ;; TODO: handle arbitrary logical vector lengths.
+    [(and (int32_t? stride) (eq? len 32))
+      (let ([output-type 'i32x8]
+            [exprs (list (ramp base stride 8)
+                         (ramp (sca-add base (int32_t (bv 8 32))) stride 8)
+                         (ramp (sca-add base (int32_t (bv 16 32))) stride 8)
+                         (ramp (sca-add base (int32_t (bv 24 32))) stride 8))]
+            [ihal (halide:interpret halide-expr)]
+            [tbl (map (lambda (i) (define-symbolic* idx integer?) idx) (range 256))])
+        (list (cons (x86:??swizzle 0 (for/list ([i (range 16)]) (list (ihal i))) exprs tbl output-type) 1)))]
+    [else (error "Unimplemented: handle-build-vec base stride len x86-sub-exprs halide-expr")]))
 
 (define (make-scalar-broadcast scalar x86-instr)
   (cons (x86-instr scalar) (x86:instr-cost x86-instr)))
@@ -76,6 +91,40 @@
         ;; TODO: let unsigned widening merge into widen+reinterpret, i.e.:
         x86:vpmovzxbw_s
   ))
+
+(define (get-broadcast-isa)
+  (list x86:vpbroadcastb x86:vpbroadcastw x86:vpbroadcastd x86:vpbroadcastq
+        x86:vpbroadcastb_128 x86:vpbroadcastw_128 x86:vpbroadcastd_128 x86:vpbroadcastq_128
+  ))
+
+(define (make-fill-arg-grammars scalars)
+  (display "make-fill-arg-grammars\n")
+  (pretty-print scalars)
+  (define (bool-const) (define-symbolic* b boolean?) b)
+  (define (int8-const) (int8x1 (apply choose* scalars)))
+  (define (uint8-const) (uint8x1 (apply choose* scalars)))
+  (define (int16-const) (int16x1 (apply choose* scalars)))
+  (define (uint16-const) (uint16x1 (apply choose* scalars)))
+  (define (int32-const) (int32x1 (apply choose* scalars)))
+  (define (uint32-const) (uint32x1 (apply choose* scalars)))
+  (define (int64-const) (int64x1 (apply choose* scalars)))
+  (define (uint64-const) (uint64x1 (apply choose* scalars)))
+  (define (fill-arg-grammars node [pos -1])
+    (match node
+      ['bool (bool-const)]
+      ['int8 (int8-const)]
+      ['uint8 (uint8-const)]
+      ['uint8_t (uint8-const)]
+      ['int16 (int16-const)]
+      ['uint16 (uint16-const)]
+      ['int32 (int32-const)]
+      ['uint32 (uint32-const)]
+      ['int64 (int64-const)]
+      ['uint64 (uint64-const)]
+      ; TODO: HVX has some weird types here, for scalar registers?
+      [_ node]))
+  fill-arg-grammars)
+
 
 (define (handle-vs-mpy-add expr weights sat? round? half? output-type x86-sub-exprs halide-expr)
   (let* ([input-type (get-input-type expr)]
@@ -106,6 +155,8 @@
                     x86:pmuludq-vs x86:pmullw-vs)
               ;; TODO: should we include the shift-left variants? I think we need to.
               (list x86:vpsllw x86:vpslld x86:vpsllq)
+              ;; TODO: are these useful?
+              (list x86:resize x86:vinserti128)
               ;; TODO: should we include saturating adds even if not sat?
               (if sat?
                 (list x86:vpaddsb x86:vpaddsw x86:vpaddusb x86:vpaddusw
@@ -118,8 +169,8 @@
                 '())))]
          ; TODO: better pruning and more isa options
          ; TODO: are there better depth/cost combos?
-         [depth 3]
-         [max-cost 15]
+         [depth 4]
+         [max-cost 10]
          [grouped-sub-exprs (prepare-sub-exprs x86-sub-exprs)]
          [number-reads (length weights)]
          [desired-types (x86:get-vector-types output-type)]
@@ -145,11 +196,11 @@
     ; (display "grouped sub exprs!\n")
     ; (pretty-print grouped-sub-exprs)
     ; (pretty-print candidates)
-    ; (display (format "~a ~a ~a\n" isa desired-types grouped-sub-exprs))
+    ; (pretty-print isa)
     ; (pretty-print grouped-sub-exprs)
-    ; (display (format "Types; ~a ~a \n" input-type output-type))
+    ; (display (format "Types: ~a ~a ~a \n" desired-types input-type output-type))
 
-    ;; Filter out templates that read too much or too little data
+    ; ; Filter out templates that read too much or too little data
     ; (display (format "Before filtering reads: ~a\n" (length candidates)))
     ; (display (format "Number of reads: ~a\n" number-reads))
 
@@ -168,40 +219,18 @@
     ;; Sort them (I am ashamed of this line below)
     (set! candidates (time (sort candidates (lambda (v1 v2) (if (eq? (car (cdr v1)) (car (cdr v2))) (< (cdr (cdr v1)) (cdr (cdr v2))) (< (car (cdr v1)) (car (cdr v2))))))))
 
-    ; (println "candidates!")
+    ; (println "x86:vs-mpy-add sorted candidates!")
     ; (pretty-print candidates)
 
     (let* ([add-scalars (halide:extract-add-scalars halide-expr)]
            [mpy-add-scalars (set->list (list->set (append weights add-scalars)))]
            [shl-scalars (halide:make-scalar-log2s mpy-add-scalars)]
            [int-consts (set->list (list->set (append shl-scalars mpy-add-scalars)))])
-      (define (bool-const) (define-symbolic* b boolean?) b)
-      (define (int8-const) (cpp:cast (apply choose* int-consts) 'int8))
-      (define (uint8-const) (cpp:cast (apply choose* int-consts) 'uint8))
-      (define (int16-const) (cpp:cast (apply choose* int-consts) 'int16))
-      (define (uint16-const) (cpp:cast (apply choose* int-consts) 'uint16))
-      (define (int32-const) (cpp:cast (apply choose* int-consts) 'int32))
-      (define (uint32-const) (cpp:cast (apply choose* int-consts) 'uint32))
-      (define (int64-const) (cpp:cast (apply choose* int-consts) 'int64))
-      (define (uint64-const) (cpp:cast (apply choose* int-consts) 'uint64))
-      (define (fill-arg-grammars node [pos -1])
-       (match node
-         ['bool (bool-const)]
-         ['int8 (int8-const)]
-         ['uint8 (uint8-const)]
-         ['uint8_t (uint8-const)]
-         ['int16 (int16-const)]
-         ['uint16 (uint16-const)]
-         ['int32 (int32-const)]
-         ['uint32 (uint32-const)]
-         ['int64 (int64-const)]
-         ['uint64 (uint64-const)]
-         ; TODO: HVX has some weird types here, for scalar registers?
-         [_ node]))
+      (define fill-arg-grammars (make-fill-arg-grammars int-consts))
 
       (time (for/list ([candidate candidates]) (cons (uniquify-swizzles (x86:visit (car candidate) fill-arg-grammars)) (car (cdr candidate))))))))
 
-(define (handle-cast expr output-type saturate? arm-sub-exprs halide-expr)
+(define (handle-cast expr output-type saturate? x86-sub-exprs halide-expr)
   (let* ([input-type (get-input-type expr)]
          [narrowing? (< (cpp:type-bw output-type) (cpp:type-bw input-type))]
          [widening? (> (cpp:type-bw output-type) (cpp:type-bw input-type))]
@@ -211,7 +240,7 @@
                 [widening? (append (get-widen-isa) (list x86:resize x86:vinserti128))]
                 ; TODO: what if it's just a saturate call?
                 [else (error "x86:handle-cast doesn't have reinterpreting implemented yet!")])]
-         [grouped-sub-exprs (prepare-sub-exprs arm-sub-exprs)]
+         [grouped-sub-exprs (prepare-sub-exprs x86-sub-exprs)]
          [desired-types (x86:get-vector-types output-type)]
          ; TODO: should this be the depth and the cost?
          [depth 3]
@@ -237,27 +266,75 @@
     ; (pretty-print candidates)
 
     ;; Need imm8 for vinserti128
-    (define (uint8-const) (define-symbolic* imm8 (bitvector 8)) imm8)
+    (define (uint8-const) (define-symbolic* imm8 (bitvector 8)) (uint8_t imm8))
     (define (fill-arg-grammars node [pos -1])
       (match node
         ;; TODO: need to fill imm8 values
-        ['uint8 (uint8_t (uint8-const))]
+        ['uint8 (uint8-const)]
         [_ node]))
     ; (for/list ([candidate sorted-candidates]) (cons (x86:visit (car candidate) fill-arg-grammars) (cdr candidate))))
 
     (for/list ([candidate candidates]) (cons (uniquify-swizzles (x86:visit (car candidate) fill-arg-grammars)) (cdr candidate)))))
 
+(define (handle-minimum a b x86-sub-exprs halide-expr)
+  (let* ([output-type (halide:elem-type halide-expr)]
+         ; TODO: which conditionals do we want to use?
+         ; TODO: do we need `reinterpret`?
+         [isa (append
+                (list x86:vpminsw x86:vpminsd x86:vpminsb x86:vpminuw
+                      x86:vpminud x86:vpminub
+                      ;; TODO: should have 128-bit versions of the AVX2
+                      ;; SSE2
+                      x86:pminsw x86:pminub)
+                (get-broadcast-isa)
+                ;; TODO: what else might be needed?
+            )]
+         [grouped-sub-exprs (prepare-sub-exprs x86-sub-exprs)]
+         [desired-types (x86:get-vector-types output-type)]
+         ; TODO: is this a good depth / cost??
+         [depth 2]
+         [max-cost 7]
+         [candidates (enumerate-x86 isa desired-types grouped-sub-exprs depth max-cost)]
+         [scalars (halide:extract-minmax-scalars halide-expr)]
+         [fill-arg-grammars (make-fill-arg-grammars scalars)])
+
+    ;; TODO: how do we handle conditionals?
+    (time (for/list ([candidate candidates]) (cons (uniquify-swizzles (x86:visit (car candidate) fill-arg-grammars)) (cdr candidate))))))
+
+(define (handle-maximum a b x86-sub-exprs halide-expr)
+  (let* ([output-type (halide:elem-type halide-expr)]
+         ; TODO: which conditionals do we want to use?
+         ; TODO: do we need `reinterpret`?
+         [isa (list x86:vpmaxsw x86:vpmaxsd x86:vpmaxsb x86:vpmaxuw
+                    x86:vpmaxud x86:vpmaxub
+                    ;; TODO: should have 128-bit versions of the AVX2
+                    ;; SSE2
+                    x86:pmaxsw x86:pmaxub)]
+         [grouped-sub-exprs (prepare-sub-exprs x86-sub-exprs)]
+         [desired-types (x86:get-vector-types output-type)]
+         ; TODO: is this a good depth / cost??
+         [depth 2]
+         [max-cost 7]
+         [candidates (enumerate-x86 isa desired-types grouped-sub-exprs depth max-cost)]
+         [scalars (halide:extract-minmax-scalars halide-expr)]
+         [fill-arg-grammars (make-fill-arg-grammars scalars)])
+
+    ;; TODO: how do we handle conditionals?
+    (time (for/list ([candidate candidates]) (cons (uniquify-swizzles (x86:visit (car candidate) fill-arg-grammars)) (cdr candidate))))))
+
+
 (define (get-x86-grammar-helper halide-expr ir-expr x86-sub-exprs output-layout)
   ;; TODO: figure out which operations should use output-layout...
   (destruct ir-expr
 
-    ; Data loading/shuffling
+    ;; Data loading/shuffling
     [(x86-ir:load-data live-data gather-tbl)
      (define buffers (set->list (halide:extract-live-buffers halide-expr)))
-     (define candidates (for/list ([buffer buffers]) (cons (x86:??abstr-load 0 live-data buffer) 1)))
      (define buf-elemTypes (map buffer-elemT buffers))
+     (display "x86-ir:load-data:\n")
+     (pretty-print buf-elemTypes)
      (define (label-cost value)
-        (cons value 2))
+        (cons value (if (x86:is-256-expr? value) 1 2)))
      (define (generate-shuffles type)
         (define (construct-loads b)
           (define tbl (map (lambda (i) (define-symbolic* idx integer?) idx) (range 256)))
@@ -265,7 +342,11 @@
           (map make-load (x86:get-vector-types (buffer-elemT b))))
         (define actual-loads (flatten (map construct-loads buffers)))
         (x86:make-shuffles-list actual-loads type))
-     (map label-cost (flatten (map generate-shuffles buf-elemTypes)))]
+     (sort (map label-cost (flatten (map generate-shuffles buf-elemTypes))) (lambda (v1 v2) (<= (cdr v1) (cdr v2))))]
+
+    ;; Vector creation
+    [(x86-ir:build-vec base stride len)
+      (handle-build-vec base stride len x86-sub-exprs halide-expr)]
 
     [(x86-ir:broadcast scalar-expr)
       ;; TODO: is this correct?
@@ -276,6 +357,12 @@
 
     [(x86-ir:cast expr type saturate?)
       (handle-cast expr type saturate? x86-sub-exprs halide-expr)]
+
+    [(x86-ir:minimum expr0 expr1)
+      (handle-minimum expr0 expr1 x86-sub-exprs halide-expr)]
+
+    [(x86-ir:maximum expr0 expr1)
+      (handle-maximum expr0 expr1 x86-sub-exprs halide-expr)]
 
     ;; TODO: load-data, broadcast, build-vec
     ;; TODO: cast, abs, abs-diff,
@@ -447,10 +534,14 @@
          (hash-set! grouped-sub-exprs out-type (set-add exprs base-load-expr)))]
       ; TODO: ask Maaz about the vsplat cond here from the HVX code
       [(x86:is-broadcast? x86-sub-expr)
-       (define elemT (x86:elem-type (x86:interpret x86-sub-expr)))
-       (for ([out-type (x86:get-vector-types elemT)])
-         (define exprs (hash-ref! grouped-sub-exprs out-type (set)))
-         (hash-set! grouped-sub-exprs out-type (set-add exprs x86-sub-expr)))]
+        (define out-type (x86:get-interpreted-type x86-sub-expr))
+        (define exprs (hash-ref! grouped-sub-exprs out-type (set)))
+        (hash-set! grouped-sub-exprs out-type (set-add exprs x86-sub-expr))
+        (when (x86:is-256-broadcast? x86-sub-expr)
+          (define out-type-128 (x86:get-128-type out-type))
+          (define exprs-128 (hash-ref! grouped-sub-exprs out-type-128 (set)))
+          (define x86-sub-expr-128 (x86:get-128-broadcast x86-sub-expr))
+          (hash-set! grouped-sub-exprs out-type-128 (set-add exprs-128 x86-sub-expr-128)))]
       [else
        (define sub-expr-type (x86:get-interpreted-type x86-sub-expr))
        (define exprs (hash-ref! grouped-sub-exprs sub-expr-type (set)))
