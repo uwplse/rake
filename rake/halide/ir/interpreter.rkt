@@ -230,7 +230,7 @@
     ;; Shuffles
     [(vec-broadcast n vec) (define l (vec-len vec)) (lambda (i) ((interpret vec) (modulo i l)))]
     [(slice_vectors vec base stride len) (lambda (i) ((interpret vec) (+ (interpret base) (* i (interpret stride)))))]
-    [(concat_vectors v1 v2 len) (lambda (i) (if (< i len) ((interpret v1) i) ((interpret v2) (- i (vec-len v1)))))]
+    [(concat_vectors v1 v2 len) (lambda (i) (if (< i len) ((interpret v1) i) ((interpret v2) (- i len))))]
     [(dynamic_shuffle vec idxs st end) (lambda (i) ((interpret vec) (+ ((interpret idxs) i) st)))]
     [(interleave v1 v2) (lambda (i) (if (even? i) ((interpret v1) (quotient i 2)) ((interpret v2) (quotient i 2))))]
     [(interleave4 v1 v2 v3 v4)
@@ -527,8 +527,8 @@
   (let* ([input-lanes (quotient (* bo lanes) bi)]
          [index-ratio (quotient input-lanes lanes)]
          [input-index (* index index-ratio)]
-         [start-bit (input-index * bi)]
-         [end-bit (+ (input-index * bi) bo)]
+         [start-bit (* input-index bi)]
+         [end-bit (+ start-bit bo)]
          [bits (do-reinterpret-concat-helper vec start-bit end-bit bi input-index)])
     ((get-cast-type type) bits)))
 

@@ -43,10 +43,10 @@
     [(eq? type 'i16x8) '(0 1 6 7)]
     [(eq? type 'i32x4) '(0 1 2 3)]
     [(eq? type 'i64x2) '(0 1)]
-    [(eq? type 'i8x32) '(0 7 14 21 28)]
-    [(eq? type 'i16x16) '(0 7 12 15)]
-    [(eq? type 'i32x8) '(0 1 6 7)]
-    [(eq? type 'i64x4) '(0 1 2 3)]
+    ; [(eq? type 'i8x32) '(0 7 14 21 28)]
+    ; [(eq? type 'i16x16) '(0 7 12 15)]
+    ; [(eq? type 'i32x8) '(0 1 6 7)]
+    ; [(eq? type 'i64x4) '(0 1 2 3)]
 
     [(eq? type 'u8x8) '(0 1 6 7)]
     [(eq? type 'u16x4) '(0 1 2 3)]
@@ -56,10 +56,11 @@
     [(eq? type 'u16x8) '(0 1 6 7)]
     [(eq? type 'u32x4) '(0 1 2 3)]
     [(eq? type 'u64x2) '(0 1)]
-    [(eq? type 'u8x32) '(0 7 14 21 28)]
-    [(eq? type 'u16x16) '(0 7 12 15)]
-    [(eq? type 'u32x8) '(0 1 6 7)]
-    [(eq? type 'u64x4) '(0 1 2 3)]))
+    ; [(eq? type 'u8x32) '(0 7 14 21 28)]
+    ; [(eq? type 'u16x16) '(0 7 12 15)]
+    ; [(eq? type 'u32x8) '(0 1 6 7)]
+    ; [(eq? type 'u64x4) '(0 1 2 3)]
+))
 
 (define (synthesize-translation templates halide-expr arm-sub-exprs value-bounds translation-history)
   (cond

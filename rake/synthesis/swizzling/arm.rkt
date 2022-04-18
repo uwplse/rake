@@ -188,7 +188,7 @@
          [elem-type (arm:elem-type intr-expr)]
          [output-type (get-output-type swizzle-node)]
          ; TODO: what others? other load types / the extract options?
-         [isa (list arm:zip arm:uzip1 arm:uzip2 arm:dup arm:dupw arm:dupn arm:trn1 arm:trn2)]
+         [isa (list arm:zip1 arm:zip2 arm:uzip1 arm:uzip2 arm:dup arm:dupw arm:dupn arm:trn1 arm:trn2)]
          [grouped-base-exprs (make-hash)])
     (for ([base base-exprs])
       (let ([base-type (arm:get-interpreted-type base)])
@@ -314,10 +314,10 @@
     [(eq? type 'i16x8) (range 8)]
     [(eq? type 'i32x4) (range 4)]
     [(eq? type 'i64x2) (range 2)]
-    [(eq? type 'i8x32) (range 32)]
-    [(eq? type 'i16x16) (range 16)]
-    [(eq? type 'i32x8) (range 8)]
-    [(eq? type 'i64x4) (range 4)]
+    ; [(eq? type 'i8x32) (range 32)]
+    ; [(eq? type 'i16x16) (range 16)]
+    ; [(eq? type 'i32x8) (range 8)]
+    ; [(eq? type 'i64x4) (range 4)]
     [(eq? type 'u8x8) (range 8)]
     [(eq? type 'u16x4) (range 4)]
     [(eq? type 'u32x2) (range 2)]
@@ -326,10 +326,11 @@
     [(eq? type 'u16x8) (range 8)]
     [(eq? type 'u32x4) (range 4)]
     [(eq? type 'u64x2) (range 2)]
-    [(eq? type 'u8x32) (range 32)]
-    [(eq? type 'u16x16) (range 16)]
-    [(eq? type 'u32x8) (range 8)]
-    [(eq? type 'u64x4) (range 4)]))
+    ; [(eq? type 'u8x32) (range 32)]
+    ; [(eq? type 'u16x16) (range 16)]
+    ; [(eq? type 'u32x8) (range 8)]
+    ; [(eq? type 'u64x4) (range 4)]
+))
 
 (define (synthesize-incremental halide-expr template sym-consts lanes-to-verify discarded-sols)
   ; (display "\n\nsynthesize-incremental\n\n")
@@ -423,7 +424,8 @@
 ;; TODO: need instruction costs!!
 (define (instr-cost instr)
   (cond
-    [(eq? instr arm:zip) 2]
+    [(eq? instr arm:zip1) 1]
+    [(eq? instr arm:zip2) 1]
     [(eq? instr arm:uzip1) 1]
     [(eq? instr arm:uzip2) 1]
     [(eq? instr arm:dup) 1]
