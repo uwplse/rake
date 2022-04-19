@@ -271,42 +271,45 @@
                [(eq? tile-w 128)
                 (set
                   (list buf base align)
-                  (list buf (sca-add base (quotient 64 elem-bw)) align)
+                  ;(list buf (sca-add base (quotient 64 elem-bw)) align)
                 )]
                [(eq? tile-w 256)
                 (set
                  (list buf base align)
-                 (list buf (sca-add base (quotient 64 elem-bw)) align)
+                 ;(list buf (sca-add base (quotient 64 elem-bw)) align)
                  (list buf (sca-add base (quotient 128 elem-bw)) align)
-                 (list buf (sca-add base (quotient 196 elem-bw)) align))]
+                 ;(list buf (sca-add base (quotient 196 elem-bw)) align)
+                 )]
                [(eq? tile-w 512)
                 (set
                  (list buf base align)
-                 (list buf (sca-add base (quotient 64 elem-bw)) align)
+                 ;(list buf (sca-add base (quotient 64 elem-bw)) align)
                  (list buf (sca-add base (quotient 128 elem-bw)) align)
-                 (list buf (sca-add base (quotient 196 elem-bw)) align)
+                 ;(list buf (sca-add base (quotient 196 elem-bw)) align)
                  (list buf (sca-add base (quotient 256 elem-bw)) align)
-                 (list buf (sca-add base (quotient 320 elem-bw)) align)
+                 ;(list buf (sca-add base (quotient 320 elem-bw)) align)
                  (list buf (sca-add base (quotient 384 elem-bw)) align)
-                 (list buf (sca-add base (quotient 448 elem-bw)) align))]
+                 ;(list buf (sca-add base (quotient 448 elem-bw)) align)
+                 )]
                [(eq? tile-w 1024)
                 (set
                  (list buf base align)
-                 (list buf (sca-add base (quotient 64 elem-bw)) align)
+                 ;(list buf (sca-add base (quotient 64 elem-bw)) align)
                  (list buf (sca-add base (quotient 128 elem-bw)) align)
-                 (list buf (sca-add base (quotient 192 elem-bw)) align)
+                 ;(list buf (sca-add base (quotient 192 elem-bw)) align)
                  (list buf (sca-add base (quotient 256 elem-bw)) align)
-                 (list buf (sca-add base (quotient 320 elem-bw)) align)
+                 ;(list buf (sca-add base (quotient 320 elem-bw)) align)
                  (list buf (sca-add base (quotient 384 elem-bw)) align)
-                 (list buf (sca-add base (quotient 448 elem-bw)) align)
+                 ;(list buf (sca-add base (quotient 448 elem-bw)) align)
                  (list buf (sca-add base (quotient 512 elem-bw)) align)
-                 (list buf (sca-add base (quotient 576 elem-bw)) align)
+                 ;(list buf (sca-add base (quotient 576 elem-bw)) align)
                  (list buf (sca-add base (quotient 640 elem-bw)) align)
-                 (list buf (sca-add base (quotient 704 elem-bw)) align)
+                 ;(list buf (sca-add base (quotient 704 elem-bw)) align)
                  (list buf (sca-add base (quotient 768 elem-bw)) align)
-                 (list buf (sca-add base (quotient 832 elem-bw)) align)
+                 ;(list buf (sca-add base (quotient 832 elem-bw)) align)
                  (list buf (sca-add base (quotient 896 elem-bw)) align)
-                 (list buf (sca-add base (quotient 960 elem-bw)) align))]
+                 ;(list buf (sca-add base (quotient 960 elem-bw)) align)
+                 )]
                [else
                 (error "NYI: Extracting vec from:" expr)]))
            (set-union! loads lds)]
