@@ -105,6 +105,7 @@
     (let* ([add-scalars (halide:extract-add-scalars halide-expr)]
            [int-consts (set->list (list->set (append weights add-scalars)))])
       (define (bool-const) (define-symbolic* b boolean?) b)
+      (define (uint1-const) (define-symbolic* b boolean?) (uint1_t b))
       (define (int8-const) (int8x1 (apply choose* int-consts)))
       (define (uint8-const) (uint8x1 (apply choose* int-consts)))
       (define (int16-const) (int16x1 (apply choose* int-consts)))
@@ -118,6 +119,7 @@
          [#t #t]
          [#f #f]
          ['bool (bool-const)]
+         ['uint1 (uint1-const)]
          ['int8 (int8-const)]
          ['uint8 (uint8-const)]
          ['int16 (int16-const)]
@@ -260,8 +262,40 @@
                 (list arm:shrn arm:rshrn arm:sqrshrn arm:sqrshrun arm:sqshrn arm:sqshrun arm:uqrshrn arm:uqshrn)
                 (error "AJ needs to implement srshr, sshr, ssra, urshr, ursra, ushr, usra\n"))]
          ; TODO: how to decide depth/cost
-         [candidates (enumerate-arm isa desired-expr-types grouped-sub-exprs 1 2)])
-    (sort-and-uniquify candidates)))
+         [candidates (begin
+                       (pretty-print desired-expr-types)
+                       (pretty-print isa)
+                       (pretty-print grouped-sub-exprs)
+                       (enumerate-arm isa desired-expr-types grouped-sub-exprs 1 2))])
+    
+    (let ([add-scalars (halide:extract-add-scalars halide-expr)])
+      (define (bool-const) (define-symbolic* b boolean?) b)
+      (define (uint1-const) (define-symbolic* b boolean?) (uint1_t b))
+      (define (int8-const) (int8x1 shift))
+      (define (uint8-const) (uint8x1 shift))
+      (define (int16-const) (int16x1 shift))
+      (define (uint16-const) (uint16x1 shift))
+      (define (int32-const) (int32x1 shift))
+      (define (uint32-const) (uint32x1 shift))
+      (define (int64-const) (int64x1 shift))
+      (define (uint64-const) (uint64x1 shift))
+      (define (fill-arg-grammars node [pos -1])
+       (match node
+         [#t #t]
+         [#f #f]
+         ['bool (bool-const)]
+         ['uint1 (uint1-const)]
+         ['int8 (int8-const)]
+         ['uint8 (uint8-const)]
+         ['int16 (int16-const)]
+         ['uint16 (uint16-const)]
+         ['int32 (int32-const)]
+         ['uint32 (uint32-const)]
+         ['int64 (int64-const)]
+         ['uint64 (uint64-const)]
+         [_ node]))
+
+      (sort-and-uniquify (for/list ([candidate candidates]) (cons (arm:visit (car candidate) fill-arg-grammars) (cdr candidate)))))))
 
 (define (handle-abs-diff expr0 expr1 widening? output-type arm-sub-exprs halide-expr)
   (let* ([isa (if widening?
@@ -394,11 +428,11 @@
          (define base-load-expr (arm:??shuffle swizzle-node-id (arm:??shuffle-lds arm-sub-expr) out-type))
          (define exprs (hash-ref! grouped-sub-exprs out-type (set)))
          (hash-set! grouped-sub-exprs out-type (set-add exprs base-load-expr)))]
-      [(arm:is-broadcast? arm-sub-expr)
-       (define elemT (arm:elem-type (arm:interpret arm-sub-expr)))
-       (for ([out-type (arm:get-vector-types elemT)])
-         (define exprs (hash-ref! grouped-sub-exprs out-type (set)))
-         (hash-set! grouped-sub-exprs out-type (set-add exprs arm-sub-expr)))]
+      ;[(arm:is-broadcast? arm-sub-expr)
+       ;(define elemT (arm:elem-type (arm:interpret arm-sub-expr)))
+       ;(for ([out-type (arm:get-vector-types elemT)])
+         ;(define exprs (hash-ref! grouped-sub-exprs out-type (set)))
+         ;(hash-set! grouped-sub-exprs out-type (set-add exprs arm-sub-expr)))]
       [else
        (define sub-expr-type (arm:get-interpreted-type arm-sub-expr))
        (define exprs (hash-ref! grouped-sub-exprs sub-expr-type (set)))
@@ -460,16 +494,16 @@
                [candidates-cost (filter (lambda (expr) (<= (cdr expr) max-cost)) candidates)]
                [candidates-read (if (eq? read-count -1) candidates-cost (filter (lambda (expr) (<= (arm:max-unique-inputs (car expr)) read-count)) candidates-cost))]
                [candidates-unique (set->list (list->set candidates-read))])
-          ; (display (format "depth: ~a\n" depth))
-          ; (display (format "output-types: ~a\n" output-types))
-          ; (display "base-exprs: \n")
-          ; (pretty-print base-exprs)
-          ; (display "candidates: \n")
-          ; (println candidates)
-          ; (display "candidates-unique: \n")
-          ; (println candidates-unique)
-          ; (display "parent-instr: \n")
-          ; (println parent-instr)
+           ;(display (format "depth: ~a\n" depth))
+           ;(display (format "output-types: ~a\n" output-types))
+           ;(display "base-exprs: \n")
+           ;(pretty-print base-exprs)
+           ;(display "candidates: \n")
+           ;(println candidates)
+           ;(display "candidates-unique: \n")
+           ;(println candidates-unique)
+           ;(display "parent-instr: \n")
+           ;(println parent-instr)
           ;(pretty-print base-exprs)
           (hash-set! enumeration-cache key candidates-unique)
           candidates-unique)])))
@@ -500,6 +534,7 @@
     [#t #t]
     [#f #t]
     ['bool #t]
+    ['uint1 #t]
     ['int8 #t]
     ['uint8 #t]
     ['int16 #t]

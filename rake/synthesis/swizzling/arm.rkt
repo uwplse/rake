@@ -180,7 +180,7 @@
   (define-values (target-node-id base-exprs)
     (extract-swizzle-information swizzle-node starting-vecs))
   ; (display (format "\n\nget-arm-swizzle-grammar-gen ~a\n" target-node-id))
-  (pretty-print base-exprs)
+  ;(pretty-print base-exprs)
   ; (display "here?\n\n")
   ;(pretty-print starting-vecs)
   ;(display "\nEnd information extraction\n\n")
