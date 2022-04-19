@@ -61,8 +61,21 @@
       [((arm:i64x2 v0) (arm:i64x2 v1)) `(halide.ir.add, (to-llvm-type arm-expr), `(list ,(input-arg Vn) ,(input-arg Vm)))]
       [(_ _) (error (format "arm:add variant not understood: ~a" arm-expr))])]
 
-    [(arm:addhn Vd Vn Vm b)
-      (handle-addhn arm-expr)]
+    [(arm:addhn Vd Vn Vm Vb)
+      (destruct* ((arm:interpret Vd) (arm:interpret Vn) (arm:interpret Vm) (arm:interpret Vb))
+        [((arm:i16x8 v0) (arm:i16x8 v1) (arm:i16x8 v2) (arm:i16x8 v3))
+          (handle-narrow-concat arm-expr `addhn.v8i8 Vd Vn Vm Vb)]
+        [((arm:i32x4 v0) (arm:i32x4 v1) (arm:i32x4 v2) (arm:i32x4 v3))
+          (handle-narrow-concat arm-expr `addhn.v4i16 Vd Vn Vm Vb)]
+        [((arm:i64x2 v0) (arm:i64x2 v1) (arm:i64x2 v2) (arm:i64x2 v3))
+          (handle-narrow-concat arm-expr `addhn.v2i32 Vd Vn Vm Vb)]
+        [((arm:u16x8 v0) (arm:u16x8 v1) (arm:u16x8 v2) (arm:u16x8 v3))
+          (handle-narrow-concat arm-expr `addhn.v8i8 Vd Vn Vm Vb)]
+        [((arm:u32x4 v0) (arm:u32x4 v1) (arm:u32x4 v2) (arm:u32x4 v3))
+         (handle-narrow-concat arm-expr `addhn.v4i16 Vd Vn Vm Vb)]
+        [((arm:u64x2 v0) (arm:u64x2 v1) (arm:u64x2 v2) (arm:u64x2 v3))
+          (handle-narrow-concat arm-expr `addhn.v2i32 Vd Vn Vm Vb)]
+        [(_ _ _ _) (error (format "arm:addhn variant not understood: ~a" arm-expr))])]
 
     ;;;;;;;;;;;;;;;;;;;;;;; Concatenate Tiles ;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -319,42 +332,7 @@
   
   (string->sexp res))
 
-(define (handle-addhn-helper expr)
-  (destruct expr
-    [(arm:addhn Vd Vn Vm b)
-    ;; TODO: handle the unexpected case
-    (destruct* ((arm:interpret Vd) (arm:interpret Vn) (arm:interpret Vm) (arm:interpret b))
-      [((arm:i8x16 v0) (arm:i16x8 v1) (arm:i16x8 v2) (uint1_t v3))
-          (values `addhn.v8i8 Vd Vn Vm b)]
-      [((arm:i16x8 v0) (arm:i32x4 v1) (arm:i32x4 v2) (uint1_t v3))
-          (values `addhn.v4i16 Vd Vn Vm b)]
-      [((arm:i32x4 v0) (arm:i64x2 v1) (arm:i64x2 v2) (uint1_t v3))
-          (values `addhn.v2i32 Vd Vn Vm b)]
-      [((arm:u8x16 v0) (arm:u16x8 v1) (arm:u16x8 v2) (uint1_t v3))
-          (values `addhn.v8i8 Vd Vn Vm b)]
-      [((arm:u16x8 v0) (arm:u32x4 v1) (arm:u32x4 v2) (uint1_t v3))
-          (values `addhn.v4i16 Vd Vn Vm b)]
-      [((arm:u32x4 v0) (arm:u64x2 v1) (arm:u64x2 v2) (uint1_t v3))
-          (values `addhn.v2i32 Vd Vn Vm b)]
-      [(_ _ _ _) (error (format "handle-addhn-helper failed to understand addhn variant: ~a" expr))])]
-    [_ (error (format "handle-addhn-helper failed to understand: ~a" expr))]))
-
-(define (handle-addhn expr)
-  (define-values (name Vd Vn Vm b)
-    (handle-addhn-helper expr))
-
-  ;; TODO: handle the unexpected cases.
-  (cond
-    [(and (concrete? b) b)
-      ;; ADDHN - Expect dst to be ADDHN2
-      (define-values (dst_name dst_Vd dst_Vn dst_Vm dst_b)
-        (handle-addhn-helper Vd))
-
-      (if (and (concrete? dst_b) (not dst_b) (eqv? name dst_name))
-        (let ([lo (generate name (to-llvm-type-narrow Vn) `(list ,(input-arg Vn) ,(input-arg Vm)))]
-              [hi (generate name (to-llvm-type-narrow Vn) `(list ,(input-arg dst_Vn) ,(input-arg dst_Vm)))])
-          `(halide.concat_vectors, (to-llvm-type expr), `(list, lo hi)))
-        (error (format "handle-addhn can't handle this chain of expressions:\n~a\n" expr)))]
-    [(and (concrete? b) (not b))
-      (error (format "handle-addhn doesn't know what to do with ADDHN2:\n~a\n" expr))]
-    [else (error (format "handle-addhn recieved non-concrete flag:\n~a\n" expr))]))
+(define (handle-narrow-concat arm-expr name Vd Vn Vm Vb)
+  (let ([lo (generate name (to-llvm-type-narrow Vd) `(list ,(input-arg Vd) ,(input-arg Vn)))]
+        [hi (generate name (to-llvm-type-narrow Vm) `(list ,(input-arg Vm) ,(input-arg Vb)))])
+    `(halide.concat_vectors, (to-llvm-type arm-expr), `(list, lo hi))))
