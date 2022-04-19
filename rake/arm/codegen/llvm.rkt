@@ -77,25 +77,58 @@
           (handle-narrow-concat arm-expr `addhn.v2i32 Vd Vn Vm Vb)]
         [(_ _ _ _) (error (format "arm:addhn variant not understood: ~a" arm-expr))])]
 
-    ;;;;;;;;;;;;;;;;;;;;;;; Concatenate Tiles ;;;;;;;;;;;;;;;;;;;;;;;;
+    [(arm:addp Vn Vm)
+      (destruct* ((arm:interpret Vn) (arm:interpret Vm))
+        [((arm:i8x8 v0) (arm:i8x8 v1))
+          (generate `addp.v8i8 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
+        [((arm:i8x16 v0) (arm:i8x16 v1))
+          (generate `addp.v16i8 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
+        [((arm:u8x8 v0) (arm:u8x8 v1))
+          (generate `addp.v8i8 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
+        [((arm:u8x16 v0) (arm:u8x16 v1))
+          (generate `addp.v16i8 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
+        [((arm:i16x4 v0) (arm:i16x4 v1))
+          (generate `addp.v4i16 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
+        [((arm:i16x8 v0) (arm:i16x8 v1))
+          (generate `addp.v8i16 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
+        [((arm:u16x4 v0) (arm:u16x4 v1))
+          (generate `addp.v4i16 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
+        [((arm:u16x8 v0) (arm:u16x8 v1))
+          (generate `addp.v8i16 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
+        [((arm:i32x2 v0) (arm:i32x2 v1))
+          (generate `addp.v2i32 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
+        [((arm:i32x4 v0) (arm:i32x4 v1))
+          (generate `addp.v4i32 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
+        [((arm:u32x2 v0) (arm:u32x2 v1))
+          (generate `addp.v2i32 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
+        [((arm:u32x4 v0) (arm:u32x4 v1))
+          (generate `addp.v4i32 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
+        ;; TODO: LLVM has a llvm.aarch64.neon.addp.v2i64 variant
+        [(_ _) (error (format "arm:addp variant not understood: ~a" arm-expr))])]
 
-    [(arm:concat-tiles tiles)
-     (define tile-cnt (length tiles))
-     (define tile-elems (arm:num-elems (arm:interpret (list-ref tiles 0))))
-     (define tile-elemT (arm:elem-type (arm:interpret (list-ref tiles 0))))
-     (define output-type (format "~ax~a" tile-elemT (* tile-cnt tile-elems)))
-     
-     (define (tiles->compiled-str tiles)
-       (cond
-         [(eq? (length tiles) 1) (input-arg (first tiles))]
-         [else
-          (define curr-tile (input-arg (first tiles)))
-          (format "~a ~a" curr-tile (tiles->compiled-str (rest tiles)))]))
-     
-     (match (length tiles)
-       [1 (compile (first tiles))]
-       [_ `(halide.concat_vectors, (string->sexp output-type), (string->sexp (format "(list ~a)" (tiles->compiled-str tiles))))])]
-
+    [(arm:addv Vn)
+      (destruct* ((arm:interpret Vn))
+        [((arm:u8x8 v0))
+          `(llvm.vector.reduce.add.v8i8, (to-llvm-type arm-expr), `(list ,(input-arg Vn)))]
+        [((arm:u16x4 v0))
+          `(llvm.vector.reduce.add.v4i16, (to-llvm-type arm-expr), `(list ,(input-arg Vn)))]
+        [((arm:u8x16 v0))
+          `(llvm.vector.reduce.add.v16i8, (to-llvm-type arm-expr), `(list ,(input-arg Vn)))]
+        [((arm:u16x8 v0))
+          `(llvm.vector.reduce.add.v8i16, (to-llvm-type arm-expr), `(list ,(input-arg Vn)))]
+        [((arm:u32x2 v0))
+          `(llvm.vector.reduce.add.v2i32, (to-llvm-type arm-expr), `(list ,(input-arg Vn)))]
+        [((arm:i8x8 v0))
+          `(llvm.vector.reduce.add.v8i8, (to-llvm-type arm-expr), `(list ,(input-arg Vn)))]
+        [((arm:i16x4 v0))
+          `(llvm.vector.reduce.add.v4i16, (to-llvm-type arm-expr), `(list ,(input-arg Vn)))]
+        [((arm:i8x16 v0))
+          `(llvm.vector.reduce.add.v16i8, (to-llvm-type arm-expr), `(list ,(input-arg Vn)))]
+        [((arm:i16x8 v0))
+          `(llvm.vector.reduce.add.v8i16, (to-llvm-type arm-expr), `(list ,(input-arg Vn)))]
+        [((arm:i32x2 v0))
+          `(llvm.vector.reduce.add.v2i32, (to-llvm-type arm-expr), `(list ,(input-arg Vn)))]
+        [(_) (assert #f "infeasible")])]
 
     [(arm:dup Vn)
      (destruct (arm:interpret Vn)
@@ -112,6 +145,14 @@
        [(int64_t _)  `(halide.ir.x2, (to-llvm-type arm-expr), `(list, (compile-scalar Vn)))]
        [_ (error (format "arm:dup variant not understood: ~a" arm-expr))])]
 
+    [(arm:dupn Vn)
+      (destruct (arm:interpret Vn)
+        [(int8_t v0)
+          `(halide.ir.x4, (to-llvm-type arm-expr), `(list, (compile-scalar Vn)))]
+        [(uint8_t v0)
+          `(halide.ir.x4, (to-llvm-type arm-expr), `(list, (compile-scalar Vn)))]
+        [_ (error (format "arm:dupn variant not understood: ~a" arm-expr))])]
+
     ;; TODO: this doesn't exist anymore??
     [(arm:dupw Vn)
      (destruct (arm:interpret Vn)
@@ -122,9 +163,28 @@
        [(int16_t _)  `(halide.ir.x8, (to-llvm-type arm-expr), `(list, (compile-scalar Vn)))]
        [(uint32_t _) `(halide.ir.x4, (to-llvm-type arm-expr), `(list, (compile-scalar Vn)))]
        [(int32_t _)  `(halide.ir.x4, (to-llvm-type arm-expr), `(list, (compile-scalar Vn)))]
-       [(uint64_t _) `(halide.ir.x2, (to-llvm-type arm-expr), `(list, (compile-scalar Vn)))]
-       [(int64_t _)  `(halide.ir.x2, (to-llvm-type arm-expr), `(list, (compile-scalar Vn)))]
        [_ (error (format "arm:dupw variant not understood: ~a" arm-expr))])]
+
+    ;; TODO: the extract vectors codegen
+
+    ;;;;;;;;;;;;;;;;;;;;;;; Concatenate Tiles ;;;;;;;;;;;;;;;;;;;;;;;;
+
+    [(arm:concat-tiles tiles)
+     (define tile-cnt (length tiles))
+     (define tile-elems (arm:num-elems (arm:interpret (list-ref tiles 0))))
+     (define tile-elemT (arm:elem-type (arm:interpret (list-ref tiles 0))))
+     (define output-type (format "~ax~a" tile-elemT (* tile-cnt tile-elems)))
+
+     (define (tiles->compiled-str tiles)
+       (cond
+         [(eq? (length tiles) 1) (input-arg (first tiles))]
+         [else
+          (define curr-tile (input-arg (first tiles)))
+          (format "~a ~a" curr-tile (tiles->compiled-str (rest tiles)))]))
+
+     (match (length tiles)
+       [1 (compile (first tiles))]
+       [_ `(halide.concat_vectors, (string->sexp output-type), (string->sexp (format "(list ~a)" (tiles->compiled-str tiles))))])]
 
     ;;;;;;;;;;;;;;;;; Instructions for vector creation ;;;;;;;;;;;;;;;
     
