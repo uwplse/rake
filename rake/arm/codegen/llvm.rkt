@@ -22,6 +22,23 @@
 (define (compile arm-expr)
   (match arm-expr
 
+    [(arm:abs Vn)
+      (destruct (arm:interpret Vn)
+        [(arm:i8x8 v0)
+          (generate `abs.v8i8 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ))]
+        [(arm:i8x16 v0)
+          (generate `abs.v16i8 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ))]
+        [(arm:i16x4 v0)
+          (generate `abs.v4i16 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ))]
+        [(arm:i16x8 v0)
+          (generate `abs.v8i16 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ))]
+        [(arm:i32x2 v0)
+          (generate `abs.v2i32 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ))]
+        [(arm:i32x4 v0)
+          (generate `abs.v4i32 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ))]
+        ;; TODO: there is a 64-bit variant called llvm.aarch64.neon.abs.v1i64 in LLVM?
+        [_ (error (format "arm:abs variant not understood: ~a" arm-expr))])]
+
     [(arm:add Vn Vm)
      (destruct* ((arm:interpret Vn) (arm:interpret Vm))
       ;; There are no intrinsics for add
@@ -43,6 +60,9 @@
       [((arm:i32x4 v0) (arm:i32x4 v1)) `(halide.ir.add, (to-llvm-type arm-expr), `(list ,(input-arg Vn) ,(input-arg Vm)))]
       [((arm:i64x2 v0) (arm:i64x2 v1)) `(halide.ir.add, (to-llvm-type arm-expr), `(list ,(input-arg Vn) ,(input-arg Vm)))]
       [(_ _) (error (format "arm:add variant not understood: ~a" arm-expr))])]
+
+    [(arm:addhn Vd Vn Vm b)
+      (handle-addhn arm-expr)]
 
     ;;;;;;;;;;;;;;;;;;;;;;; Concatenate Tiles ;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -186,9 +206,28 @@
     [(arm:u32x2 data) (string->sexp "uint32x2")]
     [(arm:i32x4 data) (string->sexp "int32x4")]
     [(arm:u32x4 data) (string->sexp "uint32x4")]
+    [(arm:i64x1 data) (string->sexp "int64")]
+    [(arm:u64x1 data) (string->sexp "uint64")]
     [(arm:i64x2 data) (string->sexp "int64x2")]
     [(arm:u64x2 data) (string->sexp "uint64x2")]
-    [_ (error (format "implement the rest of the arm types: ~a" arm-expr))]))
+    [_ (error (format "(arm:to-llvm-type) implement the rest of the arm types: ~a" arm-expr))]))
+
+;; Useful helper function for ARM's weird narrowing instruction patterns.
+(define (to-llvm-type-narrow arm-expr)
+  (match (arm:interpret arm-expr)
+    [(arm:i16x4 data) (string->sexp "int8x4")]
+    [(arm:u16x4 data) (string->sexp "uint8x4")]
+    [(arm:i16x8 data) (string->sexp "int8x8")]
+    [(arm:u16x8 data) (string->sexp "uint8x8")]
+    [(arm:i32x2 data) (string->sexp "int16x2")]
+    [(arm:u32x2 data) (string->sexp "uint16x2")]
+    [(arm:i32x4 data) (string->sexp "int16x4")]
+    [(arm:u32x4 data) (string->sexp "uint16x4")]
+    [(arm:i64x1 data) (string->sexp "int32")]
+    [(arm:u64x1 data) (string->sexp "uint32")]
+    [(arm:i64x2 data) (string->sexp "int32x2")]
+    [(arm:u64x2 data) (string->sexp "uint32x2")]
+    [_ (error (format "(arm:to-llvm-type-narrow) implement the rest of the arm types: ~a" arm-expr))]))
 
 (define (compile-idx idx)
   (cond
@@ -279,3 +318,43 @@
       [_ (error "arm:llvm-codegen: compile-scalar ~a" s)]))
   
   (string->sexp res))
+
+(define (handle-addhn-helper expr)
+  (destruct expr
+    [(arm:addhn Vd Vn Vm b)
+    ;; TODO: handle the unexpected case
+    (destruct* ((arm:interpret Vd) (arm:interpret Vn) (arm:interpret Vm) (arm:interpret b))
+      [((arm:i8x16 v0) (arm:i16x8 v1) (arm:i16x8 v2) (uint1_t v3))
+          (values `addhn.v8i8 Vd Vn Vm b)]
+      [((arm:i16x8 v0) (arm:i32x4 v1) (arm:i32x4 v2) (uint1_t v3))
+          (values `addhn.v4i16 Vd Vn Vm b)]
+      [((arm:i32x4 v0) (arm:i64x2 v1) (arm:i64x2 v2) (uint1_t v3))
+          (values `addhn.v2i32 Vd Vn Vm b)]
+      [((arm:u8x16 v0) (arm:u16x8 v1) (arm:u16x8 v2) (uint1_t v3))
+          (values `addhn.v8i8 Vd Vn Vm b)]
+      [((arm:u16x8 v0) (arm:u32x4 v1) (arm:u32x4 v2) (uint1_t v3))
+          (values `addhn.v4i16 Vd Vn Vm b)]
+      [((arm:u32x4 v0) (arm:u64x2 v1) (arm:u64x2 v2) (uint1_t v3))
+          (values `addhn.v2i32 Vd Vn Vm b)]
+      [(_ _ _ _) (error (format "handle-addhn-helper failed to understand addhn variant: ~a" expr))])]
+    [_ (error (format "handle-addhn-helper failed to understand: ~a" expr))]))
+
+(define (handle-addhn expr)
+  (define-values (name Vd Vn Vm b)
+    (handle-addhn-helper expr))
+
+  ;; TODO: handle the unexpected cases.
+  (cond
+    [(and (concrete? b) b)
+      ;; ADDHN - Expect dst to be ADDHN2
+      (define-values (dst_name dst_Vd dst_Vn dst_Vm dst_b)
+        (handle-addhn-helper Vd))
+
+      (if (and (concrete? dst_b) (not dst_b) (eqv? name dst_name))
+        (let ([lo (generate name (to-llvm-type-narrow Vn) `(list ,(input-arg Vn) ,(input-arg Vm)))]
+              [hi (generate name (to-llvm-type-narrow Vn) `(list ,(input-arg dst_Vn) ,(input-arg dst_Vm)))])
+          `(halide.concat_vectors, (to-llvm-type expr), `(list, lo hi)))
+        (error (format "handle-addhn can't handle this chain of expressions:\n~a\n" expr)))]
+    [(and (concrete? b) (not b))
+      (error (format "handle-addhn doesn't know what to do with ADDHN2:\n~a\n" expr))]
+    [else (error (format "handle-addhn recieved non-concrete flag:\n~a\n" expr))]))
