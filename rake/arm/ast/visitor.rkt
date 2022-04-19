@@ -15,7 +15,7 @@
   (match expr
     [(arm:ld buf loc align output-type) (transform (arm:ld (visit buf transform) loc align output-type))]
 
-        [(arm:abs Vn) (transform (arm:abs (visit Vn transform)))]
+    [(arm:abs Vn) (transform (arm:abs (visit Vn transform)))]
 
     [(arm:add Vn Vm) (transform (arm:add (visit Vn transform) (visit Vm transform)))]
 
@@ -191,9 +191,9 @@
 
     [(arm:sqsub Vn Vm) (transform (arm:sqsub (visit Vn transform) (visit Vm transform)))]
 
-    [(arm:sqxtn Vn) (transform (arm:sqxtn (visit Vn transform)))]
+    [(arm:sqxtn Vn Vm) (transform (arm:sqxtn (visit Vn transform) (visit Vm transform)))]
 
-    [(arm:sqxtun Vn) (transform (arm:sqxtun (visit Vn transform)))]
+    [(arm:sqxtun Vn Vm) (transform (arm:sqxtun (visit Vn transform) (visit Vm transform)))]
 
     [(arm:srhadd Vn Vm) (transform (arm:srhadd (visit Vn transform) (visit Vm transform)))]
 
@@ -281,7 +281,7 @@
 
     [(arm:uqsub Vn Vm) (transform (arm:uqsub (visit Vn transform) (visit Vm transform)))]
 
-    [(arm:uqxtn Vn) (transform (arm:uqxtn (visit Vn transform)))]
+    [(arm:uqxtn Vn Vm) (transform (arm:uqxtn (visit Vn transform) (visit Vm transform)))]
 
     [(arm:urhadd Vn Vm) (transform (arm:urhadd (visit Vn transform) (visit Vm transform)))]
 
@@ -513,9 +513,9 @@
 
     [(arm:sqsub Vn Vm) (transform (arm:sqsub (visit-shallow Vn transform) (visit-shallow Vm transform)))]
 
-    [(arm:sqxtn Vn) (transform (arm:sqxtn (visit-shallow Vn transform)))]
+    [(arm:sqxtn Vn Vm) (transform (arm:sqxtn (visit-shallow Vn transform) (visit-shallow Vm transform)))]
 
-    [(arm:sqxtun Vn) (transform (arm:sqxtun (visit-shallow Vn transform)))]
+    [(arm:sqxtun Vn Vm) (transform (arm:sqxtun (visit-shallow Vn transform) (visit-shallow Vm transform)))]
 
     [(arm:srhadd Vn Vm) (transform (arm:srhadd (visit-shallow Vn transform) (visit-shallow Vm transform)))]
 
@@ -603,7 +603,7 @@
 
     [(arm:uqsub Vn Vm) (transform (arm:uqsub (visit-shallow Vn transform) (visit-shallow Vm transform)))]
 
-    [(arm:uqxtn Vn) (transform (arm:uqxtn (visit-shallow Vn transform)))]
+    [(arm:uqxtn Vn Vm) (transform (arm:uqxtn (visit-shallow Vn transform) (visit-shallow Vm transform)))]
 
     [(arm:urhadd Vn Vm) (transform (arm:urhadd (visit-shallow Vn transform) (visit-shallow Vm transform)))]
 

@@ -53,9 +53,9 @@
 (struct umax (Vn Vm) #:transparent)                         ;; max
 (struct smax (Vn Vm) #:transparent)                         ;; max
 (struct sqneg (Vn) #:transparent)                           ;; saturating_negate
-(struct uqxtn (Vn) #:transparent)                           ;; saturating_narrow
-(struct sqxtn (Vn) #:transparent)                           ;; saturating_narrow
-(struct sqxtun (Vn) #:transparent)                          ;; saturating_narrow
+(struct uqxtn (Vn Vm) #:transparent)                        ;; saturating_narrow
+(struct sqxtn (Vn Vm) #:transparent)                        ;; saturating_narrow
+(struct sqxtun (Vn Vm) #:transparent)                       ;; saturating_narrow
 (struct rshrn (Vd Vn Vm Vb) #:transparent)                  ;; rounding_shift_right_narrow
 (struct uqrshl (Vn Vm) #:transparent)                       ;; saturating_rounding_shift_left
 (struct sqrshl (Vn Vm) #:transparent)                       ;; saturating_rounding_shift_left
@@ -1046,15 +1046,15 @@
                          )]
 
     [(eq? sqxtn instr) (list
-                         (instr-sig 'i8x8 (list 'i16x8))
-                         (instr-sig 'i16x4 (list 'i32x4))
-                         (instr-sig 'i32x2 (list 'i64x2))
+                         (instr-sig 'i8x16 (list 'i16x8 'i16x8))
+                         (instr-sig 'i16x8 (list 'i32x4 'i32x4))
+                         (instr-sig 'i32x4 (list 'i64x2 'i64x2))
                          )]
 
     [(eq? sqxtun instr) (list
-                         (instr-sig 'u8x8 (list 'i16x8))
-                         (instr-sig 'u16x4 (list 'i32x4))
-                         (instr-sig 'u32x2 (list 'i64x2))
+                         (instr-sig 'u8x16 (list 'i16x8 'i16x8))
+                         (instr-sig 'u16x8 (list 'i32x4 'i32x4))
+                         (instr-sig 'u32x4 (list 'i64x2 'i64x2))
                          )]
 
     [(eq? srhadd instr) (list
@@ -1425,9 +1425,9 @@
                          )]
 
     [(eq? uqxtn instr) (list
-                         (instr-sig 'u8x8 (list 'u16x8))
-                         (instr-sig 'u16x4 (list 'u32x4))
-                         (instr-sig 'u32x2 (list 'u64x2))
+                         (instr-sig 'u8x16 (list 'u16x8 'u16x8))
+                         (instr-sig 'u16x8 (list 'u32x4 'u32x4))
+                         (instr-sig 'u32x4 (list 'u64x2 'u64x2))
                          )]
 
     [(eq? urhadd instr) (list
