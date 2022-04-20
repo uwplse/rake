@@ -51,7 +51,7 @@
          [widening? (>= (cpp:type-bw output-type) (* 2 (cpp:type-bw input-type)))]
          ; TODO: better pruning and more isa options
          [isa (if widening?
-                (list arm:reinterpret arm:add arm:addv arm:saddlv arm:uaddlv arm:saddl arm:saddw arm:saddlp arm:sadalp arm:smlal-vs arm:smlsl-vs arm:sdot.v2i32.v8i8 arm:udot.v2i32.v8i8 arm:sdot.v4i32.v16i8 arm:udot.v4i32.v16i8 arm:shll arm:ssubl arm:sub arm:uadalp arm:uaddl arm:uaddlp arm:uaddw arm:umlal-vs arm:umlsl-vs arm:usubl arm:usubw arm:smull-vs arm:umull-vs)
+                (list arm:reinterpret arm:add arm:addv arm:saddlv arm:uaddlv arm:saddl arm:saddw arm:saddlp arm:sadalp arm:smlal-vs arm:smlsl-vs arm:sdot.v2i32.v8i8 arm:udot.v2i32.v8i8 arm:sdot.v4i32.v16i8 arm:udot.v4i32.v16i8 arm:shll arm:ssubl arm:ssubw arm:sub arm:uadalp arm:uaddl arm:uaddlp arm:uaddw arm:umlal-vs arm:umlsl-vs arm:usubl arm:usubw arm:smull-vs arm:umull-vs)
                 ;(list arm:reinterpret arm:umull-vs arm:add)
                 (list arm:reinterpret arm:add arm:sub arm:addp arm:mla-vs arm:mls-vs arm:mul-vs arm:shl arm:neg))]
          [depth (if widening? 2 2)]
@@ -404,6 +404,12 @@
     (arm:dupw? arm-template)
     (arm:dupn? arm-template)))
 
+(define (arm:get-broadcasted-val arm-template)
+  (cond
+    [(arm:dup? arm-template) (arm:dup-Vn arm-template)]
+    [(arm:dupw? arm-template) (arm:dupw-Vn arm-template)]
+    [(arm:dupn? arm-template) (arm:dupn-Vn arm-template)]))
+
 ;; Taken directly from hvx.rkt
 (define (prepare-sub-exprs arm-sub-exprs)
   (define grouped-sub-exprs (make-hash))
@@ -428,11 +434,18 @@
          (define base-load-expr (arm:??shuffle swizzle-node-id (arm:??shuffle-lds arm-sub-expr) out-type))
          (define exprs (hash-ref! grouped-sub-exprs out-type (set)))
          (hash-set! grouped-sub-exprs out-type (set-add exprs base-load-expr)))]
-      ;[(arm:is-broadcast? arm-sub-expr)
-       ;(define elemT (arm:elem-type (arm:interpret arm-sub-expr)))
-       ;(for ([out-type (arm:get-vector-types elemT)])
-         ;(define exprs (hash-ref! grouped-sub-exprs out-type (set)))
-         ;(hash-set! grouped-sub-exprs out-type (set-add exprs arm-sub-expr)))]
+      [(arm:is-broadcast? arm-sub-expr)
+       (define sub-expr-type (arm:get-interpreted-type arm-sub-expr))
+       (define exprs (hash-ref! grouped-sub-exprs sub-expr-type (set)))
+       (hash-set! grouped-sub-exprs sub-expr-type (set-add exprs arm-sub-expr))
+       (define sca (arm:get-broadcasted-val arm-sub-expr))
+       (when (sca-cast? sca)
+         (define (strip-casts e)
+           (if (sca-cast? e) (strip-casts (sca-cast-sca e)) e))
+         (define alt-sub-exprs (arm:dupw (strip-casts sca)))
+         (define sub-expr-type (arm:get-interpreted-type alt-sub-exprs))
+         (define exprs (hash-ref! grouped-sub-exprs sub-expr-type (set)))
+         (hash-set! grouped-sub-exprs sub-expr-type (set-add exprs alt-sub-exprs)))]
       [else
        (define sub-expr-type (arm:get-interpreted-type arm-sub-expr))
        (define exprs (hash-ref! grouped-sub-exprs sub-expr-type (set)))
