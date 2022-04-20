@@ -862,6 +862,7 @@
                          )]
 
     [(eq? smlal-vs instr) (list
+                         (instr-sig 'i16x8 (list 'i16x8 'i8x16 'int8 'uint1))
                          (instr-sig 'i32x4 (list 'i32x4 'i16x8 'int16 'uint1))
                          (instr-sig 'i64x2 (list 'i64x2 'i32x4 'int32 'uint1))
                          )]
@@ -873,6 +874,7 @@
                          )]
 
     [(eq? smlsl-vs instr) (list
+                         (instr-sig 'i16x8 (list 'i16x8 'i8x16 'int8 'uint1))
                          (instr-sig 'i32x4 (list 'i32x4 'i16x8 'int16 'uint1))
                          (instr-sig 'i64x2 (list 'i64x2 'i32x4 'int32 'uint1))
                          )]
@@ -1334,6 +1336,7 @@
                          )]
 
     [(eq? umlal-vs instr) (list
+                         (instr-sig 'u16x8 (list 'u16x8 'u8x16 'uint8 'uint1))
                          (instr-sig 'u32x4 (list 'u32x4 'u16x8 'uint16 'uint1))
                          (instr-sig 'u64x2 (list 'u64x2 'u32x4 'uint32 'uint1))
                          )]
@@ -1345,6 +1348,7 @@
                          )]
 
     [(eq? umlsl-vs instr) (list
+                         (instr-sig 'u16x8 (list 'u16x8 'u8x16 'uint8 'uint1))
                          (instr-sig 'u32x4 (list 'u32x4 'u16x8 'uint16 'uint1))
                          (instr-sig 'u64x2 (list 'u64x2 'u32x4 'uint32 'uint1))
                          )]
