@@ -86,7 +86,7 @@
            (halide:interpret
             (vec-abs
              v0)))]
-        [(_) (assert #f "infeasible")])]
+        [(_) (assert #f (format "infeasible in abs" p))])]
 
     [(arm:add Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
@@ -186,7 +186,7 @@
             (vec-add
              v0
              v1)))]
-        [(_ _) (assert #f "infeasible")])]
+        [(_ _) (assert #f (format "infeasible in add" p))])]
 
     [(arm:addhn Vd Vn Vm Vb)
       (destruct* ((interpret Vd) (interpret Vn) (interpret Vm) (interpret Vb))
@@ -286,7 +286,7 @@
                 v2
                 v3)
                (x2 (uint64_t (bv 32 64))))) 2)))]
-        [(_ _ _ _) (assert #f "infeasible")])]
+        [(_ _ _ _) (assert #f (format "infeasible in addhn" p))])]
 
     [(arm:addp Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
@@ -386,7 +386,7 @@
               v0)
              (vector_reduce 'add 2
               v1) 2)))]
-        [(_ _) (assert #f "infeasible")])]
+        [(_ _) (assert #f (format "infeasible in addp" p))])]
 
     [(arm:addv Vn)
       (destruct* ((interpret Vn))
@@ -430,7 +430,7 @@
           (int32_t           (halide:interpret
             (vector_reduce 'add 2
              v0)))]
-        [(_) (assert #f "infeasible")])]
+        [(_) (assert #f (format "infeasible in addv" p))])]
 
     [(arm:dup Vn)
       (destruct* ((interpret Vn))
@@ -466,7 +466,7 @@
           (arm:u64x2
            (halide:interpret
             (x2 (uint64_t v0))))]
-        [(_) (assert #f "infeasible")])]
+        [(_) (assert #f (format "infeasible in dup" p))])]
 
     [(arm:dupn Vn)
       (destruct* ((interpret Vn))
@@ -478,7 +478,7 @@
           (arm:u8x4
            (halide:interpret
             (x4 (uint8_t v0))))]
-        [(_) (assert #f "infeasible")])]
+        [(_) (assert #f (format "infeasible in dupn" p))])]
 
     [(arm:dupw Vn)
       (destruct* ((interpret Vn))
@@ -506,7 +506,7 @@
           (arm:u32x4
            (halide:interpret
             (x4 (uint32_t v0))))]
-        [(_) (assert #f "infeasible")])]
+        [(_) (assert #f (format "infeasible in dupw" p))])]
 
     [(arm:ext16i1 Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
@@ -526,7 +526,7 @@
               v0 1 1 15)
              (slice_vectors
               v1 0 1 1) 15)))]
-        [(_ _) (assert #f "infeasible")])]
+        [(_ _) (assert #f (format "infeasible in ext16i1" p))])]
 
     [(arm:ext16i10 Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
@@ -546,7 +546,7 @@
               v0 10 1 6)
              (slice_vectors
               v1 0 1 10) 6)))]
-        [(_ _) (assert #f "infeasible")])]
+        [(_ _) (assert #f (format "infeasible in ext16i10" p))])]
 
     [(arm:ext16i11 Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
@@ -566,7 +566,7 @@
               v0 11 1 5)
              (slice_vectors
               v1 0 1 11) 5)))]
-        [(_ _) (assert #f "infeasible")])]
+        [(_ _) (assert #f (format "infeasible in ext16i11" p))])]
 
     [(arm:ext16i12 Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
@@ -586,7 +586,7 @@
               v0 12 1 4)
              (slice_vectors
               v1 0 1 12) 4)))]
-        [(_ _) (assert #f "infeasible")])]
+        [(_ _) (assert #f (format "infeasible in ext16i12" p))])]
 
     [(arm:ext16i13 Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
@@ -606,7 +606,7 @@
               v0 13 1 3)
              (slice_vectors
               v1 0 1 13) 3)))]
-        [(_ _) (assert #f "infeasible")])]
+        [(_ _) (assert #f (format "infeasible in ext16i13" p))])]
 
     [(arm:ext16i14 Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
@@ -626,7 +626,7 @@
               v0 14 1 2)
              (slice_vectors
               v1 0 1 14) 2)))]
-        [(_ _) (assert #f "infeasible")])]
+        [(_ _) (assert #f (format "infeasible in ext16i14" p))])]
 
     [(arm:ext16i15 Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
@@ -646,7 +646,7 @@
               v0 15 1 1)
              (slice_vectors
               v1 0 1 15) 1)))]
-        [(_ _) (assert #f "infeasible")])]
+        [(_ _) (assert #f (format "infeasible in ext16i15" p))])]
 
     [(arm:ext16i2 Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
@@ -666,7 +666,7 @@
               v0 2 1 14)
              (slice_vectors
               v1 0 1 2) 14)))]
-        [(_ _) (assert #f "infeasible")])]
+        [(_ _) (assert #f (format "infeasible in ext16i2" p))])]
 
     [(arm:ext16i3 Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
@@ -686,7 +686,7 @@
               v0 3 1 13)
              (slice_vectors
               v1 0 1 3) 13)))]
-        [(_ _) (assert #f "infeasible")])]
+        [(_ _) (assert #f (format "infeasible in ext16i3" p))])]
 
     [(arm:ext16i4 Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
@@ -706,7 +706,7 @@
               v0 4 1 12)
              (slice_vectors
               v1 0 1 4) 12)))]
-        [(_ _) (assert #f "infeasible")])]
+        [(_ _) (assert #f (format "infeasible in ext16i4" p))])]
 
     [(arm:ext16i5 Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
@@ -726,7 +726,7 @@
               v0 5 1 11)
              (slice_vectors
               v1 0 1 5) 11)))]
-        [(_ _) (assert #f "infeasible")])]
+        [(_ _) (assert #f (format "infeasible in ext16i5" p))])]
 
     [(arm:ext16i6 Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
@@ -746,7 +746,7 @@
               v0 6 1 10)
              (slice_vectors
               v1 0 1 6) 10)))]
-        [(_ _) (assert #f "infeasible")])]
+        [(_ _) (assert #f (format "infeasible in ext16i6" p))])]
 
     [(arm:ext16i7 Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
@@ -766,7 +766,7 @@
               v0 7 1 9)
              (slice_vectors
               v1 0 1 7) 9)))]
-        [(_ _) (assert #f "infeasible")])]
+        [(_ _) (assert #f (format "infeasible in ext16i7" p))])]
 
     [(arm:ext16i8 Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
@@ -786,7 +786,7 @@
               v0 8 1 8)
              (slice_vectors
               v1 0 1 8) 8)))]
-        [(_ _) (assert #f "infeasible")])]
+        [(_ _) (assert #f (format "infeasible in ext16i8" p))])]
 
     [(arm:ext16i9 Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
@@ -806,7 +806,7 @@
               v0 9 1 7)
              (slice_vectors
               v1 0 1 9) 7)))]
-        [(_ _) (assert #f "infeasible")])]
+        [(_ _) (assert #f (format "infeasible in ext16i9" p))])]
 
     [(arm:ext8i1 Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
@@ -826,7 +826,7 @@
               v0 1 1 7)
              (slice_vectors
               v1 0 1 1) 7)))]
-        [(_ _) (assert #f "infeasible")])]
+        [(_ _) (assert #f (format "infeasible in ext8i1" p))])]
 
     [(arm:ext8i2 Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
@@ -846,7 +846,7 @@
               v0 2 1 6)
              (slice_vectors
               v1 0 1 2) 6)))]
-        [(_ _) (assert #f "infeasible")])]
+        [(_ _) (assert #f (format "infeasible in ext8i2" p))])]
 
     [(arm:ext8i3 Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
@@ -866,7 +866,7 @@
               v0 3 1 5)
              (slice_vectors
               v1 0 1 3) 5)))]
-        [(_ _) (assert #f "infeasible")])]
+        [(_ _) (assert #f (format "infeasible in ext8i3" p))])]
 
     [(arm:ext8i4 Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
@@ -886,7 +886,7 @@
               v0 4 1 4)
              (slice_vectors
               v1 0 1 4) 4)))]
-        [(_ _) (assert #f "infeasible")])]
+        [(_ _) (assert #f (format "infeasible in ext8i4" p))])]
 
     [(arm:ext8i5 Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
@@ -906,7 +906,7 @@
               v0 5 1 3)
              (slice_vectors
               v1 0 1 5) 3)))]
-        [(_ _) (assert #f "infeasible")])]
+        [(_ _) (assert #f (format "infeasible in ext8i5" p))])]
 
     [(arm:ext8i6 Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
@@ -926,7 +926,7 @@
               v0 6 1 2)
              (slice_vectors
               v1 0 1 6) 2)))]
-        [(_ _) (assert #f "infeasible")])]
+        [(_ _) (assert #f (format "infeasible in ext8i6" p))])]
 
     [(arm:ext8i7 Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
@@ -946,7 +946,7 @@
               v0 7 1 1)
              (slice_vectors
               v1 0 1 7) 1)))]
-        [(_ _) (assert #f "infeasible")])]
+        [(_ _) (assert #f (format "infeasible in ext8i7" p))])]
 
     [(arm:mla-vs Vd Vn Vm)
       (destruct* ((interpret Vd) (interpret Vn) (interpret Vm))
@@ -998,7 +998,7 @@
              (vec-mul
               v1
               (x4 (uint32_t v2))))))]
-        [(_ _ _) (assert #f "infeasible")])]
+        [(_ _ _) (assert #f (format "infeasible in mla-vs" p))])]
 
     [(arm:mla-vv Vd Vn Vm)
       (destruct* ((interpret Vd) (interpret Vn) (interpret Vm))
@@ -1050,7 +1050,7 @@
              (vec-mul
               v1
               v2))))]
-        [(_ _ _) (assert #f "infeasible")])]
+        [(_ _ _) (assert #f (format "infeasible in mla-vv" p))])]
 
     [(arm:mls-vs Vd Vn Vm)
       (destruct* ((interpret Vd) (interpret Vn) (interpret Vm))
@@ -1102,7 +1102,7 @@
              (vec-mul
               v1
               (x4 (uint32_t v2))))))]
-        [(_ _ _) (assert #f "infeasible")])]
+        [(_ _ _) (assert #f (format "infeasible in mls-vs" p))])]
 
     [(arm:mls-vv Vd Vn Vm)
       (destruct* ((interpret Vd) (interpret Vn) (interpret Vm))
@@ -1154,7 +1154,7 @@
              (vec-mul
               v1
               v2))))]
-        [(_ _ _) (assert #f "infeasible")])]
+        [(_ _ _) (assert #f (format "infeasible in mls-vv" p))])]
 
     [(arm:mul-vs Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
@@ -1230,7 +1230,7 @@
             (vec-mul
              v0
              (x4 (int32_t v1)))))]
-        [(_ _) (assert #f "infeasible")])]
+        [(_ _) (assert #f (format "infeasible in mul-vs" p))])]
 
     [(arm:mul-vv Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
@@ -1306,7 +1306,7 @@
             (vec-mul
              v0
              v1)))]
-        [(_ _) (assert #f "infeasible")])]
+        [(_ _) (assert #f (format "infeasible in mul-vv" p))])]
 
     [(arm:neg Vn)
       (destruct* ((interpret Vn))
@@ -1352,7 +1352,7 @@
             (vec-sub
              (x2 (int64_t (bv 0 64)))
              v0)))]
-        [(_) (assert #f "infeasible")])]
+        [(_) (assert #f (format "infeasible in neg" p))])]
 
     [(arm:raddhn Vd Vn Vm Vb)
       (destruct* ((interpret Vd) (interpret Vn) (interpret Vm) (interpret Vb))
@@ -1556,7 +1556,7 @@
                  v2
                  v3)
                 (x2 (uint64_t (bv 4294967296 64)))))) 2)))]
-        [(_ _ _ _) (assert #f "infeasible")])]
+        [(_ _ _ _) (assert #f (format "infeasible in raddhn" p))])]
 
     [(arm:rshrn Vd Vn Vm Vb)
       (destruct* ((interpret Vd) (interpret Vn) (interpret Vm) (interpret Vb))
@@ -1740,7 +1740,7 @@
                   (vec-shr
                    v2
                    (x2 (sca-sub  (uint64_t  v3)  (uint64_t (bv 1 64)))))))) 2)))]
-        [(_ _ _ _) (assert #f "infeasible")])]
+        [(_ _ _ _) (assert #f (format "infeasible in rshrn" p))])]
 
     [(arm:rsubhn Vd Vn Vm Vb)
       (destruct* ((interpret Vd) (interpret Vn) (interpret Vm) (interpret Vb))
@@ -1944,7 +1944,7 @@
                  v2
                  v3)
                 (x2 (uint64_t (bv 4294967296 64)))))) 2)))]
-        [(_ _ _ _) (assert #f "infeasible")])]
+        [(_ _ _ _) (assert #f (format "infeasible in rsubhn" p))])]
 
     [(arm:saba Vd Vn Vm)
       (destruct* ((interpret Vd) (interpret Vn) (interpret Vm))
@@ -2002,7 +2002,7 @@
               (vec-absd
                v1
                v2)))))]
-        [(_ _ _) (assert #f "infeasible")])]
+        [(_ _ _) (assert #f (format "infeasible in saba" p))])]
 
     [(arm:sabal Vd Vn Vm Vb)
       (destruct* ((interpret Vd) (interpret Vn) (interpret Vm) (interpret Vb))
@@ -2063,7 +2063,7 @@
                  v1 0 1 2)
                 (slice_vectors
                  v2 0 1 2)))))))]
-        [(_ _ _ _) (assert #f "infeasible")])]
+        [(_ _ _ _) (assert #f (format "infeasible in sabal" p))])]
 
     [(arm:sabd Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
@@ -2103,7 +2103,7 @@
             (vec-absd
              v0
              v1)))]
-        [(_ _) (assert #f "infeasible")])]
+        [(_ _) (assert #f (format "infeasible in sabd" p))])]
 
     [(arm:sadalp Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
@@ -2152,7 +2152,7 @@
              (vector_reduce 'add 2
               (int64x4
                v1)))))]
-        [(_ _) (assert #f "infeasible")])]
+        [(_ _) (assert #f (format "infeasible in sadalp" p))])]
 
     [(arm:saddl Vd Vn Vm)
       (destruct* ((interpret Vd) (interpret Vn) (interpret Vm))
@@ -2213,7 +2213,7 @@
               (int64x2
                (slice_vectors
                 v1 0 1 2))))))]
-        [(_ _ _) (assert #f "infeasible")])]
+        [(_ _ _) (assert #f (format "infeasible in saddl" p))])]
 
     [(arm:saddlp Vn)
       (destruct* ((interpret Vn))
@@ -2252,7 +2252,7 @@
             (vector_reduce 'add 2
              (int64x4
               v0))))]
-        [(_) (assert #f "infeasible")])]
+        [(_) (assert #f (format "infeasible in saddlp" p))])]
 
     [(arm:saddlv Vn)
       (destruct* ((interpret Vn))
@@ -2281,7 +2281,7 @@
             (vector_reduce 'add 4
              (int64x4
               v0))))]
-        [(_) (assert #f "infeasible")])]
+        [(_) (assert #f (format "infeasible in saddlv" p))])]
 
     [(arm:saddw Vd Vn Vm)
       (destruct* ((interpret Vd) (interpret Vn) (interpret Vm))
@@ -2324,7 +2324,7 @@
               (int64x2
                (slice_vectors
                 v1 0 1 2))))))]
-        [(_ _ _) (assert #f "infeasible")])]
+        [(_ _ _) (assert #f (format "infeasible in saddw" p))])]
 
     [(arm:sdot.v2i32.v8i4 Vd Vn Vm)
       (destruct* ((interpret Vd) (interpret Vn) (interpret Vm))
@@ -2342,7 +2342,7 @@
                  (concat_vectors
                   v2
                   v2 4))))))))]
-        [(_ _ _) (assert #f "infeasible")])]
+        [(_ _ _) (assert #f (format "infeasible in sdot.v2i32.v8i4" p))])]
 
     [(arm:sdot.v2i32.v8i8 Vd Vn Vm)
       (destruct* ((interpret Vd) (interpret Vn) (interpret Vm))
@@ -2358,7 +2358,7 @@
                  v1)
                 (int16x8
                  v2)))))))]
-        [(_ _ _) (assert #f "infeasible")])]
+        [(_ _ _) (assert #f (format "infeasible in sdot.v2i32.v8i8" p))])]
 
     [(arm:sdot.v4i32.v16i4 Vd Vn Vm)
       (destruct* ((interpret Vd) (interpret Vn) (interpret Vm))
@@ -2380,7 +2380,7 @@
                   (concat_vectors
                    v2
                    v2 4) 4))))))))]
-        [(_ _ _) (assert #f "infeasible")])]
+        [(_ _ _) (assert #f (format "infeasible in sdot.v4i32.v16i4" p))])]
 
     [(arm:sdot.v4i32.v16i8 Vd Vn Vm)
       (destruct* ((interpret Vd) (interpret Vn) (interpret Vm))
@@ -2396,7 +2396,7 @@
                  v1)
                 (int16x16
                  v2)))))))]
-        [(_ _ _) (assert #f "infeasible")])]
+        [(_ _ _) (assert #f (format "infeasible in sdot.v4i32.v16i8" p))])]
 
     [(arm:shadd Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
@@ -2472,7 +2472,7 @@
                v0
                v1)
               (x4 (uint32_t (bv 1 32)))))))]
-        [(_ _) (assert #f "infeasible")])]
+        [(_ _) (assert #f (format "infeasible in shadd" p))])]
 
     [(arm:shl Vn)
       (destruct* ((interpret Vn))
@@ -2546,7 +2546,7 @@
            (halide:interpret
             (vec-shl
              v0)))]
-        [(_) (assert #f "infeasible")])]
+        [(_) (assert #f (format "infeasible in shl" p))])]
 
     [(arm:shll Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
@@ -2622,7 +2622,7 @@
                (slice_vectors
                 v0 0 1 2)))
               (x2 (uint64_t (bv 32 64))))))]
-        [(_ _) (assert #f "infeasible")])]
+        [(_ _) (assert #f (format "infeasible in shll" p))])]
 
     [(arm:shrn Vd Vn Vm Vb)
       (destruct* ((interpret Vd) (interpret Vn) (interpret Vm) (interpret Vb))
@@ -2698,7 +2698,7 @@
               (vec-shr
                v2
                (x2 (uint64_t v3)))) 2)))]
-        [(_ _ _ _) (assert #f "infeasible")])]
+        [(_ _ _ _) (assert #f (format "infeasible in shrn" p))])]
 
     [(arm:shsub Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
@@ -2834,7 +2834,7 @@
                  (x4 (int32_t (bv 1 32)))))
                (x4 (int32_t (bv 1 32))))
               (x4 (uint32_t (bv 1 32)))))))]
-        [(_ _) (assert #f "infeasible")])]
+        [(_ _) (assert #f (format "infeasible in shsub" p))])]
 
     [(arm:smax Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
@@ -2874,7 +2874,7 @@
             (vec-max
              v0
              v1)))]
-        [(_ _) (assert #f "infeasible")])]
+        [(_ _) (assert #f (format "infeasible in smax" p))])]
 
     [(arm:smaxp Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
@@ -2926,7 +2926,7 @@
               v0)
              (vector_reduce 'max 2
               v1) 2)))]
-        [(_ _) (assert #f "infeasible")])]
+        [(_ _) (assert #f (format "infeasible in smaxp" p))])]
 
     [(arm:smaxv Vn)
       (destruct* ((interpret Vn))
@@ -2950,7 +2950,7 @@
           (int32_t           (halide:interpret
             (vector_reduce 'max 4
              v0)))]
-        [(_) (assert #f "infeasible")])]
+        [(_) (assert #f (format "infeasible in smaxv" p))])]
 
     [(arm:smin Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
@@ -2990,7 +2990,7 @@
             (vec-min
              v0
              v1)))]
-        [(_ _) (assert #f "infeasible")])]
+        [(_ _) (assert #f (format "infeasible in smin" p))])]
 
     [(arm:sminp Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
@@ -3042,7 +3042,7 @@
               v0)
              (vector_reduce 'min 2
               v1) 2)))]
-        [(_ _) (assert #f "infeasible")])]
+        [(_ _) (assert #f (format "infeasible in sminp" p))])]
 
     [(arm:sminv Vn)
       (destruct* ((interpret Vn))
@@ -3066,10 +3066,27 @@
           (int32_t           (halide:interpret
             (vector_reduce 'min 4
              v0)))]
-        [(_) (assert #f "infeasible")])]
+        [(_) (assert #f (format "infeasible in sminv" p))])]
 
     [(arm:smlal-vs Vd Vn Vm Vb)
       (destruct* ((interpret Vd) (interpret Vn) (interpret Vm) (interpret Vb))
+        [((arm:i16x8 v0) (arm:i8x16 v1) (int8_t v2) (uint1_t v3))
+           (arm:i16x8
+            (halide:interpret
+             (vec-add
+             v0
+              (vec-if
+              (x8 (uint1_t v3))
+              (vec-mul
+               (int16x8
+                (slice_vectors
+                 v1 8 1 8))
+               (x8 (int16x1 (int8_t v2))))
+              (vec-mul
+               (int16x8
+                (slice_vectors
+                 v1 0 1 8))
+               (x8 (int16x1 (int8_t v2))))))))]
         [((arm:i32x4 v0) (arm:i16x8 v1) (int16_t v2) (uint1_t v3))
            (arm:i32x4
             (halide:interpret
@@ -3104,7 +3121,7 @@
                 (slice_vectors
                  v1 0 1 2))
                (x2 (int64x1 (int32_t v2))))))))]
-        [(_ _ _ _) (assert #f "infeasible")])]
+        [(_ _ _ _) (assert #f (format "infeasible in smlal-vs" p))])]
 
     [(arm:smlal-vv Vd Vn Vm Vb)
       (destruct* ((interpret Vd) (interpret Vn) (interpret Vm) (interpret Vb))
@@ -3171,10 +3188,27 @@
                (int64x2
                 (slice_vectors
                  v2 0 1 2)))))))]
-        [(_ _ _ _) (assert #f "infeasible")])]
+        [(_ _ _ _) (assert #f (format "infeasible in smlal-vv" p))])]
 
     [(arm:smlsl-vs Vd Vn Vm Vb)
       (destruct* ((interpret Vd) (interpret Vn) (interpret Vm) (interpret Vb))
+        [((arm:i16x8 v0) (arm:i8x16 v1) (int8_t v2) (uint1_t v3))
+           (arm:i16x8
+            (halide:interpret
+             (vec-sub
+             v0
+              (vec-if
+              (x8 (uint1_t v3))
+              (vec-mul
+               (int16x8
+                (slice_vectors
+                 v1 8 1 8))
+               (x8 (int16x1 (int8_t v2))))
+              (vec-mul
+               (int16x8
+                (slice_vectors
+                 v1 0 1 8))
+               (x8 (int16x1 (int8_t v2))))))))]
         [((arm:i32x4 v0) (arm:i16x8 v1) (int16_t v2) (uint1_t v3))
            (arm:i32x4
             (halide:interpret
@@ -3209,7 +3243,7 @@
                 (slice_vectors
                  v1 0 1 2))
                (x2 (int64x1 (int32_t v2))))))))]
-        [(_ _ _ _) (assert #f "infeasible")])]
+        [(_ _ _ _) (assert #f (format "infeasible in smlsl-vs" p))])]
 
     [(arm:smlsl-vv Vd Vn Vm Vb)
       (destruct* ((interpret Vd) (interpret Vn) (interpret Vm) (interpret Vb))
@@ -3276,7 +3310,7 @@
                (int64x2
                 (slice_vectors
                  v2 0 1 2)))))))]
-        [(_ _ _ _) (assert #f "infeasible")])]
+        [(_ _ _ _) (assert #f (format "infeasible in smlsl-vv" p))])]
 
     [(arm:smull-vs Vd Vn Vm)
       (destruct* ((interpret Vd) (interpret Vn) (interpret Vm))
@@ -3331,7 +3365,7 @@
                 v0 0 1 2))
               (int64x2
                (x2 (int32_t v1)))))))]
-        [(_ _ _) (assert #f "infeasible")])]
+        [(_ _ _) (assert #f (format "infeasible in smull-vs" p))])]
 
     [(arm:smull-vv Vd Vn Vm)
       (destruct* ((interpret Vd) (interpret Vn) (interpret Vm))
@@ -3392,7 +3426,7 @@
               (int64x2
                (slice_vectors
                 v1 0 1 2))))))]
-        [(_ _ _) (assert #f "infeasible")])]
+        [(_ _ _) (assert #f (format "infeasible in smull-vv" p))])]
 
     [(arm:sqabs Vn)
       (destruct* ((interpret Vn))
@@ -3487,7 +3521,7 @@
              (int64x2
               (vec-abs
                v0)))))]
-        [(_) (assert #f "infeasible")])]
+        [(_) (assert #f (format "infeasible in sqabs" p))])]
 
     [(arm:sqadd Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
@@ -3599,7 +3633,7 @@
                 v1
                 (x4 (int32_t (bv 0 32))))))
              v1)))]
-        [(_ _) (assert #f "infeasible")])]
+        [(_ _) (assert #f (format "infeasible in sqadd" p))])]
 
     [(arm:sqdmlal-vs Vd Vn Vm Vb)
       (destruct* ((interpret Vd) (interpret Vn) (interpret Vm) (interpret Vb))
@@ -3741,7 +3775,7 @@
                         (x2 (int32_t v2))))
                       (x2 (int64_t (bv 2 64)))))
                      (x2 (int64_t (bv 2 64))))))))]
-        [(_ _ _ _) (assert #f "infeasible")])]
+        [(_ _ _ _) (assert #f (format "infeasible in sqdmlal-vs" p))])]
 
     [(arm:sqdmlal-vv Vd Vn Vm Vb)
       (destruct* ((interpret Vd) (interpret Vn) (interpret Vm) (interpret Vb))
@@ -3923,7 +3957,7 @@
                              v2 0 1 2))))
                           (x2 (int64_t (bv 2 64)))))
                          (x2 (int64_t (bv 2 64))))))))]
-        [(_ _ _ _) (assert #f "infeasible")])]
+        [(_ _ _ _) (assert #f (format "infeasible in sqdmlal-vv" p))])]
 
     [(arm:sqdmlsl-vs Vd Vn Vm Vb)
       (destruct* ((interpret Vd) (interpret Vn) (interpret Vm) (interpret Vb))
@@ -4065,7 +4099,7 @@
                         (x2 (int32_t v2))))
                       (x2 (int64_t (bv 2 64)))))
                      (x2 (int64_t (bv 2 64))))))))]
-        [(_ _ _ _) (assert #f "infeasible")])]
+        [(_ _ _ _) (assert #f (format "infeasible in sqdmlsl-vs" p))])]
 
     [(arm:sqdmlsl-vv Vd Vn Vm Vb)
       (destruct* ((interpret Vd) (interpret Vn) (interpret Vm) (interpret Vb))
@@ -4247,7 +4281,7 @@
                              v2 0 1 2))))
                           (x2 (int64_t (bv 2 64)))))
                          (x2 (int64_t (bv 2 64))))))))]
-        [(_ _ _ _) (assert #f "infeasible")])]
+        [(_ _ _ _) (assert #f (format "infeasible in sqdmlsl-vv" p))])]
 
     [(arm:sqdmulh Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
@@ -4311,7 +4345,7 @@
                 (x4 (uint64_t (bv 31 64))))
                (x4 (int64_t (bv 2147483647 64))))
               (x4 (int64_t (bv -2147483648 64)))))))]
-        [(_ _) (assert #f "infeasible")])]
+        [(_ _) (assert #f (format "infeasible in sqdmulh" p))])]
 
     [(arm:sqdmull-vs Vd Vn Vm)
       (destruct* ((interpret Vd) (interpret Vn) (interpret Vm))
@@ -4449,7 +4483,7 @@
                        (x2 (int32_t v1))))
                      (x2 (int64_t (bv 2 64)))))
                     (x2 (int64_t (bv 2 64)))))))]
-        [(_ _ _) (assert #f "infeasible")])]
+        [(_ _ _) (assert #f (format "infeasible in sqdmull-vs" p))])]
 
     [(arm:sqdmull-vv Vd Vn Vm)
       (destruct* ((interpret Vd) (interpret Vn) (interpret Vm))
@@ -4627,7 +4661,7 @@
                             v1 0 1 2))))
                          (x2 (int64_t (bv 2 64)))))
                         (x2 (int64_t (bv 2 64)))))))]
-        [(_ _ _) (assert #f "infeasible")])]
+        [(_ _ _) (assert #f (format "infeasible in sqdmull-vv" p))])]
 
     [(arm:sqneg Vn)
       (destruct* ((interpret Vn))
@@ -4687,7 +4721,7 @@
              (vec-max
               v0
               (x2 (int64_t (bv -9223372036854775808 64)))))))]
-        [(_) (assert #f "infeasible")])]
+        [(_) (assert #f (format "infeasible in sqneg" p))])]
 
     [(arm:sqrdmulh Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
@@ -4791,7 +4825,7 @@
                  (x4 (int64_t (bv 2147483648 64)))))
                (x4 (int64_t (bv 2147483647 64))))
               (x4 (int64_t (bv -2147483648 64)))))))]
-        [(_ _) (assert #f "infeasible")])]
+        [(_ _) (assert #f (format "infeasible in sqrdmulh" p))])]
 
     [(arm:sqrshl Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
@@ -5034,7 +5068,7 @@
                   (vec-sub
                    (x2 (int64_t (bv -1 64)))
                    v1)))))))]
-        [(_ _) (assert #f "infeasible")])]
+        [(_ _) (assert #f (format "infeasible in sqrshl" p))])]
 
     [(arm:sqrshrn Vd Vn Vm Vb)
       (destruct* ((interpret Vd) (interpret Vn) (interpret Vm) (interpret Vb))
@@ -5152,7 +5186,7 @@
                      (x2 (sca-sub  (uint64_t  v3)  (uint64_t (bv 1 64)))))))
                   (x2 (int64_t (bv 2147483647 64))))
                  (x2 (int64_t (bv -2147483648 64))))) 2)))]
-        [(_ _ _ _) (assert #f "infeasible")])]
+        [(_ _ _ _) (assert #f (format "infeasible in sqrshrn" p))])]
 
     [(arm:sqrshrun Vd Vn Vm Vb)
       (destruct* ((interpret Vd) (interpret Vn) (interpret Vm) (interpret Vb))
@@ -5270,7 +5304,7 @@
                      (x2 (sca-sub  (uint64_t  v3)  (uint64_t (bv 1 64)))))))
                   (x2 (int64_t (bv 4294967295 64))))
                  (x2 (int64_t (bv 0 64))))) 2)))]
-        [(_ _ _ _) (assert #f "infeasible")])]
+        [(_ _ _ _) (assert #f (format "infeasible in sqrshrun" p))])]
 
     [(arm:sqshl Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
@@ -5458,7 +5492,7 @@
               (int64x2
                v0)
               v1))))]
-        [(_ _) (assert #f "infeasible")])]
+        [(_ _) (assert #f (format "infeasible in sqshl" p))])]
 
     [(arm:sqshlu Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
@@ -5648,7 +5682,7 @@
               (uint64x2
                v0)
               v1))))]
-        [(_ _) (assert #f "infeasible")])]
+        [(_ _) (assert #f (format "infeasible in sqshlu" p))])]
 
     [(arm:sqshrn Vd Vn Vm Vb)
       (destruct* ((interpret Vd) (interpret Vn) (interpret Vm) (interpret Vb))
@@ -5712,7 +5746,7 @@
                  (x2 (uint64_t v3)))
                 (x2 (int64_t (bv 2147483647 64))))
                (x2 (int64_t (bv -2147483648 64))))) 2)))]
-        [(_ _ _ _) (assert #f "infeasible")])]
+        [(_ _ _ _) (assert #f (format "infeasible in sqshrn" p))])]
 
     [(arm:sqshrun Vd Vn Vm Vb)
       (destruct* ((interpret Vd) (interpret Vn) (interpret Vm) (interpret Vb))
@@ -5776,7 +5810,7 @@
                  (x2 (uint64_t v3)))
                 (x2 (int64_t (bv 4294967295 64))))
                (x2 (int64_t (bv 0 64))))) 2)))]
-        [(_ _ _ _) (assert #f "infeasible")])]
+        [(_ _ _ _) (assert #f (format "infeasible in sqshrun" p))])]
 
     [(arm:sqsub Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
@@ -5888,7 +5922,7 @@
                 (x4 (int32_t (bv 0 32))))
                (x4 (int32_t (bv -2147483648 32)))))
              v1)))]
-        [(_ _) (assert #f "infeasible")])]
+        [(_ _) (assert #f (format "infeasible in sqsub" p))])]
 
     [(arm:sqxtn Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
@@ -5940,7 +5974,7 @@
                 v1
                 (x2 (int64_t (bv 2147483647 64))))
                (x2 (int64_t (bv -2147483648 64))))) 2)))]
-        [(_ _) (assert #f "infeasible")])]
+        [(_ _) (assert #f (format "infeasible in sqxtn" p))])]
 
     [(arm:sqxtun Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
@@ -5992,7 +6026,7 @@
                 v1
                 (x2 (int64_t (bv 4294967295 64))))
                (x2 (int64_t (bv 0 64))))) 2)))]
-        [(_ _) (assert #f "infeasible")])]
+        [(_ _) (assert #f (format "infeasible in sqxtun" p))])]
 
     [(arm:srhadd Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
@@ -6128,7 +6162,7 @@
                  (x4 (int32_t (bv 1 32)))))
                (x4 (int32_t (bv 1 32))))
               (x4 (uint32_t (bv 1 32)))))))]
-        [(_ _) (assert #f "infeasible")])]
+        [(_ _) (assert #f (format "infeasible in srhadd" p))])]
 
     [(arm:srhsub Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
@@ -6264,7 +6298,7 @@
                  (x4 (int32_t (bv 1 32)))))
                (x4 (int32_t (bv 1 32))))
               (x4 (uint32_t (bv 1 32)))))))]
-        [(_ _) (assert #f "infeasible")])]
+        [(_ _) (assert #f (format "infeasible in srhsub" p))])]
 
     [(arm:srshl Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
@@ -6401,7 +6435,7 @@
                 (vec-add
                  v1
                  (x2 (int64_t (bv 1 64)))))))))]
-        [(_ _) (assert #f "infeasible")])]
+        [(_ _) (assert #f (format "infeasible in srshl" p))])]
 
     [(arm:sshl Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
@@ -6447,7 +6481,7 @@
             (vec-shl
              v0
              v1)))]
-        [(_ _) (assert #f "infeasible")])]
+        [(_ _) (assert #f (format "infeasible in sshl" p))])]
 
     [(arm:sshll Vd Vn Vm)
       (destruct* ((interpret Vd) (interpret Vn) (interpret Vm))
@@ -6487,7 +6521,7 @@
                (slice_vectors
                 v0 0 1 2)))
               (x2 (uint64x1 (uint32_t v1))))))]
-        [(_ _ _) (assert #f "infeasible")])]
+        [(_ _ _) (assert #f (format "infeasible in sshll" p))])]
 
     [(arm:ssubl Vd Vn Vm)
       (destruct* ((interpret Vd) (interpret Vn) (interpret Vm))
@@ -6548,7 +6582,7 @@
               (int64x2
                (slice_vectors
                 v1 0 1 2))))))]
-        [(_ _ _) (assert #f "infeasible")])]
+        [(_ _ _) (assert #f (format "infeasible in ssubl" p))])]
 
     [(arm:ssubw Vd Vn Vm)
       (destruct* ((interpret Vd) (interpret Vn) (interpret Vm))
@@ -6588,7 +6622,7 @@
                 v1 2 1 2)
                (slice_vectors
                 v1 0 1 2))))))]
-        [(_ _ _) (assert #f "infeasible")])]
+        [(_ _ _) (assert #f (format "infeasible in ssubw" p))])]
 
     [(arm:sub Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
@@ -6688,7 +6722,7 @@
             (vec-sub
              v0
              v1)))]
-        [(_ _) (assert #f "infeasible")])]
+        [(_ _) (assert #f (format "infeasible in sub" p))])]
 
     [(arm:subhn Vd Vn Vm Vb)
       (destruct* ((interpret Vd) (interpret Vn) (interpret Vm) (interpret Vb))
@@ -6788,7 +6822,7 @@
                 v2
                 v3)
                (x2 (uint64_t (bv 32 64))))) 2)))]
-        [(_ _ _ _) (assert #f "infeasible")])]
+        [(_ _ _ _) (assert #f (format "infeasible in subhn" p))])]
 
     [(arm:suqadd Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
@@ -6846,7 +6880,7 @@
                v0)
               (int64x4
                v1)))))]
-        [(_ _) (assert #f "infeasible")])]
+        [(_ _) (assert #f (format "infeasible in suqadd" p))])]
 
     [(arm:sxtl Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
@@ -6880,7 +6914,7 @@
                v0 2 1 2)
               (slice_vectors
                v0 0 1 2)))))]
-        [(_ _) (assert #f "infeasible")])]
+        [(_ _) (assert #f (format "infeasible in sxtl" p))])]
 
     [(arm:trn1 Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
@@ -6996,7 +7030,7 @@
               v1 1 1 1)
              (slice_vectors
               v0 1 1 1) 1)))]
-        [(_ _) (assert #f "infeasible")])]
+        [(_ _) (assert #f (format "infeasible in trn1" p))])]
 
     [(arm:trn2 Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
@@ -7112,7 +7146,7 @@
               v1 0 1 1)
              (slice_vectors
               v0 0 1 1) 1)))]
-        [(_ _) (assert #f "infeasible")])]
+        [(_ _) (assert #f (format "infeasible in trn2" p))])]
 
     [(arm:uabd Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
@@ -7152,7 +7186,7 @@
             (vec-absd
              v0
              v1)))]
-        [(_ _) (assert #f "infeasible")])]
+        [(_ _) (assert #f (format "infeasible in uabd" p))])]
 
     [(arm:uadalp Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
@@ -7201,7 +7235,7 @@
              (vector_reduce 'add 2
               (uint64x4
                v1)))))]
-        [(_ _) (assert #f "infeasible")])]
+        [(_ _) (assert #f (format "infeasible in uadalp" p))])]
 
     [(arm:uaddl Vd Vn Vm)
       (destruct* ((interpret Vd) (interpret Vn) (interpret Vm))
@@ -7264,7 +7298,7 @@
               (uint64x2
                (slice_vectors
                 v1 0 1 2))))))]
-        [(_ _ _) (assert #f "infeasible")])]
+        [(_ _ _) (assert #f (format "infeasible in uaddl" p))])]
 
     [(arm:uaddlp Vn)
       (destruct* ((interpret Vn))
@@ -7338,7 +7372,7 @@
             (vector_reduce 'add 2
              (uint64x4
               v0))))]
-        [(_) (assert #f "infeasible")])]
+        [(_) (assert #f (format "infeasible in uaddlp" p))])]
 
     [(arm:uaddlv Vn)
       (destruct* ((interpret Vn))
@@ -7367,7 +7401,7 @@
             (vector_reduce 'add 4
              (uint64x4
               v0))))]
-        [(_) (assert #f "infeasible")])]
+        [(_) (assert #f (format "infeasible in uaddlv" p))])]
 
     [(arm:uaddw Vd Vn Vm)
       (destruct* ((interpret Vd) (interpret Vn) (interpret Vm))
@@ -7410,7 +7444,7 @@
               (uint64x2
                (slice_vectors
                 v1 0 1 2))))))]
-        [(_ _ _) (assert #f "infeasible")])]
+        [(_ _ _) (assert #f (format "infeasible in uaddw" p))])]
 
     [(arm:udot.v2i32.v8i4 Vd Vn Vm)
       (destruct* ((interpret Vd) (interpret Vn) (interpret Vm))
@@ -7442,7 +7476,7 @@
                  (concat_vectors
                   v2
                   v2 4))))))))]
-        [(_ _ _) (assert #f "infeasible")])]
+        [(_ _ _) (assert #f (format "infeasible in udot.v2i32.v8i4" p))])]
 
     [(arm:udot.v2i32.v8i8 Vd Vn Vm)
       (destruct* ((interpret Vd) (interpret Vn) (interpret Vm))
@@ -7470,7 +7504,7 @@
                  v1)
                 (uint16x8
                  v2)))))))]
-        [(_ _ _) (assert #f "infeasible")])]
+        [(_ _ _) (assert #f (format "infeasible in udot.v2i32.v8i8" p))])]
 
     [(arm:udot.v4i32.v16i4 Vd Vn Vm)
       (destruct* ((interpret Vd) (interpret Vn) (interpret Vm))
@@ -7510,7 +7544,7 @@
                   (concat_vectors
                    v2
                    v2 4) 4))))))))]
-        [(_ _ _) (assert #f "infeasible")])]
+        [(_ _ _) (assert #f (format "infeasible in udot.v4i32.v16i4" p))])]
 
     [(arm:udot.v4i32.v16i8 Vd Vn Vm)
       (destruct* ((interpret Vd) (interpret Vn) (interpret Vm))
@@ -7538,7 +7572,7 @@
                  v1)
                 (uint16x16
                  v2)))))))]
-        [(_ _ _) (assert #f "infeasible")])]
+        [(_ _ _) (assert #f (format "infeasible in udot.v4i32.v16i8" p))])]
 
     [(arm:uhadd Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
@@ -7614,7 +7648,7 @@
                v0
                v1)
               (x4 (uint32_t (bv 1 32)))))))]
-        [(_ _) (assert #f "infeasible")])]
+        [(_ _) (assert #f (format "infeasible in uhadd" p))])]
 
     [(arm:uhsub Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
@@ -7750,7 +7784,7 @@
                  (x4 (uint32_t (bv 1 32)))))
                (x4 (uint32_t (bv 1 32))))
               (x4 (uint32_t (bv 1 32)))))))]
-        [(_ _) (assert #f "infeasible")])]
+        [(_ _) (assert #f (format "infeasible in uhsub" p))])]
 
     [(arm:umax Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
@@ -7790,7 +7824,7 @@
             (vec-max
              v0
              v1)))]
-        [(_ _) (assert #f "infeasible")])]
+        [(_ _) (assert #f (format "infeasible in umax" p))])]
 
     [(arm:umaxp Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
@@ -7842,7 +7876,7 @@
               v0)
              (vector_reduce 'max 2
               v1) 2)))]
-        [(_ _) (assert #f "infeasible")])]
+        [(_ _) (assert #f (format "infeasible in umaxp" p))])]
 
     [(arm:umaxv Vn)
       (destruct* ((interpret Vn))
@@ -7866,7 +7900,7 @@
           (uint32_t           (halide:interpret
             (vector_reduce 'max 4
              v0)))]
-        [(_) (assert #f "infeasible")])]
+        [(_) (assert #f (format "infeasible in umaxv" p))])]
 
     [(arm:umin Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
@@ -7906,7 +7940,7 @@
             (vec-min
              v0
              v1)))]
-        [(_ _) (assert #f "infeasible")])]
+        [(_ _) (assert #f (format "infeasible in umin" p))])]
 
     [(arm:uminp Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
@@ -7958,7 +7992,7 @@
               v0)
              (vector_reduce 'min 2
               v1) 2)))]
-        [(_ _) (assert #f "infeasible")])]
+        [(_ _) (assert #f (format "infeasible in uminp" p))])]
 
     [(arm:uminv Vn)
       (destruct* ((interpret Vn))
@@ -7982,10 +8016,27 @@
           (uint32_t           (halide:interpret
             (vector_reduce 'min 4
              v0)))]
-        [(_) (assert #f "infeasible")])]
+        [(_) (assert #f (format "infeasible in uminv" p))])]
 
     [(arm:umlal-vs Vd Vn Vm Vb)
       (destruct* ((interpret Vd) (interpret Vn) (interpret Vm) (interpret Vb))
+        [((arm:u16x8 v0) (arm:u8x16 v1) (uint8_t v2) (uint1_t v3))
+           (arm:u16x8
+            (halide:interpret
+             (vec-add
+             v0
+              (vec-if
+              (x8 (uint1_t v3))
+              (vec-mul
+               (uint16x8
+                (slice_vectors
+                 v1 8 1 8))
+               (x8 (uint16x1 (uint8_t v2))))
+              (vec-mul
+               (uint16x8
+                (slice_vectors
+                 v1 0 1 8))
+               (x8 (uint16x1 (uint8_t v2))))))))]
         [((arm:u32x4 v0) (arm:u16x8 v1) (uint16_t v2) (uint1_t v3))
            (arm:u32x4
             (halide:interpret
@@ -8020,7 +8071,7 @@
                 (slice_vectors
                  v1 0 1 2))
                (x2 (uint64x1 (uint32_t v2))))))))]
-        [(_ _ _ _) (assert #f "infeasible")])]
+        [(_ _ _ _) (assert #f (format "infeasible in umlal-vs" p))])]
 
     [(arm:umlal-vv Vd Vn Vm Vb)
       (destruct* ((interpret Vd) (interpret Vn) (interpret Vm) (interpret Vb))
@@ -8087,10 +8138,27 @@
                (uint64x2
                 (slice_vectors
                  v2 0 1 2)))))))]
-        [(_ _ _ _) (assert #f "infeasible")])]
+        [(_ _ _ _) (assert #f (format "infeasible in umlal-vv" p))])]
 
     [(arm:umlsl-vs Vd Vn Vm Vb)
       (destruct* ((interpret Vd) (interpret Vn) (interpret Vm) (interpret Vb))
+        [((arm:u16x8 v0) (arm:u8x16 v1) (uint8_t v2) (uint1_t v3))
+           (arm:u16x8
+            (halide:interpret
+             (vec-sub
+             v0
+              (vec-if
+              (x8 (uint1_t v3))
+              (vec-mul
+               (uint16x8
+                (slice_vectors
+                 v1 8 1 8))
+               (x8 (uint16x1 (uint8_t v2))))
+              (vec-mul
+               (uint16x8
+                (slice_vectors
+                 v1 0 1 8))
+               (x8 (uint16x1 (uint8_t v2))))))))]
         [((arm:u32x4 v0) (arm:u16x8 v1) (uint16_t v2) (uint1_t v3))
            (arm:u32x4
             (halide:interpret
@@ -8125,7 +8193,7 @@
                 (slice_vectors
                  v1 0 1 2))
                (x2 (uint64x1 (uint32_t v2))))))))]
-        [(_ _ _ _) (assert #f "infeasible")])]
+        [(_ _ _ _) (assert #f (format "infeasible in umlsl-vs" p))])]
 
     [(arm:umlsl-vv Vd Vn Vm Vb)
       (destruct* ((interpret Vd) (interpret Vn) (interpret Vm) (interpret Vb))
@@ -8192,7 +8260,7 @@
                (uint64x2
                 (slice_vectors
                  v2 0 1 2)))))))]
-        [(_ _ _ _) (assert #f "infeasible")])]
+        [(_ _ _ _) (assert #f (format "infeasible in umlsl-vv" p))])]
 
     [(arm:umull-vs Vd Vn Vm)
       (destruct* ((interpret Vd) (interpret Vn) (interpret Vm))
@@ -8247,7 +8315,7 @@
                 v0 0 1 2))
               (uint64x2
                (x2 (uint32_t v1)))))))]
-        [(_ _ _) (assert #f "infeasible")])]
+        [(_ _ _) (assert #f (format "infeasible in umull-vs" p))])]
 
     [(arm:umull-vv Vd Vn Vm)
       (destruct* ((interpret Vd) (interpret Vn) (interpret Vm))
@@ -8308,7 +8376,7 @@
               (uint64x2
                (slice_vectors
                 v1 0 1 2))))))]
-        [(_ _ _) (assert #f "infeasible")])]
+        [(_ _ _) (assert #f (format "infeasible in umull-vv" p))])]
 
     [(arm:uqadd Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
@@ -8372,7 +8440,7 @@
                v1)
               v0)
              v1)))]
-        [(_ _) (assert #f "infeasible")])]
+        [(_ _) (assert #f (format "infeasible in uqadd" p))])]
 
     [(arm:uqrshl Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
@@ -8603,7 +8671,7 @@
                   (vec-sub
                    (x2 (int64_t (bv -1 64)))
                    v1)))))))]
-        [(_ _) (assert #f "infeasible")])]
+        [(_ _) (assert #f (format "infeasible in uqrshl" p))])]
 
     [(arm:uqrshrn Vd Vn Vm Vb)
       (destruct* ((interpret Vd) (interpret Vn) (interpret Vm) (interpret Vb))
@@ -8709,7 +8777,7 @@
                     v2
                     (x2 (sca-sub  (uint64_t  v3)  (uint64_t (bv 1 64)))))))
                  (x2 (uint64_t (bv 4294967295 64))))) 2)))]
-        [(_ _ _ _) (assert #f "infeasible")])]
+        [(_ _ _ _) (assert #f (format "infeasible in uqrshrn" p))])]
 
     [(arm:uqshl Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
@@ -8873,7 +8941,7 @@
               (uint64x2
                v0)
               v1))))]
-        [(_ _) (assert #f "infeasible")])]
+        [(_ _) (assert #f (format "infeasible in uqshl" p))])]
 
     [(arm:uqshrn Vd Vn Vm Vb)
       (destruct* ((interpret Vd) (interpret Vn) (interpret Vm) (interpret Vb))
@@ -8925,7 +8993,7 @@
                 v2
                 (x2 (uint64_t v3)))
                (x2 (uint64_t (bv 4294967295 64))))) 2)))]
-        [(_ _ _ _) (assert #f "infeasible")])]
+        [(_ _ _ _) (assert #f (format "infeasible in uqshrn" p))])]
 
     [(arm:uqsub Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
@@ -8977,7 +9045,7 @@
               v0
               v1)
              v1)))]
-        [(_ _) (assert #f "infeasible")])]
+        [(_ _) (assert #f (format "infeasible in uqsub" p))])]
 
     [(arm:uqxtn Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
@@ -9017,7 +9085,7 @@
               (vec-min
                v1
                (x2 (uint64_t (bv 4294967295 64))))) 2)))]
-        [(_ _) (assert #f "infeasible")])]
+        [(_ _) (assert #f (format "infeasible in uqxtn" p))])]
 
     [(arm:urhadd Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
@@ -9153,7 +9221,7 @@
                  (x4 (uint32_t (bv 1 32)))))
                (x4 (uint32_t (bv 1 32))))
               (x4 (uint32_t (bv 1 32)))))))]
-        [(_ _) (assert #f "infeasible")])]
+        [(_ _) (assert #f (format "infeasible in urhadd" p))])]
 
     [(arm:urhsub Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
@@ -9289,7 +9357,7 @@
                  (x4 (uint32_t (bv 1 32)))))
                (x4 (uint32_t (bv 1 32))))
               (x4 (uint32_t (bv 1 32)))))))]
-        [(_ _) (assert #f "infeasible")])]
+        [(_ _) (assert #f (format "infeasible in urhsub" p))])]
 
     [(arm:urshl Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
@@ -9426,7 +9494,7 @@
                 (vec-add
                  v1
                  (x2 (int64_t (bv 1 64)))))))))]
-        [(_ _) (assert #f "infeasible")])]
+        [(_ _) (assert #f (format "infeasible in urshl" p))])]
 
     [(arm:ushl Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
@@ -9472,7 +9540,7 @@
             (vec-shl
              v0
              v1)))]
-        [(_ _) (assert #f "infeasible")])]
+        [(_ _) (assert #f (format "infeasible in ushl" p))])]
 
     [(arm:ushll Vd Vn Vm)
       (destruct* ((interpret Vd) (interpret Vn) (interpret Vm))
@@ -9512,7 +9580,7 @@
                (slice_vectors
                 v0 0 1 2)))
               (x2 (uint64x1 (uint32_t v1))))))]
-        [(_ _ _) (assert #f "infeasible")])]
+        [(_ _ _) (assert #f (format "infeasible in ushll" p))])]
 
     [(arm:usqadd Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
@@ -9570,7 +9638,7 @@
                v0)
               (int64x4
                v1)))))]
-        [(_ _) (assert #f "infeasible")])]
+        [(_ _) (assert #f (format "infeasible in usqadd" p))])]
 
     [(arm:usubl Vd Vn Vm)
       (destruct* ((interpret Vd) (interpret Vn) (interpret Vm))
@@ -9631,7 +9699,7 @@
               (int64x2
                (slice_vectors
                 v1 0 1 2))))))]
-        [(_ _ _) (assert #f "infeasible")])]
+        [(_ _ _) (assert #f (format "infeasible in usubl" p))])]
 
     [(arm:usubw Vd Vn Vm)
       (destruct* ((interpret Vd) (interpret Vn) (interpret Vm))
@@ -9671,7 +9739,7 @@
                 v1 2 1 2)
                (slice_vectors
                 v1 0 1 2))))))]
-        [(_ _ _) (assert #f "infeasible")])]
+        [(_ _ _) (assert #f (format "infeasible in usubw" p))])]
 
     [(arm:uxtl Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
@@ -9705,7 +9773,7 @@
                v0 2 1 2)
               (slice_vectors
                v0 0 1 2)))))]
-        [(_ _) (assert #f "infeasible")])]
+        [(_ _) (assert #f (format "infeasible in uxtl" p))])]
 
     [(arm:uzip1 Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
@@ -9821,7 +9889,7 @@
               v0 0 1 1)
              (slice_vectors
               v1 0 1 1) 1)))]
-        [(_ _) (assert #f "infeasible")])]
+        [(_ _) (assert #f (format "infeasible in uzip1" p))])]
 
     [(arm:uzip2 Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
@@ -9937,7 +10005,7 @@
               v0 1 1 1)
              (slice_vectors
               v1 1 1 1) 1)))]
-        [(_ _) (assert #f "infeasible")])]
+        [(_ _) (assert #f (format "infeasible in uzip2" p))])]
 
     [(arm:vabdl_i16x4 Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
@@ -9955,7 +10023,7 @@
              (vec-absd
               v0
               v1))))]
-        [(_ _) (assert #f "infeasible")])]
+        [(_ _) (assert #f (format "infeasible in vabdl_i16x4" p))])]
 
     [(arm:vabdl_i32x2 Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
@@ -9973,7 +10041,7 @@
              (vec-absd
               v0
               v1))))]
-        [(_ _) (assert #f "infeasible")])]
+        [(_ _) (assert #f (format "infeasible in vabdl_i32x2" p))])]
 
     [(arm:vabdl_i8x8 Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
@@ -9991,7 +10059,7 @@
              (vec-absd
               v0
               v1))))]
-        [(_ _) (assert #f "infeasible")])]
+        [(_ _) (assert #f (format "infeasible in vabdl_i8x8" p))])]
 
     [(arm:vabdl_u16x4 Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
@@ -10002,7 +10070,7 @@
              (vec-absd
               v0
               v1))))]
-        [(_ _) (assert #f "infeasible")])]
+        [(_ _) (assert #f (format "infeasible in vabdl_u16x4" p))])]
 
     [(arm:vabdl_u32x2 Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
@@ -10013,7 +10081,7 @@
              (vec-absd
               v0
               v1))))]
-        [(_ _) (assert #f "infeasible")])]
+        [(_ _) (assert #f (format "infeasible in vabdl_u32x2" p))])]
 
     [(arm:vabdl_u8x8 Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
@@ -10024,7 +10092,7 @@
              (vec-absd
               v0
               v1))))]
-        [(_ _) (assert #f "infeasible")])]
+        [(_ _) (assert #f (format "infeasible in vabdl_u8x8" p))])]
 
     [(arm:xtn Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
@@ -10076,7 +10144,7 @@
               v0)
              (int32x2
               v1) 2)))]
-        [(_ _) (assert #f "infeasible")])]
+        [(_ _) (assert #f (format "infeasible in xtn" p))])]
 
     [(arm:zip1 Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
@@ -10192,7 +10260,7 @@
               v0 0 1 1)
              (slice_vectors
               v1 0 1 1) 1)))]
-        [(_ _) (assert #f "infeasible")])]
+        [(_ _) (assert #f (format "infeasible in zip1" p))])]
 
     [(arm:zip2 Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))
@@ -10308,7 +10376,7 @@
               v0 1 1 1)
              (slice_vectors
               v1 1 1 1) 1)))]
-        [(_ _) (assert #f "infeasible")])]
+        [(_ _) (assert #f (format "infeasible in zip2" p))])]
 
     [(arm:reinterpret Vn)
       (destruct (interpret Vn)
