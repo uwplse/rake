@@ -55,12 +55,13 @@
                 ;(list arm:reinterpret arm:umull-vs arm:add)
                 (list arm:reinterpret arm:add arm:sub arm:addp arm:mla-vs arm:mls-vs arm:mul-vs arm:shl arm:neg))]
          [depth (if widening? 2 2)]
+         [max-cost 20]
          [grouped-sub-exprs (prepare-sub-exprs arm-sub-exprs)]
          [number-reads (length weights)]
          [desired-types (arm:get-vector-types output-type)]
          ; Enumerate those with the correct output type
          ; TODO: do the pruning somehow...
-         [candidates (time (enumerate-arm isa desired-types grouped-sub-exprs depth 7 number-reads))]
+         [candidates (time (enumerate-arm isa desired-types grouped-sub-exprs depth max-cost number-reads))]
          [load-buffers (halide:extract-live-buffers halide-expr)]
          [live-buffers (lambda (expr)
                          (let* ([live-bufs (mutable-set)]
@@ -147,16 +148,20 @@
          [desired-types (arm:get-vector-types output-type)]
          ; TODO: do the pruning somehow...
          ; TODO: should this be the depth and the cost?
-         [candidates (enumerate-arm isa desired-types grouped-sub-exprs 3 7)])
+         [depth 2]
+         [max-cost (if narrowing? 15 10)]
+         [candidates (enumerate-arm isa desired-types grouped-sub-exprs depth max-cost)])
 
      (sort-and-uniquify candidates)))
 
 (define (handle-abs expr saturate? output-type arm-sub-exprs halide-expr)
   (let ([isa (list arm:abs arm:sqabs arm:reinterpret)]
         [grouped-sub-exprs (prepare-sub-exprs arm-sub-exprs)]
-        [desired-types (arm:get-vector-types output-type)])
-    ; TODO: is this a good depth / cost??
-    (define candidates (enumerate-arm isa desired-types grouped-sub-exprs 2 2))
+        [desired-types (arm:get-vector-types output-type)]
+        ; TODO: is this a good depth / cost??
+        [depth 2]
+        [max-cost 10])
+    (define candidates (enumerate-arm isa desired-types grouped-sub-exprs depth max-cost))
     (sort-and-uniquify candidates)))
 
 (define (handle-minimum a b arm-sub-exprs halide-expr)
@@ -167,7 +172,9 @@
          [grouped-sub-exprs (prepare-sub-exprs arm-sub-exprs)]
          [desired-types (arm:get-vector-types output-type)]
          ; TODO: is this a good depth / cost??
-         [candidates (enumerate-arm isa desired-types grouped-sub-exprs 2 2)])
+         [depth 2]
+         [max-cost 10]
+         [candidates (enumerate-arm isa desired-types grouped-sub-exprs depth max-cost)])
     (sort-and-uniquify candidates)))
 
 (define (handle-maximum a b arm-sub-exprs halide-expr)
@@ -178,7 +185,9 @@
          [grouped-sub-exprs (prepare-sub-exprs arm-sub-exprs)]
          [desired-types (arm:get-vector-types output-type)]
          ; TODO: is this a good depth / cost??
-         [candidates (enumerate-arm isa desired-types grouped-sub-exprs 2 2)])
+         [depth 2]
+         [max-cost 10]
+         [candidates (enumerate-arm isa desired-types grouped-sub-exprs depth max-cost)])
     (sort-and-uniquify candidates)))
 
 (define (handle-vv-mpy-add expr weights output-type arm-sub-exprs halide-expr)
@@ -192,7 +201,9 @@
          ; TODO: why is this the number of reads? formula taken from hvx.rkt
          [width (length weights)]
          [number-reads (- (* width 2) (if (eq? width 5) 1 0))]
-         [candidates (enumerate-arm isa desired-types grouped-sub-exprs 4 8 number-reads)])
+         [depth 4]
+         [max-cost 20]
+         [candidates (enumerate-arm isa desired-types grouped-sub-exprs depth max-cost number-reads)])
 
     (define (uint1-const) (define-symbolic* b boolean?) (uint1_t b))
     (define (fill-arg-grammars node [pos -1])
@@ -208,7 +219,9 @@
          [output-type (halide:elem-type halide-expr)]
          [desired-types (arm:get-vector-types output-type)]
          ; TODO: how to decide depth/cost
-         [candidates (enumerate-arm isa desired-types grouped-sub-exprs 1 2)])
+         [depth 1]
+         [max-cost 4]
+         [candidates (enumerate-arm isa desired-types grouped-sub-exprs depth max-cost)])
     (sort-and-uniquify candidates)))
 
 (define (handle-add-sat expr0 expr1 arm-sub-exprs halide-expr)
@@ -217,7 +230,9 @@
          [output-type (halide:elem-type halide-expr)]
          [desired-types (arm:get-vector-types output-type)]
          ; TODO: how to decide depth/cost
-         [candidates (enumerate-arm isa desired-types grouped-sub-exprs 1 2)])
+         [depth 1]
+         [max-cost 4]
+         [candidates (enumerate-arm isa desired-types grouped-sub-exprs depth max-cost)])
     (sort-and-uniquify candidates)))
 
 (define (handle-sub-sat expr0 expr1 arm-sub-exprs halide-expr)
@@ -226,7 +241,9 @@
          [output-type (halide:elem-type halide-expr)]
          [desired-types (arm:get-vector-types output-type)]
          ; TODO: how to decide depth/cost
-         [candidates (enumerate-arm isa desired-types grouped-sub-exprs 1 2)])
+         [depth 1]
+         [max-cost 4]
+         [candidates (enumerate-arm isa desired-types grouped-sub-exprs depth max-cost)])
     (sort-and-uniquify candidates)))
 
 (define (handle-vs-shift-left expr shift round? saturate? signed? arm-sub-exprs halide-expr)
@@ -235,13 +252,15 @@
          [widening? (> (cpp:type-bw output-type) (cpp:type-bw input-type))]
          [desired-expr-types (arm:get-vector-types output-type)]
          [grouped-sub-exprs (prepare-sub-exprs arm-sub-exprs)]
+         [depth 1]
+         [max-cost 4]
          [isa (if widening?
                 ; TODO: use saturating / rounding / signedness information
                 ; TODO: are there more widening versions?
                 (list arm:sshll arm:ushll)
                 (list arm:sqrshl arm:uqrshl arm:sqshl arm:uqshl arm:sqshlu arm:srshl arm:urshl))]
          ; TODO: how to decide depth/cost
-         [candidates (enumerate-arm isa desired-expr-types grouped-sub-exprs 1 2)])
+         [candidates (enumerate-arm isa desired-expr-types grouped-sub-exprs depth max-cost)])
     (sort-and-uniquify candidates)))
 
 (define (handle-vv-shift-left expr0 expr1 round? saturate? signed? arm-sub-exprs halide-expr)
@@ -250,12 +269,14 @@
          [widening? (> (cpp:type-bw output-type) (cpp:type-bw input-type))]
          [desired-expr-types (arm:get-vector-types output-type)]
          [grouped-sub-exprs (prepare-sub-exprs arm-sub-exprs)]
+         [depth 1]
+         [max-cost 4]
          [isa (if widening?
                 ; TODO: can we even use saturating / rounding / signedness information?
                 (error "vv-shift-left has no widening asm instructions\n")
                 (list arm:sshl arm:ushl))]
          ; TODO: how to decide depth/cost
-         [candidates (enumerate-arm isa desired-expr-types grouped-sub-exprs 1 2)])
+         [candidates (enumerate-arm isa desired-expr-types grouped-sub-exprs depth max-cost)])
     (sort-and-uniquify candidates)))
 
 (define (handle-vs-shift-right expr shift round? saturate? signed? output-type arm-sub-exprs halide-expr)
@@ -268,12 +289,14 @@
                 ; TODO: need srshr, sshr, ssra, urshr, ursra, ushr, usra
                 (list arm:shrn arm:rshrn arm:sqrshrn arm:sqrshrun arm:sqshrn arm:sqshrun arm:uqrshrn arm:uqshrn)
                 (error "AJ needs to implement srshr, sshr, ssra, urshr, ursra, ushr, usra\n"))]
+         [depth 1]
+         [max-cost (if narrowing? 7 4)]
          ; TODO: how to decide depth/cost
          [candidates (begin
                        (pretty-print desired-expr-types)
                        (pretty-print isa)
                        (pretty-print grouped-sub-exprs)
-                       (enumerate-arm isa desired-expr-types grouped-sub-exprs 1 2))])
+                       (enumerate-arm isa desired-expr-types grouped-sub-exprs depth max-cost))])
     
     (let ([add-scalars (halide:extract-add-scalars halide-expr)])
       (define (bool-const) (define-symbolic* b boolean?) b)
@@ -311,7 +334,11 @@
          [grouped-sub-exprs (prepare-sub-exprs arm-sub-exprs)]
          [desired-types (arm:get-vector-types output-type)]
          ; TODO: is this a good depth / cost??
-         [candidates (enumerate-arm isa desired-types grouped-sub-exprs 2 2)])
+         [depth 2]
+         [max-cost 8]
+         [candidates (enumerate-arm isa desired-types grouped-sub-exprs depth max-cost)])
+    (display (format "\n\nabsd isa:\n~a\n" (pretty-format isa)))
+    (display (format "absd candidates:\n~a\n\n\n" (pretty-format candidates)))
     (sort-and-uniquify candidates)))
 
 (define (handle-build-vec base stride len arm-sub-exprs halide-expr)
