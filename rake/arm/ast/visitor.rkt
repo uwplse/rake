@@ -197,7 +197,7 @@
 
     [(arm:srhadd Vn Vm) (transform (arm:srhadd (visit Vn transform) (visit Vm transform)))]
 
-    [(arm:srhsub Vn Vm) (transform (arm:srhsub (visit Vn transform) (visit Vm transform)))]
+    ; [(arm:srhsub Vn Vm) (transform (arm:srhsub (visit Vn transform) (visit Vm transform)))]
 
     [(arm:srshl Vn Vm) (transform (arm:srshl (visit Vn transform) (visit Vm transform)))]
 
@@ -285,7 +285,7 @@
 
     [(arm:urhadd Vn Vm) (transform (arm:urhadd (visit Vn transform) (visit Vm transform)))]
 
-    [(arm:urhsub Vn Vm) (transform (arm:urhsub (visit Vn transform) (visit Vm transform)))]
+    ; [(arm:urhsub Vn Vm) (transform (arm:urhsub (visit Vn transform) (visit Vm transform)))]
 
     [(arm:urshl Vn Vm) (transform (arm:urshl (visit Vn transform) (visit Vm transform)))]
 
@@ -519,7 +519,7 @@
 
     [(arm:srhadd Vn Vm) (transform (arm:srhadd (visit-shallow Vn transform) (visit-shallow Vm transform)))]
 
-    [(arm:srhsub Vn Vm) (transform (arm:srhsub (visit-shallow Vn transform) (visit-shallow Vm transform)))]
+    ; [(arm:srhsub Vn Vm) (transform (arm:srhsub (visit-shallow Vn transform) (visit-shallow Vm transform)))]
 
     [(arm:srshl Vn Vm) (transform (arm:srshl (visit-shallow Vn transform) (visit-shallow Vm transform)))]
 
@@ -607,7 +607,7 @@
 
     [(arm:urhadd Vn Vm) (transform (arm:urhadd (visit-shallow Vn transform) (visit-shallow Vm transform)))]
 
-    [(arm:urhsub Vn Vm) (transform (arm:urhsub (visit-shallow Vn transform) (visit-shallow Vm transform)))]
+    ; [(arm:urhsub Vn Vm) (transform (arm:urhsub (visit-shallow Vn transform) (visit-shallow Vm transform)))]
 
     [(arm:urshl Vn Vm) (transform (arm:urshl (visit-shallow Vn transform) (visit-shallow Vm transform)))]
 

@@ -46,8 +46,8 @@
 (struct shsub (Vn Vm) #:transparent)                        ;; halving_sub
 (struct urhadd (Vn Vm) #:transparent)                       ;; rounding_halving_add
 (struct srhadd (Vn Vm) #:transparent)                       ;; rounding_halving_add
-(struct urhsub (Vn Vm) #:transparent)                       ;; rounding_halving_sub
-(struct srhsub (Vn Vm) #:transparent)                       ;; rounding_halving_sub
+; (struct urhsub (Vn Vm) #:transparent)                       ;; rounding_halving_sub
+; (struct srhsub (Vn Vm) #:transparent)                       ;; rounding_halving_sub
 (struct umin (Vn Vm) #:transparent)                         ;; min
 (struct smin (Vn Vm) #:transparent)                         ;; min
 (struct umax (Vn Vm) #:transparent)                         ;; max
@@ -1068,14 +1068,14 @@
                          (instr-sig 'i32x4 (list 'i32x4 'i32x4))
                          )]
 
-    [(eq? srhsub instr) (list
-                         (instr-sig 'i8x8 (list 'i8x8 'i8x8))
-                         (instr-sig 'i8x16 (list 'i8x16 'i8x16))
-                         (instr-sig 'i16x4 (list 'i16x4 'i16x4))
-                         (instr-sig 'i16x8 (list 'i16x8 'i16x8))
-                         (instr-sig 'i32x2 (list 'i32x2 'i32x2))
-                         (instr-sig 'i32x4 (list 'i32x4 'i32x4))
-                         )]
+    ; [(eq? srhsub instr) (list
+    ;                      (instr-sig 'i8x8 (list 'i8x8 'i8x8))
+    ;                      (instr-sig 'i8x16 (list 'i8x16 'i8x16))
+    ;                      (instr-sig 'i16x4 (list 'i16x4 'i16x4))
+    ;                      (instr-sig 'i16x8 (list 'i16x8 'i16x8))
+    ;                      (instr-sig 'i32x2 (list 'i32x2 'i32x2))
+    ;                      (instr-sig 'i32x4 (list 'i32x4 'i32x4))
+    ;                      )]
 
     [(eq? srshl instr) (list
                          (instr-sig 'i8x8 (list 'i8x8 'i8x8))
@@ -1443,14 +1443,14 @@
                          (instr-sig 'u32x4 (list 'u32x4 'u32x4))
                          )]
 
-    [(eq? urhsub instr) (list
-                         (instr-sig 'u8x8 (list 'u8x8 'u8x8))
-                         (instr-sig 'u8x16 (list 'u8x16 'u8x16))
-                         (instr-sig 'u16x4 (list 'u16x4 'u16x4))
-                         (instr-sig 'u16x8 (list 'u16x8 'u16x8))
-                         (instr-sig 'u32x2 (list 'u32x2 'u32x2))
-                         (instr-sig 'u32x4 (list 'u32x4 'u32x4))
-                         )]
+    ; [(eq? urhsub instr) (list
+    ;                      (instr-sig 'u8x8 (list 'u8x8 'u8x8))
+    ;                      (instr-sig 'u8x16 (list 'u8x16 'u8x16))
+    ;                      (instr-sig 'u16x4 (list 'u16x4 'u16x4))
+    ;                      (instr-sig 'u16x8 (list 'u16x8 'u16x8))
+    ;                      (instr-sig 'u32x2 (list 'u32x2 'u32x2))
+    ;                      (instr-sig 'u32x4 (list 'u32x4 'u32x4))
+    ;                      )]
 
     [(eq? urshl instr) (list
                          (instr-sig 'u8x8 (list 'u8x8 'i8x8))
