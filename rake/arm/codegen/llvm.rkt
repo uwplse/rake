@@ -133,16 +133,16 @@
     [(arm:dup Vn)
      (destruct (arm:interpret Vn)
        ;; TODO: there are no llvm intrinsics for these...
-       [(uint8_t _)  `(halide.ir.x8, (to-llvm-type arm-expr), `(list, (compile-scalar Vn)))]
-       [(int8_t _)   `(halide.ir.x8, (to-llvm-type arm-expr), `(list, (compile-scalar Vn)))]
-       [(uint16_t _) `(halide.ir.x4, (to-llvm-type arm-expr), `(list, (compile-scalar Vn)))]
-       [(int16_t _)  `(halide.ir.x4, (to-llvm-type arm-expr), `(list, (compile-scalar Vn)))]
+       [(uint8_t _)  `(halide.ir.x8, (to-llvm-type arm-expr), `(list ,(compile-scalar Vn)))]
+       [(int8_t _)   `(halide.ir.x8, (to-llvm-type arm-expr), `(list ,(compile-scalar Vn)))]
+       [(uint16_t _) `(halide.ir.x4, (to-llvm-type arm-expr), `(list ,(compile-scalar Vn)))]
+       [(int16_t _)  `(halide.ir.x4, (to-llvm-type arm-expr), `(list ,(compile-scalar Vn)))]
        ;; TODO: there are 2S and 4S variants of this instruction
-       [(uint32_t _) `(halide.ir.x2, (to-llvm-type arm-expr), `(list, (compile-scalar Vn)))]
-       [(int32_t _)  `(halide.ir.x2, (to-llvm-type arm-expr), `(list, (compile-scalar Vn)))]
+       [(uint32_t _) `(halide.ir.x2, (to-llvm-type arm-expr), `(list ,(compile-scalar Vn)))]
+       [(int32_t _)  `(halide.ir.x2, (to-llvm-type arm-expr), `(list ,(compile-scalar Vn)))]
        ;; Yes, the instruction type is 2D for 64-bit
-       [(uint64_t _) `(halide.ir.x2, (to-llvm-type arm-expr), `(list, (compile-scalar Vn)))]
-       [(int64_t _)  `(halide.ir.x2, (to-llvm-type arm-expr), `(list, (compile-scalar Vn)))]
+       [(uint64_t _) `(halide.ir.x2, (to-llvm-type arm-expr), `(list ,(compile-scalar Vn)))]
+       [(int64_t _)  `(halide.ir.x2, (to-llvm-type arm-expr), `(list ,(compile-scalar Vn)))]
        [_ (error (format "arm:dup variant not understood: ~a" arm-expr))])]
 
     [(arm:dupn Vn)
@@ -166,6 +166,98 @@
        [_ (error (format "arm:dupw variant not understood: ~a" arm-expr))])]
 
     ;; TODO: the extract vectors codegen
+
+    [(arm:mla-vs Vd Vn Vm)
+      ;; TODO: no LLVM intrinsics, make SExpParser construct the correct code.
+      `(halide.mla, (to-llvm-type arm-expr), `(list, `(list ,(input-arg Vd) ,(input-arg Vn) ,(compile-scalar Vm))))]
+
+    [(arm:mla-vv Vd Vn Vm)
+      ;; TODO: no LLVM intrinsics, make SExpParser construct the correct code.
+      `(halide.mla, (to-llvm-type arm-expr), `(list, `(list ,(input-arg Vd) ,(input-arg Vn) ,(input-arg Vm))))]
+
+    [(arm:mls-vs Vd Vn Vm)
+      ;; TODO: no LLVM intrinsics, make SExpParser construct the correct code.
+      `(halide.mls, (to-llvm-type arm-expr), `(list, `(list ,(input-arg Vd) ,(input-arg Vn) ,(compile-scalar Vm))))]
+
+    [(arm:mls-vv Vd Vn Vm)
+      ;; TODO: no LLVM intrinsics, make SExpParser construct the correct code.
+        `(halide.mls, (to-llvm-type arm-expr), `(list, `(list ,(input-arg Vd) ,(input-arg Vn) ,(input-arg Vm))))]
+
+    [(arm:mul-vs Vn Vm)
+      ;; TODO: no LLVM intrinsics, make SExpParser construct the correct code.
+      `(halide.ir.mul, (to-llvm-type arm-expr), `(list ,(input-arg Vn) ,(compile-scalar Vm)))]
+
+    [(arm:mul-vv Vn Vm)
+      ;; TODO: no LLVM intrinsics, make SExpParser construct the correct code.
+      `(halide.ir.mul, (to-llvm-type arm-expr), `(list ,(input-arg Vn) ,(input-arg Vm)))]
+
+    [(arm:neg Vn)
+      ;; TODO: no LLVM intrinsics, make SExpParser construct the correct code.
+      `(halide.ir.neg, (to-llvm-type arm-expr), `(list ,(input-arg Vn)))]
+
+    [(arm:raddhn Vd Vn Vm Vb)
+      (destruct* ((arm:interpret Vd) (arm:interpret Vn) (arm:interpret Vm) (arm:interpret Vb))
+        [((arm:i16x8 v0) (arm:i16x8 v1) (arm:i16x8 v2) (arm:i16x8 v3))
+          (handle-narrow-concat arm-expr `raddhn.v8i8 Vd Vn Vm Vb)]
+        [((arm:i32x4 v0) (arm:i32x4 v1) (arm:i32x4 v2) (arm:i32x4 v3))
+          (handle-narrow-concat arm-expr `raddhn.v4i16 Vd Vn Vm Vb)]
+        [((arm:i64x2 v0) (arm:i64x2 v1) (arm:i64x2 v2) (arm:i64x2 v3))
+          (handle-narrow-concat arm-expr `raddhn.v2i32 Vd Vn Vm Vb)]
+        [((arm:u16x8 v0) (arm:u16x8 v1) (arm:u16x8 v2) (arm:u16x8 v3))
+          (handle-narrow-concat arm-expr `raddhn.v8i8 Vd Vn Vm Vb)]
+        [((arm:u32x4 v0) (arm:u32x4 v1) (arm:u32x4 v2) (arm:u32x4 v3))
+          (handle-narrow-concat arm-expr `raddhn.v4i16 Vd Vn Vm Vb)]
+        [((arm:u64x2 v0) (arm:u64x2 v1) (arm:u64x2 v2) (arm:u64x2 v3))
+          (handle-narrow-concat arm-expr `raddhn.v2i32 Vd Vn Vm Vb)]
+        [(_ _ _ _) (error (format "arm:raddhn variant not understood: ~a" arm-expr))])]
+
+    [(arm:uaddw Vd Vn Vm)
+      ;; TODO: no LLVM intrinsics, make SExpParser construct the correct code.
+      (destruct* ((arm:interpret Vd) (arm:interpret Vn) (arm:interpret Vm))
+        [((arm:u16x8 v0) (arm:u8x16 v1) (uint1_t v2))
+           (handle-wide-slice-binary1 arm-expr `wide_add Vd Vn v2)]
+        [((arm:u32x4 v0) (arm:u16x8 v1) (uint1_t v2))
+           (handle-wide-slice-binary1 arm-expr `wide_add Vd Vn v2)]
+        [((arm:u64x2 v0) (arm:u32x4 v1) (uint1_t v2))
+           (handle-wide-slice-binary1 arm-expr `wide_add Vd Vn v2)]
+        [(_ _ _) (error (format "arm:uaddw variant not understood: ~a" arm-expr))])]
+
+    [(arm:umull-vs Vd Vn Vm)
+      ;; TODO: we want llvm.aarch64.neon.umull.v* variants, but need the second type to be broadcast.
+      (destruct* ((arm:interpret Vd) (arm:interpret Vn) (arm:interpret Vm))
+        [((arm:u8x16 v0) (uint8_t v1) (uint1_t v2))
+            (handle-wide-slice-binary-broadcast arm-expr `umull.v8i16 Vd Vn v2 `halide.ir.x8)]
+        [((arm:u16x8 v0) (uint16_t v1) (uint1_t v2))
+            (handle-wide-slice-binary-broadcast arm-expr `umull.v4i32 Vd Vn v2 `halide.ir.x4)]
+        [((arm:u32x4 v0) (uint32_t v1) (uint1_t v2))
+            (handle-wide-slice-binary-broadcast arm-expr `umull.v2i64 Vd Vn v2 `halide.ir.x2)]
+        [(_ _ _) (error (format "arm:umull-vs variant not understood: ~a" arm-expr))])]
+
+    [(arm:rshrn Vd Vn Vm Vb)
+      (destruct* ((arm:interpret Vd) (arm:interpret Vn) (arm:interpret Vm) (arm:interpret Vb))
+        [((arm:i16x8 v0) (uint16_t v1) (arm:i16x8 v2) (uint16_t v3))
+          (handle-narrow-concat-scalar arm-expr `rshrn.v8i8 Vd Vn Vm Vb)]
+        [((arm:i32x4 v0) (uint32_t v1) (arm:i32x4 v2) (uint32_t v3))
+          (handle-narrow-concat-scalar arm-expr `rshrn.v4i16 Vd Vn Vm Vb)]
+        [((arm:i64x2 v0) (uint64_t v1) (arm:i64x2 v2) (uint64_t v3))
+          (handle-narrow-concat-scalar arm-expr `rshrn.v2i32 Vd Vn Vm Vb)]
+        [((arm:u16x8 v0) (uint16_t v1) (arm:u16x8 v2) (uint16_t v3))
+          (handle-narrow-concat-scalar arm-expr `rshrn.v8i8 Vd Vn Vm Vb)]
+        [((arm:u32x4 v0) (uint32_t v1) (arm:u32x4 v2) (uint32_t v3))
+          (handle-narrow-concat-scalar arm-expr `rshrn.v4i16 Vd Vn Vm Vb)]
+        [((arm:u64x2 v0) (uint64_t v1) (arm:u64x2 v2) (uint64_t v3))
+          (handle-narrow-concat-scalar arm-expr `rshrn.v2i32 Vd Vn Vm Vb)]
+        [(_ _ _ _) (error (format "arm:rshrn variant not understood: ~a" arm-expr))])]
+
+    [(arm:uqxtn Vn Vm)
+      (destruct* ((arm:interpret Vn) (arm:interpret Vm))
+        [((arm:u16x8 v0) (arm:u16x8 v1))
+          (handle-narrow-concat-small arm-expr `uqxtn.v8i8 Vn Vm)]
+        [((arm:u32x4 v0) (arm:u32x4 v1))
+          (handle-narrow-concat-small arm-expr `uqxtn.v4i16 Vn Vm)]
+        [((arm:u64x2 v0) (arm:u64x2 v1))
+          (handle-narrow-concat-small arm-expr `uqxtn.v2i32 Vn Vm)]
+        [(_ _) (error (format "arm:uqxtn variant not understood: ~a" arm-expr))])]
 
     ;;;;;;;;;;;;;;;;;;;;;;; Concatenate Tiles ;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -302,6 +394,20 @@
     [(arm:u64x2 data) (string->sexp "uint32x2")]
     [_ (error (format "(arm:to-llvm-type-narrow) implement the rest of the arm types: ~a" arm-expr))]))
 
+;; Useful helper function for ARM's weird widening instruction patterns.
+(define (to-llvm-type-half arm-expr)
+  (match (arm:interpret arm-expr)
+    [(arm:i8x16 data) (string->sexp "int8x8")]
+    [(arm:u8x16 data) (string->sexp "uint8x8")]
+    [(arm:i16x8 data) (string->sexp "int16x4")]
+    [(arm:u16x8 data) (string->sexp "uint16x4")]
+    [(arm:i32x4 data) (string->sexp "int32x2")]
+    [(arm:u32x4 data) (string->sexp "uint32x2")]
+    [(arm:i64x2 data) (string->sexp "int64")]
+    [(arm:u64x2 data) (string->sexp "uint64")]
+    [_ (error (format "(arm:to-llvm-type-half) implement the rest of the arm types: ~a" arm-expr))]))
+
+
 (define (compile-idx idx)
   (cond
     [(concrete? idx) (arm:interpret idx)]
@@ -394,5 +500,44 @@
 
 (define (handle-narrow-concat arm-expr name Vd Vn Vm Vb)
   (let ([lo (generate name (to-llvm-type-narrow Vd) `(list ,(input-arg Vd) ,(input-arg Vn)))]
-        [hi (generate name (to-llvm-type-narrow Vm) `(list ,(input-arg Vm) ,(input-arg Vb)))])
-    `(halide.concat_vectors, (to-llvm-type arm-expr), `(list, lo hi))))
+        [lo-type (to-llvm-type-narrow Vd)]
+        [hi (generate name (to-llvm-type-narrow Vm) `(list ,(input-arg Vm) ,(input-arg Vb)))]
+        [hi-type (to-llvm-type-narrow Vm)])
+    `(halide.concat_vectors, (to-llvm-type arm-expr), `(list (,lo-type ,lo) (,hi-type ,hi)))))
+
+;; Vn and Vb are scalars
+(define (handle-narrow-concat-scalar arm-expr name Vd Vn Vm Vb)
+  (let ([lo (generate name (to-llvm-type-narrow Vd) `(list ,(input-arg Vd) ,(compile-scalar Vn)))]
+        [lo-type (to-llvm-type-narrow Vd)]
+        [hi (generate name (to-llvm-type-narrow Vm) `(list ,(input-arg Vm) ,(compile-scalar Vb)))]
+        [hi-type (to-llvm-type-narrow Vm)])
+    `(halide.concat_vectors, (to-llvm-type arm-expr), `(list (,lo-type ,lo) (,hi-type ,hi)))))
+
+;; Each arg is it's own sub-arg
+(define (handle-narrow-concat-small arm-expr name Vd Vn)
+  (let ([lo (generate name (to-llvm-type-narrow Vd) `(list ,(input-arg Vd)))]
+        [lo-type (to-llvm-type-narrow Vd)]
+        [hi (generate name (to-llvm-type-narrow Vn) `(list ,(input-arg Vn)))]
+        [hi-type (to-llvm-type-narrow Vn)])
+    `(halide.concat_vectors, (to-llvm-type arm-expr), `(list (,lo-type ,lo) (,hi-type ,hi)))))
+
+;; Only read half of the input vector Vn for this operation
+(define (handle-wide-slice-binary1 arm-expr name Vd Vn flag)
+  (let* ([slice (if flag `halide.ir.shalf `halide.ir.fhalf)]
+         [type (to-llvm-type-half Vn)]
+         [half (list slice type `(list ,(input-arg Vn)))])
+    (generate name (to-llvm-type arm-expr) `(list ,(input-arg Vd) (,type ,half)))))
+
+;; Only read half of the input vector Vd for this operation and broadcast Vn
+(define (handle-wide-slice-binary-broadcast arm-expr name Vd Vn flag broadcast)
+  (let* ([slice (if flag `halide.ir.shalf `halide.ir.fhalf)]
+         [type (to-llvm-type-half Vd)]
+         [half (list slice type `(list ,(input-arg Vd)))]
+         [b-type (to-llvm-type-half Vd)]
+         [b `(,broadcast ,b-type (list ,(compile-scalar Vn)))])
+    (generate
+      name
+      (to-llvm-type arm-expr)
+      `(list
+        (,type ,half)
+        (,b-type ,b)))))
