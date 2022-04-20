@@ -1219,16 +1219,16 @@
     [(eq? uaddlp instr) (list
                          (instr-sig 'u16x4 (list 'u8x8))
                          (instr-sig 'u16x8 (list 'u8x16))
-                         (instr-sig 'i16x4 (list 'u8x8))
-                         (instr-sig 'i16x8 (list 'u8x16))
+                         ;(instr-sig 'i16x4 (list 'u8x8))
+                         ;(instr-sig 'i16x8 (list 'u8x16))
                          (instr-sig 'u32x2 (list 'u16x4))
                          (instr-sig 'u32x4 (list 'u16x8))
-                         (instr-sig 'i32x2 (list 'u16x4))
-                         (instr-sig 'i32x4 (list 'u16x8))
+                         ;(instr-sig 'i32x2 (list 'u16x4))
+                         ;(instr-sig 'i32x4 (list 'u16x8))
                          (instr-sig 'uint64 (list 'u32x2))
                          (instr-sig 'u64x2 (list 'u32x4))
-                         (instr-sig 'int64 (list 'u32x2))
-                         (instr-sig 'i64x2 (list 'u32x4))
+                         ;(instr-sig 'int64 (list 'u32x2))
+                         ;(instr-sig 'i64x2 (list 'u32x4))
                          )]
 
     [(eq? uaddlv instr) (list

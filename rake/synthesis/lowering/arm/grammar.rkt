@@ -51,7 +51,7 @@
          [widening? (>= (cpp:type-bw output-type) (* 2 (cpp:type-bw input-type)))]
          ; TODO: better pruning and more isa options
          [isa (if widening?
-                (list arm:reinterpret arm:add arm:addv arm:saddlv arm:uaddlv arm:saddl arm:saddw arm:saddlp arm:sadalp arm:smlal-vs arm:smlsl-vs arm:sdot.v2i32.v8i8 arm:udot.v2i32.v8i8 arm:sdot.v4i32.v16i8 arm:udot.v4i32.v16i8 arm:shll arm:ssubl arm:ssubw arm:sub arm:uadalp arm:uaddl arm:uaddlp arm:uaddw arm:umlal-vs arm:umlsl-vs arm:usubl arm:usubw arm:smull-vs arm:umull-vs)
+                (list arm:reinterpret arm:mul-vs arm:sxtl arm:uxtl arm:add arm:addv arm:saddlv arm:uaddlv arm:saddl arm:saddw arm:saddlp arm:sadalp arm:smlal-vs arm:smlsl-vs arm:sdot.v2i32.v8i8 arm:udot.v2i32.v8i8 arm:sdot.v4i32.v16i8 arm:udot.v4i32.v16i8 arm:shll arm:ssubl arm:ssubw arm:sub arm:uadalp arm:uaddl arm:uaddlp arm:uaddw arm:umlal-vs arm:umlsl-vs arm:usubl arm:usubw arm:smull-vs arm:umull-vs)
                 ;(list arm:reinterpret arm:umull-vs arm:add)
                 (list arm:reinterpret arm:add arm:sub arm:addp arm:mla-vs arm:mls-vs arm:mul-vs arm:shl arm:neg))]
          [depth (if widening? 2 2)]
@@ -193,7 +193,14 @@
          [width (length weights)]
          [number-reads (- (* width 2) (if (eq? width 5) 1 0))]
          [candidates (enumerate-arm isa desired-types grouped-sub-exprs 4 8 number-reads)])
-    (sort-and-uniquify candidates)))
+
+    (define (uint1-const) (define-symbolic* b boolean?) (uint1_t b))
+    (define (fill-arg-grammars node [pos -1])
+      (match node
+        ['uint1 (uint1-const)]
+        [_ node]))
+
+    (sort-and-uniquify (for/list ([candidate candidates]) (cons (arm:visit (car candidate) fill-arg-grammars) (cdr candidate))))))
 
 (define (handle-neg-sat expr arm-sub-exprs halide-expr)
   (let* ([isa (list arm:sqneg)]
