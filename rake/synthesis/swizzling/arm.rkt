@@ -92,6 +92,13 @@
     [_ (error "Unidentified swizzle-node ~a" node)]))
 
 (define (synthesize-swizzle-node swizzle-node starting-vecs arm-template swizzle-budget halide-expr arm-sub-exprs value-bounds translation-history)
+
+  (define (reset-lo/hi-flags node [pos -1])
+    (destruct node
+      [(uint1_t x) (define-symbolic* b boolean?) (uint1_t b)]
+      [_ node]))
+  (set! arm-template (arm:visit-shallow arm-template reset-lo/hi-flags))
+  
   ;; Get swizzle grammar
   (define candidates (get-arm-swizzle-grammar halide-expr arm-template swizzle-budget swizzle-node starting-vecs arm-sub-exprs translation-history))
 
