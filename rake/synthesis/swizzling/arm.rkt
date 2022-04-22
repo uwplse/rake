@@ -92,11 +92,27 @@
     [_ (error "Unidentified swizzle-node ~a" node)]))
 
 (define (synthesize-swizzle-node swizzle-node starting-vecs arm-template swizzle-budget halide-expr arm-sub-exprs value-bounds translation-history)
-
+  (define target-node-id (get-swizzle-node-id swizzle-node))
+  
+  (define (contains-swizzle-node? expr)
+    (define found #f)
+    (define (sw-nd-srch node [pos -1])
+      (destruct node
+        [(arm:??load id live-data buffer gather-tbl output-type)
+         (if (equal? id target-node-id) (set! found #t) node)]
+        [(arm:??swizzle id live-data expr gather-tbl output-type)
+         (if (equal? id target-node-id) (set! found #t) node)]
+        [_ node]))
+    (arm:visit-shallow expr sw-nd-srch)
+    found)
+  
   (define (reset-lo/hi-flags node [pos -1])
     (destruct node
-      [(uint1_t x) (define-symbolic* b boolean?) (uint1_t b)]
+      [(arm:smlal-vs a b c d) (define-symbolic* x boolean?) (if (contains-swizzle-node? b) (arm:smlal-vs a b c (uint1_t x)) node)]
+      [(arm:smull-vs a b c) (define-symbolic* x boolean?) (if (contains-swizzle-node? a) (arm:smull-vs a b (uint1_t x)) node)]
+      [(arm:ushll a b c) (define-symbolic* x boolean?) (if (contains-swizzle-node? a) (arm:ushll a b (uint1_t x)) node)]
       [_ node]))
+
   (set! arm-template (arm:visit-shallow arm-template reset-lo/hi-flags))
   
   ;; Get swizzle grammar
@@ -152,19 +168,19 @@
   ; (pretty-print halide-expr)
   ; (pretty-print template)
 
-  ;(define-values (optimized-halide-expr optimized-template inferred-axioms)
-    ;(optimize-query halide-expr template arm-sub-exprs value-bounds translation-history))
+  (define-values (optimized-halide-expr optimized-template inferred-axioms)
+    (arm:optimize-query halide-expr template arm-sub-exprs value-bounds translation-history))
 
   ;(pretty-print optimized-halide-expr)
   ;(pretty-print optimized-template)
   
   ;; Incrementally checks the template for more and more lanes
-  (define sym-consts (set->list (set-subtract (list->set (symbolics template)) (list->set (symbolics halide-expr)))))
+  (define sym-consts (set->list (set-subtract (list->set (symbolics optimized-template)) (list->set (symbolics optimized-halide-expr)))))
    ;(display "\n\nrunning synthesizer on...\n\n")
    ;(pretty-print template)
    ;(pretty-print halide-expr)
-  (define lanes-to-verify (verification-lanes (arm:get-interpreted-type template)))
-  (synthesize-incremental halide-expr template sym-consts lanes-to-verify '()))
+  (define lanes-to-verify (verification-lanes (arm:get-interpreted-type optimized-template)))
+  (synthesize-incremental optimized-halide-expr optimized-template sym-consts lanes-to-verify inferred-axioms '()))
 
 (define grammar-lib (make-hash))
 
@@ -339,7 +355,7 @@
     ; [(eq? type 'u64x4) (range 4)]
 ))
 
-(define (synthesize-incremental halide-expr template sym-consts lanes-to-verify discarded-sols)
+(define (synthesize-incremental halide-expr template sym-consts lanes-to-verify inferred-axioms discarded-sols)
   ; (display "\n\nsynthesize-incremental\n\n")
   (cond
     [(empty? lanes-to-verify) (model)]
@@ -353,6 +369,7 @@
      
      (define st (current-milliseconds))
      (clear-vc!)
+     (for-each (lambda (axiom) (assume axiom)) inferred-axioms)
      (define sol (synthesize #:forall (symbolics halide-expr)
                              #:guarantee (begin
                                            (assert (not (ormap (lambda (discarded-sol) (equal? template discarded-sol)) discarded-sols)))
@@ -367,12 +384,12 @@
         (define c-sol sol);(complete-solution sol sym-consts))
         (define updated-template (evaluate template c-sol))
         ;(pretty-print updated-template)
-        (define sub-sol (synthesize-incremental halide-expr updated-template sym-consts (rest lanes-to-verify) '()))
+        (define sub-sol (synthesize-incremental halide-expr updated-template sym-consts (rest lanes-to-verify) inferred-axioms '()))
         (cond
           [(correct? sub-sol) c-sol]
           [else
            (define discarded-sol (evaluate template c-sol))
-           (synthesize-incremental halide-expr template sym-consts lanes-to-verify (append (list discarded-sol) discarded-sols))])]
+           (synthesize-incremental halide-expr template sym-consts lanes-to-verify inferred-axioms (append (list discarded-sol) discarded-sols))])]
        [else
         (unsat)])]))
 
