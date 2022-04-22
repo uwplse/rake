@@ -240,7 +240,7 @@
          [candidates (enumerate-arm isa desired-types grouped-sub-exprs depth max-cost)])
     (sort-and-uniquify candidates)))
 
-(define (handle-add-sat expr0 expr1 arm-sub-exprs halide-expr)
+(define (handle-add-sat expr0 expr1 outT arm-sub-exprs halide-expr)
   (let* ([isa (list arm:sqadd arm:suqadd arm:usqadd arm:uqadd)]
          [grouped-sub-exprs (prepare-sub-exprs arm-sub-exprs)]
          [output-type (halide:elem-type halide-expr)]
@@ -251,7 +251,7 @@
          [candidates (enumerate-arm isa desired-types grouped-sub-exprs depth max-cost)])
     (sort-and-uniquify candidates)))
 
-(define (handle-sub-sat expr0 expr1 arm-sub-exprs halide-expr)
+(define (handle-sub-sat expr0 expr1 outT arm-sub-exprs halide-expr)
   (let* ([isa (list arm:sqsub arm:uqsub)]
          [grouped-sub-exprs (prepare-sub-exprs arm-sub-exprs)]
          [output-type (halide:elem-type halide-expr)]
@@ -421,11 +421,11 @@
     [(arm-ir:neg-sat expr)
       (handle-neg-sat expr arm-sub-exprs halide-expr)]
 
-    [(arm-ir:add-sat expr0 expr1)
-      (handle-add-sat expr0 expr1 arm-sub-exprs halide-expr)]
+    [(arm-ir:add-sat expr0 expr1 outT)
+      (handle-add-sat expr0 expr1 outT arm-sub-exprs halide-expr)]
 
-    [(arm-ir:sub-sat expr0 expr1)
-      (handle-sub-sat expr0 expr1 arm-sub-exprs halide-expr)]
+    [(arm-ir:sub-sat expr0 expr1 outT)
+      (handle-sub-sat expr0 expr1 outT arm-sub-exprs halide-expr)]
 
     [(arm-ir:vs-shift-left expr shift round? saturate? signed?)
       (handle-vs-shift-left expr shift round? saturate? signed? arm-sub-exprs halide-expr)]
