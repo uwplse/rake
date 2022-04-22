@@ -51,10 +51,10 @@
          [widening? (>= (cpp:type-bw output-type) (* 2 (cpp:type-bw input-type)))]
          ; TODO: better pruning and more isa options
          [isa (if widening?
-                (list arm:reinterpret arm:mul-vs arm:sxtl arm:uxtl arm:add arm:addv arm:saddlv arm:uaddlv arm:saddl arm:saddw arm:saddlp arm:sadalp arm:smlal-vs arm:smlsl-vs arm:sdot.v2i32.v8i8 arm:udot.v2i32.v8i8 arm:sdot.v4i32.v16i8 arm:udot.v4i32.v16i8 arm:shll arm:ssubl arm:ssubw arm:sub arm:uadalp arm:uaddl arm:uaddlp arm:uaddw arm:umlal-vs arm:umlsl-vs arm:usubl arm:usubw arm:smull-vs arm:umull-vs)
-                ;(list arm:reinterpret arm:umull-vs arm:add)
-                (list arm:reinterpret arm:add arm:sub arm:addp arm:mla-vs arm:mls-vs arm:mul-vs arm:shl arm:neg))]
-         [depth (if widening? 2 2)]
+                (list arm:reinterpret arm:mul-vs arm:sxtl arm:uxtl arm:add arm:addv arm:saddlv arm:uaddlv arm:saddl arm:saddw arm:saddlp arm:sadalp arm:smlal-vs arm:smlsl-vs arm:sdot.v2i32.v8i8 arm:udot.v2i32.v8i8 arm:sdot.v4i32.v16i8 arm:udot.v4i32.v16i8 arm:ushll arm:sshll arm:ssubl arm:ssubw arm:sub arm:uadalp arm:uaddl arm:uaddlp arm:uaddw arm:umlal-vs arm:umlsl-vs arm:usubl arm:usubw arm:smull-vs arm:umull-vs)
+                ;(list arm:add arm:sshll arm:ushll arm:reinterpret)
+                (list arm:reinterpret arm:add arm:sub arm:addp arm:mla-vs arm:mls-vs arm:mul-vs arm:neg))] ;arm:shl
+         [depth (if widening? 3 2)]
          [grouped-sub-exprs (prepare-sub-exprs arm-sub-exprs)]
          [number-reads (length weights)]
          [desired-types (arm:get-vector-types output-type)]
@@ -103,7 +103,8 @@
     (set! candidates (time (sort candidates (lambda (v1 v2) (if (eq? (car (cdr v1)) (car (cdr v2))) (< (cdr (cdr v1)) (cdr (cdr v2))) (< (car (cdr v1)) (car (cdr v2))))))))
 
     (let* ([add-scalars (halide:extract-add-scalars halide-expr)]
-           [int-consts (set->list (list->set (append weights add-scalars)))])
+           [shl-scalars (halide:extract-shl-scalars halide-expr)]
+           [int-consts (set->list (list->set (append weights add-scalars shl-scalars)))])
       (define (bool-const) (define-symbolic* b boolean?) b)
       (define (uint1-const) (define-symbolic* b boolean?) (uint1_t b))
       (define (int8-const) (int8x1 (apply choose* int-consts)))
@@ -270,10 +271,10 @@
                 (error "AJ needs to implement srshr, sshr, ssra, urshr, ursra, ushr, usra\n"))]
          ; TODO: how to decide depth/cost
          [candidates (begin
-                       (pretty-print desired-expr-types)
-                       (pretty-print isa)
-                       (pretty-print grouped-sub-exprs)
-                       (enumerate-arm isa desired-expr-types grouped-sub-exprs 1 2))])
+                       ;(pretty-print desired-expr-types)
+                       ;(pretty-print isa)
+                       ;(pretty-print grouped-sub-exprs)
+                       (enumerate-arm isa desired-expr-types grouped-sub-exprs 1 5))])
     
     (let ([add-scalars (halide:extract-add-scalars halide-expr)])
       (define (bool-const) (define-symbolic* b boolean?) b)
@@ -311,8 +312,13 @@
          [grouped-sub-exprs (prepare-sub-exprs arm-sub-exprs)]
          [desired-types (arm:get-vector-types output-type)]
          ; TODO: is this a good depth / cost??
-         [candidates (enumerate-arm isa desired-types grouped-sub-exprs 2 2)])
+         [candidates (enumerate-arm isa desired-types grouped-sub-exprs 2 4)])
     (sort-and-uniquify candidates)))
+
+(define (handle-vs-divide expr divisor)
+  ;smull-vs umull-vs ushr sshr xtn
+  (error "Reached the end my friend")
+  )
 
 (define (handle-build-vec base stride len arm-sub-exprs halide-expr)
   (cond
@@ -399,6 +405,9 @@
 
     ; TODO: abs-diff-acc, select, is-equal, less-than, less-than-eq, bitwise-and, vs-divide
 
+    [(arm-ir:vs-divide expr divisor)
+      (handle-vs-divide expr divisor)]
+    
     [(arm-ir:build-vec base stride len)
       (handle-build-vec base stride len arm-sub-exprs halide-expr)]
 
@@ -442,17 +451,15 @@
          (define exprs (hash-ref! grouped-sub-exprs out-type (set)))
          (hash-set! grouped-sub-exprs out-type (set-add exprs base-load-expr)))]
       [(arm:is-broadcast? arm-sub-expr)
-       (define sub-expr-type (arm:get-interpreted-type arm-sub-expr))
-       (define exprs (hash-ref! grouped-sub-exprs sub-expr-type (set)))
-       (hash-set! grouped-sub-exprs sub-expr-type (set-add exprs arm-sub-expr))
-       (define sca (arm:get-broadcasted-val arm-sub-expr))
-       (when (sca-cast? sca)
-         (define (strip-casts e)
-           (if (sca-cast? e) (strip-casts (sca-cast-sca e)) e))
-         (define alt-sub-exprs (arm:dupw (strip-casts sca)))
-         (define sub-expr-type (arm:get-interpreted-type alt-sub-exprs))
+       (define (gen-broadcasts expr)
+         (define br-expr (arm:dupw expr))
+         (define sub-expr-type (arm:get-interpreted-type br-expr))
          (define exprs (hash-ref! grouped-sub-exprs sub-expr-type (set)))
-         (hash-set! grouped-sub-exprs sub-expr-type (set-add exprs alt-sub-exprs)))]
+         (hash-set! grouped-sub-exprs sub-expr-type (set-add exprs br-expr))
+         (when (sca-cast? expr)
+           (gen-broadcasts (sca-cast-sca expr))))
+       
+       (gen-broadcasts (arm:get-broadcasted-val arm-sub-expr))]
       [else
        (define sub-expr-type (arm:get-interpreted-type arm-sub-expr))
        (define exprs (hash-ref! grouped-sub-exprs sub-expr-type (set)))
