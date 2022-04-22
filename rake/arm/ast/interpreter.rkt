@@ -10466,4 +10466,7 @@
            (cpp:eval intr-stride)))
          (cpp:type intr-base))))]
 
+    [(arm:abstr-expr orig-expr abstr-vals offset)
+     (define vecType (arm:get-type-struct (interpret orig-expr)))
+     (vecType (lambda (i) (halide:buffer-ref abstr-vals (+ i offset))))]
     [_ p]))
