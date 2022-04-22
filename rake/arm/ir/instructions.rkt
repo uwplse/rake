@@ -54,8 +54,8 @@ add, sadd, mul, min, max, and, or
 (struct vs-dmpy-add-hh-sat (expr weight round? accumulate? outT) #:super struct:ast-node #:transparent)      ;; Instructions: sqdmulh, sqdmulh, sqrdmulh, sqrdmlah, sqrdmlsh
 
 (struct neg-sat (expr0) #:super struct:ast-node #:transparent)                               ;; Instructions: sqneg
-(struct add-sat (expr0 expr1) #:super struct:ast-node #:transparent)                         ;; Instructions: sqadd, suqadd, usqadd, uqadd
-(struct sub-sat (expr0 expr1) #:super struct:ast-node #:transparent)                         ;; Instructions: sqsub, uqsub
+(struct add-sat (expr0 expr1 outT) #:super struct:ast-node #:transparent)                         ;; Instructions: sqadd, suqadd, usqadd, uqadd
+(struct sub-sat (expr0 expr1 outT) #:super struct:ast-node #:transparent)                         ;; Instructions: sqsub, uqsub
 
 (struct vs-shift-left (expr shift round? saturate? signed?) #:super struct:ast-node #:transparent)  ;; Instructions: sqrshl, sqshl, sqshlu, srshl, uqrshl, uqshl, urshl, sshll, ushll
 (struct vv-shift-left (expr0 expr1 round? saturate? signed?) #:super struct:ast-node #:transparent)  ;; Instructions: sshl, ushl
