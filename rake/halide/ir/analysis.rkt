@@ -144,8 +144,13 @@
   (define shl-scalars (mutable-set))
   (define (extract-shl-const node)
     (destruct node
-      ;; We only need to examing shift-right and divide
+      ;; We only need to examing shift-left and multiplies
       [(vec-shl v1 v2) (set-union! shl-scalars (extract-scalars v2))]
+      [(vec-mul v1 v2)
+       (define mul-scalars (set-union (extract-scalars v1) (extract-scalars v2)))
+       (define pow-of-2-scalars (filter (lambda (c) (is-power-of-2? c)) (set->list mul-scalars)))
+       (define log-2-scalars (list->set (map (lambda (c) (log-2 c)) pow-of-2-scalars)))
+       (set-union! shl-scalars log-2-scalars)]
       ;; Ignore everything else
       [_ node]))
   (halide:visit expr extract-shl-const)
