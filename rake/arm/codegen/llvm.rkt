@@ -46,17 +46,17 @@
     [(arm:addhn Vd Vn Vm Vb)
       (destruct* ((arm:interpret Vd) (arm:interpret Vn) (arm:interpret Vm) (arm:interpret Vb))
         [((arm:i16x8 v0) (arm:i16x8 v1) (arm:i16x8 v2) (arm:i16x8 v3))
-          (handle-narrow-concat arm-expr `addhn.v8i8 Vd Vn Vm Vb)]
+          (generate-rake `addhn_i16x16 (to-llvm-type arm-expr) `(list ,(input-arg Vd) ,(input-arg Vn) ,(input-arg Vm) ,(input-arg Vb)))]
         [((arm:i32x4 v0) (arm:i32x4 v1) (arm:i32x4 v2) (arm:i32x4 v3))
-          (handle-narrow-concat arm-expr `addhn.v4i16 Vd Vn Vm Vb)]
+          (generate-rake `addhn_i32x8 (to-llvm-type arm-expr) `(list ,(input-arg Vd) ,(input-arg Vn) ,(input-arg Vm) ,(input-arg Vb)))]
         [((arm:i64x2 v0) (arm:i64x2 v1) (arm:i64x2 v2) (arm:i64x2 v3))
-          (handle-narrow-concat arm-expr `addhn.v2i32 Vd Vn Vm Vb)]
+          (generate-rake `addhn_i64x4 (to-llvm-type arm-expr) `(list ,(input-arg Vd) ,(input-arg Vn) ,(input-arg Vm) ,(input-arg Vb)))]
         [((arm:u16x8 v0) (arm:u16x8 v1) (arm:u16x8 v2) (arm:u16x8 v3))
-          (handle-narrow-concat arm-expr `addhn.v8i8 Vd Vn Vm Vb)]
+          (generate-rake `addhn_i16x16 (to-llvm-type arm-expr) `(list ,(input-arg Vd) ,(input-arg Vn) ,(input-arg Vm) ,(input-arg Vb)))]
         [((arm:u32x4 v0) (arm:u32x4 v1) (arm:u32x4 v2) (arm:u32x4 v3))
-         (handle-narrow-concat arm-expr `addhn.v4i16 Vd Vn Vm Vb)]
+         (generate-rake `addhn_i32x8 (to-llvm-type arm-expr) `(list ,(input-arg Vd) ,(input-arg Vn) ,(input-arg Vm) ,(input-arg Vb)))]
         [((arm:u64x2 v0) (arm:u64x2 v1) (arm:u64x2 v2) (arm:u64x2 v3))
-          (handle-narrow-concat arm-expr `addhn.v2i32 Vd Vn Vm Vb)]
+          (generate-rake `addhn_i64x4 (to-llvm-type arm-expr) `(list ,(input-arg Vd) ,(input-arg Vn) ,(input-arg Vm) ,(input-arg Vb)))]
         [(_ _ _ _) (error (format "arm:addhn variant not understood: ~a" arm-expr))])]
 
     [(arm:addp Vn Vm)
@@ -180,17 +180,17 @@
     [(arm:raddhn Vd Vn Vm Vb)
       (destruct* ((arm:interpret Vd) (arm:interpret Vn) (arm:interpret Vm) (arm:interpret Vb))
         [((arm:i16x8 v0) (arm:i16x8 v1) (arm:i16x8 v2) (arm:i16x8 v3))
-          (handle-narrow-concat arm-expr `raddhn.v8i8 Vd Vn Vm Vb)]
+          (generate-rake `raddhn_i16x16 (to-llvm-type arm-expr) `(list ,(input-arg Vd) ,(input-arg Vn) ,(input-arg Vm) ,(input-arg Vb)))]
         [((arm:i32x4 v0) (arm:i32x4 v1) (arm:i32x4 v2) (arm:i32x4 v3))
-          (handle-narrow-concat arm-expr `raddhn.v4i16 Vd Vn Vm Vb)]
+          (generate-rake `raddhn_i32x8 (to-llvm-type arm-expr) `(list ,(input-arg Vd) ,(input-arg Vn) ,(input-arg Vm) ,(input-arg Vb)))]
         [((arm:i64x2 v0) (arm:i64x2 v1) (arm:i64x2 v2) (arm:i64x2 v3))
-          (handle-narrow-concat arm-expr `raddhn.v2i32 Vd Vn Vm Vb)]
+          (generate-rake `raddhn_i64x4 (to-llvm-type arm-expr) `(list ,(input-arg Vd) ,(input-arg Vn) ,(input-arg Vm) ,(input-arg Vb)))]
         [((arm:u16x8 v0) (arm:u16x8 v1) (arm:u16x8 v2) (arm:u16x8 v3))
-          (handle-narrow-concat arm-expr `raddhn.v8i8 Vd Vn Vm Vb)]
+          (generate-rake `raddhn_i16x16 (to-llvm-type arm-expr) `(list ,(input-arg Vd) ,(input-arg Vn) ,(input-arg Vm) ,(input-arg Vb)))]
         [((arm:u32x4 v0) (arm:u32x4 v1) (arm:u32x4 v2) (arm:u32x4 v3))
-          (handle-narrow-concat arm-expr `raddhn.v4i16 Vd Vn Vm Vb)]
+          (generate-rake `raddhn_i32x8 (to-llvm-type arm-expr) `(list ,(input-arg Vd) ,(input-arg Vn) ,(input-arg Vm) ,(input-arg Vb)))]
         [((arm:u64x2 v0) (arm:u64x2 v1) (arm:u64x2 v2) (arm:u64x2 v3))
-          (handle-narrow-concat arm-expr `raddhn.v2i32 Vd Vn Vm Vb)]
+          (generate-rake `raddhn_i64x4 (to-llvm-type arm-expr) `(list ,(input-arg Vd) ,(input-arg Vn) ,(input-arg Vm) ,(input-arg Vb)))]
         [(_ _ _ _) (error (format "arm:raddhn variant not understood: ~a" arm-expr))])]
 
     [(arm:uaddw Vd Vn Vm)
@@ -228,27 +228,27 @@
     [(arm:rshrn Vd Vn Vm Vb)
       (destruct* ((arm:interpret Vd) (arm:interpret Vn) (arm:interpret Vm) (arm:interpret Vb))
         [((arm:i16x8 v0) (uint16_t v1) (arm:i16x8 v2) (uint16_t v3))
-          (handle-narrow-concat-scalar arm-expr `rshrn.v8i8 Vd (uint32x1 Vn) Vm (uint32x1 Vb))]
+          (generate-rake `rshrn_i16x16 (to-llvm-type arm-expr) `(list ,(input-arg Vd) ,(compile-scalar (uint32x1 Vn)) ,(input-arg Vm) ,(compile-scalar (uint32x1 Vb))))]
         [((arm:i32x4 v0) (uint32_t v1) (arm:i32x4 v2) (uint32_t v3))
-          (handle-narrow-concat-scalar arm-expr `rshrn.v4i16 Vd Vn Vm Vb)]
+          (generate-rake `rshrn_i32x8 (to-llvm-type arm-expr) `(list ,(input-arg Vd) ,(compile-scalar (uint32x1 Vn)) ,(input-arg Vm) ,(compile-scalar (uint32x1 Vb))))]
         [((arm:i64x2 v0) (uint64_t v1) (arm:i64x2 v2) (uint64_t v3))
-          (handle-narrow-concat-scalar arm-expr `rshrn.v2i32 Vd (uint32x1 Vn) Vm (uint32x1 Vb))]
+          (generate-rake `rshrn_i64x4 (to-llvm-type arm-expr) `(list ,(input-arg Vd) ,(compile-scalar (uint32x1 Vn)) ,(input-arg Vm) ,(compile-scalar (uint32x1 Vb))))]
         [((arm:u16x8 v0) (uint16_t v1) (arm:u16x8 v2) (uint16_t v3))
-          (handle-narrow-concat-scalar arm-expr `rshrn.v8i8 Vd (uint32x1 Vn) Vm (uint32x1 Vb))]
+          (generate-rake `rshrn_i16x16 (to-llvm-type arm-expr) `(list ,(input-arg Vd) ,(compile-scalar (uint32x1 Vn)) ,(input-arg Vm) ,(compile-scalar (uint32x1 Vb))))]
         [((arm:u32x4 v0) (uint32_t v1) (arm:u32x4 v2) (uint32_t v3))
-          (handle-narrow-concat-scalar arm-expr `rshrn.v4i16 Vd Vn Vm Vb)]
+          (generate-rake `rshrn_i32x8 (to-llvm-type arm-expr) `(list ,(input-arg Vd) ,(compile-scalar (uint32x1 Vn)) ,(input-arg Vm) ,(compile-scalar (uint32x1 Vb))))]
         [((arm:u64x2 v0) (uint64_t v1) (arm:u64x2 v2) (uint64_t v3))
-          (handle-narrow-concat-scalar arm-expr `rshrn.v2i32 Vd (uint32x1 Vn) Vm (uint32x1 Vb))]
+          (generate-rake `rshrn_i64x4 (to-llvm-type arm-expr) `(list ,(input-arg Vd) ,(compile-scalar (uint32x1 Vn)) ,(input-arg Vm) ,(compile-scalar (uint32x1 Vb))))]
         [(_ _ _ _) (error (format "arm:rshrn variant not understood: ~a" arm-expr))])]
 
     [(arm:uqxtn Vn Vm)
       (destruct* ((arm:interpret Vn) (arm:interpret Vm))
         [((arm:u16x8 v0) (arm:u16x8 v1))
-          (handle-narrow-concat-small arm-expr `uqxtn.v8i8 Vn Vm)]
+          (generate-rake `uqxtn_u16x16 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
         [((arm:u32x4 v0) (arm:u32x4 v1))
-          (handle-narrow-concat-small arm-expr `uqxtn.v4i16 Vn Vm)]
+          (generate-rake `uqxtn_u32x8 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
         [((arm:u64x2 v0) (arm:u64x2 v1))
-          (handle-narrow-concat-small arm-expr `uqxtn.v2i32 Vn Vm)]
+          (generate-rake `uqxtn_u64x4 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
         [(_ _) (error (format "arm:uqxtn variant not understood: ~a" arm-expr))])]
 
     [(arm:usubl Vd Vn Vm)
@@ -373,11 +373,11 @@
     [(arm:sqrshrn Vd Vn Vm Vb)
       (destruct* ((arm:interpret Vd) (arm:interpret Vn) (arm:interpret Vm) (arm:interpret Vb))
         [((arm:i16x8 v0) (uint16_t v1) (arm:i16x8 v2) (uint16_t v3))
-          (handle-narrow-concat-scalar arm-expr `sqrshrn.v8i8 Vd (uint32x1 Vn) Vm (uint32x1 Vb))]
+          (generate-rake `sqrshrn_i16x16 (to-llvm-type arm-expr) `(list ,(input-arg Vd) ,(compile-scalar (uint32x1 Vn)) ,(input-arg Vm) ,(compile-scalar (uint32x1 Vb))))]
         [((arm:i32x4 v0) (uint32_t v1) (arm:i32x4 v2) (uint32_t v3))
-          (handle-narrow-concat-scalar arm-expr `sqrshrn.v4i16 Vd Vn Vm Vb)]
+          (generate-rake `sqrshrn_i32x8 (to-llvm-type arm-expr) `(list ,(input-arg Vd) ,(compile-scalar (uint32x1 Vn)) ,(input-arg Vm) ,(compile-scalar (uint32x1 Vb))))]
         [((arm:i64x2 v0) (uint64_t v1) (arm:i64x2 v2) (uint64_t v3))
-          (handle-narrow-concat-scalar arm-expr `sqrshrn.v2i32 Vd (uint32x1 Vn) Vm (uint32x1 Vb))]
+          (generate-rake `sqrshrn_i64x4 (to-llvm-type arm-expr) `(list ,(input-arg Vd) ,(compile-scalar (uint32x1 Vn)) ,(input-arg Vm) ,(compile-scalar (uint32x1 Vb))))]
         [(_ _ _ _) (error (format "arm:sqrshrn variant not understood: ~a" arm-expr))])]
 
     [(arm:saddl Vd Vn Vm)
@@ -390,6 +390,7 @@
            (handle-wide-slice-binary2 arm-expr `widening_add Vd Vn v2)]
         [(_ _ _) (error (format "arm:saddl variant not understood: ~a" arm-expr))])]
 
+    ;; TODO: calls to hand-created LLVM intrinsics.
     [(arm:uaddl Vd Vn Vm)
       (destruct* ((arm:interpret Vd) (arm:interpret Vn) (arm:interpret Vm))
         [((arm:u8x16 v0) (arm:u8x16 v1) (uint1_t v2))
@@ -403,11 +404,11 @@
     [(arm:sqxtun Vn Vm)
       (destruct* ((arm:interpret Vn) (arm:interpret Vm))
         [((arm:i16x8 v0) (arm:i16x8 v1))
-          (handle-narrow-concat-small arm-expr `sqxtun.v8i8 Vn Vm)]
+          (generate-rake `sqxtun_i16x16 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
         [((arm:i32x4 v0) (arm:i32x4 v1))
-          (handle-narrow-concat-small arm-expr `sqxtun.v4i16 Vn Vm)]
+          (generate-rake `sqxtun_i32x8 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
         [((arm:i64x2 v0) (arm:i64x2 v1))
-          (handle-narrow-concat-small arm-expr `sqxtun.v2i32 Vn Vm)]
+          (generate-rake `sqxtun_i64x4 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
         [(_ _) (error (format "arm:sqxtun variant not understood: ~a" arm-expr))])]
 
     [(arm:smlal-vs Vd Vn Vm Vb)
@@ -430,14 +431,35 @@
            (handle-wide-slice-binary1-broadcast arm-expr `mlal Vd Vn Vm v3 `halide.ir.x2)]
         [(_ _ _ _) (error (format "arm:umlal-vs variant not understood: ~a" arm-expr))])]
 
+    [(arm:uabd Vn Vm)
+      (destruct* ((arm:interpret Vn) (arm:interpret Vm))
+        [((arm:u8x8 v0) (arm:u8x8 v1))
+          (generate `uabd.v8i8 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
+        [((arm:u8x16 v0) (arm:u8x16 v1))
+          (generate `uabd.v16i8 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
+        [((arm:u16x4 v0) (arm:u16x4 v1))
+          (generate `uabd.v4i16 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
+        [((arm:u16x8 v0) (arm:u16x8 v1))
+          (generate `uabd.v8i16 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
+        [((arm:u32x2 v0) (arm:u32x2 v1))
+          (generate `uabd.v2i32 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
+        [((arm:u32x4 v0) (arm:u32x4 v1))
+          (generate `uabd.v4i32 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
+        [(_ _) (error (format "arm:uabd variant not understood: ~a" arm-expr))])]
 
     [_ (string->sexp (format "~a" arm-expr))]))
 
 (define (generate instruction output-type inputs)
   `(,(instruction-helper instruction) ,output-type ,inputs))
 
+(define (generate-rake instruction output-type inputs)
+  `(,(instruction-helper-rake instruction) ,output-type ,inputs))
+
 (define (instruction-helper instruction)
   (string->sexp (format "llvm.aarch64.neon.~a" instruction)))
+
+(define (instruction-helper-rake instruction)
+  (string->sexp (format "rake.~a" instruction)))
 
 (define (input-arg a)
   `(,(to-llvm-type a) ,(compile a)))
@@ -595,29 +617,6 @@
       [_ (error "arm:llvm-codegen: compile-scalar ~a" s)]))
   
   (string->sexp res))
-
-(define (handle-narrow-concat arm-expr name Vd Vn Vm Vb)
-  (let ([lo (generate name (to-llvm-type-narrow Vd) `(list ,(input-arg Vd) ,(input-arg Vn)))]
-        [lo-type (to-llvm-type-narrow Vd)]
-        [hi (generate name (to-llvm-type-narrow Vm) `(list ,(input-arg Vm) ,(input-arg Vb)))]
-        [hi-type (to-llvm-type-narrow Vm)])
-    `(halide.concat_vectors, (to-llvm-type arm-expr), `(list (,lo-type ,lo) (,hi-type ,hi)))))
-
-;; Vn and Vb are scalars
-(define (handle-narrow-concat-scalar arm-expr name Vd Vn Vm Vb)
-  (let ([lo (generate name (to-llvm-type-narrow Vd) `(list ,(input-arg Vd) ,(compile-scalar Vn)))]
-        [lo-type (to-llvm-type-narrow Vd)]
-        [hi (generate name (to-llvm-type-narrow Vm) `(list ,(input-arg Vm) ,(compile-scalar Vb)))]
-        [hi-type (to-llvm-type-narrow Vm)])
-    `(halide.concat_vectors, (to-llvm-type arm-expr), `(list (,lo-type ,lo) (,hi-type ,hi)))))
-
-;; Each arg is it's own sub-arg
-(define (handle-narrow-concat-small arm-expr name Vd Vn)
-  (let ([lo (generate name (to-llvm-type-narrow Vd) `(list ,(input-arg Vd)))]
-        [lo-type (to-llvm-type-narrow Vd)]
-        [hi (generate name (to-llvm-type-narrow Vn) `(list ,(input-arg Vn)))]
-        [hi-type (to-llvm-type-narrow Vn)])
-    `(halide.concat_vectors, (to-llvm-type arm-expr), `(list (,lo-type ,lo) (,hi-type ,hi)))))
 
 ;; Only read half of the input vector for this operation
 (define (handle-wide-slice-unary arm-expr name Vn flag)

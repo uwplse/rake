@@ -138,6 +138,7 @@
 (define (handle-cast expr output-type saturate? arm-sub-exprs halide-expr)
   (let* ([input-type (get-input-type expr)]
          [narrowing? (< (cpp:type-bw output-type) (cpp:type-bw input-type))]
+         [double-narrow? (and narrowing? (< (* 2 (cpp:type-bw output-type)) (cpp:type-bw input-type)))]
          [widening? (> (cpp:type-bw output-type) (cpp:type-bw input-type))]
          ; TODO: should we just do the selection here?
          [isa (cond
@@ -150,8 +151,22 @@
          ; TODO: do the pruning somehow...
          ; TODO: should this be the depth and the cost?
          [depth 2]
-         [max-cost (if narrowing? 15 10)]
+         [max-cost
+          (cond
+            [double-narrow? 30]
+            [narrowing? 15]
+            [else 10])]
          [candidates (enumerate-arm isa desired-types grouped-sub-exprs depth max-cost)])
+
+    (display "handle-cast\n")
+    (pretty-print isa)
+    (pretty-print candidates)
+    (pretty-print desired-types)
+    (pretty-print expr)
+    (pretty-print output-type)
+    (pretty-print saturate?)
+    (pretty-print arm-sub-exprs)
+    (pretty-print input-type)
 
      (sort-and-uniquify candidates)))
 
@@ -526,7 +541,7 @@
   (not (and (eqv? parent-instr arm:reinterpret) (eqv? child-instr arm:reinterpret))))
 
 (define (enumerate-arm instr-set output-types base-exprs depth max-cost [read-count -1] [parent-instr (void)] [arg-pos -1])
-  (let ([key (list instr-set output-types base-exprs depth max-cost read-count arg-pos)])
+  (let ([key (list instr-set output-types base-exprs depth max-cost read-count parent-instr arg-pos)])
     (cond
       ; We have enumerated this tree before
       [(hash-has-key? enumeration-cache key) (hash-ref enumeration-cache key)]

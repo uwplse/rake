@@ -17,7 +17,7 @@
 
     [(eq? arm:addhn instr) 6] ;; double instruction
 
-    [(eq? arm:addp instr) 2]
+    [(eq? arm:addp instr) 2.001]
 
     [(eq? arm:addv instr) 3]
 
@@ -97,11 +97,11 @@
 
     [(eq? arm:sabd instr) 3]
 
-    [(eq? arm:sadalp instr) 3]
+    [(eq? arm:sadalp instr) 3.001]
 
     [(eq? arm:saddl instr) 2]
 
-    [(eq? arm:saddlp instr) 2]
+    [(eq? arm:saddlp instr) 2.001]
 
     [(eq? arm:saddlv instr) 3]
 
@@ -127,13 +127,13 @@
 
     [(eq? arm:smax instr) 2]
 
-    [(eq? arm:smaxp instr) 2]
+    [(eq? arm:smaxp instr) 2.001]
 
     [(eq? arm:smaxv instr) 3]
 
     [(eq? arm:smin instr) 2]
 
-    [(eq? arm:sminp instr) 2]
+    [(eq? arm:sminp instr) 2.001]
 
     [(eq? arm:sminv instr) 3]
 
@@ -219,11 +219,11 @@
 
     [(eq? arm:uabd instr) 3]
 
-    [(eq? arm:uadalp instr) 3]
+    [(eq? arm:uadalp instr) 3.001]
 
     [(eq? arm:uaddl instr) 2]
 
-    [(eq? arm:uaddlp instr) 2]
+    [(eq? arm:uaddlp instr) 2.001]
 
     [(eq? arm:uaddlv instr) 3]
 
@@ -243,13 +243,13 @@
 
     [(eq? arm:umax instr) 2]
 
-    [(eq? arm:umaxp instr) 2]
+    [(eq? arm:umaxp instr) 2.001]
 
     [(eq? arm:umaxv instr) 3]
 
     [(eq? arm:umin instr) 2]
 
-    [(eq? arm:uminp instr) 2]
+    [(eq? arm:uminp instr) 2.001]
 
     [(eq? arm:uminv instr) 3]
 
