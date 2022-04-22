@@ -1696,6 +1696,30 @@
     [(eq? type 'i64x1) i64x1]
     [(eq? type 'i64x2) i64x2]
     ; [(eq? type 'i64x4) i64x4]
+
+    ;;---
+
+    [(i8x8? type) i8x8]
+    [(i8x16? type) i8x16]
+
+    [(u8x8? type) u8x8]
+    [(u8x16? type) u8x16]
+
+    [(i16x4? type) i16x4]
+    [(i16x8? type) i16x8]
+
+    [(u16x4? type) u16x4]
+    [(u16x8? type) u16x8]
+
+    [(i32x2? type) i32x2]
+    [(i32x4? type) i32x4]
+
+    [(u32x2? type) u32x2]
+    [(u32x4? type) u32x4]
+    
+    [(i64x1? type) i64x1]
+    [(i64x2? type) i64x2]
+    
     [else (error "Unrecognized type (get-type-struct) ~a" type)]))
 
 (define (get-element expr index)
