@@ -4347,6 +4347,70 @@
               (x4 (int64_t (bv -2147483648 64)))))))]
         [(_ _) (assert #f (format "infeasible in sqdmulh\n~a\n" (pretty-format p)))])]
 
+    [(arm:sqdmulh-vs Vn Vm)
+      (destruct* ((interpret Vn) (interpret Vm))
+        [((arm:i16x4 v0) (int16_t v1))
+          (arm:i16x4
+           (halide:interpret
+            (int16x4
+             (vec-max
+              (vec-min
+               (vec-shr
+                (vec-mul
+                 (int32x4
+                  v0)
+                 (int32x4
+                  (x4 (int16_t v1))))
+                (x4 (uint32_t (bv 15 32))))
+               (x4 (int32_t (bv 32767 32))))
+              (x4 (int32_t (bv -32768 32)))))))]
+        [((arm:i16x8 v0) (arm:i16x2 v1))
+          (arm:i16x8
+           (halide:interpret
+            (int16x8
+             (vec-max
+              (vec-min
+               (vec-shr
+                (vec-mul
+                 (int32x8
+                  v0)
+                 (int32x8
+                  (x8 (int16_t v1))))
+                (x8 (uint32_t (bv 15 32))))
+               (x8 (int32_t (bv 32767 32))))
+              (x8 (int32_t (bv -32768 32)))))))]
+        [((arm:i32x2 v0) (int32_t v1))
+          (arm:i32x2
+           (halide:interpret
+            (int32x2
+             (vec-max
+              (vec-min
+               (vec-shr
+                (vec-mul
+                 (int64x2
+                  v0)
+                 (int64x2
+                  (x2 (int32_t v1))))
+                (x2 (uint64_t (bv 31 64))))
+               (x2 (int64_t (bv 2147483647 64))))
+              (x2 (int64_t (bv -2147483648 64)))))))]
+        [((arm:i32x4 v0) (arm:i32x2 v1))
+          (arm:i32x4
+           (halide:interpret
+            (int32x4
+             (vec-max
+              (vec-min
+               (vec-shr
+                (vec-mul
+                 (int64x4
+                  v0)
+                 (int64x4
+                  (x4 (int32_t v1))))
+                (x4 (uint64_t (bv 31 64))))
+               (x4 (int64_t (bv 2147483647 64))))
+              (x4 (int64_t (bv -2147483648 64)))))))]
+        [(_ _) (assert #f (format "infeasible in sqdmulh-vs\n~a\n" (pretty-format p)))])]
+
     [(arm:sqdmull-vs Vd Vn Vm)
       (destruct* ((interpret Vd) (interpret Vn) (interpret Vm))
         [((arm:i16x8 v0) (int16_t v1) (uint1_t v2))
@@ -4826,6 +4890,110 @@
                (x4 (int64_t (bv 2147483647 64))))
               (x4 (int64_t (bv -2147483648 64)))))))]
         [(_ _) (assert #f (format "infeasible in sqrdmulh\n~a\n" (pretty-format p)))])]
+
+    [(arm:sqrdmulh-vs Vn Vm)
+      (destruct* ((interpret Vn) (interpret Vm))
+        [((arm:i16x4 v0) (int16_t v1))
+          (arm:i16x4
+           (halide:interpret
+            (int16x4
+             (vec-max
+              (vec-min
+               (vec-add
+                (vec-bwand
+                 (x4 (int32_t (bv 1 32)))
+                 (vec-div
+                  (vec-mul
+                   (int32x4
+                    v0)
+                   (int32x4
+                    (x4 (int16_t v1))))
+                  (x4 (int32_t (bv 16384 32)))))
+                (vec-div
+                 (vec-mul
+                  (int32x4
+                   v0)
+                  (int32x4
+                   (x4 (int16_t v1))))
+                 (x4 (int32_t (bv 32768 32)))))
+               (x4 (int32_t (bv 32767 32))))
+              (x4 (int32_t (bv -32768 32)))))))]
+        [((arm:i16x8 v0) (arm:i16x2 v1))
+          (arm:i16x8
+           (halide:interpret
+            (int16x8
+             (vec-max
+              (vec-min
+               (vec-add
+                (vec-bwand
+                 (x8 (int32_t (bv 1 32)))
+                 (vec-div
+                  (vec-mul
+                   (int32x8
+                    v0)
+                   (int32x8
+                    (x8 (int16_t v1))))
+                  (x8 (int32_t (bv 16384 32)))))
+                (vec-div
+                 (vec-mul
+                  (int32x8
+                   v0)
+                  (int32x8
+                   (x8 (int16_t v1))))
+                 (x8 (int32_t (bv 32768 32)))))
+               (x8 (int32_t (bv 32767 32))))
+              (x8 (int32_t (bv -32768 32)))))))]
+        [((arm:i32x2 v0) (int32_t v1))
+          (arm:i32x2
+           (halide:interpret
+            (int32x2
+             (vec-max
+              (vec-min
+               (vec-add
+                (vec-bwand
+                 (x2 (int64_t (bv 1 64)))
+                 (vec-div
+                  (vec-mul
+                   (int64x2
+                    v0)
+                   (int64x2
+                    (x2 (int32_t v1))))
+                  (x2 (int64_t (bv 1073741824 64)))))
+                (vec-div
+                 (vec-mul
+                  (int64x2
+                   v0)
+                  (int64x2
+                   (x2 (int32_t v1))))
+                 (x2 (int64_t (bv 2147483648 64)))))
+               (x2 (int64_t (bv 2147483647 64))))
+              (x2 (int64_t (bv -2147483648 64)))))))]
+        [((arm:i32x4 v0) (arm:i32x2 v1))
+          (arm:i32x4
+           (halide:interpret
+            (int32x4
+             (vec-max
+              (vec-min
+               (vec-add
+                (vec-bwand
+                 (x4 (int64_t (bv 1 64)))
+                 (vec-div
+                  (vec-mul
+                   (int64x4
+                    v0)
+                   (int64x4
+                    (x4 (int32_t v1))))
+                  (x4 (int64_t (bv 1073741824 64)))))
+                (vec-div
+                 (vec-mul
+                  (int64x4
+                   v0)
+                  (int64x4
+                   (x4 (int32_t v1))))
+                 (x4 (int64_t (bv 2147483648 64)))))
+               (x4 (int64_t (bv 2147483647 64))))
+              (x4 (int64_t (bv -2147483648 64)))))))]
+        [(_ _) (assert #f (format "infeasible in sqrdmulh-vs\n~a\n" (pretty-format p)))])]
 
     [(arm:sqrshl Vn Vm)
       (destruct* ((interpret Vn) (interpret Vm))

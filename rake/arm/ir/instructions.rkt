@@ -50,8 +50,8 @@ add, sadd, mul, min, max, and, or
 (struct vv-dmpy-add-sat (expr weight accumulate? outT) #:super struct:ast-node #:transparent)           ;; Instructions: sqdmull, sqdmlal, sqdmlsl
 (struct vs-dmpy-add-sat (expr weight accumulate? outT) #:super struct:ast-node #:transparent)           ;; Instructions: sqdmull, sqdmlal, sqdmlsl
 
-(struct vv-dmpy-add-hh-sat (expr weight round? accumulate? outT) #:super struct:ast-node #:transparent)      ;; Instructions: sqdmulh, sqdmulh, sqrdmulh, sqrdmlah, sqrdmlsh
-(struct vs-dmpy-add-hh-sat (expr weight round? accumulate? outT) #:super struct:ast-node #:transparent)      ;; Instructions: sqdmulh, sqdmulh, sqrdmulh, sqrdmlah, sqrdmlsh
+(struct vv-dmpy-add-hh-sat (expr weight round? accumulate? outT) #:super struct:ast-node #:transparent)      ;; Instructions: sqdmulh, sqrdmulh, sqrdmlah, sqrdmlsh
+(struct vs-dmpy-add-hh-sat (expr weight round? accumulate? outT) #:super struct:ast-node #:transparent)      ;; Instructions: sqdmulh, sqrdmulh, sqrdmlah, sqrdmlsh
 
 (struct neg-sat (expr0) #:super struct:ast-node #:transparent)                               ;; Instructions: sqneg
 (struct add-sat (expr0 expr1) #:super struct:ast-node #:transparent)                         ;; Instructions: sqadd, suqadd, usqadd, uqadd

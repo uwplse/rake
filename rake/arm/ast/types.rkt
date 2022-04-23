@@ -76,6 +76,8 @@
 (struct rsubhn (Vd Vn Vm Vb) #:transparent)                 ;; rounding_sub_high_narrow
 (struct sqdmulh (Vn Vm) #:transparent)                      ;; qdmulh
 (struct sqrdmulh (Vn Vm) #:transparent)                     ;; qrdmulh
+(struct sqdmulh-vs (Vn Vm) #:transparent)                   ;; qdmulh
+(struct sqrdmulh-vs (Vn Vm) #:transparent)                  ;; qrdmulh
 (struct addp (Vn Vm) #:transparent)                         ;; pairwise_add
 (struct uaddlp (Vn) #:transparent)                          ;; pairwise_widening_add
 (struct saddlp (Vn) #:transparent)                          ;; pairwise_widening_add
@@ -943,6 +945,13 @@
                          (instr-sig 'i32x4 (list 'i32x4 'i32x4))
                          )]
 
+    [(eq? sqdmulh-vs instr) (list
+                         (instr-sig 'i16x4 (list 'i16x4 'int16))
+                         (instr-sig 'i16x8 (list 'i16x8 'int16))
+                         (instr-sig 'i32x2 (list 'i32x2 'int32))
+                         (instr-sig 'i32x4 (list 'i32x4 'int32))
+                         )]
+
     [(eq? sqdmull-vs instr) (list
                          (instr-sig 'i32x4 (list 'i16x8 'int16 'uint1))
                          (instr-sig 'i64x2 (list 'i32x4 'int32 'uint1))
@@ -968,6 +977,13 @@
                          (instr-sig 'i16x8 (list 'i16x8 'i16x8))
                          (instr-sig 'i32x2 (list 'i32x2 'i32x2))
                          (instr-sig 'i32x4 (list 'i32x4 'i32x4))
+                         )]
+
+    [(eq? sqrdmulh-vs instr) (list
+                         (instr-sig 'i16x4 (list 'i16x4 'int16))
+                         (instr-sig 'i16x8 (list 'i16x8 'int16))
+                         (instr-sig 'i32x2 (list 'i32x2 'int32))
+                         (instr-sig 'i32x4 (list 'i32x4 'int32))
                          )]
 
     [(eq? sqrshl instr) (list

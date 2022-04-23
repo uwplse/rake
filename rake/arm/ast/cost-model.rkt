@@ -162,6 +162,7 @@
     [(eq? arm:sqdmlsl-vv instr) 3]
 
     [(eq? arm:sqdmulh instr) 3]
+    [(eq? arm:sqdmulh-vs instr) 3]
 
     [(eq? arm:sqdmull-vs instr) 3]
 
@@ -170,6 +171,7 @@
     [(eq? arm:sqneg instr) 3]
 
     [(eq? arm:sqrdmulh instr) 3]
+    [(eq? arm:sqrdmulh-vs instr) 3]
 
     [(eq? arm:sqrshl instr) 3]
 

@@ -204,6 +204,17 @@
            (handle-wide-slice-binary1 arm-expr `wide_add Vd Vn v2)]
         [(_ _ _) (error (format "arm:uaddw variant not understood: ~a" arm-expr))])]
 
+    [(arm:saddw Vd Vn Vm)
+      ;; TODO: no LLVM intrinsics, make SExpParser construct the correct code.
+      (destruct* ((arm:interpret Vd) (arm:interpret Vn) (arm:interpret Vm))
+        [((arm:i16x8 v0) (arm:i8x16 v1) (uint1_t v2))
+           (handle-wide-slice-binary1 arm-expr `wide_add Vd Vn v2)]
+        [((arm:i32x4 v0) (arm:i16x8 v1) (uint1_t v2))
+           (handle-wide-slice-binary1 arm-expr `wide_add Vd Vn v2)]
+        [((arm:i64x2 v0) (arm:i32x4 v1) (uint1_t v2))
+           (handle-wide-slice-binary1 arm-expr `wide_add Vd Vn v2)]
+        [(_ _ _) (error (format "arm:saddw variant not understood: ~a" arm-expr))])]
+
     [(arm:umull-vs Vd Vn Vm)
       ;; TODO: we want llvm.aarch64.neon.umull.v* variants, but need the second type to be broadcast.
       (destruct* ((arm:interpret Vd) (arm:interpret Vn) (arm:interpret Vm))
@@ -268,21 +279,21 @@
     [(arm:smull-vs Vd Vn Vm)
       (destruct* ((arm:interpret Vd) (arm:interpret Vn) (arm:interpret Vm))
         [((arm:i8x16 v0) (int8_t v1) (uint1_t v2))
-           (handle-wide-slice-binary-broadcast arm-expr `smull.v8i16 Vd Vn v2 `halide.ir.x8)]
+           (handle-wide-slice-binary-broadcast arm-expr `smull_i8x16 Vd Vn v2 `halide.ir.x16)]
         [((arm:i16x8 v0) (int16_t v1) (uint1_t v2))
-           (handle-wide-slice-binary-broadcast arm-expr `smull.v4i32 Vd Vn v2 `halide.ir.x4)]
+           (handle-wide-slice-binary-broadcast arm-expr `smull_i16x8 Vd Vn v2 `halide.ir.x8)]
         [((arm:i32x4 v0) (int32_t v1) (uint1_t v2))
-           (handle-wide-slice-binary-broadcast arm-expr `smull.v2i64 Vd Vn v2 `halide.ir.x2)]
+           (handle-wide-slice-binary-broadcast arm-expr `smull_i32x4 Vd Vn v2 `halide.ir.x4)]
         [(_ _ _) (error (format "arm:smull-vs variant not understood: ~a" arm-expr))])]
 
     [(arm:smull-vv Vd Vn Vm)
       (destruct* ((arm:interpret Vd) (arm:interpret Vn) (arm:interpret Vm))
         [((arm:i8x16 v0) (arm:i8x16 v1) (uint1_t v2))
-           (handle-wide-slice-binary2 arm-expr `smull.v8i16 Vd Vn v2)]
+          (handle-wide-slice-binary arm-expr `smull_i8x16 Vd Vn v2)]
         [((arm:i16x8 v0) (arm:i16x8 v1) (uint1_t v2))
-           (handle-wide-slice-binary2 arm-expr `smull.v4i32 Vd Vn v2)]
+           (handle-wide-slice-binary arm-expr `smull_i16x8 Vd Vn v2)]
         [((arm:i32x4 v0) (arm:i32x4 v1) (uint1_t v2))
-           (handle-wide-slice-binary2 arm-expr `smull.v2i64 Vd Vn v2)]
+           (handle-wide-slice-binary arm-expr `smull_i32x4 Vd Vn v2)]
         [(_ _ _) (error (format "arm:smull-vv variant not understood: ~a" arm-expr))])]
 
     [(arm:sxtl Vn Vm)
@@ -514,6 +525,23 @@
     [(arm:u64x2 data) (string->sexp "uint32x2")]
     [_ (error (format "(arm:to-llvm-type-narrow) implement the rest of the arm types: ~a" arm-expr))]))
 
+;; Useful helper function for arm's weird widening instructions
+(define (to-llvm-type-wide arm-expr)
+  (match (arm:interpret arm-expr)
+    [(arm:i8x8 data) (string->sexp "int16x8")]
+    [(arm:u8x8 data) (string->sexp "uint16x8")]
+    [(arm:i8x16 data) (string->sexp "int16x16")]
+    [(arm:u8x16 data) (string->sexp "uint16x16")]
+    [(arm:i16x4 data) (string->sexp "int32x4")]
+    [(arm:u16x4 data) (string->sexp "uint32x4")]
+    [(arm:i16x8 data) (string->sexp "int32x8")]
+    [(arm:u16x8 data) (string->sexp "uint32x8")]
+    [(arm:i32x2 data) (string->sexp "int64x2")]
+    [(arm:u32x2 data) (string->sexp "uint64x2")]
+    [(arm:i32x4 data) (string->sexp "int64x4")]
+    [(arm:u32x4 data) (string->sexp "uint64x4")]
+    [_ (error (format "(arm:to-llvm-type-wide) implement the rest of the arm types: ~a" arm-expr))]))
+
 ;; Useful helper function for ARM's weird widening instruction patterns.
 (define (to-llvm-type-half arm-expr)
   (match (arm:interpret arm-expr)
@@ -650,16 +678,25 @@
          [b `(,broadcast ,type (list ,(compile-scalar Vm)))])
     (generate name (to-llvm-type arm-expr) `(list ,(input-arg Vd) (,type ,half) (,type ,b)))))
 
-;; Only read half of the input vector Vd for this operation and broadcast Vn
+;; Only read half of the output vector and broadcast Vn
 (define (handle-wide-slice-binary-broadcast arm-expr name Vd Vn flag broadcast)
   (let* ([slice (if flag `halide.ir.shalf `halide.ir.fhalf)]
-         [type (to-llvm-type-half Vd)]
-         [half (list slice type `(list ,(input-arg Vd)))]
-         [b-type (to-llvm-type-half Vd)]
-         [b `(,broadcast ,b-type (list ,(compile-scalar Vn)))])
-    (generate
-      name
-      (to-llvm-type arm-expr)
-      `(list
-        (,type ,half)
-        (,b-type ,b)))))
+         [type (to-llvm-type arm-expr)]
+        ;  [half (list slice type `(list ,(input-arg Vd)))]
+         [b-type (to-llvm-type Vd)]
+         [b `(,broadcast ,b-type (list ,(compile-scalar Vn)))]
+         [wide-type (to-llvm-type-wide Vd)]
+         [call (generate-rake name wide-type `(list ,(input-arg Vd) (,b-type ,b)))])
+    `(,slice
+      ,type
+      (list (,wide-type ,call)))))
+
+;; Only read half of the output vector
+(define (handle-wide-slice-binary arm-expr name Vd Vn flag)
+  (let* ([slice (if flag `halide.ir.shalf `halide.ir.fhalf)]
+         [type (to-llvm-type arm-expr)]
+         [wide-type (to-llvm-type-wide arm-expr)]
+         [call (generate-rake name wide-type `(list ,(input-arg Vd) ,(input-arg Vn)))])
+    `(,slice
+      ,type
+      (list (,wide-type ,call)))))
