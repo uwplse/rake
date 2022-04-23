@@ -458,6 +458,53 @@
           (generate `uabd.v4i32 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
         [(_ _) (error (format "arm:uabd variant not understood: ~a" arm-expr))])]
 
+    [(arm:sqadd Vn Vm)
+      (destruct* ((arm:interpret Vn) (arm:interpret Vm))
+        [((arm:i8x8 v0) (arm:i8x8 v1))
+          (generate `sqadd.v8i8 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
+        [((arm:i8x16 v0) (arm:i8x16 v1))
+          (generate `sqadd.v16i8 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
+        [((arm:i16x4 v0) (arm:i16x4 v1))
+          (generate `sqadd.v4i16 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
+        [((arm:i16x8 v0) (arm:i16x8 v1))
+          (generate `sqadd.v8i16 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
+        [((arm:i32x2 v0) (arm:i32x2 v1))
+          (generate `sqadd.v2i32 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
+        [((arm:i32x4 v0) (arm:i32x4 v1))
+          (generate `sqadd.v4i32 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
+        ;; TODO: LLVM has i64 variants?
+        [(_ _) (error (format "arm:sqadd variant not understood: ~a" arm-expr))])]
+
+    [(arm:uqadd Vn Vm)
+      (destruct* ((arm:interpret Vn) (arm:interpret Vm))
+        [((arm:u8x8 v0) (arm:u8x8 v1))
+          (generate `uqadd.v8i8 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
+        [((arm:u8x16 v0) (arm:u8x16 v1))
+          (generate `uqadd.v16i8 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
+        [((arm:u16x4 v0) (arm:u16x4 v1))
+          (generate `uqadd.v4i16 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
+        [((arm:u16x8 v0) (arm:u16x8 v1))
+          (generate `uqadd.v8i16 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
+        [((arm:u32x2 v0) (arm:u32x2 v1))
+          (generate `uqadd.v2i32 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
+        [((arm:u32x4 v0) (arm:u32x4 v1))
+          (generate `uqadd.v4i32 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
+        ;; TODO: LLVM has i64 variants?
+        [(_ _) (error (format "arm:uqadd variant not understood: ~a" arm-expr))])]
+
+    [(arm:sqrdmulh-vs Vn Vm)
+      (destruct* ((arm:interpret Vn) (arm:interpret Vm))
+        ;; TODO: might want to generate the normal (non-lane) versions?
+        [((arm:i16x4 v0) (int16_t v1))
+          (generate `sqrdmulh.lane.v4i16.v4i16 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg (arm:dup Vm)) ,(compile-scalar (uint32_t (bv 0 32)))))]
+        [((arm:i16x8 v0) (int16_t v1))
+          (generate `sqrdmulh.laneq.v8i16.v8i16 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg (arm:dupw Vm)) ,(compile-scalar (uint32_t (bv 0 32)))))]
+        [((arm:i32x2 v0) (int32_t v1))
+          (generate `sqrdmulh.lane.v2i32.v2i32 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg (arm:dup Vm)) ,(compile-scalar (uint32_t (bv 0 32)))))]
+        [((arm:i32x4 v0) (int32_t v1))
+          (generate `sqrdmulh.laneq.v4i32.v4i32 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg (arm:dupw Vm)) ,(compile-scalar (uint32_t (bv 0 32)))))]
+        [(_ _) (error (format "arm:sqrdmulh-vs variant not understood: ~a" arm-expr))])]
+
     [_ (string->sexp (format "~a" arm-expr))]))
 
 (define (generate instruction output-type inputs)
