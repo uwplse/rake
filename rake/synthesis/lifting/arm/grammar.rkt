@@ -63,17 +63,18 @@
           (define in-type (arm-ir:elem-type^ expr))
           (define narrower-type (if (<= (cpp:type-bw e-type) (cpp:type-bw outT)) e-type outT))
           (define wider-type (if (>= (cpp:type-bw in-type) (cpp:type-bw narrower-type)) in-type narrower-type))
+
           ;; Try folding by updating the output type or the saturation flag saturate
           (flatten
             (list
               (arm-ir:vs-mpy-add (get-node-id) expr weights wider-type)
               (if (arm-ir:combine? expr)
                 (list
-                  (arm-ir:add-sat (get-node-id) (arm-ir:combine-expr0 expr) (arm-ir:combine-expr1 expr))
-                  (arm-ir:sub-sat (get-node-id) (arm-ir:combine-expr0 expr) (arm-ir:combine-expr1 expr)))
+                  (arm-ir:add-sat (get-node-id) (arm-ir:combine-expr0 expr) (arm-ir:combine-expr1 expr) wider-type)
+                  (arm-ir:sub-sat (get-node-id) (arm-ir:combine-expr0 expr) (arm-ir:combine-expr1 expr) wider-type))
                 (list
-                  (arm-ir:add-sat (get-node-id) expr expr)
-                  (arm-ir:sub-sat (get-node-id) expr expr)))))]
+                  (arm-ir:add-sat (get-node-id) expr expr wider-type)
+                  (arm-ir:sub-sat (get-node-id) expr expr wider-type)))))]
          [(or (vec-mul? halide-expr) (vec-shl? halide-expr))
           ;; Try folding the mul by updating the weight-matrix
           (define castfn (match outT ['int8 int8x1] ['int16 int16x1] ['int32 int32x1] ['uint8 uint8x1] ['uint16 uint16x1] ['uint32 uint32x1]))
@@ -109,7 +110,7 @@
 
       [(arm-ir:vv-mpy-add expr weights output-type)
        (cond
-;         [(halide:cast-op? halide-expr)
+;         [(halide:adcast-op? halide-expr)
 ;          ;; Try folding by forcing saturation
 ;          (flatten
 ;            (list
@@ -138,7 +139,7 @@
       [(arm-ir:vs-dmpy-add-hh-sat expr weight round? accumulate? outT)
        (list (arm-ir:vs-dmpy-add-hh-sat (get-node-id) expr weight (choose* #t #f) (choose* #t #f) (halide:elem-type halide-expr)))]
 
-      [(arm-ir:add-sat expr0 expr1) '()]
+      [(arm-ir:add-sat expr0 expr1 outT) '()]
 
       [(arm-ir:vs-shift-right sub-expr shift round? saturate? signed? outT)
        (define shr-scalars (halide:extract-shr-scalars halide-expr))
@@ -215,7 +216,7 @@
         (flatten
           (list
             (mk-halving-add-instr (update-input-data sub-expr halide-expr) (choose* #t #f) (halide:extract-shr-scalars halide-expr))
-            (if (<= (length weights) 2)
+            (if (eq? (length weights) 2)
                 (arm-ir:vs-dmpy-add-sat (get-node-id) sub-expr (apply choose* weights) (choose* #t #f) (halide:elem-type halide-expr))
                 '())
             (if (<= (length weights) 2)
@@ -231,7 +232,7 @@
 
       [(arm-ir:vs-dmpy-add-hh-sat expr weight round? accumulate? outT) '()]
 
-      [(arm-ir:add-sat expr0 expr1) '()]
+      [(arm-ir:add-sat expr0 expr1 outT) '()]
 
       [(arm-ir:vs-shift-right sub-expr const-val round? saturate? signed? output-type) '()]
 

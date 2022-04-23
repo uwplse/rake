@@ -299,38 +299,25 @@
 
 
 ; simplify(clamp(a, a.type().min() - min(b, 0), a.type().max() - max(b, 0))) + b
-(define (saturating-add-impl lhs rhs)
+(define (saturating-add-impl lhs rhs outT)
   ; TODO: assert same type for debugging.
-  (let* ([type (cpp:type lhs)]
-         [min-val (min-representable type)]
-         [max-val (max-representable type)]
-         [min-func (if (cpp:signed-expr? lhs) bvsmin bvumin)]
-         [max-func (if (cpp:signed-expr? lhs) bvsmax bvumax)]
-         [a (cpp:eval lhs)]
-         [b (cpp:eval rhs)]
-         [zero (cpp:eval (const-zero type))]
-         [bottom (bvsub min-val (min-func b zero))]
-         [top (bvsub max-val (max-func b zero))]
-         [clamped (bvclamp a bottom top type)]
-         [sum (bvadd clamped b)])
-    (mk-cpp-expr sum type)))
+  (let* ([type outT]
+         [satfn (get-sat-fn outT)]
+         [a (cpp:eval (cpp:cast lhs 'int64))]
+         [b (cpp:eval (cpp:cast rhs 'int64))]
+         [sum (int64_t (bvadd a b))])
+    (satfn sum)))
 
 ; simplify(clamp(a, a.type().min() + max(b, 0), a.type().max() + min(b, 0))) - b
-(define (saturating-sub-impl lhs rhs)
+(define (saturating-sub-impl lhs rhs outT)
   ; TODO: assert same type for debugging.
   (let* ([type (cpp:type lhs)]
-         [min-val (min-representable type)]
-         [max-val (max-representable type)]
-         [min-func (if (cpp:signed-expr? lhs) bvsmin bvumin)]
-         [max-func (if (cpp:signed-expr? lhs) bvsmax bvumax)]
-         [a (cpp:eval lhs)]
-         [b (cpp:eval rhs)]
-         [zero (cpp:eval (const-zero type))]
-         [bottom (bvadd min-val (max-func b zero))]
-         [top (bvadd max-val (min-func b zero))]
-         [clamped (bvclamp a bottom top type)]
-         [diff (bvsub clamped b)])
-    (mk-cpp-expr diff type)))
+         [satfn (get-sat-fn outT)]
+         [a (cpp:eval (cpp:cast lhs 'int64))]
+         [b (cpp:eval (cpp:cast rhs 'int64))]
+         [diff (int64_t (bvsub a b))])
+    (satfn diff)))
+         
 
 (define (widen expr)
   (destruct expr
@@ -616,23 +603,23 @@
                [zero (const-zero (cpp:type value))])
           (saturating-sub-impl zero value)))]
 
-    [(arm-ir:add-sat expr0 expr1)
+    [(arm-ir:add-sat expr0 expr1 outT)
      (define input0 (interpret expr0))
      (define input1 (interpret expr1))
      ; TODO: do we need a saturating cast? I don't think we do.
      (lambda (i)
         (let ([value0 (input0 i)]
               [value1 (input1 i)])
-          (saturating-add-impl value0 value1)))]
+          (saturating-add-impl value0 value1 outT)))]
 
-    [(arm-ir:sub-sat expr0 expr1)
+    [(arm-ir:sub-sat expr0 expr1 outT)
      (define input0 (interpret expr0))
      (define input1 (interpret expr1))
      ; TODO: do we need a saturating cast? I don't think we do.
      (lambda (i)
         (let ([value0 (input0 i)]
               [value1 (input1 i)])
-          (saturating-sub-impl value0 value1)))]
+          (saturating-sub-impl value0 value1 outT)))]
 
     [(arm-ir:vs-shift-left expr shift round? saturate? signed?)
         (error "vs-shift-left Not yet implemented\n")]
@@ -777,8 +764,8 @@
     [(arm-ir:vs-dmpy-add-hh-sat expr weight round? accumulate? outT) (+ (instr-count expr) 1)]
 
     [(arm-ir:neg-sat expr) (+ (instr-count expr) 1)]
-    [(arm-ir:add-sat expr0 expr1) (+ (instr-count expr0) (instr-count expr1) 1)]
-    [(arm-ir:sub-sat expr0 expr1) (+ (instr-count expr0) (instr-count expr1) 1)]
+    [(arm-ir:add-sat expr0 expr1 outT) (+ (instr-count expr0) (instr-count expr1) 1)]
+    [(arm-ir:sub-sat expr0 expr1 outT) (+ (instr-count expr0) (instr-count expr1) 1)]
 
     [(arm-ir:vs-shift-left expr shift round? saturate? signed?) (+ (instr-count expr) (instr-count shift) 1)]
     [(arm-ir:vv-shift-left expr0 expr1 round? saturate? signed?) (+ (instr-count expr0) (instr-count expr1) 1)]
@@ -829,8 +816,8 @@
       [(arm-ir:vs-dmpy-add-hh-sat expr weight round? accumulate? outT) (handler (arm-ir:vs-dmpy-add-hh-sat (arm-ir:ast-node-id ir-expr) (handler expr) weight round? accumulate? outT))]
 
       [(arm-ir:neg-sat expr) (handler (arm-ir:neg-sat (arm-ir:ast-node-id ir-expr) (visit expr handler)))]
-      [(arm-ir:add-sat expr0 expr1) (handler (arm-ir:add-sat (arm-ir:ast-node-id ir-expr) (visit expr0 handler) (visit expr1 handler)))]
-      [(arm-ir:sub-sat expr0 expr1) (handler (arm-ir:sub-sat (arm-ir:ast-node-id ir-expr) (visit expr0 handler) (visit expr1 handler)))]
+      [(arm-ir:add-sat expr0 expr1 outT) (handler (arm-ir:add-sat (arm-ir:ast-node-id ir-expr) (visit expr0 handler) (visit expr1 handler) outT))]
+      [(arm-ir:sub-sat expr0 expr1 outT) (handler (arm-ir:sub-sat (arm-ir:ast-node-id ir-expr) (visit expr0 handler) (visit expr1 handler) outT))]
 
       [(arm-ir:vs-shift-left expr shift round? saturate? signed?) (handler (arm-ir:vs-shift-left (arm-ir:ast-node-id ir-expr) (visit expr handler) (visit shift handler) round? saturate? signed?))]
       [(arm-ir:vv-shift-left expr0 expr1 round? saturate? signed?) (handler (arm-ir:vv-shift-left (arm-ir:ast-node-id ir-expr) (visit expr0 handler) (visit expr1 handler) round? saturate? signed?))]
@@ -884,8 +871,8 @@
     [(arm-ir:vs-dmpy-add-hh-sat expr weight round? accumulate? outT) (list expr)]
 
     [(arm-ir:neg-sat expr) (list expr)]
-    [(arm-ir:add-sat expr0 expr1) (list expr0 expr1)]
-    [(arm-ir:sub-sat expr0 expr1) (list expr0 expr1)]
+    [(arm-ir:add-sat expr0 expr1 outT) (list expr0 expr1)]
+    [(arm-ir:sub-sat expr0 expr1 outT) (list expr0 expr1)]
 
     [(arm-ir:vs-shift-left expr shift round? saturate? signed?) (list expr shift)]
     [(arm-ir:vv-shift-left expr0 expr1 round? saturate? signed?) (list expr0 expr1)]
