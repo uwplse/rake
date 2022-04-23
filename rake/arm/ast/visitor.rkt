@@ -209,6 +209,8 @@
 
     [(arm:sshll Vd Vn Vm) (transform (arm:sshll (visit Vd transform) (visit Vn transform) (visit Vm transform)))]
 
+    [(arm:sshr Vn Vm) (transform (arm:sshr (visit Vn transform) (visit Vm transform)))]
+
     [(arm:ssubl Vd Vn Vm) (transform (arm:ssubl (visit Vd transform) (visit Vn transform) (visit Vm transform)))]
 
     [(arm:ssubw Vd Vn Vm) (transform (arm:ssubw (visit Vd transform) (visit Vn transform) (visit Vm transform)))]
@@ -296,6 +298,8 @@
     [(arm:ushl Vn Vm) (transform (arm:ushl (visit Vn transform) (visit Vm transform)))]
 
     [(arm:ushll Vd Vn Vm) (transform (arm:ushll (visit Vd transform) (visit Vn transform) (visit Vm transform)))]
+
+    [(arm:ushr Vn Vm) (transform (arm:ushr (visit Vn transform) (visit Vm transform)))]
 
     [(arm:usqadd Vn Vm) (transform (arm:usqadd (visit Vn transform) (visit Vm transform)))]
 
@@ -536,6 +540,8 @@
 
     [(arm:sshll Vd Vn Vm) (transform (arm:sshll (visit-shallow Vd transform) (visit-shallow Vn transform) (visit-shallow Vm transform)))]
 
+    [(arm:sshr Vn Vm) (transform (arm:sshr (visit-shallow Vn transform) (visit-shallow Vm transform)))]
+
     [(arm:ssubl Vd Vn Vm) (transform (arm:ssubl (visit-shallow Vd transform) (visit-shallow Vn transform) (visit-shallow Vm transform)))]
 
     [(arm:ssubw Vd Vn Vm) (transform (arm:ssubw (visit-shallow Vd transform) (visit-shallow Vn transform) (visit-shallow Vm transform)))]
@@ -623,6 +629,8 @@
     [(arm:ushl Vn Vm) (transform (arm:ushl (visit-shallow Vn transform) (visit-shallow Vm transform)))]
 
     [(arm:ushll Vd Vn Vm) (transform (arm:ushll (visit-shallow Vd transform) (visit-shallow Vn transform) (visit-shallow Vm transform)))]
+
+    [(arm:ushr Vn Vm) (transform (arm:ushr (visit-shallow Vn transform) (visit-shallow Vm transform)))]
 
     [(arm:usqadd Vn Vm) (transform (arm:usqadd (visit-shallow Vn transform) (visit-shallow Vm transform)))]
 

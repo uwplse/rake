@@ -321,5 +321,5 @@
 
     [(eq? arm:zip2 instr) 2]
 
-    [(eq? arm:reinterpret instr) 0]
+    [(eq? arm:reinterpret instr) 0.001]
     [else 1]))
