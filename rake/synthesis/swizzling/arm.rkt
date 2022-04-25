@@ -108,18 +108,177 @@
   
   (define (reset-lo/hi-flags node [pos -1])
     (destruct node
-      [(arm:smlal-vs a b c d) (define-symbolic* x boolean?) (if (contains-swizzle-node? b) (arm:smlal-vs a b c (uint1_t x)) node)]
-      [(arm:smull-vs a b c) (define-symbolic* x boolean?) (if (contains-swizzle-node? a) (arm:smull-vs a b (uint1_t x)) node)]
-      [(arm:ushll a b c) (define-symbolic* x boolean?) (if (contains-swizzle-node? a) (arm:ushll a b (uint1_t x)) node)]
+      [(arm:sabal Vd Vn Vm Vb)
+        (define-symbolic* x boolean?)
+        (if (or (contains-swizzle-node? Vn) (contains-swizzle-node? Vm))
+          (arm:sabal Vd Vn Vm (uint1_t x))
+          node)]
+      [(arm:saddl Vd Vn Vm)
+        (define-symbolic* x boolean?)
+        (if (or (contains-swizzle-node? Vd) (contains-swizzle-node? Vn))
+          (arm:saddl Vd Vn (uint1_t x))
+          node)]
+      [(arm:saddw Vd Vn Vm)
+        (define-symbolic* x boolean?)
+        (if (contains-swizzle-node? Vn)
+          (arm:saddw Vd Vn (uint1_t x))
+          node)]
+      [(arm:shll Vn Vm)
+        (define-symbolic* x boolean?)
+        (if (contains-swizzle-node? Vn)
+          (arm:shll Vn (uint1_t x))
+          node)]
+      [(arm:smlal-vs a b c d)
+        (define-symbolic* x boolean?)
+        (if (contains-swizzle-node? b)
+          (arm:smlal-vs a b c (uint1_t x))
+          node)]
+      [(arm:smlal-vv Vd Vn Vm Vb)
+        (define-symbolic* x boolean?)
+        (if (or (contains-swizzle-node? Vn) (contains-swizzle-node? Vm))
+          (arm:smlal-vv Vd Vn Vm (uint1_t x))
+          node)]
+      [(arm:smlsl-vs Vd Vn Vm Vb)
+        (define-symbolic* x boolean?)
+        (if (contains-swizzle-node? Vn)
+          (arm:smlsl-vs Vd Vn Vm (uint1_t x))
+          node)]
+      [(arm:smlsl-vv Vd Vn Vm Vb)
+        (define-symbolic* x boolean?)
+        (if (or (contains-swizzle-node? Vn) (contains-swizzle-node? Vm))
+          (arm:smlsl-vv Vd Vn Vm (uint1_t x))
+          node)]
+      [(arm:smull-vs a b c)
+        (define-symbolic* x boolean?)
+        (if (contains-swizzle-node? a)
+          (arm:smull-vs a b (uint1_t x))
+          node)]
+      [(arm:smull-vv Vd Vn Vm)
+        (define-symbolic* x boolean?)
+        (if (or (contains-swizzle-node? Vd) (contains-swizzle-node? Vn))
+          (arm:smull-vv Vd Vn (uint1_t x))
+          node)]
+      [(arm:sqdmlal-vs Vd Vn Vm Vb)
+        (define-symbolic* x boolean?)
+        (if (contains-swizzle-node? Vn)
+          (arm:sqdmlal-vs Vd Vn Vm (uint1_t x))
+          node)]
+      [(arm:sqdmlal-vv Vd Vn Vm Vb)
+        (define-symbolic* x boolean?)
+        (if (or (contains-swizzle-node? Vn) (contains-swizzle-node? Vm))
+          (arm:sqdmlal-vv Vd Vn Vm (uint1_t x))
+          node)]
+      [(arm:sqdmlsl-vs Vd Vn Vm Vb)
+        (define-symbolic* x boolean?)
+        (if (contains-swizzle-node? Vn)
+          (arm:sqdmlsl-vs Vd Vn Vm (uint1_t x))
+          node)]
+      [(arm:sqdmlsl-vv Vd Vn Vm Vb)
+        (define-symbolic* x boolean?)
+        (if (or (contains-swizzle-node? Vn) (contains-swizzle-node? Vm))
+          (arm:sqdmlsl-vv Vd Vn Vm (uint1_t x))
+          node)]
+      [(arm:sqdmull-vs Vd Vn Vm)
+        (define-symbolic* x boolean?)
+        (if (contains-swizzle-node? Vd)
+          (arm:sqdmull-vs Vd Vn (uint1_t x))
+          node)]
+      [(arm:sqdmull-vv Vd Vn Vm)
+        (define-symbolic* x boolean?)
+        (if (or (contains-swizzle-node? Vd) (contains-swizzle-node? Vn))
+          (arm:sqdmull-vv Vd Vn (uint1_t x))
+          node)]
+      [(arm:sshll Vd Vn Vm)
+        (define-symbolic* x boolean?)
+        (if (contains-swizzle-node? Vd)
+          (arm:sshll Vd Vn (uint1_t x))
+          node)]
+      [(arm:ssubl Vd Vn Vm)
+        (define-symbolic* x boolean?)
+        (if (or (contains-swizzle-node? Vd) (contains-swizzle-node? Vn))
+          (arm:ssubl Vd Vn (uint1_t x))
+          node)]
+      [(arm:ssubw Vd Vn Vm)
+        (define-symbolic* x boolean?)
+        (if (contains-swizzle-node? Vn)
+          (arm:ssubw Vd Vn (uint1_t x))
+          node)]
+      [(arm:sxtl Vn Vm)
+        (define-symbolic* x boolean?)
+        (if (contains-swizzle-node? Vn)
+          (arm:sxtl Vn (uint1_t x))
+          node)]
+      [(arm:uaddl Vd Vn Vm)
+        (define-symbolic* x boolean?)
+        (if (or (contains-swizzle-node? Vd) (contains-swizzle-node? Vn))
+          (arm:uaddl Vd Vn (uint1_t x))
+          node)]
+      [(arm:uaddw Vd Vn Vm)
+        (define-symbolic* x boolean?)
+        (if (contains-swizzle-node? Vn)
+          (arm:uaddw Vd Vn (uint1_t x))
+          node)]
+      [(arm:umlal-vs a b c d)
+        (define-symbolic* x boolean?)
+        (if (contains-swizzle-node? b)
+          (arm:umlal-vs a b c (uint1_t x))
+          node)]
+      [(arm:umlal-vv Vd Vn Vm Vb)
+        (define-symbolic* x boolean?)
+        (if (or (contains-swizzle-node? Vn) (contains-swizzle-node? Vm))
+          (arm:umlal-vv Vd Vn Vm (uint1_t x))
+          node)]
+      [(arm:umlsl-vs a b c d)
+        (define-symbolic* x boolean?)
+        (if (contains-swizzle-node? b)
+          (arm:umlsl-vs a b c (uint1_t x))
+          node)]
+      [(arm:umlsl-vv Vd Vn Vm Vb)
+        (define-symbolic* x boolean?)
+        (if (or (contains-swizzle-node? Vn) (contains-swizzle-node? Vm))
+          (arm:umlsl-vv Vd Vn Vm (uint1_t x))
+          node)]
+      [(arm:umull-vs a b c)
+        (define-symbolic* x boolean?)
+        (if (contains-swizzle-node? a)
+          (arm:umull-vs a b (uint1_t x))
+          node)]
+      [(arm:umull-vv Vd Vn Vm)
+        (define-symbolic* x boolean?)
+        (if (or (contains-swizzle-node? Vd) (contains-swizzle-node? Vn))
+          (arm:umull-vv Vd Vn (uint1_t x))
+          node)]
+      [(arm:ushll a b c)
+        (define-symbolic* x boolean?)
+        (if (contains-swizzle-node? a)
+          (arm:ushll a b (uint1_t x))
+          node)]
+      [(arm:usubl Vd Vn Vm)
+        (define-symbolic* x boolean?)
+        (if (or (contains-swizzle-node? Vd) (contains-swizzle-node? Vn))
+          (arm:usubl Vd Vn (uint1_t x))
+          node)]
+      [(arm:usubw Vd Vn Vm)
+        (define-symbolic* x boolean?)
+        (if (contains-swizzle-node? Vn)
+          (arm:usubw Vd Vn (uint1_t x))
+          node)]
+      [(arm:uxtl Vn Vm)
+        (define-symbolic* x boolean?)
+        (if (contains-swizzle-node? Vn)
+          (arm:uxtl Vn (uint1_t x))
+          node)]
       [_ node]))
 
   (set! arm-template (arm:visit-shallow arm-template reset-lo/hi-flags))
+
+  (display (format "Reset arm template: ~a\n" arm-template))
   
   ;; Get swizzle grammar
   (define candidates (get-arm-swizzle-grammar halide-expr arm-template swizzle-budget swizzle-node starting-vecs arm-sub-exprs translation-history))
 
-  ;(display "Candidates\n")
-  ;(pretty-print candidates)
+  (display "Swizzling candidates\n")
+  (pretty-print candidates)
   ;; Run synthesizer
   (define-values (successful? updated-template) (synthesize-arm-translation candidates halide-expr arm-sub-exprs value-bounds translation-history))
   
@@ -138,6 +297,7 @@
      (values #t (car updated-template) (cdr updated-template))]
     [else
      (display (format "\nFailed to synthesize implementation for swizzle node ~a\n\n" swizzle-node))
+    ;  (error "done")
      (values #f updated-template 0)]))
 
 (define (incorrect? sol)
@@ -164,21 +324,20 @@
         (synthesize-arm-translation (rest templates) halide-expr arm-sub-exprs value-bounds translation-history)])]))
 
 (define (run-synthesizer template halide-expr arm-sub-exprs value-bounds translation-history)
-  ; (display "run-synthesizer\n")
-  ; (pretty-print halide-expr)
-  ; (pretty-print template)
+  (display "arm:swizzling:run-synthesizer\n")
+  (pretty-print halide-expr)
+  (pretty-print template)
 
   (define-values (optimized-halide-expr optimized-template inferred-axioms)
     (arm:optimize-query halide-expr template arm-sub-exprs value-bounds translation-history))
 
-  ;(pretty-print optimized-halide-expr)
-  ;(pretty-print optimized-template)
+  (display "\n\nrunning synthesizer on...\n\n")
+  (pretty-print optimized-halide-expr)
+  (pretty-print optimized-template)
   
   ;; Incrementally checks the template for more and more lanes
   (define sym-consts (set->list (set-subtract (list->set (symbolics optimized-template)) (list->set (symbolics optimized-halide-expr)))))
-   ;(display "\n\nrunning synthesizer on...\n\n")
-   ;(pretty-print template)
-   ;(pretty-print halide-expr)
+  
   (define lanes-to-verify (verification-lanes (arm:get-interpreted-type optimized-template)))
   (synthesize-incremental optimized-halide-expr optimized-template sym-consts lanes-to-verify inferred-axioms '()))
 
@@ -362,10 +521,10 @@
     [else
      (define curr-lane (first lanes-to-verify))
      
-      ;(display (format "Verifying lane: ~a\n" curr-lane))
-      ;(set-curr-cn! curr-lane)
-      ;(println ((halide:interpret halide-expr) curr-lane))
-      ;(println (arm:get-element (arm:interpret template) curr-lane))
+      (display (format "Verifying lane: ~a\n" curr-lane))
+      (set-curr-cn! curr-lane)
+      (println ((halide:interpret halide-expr) curr-lane))
+      (println (arm:get-element (arm:interpret template) curr-lane))
      
      (define st (current-milliseconds))
      (clear-vc!)

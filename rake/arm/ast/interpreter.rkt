@@ -2379,7 +2379,7 @@
                    v2 4)
                   (concat_vectors
                    v2
-                   v2 4) 4))))))))]
+                   v2 4) 8))))))))]
         [(_ _ _) (assert #f (format "infeasible in sdot.v4i32.v16i4\n~a\n" (pretty-format p)))])]
 
     [(arm:sdot.v4i32.v16i8 Vd Vn Vm)
@@ -7739,7 +7739,7 @@
                    v2 4)
                   (concat_vectors
                    v2
-                   v2 4) 4))))))))]
+                   v2 4) 8))))))))]
         [((arm:u32x4 v0) (arm:u8x16 v1) (arm:u8x4 v2))
           (arm:u32x4
            (halide:interpret
@@ -7757,7 +7757,7 @@
                    v2 4)
                   (concat_vectors
                    v2
-                   v2 4) 4))))))))]
+                   v2 4) 8))))))))]
         [(_ _ _) (assert #f (format "infeasible in udot.v4i32.v16i4\n~a\n" (pretty-format p)))])]
 
     [(arm:udot.v4i32.v16i8 Vd Vn Vm)
@@ -10719,7 +10719,7 @@
             [(eq? i 1) (interpret v1)]
             [(eq? i 2) (interpret v2)]
             [(eq? i 3) (interpret v3)]
-            [else (assert #f (format "infeasible in Ri8x4\n~a\n" (pretty-format p)))])))]
+            [else (assert #f (format "infeasible in Ri8x4\n~a\n~a\n" (pretty-format p) i))])))]
 
     [(arm:Ru8x4 v0 v1 v2 v3)
       (arm:u8x4
@@ -10729,7 +10729,7 @@
             [(eq? i 1) (interpret v1)]
             [(eq? i 2) (interpret v2)]
             [(eq? i 3) (interpret v3)]
-            [else (assert #f (format "infeasible in Ru8x4\n~a\n" (pretty-format p)))])))]
+            [else (assert #f (format "infeasible in Ru8x4\n~a\n~a\n" (pretty-format p) i))])))]
 
     [(arm:??sub-expr exprs c) (interpret (list-ref exprs c))]
     
