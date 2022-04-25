@@ -158,17 +158,24 @@
             [else 10])]
          [candidates (enumerate-arm isa desired-types grouped-sub-exprs depth max-cost)])
 
-    (display "handle-cast\n")
-    (pretty-print isa)
-    (pretty-print candidates)
-    (pretty-print desired-types)
-    (pretty-print expr)
-    (pretty-print output-type)
-    (pretty-print saturate?)
-    (pretty-print arm-sub-exprs)
-    (pretty-print input-type)
+    ; (display "handle-cast\n")
+    ; (pretty-print isa)
+    ; (pretty-print candidates)
+    ; (pretty-print desired-types)
+    ; (pretty-print expr)
+    ; (pretty-print output-type)
+    ; (pretty-print saturate?)
+    ; (pretty-print arm-sub-exprs)
+    ; (pretty-print input-type)
 
-     (sort-and-uniquify candidates)))
+    ;; Widening instructions contain boolean flags.
+    (define (uint1-const) (define-symbolic* b boolean?) (uint1_t b))
+    (define (fill-arg-grammars node [pos -1])
+      (match node
+        ['uint1 (uint1-const)]
+        [_ node]))
+
+    (sort-and-uniquify (for/list ([candidate candidates]) (cons (arm:visit (car candidate) fill-arg-grammars) (cdr candidate))))))
 
 (define (handle-abs expr saturate? output-type arm-sub-exprs halide-expr)
   (let ([isa (list arm:abs arm:sqabs arm:reinterpret)]
@@ -228,6 +235,61 @@
         [_ node]))
 
     (sort-and-uniquify (for/list ([candidate candidates]) (cons (arm:visit (car candidate) fill-arg-grammars) (cdr candidate))))))
+
+; (handle-vs-dmpy-add-hh-sat expr weight round? accumulate? outT arm-sub-exprs halide-expr)
+
+(define (handle-vs-dmpy-add-hh-sat expr weight round? acc? output-type arm-sub-exprs halide-expr)
+  (let* (; TODO: better pruning and more isa options
+         [isa (list arm:sqdmulh-vs arm:sqrdmulh-vs arm:sqdmlal-vs arm:sqdmlsl-vs)]
+         [depth 2]
+         [max-cost 15]
+         [grouped-sub-exprs (prepare-sub-exprs arm-sub-exprs)]
+         [desired-types (arm:get-vector-types output-type)]
+         [candidates (time (enumerate-arm isa desired-types grouped-sub-exprs depth max-cost))]
+         [load-buffers (halide:extract-live-buffers halide-expr)]
+         [live-buffers (lambda (expr)
+                         (let* ([live-bufs (mutable-set)]
+                               [extract-buffer (lambda (node [pos -1])
+                                                  (destruct node
+                                                    [(buffer data elemT) (set-add! live-bufs node) node]
+                                                    ;[(arm:??swizzle id live-data exprs idx-tbl output-type) (display (format "checking: (arm:??swizzle ~a ~a ~a ~a ~a)\n" id live-data exprs idx-tbl output-type))]
+                                                    [_ node]))])
+                            (arm:visit expr extract-buffer)
+                            live-bufs))])
+
+    ;; TODO: read count filtering?
+    (set! candidates (time (filter (lambda (c) (equal? (live-buffers (car c)) load-buffers)) candidates)))
+
+    ;; TODO: more scalars? or is it this easy?
+    (let* ([scalars (list weight)])
+      (define (bool-const) (define-symbolic* b boolean?) b)
+      (define (uint1-const) (define-symbolic* b boolean?) (uint1_t b))
+      (define (int8-const) (int8x1 (apply choose* scalars)))
+      (define (uint8-const) (uint8x1 (apply choose* scalars)))
+      (define (int16-const) (int16x1 (apply choose* scalars)))
+      (define (uint16-const) (uint16x1 (apply choose* scalars)))
+      (define (int32-const) (int32x1 (apply choose* scalars)))
+      (define (uint32-const) (uint32x1 (apply choose* scalars)))
+      (define (int64-const) (int64x1 (apply choose* scalars)))
+      (define (uint64-const) (uint64x1 (apply choose* scalars)))
+      (define (fill-arg-grammars node [pos -1])
+       (match node
+         [#t #t]
+         [#f #f]
+         ['bool (bool-const)]
+         ['uint1 (uint1-const)]
+         ['int8 (int8-const)]
+         ['uint8 (uint8-const)]
+         ['int16 (int16-const)]
+         ['uint16 (uint16-const)]
+         ['int32 (int32-const)]
+         ['uint32 (uint32-const)]
+         ['int64 (int64-const)]
+         ['uint64 (uint64-const)]
+         ; TODO: HVX has some weird types here, for scalar registers?
+         [_ node]))
+
+      (sort-and-uniquify (for/list ([candidate candidates]) (cons (arm:visit (car candidate) fill-arg-grammars) (cdr candidate)))))))
 
 (define (handle-neg-sat expr arm-sub-exprs halide-expr)
   (let* ([isa (list arm:sqneg)]
@@ -353,10 +415,78 @@
     (display (format "absd candidates:\n~a\n\n\n" (pretty-format candidates)))
     (sort-and-uniquify candidates)))
 
-(define (handle-vs-divide expr divisor)
+(define (handle-vs-divide expr divisor arm-sub-exprs halide-expr)
   ;smull-vs umull-vs ushr sshr xtn
-  (error "Reached the end my friend")
-  )
+  ;; TODO: do we want a halving add? or saturating narrows? or sqdmulh-vs/sqrdmulh-vs
+  (let* ([isa (list arm:smull-vs arm:umull-vs arm:shrn arm:ushr arm:sshr arm:xtn)]
+         [output-type (halide:elem-type halide-expr)]
+         [grouped-sub-exprs (prepare-sub-exprs arm-sub-exprs)]
+         [desired-types (arm:get-vector-types output-type)]
+         ; TODO: is this a good depth / cost??
+         [depth 4]
+         [max-cost 20]
+         [candidates (enumerate-arm isa desired-types grouped-sub-exprs depth max-cost)])
+
+    ; (display (format "handle-vs-divide\ncandidates:\n~a\n" (pretty-format candidates)))
+
+     ;; Sort them
+     (set! candidates (sort candidates (lambda (v1 v2) (<= (cdr v1) (cdr v2)))))
+
+    ;  (display (format "handle-vs-divide\nsorted candidates:\n~a\n" (pretty-format candidates)))
+
+     ;; TODO: Filter them
+     (define (instr-repeat? candidate)
+       (define instrs (mutable-set))
+       (define keep? #t)
+       (define (check-instr node [pos -1])
+        ;  (display (format "checking instruction... ~a\n" node))
+         (cond
+           ;; TODO: HVX doesn't filter out widening multiplies, why not?
+           [(arm:ushr? node)
+            (when (set-member? instrs 'ushr)
+              (set! keep? #f))
+            (set-add! instrs 'ushr)]
+           [(arm:sshr? node) (when (set-member? instrs 'sshr) (set! keep? #f)) (set-add! instrs 'sshr)]
+           [(arm:xtn? node) (when (set-member? instrs 'xtn) (set! keep? #f)) (set-add! instrs 'xtn)]
+           [(arm:shrn? node) (when (set-member? instrs 'shrn) (set! keep? #f)) (set-add! instrs 'shrn)])
+         node)
+       (arm:visit-shallow candidate check-instr)
+      ;  (display (format "\nCandidate:\n~a\nkept:~a\n\n" candidate keep?))
+       keep?)
+     (set! candidates (filter (lambda (c) (instr-repeat? (car c))) candidates))
+
+    ; (display (format "handle-vs-divide\nfiltered candidates:\n~a\n" (pretty-format candidates)))
+
+     ;; Fill in param grammars
+     (define-symbolic bvc8 (bitvector 8))
+     (define-symbolic bvc16 (bitvector 16))
+     (define int-consts (list (int8_t bvc8) (int16_t bvc16) (uint8_t bvc8) (uint16_t bvc16)))
+     (define (bool-const) (define-symbolic* b boolean?) b)
+     (define (uint1-const) (define-symbolic* b boolean?) (uint1_t b))
+     (define (int8-const) (cpp:cast  (apply choose* int-consts) 'int8))
+     (define (uint8-const) (cpp:cast  (apply choose* int-consts) 'uint8))
+     (define (int16-const) (cpp:cast  (apply choose* int-consts) 'int16))
+     (define (uint16-const) (cpp:cast  (apply choose* int-consts) 'uint16))
+     (define (int32-const) (cpp:cast  (apply choose* int-consts) 'int32))
+     (define (uint32-const) (cpp:cast  (apply choose* int-consts) 'uint32))
+     ;; TODO: do we need larger types?
+     (define (fill-arg-grammars node [pos -1])
+       (match node
+         [#t #t]
+         [#f #f]
+         ['bool (bool-const)]
+         ['uint1 (uint1-const)]
+         ['int8 (int8-const)]
+         ['uint8 (uint8-const)]
+         ['int8 (int8-const)]
+         ['int16 (int16-const)]
+         ['uint16 (uint16-const)]
+         ['int32 (int32-const)]
+         ['uint32 (uint32-const)]
+         [_ node]))
+    (define output (sort-and-uniquify (for/list ([candidate candidates]) (cons (arm:visit (car candidate) fill-arg-grammars) (cdr candidate)))))
+    ; (display (format "handle-vs-divide\noutput:\n~a\n" (pretty-format output)))
+    output))
 
 (define (handle-build-vec base stride len arm-sub-exprs halide-expr)
   (cond
@@ -418,6 +548,9 @@
 
     ; TODO: vv-dmpy-add-sat, vs-dmpy-add-sat, vv-dmpy-add-hh-sat, vs-dmpy-add-hh-sat
 
+    [(arm-ir:vs-dmpy-add-hh-sat expr weight round? accumulate? outT)
+      (handle-vs-dmpy-add-hh-sat expr weight round? accumulate? outT arm-sub-exprs halide-expr)]
+
     [(arm-ir:neg-sat expr)
       (handle-neg-sat expr arm-sub-exprs halide-expr)]
 
@@ -444,7 +577,7 @@
     ; TODO: abs-diff-acc, select, is-equal, less-than, less-than-eq, bitwise-and, vs-divide
 
     [(arm-ir:vs-divide expr divisor)
-      (handle-vs-divide expr divisor)]
+      (handle-vs-divide expr divisor arm-sub-exprs halide-expr)]
     
     [(arm-ir:build-vec base stride len)
       (handle-build-vec base stride len arm-sub-exprs halide-expr)]

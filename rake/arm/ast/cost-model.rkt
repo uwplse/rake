@@ -203,6 +203,8 @@
 
     [(eq? arm:sshll instr) 2]
 
+    [(eq? arm:sshr instr) 2]
+
     [(eq? arm:ssubl instr) 2]
 
     [(eq? arm:ssubw instr) 2]
@@ -290,6 +292,8 @@
     [(eq? arm:ushl instr) 2]
 
     [(eq? arm:ushll instr) 2]
+
+    [(eq? arm:ushr instr) 2]
 
     [(eq? arm:usqadd instr) 3]
 
