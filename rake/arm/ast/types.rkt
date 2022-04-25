@@ -188,6 +188,10 @@
 (struct ext16i14 (Vn Vm) #:transparent)                     ;; extract_vectors_16i14
 (struct ext16i15 (Vn Vm) #:transparent)                     ;; extract_vectors_16i15
 
+;; Length 4 vector registers for udot/sdot functions.
+(struct Ri8x4 (v0 v1 v2 v3) #:transparent)
+(struct Ru8x4 (v0 v1 v2 v3) #:transparent)
+
 ;; ARM instructions for vector creation
 (struct ld (buf loc align output-type) #:transparent)
 ;; TODO: add the rest of the options
@@ -745,7 +749,7 @@
                          )]
 
     [(eq? sdot.v2i32.v8i4 instr) (list
-                         (instr-sig 'i32x2 (list 'i32x2 'i8x8 'i8x4))
+                         (instr-sig 'i32x2 (list 'i32x2 'i8x8 'int8x4))
                          )]
 
     [(eq? sdot.v2i32.v8i8 instr) (list
@@ -753,7 +757,7 @@
                          )]
 
     [(eq? sdot.v4i32.v16i4 instr) (list
-                         (instr-sig 'i32x4 (list 'i32x4 'i8x16 'i8x4))
+                         (instr-sig 'i32x4 (list 'i32x4 'i8x16 'int8x4))
                          )]
 
     [(eq? sdot.v4i32.v16i8 instr) (list
@@ -1274,8 +1278,8 @@
                          )]
 
     [(eq? udot.v2i32.v8i4 instr) (list
-                         (instr-sig 'i32x2 (list 'i32x2 'u8x8 'u8x4))
-                         (instr-sig 'u32x2 (list 'u32x2 'u8x8 'u8x4))
+                         (instr-sig 'i32x2 (list 'i32x2 'u8x8 'uint8x4))
+                         (instr-sig 'u32x2 (list 'u32x2 'u8x8 'uint8x4))
                          )]
 
     [(eq? udot.v2i32.v8i8 instr) (list
@@ -1284,8 +1288,8 @@
                          )]
 
     [(eq? udot.v4i32.v16i4 instr) (list
-                         (instr-sig 'i32x4 (list 'i32x4 'u8x16 'u8x4))
-                         (instr-sig 'u32x4 (list 'u32x4 'u8x16 'u8x4))
+                         (instr-sig 'i32x4 (list 'i32x4 'u8x16 'uint8x4))
+                         (instr-sig 'u32x4 (list 'u32x4 'u8x16 'uint8x4))
                          )]
 
     [(eq? udot.v4i32.v16i8 instr) (list

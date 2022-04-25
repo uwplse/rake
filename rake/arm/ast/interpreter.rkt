@@ -10710,7 +10710,27 @@
       (let ([vecType (arm:get-type-struct output-type)])
         (vecType
           (lambda (i) (halide:buffer-ref buf (+ (interpret loc) i)))))]
-    
+
+    [(arm:Ri8x4 v0 v1 v2 v3)
+      (arm:i8x4
+        (lambda (i)
+          (cond
+            [(eq? i 0) (interpret v0)]
+            [(eq? i 1) (interpret v1)]
+            [(eq? i 2) (interpret v2)]
+            [(eq? i 3) (interpret v3)]
+            [else (assert #f (format "infeasible in Ri8x4\n~a\n" (pretty-format p)))])))]
+
+    [(arm:Ru8x4 v0 v1 v2 v3)
+      (arm:u8x4
+        (lambda (i)
+          (cond
+            [(eq? i 0) (interpret v0)]
+            [(eq? i 1) (interpret v1)]
+            [(eq? i 2) (interpret v2)]
+            [(eq? i 3) (interpret v3)]
+            [else (assert #f (format "infeasible in Ru8x4\n~a\n" (pretty-format p)))])))]
+
     [(arm:??sub-expr exprs c) (interpret (list-ref exprs c))]
     
     [(ramp base stride len)

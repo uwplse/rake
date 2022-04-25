@@ -49,14 +49,27 @@
 (define (handle-vs-mpy-add expr weights output-type arm-sub-exprs halide-expr)
   (let* ([input-type (get-input-type expr)]
          [widening? (>= (cpp:type-bw output-type) (* 2 (cpp:type-bw input-type)))]
+         [double-widening? (>= (cpp:type-bw output-type) (* 4 (cpp:type-bw input-type)))]
          ; TODO: better pruning and more isa options
-         [isa (if widening?
-                (list arm:reinterpret arm:mul-vs arm:sxtl arm:uxtl arm:add arm:addv arm:saddlv arm:uaddlv arm:saddl arm:saddw arm:saddlp arm:sadalp arm:smlal-vs arm:smlsl-vs arm:sdot.v2i32.v8i8 arm:udot.v2i32.v8i8 arm:sdot.v4i32.v16i8 arm:udot.v4i32.v16i8 arm:ushll arm:sshll arm:ssubl arm:ssubw arm:sub arm:uadalp arm:uaddl arm:uaddlp arm:uaddw arm:umlal-vs arm:umlsl-vs arm:usubl arm:usubw arm:smull-vs arm:umull-vs)
-                ;(list arm:add arm:sshll arm:ushll arm:reinterpret)
-                (list arm:reinterpret arm:add arm:sub arm:addp arm:mla-vs arm:mls-vs arm:mul-vs arm:neg))] ;arm:shl
-         [depth (if widening? 3 2)]
+         [isa (flatten
+                (list
+                  (if widening?
+                    (list arm:reinterpret arm:mul-vs arm:sxtl arm:uxtl arm:add arm:addv arm:saddlv arm:uaddlv arm:saddl arm:saddw arm:saddlp arm:sadalp arm:smlal-vs arm:smlsl-vs arm:ushll arm:sshll arm:ssubl arm:ssubw arm:sub arm:uadalp arm:uaddl arm:uaddlp arm:uaddw arm:umlal-vs arm:umlsl-vs arm:usubl arm:usubw arm:smull-vs arm:umull-vs)
+                    ;(list arm:add arm:sshll arm:ushll arm:reinterpret)
+                    (list arm:reinterpret arm:add arm:sub arm:addp arm:mla-vs arm:mls-vs arm:mul-vs arm:neg)) ;arm:shl
+                  (if double-widening?
+                    (list arm:sdot.v2i32.v8i4 arm:udot.v2i32.v8i4 arm:sdot.v4i32.v16i4 arm:udot.v4i32.v16i4)
+                    '())))]
+         [depth (if double-widening? 1 (if widening? 3 2))]
          [max-cost 20]
-         [grouped-sub-exprs (prepare-sub-exprs arm-sub-exprs)]
+         ;; TODO: allow double-widening to have a zero vector as a sub-expr?
+         [sub-exprs arm-sub-exprs]
+          ; (if double-widening?
+          ;   (append
+          ;     (list (arm:dup (int32_t (bv 0 8))) (arm:dup (uint32_t (bv 0 8))) (arm:dupw (int32_t (bv 0 8))) (arm:dupw (uint32_t (bv 0 8))))
+          ;     arm-sub-exprs)
+          ;   arm-sub-exprs)]
+         [grouped-sub-exprs (prepare-sub-exprs sub-exprs)]
          [number-reads (length weights)]
          [desired-types (arm:get-vector-types output-type)]
          ; Enumerate those with the correct output type
@@ -84,16 +97,19 @@
     ;(display (format "Types; ~a ~a ~a\n" input-type output-type widening?))
 
     ;; Filter out templates that read too much or too little data
-    ;(display (format "Before filtering reads: ~a\n" (length candidates)))
+    (display (format "Is double-widening? ~a" double-widening?))
+    (pretty-print isa)
+    (display (format "Before filtering reads: ~a\n" (length candidates)))
+    (pretty-print candidates)
     (set! candidates (time (filter (lambda (c) (eq? (arm:max-unique-inputs (car c)) number-reads)) candidates)))
-    ;(display (format "After filtering reads: ~a\n" (length candidates)))
+    (display (format "After filtering reads: ~a\n" (length candidates)))
     ;(display (format "Load buffers: ~a\n" load-buffers))
     ;(display "First:\n")
     ;(pretty-print (first candidates))
-    ;(display (format "LB: ~a\n" (live-buffers (car (first candidates)))))
+    ; (display (format "LB: ~a\n" (live-buffers (car (first candidates)))))
     (set! candidates (time (filter (lambda (c) (equal? (live-buffers (car c)) load-buffers)) candidates)))
 
-    ;(display (format "After filtering buffers: ~a\n" (length candidates)))
+    (display (format "After filtering buffers: ~a\n" (length candidates)))
     ;(pretty-print (take candidates 50))
     ;(println (length candidates))
 
@@ -130,6 +146,8 @@
          ['uint32 (uint32-const)]
          ['int64 (int64-const)]
          ['uint64 (uint64-const)]
+         ['int8x4 (arm:Ri8x4 (int8-const) (int8-const) (int8-const) (int8-const))]
+         ['uint8x4 (arm:Ru8x4 (uint8-const) (uint8-const) (uint8-const) (uint8-const))]
          ; TODO: HVX has some weird types here, for scalar registers?
          [_ node]))
 
@@ -673,6 +691,17 @@
   ;(display (format "(not-dbl-reinterpret ~a ~a)\n\n" parent-instr child-instr))
   (not (and (eqv? parent-instr arm:reinterpret) (eqv? child-instr arm:reinterpret))))
 
+(define (is-dot-product-instr? instr)
+  (or
+    (eqv? instr arm:udot.v2i32.v8i4)
+    (eqv? instr arm:udot.v2i32.v8i8)
+    (eqv? instr arm:udot.v4i32.v16i4)
+    (eqv? instr arm:udot.v4i32.v16i8)
+    (eqv? instr arm:sdot.v2i32.v8i4)
+    (eqv? instr arm:sdot.v2i32.v8i8)
+    (eqv? instr arm:sdot.v4i32.v16i4)
+    (eqv? instr arm:sdot.v4i32.v16i8)))
+
 (define (enumerate-arm instr-set output-types base-exprs depth max-cost [read-count -1] [parent-instr (void)] [arg-pos -1])
   (let ([key (list instr-set output-types base-exprs depth max-cost read-count parent-instr arg-pos)])
     (cond
@@ -741,6 +770,8 @@
     ['uint32 #t]
     ['int64 #t]
     ['uint64 #t]
+    ['int8x4 #t]
+    ['uint8x4 #t]
     [_ #f]))
 
 (define (get-arg-opts arg-types instr instr-set base-exprs depth max-cost read-count arg-pos)

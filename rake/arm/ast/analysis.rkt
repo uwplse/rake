@@ -132,10 +132,10 @@
     [(arm:uaddlp Vn) (max-unique-inputs Vn)]
     [(arm:uaddlv Vn) (max-unique-inputs Vn)]
     [(arm:uaddw Vd Vn Vm) (+ (max-unique-inputs Vd) (max-unique-inputs Vn) (max-unique-inputs Vm))]
-    [(arm:udot.v2i32.v8i4 Vd Vn Vm) (+ (max-unique-inputs Vd) (max-unique-inputs Vn) (max-unique-inputs Vm))]
-    [(arm:udot.v2i32.v8i8 Vd Vn Vm) (+ (max-unique-inputs Vd) (max-unique-inputs Vn) (max-unique-inputs Vm))]
-    [(arm:udot.v4i32.v16i4 Vd Vn Vm) (+ (max-unique-inputs Vd) (max-unique-inputs Vn) (max-unique-inputs Vm))]
-    [(arm:udot.v4i32.v16i8 Vd Vn Vm) (+ (max-unique-inputs Vd) (max-unique-inputs Vn) (max-unique-inputs Vm))]
+    [(arm:udot.v2i32.v8i4 Vd Vn Vm) (+ (max-unique-inputs Vd) (* 4 (max-unique-inputs Vn)) (max-unique-inputs Vm))]
+    [(arm:udot.v2i32.v8i8 Vd Vn Vm) (+ (max-unique-inputs Vd) (* 4 (max-unique-inputs Vn)) (max-unique-inputs Vm))]
+    [(arm:udot.v4i32.v16i4 Vd Vn Vm) (+ (max-unique-inputs Vd) (* 4 (max-unique-inputs Vn)) (max-unique-inputs Vm))]
+    [(arm:udot.v4i32.v16i8 Vd Vn Vm) (+ (max-unique-inputs Vd) (* 4 (max-unique-inputs Vn)) (max-unique-inputs Vm))]
     [(arm:uhadd Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
     [(arm:uhsub Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
     [(arm:umax Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
@@ -191,6 +191,8 @@
         [(eq? 'int32 expr) 0]
         [(eq? 'uint64 expr) 0]
         [(eq? 'int64 expr) 0]
+        [(eq? 'uint8x4 expr) 0]
+        [(eq? 'int8x4 expr) 0]
         [else (error (format "max-unique-inputs failed to recognize ~a" expr))])]))
 
 (define (get-interpreted-type arm-expr)
