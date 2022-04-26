@@ -11,7 +11,10 @@
          rake/arm/ast/interpreter
          rake/synthesis/axioms)
 
-(provide (rename-out [optimize-query arm:optimize-query]))
+(provide
+ (rename-out
+  [optimize-query arm:optimize-query]
+  [unpack-abstr-exprs-arm arm:unpack-abstr-exprs]))
 
 (define axioms (list))
 

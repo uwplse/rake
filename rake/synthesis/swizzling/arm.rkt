@@ -52,7 +52,7 @@
           [(arm:??swizzle id live-data expr gather-tbl output-type) (set! swizzle-nodes (append (list node) swizzle-nodes)) node]
           [_ node]))
       (arm:visit-shallow arm-template register-gather-node)
-      
+
       ;; Synthesize an implementation for each swizzle node incrementally
       (synthesize-swizzle-nodes (reverse swizzle-nodes) starting-vecs arm-template swizzle-budget halide-expr arm-sub-exprs value-bounds translation-history)]
     [else (error (format "Unrecognized lowering algorithm specified: '~a. Supported algorithms: ['enumerative]" swizzling-algo))]))
