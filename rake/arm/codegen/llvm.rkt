@@ -729,7 +729,6 @@
 (define (handle-wide-slice-binary-broadcast arm-expr name Vd Vn flag broadcast)
   (let* ([slice (if flag `halide.ir.shalf `halide.ir.fhalf)]
          [type (to-llvm-type arm-expr)]
-        ;  [half (list slice type `(list ,(input-arg Vd)))]
          [b-type (to-llvm-type Vd)]
          [b `(,broadcast ,b-type (list ,(compile-scalar Vn)))]
          [wide-type (to-llvm-type-wide Vd)]
@@ -742,7 +741,7 @@
 (define (handle-wide-slice-binary arm-expr name Vd Vn flag)
   (let* ([slice (if flag `halide.ir.shalf `halide.ir.fhalf)]
          [type (to-llvm-type arm-expr)]
-         [wide-type (to-llvm-type-wide arm-expr)]
+         [wide-type (to-llvm-type-wide Vd)]
          [call (generate-rake name wide-type `(list ,(input-arg Vd) ,(input-arg Vn)))])
     `(,slice
       ,type
