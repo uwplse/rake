@@ -22,12 +22,17 @@
 
 (define (get-arm-grammar halide-expr ir-expr arm-sub-exprs cost-ub)
   (let* ([key (cons (arm-ir:ast-node-id ir-expr) arm-sub-exprs)]
-         [check-cache (and (not (arm-ir:load-data? ir-expr)) (hash-has-key? grammar-cache key))]
-         [candidates (if check-cache (hash-ref grammar-cache key) (get-arm-grammar-helper halide-expr ir-expr arm-sub-exprs))])
-    ;(display (format "get-arm-grammar received ~a candidates\n" (length candidates)))
-    ;(println (filter (lambda (c) (<= (cdr c) cost-ub)) candidates))
+         [check-cache (and (not (arm-ir:load-data? ir-expr)) (hash-has-key? grammar-cache key))])
+
+    (define candidates
+      (cond
+        [check-cache (hash-ref grammar-cache key)]
+        [else
+          (define candidates (get-arm-grammar-helper halide-expr ir-expr arm-sub-exprs))
+          (hash-set! grammar-cache key candidates)
+          candidates]))
+
     (let ([filtered (filter (lambda (c) (<= (cdr c) cost-ub)) candidates)])
-      ;(display (format "And ~a of them pass the cost filtering\n" (length filtered)))
       filtered)))
 
 (define (get-input-type expr)
@@ -97,19 +102,19 @@
     ;(display (format "Types; ~a ~a ~a\n" input-type output-type widening?))
 
     ;; Filter out templates that read too much or too little data
-    (display (format "Is double-widening? ~a" double-widening?))
-    (pretty-print isa)
-    (display (format "Before filtering reads: ~a\n" (length candidates)))
-    (pretty-print candidates)
-    (set! candidates (time (filter (lambda (c) (eq? (arm:max-unique-inputs (car c)) number-reads)) candidates)))
-    (display (format "After filtering reads: ~a\n" (length candidates)))
+    ;(display (format "Is double-widening? ~a" double-widening?))
+    ;(pretty-print isa)
+    ;(display (format "Before filtering reads: ~a\n" (length candidates)))
+    ;(pretty-print candidates)
+    ;(set! candidates (time (filter (lambda (c) (eq? (arm:max-unique-inputs (car c)) number-reads)) candidates)))
+    ;(display (format "After filtering reads: ~a\n" (length candidates)))
     ;(display (format "Load buffers: ~a\n" load-buffers))
     ;(display "First:\n")
     ;(pretty-print (first candidates))
     ; (display (format "LB: ~a\n" (live-buffers (car (first candidates)))))
     (set! candidates (time (filter (lambda (c) (equal? (live-buffers (car c)) load-buffers)) candidates)))
 
-    (display (format "After filtering buffers: ~a\n" (length candidates)))
+    ;(display (format "After filtering buffers: ~a\n" (length candidates)))
     ;(pretty-print (take candidates 50))
     ;(println (length candidates))
 
@@ -706,7 +711,7 @@
   (let ([key (list instr-set output-types base-exprs depth max-cost read-count parent-instr arg-pos)])
     (cond
       ; We have enumerated this tree before
-      [(hash-has-key? enumeration-cache key) (hash-ref enumeration-cache key)]
+      [(hash-has-key? enumeration-cache key) (println "ASDASDASDASDA") (hash-ref enumeration-cache key)]
 
       ; Base case
       [(<= depth 0) (apply append (for/list ([output-type output-types]) (hash-ref! base-exprs output-type (list))))]

@@ -75,8 +75,8 @@
      (hash-set! synthesis-db (cons (first templates) halide-expr) (correct? sol))
      (cond
        [(correct? sol)
-        (display (format "Evaluation template:\n~a\n" (pretty-format template)))
-        (display (format "Updated template:\n~a\n" (pretty-format updated-template)))
+        ;(display (format "Evaluation template:\n~a\n" (pretty-format template)))
+        ;(display (format "Updated template:\n~a\n" (pretty-format updated-template)))
         (values #t (cons updated-template (cdr template)))]
        [else
         (synthesize-translation (rest templates) halide-expr arm-sub-exprs value-bounds translation-history)])]))
@@ -96,14 +96,14 @@
   ;(pretty-print optimized-template)
 
   ;; Incrementally checks the template for more and more lanes
-  (display "arm:run-synthesizer interpreting for lanes\n")
-  (pretty-print optimized-template)
-  (pretty-print (arm:interpret optimized-template))
-  (pretty-print optimized-halide-expr)
-  (pretty-print (halide:interpret optimized-halide-expr))
+  ;(display "arm:run-synthesizer interpreting for lanes\n")
+  ;(pretty-print optimized-template)
+  ;(pretty-print (arm:interpret optimized-template))
+  ;(pretty-print optimized-halide-expr)
+  ;(pretty-print (halide:interpret optimized-halide-expr))
   (define itype (arm:get-interpreted-type optimized-template))
   (define lanes-to-verify (verification-lanes itype))
-  (display (format "Verifying lanes: ~a for itype: ~a\n" lanes-to-verify itype))
+  ;(display (format "Verifying lanes: ~a for itype: ~a\n" lanes-to-verify itype))
   ; (display "arm:run-synthesizer synthesizing incrementally\n")
   (synthesize-incremental optimized-halide-expr optimized-template inferred-axioms lanes-to-verify '()))
 
@@ -113,7 +113,7 @@
     [else
      (define curr-lane (first lanes-to-verify))
 
-     (display (format "\n\nVerifying lane: ~a\n" curr-lane))
+     ;(display (format "\n\nVerifying lane: ~a\n" curr-lane))
     ;  (when (eq? 0 curr-lane)
     ;    (pretty-print optimized-template))
     ;  (println inferred-axioms)
@@ -137,7 +137,7 @@
      (define runtime (- (current-milliseconds) st))
 
      (display (format "Ran synthesizer for ~a ms\n" runtime))
-     (display (format "Solution: ~a\nCorrect? ~a\n" sol (correct? sol)))
+     ;(display (format "Solution: ~a\nCorrect? ~a\n" sol (correct? sol)))
      (log (format "Lowering query: ~a ms\n" runtime))
 
      (cond
