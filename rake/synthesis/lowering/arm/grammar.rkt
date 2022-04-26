@@ -106,7 +106,7 @@
     ;(pretty-print isa)
     ;(display (format "Before filtering reads: ~a\n" (length candidates)))
     ;(pretty-print candidates)
-    ;(set! candidates (time (filter (lambda (c) (eq? (arm:max-unique-inputs (car c)) number-reads)) candidates)))
+    (set! candidates (time (filter (lambda (c) (eq? (arm:max-unique-inputs (car c)) number-reads)) candidates)))
     ;(display (format "After filtering reads: ~a\n" (length candidates)))
     ;(display (format "Load buffers: ~a\n" load-buffers))
     ;(display "First:\n")
