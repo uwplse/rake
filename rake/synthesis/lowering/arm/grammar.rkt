@@ -56,7 +56,7 @@
                   (if widening?
                     (list arm:reinterpret arm:mul-vs arm:sxtl arm:uxtl arm:add arm:addv arm:saddlv arm:uaddlv arm:saddl arm:saddw arm:saddlp arm:sadalp arm:smlal-vs arm:smlsl-vs arm:ushll arm:sshll arm:ssubl arm:ssubw arm:sub arm:uadalp arm:uaddl arm:uaddlp arm:uaddw arm:umlal-vs arm:umlsl-vs arm:usubl arm:usubw arm:smull-vs arm:umull-vs)
                     ;(list arm:add arm:sshll arm:ushll arm:reinterpret)
-                    (list arm:reinterpret arm:add arm:sub arm:addp arm:mla-vs arm:mls-vs arm:mul-vs arm:neg)) ;arm:shl
+                    (list arm:reinterpret arm:add arm:sub arm:addp arm:mla-vs arm:mls-vs arm:mul-vs arm:neg arm:shl))
                   (if double-widening?
                     (list arm:sdot.v2i32.v8i4 arm:udot.v2i32.v8i4 arm:sdot.v4i32.v16i4 arm:udot.v4i32.v16i4)
                     '())))]
@@ -97,19 +97,19 @@
     ;(display (format "Types; ~a ~a ~a\n" input-type output-type widening?))
 
     ;; Filter out templates that read too much or too little data
-    (display (format "Is double-widening? ~a" double-widening?))
-    (pretty-print isa)
-    (display (format "Before filtering reads: ~a\n" (length candidates)))
-    (pretty-print candidates)
+    ; (display (format "Is double-widening? ~a" double-widening?))
+    ; (pretty-print isa)
+    ; (display (format "Before filtering reads: ~a\n" (length candidates)))
+    ; (pretty-print candidates)
     (set! candidates (time (filter (lambda (c) (eq? (arm:max-unique-inputs (car c)) number-reads)) candidates)))
-    (display (format "After filtering reads: ~a\n" (length candidates)))
+    ; (display (format "After filtering reads: ~a\n" (length candidates)))
     ;(display (format "Load buffers: ~a\n" load-buffers))
     ;(display "First:\n")
     ;(pretty-print (first candidates))
     ; (display (format "LB: ~a\n" (live-buffers (car (first candidates)))))
     (set! candidates (time (filter (lambda (c) (equal? (live-buffers (car c)) load-buffers)) candidates)))
 
-    (display (format "After filtering buffers: ~a\n" (length candidates)))
+    ; (display (format "After filtering buffers: ~a\n" (length candidates)))
     ;(pretty-print (take candidates 50))
     ;(println (length candidates))
 
@@ -380,17 +380,33 @@
          [narrowing? (< (cpp:type-bw output-type) (cpp:type-bw input-type))]
          [desired-expr-types (arm:get-vector-types output-type)]
          [grouped-sub-exprs (prepare-sub-exprs arm-sub-exprs)]
-         [isa (if narrowing?
-                ; TODO: use saturating / rounding / signedness information
-                ; TODO: need srshr, sshr, ssra, urshr, ursra, ushr, usra
-                (list arm:shrn arm:rshrn arm:sqrshrn arm:sqrshrun arm:sqshrn arm:sqshrun arm:uqrshrn arm:uqshrn)
-                (error "AJ needs to implement srshr, sshr, ssra, urshr, ursra, ushr, usra\n"))]
-         [depth 1]
-         [max-cost (if narrowing? 7 4)]
+         ;; TODO: what about widening shifts? do we care about those?
+         [immediate-narrowing? (and narrowing? (concrete? shift))]
+         [symbolic-narrowing? (and narrowing? (not (concrete? shift)))]
+         [isa
+          (cond
+            ; TODO: use saturating / rounding / signedness information
+            [immediate-narrowing? (list arm:shrn arm:rshrn arm:sqrshrn arm:sqrshrun arm:sqshrn arm:sqshrun arm:uqrshrn arm:uqshrn)]
+            ;; Doing anon-concrete shift, use regular shift patterns
+            [symbolic-narrowing? (append (list arm:xtn arm:uqxtn arm:sqxtn arm:sqxtun) (list arm:uqrshr arm:sqrshr arm:srshr arm:urshr arm:ushr arm:sshr))]
+            ; TODO: need ssra, ursra, usra
+            [else (error (format "Regular shift right not yet supported:\n~a >> ~a |- ~a ~a ~a ~a\n" expr shift round? saturate? signed? output-type))])]
+            ; [else (list arm:uqrshr arm:sqrshr arm:srshr arm:urshr arm:ushr arm:sshr)])]
+         [depth
+          (cond
+            [immediate-narrowing? 1]
+            [symbolic-narrowing? 2]
+            ; TODO: should be larger?
+            [else 1])]
+         [max-cost
+          (cond
+            [immediate-narrowing? 7]
+            [symbolic-narrowing? 12]
+            ; TODO: should be larger?
+            [else 4])]
          ; TODO: how to decide depth/cost
          [candidates (enumerate-arm isa desired-expr-types grouped-sub-exprs depth max-cost)])
     
-    (let ([add-scalars (halide:extract-add-scalars halide-expr)])
       (define (bool-const) (define-symbolic* b boolean?) b)
       (define (uint1-const) (define-symbolic* b boolean?) (uint1_t b))
       (define (int8-const) (int8x1 shift))
@@ -401,7 +417,23 @@
       (define (uint32-const) (uint32x1 shift))
       (define (int64-const) (int64x1 shift))
       (define (uint64-const) (uint64x1 shift))
-      (define (fill-arg-grammars node [pos -1])
+      (define (fill-arg-grammars-imm node [pos -1])
+       (match node
+         [#t #t]
+         [#f #f]
+         ['bool (bool-const)]
+         ['uint1 (uint1-const)]
+         ['int8_imm (int8-const)]
+         ['uint8_imm (uint8-const)]
+         ['int16_imm (int16-const)]
+         ['uint16_imm (uint16-const)]
+         ['int32_imm (int32-const)]
+         ['uint32_imm (uint32-const)]
+         ['int64_imm (int64-const)]
+         ['uint64_imm (uint64-const)]
+         [_ node]))
+
+      (define (fill-arg-grammars-sym node [pos -1])
        (match node
          [#t #t]
          [#f #f]
@@ -415,9 +447,13 @@
          ['uint32 (uint32-const)]
          ['int64 (int64-const)]
          ['uint64 (uint64-const)]
+         ;; Fill immediates too
+         ;; TODO: only fill if shift is concrete?
          [_ node]))
 
-      (sort-and-uniquify (for/list ([candidate candidates]) (cons (arm:visit (car candidate) fill-arg-grammars) (cdr candidate)))))))
+      (define fill-arg-grammars (if (concrete? shift) fill-arg-grammars-imm fill-arg-grammars-sym))
+
+      (sort-and-uniquify (for/list ([candidate candidates]) (cons (arm:visit (car candidate) fill-arg-grammars) (cdr candidate))))))
 
 (define (handle-abs-diff expr0 expr1 widening? output-type arm-sub-exprs halide-expr)
   (let* ([isa (if widening?

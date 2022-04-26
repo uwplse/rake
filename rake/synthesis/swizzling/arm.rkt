@@ -277,8 +277,8 @@
   ;; Get swizzle grammar
   (define candidates (get-arm-swizzle-grammar halide-expr arm-template swizzle-budget swizzle-node starting-vecs arm-sub-exprs translation-history))
 
-  (display "Swizzling candidates\n")
-  (pretty-print candidates)
+  (display "Swizzling candidate0:\n")
+  (pretty-print (first candidates))
   ;; Run synthesizer
   (define-values (successful? updated-template) (synthesize-arm-translation candidates halide-expr arm-sub-exprs value-bounds translation-history))
   
@@ -324,16 +324,17 @@
         (synthesize-arm-translation (rest templates) halide-expr arm-sub-exprs value-bounds translation-history)])]))
 
 (define (run-synthesizer template halide-expr arm-sub-exprs value-bounds translation-history)
-  (display "arm:swizzling:run-synthesizer\n")
-  (pretty-print halide-expr)
-  (pretty-print template)
+  ; (display "arm:swizzling:run-synthesizer\n")
+  ; (pretty-print halide-expr)
+  ; (pretty-print template)
 
   (define-values (optimized-halide-expr optimized-template inferred-axioms)
     (arm:optimize-query halide-expr template arm-sub-exprs value-bounds translation-history))
 
-  (display "\n\nrunning synthesizer on...\n\n")
-  (pretty-print optimized-halide-expr)
-  (pretty-print optimized-template)
+  ; (display "\n\nrunning synthesizer on...\n\n")
+  ; (pretty-print optimized-halide-expr)
+  ; (pretty-print optimized-template)
+  ; (display (format "inferred axioms: ~a\n" inferred-axioms))
   
   ;; Incrementally checks the template for more and more lanes
   (define sym-consts (set->list (set-subtract (list->set (symbolics optimized-template)) (list->set (symbolics optimized-halide-expr)))))
@@ -521,11 +522,11 @@
     [else
      (define curr-lane (first lanes-to-verify))
      
-      (display (format "Verifying lane: ~a\n" curr-lane))
-      (set-curr-cn! curr-lane)
-      (println ((halide:interpret halide-expr) curr-lane))
-      (println (arm:get-element (arm:interpret template) curr-lane))
-     
+      ; (display (format "Verifying lane: ~a\n" curr-lane))
+      ; (set-curr-cn! curr-lane)
+      ; (println ((halide:interpret halide-expr) curr-lane))
+      ; (println (arm:get-element (arm:interpret template) curr-lane))
+
      (define st (current-milliseconds))
      (clear-vc!)
      (for-each (lambda (axiom) (assume axiom)) inferred-axioms)

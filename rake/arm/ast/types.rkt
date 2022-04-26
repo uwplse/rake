@@ -59,6 +59,8 @@
 (struct rshrn (Vd Vn Vm Vb) #:transparent)                  ;; rounding_shift_right_narrow
 (struct uqrshl (Vn Vm) #:transparent)                       ;; saturating_rounding_shift_left
 (struct sqrshl (Vn Vm) #:transparent)                       ;; saturating_rounding_shift_left
+(struct uqrshr (Vn Vm) #:transparent)                       ;; saturating_rounding_shift_right
+(struct sqrshr (Vn Vm) #:transparent)                       ;; saturating_rounding_shift_right
 (struct uqrshrn (Vd Vn Vm Vb) #:transparent)                ;; saturating_rounding_shift_right_narrow
 (struct sqrshrn (Vd Vn Vm Vb) #:transparent)                ;; saturating_rounding_shift_right_narrow
 (struct sqrshrun (Vd Vn Vm Vb) #:transparent)               ;; saturating_rounding_shift_right_narrow
@@ -115,7 +117,7 @@
 (struct saddl (Vd Vn Vm) #:transparent)                     ;; signed_add_long_hilo
 (struct saddlv (Vn) #:transparent)                          ;; signed_add_long_across_vector
 (struct saddw (Vd Vn Vm) #:transparent)                     ;; signed_add_wide_hilo
-(struct shl (Vn) #:transparent)                             ;; shift_left
+(struct shl (Vn Vm) #:transparent)                          ;; shift_left
 (struct shll (Vn Vm) #:transparent)                         ;; shift_left_long_hilo
 (struct shrn (Vd Vn Vm Vb) #:transparent)                   ;; shift_right_narrow
 (struct smaxv (Vn) #:transparent)                           ;; signed_maximum_across_vector
@@ -187,6 +189,8 @@
 (struct ext16i13 (Vn Vm) #:transparent)                     ;; extract_vectors_16i13
 (struct ext16i14 (Vn Vm) #:transparent)                     ;; extract_vectors_16i14
 (struct ext16i15 (Vn Vm) #:transparent)                     ;; extract_vectors_16i15
+(struct srshr (Vn Vm) #:transparent)                        ;; rounding_shift_right
+(struct urshr (Vn Vm) #:transparent)                        ;; rounding_shift_right
 
 ;; Length 4 vector registers for udot/sdot functions.
 (struct Ri8x4 (v0 v1 v2 v3) #:transparent)
@@ -668,13 +672,14 @@
                          (instr-sig 'u32x4 (list 'u64x2 'u64x2 'u64x2 'u64x2))
                          )]
 
+    ;; Immediate
     [(eq? rshrn instr) (list
-                         (instr-sig 'i8x16 (list 'i16x8 'uint16 'i16x8 'uint16))
-                         (instr-sig 'i16x8 (list 'i32x4 'uint32 'i32x4 'uint32))
-                         (instr-sig 'i32x4 (list 'i64x2 'uint64 'i64x2 'uint64))
-                         (instr-sig 'u8x16 (list 'u16x8 'uint16 'u16x8 'uint16))
-                         (instr-sig 'u16x8 (list 'u32x4 'uint32 'u32x4 'uint32))
-                         (instr-sig 'u32x4 (list 'u64x2 'uint64 'u64x2 'uint64))
+                         (instr-sig 'i8x16 (list 'i16x8 'uint16_imm 'i16x8 'uint16_imm))
+                         (instr-sig 'i16x8 (list 'i32x4 'uint32_imm 'i32x4 'uint32_imm))
+                         (instr-sig 'i32x4 (list 'i64x2 'uint64_imm 'i64x2 'uint64_imm))
+                         (instr-sig 'u8x16 (list 'u16x8 'uint16_imm 'u16x8 'uint16_imm))
+                         (instr-sig 'u16x8 (list 'u32x4 'uint32_imm 'u32x4 'uint32_imm))
+                         (instr-sig 'u32x4 (list 'u64x2 'uint64_imm 'u64x2 'uint64_imm))
                          )]
 
     [(eq? rsubhn instr) (list
@@ -773,21 +778,22 @@
                          (instr-sig 'i32x4 (list 'i32x4 'i32x4))
                          )]
 
+    ;; Immediate
     [(eq? shl instr) (list
-                         (instr-sig 'i8x8 (list 'i8x8))
-                         (instr-sig 'i8x16 (list 'i8x16))
-                         (instr-sig 'i16x4 (list 'i16x4))
-                         (instr-sig 'i16x8 (list 'i16x8))
-                         (instr-sig 'i32x2 (list 'i32x2))
-                         (instr-sig 'i32x4 (list 'i32x4))
-                         (instr-sig 'i64x2 (list 'i64x2))
-                         (instr-sig 'u8x8 (list 'u8x8))
-                         (instr-sig 'u8x16 (list 'u8x16))
-                         (instr-sig 'u16x4 (list 'u16x4))
-                         (instr-sig 'u16x8 (list 'u16x8))
-                         (instr-sig 'u32x2 (list 'u32x2))
-                         (instr-sig 'u32x4 (list 'u32x4))
-                         (instr-sig 'u64x2 (list 'u64x2))
+                         (instr-sig 'i8x8 (list 'i8x8 'int8_imm))
+                         (instr-sig 'i8x16 (list 'i8x16 'int8_imm))
+                         (instr-sig 'i16x4 (list 'i16x4 'int16_imm))
+                         (instr-sig 'i16x8 (list 'i16x8 'int16_imm))
+                         (instr-sig 'i32x2 (list 'i32x2 'int32_imm))
+                         (instr-sig 'i32x4 (list 'i32x4 'int32_imm))
+                         (instr-sig 'i64x2 (list 'i64x2 'int64_imm))
+                         (instr-sig 'u8x8 (list 'u8x8 'uint8_imm))
+                         (instr-sig 'u8x16 (list 'u8x16 'uint8_imm))
+                         (instr-sig 'u16x4 (list 'u16x4 'uint16_imm))
+                         (instr-sig 'u16x8 (list 'u16x8 'uint16_imm))
+                         (instr-sig 'u32x2 (list 'u32x2 'uint32_imm))
+                         (instr-sig 'u32x4 (list 'u32x4 'uint32_imm))
+                         (instr-sig 'u64x2 (list 'u64x2 'uint64_imm))
                          )]
 
     [(eq? shll instr) (list
@@ -799,13 +805,14 @@
                          (instr-sig 'u64x2 (list 'u32x4 'uint1))
                          )]
 
+    ;; Immediate.
     [(eq? shrn instr) (list
-                         (instr-sig 'i8x16 (list 'i16x8 'uint16 'i16x8 'uint16))
-                         (instr-sig 'i16x8 (list 'i32x4 'uint32 'i32x4 'uint32))
-                         (instr-sig 'i32x4 (list 'i64x2 'uint64 'i64x2 'uint64))
-                         (instr-sig 'u8x16 (list 'u16x8 'uint16 'u16x8 'uint16))
-                         (instr-sig 'u16x8 (list 'u32x4 'uint32 'u32x4 'uint32))
-                         (instr-sig 'u32x4 (list 'u64x2 'uint64 'u64x2 'uint64))
+                         (instr-sig 'i8x16 (list 'i16x8 'uint16_imm 'i16x8 'uint16_imm))
+                         (instr-sig 'i16x8 (list 'i32x4 'uint32_imm 'i32x4 'uint32_imm))
+                         (instr-sig 'i32x4 (list 'i64x2 'uint64_imm 'i64x2 'uint64_imm))
+                         (instr-sig 'u8x16 (list 'u16x8 'uint16_imm 'u16x8 'uint16_imm))
+                         (instr-sig 'u16x8 (list 'u32x4 'uint32_imm 'u32x4 'uint32_imm))
+                         (instr-sig 'u32x4 (list 'u64x2 'uint64_imm 'u64x2 'uint64_imm))
                          )]
 
     [(eq? shsub instr) (list
@@ -1002,18 +1009,32 @@
                          (instr-sig 'i64x2 (list 'i64x2 'i64x2))
                          )]
 
+    ;; Codegen to sqrshl with negative rhs.
+    [(eq? sqrshr instr) (list
+                         (instr-sig 'i8x8 (list 'i8x8 'i8x8))
+                         (instr-sig 'i8x16 (list 'i8x16 'i8x16))
+                         (instr-sig 'i16x4 (list 'i16x4 'i16x4))
+                         (instr-sig 'i16x8 (list 'i16x8 'i16x8))
+                         (instr-sig 'i32x2 (list 'i32x2 'i32x2))
+                         (instr-sig 'i32x4 (list 'i32x4 'i32x4))
+                         (instr-sig 'i64x2 (list 'i64x2 'i64x2))
+                         )]
+
+    ;; Immediate.
     [(eq? sqrshrn instr) (list
-                         (instr-sig 'i8x16 (list 'i16x8 'uint16 'i16x8 'uint16))
-                         (instr-sig 'i16x8 (list 'i32x4 'uint32 'i32x4 'uint32))
-                         (instr-sig 'i32x4 (list 'i64x2 'uint64 'i64x2 'uint64))
+                         (instr-sig 'i8x16 (list 'i16x8 'uint16_imm 'i16x8 'uint16_imm))
+                         (instr-sig 'i16x8 (list 'i32x4 'uint32_imm 'i32x4 'uint32_imm))
+                         (instr-sig 'i32x4 (list 'i64x2 'uint64_imm 'i64x2 'uint64_imm))
                          )]
 
+    ;; Immediate.
     [(eq? sqrshrun instr) (list
-                         (instr-sig 'u8x16 (list 'i16x8 'uint16 'i16x8 'uint16))
-                         (instr-sig 'u16x8 (list 'i32x4 'uint32 'i32x4 'uint32))
-                         (instr-sig 'u32x4 (list 'i64x2 'uint64 'i64x2 'uint64))
+                         (instr-sig 'u8x16 (list 'i16x8 'uint16_imm 'i16x8 'uint16_imm))
+                         (instr-sig 'u16x8 (list 'i32x4 'uint32_imm 'i32x4 'uint32_imm))
+                         (instr-sig 'u32x4 (list 'i64x2 'uint64_imm 'i64x2 'uint64_imm))
                          )]
 
+    ;; There is an immediate version, rely on LLVM for that.
     [(eq? sqshl instr) (list
                          (instr-sig 'i8x8 (list 'i8x8 'i8x8))
                          (instr-sig 'i8x8 (list 'i8x8 'u8x8))
@@ -1031,6 +1052,7 @@
                          (instr-sig 'i64x2 (list 'i64x2 'u64x2))
                          )]
 
+    ;; TODO: I think there's only an immediate version of this?
     [(eq? sqshlu instr) (list
                          (instr-sig 'u8x8 (list 'i8x8 'i8x8))
                          (instr-sig 'u8x8 (list 'i8x8 'u8x8))
@@ -1048,16 +1070,18 @@
                          (instr-sig 'u64x2 (list 'i64x2 'u64x2))
                          )]
 
+    ;; Immediate.
     [(eq? sqshrn instr) (list
-                         (instr-sig 'i8x16 (list 'i16x8 'uint16 'i16x8 'uint16))
-                         (instr-sig 'i16x8 (list 'i32x4 'uint32 'i32x4 'uint32))
-                         (instr-sig 'i32x4 (list 'i64x2 'uint64 'i64x2 'uint64))
+                         (instr-sig 'i8x16 (list 'i16x8 'uint16_imm 'i16x8 'uint16_imm))
+                         (instr-sig 'i16x8 (list 'i32x4 'uint32_imm 'i32x4 'uint32_imm))
+                         (instr-sig 'i32x4 (list 'i64x2 'uint64_imm 'i64x2 'uint64_imm))
                          )]
 
+    ;; Immediate
     [(eq? sqshrun instr) (list
-                         (instr-sig 'u8x16 (list 'i16x8 'uint16 'i16x8 'uint16))
-                         (instr-sig 'u16x8 (list 'i32x4 'uint32 'i32x4 'uint32))
-                         (instr-sig 'u32x4 (list 'i64x2 'uint64 'i64x2 'uint64))
+                         (instr-sig 'u8x16 (list 'i16x8 'uint16_imm 'i16x8 'uint16_imm))
+                         (instr-sig 'u16x8 (list 'i32x4 'uint32_imm 'i32x4 'uint32_imm))
+                         (instr-sig 'u32x4 (list 'i64x2 'uint64_imm 'i64x2 'uint64_imm))
                          )]
 
     [(eq? sqsub instr) (list
@@ -1099,6 +1123,28 @@
     ;                      (instr-sig 'i32x4 (list 'i32x4 'i32x4))
     ;                      )]
 
+    ;; Immediate.
+    ; [(eq? srshr instr) (list
+    ;                      (instr-sig 'i8x8 (list 'i8x8 'int8_imm))
+    ;                      (instr-sig 'i8x16 (list 'i8x16 'int8_imm))
+    ;                      (instr-sig 'i16x4 (list 'i16x4 'int16_imm))
+    ;                      (instr-sig 'i16x8 (list 'i16x8 'int16_imm))
+    ;                      (instr-sig 'i32x2 (list 'i32x2 'int32_imm))
+    ;                      (instr-sig 'i32x4 (list 'i32x4 'int32_imm))
+    ;                      (instr-sig 'i64x2 (list 'i64x2 'int32_imm))
+    ;                      )]
+
+    ;; Generate the SRSHL instruction with a negated rhs if non-immediate.
+    [(eq? srshr instr) (list
+                         (instr-sig 'i8x8 (list 'i8x8 'i8x8))
+                         (instr-sig 'i8x16 (list 'i8x16 'i8x16))
+                         (instr-sig 'i16x4 (list 'i16x4 'i16x4))
+                         (instr-sig 'i16x8 (list 'i16x8 'i16x8))
+                         (instr-sig 'i32x2 (list 'i32x2 'i32x2))
+                         (instr-sig 'i32x4 (list 'i32x4 'i32x4))
+                         (instr-sig 'i64x2 (list 'i64x2 'i64x2))
+                         )]
+
     [(eq? srshl instr) (list
                          (instr-sig 'i8x8 (list 'i8x8 'i8x8))
                          (instr-sig 'i8x16 (list 'i8x16 'i8x16))
@@ -1119,20 +1165,33 @@
                          (instr-sig 'i64x2 (list 'i64x2 'i64x2))
                          )]
 
+    ;; Immediate.
     [(eq? sshll instr) (list
-                         (instr-sig 'i16x8 (list 'i8x16 'uint8 'uint1))
-                         (instr-sig 'i32x4 (list 'i16x8 'uint16 'uint1))
-                         (instr-sig 'i64x2 (list 'i32x4 'uint32 'uint1))
+                         (instr-sig 'i16x8 (list 'i8x16 'uint8_imm 'uint1))
+                         (instr-sig 'i32x4 (list 'i16x8 'uint16_imm 'uint1))
+                         (instr-sig 'i64x2 (list 'i32x4 'uint32_imm 'uint1))
                          )]
 
-    [(eq? sshr instr) (list
-                         (instr-sig 'i8x8 (list 'i8x8 'uint8))
-                         (instr-sig 'i8x16 (list 'i8x16 'uint8))
-                         (instr-sig 'i16x4 (list 'i16x4 'uint8))
-                         (instr-sig 'i16x8 (list 'i16x8 'uint8))
-                         (instr-sig 'i32x2 (list 'i32x2 'uint8))
-                         (instr-sig 'i32x4 (list 'i32x4 'uint8))
-                         (instr-sig 'i64x2 (list 'i64x2 'uint8))
+    ; ;; Immediate.
+    ; [(eq? sshr instr) (list
+    ;                      (instr-sig 'i8x8 (list 'i8x8 'uint8_imm))
+    ;                      (instr-sig 'i8x16 (list 'i8x16 'uint8_imm))
+    ;                      (instr-sig 'i16x4 (list 'i16x4 'uint8_imm))
+    ;                      (instr-sig 'i16x8 (list 'i16x8 'uint8_imm))
+    ;                      (instr-sig 'i32x2 (list 'i32x2 'uint8_imm))
+    ;                      (instr-sig 'i32x4 (list 'i32x4 'uint8_imm))
+    ;                      (instr-sig 'i64x2 (list 'i64x2 'uint8_imm))
+    ;                      )]
+
+    ;; Generate the SSHL instruction with a negated rhs if non-immediate.
+    [(eq? sshl instr) (list
+                         (instr-sig 'i8x8 (list 'i8x8 'i8x8))
+                         (instr-sig 'i8x16 (list 'i8x16 'i8x16))
+                         (instr-sig 'i16x4 (list 'i16x4 'i16x4))
+                         (instr-sig 'i16x8 (list 'i16x8 'i16x8))
+                         (instr-sig 'i32x2 (list 'i32x2 'i32x2))
+                         (instr-sig 'i32x4 (list 'i32x4 'i32x4))
+                         (instr-sig 'i64x2 (list 'i64x2 'i64x2))
                          )]
 
     [(eq? ssubl instr) (list
@@ -1422,12 +1481,25 @@
                          (instr-sig 'u64x2 (list 'u64x2 'i64x2))
                          )]
 
-    [(eq? uqrshrn instr) (list
-                         (instr-sig 'u8x16 (list 'u16x8 'uint16 'u16x8 'uint16))
-                         (instr-sig 'u16x8 (list 'u32x4 'uint32 'u32x4 'uint32))
-                         (instr-sig 'u32x4 (list 'u64x2 'uint64 'u64x2 'uint64))
+    ;; Generate the uqrshl instruction with a negated rhs if non-immediate.
+    [(eq? uqrshr instr) (list
+                         (instr-sig 'u8x8 (list 'u8x8 'i8x8))
+                         (instr-sig 'u8x16 (list 'u8x16 'i8x16))
+                         (instr-sig 'u16x4 (list 'u16x4 'i16x4))
+                         (instr-sig 'u16x8 (list 'u16x8 'i16x8))
+                         (instr-sig 'u32x2 (list 'u32x2 'i32x2))
+                         (instr-sig 'u32x4 (list 'u32x4 'i32x4))
+                         (instr-sig 'u64x2 (list 'u64x2 'i64x2))
                          )]
 
+    ;; Immediate.
+    [(eq? uqrshrn instr) (list
+                         (instr-sig 'u8x16 (list 'u16x8 'uint16_imm 'u16x8 'uint16_imm))
+                         (instr-sig 'u16x8 (list 'u32x4 'uint32_imm 'u32x4 'uint32_imm))
+                         (instr-sig 'u32x4 (list 'u64x2 'uint64_imm 'u64x2 'uint64_imm))
+                         )]
+
+    ;; There is an immediate version, rely on LLVM for that.
     [(eq? uqshl instr) (list
                          (instr-sig 'u8x8 (list 'u8x8 'i8x8))
                          (instr-sig 'u8x8 (list 'u8x8 'u8x8))
@@ -1445,10 +1517,11 @@
                          (instr-sig 'u64x2 (list 'u64x2 'u64x2))
                          )]
 
+    ;; Immediate.
     [(eq? uqshrn instr) (list
-                         (instr-sig 'u8x16 (list 'u16x8 'uint16 'u16x8 'uint16))
-                         (instr-sig 'u16x8 (list 'u32x4 'uint32 'u32x4 'uint32))
-                         (instr-sig 'u32x4 (list 'u64x2 'uint64 'u64x2 'uint64))
+                         (instr-sig 'u8x16 (list 'u16x8 'uint16_imm 'u16x8 'uint16_imm))
+                         (instr-sig 'u16x8 (list 'u32x4 'uint32_imm 'u32x4 'uint32_imm))
+                         (instr-sig 'u32x4 (list 'u64x2 'uint64_imm 'u64x2 'uint64_imm))
                          )]
 
     [(eq? uqsub instr) (list
@@ -1494,6 +1567,17 @@
                          (instr-sig 'u64x2 (list 'u64x2 'i64x2))
                          )]
 
+    ;; Immediate.
+    [(eq? urshr instr) (list
+                         (instr-sig 'u8x8 (list 'u8x8 'uint8_imm))
+                         (instr-sig 'u8x16 (list 'u8x16 'uint8_imm))
+                         (instr-sig 'u16x4 (list 'u16x4 'uint16_imm))
+                         (instr-sig 'u16x8 (list 'u16x8 'uint16_imm))
+                         (instr-sig 'u32x2 (list 'u32x2 'uint32_imm))
+                         (instr-sig 'u32x4 (list 'u32x4 'uint32_imm))
+                         (instr-sig 'u64x2 (list 'u64x2 'uint32_imm))
+                         )]
+
     [(eq? ushl instr) (list
                          (instr-sig 'u8x8 (list 'u8x8 'i8x8))
                          (instr-sig 'u8x16 (list 'u8x16 'i8x16))
@@ -1504,20 +1588,22 @@
                          (instr-sig 'u64x2 (list 'u64x2 'i64x2))
                          )]
 
+    ;; Immediate.
     [(eq? ushll instr) (list
-                         (instr-sig 'u16x8 (list 'u8x16 'uint8 'uint1))
-                         (instr-sig 'u32x4 (list 'u16x8 'uint16 'uint1))
-                         (instr-sig 'u64x2 (list 'u32x4 'uint32 'uint1))
+                         (instr-sig 'u16x8 (list 'u8x16 'uint8_imm 'uint1))
+                         (instr-sig 'u32x4 (list 'u16x8 'uint16_imm 'uint1))
+                         (instr-sig 'u64x2 (list 'u32x4 'uint32_imm 'uint1))
                          )]
 
+    ;; Immediate.
     [(eq? ushr instr) (list
-                         (instr-sig 'u8x8 (list 'u8x8 'uint8))
-                         (instr-sig 'u8x16 (list 'u8x16 'uint8))
-                         (instr-sig 'u16x4 (list 'u16x4 'uint8))
-                         (instr-sig 'u16x8 (list 'u16x8 'uint8))
-                         (instr-sig 'u32x2 (list 'u32x2 'uint8))
-                         (instr-sig 'u32x4 (list 'u32x4 'uint8))
-                         (instr-sig 'u64x2 (list 'u64x2 'uint8))
+                         (instr-sig 'u8x8 (list 'u8x8 'uint8_imm))
+                         (instr-sig 'u8x16 (list 'u8x16 'uint8_imm))
+                         (instr-sig 'u16x4 (list 'u16x4 'uint8_imm))
+                         (instr-sig 'u16x8 (list 'u16x8 'uint8_imm))
+                         (instr-sig 'u32x2 (list 'u32x2 'uint8_imm))
+                         (instr-sig 'u32x4 (list 'u32x4 'uint8_imm))
+                         (instr-sig 'u64x2 (list 'u64x2 'uint8_imm))
                          )]
 
     [(eq? usqadd instr) (list

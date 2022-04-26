@@ -174,6 +174,7 @@
     [(eq? arm:sqrdmulh-vs instr) 3]
 
     [(eq? arm:sqrshl instr) 3]
+    [(eq? arm:sqrshr instr) 3]
 
     [(eq? arm:sqrshrn instr) 6] ;; is a double instruction
 
@@ -274,6 +275,8 @@
     [(eq? arm:uqrshl instr) 3]
 
     [(eq? arm:uqrshrn instr) 6] ;; is a double instruction
+
+    [(eq? arm:uqrshr instr) 3]
 
     [(eq? arm:uqshl instr) 2]
 
