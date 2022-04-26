@@ -249,7 +249,7 @@
   [(define write-proc
      (make-constructor-style-printer
       (lambda (obj) `arm:abstr-expr)
-      (lambda (obj) (list ))))])
+      (lambda (obj) (list (abstr-expr-abstr-vals obj)))))])
 
 (struct ??sub-expr (exprs c)
   #:transparent

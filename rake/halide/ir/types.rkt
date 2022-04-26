@@ -12,7 +12,13 @@
 ;; Define Halide's IR
 
 ;; A node to represent abstract expressions
-(struct abstr-halide-expr (orig-expr abstr-vals))
+(struct abstr-halide-expr (orig-expr abstr-vals)
+  #:transparent
+  #:methods gen:custom-write
+  [(define write-proc
+     (make-constructor-style-printer
+      (lambda (obj) 'abstr-halide-expr)
+      (lambda (obj) (list (abstr-halide-expr-abstr-vals obj)))))])
 
 ;; A dummy node to capture var lookups
 ;; (Because for variables that live outside the loop
