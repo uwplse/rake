@@ -711,7 +711,7 @@
   (let ([key (list instr-set output-types base-exprs depth max-cost read-count parent-instr arg-pos)])
     (cond
       ; We have enumerated this tree before
-      [(hash-has-key? enumeration-cache key) (println "ASDASDASDASDA") (hash-ref enumeration-cache key)]
+      [(hash-has-key? enumeration-cache key) (hash-ref enumeration-cache key)]
 
       ; Base case
       [(<= depth 0) (apply append (for/list ([output-type output-types]) (hash-ref! base-exprs output-type (list))))]
