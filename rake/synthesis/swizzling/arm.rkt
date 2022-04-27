@@ -19,6 +19,7 @@
   rake/arm/ast/visitor
   rake/arm/ast/interpreter
   rake/arm/ast/analysis
+  rake/arm/ast/cost-model
   rake/synthesis/lowering/arm/util
 )
 
@@ -272,13 +273,13 @@
 
   (set! arm-template (arm:visit-shallow arm-template reset-lo/hi-flags))
 
-  (display (format "Reset arm template: ~a\n" arm-template))
+  ;(display (format "Reset arm template: ~a\n" arm-template))
   
   ;; Get swizzle grammar
   (define candidates (get-arm-swizzle-grammar halide-expr arm-template swizzle-budget swizzle-node starting-vecs arm-sub-exprs translation-history))
 
-  (display "Swizzling candidate0:\n")
-  (pretty-print (first candidates))
+  ;(display "Swizzling candidates\n")
+  ;(pretty-print candidates)
   ;; Run synthesizer
   (define-values (successful? updated-template) (synthesize-arm-translation candidates halide-expr arm-sub-exprs value-bounds translation-history))
   
@@ -371,7 +372,7 @@
          [elem-type (arm:elem-type intr-expr)]
          [output-type (get-output-type swizzle-node)]
          ; TODO: what others? other load types / the extract options?
-         [isa (list arm:zip1 arm:zip2 arm:uzip1 arm:uzip2 arm:dup arm:dupw arm:dupn arm:trn1 arm:trn2)]
+         [isa (list arm:zip1 arm:zip2 arm:uzip1 arm:uzip2 arm:trn1 arm:trn2)] ; arm:dup arm:dupw arm:dupn ; 
          [grouped-base-exprs (make-hash)])
     (for ([base base-exprs])
       (let ([base-type (arm:get-interpreted-type base)])
@@ -383,7 +384,7 @@
       (hash-set! grouped-base-exprs t (list (cons (arm:??sub-expr base c) base-c))))
 
     (set! enumeration-database (make-hash))
-    (define candidate-swizzles (enumerate-arm isa output-type grouped-base-exprs 2 (min swizzle-budget 5)))
+    (define candidate-swizzles (enumerate-arm isa output-type grouped-base-exprs 2 (min swizzle-budget 6)))
 
     ;(println (length candidate-swizzles))
 
@@ -601,23 +602,23 @@
          (append (list opts) (get-arg-opts (rest args) instr-set base-exprs depth max-cost instr))))]))
 
 (define (build-ast instr sig-expr)
-  (define cost (foldr + (instr-cost instr) (map cdr sig-expr)))
+  (define cost (foldr + (arm:instr-cost instr sig-expr) (map cdr sig-expr)))
   (define expr (apply instr (map car sig-expr)))
   (cons expr cost))
 
 ;; TODO: need instruction costs!!
-(define (instr-cost instr)
-  (cond
-    [(eq? instr arm:zip1) 1]
-    [(eq? instr arm:zip2) 1]
-    [(eq? instr arm:uzip1) 1]
-    [(eq? instr arm:uzip2) 1]
-    [(eq? instr arm:dup) 1]
-    [(eq? instr arm:dupw) 2]
-    [(eq? instr arm:dupn) 0.95]
-    [(eq? instr arm:trn1) 1]
-    [(eq? instr arm:trn2) 1]
-    [else (error "Unknown load instruction: ~a" instr)]))
+;(define (instr-cost instr)
+;  (cond
+;    [(eq? instr arm:zip1) 1]
+;    [(eq? instr arm:zip2) 1]
+;    [(eq? instr arm:uzip1) 1]
+;    [(eq? instr arm:uzip2) 1]
+;    [(eq? instr arm:dup) 1]
+;    [(eq? instr arm:dupw) 2]
+;    [(eq? instr arm:dupn) 0.95]
+;    [(eq? instr arm:trn1) 1]
+;    [(eq? instr arm:trn2) 1]
+;    [else (error "Unknown load instruction: ~a" instr)]))
 
 
 (define (out-eq? output-type sig)

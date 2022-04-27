@@ -1906,6 +1906,8 @@
     [(u64x1 data) 1]
     [(u64x2 data) 2]
     ; [(u64x4 data) 4]
+    [(uint8_t data) 1]
+    [(int8_t data) 1]
     [_ (error "Unrecognized type ~a" expr)]))
 
 (define (half-width? expr)

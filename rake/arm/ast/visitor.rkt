@@ -636,7 +636,7 @@
 
     [(arm:urshl Vn Vm) (transform (arm:urshl (visit-shallow Vn transform) (visit-shallow Vm transform)))]
 
-    [(arm:urshr Vn Vm) (transform (arm:urshr (visit Vn transform) (visit Vm transform)))]
+    [(arm:urshr Vn Vm) (transform (arm:urshr (visit-shallow Vn transform) (visit-shallow Vm transform)))]
 
     [(arm:ushl Vn Vm) (transform (arm:ushl (visit-shallow Vn transform) (visit-shallow Vm transform)))]
 

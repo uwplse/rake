@@ -22,12 +22,17 @@
 
 (define (get-arm-grammar halide-expr ir-expr arm-sub-exprs cost-ub)
   (let* ([key (cons (arm-ir:ast-node-id ir-expr) arm-sub-exprs)]
-         [check-cache (and (not (arm-ir:load-data? ir-expr)) (hash-has-key? grammar-cache key))]
-         [candidates (if check-cache (hash-ref grammar-cache key) (get-arm-grammar-helper halide-expr ir-expr arm-sub-exprs))])
-    ;(display (format "get-arm-grammar received ~a candidates\n" (length candidates)))
-    ;(println (filter (lambda (c) (<= (cdr c) cost-ub)) candidates))
+         [check-cache (and (not (arm-ir:load-data? ir-expr)) (hash-has-key? grammar-cache key))])
+
+    (define candidates
+      (cond
+        [check-cache (hash-ref grammar-cache key)]
+        [else
+          (define candidates (get-arm-grammar-helper halide-expr ir-expr arm-sub-exprs))
+          (hash-set! grammar-cache key candidates)
+          candidates]))
+
     (let ([filtered (filter (lambda (c) (<= (cdr c) cost-ub)) candidates)])
-      ;(display (format "And ~a of them pass the cost filtering\n" (length filtered)))
       filtered)))
 
 (define (get-input-type expr)

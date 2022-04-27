@@ -11175,6 +11175,7 @@
           (lambda (i) (halide:buffer-ref buf (+ (interpret loc) i)))))]
 
     [(arm:Ri8x4 v0 v1 v2 v3)
+      (assert (make-ordering v0 v1 v2 v3))
       (arm:i8x4
         (lambda (i)
           (cond
@@ -11185,6 +11186,7 @@
             [else (assert #f (format "infeasible in Ri8x4\n~a\n~a\n" (pretty-format p) i))])))]
 
     [(arm:Ru8x4 v0 v1 v2 v3)
+      (assert (make-ordering v0 v1 v2 v3))
       (arm:u8x4
         (lambda (i)
           (cond
@@ -11213,3 +11215,54 @@
      (define vecType (arm:get-type-struct (interpret orig-expr)))
      (vecType (lambda (i) (halide:buffer-ref abstr-vals (+ i offset))))]
     [_ p]))
+
+(define (make-ordering v0 v1 v2 v3)
+  (define values0
+    (destruct-scalar-load v0))
+
+  (define load0? (list-ref values0 0))
+  (define buf0 (list-ref values0 1))
+  (define idx0 (list-ref values0 2))
+
+  (define values1
+    (destruct-scalar-load v1))
+
+  (define load1? (list-ref values1 0))
+  (define buf1 (list-ref values1 1))
+  (define idx1 (list-ref values1 2))
+
+  (define values2
+    (destruct-scalar-load v2))
+
+  (define load2? (list-ref values2 0))
+  (define buf2 (list-ref values2 1))
+  (define idx2 (list-ref values2 2))
+
+  (define values3
+    (destruct-scalar-load v3))
+
+  (define load3? (list-ref values3 0))
+  (define buf3 (list-ref values3 1))
+  (define idx3 (list-ref values3 2))
+
+  ; (display (format "Loads: ~a ~a ~a ~a\n" load0? load1? load2? load3?))
+  ; (display (format "Buffers: ~a ~a ~a ~a\n" buf0 buf1 buf2 buf3))
+  ; (display (format "Indeces: ~a ~a ~a ~a\n" idx0 idx1 idx2 idx3))
+  ; (display (format "Indeces: ~a ~a ~a ~a\n" (interpret idx0) (interpret idx1) (interpret idx2) (interpret idx3)))
+
+  (or
+    ;; Not all loads, who cares.
+    (not (and load0? load1? load2? load3?))
+    ;; If the buffers are not all equal, ordering doesn't matter.
+    (not (and (eq? buf0 buf1) (eq? buf1 buf2) (eq? buf2 buf3)))
+    ;; If all are loads are all buffers are equal, enforce an ordering.
+    (and (< (interpret idx0) (interpret idx1))
+         (< (interpret idx1) (interpret idx2))
+         (< (interpret idx2) (interpret idx3)))))
+
+(define (destruct-scalar-load arm-expr)
+  (destruct arm-expr
+    ;; TODO: update this.
+    [(sca-cast sca type) (destruct-scalar-load sca)]
+    [(load-sca buf idx) (list #t buf idx)]
+    [_ (list #f 0 0)]))

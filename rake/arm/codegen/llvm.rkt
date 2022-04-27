@@ -37,7 +37,7 @@
         [(arm:i32x4 v0)
           (generate `abs.v4i32 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ))]
         ;; TODO: there is a 64-bit variant called llvm.aarch64.neon.abs.v1i64 in LLVM?
-        [_ (error (format "arm:abs variant not understood: ~a" arm-expr))])]
+        [_ (error (format "arm:abs variant not understood:\n~a\n" (pretty-format arm-expr)))])]
 
     [(arm:add Vn Vm)
       ;; There are no intrinsics for add
@@ -57,7 +57,7 @@
          (generate-rake `addhn_i32x8 (to-llvm-type arm-expr) `(list ,(input-arg Vd) ,(input-arg Vn) ,(input-arg Vm) ,(input-arg Vb)))]
         [((arm:u64x2 v0) (arm:u64x2 v1) (arm:u64x2 v2) (arm:u64x2 v3))
           (generate-rake `addhn_i64x4 (to-llvm-type arm-expr) `(list ,(input-arg Vd) ,(input-arg Vn) ,(input-arg Vm) ,(input-arg Vb)))]
-        [(_ _ _ _) (error (format "arm:addhn variant not understood: ~a" arm-expr))])]
+        [(_ _ _ _) (error (format "arm:addhn variant not understood:\n~a\n" (pretty-format arm-expr)))])]
 
     [(arm:addp Vn Vm)
       (destruct* ((arm:interpret Vn) (arm:interpret Vm))
@@ -86,7 +86,7 @@
         [((arm:u32x4 v0) (arm:u32x4 v1))
           (generate `addp.v4i32 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
         ;; TODO: LLVM has a llvm.aarch64.neon.addp.v2i64 variant
-        [(_ _) (error (format "arm:addp variant not understood: ~a" arm-expr))])]
+        [(_ _) (error (format "arm:addp variant not understood:\n~a\n" (pretty-format arm-expr)))])]
 
     [(arm:addv Vn)
       (destruct* ((arm:interpret Vn))
@@ -125,7 +125,7 @@
        ;; Yes, the instruction type is 2D for 64-bit
        [(uint64_t _) `(halide.ir.x2, (to-llvm-type arm-expr), `(list ,(compile-scalar Vn)))]
        [(int64_t _)  `(halide.ir.x2, (to-llvm-type arm-expr), `(list ,(compile-scalar Vn)))]
-       [_ (error (format "arm:dup variant not understood: ~a" arm-expr))])]
+       [_ (error (format "arm:dup variant not understood:\n~a\n" (pretty-format arm-expr)))])]
 
     [(arm:dupn Vn)
       (destruct (arm:interpret Vn)
@@ -133,7 +133,7 @@
           `(halide.ir.x4, (to-llvm-type arm-expr), `(list, (compile-scalar Vn)))]
         [(uint8_t v0)
           `(halide.ir.x4, (to-llvm-type arm-expr), `(list, (compile-scalar Vn)))]
-        [_ (error (format "arm:dupn variant not understood: ~a" arm-expr))])]
+        [_ (error (format "arm:dupn variant not understood:\n~a\n" (pretty-format arm-expr)))])]
 
     ;; TODO: this doesn't exist anymore??
     [(arm:dupw Vn)
@@ -145,7 +145,7 @@
        [(int16_t _)  `(halide.ir.x8, (to-llvm-type arm-expr), `(list, (compile-scalar Vn)))]
        [(uint32_t _) `(halide.ir.x4, (to-llvm-type arm-expr), `(list, (compile-scalar Vn)))]
        [(int32_t _)  `(halide.ir.x4, (to-llvm-type arm-expr), `(list, (compile-scalar Vn)))]
-       [_ (error (format "arm:dupw variant not understood: ~a" arm-expr))])]
+       [_ (error (format "arm:dupw variant not understood:\n~a\n" (pretty-format arm-expr)))])]
 
     ;; TODO: the extract vectors codegen
 
@@ -191,7 +191,7 @@
           (generate-rake `raddhn_i32x8 (to-llvm-type arm-expr) `(list ,(input-arg Vd) ,(input-arg Vn) ,(input-arg Vm) ,(input-arg Vb)))]
         [((arm:u64x2 v0) (arm:u64x2 v1) (arm:u64x2 v2) (arm:u64x2 v3))
           (generate-rake `raddhn_i64x4 (to-llvm-type arm-expr) `(list ,(input-arg Vd) ,(input-arg Vn) ,(input-arg Vm) ,(input-arg Vb)))]
-        [(_ _ _ _) (error (format "arm:raddhn variant not understood: ~a" arm-expr))])]
+        [(_ _ _ _) (error (format "arm:raddhn variant not understood:\n~a\n" (pretty-format arm-expr)))])]
 
     [(arm:uaddw Vd Vn Vm)
       ;; TODO: no LLVM intrinsics, make SExpParser construct the correct code.
@@ -202,7 +202,7 @@
            (handle-wide-slice-binary1 arm-expr `wide_add Vd Vn v2)]
         [((arm:u64x2 v0) (arm:u32x4 v1) (uint1_t v2))
            (handle-wide-slice-binary1 arm-expr `wide_add Vd Vn v2)]
-        [(_ _ _) (error (format "arm:uaddw variant not understood: ~a" arm-expr))])]
+        [(_ _ _) (error (format "arm:uaddw variant not understood:\n~a\n" (pretty-format arm-expr)))])]
 
     [(arm:saddw Vd Vn Vm)
       ;; TODO: no LLVM intrinsics, make SExpParser construct the correct code.
@@ -213,7 +213,7 @@
            (handle-wide-slice-binary1 arm-expr `wide_add Vd Vn v2)]
         [((arm:i64x2 v0) (arm:i32x4 v1) (uint1_t v2))
            (handle-wide-slice-binary1 arm-expr `wide_add Vd Vn v2)]
-        [(_ _ _) (error (format "arm:saddw variant not understood: ~a" arm-expr))])]
+        [(_ _ _) (error (format "arm:saddw variant not understood:\n~a\n" (pretty-format arm-expr)))])]
 
     [(arm:umull-vs Vd Vn Vm)
       ;; TODO: we want llvm.aarch64.neon.umull.v* variants, but need the second type to be broadcast.
@@ -224,7 +224,7 @@
             (handle-wide-slice-binary-broadcast arm-expr `umull.v4i32 Vd Vn v2 `halide.ir.x4)]
         [((arm:u32x4 v0) (uint32_t v1) (uint1_t v2))
             (handle-wide-slice-binary-broadcast arm-expr `umull.v2i64 Vd Vn v2 `halide.ir.x2)]
-        [(_ _ _) (error (format "arm:umull-vs variant not understood: ~a" arm-expr))])]
+        [(_ _ _) (error (format "arm:umull-vs variant not understood:\n~a\n" (pretty-format arm-expr)))])]
 
     [(arm:umull-vv Vd Vn Vm)
       (destruct* ((arm:interpret Vd) (arm:interpret Vn) (arm:interpret Vm))
@@ -234,7 +234,7 @@
             (handle-wide-slice-binary2 arm-expr `umull.v4i32 Vd Vn v2)]
         [((arm:u32x4 v0) (arm:u32x4 v1) (uint1_t v2))
             (handle-wide-slice-binary2 arm-expr `umull.v2i64 Vd Vn v2)]
-        [(_ _ _) (error (format "arm:umull-vv variant not understood: ~a" arm-expr))])]
+        [(_ _ _) (error (format "arm:umull-vv variant not understood:\n~a\n" (pretty-format arm-expr)))])]
 
     [(arm:rshrn Vd Vn Vm Vb)
       (destruct* ((arm:interpret Vd) (arm:interpret Vn) (arm:interpret Vm) (arm:interpret Vb))
@@ -250,7 +250,7 @@
           (generate-rake `rshrn_i32x8 (to-llvm-type arm-expr) `(list ,(input-arg Vd) ,(compile-scalar (uint32x1 Vn)) ,(input-arg Vm) ,(compile-scalar (uint32x1 Vb))))]
         [((arm:u64x2 v0) (uint64_t v1) (arm:u64x2 v2) (uint64_t v3))
           (generate-rake `rshrn_i64x4 (to-llvm-type arm-expr) `(list ,(input-arg Vd) ,(compile-scalar (uint32x1 Vn)) ,(input-arg Vm) ,(compile-scalar (uint32x1 Vb))))]
-        [(_ _ _ _) (error (format "arm:rshrn variant not understood: ~a" arm-expr))])]
+        [(_ _ _ _) (error (format "arm:rshrn variant not understood:\n~a\n" (pretty-format arm-expr)))])]
 
     [(arm:uqxtn Vn Vm)
       (destruct* ((arm:interpret Vn) (arm:interpret Vm))
@@ -260,7 +260,7 @@
           (generate-rake `uqxtn_u32x8 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
         [((arm:u64x2 v0) (arm:u64x2 v1))
           (generate-rake `uqxtn_u64x4 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
-        [(_ _) (error (format "arm:uqxtn variant not understood: ~a" arm-expr))])]
+        [(_ _) (error (format "arm:uqxtn variant not understood:\n~a\n" (pretty-format arm-expr)))])]
 
     [(arm:usubl Vd Vn Vm)
       ;; TODO: no LLVM intrinsics, make SExpParser construct the correct code.
@@ -271,7 +271,7 @@
            (handle-wide-slice-binary2 arm-expr `widening_sub Vd Vn v2)]
         [((arm:u32x4 v0) (arm:u32x4 v1) (uint1_t v2))
            (handle-wide-slice-binary2 arm-expr `widening_sub Vd Vn v2)]
-        [(_ _ _) (error (format "arm:usubl variant not understood: ~a" arm-expr))])]
+        [(_ _ _) (error (format "arm:usubl variant not understood:\n~a\n" (pretty-format arm-expr)))])]
 
     [(arm:reinterpret Vn)
       `(halide.ir.reinterpret ,(to-llvm-type arm-expr), `(list ,(input-arg Vn)))]
@@ -284,7 +284,7 @@
            (handle-wide-slice-binary-broadcast arm-expr `smull_i16x8 Vd Vn v2 `halide.ir.x8)]
         [((arm:i32x4 v0) (int32_t v1) (uint1_t v2))
            (handle-wide-slice-binary-broadcast arm-expr `smull_i32x4 Vd Vn v2 `halide.ir.x4)]
-        [(_ _ _) (error (format "arm:smull-vs variant not understood: ~a" arm-expr))])]
+        [(_ _ _) (error (format "arm:smull-vs variant not understood:\n~a\n" (pretty-format arm-expr)))])]
 
     [(arm:smull-vv Vd Vn Vm)
       (destruct* ((arm:interpret Vd) (arm:interpret Vn) (arm:interpret Vm))
@@ -294,7 +294,7 @@
            (handle-wide-slice-binary arm-expr `smull_i16x8 Vd Vn v2)]
         [((arm:i32x4 v0) (arm:i32x4 v1) (uint1_t v2))
            (handle-wide-slice-binary arm-expr `smull_i32x4 Vd Vn v2)]
-        [(_ _ _) (error (format "arm:smull-vv variant not understood: ~a" arm-expr))])]
+        [(_ _ _) (error (format "arm:smull-vv variant not understood:\n~a\n" (pretty-format arm-expr)))])]
 
     [(arm:sxtl Vn Vm)
       ;; No LLVM intrinsics, just trust in LLVM->ARM
@@ -305,7 +305,7 @@
            (handle-wide-slice-unary arm-expr `sext Vn v1)]
         [((arm:i32x4 v0) (uint1_t v1))
            (handle-wide-slice-unary arm-expr `sext Vn v1)]
-        [(_ _) (error (format "arm:sxtl variant not understood: ~a" arm-expr))])]
+        [(_ _) (error (format "arm:sxtl variant not understood:\n~a\n" (pretty-format arm-expr)))])]
 
     ;;;;;;;;;;;;;;;;;;;;;;; Concatenate Tiles ;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -349,7 +349,7 @@
        [((arm:i16x8 v0) (arm:i16x8 v1)) (generate `smax.v8i16 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
        [((arm:i32x2 v0) (arm:i32x2 v1)) (generate `smax.v2i32 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
        [((arm:i32x4 v0) (arm:i32x4 v1)) (generate `smax.v4i32 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
-       [(_ _) (error (format "arm:smax variant not understood: ~a" arm-expr))])]
+       [(_ _) (error (format "arm:smax variant not understood:\n~a\n" (pretty-format arm-expr)))])]
 
     [(arm:smin Vn Vm)
      (destruct* ((arm:interpret Vn) (arm:interpret Vm))
@@ -359,7 +359,7 @@
        [((arm:i16x8 v0) (arm:i16x8 v1)) (generate `smin.v8i16 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
        [((arm:i32x2 v0) (arm:i32x2 v1)) (generate `smin.v2i32 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
        [((arm:i32x4 v0) (arm:i32x4 v1)) (generate `smin.v4i32 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
-       [(_ _) (error (format "arm:smin variant not understood: ~a" arm-expr))])]
+       [(_ _) (error (format "arm:smin variant not understood:\n~a\n" (pretty-format arm-expr)))])]
 
     [(arm:umax Vn Vm)
      (destruct* ((arm:interpret Vn) (arm:interpret Vm))
@@ -369,7 +369,7 @@
        [((arm:u16x8 v0) (arm:u16x8 v1)) (generate `umax.v8i16 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
        [((arm:u32x2 v0) (arm:u32x2 v1)) (generate `umax.v2i32 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
        [((arm:u32x4 v0) (arm:u32x4 v1)) (generate `umax.v4i32 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
-       [(_ _) (error (format "arm:umax variant not understood: ~a" arm-expr))])]
+       [(_ _) (error (format "arm:umax variant not understood:\n~a\n" (pretty-format arm-expr)))])]
 
     [(arm:umin Vn Vm)
      (destruct* ((arm:interpret Vn) (arm:interpret Vm))
@@ -379,7 +379,7 @@
        [((arm:u16x8 v0) (arm:u16x8 v1)) (generate `umin.v8i16 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
        [((arm:u32x2 v0) (arm:u32x2 v1)) (generate `umin.v2i32 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
        [((arm:u32x4 v0) (arm:u32x4 v1)) (generate `umin.v4i32 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
-       [(_ _) (error (format "arm:umin variant not understood: ~a" arm-expr))])]
+       [(_ _) (error (format "arm:umin variant not understood:\n~a\n" (pretty-format arm-expr)))])]
 
     [(arm:sqrshrn Vd Vn Vm Vb)
       (destruct* ((arm:interpret Vd) (arm:interpret Vn) (arm:interpret Vm) (arm:interpret Vb))
@@ -389,7 +389,7 @@
           (generate-rake `sqrshrn_i32x8 (to-llvm-type arm-expr) `(list ,(input-arg Vd) ,(compile-scalar (uint32x1 Vn)) ,(input-arg Vm) ,(compile-scalar (uint32x1 Vb))))]
         [((arm:i64x2 v0) (uint64_t v1) (arm:i64x2 v2) (uint64_t v3))
           (generate-rake `sqrshrn_i64x4 (to-llvm-type arm-expr) `(list ,(input-arg Vd) ,(compile-scalar (uint32x1 Vn)) ,(input-arg Vm) ,(compile-scalar (uint32x1 Vb))))]
-        [(_ _ _ _) (error (format "arm:sqrshrn variant not understood: ~a" arm-expr))])]
+        [(_ _ _ _) (error (format "arm:sqrshrn variant not understood:\n~a\n" (pretty-format arm-expr)))])]
 
     [(arm:saddl Vd Vn Vm)
       (destruct* ((arm:interpret Vd) (arm:interpret Vn) (arm:interpret Vm))
@@ -399,7 +399,7 @@
            (handle-wide-slice-binary2 arm-expr `widening_add Vd Vn v2)]
         [((arm:i32x4 v0) (arm:i32x4 v1) (uint1_t v2))
            (handle-wide-slice-binary2 arm-expr `widening_add Vd Vn v2)]
-        [(_ _ _) (error (format "arm:saddl variant not understood: ~a" arm-expr))])]
+        [(_ _ _) (error (format "arm:saddl variant not understood:\n~a\n" (pretty-format arm-expr)))])]
 
     ;; TODO: calls to hand-created LLVM intrinsics.
     [(arm:uaddl Vd Vn Vm)
@@ -410,7 +410,7 @@
            (handle-wide-slice-binary2 arm-expr `widening_add Vd Vn v2)]
         [((arm:u32x4 v0) (arm:u32x4 v1) (uint1_t v2))
            (handle-wide-slice-binary2 arm-expr `widening_add Vd Vn v2)]
-        [(_ _ _) (error (format "arm:uaddl variant not understood: ~a" arm-expr))])]
+        [(_ _ _) (error (format "arm:uaddl variant not understood:\n~a\n" (pretty-format arm-expr)))])]
 
     [(arm:sqxtun Vn Vm)
       (destruct* ((arm:interpret Vn) (arm:interpret Vm))
@@ -420,7 +420,7 @@
           (generate-rake `sqxtun_i32x8 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
         [((arm:i64x2 v0) (arm:i64x2 v1))
           (generate-rake `sqxtun_i64x4 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
-        [(_ _) (error (format "arm:sqxtun variant not understood: ~a" arm-expr))])]
+        [(_ _) (error (format "arm:sqxtun variant not understood:\n~a\n" (pretty-format arm-expr)))])]
 
     [(arm:smlal-vs Vd Vn Vm Vb)
       (destruct* ((arm:interpret Vd) (arm:interpret Vn) (arm:interpret Vm) (arm:interpret Vb))
@@ -430,7 +430,7 @@
            (handle-wide-slice-binary1-broadcast arm-expr `mlal Vd Vn Vm v3 `halide.ir.x4)]
         [((arm:i64x2 v0) (arm:i32x4 v1) (int32_t v2) (uint1_t v3))
            (handle-wide-slice-binary1-broadcast arm-expr `mlal Vd Vn Vm v3 `halide.ir.x2)]
-        [(_ _ _ _) (error (format "arm:smlal-vs variant not understood: ~a" arm-expr))])]
+        [(_ _ _ _) (error (format "arm:smlal-vs variant not understood:\n~a\n" (pretty-format arm-expr)))])]
 
     [(arm:umlal-vs Vd Vn Vm Vb)
       (destruct* ((arm:interpret Vd) (arm:interpret Vn) (arm:interpret Vm) (arm:interpret Vb))
@@ -440,7 +440,7 @@
            (handle-wide-slice-binary1-broadcast arm-expr `mlal Vd Vn Vm v3 `halide.ir.x4)]
         [((arm:u64x2 v0) (arm:u32x4 v1) (uint32_t v2) (uint1_t v3))
            (handle-wide-slice-binary1-broadcast arm-expr `mlal Vd Vn Vm v3 `halide.ir.x2)]
-        [(_ _ _ _) (error (format "arm:umlal-vs variant not understood: ~a" arm-expr))])]
+        [(_ _ _ _) (error (format "arm:umlal-vs variant not understood:\n~a\n" (pretty-format arm-expr)))])]
 
     [(arm:uabd Vn Vm)
       (destruct* ((arm:interpret Vn) (arm:interpret Vm))
@@ -456,7 +456,7 @@
           (generate `uabd.v2i32 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
         [((arm:u32x4 v0) (arm:u32x4 v1))
           (generate `uabd.v4i32 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
-        [(_ _) (error (format "arm:uabd variant not understood: ~a" arm-expr))])]
+        [(_ _) (error (format "arm:uabd variant not understood:\n~a\n" (pretty-format arm-expr)))])]
 
     [(arm:sqadd Vn Vm)
       (destruct* ((arm:interpret Vn) (arm:interpret Vm))
@@ -473,7 +473,7 @@
         [((arm:i32x4 v0) (arm:i32x4 v1))
           (generate `sqadd.v4i32 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
         ;; TODO: LLVM has i64 variants?
-        [(_ _) (error (format "arm:sqadd variant not understood: ~a" arm-expr))])]
+        [(_ _) (error (format "arm:sqadd variant not understood:\n~a\n" (pretty-format arm-expr)))])]
 
     [(arm:uqadd Vn Vm)
       (destruct* ((arm:interpret Vn) (arm:interpret Vm))
@@ -490,7 +490,7 @@
         [((arm:u32x4 v0) (arm:u32x4 v1))
           (generate `uqadd.v4i32 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
         ;; TODO: LLVM has i64 variants?
-        [(_ _) (error (format "arm:uqadd variant not understood: ~a" arm-expr))])]
+        [(_ _) (error (format "arm:uqadd variant not understood:\n~a\n" (pretty-format arm-expr)))])]
 
     [(arm:sqrdmulh-vs Vn Vm)
       (destruct* ((arm:interpret Vn) (arm:interpret Vm))
@@ -503,7 +503,32 @@
           (generate `sqrdmulh.lane.v2i32.v2i32 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg (arm:dup Vm)) ,(compile-scalar (uint32_t (bv 0 32)))))]
         [((arm:i32x4 v0) (int32_t v1))
           (generate `sqrdmulh.laneq.v4i32.v4i32 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg (arm:dupw Vm)) ,(compile-scalar (uint32_t (bv 0 32)))))]
-        [(_ _) (error (format "arm:sqrdmulh-vs variant not understood: ~a" arm-expr))])]
+        [(_ _) (error (format "arm:sqrdmulh-vs variant not understood:\n~a\n" (pretty-format arm-expr)))])]
+
+    [(arm:udot.v4i32.v16i4 Vd Vn Vm)
+      (destruct* ((arm:interpret Vd) (arm:interpret Vn) (arm:interpret Vm))
+        [((arm:i32x4 v0) (arm:u8x16 v1) (arm:u8x4 v2))
+          (define-values (w0 w1 w2 w3) (get-dot_product-values Vm))
+          (generate-rake
+            `udot_i32x4_i8x16
+            (to-llvm-type arm-expr)
+            `(list ,(input-arg Vd) ,(input-arg Vn) ,(compile-scalar w0) ,(compile-scalar w1) ,(compile-scalar w2) ,(compile-scalar w3)))]
+        [((arm:u32x4 v0) (arm:u8x16 v1) (arm:u8x4 v2))
+          ;; TODO: is there a difference between the signed and unsigned versions?
+          (define-values (w0 w1 w2 w3) (get-dot_product-values Vm))
+          (generate-rake
+            `udot_i32x4_i8x16
+            (to-llvm-type arm-expr)
+            `(list ,(input-arg Vd) ,(input-arg Vn) ,(compile-scalar w0) ,(compile-scalar w1) ,(compile-scalar w2) ,(compile-scalar w3)))]
+        [(_ _ _) (error (format "arm:udot.v4i32.v16i4 variant not understood:\n~a\n" (pretty-format arm-expr)))])]
+
+    [(arm:zip1 Vn Vm)
+      ;; There are no intrinsics for zips
+      `(halide.ir.interleave_lo, (to-llvm-type arm-expr), `(list ,(input-arg Vn) ,(input-arg Vm)))]
+
+    [(arm:zip2 Vn Vm)
+      ;; There are no intrinsics for zips
+      `(halide.ir.interleave_hi, (to-llvm-type arm-expr), `(list ,(input-arg Vn) ,(input-arg Vm)))]
 
     [_ (string->sexp (format "~a" arm-expr))]))
 
@@ -527,6 +552,36 @@
 
 (define t_i32 `int32)
 
+(define (is-scalar? arm-expr)
+  (match (arm:interpret arm-expr)
+    [(int8_t v) #t]
+    [(int16_t v) #t]
+    [(int32_t v) #t]
+    [(int64_t v) #t]
+    [(uint8_t v) #t]
+    [(uint16_t v) #t]
+    [(uint32_t v) #t]
+    [(uint64_t v) #t]
+    [(arm:i8x4 data) #f]
+    [(arm:u8x4 data) #f]
+    [(arm:i8x8 data) #f]
+    [(arm:u8x8 data) #f]
+    [(arm:i8x16 data) #f]
+    [(arm:u8x16 data) #f]
+    [(arm:i16x4 data) #f]
+    [(arm:u16x4 data) #f]
+    [(arm:i16x8 data) #f]
+    [(arm:u16x8 data) #f]
+    [(arm:i32x2 data) #f]
+    [(arm:u32x2 data) #f]
+    [(arm:i32x4 data) #f]
+    [(arm:u32x4 data) #f]
+    [(arm:i64x1 data) #t]
+    [(arm:u64x1 data) #t]
+    [(arm:i64x2 data) #f]
+    [(arm:u64x2 data) #f]
+    [_ (error (format "(arm:is-scalar?) implement the rest of the arm types: ~a\n~a\n" arm-expr (arm:interpret arm-expr)))]))
+
 (define (to-llvm-type arm-expr)
   (match (arm:interpret arm-expr)
     [(int8_t v) (string->sexp "int8")]
@@ -537,6 +592,8 @@
     [(uint16_t v) (string->sexp "uint16")]
     [(uint32_t v) (string->sexp "uint32")]
     [(uint64_t v) (string->sexp "uint64")]
+    [(arm:i8x4 data) (string->sexp "int8x4")]
+    [(arm:u8x4 data) (string->sexp "uint8x4")]
     [(arm:i8x8 data) (string->sexp "int8x8")]
     [(arm:u8x8 data) (string->sexp "uint8x8")]
     [(arm:i8x16 data) (string->sexp "int8x16")]
@@ -746,3 +803,13 @@
     `(,slice
       ,type
       (list (,wide-type ,call)))))
+
+(define (get-dot_product-values dp)
+  (destruct dp
+    [(arm:Ri8x4 v0 v1 v2 v3)
+      (values v0 v1 v2 v3)]
+
+    [(arm:Ru8x4 v0 v1 v2 v3)
+      (values v0 v1 v2 v3)]
+
+    [_ (error (format "get-dot_product-values failed on expression: ~a" dp))]))
