@@ -12,6 +12,7 @@
   rake/synthesis/lowering/hvx/synthesizer
   rake/synthesis/lowering/arm/synthesizer
   rake/synthesis/lowering/x86/synthesizer
+  rake/synthesis/lowering/arm/util
 )
 
 (require (only-in racket/base exit))
@@ -61,9 +62,9 @@
       (cond
         [successful?
           (display "\nSuccessfully found an equivalent ARM template.\n\n")
-          (display (format "~a\n" (pretty-format (car arm-template))))
+          (display (format "~a\n" (pretty-format (arm:unpack-abstr-exprs (car arm-template)))))
           (display "\nSynthesis time: 0 seconds\n\n")
-          (values #t (car arm-template) (cdr arm-template))]
+          (values #t (arm:unpack-abstr-exprs (car arm-template)) (cdr arm-template))]
         [else
           (display "Failed to synthesize template.\n\n")
           (values #f (void) 0)])]
