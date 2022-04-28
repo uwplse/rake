@@ -133,17 +133,28 @@
 
     (let* ([add-scalars (halide:extract-add-scalars halide-expr)]
            [shl-scalars (halide:extract-shl-scalars halide-expr)]
-           [int-consts (set->list (list->set (append weights add-scalars shl-scalars)))])
+           [int-scalars (set->list (list->set (append weights add-scalars shl-scalars)))]
+           [int-consts (append (filter concrete? int-scalars) (list (int8_t (bv 0 8))))])
       (define (bool-const) (define-symbolic* b boolean?) b)
       (define (uint1-const) (define-symbolic* b boolean?) (uint1_t b))
-      (define (int8-const) (int8x1 (apply choose* int-consts)))
-      (define (uint8-const) (uint8x1 (apply choose* int-consts)))
-      (define (int16-const) (int16x1 (apply choose* int-consts)))
-      (define (uint16-const) (uint16x1 (apply choose* int-consts)))
-      (define (int32-const) (int32x1 (apply choose* int-consts)))
-      (define (uint32-const) (uint32x1 (apply choose* int-consts)))
-      (define (int64-const) (int64x1 (apply choose* int-consts)))
-      (define (uint64-const) (uint64x1 (apply choose* int-consts)))
+      (define (int8-const) (int8x1 (apply choose* int-scalars)))
+      (define (uint8-const) (uint8x1 (apply choose* int-scalars)))
+      (define (int16-const) (int16x1 (apply choose* int-scalars)))
+      (define (uint16-const) (uint16x1 (apply choose* int-scalars)))
+      (define (int32-const) (int32x1 (apply choose* int-scalars)))
+      (define (uint32-const) (uint32x1 (apply choose* int-scalars)))
+      (define (int64-const) (int64x1 (apply choose* int-scalars)))
+      (define (uint64-const) (uint64x1 (apply choose* int-scalars)))
+
+      (define (int8-const-imm) (int8x1 (apply choose* int-consts)))
+      (define (uint8-const-imm) (uint8x1 (apply choose* int-consts)))
+      (define (int16-const-imm) (int16x1 (apply choose* int-consts)))
+      (define (uint16-const-imm) (uint16x1 (apply choose* int-consts)))
+      (define (int32-const-imm) (int32x1 (apply choose* int-consts)))
+      (define (uint32-const-imm) (uint32x1 (apply choose* int-consts)))
+      (define (int64-const-imm) (int64x1 (apply choose* int-consts)))
+      (define (uint64-const-imm) (uint64x1 (apply choose* int-consts)))
+
       (define (fill-arg-grammars node [pos -1])
        (match node
          [#t #t]
@@ -158,9 +169,21 @@
          ['uint32 (uint32-const)]
          ['int64 (int64-const)]
          ['uint64 (uint64-const)]
+
+         ; For dot products.
          ['int8x4 (arm:Ri8x4 (int8-const) (int8-const) (int8-const) (int8-const))]
          ['uint8x4 (arm:Ru8x4 (uint8-const) (uint8-const) (uint8-const) (uint8-const))]
-         ; TODO: HVX has some weird types here, for scalar registers?
+
+         ;; For immediates (shifts)
+         ['int8_imm (int8-const-imm)]
+         ['uint8_imm (uint8-const-imm)]
+         ['int16_imm (int16-const-imm)]
+         ['uint16_imm (uint16-const-imm)]
+         ['int32_imm (int32-const-imm)]
+         ['uint32_imm (uint32-const-imm)]
+         ['int64_imm (int64-const-imm)]
+         ['uint64_imm (uint64-const-imm)]
+
          [_ node]))
 
       (time (for/list ([candidate candidates]) (cons (uniquify-swizzles (arm:visit (car candidate) fill-arg-grammars)) (car (cdr candidate))))))))
@@ -401,7 +424,7 @@
             [immediate-narrowing? (list arm:shrn arm:rshrn arm:sqrshrn arm:sqrshrun arm:sqshrn arm:sqshrun arm:uqrshrn arm:uqshrn)]
             ;; Doing a non-concrete shift, use regular shift patterns
             ;; TODO: do we need broadcasts? or simply vector-scalar versions?
-            [symbolic-narrowing? (append (list arm:xtn arm:uqxtn arm:sqxtn arm:sqxtun) (list arm:uqrshr arm:sqrshr arm:srshr arm:urshr arm:ushr arm:sshr))]
+            [symbolic-narrowing? (append (list arm:xtn arm:uqxtn arm:sqxtn arm:sqxtun) (list arm:uqrshr-vs arm:sqrshr arm:srshr-vs arm:urshr arm:ushr-vs arm:sshr-vs))]
             ; TODO: need ssra, ursra, usra
             [else (error (format "Regular shift right not yet supported:\n~a >> ~a |- ~a ~a ~a ~a\n" expr shift round? saturate? signed? output-type))])]
             ; [else (list arm:uqrshr arm:sqrshr arm:srshr arm:urshr arm:ushr arm:sshr)])]
@@ -483,7 +506,7 @@
 (define (handle-vs-divide expr divisor arm-sub-exprs halide-expr)
   ;smull-vs umull-vs ushr sshr xtn
   ;; TODO: do we want a halving add? or saturating narrows? or sqdmulh-vs/sqrdmulh-vs
-  (let* ([isa (list arm:smull-vs arm:umull-vs arm:shrn arm:ushr arm:sshr arm:xtn)]
+  (let* ([isa (list arm:smull-vs arm:umull-vs arm:shrn arm:ushr-vs arm:sshr-vs arm:xtn)]
          [output-type (halide:elem-type halide-expr)]
          [grouped-sub-exprs (prepare-sub-exprs arm-sub-exprs)]
          [desired-types (arm:get-vector-types output-type)]
@@ -506,7 +529,12 @@
             (when (set-member? instrs 'ushr)
               (set! keep? #f))
             (set-add! instrs 'ushr)]
+            [(arm:ushr-vs? node)
+            (when (set-member? instrs 'ushr)
+              (set! keep? #f))
+            (set-add! instrs 'ushr)]
            [(arm:sshr? node) (when (set-member? instrs 'sshr) (set! keep? #f)) (set-add! instrs 'sshr)]
+           [(arm:sshr-vs? node) (when (set-member? instrs 'sshr) (set! keep? #f)) (set-add! instrs 'sshr)]
            [(arm:xtn? node) (when (set-member? instrs 'xtn) (set! keep? #f)) (set-add! instrs 'xtn)]
            [(arm:shrn? node) (when (set-member? instrs 'shrn) (set! keep? #f)) (set-add! instrs 'shrn)])
          node)
@@ -517,15 +545,15 @@
      ;; Fill in param grammars
      (define-symbolic bvc8 (bitvector 8))
      (define-symbolic bvc16 (bitvector 16))
-     (define int-consts (list (int8_t bvc8) (int16_t bvc16) (uint8_t bvc8) (uint16_t bvc16)))
+     (define int-scalars (list (int8_t bvc8) (int16_t bvc16) (uint8_t bvc8) (uint16_t bvc16)))
      (define (bool-const) (define-symbolic* b boolean?) b)
      (define (uint1-const) (define-symbolic* b boolean?) (uint1_t b))
-     (define (int8-const) (cpp:cast  (apply choose* int-consts) 'int8))
-     (define (uint8-const) (cpp:cast  (apply choose* int-consts) 'uint8))
-     (define (int16-const) (cpp:cast  (apply choose* int-consts) 'int16))
-     (define (uint16-const) (cpp:cast  (apply choose* int-consts) 'uint16))
-     (define (int32-const) (cpp:cast  (apply choose* int-consts) 'int32))
-     (define (uint32-const) (cpp:cast  (apply choose* int-consts) 'uint32))
+     (define (int8-const) (cpp:cast  (apply choose* int-scalars) 'int8))
+     (define (uint8-const) (cpp:cast  (apply choose* int-scalars) 'uint8))
+     (define (int16-const) (cpp:cast  (apply choose* int-scalars) 'int16))
+     (define (uint16-const) (cpp:cast  (apply choose* int-scalars) 'uint16))
+     (define (int32-const) (cpp:cast  (apply choose* int-scalars) 'int32))
+     (define (uint32-const) (cpp:cast  (apply choose* int-scalars) 'uint32))
      ;; TODO: do we need larger types?
      (define (fill-arg-grammars node [pos -1])
        (match node
@@ -540,6 +568,15 @@
          ['uint16 (uint16-const)]
          ['int32 (int32-const)]
          ['uint32 (uint32-const)]
+         ;; We only generate immediates
+         ['int8_imm (int8-const)]
+         ['uint8_imm (uint8-const)]
+         ['int16_imm (int16-const)]
+         ['uint16_imm (uint16-const)]
+         ['int32_imm (int32-const)]
+         ['uint32_imm (uint32-const)]
+        ;  ['int64_imm (int64-const)]
+        ;  ['uint64_imm (uint64-const)]
          [_ node]))
     (define output (sort-and-uniquify (for/list ([candidate candidates]) (cons (arm:visit (car candidate) fill-arg-grammars) (cdr candidate)))))
     output))

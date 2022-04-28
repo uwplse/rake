@@ -56,7 +56,7 @@
      ;; Lower current subexpr
      (define ir-sub-expr (first ir-sub-exprs))
      (define-values (successful? arm-subexpr-impl)
-       (synthesize-arm-expr ir-sub-expr ir-annotations ir-bounds lowering-algo swizzling-algo (or sub-expr? (not (arm-ir:combine? ir-expr)))))
+       (synthesize-arm-expr ir-sub-expr ir-annotations ir-bounds lowering-algo swizzling-algo #t)) ;; (or sub-expr? (not (arm-ir:combine? ir-expr)))
      
      (cond
        [successful?
@@ -93,10 +93,12 @@
     ;; TODO: Refactor the code below
     ;; If it does not, this is typically because the synthesizer fused multiple Halide loads into a single one:
     [(arm-ir:load-data? ir-expr)
-     (define parent-expr (first trace))
-     (define parent-spec (hash-ref ir-annotations (arm-ir:ast-node-id parent-expr)))
-     (define live-data (halide:extract-buffer-reads parent-spec))
-     (define live-buffers (set->list (halide:extract-live-buffers parent-spec)))
+    ;  (define parent-expr (first trace))
+    ;  (define parent-spec (hash-ref ir-annotations (arm-ir:ast-node-id parent-expr)))
+    ;  (define live-data (halide:extract-buffer-reads parent-spec))
+    ;  (define live-buffers (set->list (halide:extract-live-buffers parent-spec)))
+     (define-values (live-data live-buffers)
+       (get-annotated-ancestor-data trace ir-annotations ir-expr))
      (define buf-elemTypes (map buffer-elemT live-buffers))
      (values #t (set->list (list->set (flatten
                             (map
@@ -112,6 +114,16 @@
 
     [else
      (error "Unexpected: Did not find Halide IR mapping for expression ~a" ir-expr)]))
+
+(define (get-annotated-ancestor-data trace-list ir-annotations expr)
+  (cond
+    [(null? trace) (error (format "get-annotated-ancestor-data failed for expr: ~a\n" (pretty-format expr)))]
+    [(hash-has-key? ir-annotations (arm-ir:ast-node-id (first trace-list)))
+      (define ancestor-spec (hash-ref ir-annotations (arm-ir:ast-node-id (first trace-list))))
+      (define live-data (halide:extract-buffer-reads ancestor-spec))
+      (define live-buffers (set->list (halide:extract-live-buffers ancestor-spec)))
+      (values live-data live-buffers)]
+    [else (get-annotated-ancestor-data (rest trace-list) ir-annotations expr)]))
 
 (define (lower-to-optimal-arm halide-expr ir-expr arm-sub-exprs lowering-algo swizzling-algo sub-expr? [cost-ub 99999])
   (define-values (successful? arm-expr expr-cost template-cost swizzle-cost)
