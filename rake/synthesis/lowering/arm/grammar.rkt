@@ -50,7 +50,6 @@
   ;; Fill in param grammars
   (for/list ([candidate candidates]) (cons (uniquify-swizzles (car candidate)) (cdr candidate))))
 
-
 (define (handle-vs-mpy-add expr weights output-type arm-sub-exprs halide-expr)
   (let* ([input-type (get-input-type expr)]
          [widening? (>= (cpp:type-bw output-type) (* 2 (cpp:type-bw input-type)))]
@@ -61,11 +60,19 @@
                   (if widening?
                     (list arm:reinterpret arm:mul-vs arm:sxtl arm:uxtl arm:add arm:addv arm:saddlv arm:uaddlv arm:saddl arm:saddw arm:saddlp arm:sadalp arm:smlal-vs arm:smlsl-vs arm:ushll arm:sshll arm:ssubl arm:ssubw arm:sub arm:uadalp arm:uaddl arm:uaddlp arm:uaddw arm:umlal-vs arm:umlsl-vs arm:usubl arm:usubw arm:smull-vs arm:umull-vs)
                     ;(list arm:add arm:sshll arm:ushll arm:reinterpret)
-                    (list arm:reinterpret arm:add arm:sub arm:addp arm:mla-vs arm:mls-vs arm:mul-vs arm:neg arm:shl))
+                    (list arm:reinterpret arm:add arm:sub arm:addp arm:mla-vs arm:mls-vs arm:mul-vs arm:neg)) ; arm:shl
                   (if double-widening?
                     (list arm:sdot.v2i32.v8i4 arm:udot.v2i32.v8i4 arm:sdot.v4i32.v16i4 arm:udot.v4i32.v16i4)
                     '())))]
-         [depth (if double-widening? 1 (if widening? 3 2))]
+         ;; TODO: stop using bad heuristics for this.
+         [depth
+          (cond
+            [(and double-widening? (< (length weights) 5)) 2]
+            [double-widening? 4]
+            [(and widening? (< (length weights) 3)) 3]
+            [widening? 4]
+            [(< (length weights) 3) 2]
+            [else 3])]
          [max-cost 20]
          ;; TODO: allow double-widening to have a zero vector as a sub-expr?
          [sub-exprs arm-sub-exprs]
@@ -91,30 +98,30 @@
                             (arm:visit expr extract-buffer)
                             live-bufs))])
 
-    ;(display "arm sub exprs!\n")
-    ;(pretty-print arm-sub-exprs)
-    ;(display "grouped sub exprs!\n")
-    ;(pretty-print grouped-sub-exprs)
-    ;(display "candidates!\n")
-    ;(pretty-print candidates)
-    ;(display (format "~a ~a ~a\n" isa desired-types grouped-sub-exprs))
-    ;(pretty-print grouped-sub-exprs)
-    ;(display (format "Types; ~a ~a ~a\n" input-type output-type widening?))
+    ; (display "arm sub exprs!\n")
+    ; (pretty-print arm-sub-exprs)
+    ; (display "grouped sub exprs!\n")
+    ; (pretty-print grouped-sub-exprs)
+    ; (display "candidates!\n")
+    ; (pretty-print candidates)
+    ; (display (format "~a ~a ~a\n" isa desired-types grouped-sub-exprs))
+    ; (display (format "Types; ~a ~a ~a\n" input-type output-type widening?))
 
     ;; Filter out templates that read too much or too little data
     ; (display (format "Is double-widening? ~a" double-widening?))
     ; (pretty-print isa)
-    ; (display (format "Before filtering reads: ~a\n" (length candidates)))
+    (display (format "Before filtering reads: ~a\n" (length candidates)))
     ; (pretty-print candidates)
-    (set! candidates (time (filter (lambda (c) (eq? (arm:max-unique-inputs (car c)) number-reads)) candidates)))
-    ; (display (format "After filtering reads: ~a\n" (length candidates)))
-    ;(display (format "Load buffers: ~a\n" load-buffers))
-    ;(display "First:\n")
-    ;(pretty-print (first candidates))
+    ;; TODO: should this really be eq?
+    (set! candidates (time (filter (lambda (c) (>= (arm:max-unique-inputs (car c)) number-reads)) candidates)))
+    (display (format "After filtering reads: ~a\n" (length candidates)))
+    ; (display (format "Load buffers: ~a\n" load-buffers))
+    ; (display "First:\n")
+    ; (pretty-print (first candidates))
     ; (display (format "LB: ~a\n" (live-buffers (car (first candidates)))))
     (set! candidates (time (filter (lambda (c) (equal? (live-buffers (car c)) load-buffers)) candidates)))
 
-    ; (display (format "After filtering buffers: ~a\n" (length candidates)))
+    (display (format "After filtering buffers: ~a\n" (length candidates)))
     ;(pretty-print (take candidates 50))
     ;(println (length candidates))
 
@@ -392,7 +399,8 @@
           (cond
             ; TODO: use saturating / rounding / signedness information
             [immediate-narrowing? (list arm:shrn arm:rshrn arm:sqrshrn arm:sqrshrun arm:sqshrn arm:sqshrun arm:uqrshrn arm:uqshrn)]
-            ;; Doing anon-concrete shift, use regular shift patterns
+            ;; Doing a non-concrete shift, use regular shift patterns
+            ;; TODO: do we need broadcasts? or simply vector-scalar versions?
             [symbolic-narrowing? (append (list arm:xtn arm:uqxtn arm:sqxtn arm:sqxtun) (list arm:uqrshr arm:sqrshr arm:srshr arm:urshr arm:ushr arm:sshr))]
             ; TODO: need ssra, ursra, usra
             [else (error (format "Regular shift right not yet supported:\n~a >> ~a |- ~a ~a ~a ~a\n" expr shift round? saturate? signed? output-type))])]
@@ -470,8 +478,6 @@
          [depth 2]
          [max-cost 8]
          [candidates (enumerate-arm isa desired-types grouped-sub-exprs depth max-cost)])
-    (display (format "\n\nabsd isa:\n~a\n" (pretty-format isa)))
-    (display (format "absd candidates:\n~a\n\n\n" (pretty-format candidates)))
     (sort-and-uniquify candidates)))
 
 (define (handle-vs-divide expr divisor arm-sub-exprs halide-expr)
@@ -486,14 +492,9 @@
          [max-cost 20]
          [candidates (enumerate-arm isa desired-types grouped-sub-exprs depth max-cost)])
 
-    ; (display (format "handle-vs-divide\ncandidates:\n~a\n" (pretty-format candidates)))
-
      ;; Sort them
      (set! candidates (sort candidates (lambda (v1 v2) (<= (cdr v1) (cdr v2)))))
 
-    ;  (display (format "handle-vs-divide\nsorted candidates:\n~a\n" (pretty-format candidates)))
-
-     ;; TODO: Filter them
      (define (instr-repeat? candidate)
        (define instrs (mutable-set))
        (define keep? #t)
@@ -510,11 +511,8 @@
            [(arm:shrn? node) (when (set-member? instrs 'shrn) (set! keep? #f)) (set-add! instrs 'shrn)])
          node)
        (arm:visit-shallow candidate check-instr)
-      ;  (display (format "\nCandidate:\n~a\nkept:~a\n\n" candidate keep?))
        keep?)
      (set! candidates (filter (lambda (c) (instr-repeat? (car c))) candidates))
-
-    ; (display (format "handle-vs-divide\nfiltered candidates:\n~a\n" (pretty-format candidates)))
 
      ;; Fill in param grammars
      (define-symbolic bvc8 (bitvector 8))
@@ -544,7 +542,6 @@
          ['uint32 (uint32-const)]
          [_ node]))
     (define output (sort-and-uniquify (for/list ([candidate candidates]) (cons (arm:visit (car candidate) fill-arg-grammars) (cdr candidate)))))
-    ; (display (format "handle-vs-divide\noutput:\n~a\n" (pretty-format output)))
     output))
 
 (define (handle-build-vec base stride len arm-sub-exprs halide-expr)
@@ -576,7 +573,8 @@
           (map make-load (arm:get-vector-types (buffer-elemT b))))
         (define actual-loads (flatten (map construct-loads buffers)))
         (arm:make-shuffles-list actual-loads type))
-     (sort (map label-cost (flatten (map generate-shuffles buf-elemTypes))) (lambda (v1 v2) (<= (cdr v1) (cdr v2))))]
+     (define load-exprs (map label-cost (flatten (map generate-shuffles buf-elemTypes))))
+     (sort load-exprs (lambda (v1 v2) (<= (cdr v1) (cdr v2))))]
 
     ;; Data broadcasting
     [(arm-ir:broadcast scalar-expr)
@@ -729,7 +727,6 @@
 (define enumeration-cache (make-hash))
 
 (define (not-dbl-reinterpret parent-instr child-instr)
-  ;(display (format "(not-dbl-reinterpret ~a ~a)\n\n" parent-instr child-instr))
   (not (and (eqv? parent-instr arm:reinterpret) (eqv? child-instr arm:reinterpret))))
 
 (define (is-dot-product-instr? instr)
@@ -778,7 +775,6 @@
 
 ; Filter based in output type
 (define (build-instr-exprs instr instr-set output-types base-exprs depth max-cost read-count)
-  ;(display (format "instr: ~a\n" instr))
   (let* ([curried-build (curryr build-sig-exprs instr-set base-exprs depth max-cost read-count instr)]
          [filtered (filter (curry out-member? output-types) (arm:instr-forms instr))]
          [built (map curried-build filtered)])
@@ -813,6 +809,15 @@
     ['uint64 #t]
     ['int8x4 #t]
     ['uint8x4 #t]
+    ;; Immediates.
+    ['int8_imm #t]
+    ['uint8_imm #t]
+    ['int16_imm #t]
+    ['uint16_imm #t]
+    ['int32_imm #t]
+    ['uint32_imm #t]
+    ['int64_imm #t]
+    ['uint64_imm #t]
     [_ #f]))
 
 (define (get-arg-opts arg-types instr instr-set base-exprs depth max-cost read-count arg-pos)
@@ -822,8 +827,6 @@
              [opts (if (basic-type? arg)
                       (list (cons arg 0))
                       (enumerate-arm instr-set (set arg) base-exprs (sub1 depth) max-cost read-count instr arg-pos))])
-          ;(println arg)
-          ;(println (enumerate-arm instr-set (set arg) base-exprs (sub1 depth) max-cost read-count arg-pos))
           (append (list opts) (get-arg-opts (rest arg-types) instr instr-set base-exprs depth max-cost read-count (add1 arg-pos))))))
 
 
@@ -862,7 +865,7 @@
         (map
          (lambda (ld)
            (define tbl (map (lambda (i) (define-symbolic* idx integer?) idx) (range 256)))
-           (arm:??load (get-sw-node-id) (arm:??load-live-data ld) (arm:??load-buffer ld) tbl (arm:??load-output-type ld))) lds))
-        output-type]
+           (arm:??load (get-sw-node-id) (arm:??load-live-data ld) (arm:??load-buffer ld) tbl (arm:??load-output-type ld))) lds)
+        output-type)]
       [_ node]))
   (arm:visit arm-template clone-swizzle-node))
