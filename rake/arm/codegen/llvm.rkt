@@ -219,11 +219,11 @@
       ;; TODO: we want llvm.aarch64.neon.umull.v* variants, but need the second type to be broadcast.
       (destruct* ((arm:interpret Vd) (arm:interpret Vn) (arm:interpret Vm))
         [((arm:u8x16 v0) (uint8_t v1) (uint1_t v2))
-            (handle-wide-slice-binary-broadcast arm-expr `umull.v8i16 Vd Vn v2 `halide.ir.x8)]
+            (handle-wide-slice-binary-broadcast generate-rake arm-expr `umull.v8i16 Vd Vn v2 `halide.ir.x8)]
         [((arm:u16x8 v0) (uint16_t v1) (uint1_t v2))
-            (handle-wide-slice-binary-broadcast arm-expr `umull.v4i32 Vd Vn v2 `halide.ir.x4)]
+            (handle-wide-slice-binary-broadcast generate-rake arm-expr `umull.v4i32 Vd Vn v2 `halide.ir.x4)]
         [((arm:u32x4 v0) (uint32_t v1) (uint1_t v2))
-            (handle-wide-slice-binary-broadcast arm-expr `umull.v2i64 Vd Vn v2 `halide.ir.x2)]
+            (handle-wide-slice-binary-broadcast generate-rake arm-expr `umull.v2i64 Vd Vn v2 `halide.ir.x2)]
         [(_ _ _) (error (format "arm:umull-vs variant not understood:\n~a\n" (pretty-format arm-expr)))])]
 
     [(arm:umull-vv Vd Vn Vm)
@@ -279,11 +279,11 @@
     [(arm:smull-vs Vd Vn Vm)
       (destruct* ((arm:interpret Vd) (arm:interpret Vn) (arm:interpret Vm))
         [((arm:i8x16 v0) (int8_t v1) (uint1_t v2))
-           (handle-wide-slice-binary-broadcast arm-expr `smull_i8x16 Vd Vn v2 `halide.ir.x16)]
+           (handle-wide-slice-binary-broadcast generate-rake arm-expr `smull_i8x16 Vd Vn v2 `halide.ir.x16)]
         [((arm:i16x8 v0) (int16_t v1) (uint1_t v2))
-           (handle-wide-slice-binary-broadcast arm-expr `smull_i16x8 Vd Vn v2 `halide.ir.x8)]
+           (handle-wide-slice-binary-broadcast generate-rake arm-expr `smull_i16x8 Vd Vn v2 `halide.ir.x8)]
         [((arm:i32x4 v0) (int32_t v1) (uint1_t v2))
-           (handle-wide-slice-binary-broadcast arm-expr `smull_i32x4 Vd Vn v2 `halide.ir.x4)]
+           (handle-wide-slice-binary-broadcast generate-rake arm-expr `smull_i32x4 Vd Vn v2 `halide.ir.x4)]
         [(_ _ _) (error (format "arm:smull-vs variant not understood:\n~a\n" (pretty-format arm-expr)))])]
 
     [(arm:smull-vv Vd Vn Vm)
@@ -529,6 +529,25 @@
     [(arm:zip2 Vn Vm)
       ;; There are no intrinsics for zips
       `(halide.ir.interleave_hi, (to-llvm-type arm-expr), `(list ,(input-arg Vn) ,(input-arg Vm)))]
+
+    [(arm:sshll Vd Vn Vm)
+      (destruct* ((arm:interpret Vd) (arm:interpret Vn) (arm:interpret Vm))
+        [((arm:i8x16 v0) (uint8_t v1) (uint1_t v2))
+           ;; Sometimes we accidentally generate sshll by 0 instead of sext
+           (if (and (concrete? v1) (bveq v1 (bv 0 8)))
+             (compile (arm:sxtl Vd Vm))
+             (handle-wide-slice-binary-broadcast generate-rake arm-expr `sshll_i8x16 Vd Vn v2 `halide.ir.x16))]
+        [((arm:i16x8 v0) (uint16_t v1) (uint1_t v2))
+           ;; Sometimes we accidentally generate sshll by 0 instead of sext
+           (if (and (concrete? v1) (bveq v1 (bv 0 16)))
+             (compile (arm:sxtl Vd Vm))
+           (handle-wide-slice-binary-broadcast generate-rake arm-expr `sshll_i16x8 Vd Vn v2 `halide.ir.x8))]
+        [((arm:i32x4 v0) (uint32_t v1) (uint1_t v2))
+           ;; Sometimes we accidentally generate sshll by 0 instead of sext
+           (if (and (concrete? v1) (bveq v1 (bv 0 32)))
+             (compile (arm:sxtl Vd Vm))
+           (handle-wide-slice-binary-broadcast generate-rake arm-expr `sshll_i32x4 Vd Vn v2 `halide.ir.x4))]
+        [(_ _ _) (error (format "arm:sshll variant not understood:\n~a\n" (pretty-format arm-expr)))])]
 
     [_ (string->sexp (format "~a" arm-expr))]))
 
@@ -783,13 +802,13 @@
     (generate name (to-llvm-type arm-expr) `(list ,(input-arg Vd) (,type ,half) (,type ,b)))))
 
 ;; Only read half of the output vector and broadcast Vn
-(define (handle-wide-slice-binary-broadcast arm-expr name Vd Vn flag broadcast)
+(define (handle-wide-slice-binary-broadcast generator arm-expr name Vd Vn flag broadcast)
   (let* ([slice (if flag `halide.ir.shalf `halide.ir.fhalf)]
          [type (to-llvm-type arm-expr)]
          [b-type (to-llvm-type Vd)]
          [b `(,broadcast ,b-type (list ,(compile-scalar Vn)))]
          [wide-type (to-llvm-type-wide Vd)]
-         [call (generate-rake name wide-type `(list ,(input-arg Vd) (,b-type ,b)))])
+         [call (generator name wide-type `(list ,(input-arg Vd) (,b-type ,b)))])
     `(,slice
       ,type
       (list (,wide-type ,call)))))

@@ -205,6 +205,7 @@
     [(eq? arm:sshll instr) 2]
 
     [(eq? arm:sshr instr) 2]
+    [(eq? arm:sshr-vs instr) 2]
 
     [(eq? arm:ssubl instr) 2]
 
@@ -277,6 +278,7 @@
     [(eq? arm:uqrshrn instr) 6] ;; is a double instruction
 
     [(eq? arm:uqrshr instr) 3]
+    [(eq? arm:uqrshr-vs instr) 3]
 
     [(eq? arm:uqshl instr) 2]
 
@@ -297,6 +299,7 @@
     [(eq? arm:ushll instr) 2]
 
     [(eq? arm:ushr instr) 2]
+    [(eq? arm:ushr-vs instr) 2]
 
     [(eq? arm:usqadd instr) 3]
 
