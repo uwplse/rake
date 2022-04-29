@@ -50,24 +50,71 @@
   ;; Fill in param grammars
   (for/list ([candidate candidates]) (cons (uniquify-swizzles (car candidate)) (cdr candidate))))
 
+(define (use-if condition values)
+  (if condition
+    values
+    '()))
+
+(define (is-dot-product? expr)
+  (or
+    (arm:sdot.v2i32.v8i4? expr)
+    (arm:udot.v2i32.v8i4? expr)
+    (arm:sdot.v4i32.v16i4? expr)
+    (arm:udot.v4i32.v16i4? expr)))
+
 (define (handle-vs-mpy-add expr weights output-type arm-sub-exprs halide-expr)
   (let* ([input-type (get-input-type expr)]
          [widening? (>= (cpp:type-bw output-type) (* 2 (cpp:type-bw input-type)))]
          [double-widening? (>= (cpp:type-bw output-type) (* 4 (cpp:type-bw input-type)))]
+         [use-shifts? (not (null? (filter halide:is-power-of-2? weights)))]
+         ;; TODO: should we require that the output type is signed?
+         [use-subs? (not (null? (filter halide:is-signed-negative? weights)))]
          ; TODO: better pruning and more isa options
          [isa (flatten
                 (list
-                  (if widening?
-                    (list arm:reinterpret arm:mul-vs arm:sxtl arm:uxtl arm:add arm:addv arm:saddlv arm:uaddlv arm:saddl arm:saddw arm:saddlp arm:sadalp arm:smlal-vs arm:smlsl-vs arm:ushll arm:sshll arm:ssubl arm:ssubw arm:sub arm:uadalp arm:uaddl arm:uaddlp arm:uaddw arm:umlal-vs arm:umlsl-vs arm:usubl arm:usubw arm:smull-vs arm:umull-vs)
-                    ;(list arm:add arm:sshll arm:ushll arm:reinterpret)
-                    (list arm:reinterpret arm:add arm:sub arm:addp arm:mla-vs arm:mls-vs arm:mul-vs arm:neg)) ; arm:shl
-                  (if double-widening?
-                    (list arm:sdot.v2i32.v8i4 arm:udot.v2i32.v8i4 arm:sdot.v4i32.v16i4 arm:udot.v4i32.v16i4)
-                    '())))]
+                  ; (list arm:udot.v2i32.v8i4 arm:uaddl arm:umull-vs arm:udot.v4i32.v16i4 arm:reinterpret)
+                  (list arm:reinterpret arm:add arm:addp arm:mla-vs arm:mul-vs)
+                  ; (list arm:add arm:addp arm:mla-vs arm:mul-vs)
+
+                  (use-if
+                    widening?
+                    (list arm:sxtl arm:uxtl
+                          arm:saddl arm:saddw arm:saddlp arm:sadalp arm:smlal-vs arm:smull-vs
+                          arm:uaddl arm:uaddw arm:uaddlp arm:uadalp arm:umlal-vs arm:umull-vs))
+
+                  ;; TODO: when do we want reductions?
+                  ; (use-if
+                  ;   (and widening? use-reductions?)
+                  ;   (list arm:addv arm:saddlv arm:uaddlv))
+
+                  (use-if
+                    double-widening?
+                    (list arm:sdot.v2i32.v8i4 arm:udot.v2i32.v8i4 arm:sdot.v4i32.v16i4 arm:udot.v4i32.v16i4))
+
+                  (use-if
+                    (and widening? use-subs?)
+                    (list arm:smlsl-vs arm:ssubl arm:ssubw arm:sub arm:umlsl-vs arm:usubl arm:usubw))
+
+                  ;; TODO: should we include these regardless of the `widening?` flag?
+                  (use-if
+                    (and (not widening?) use-subs?)
+                    (list arm:sub arm:mls-vs arm:neg))
+
+                  (use-if
+                    (and widening? use-shifts?)
+                    (list arm:ushll arm:sshll))
+
+                  ;; TODO: debug this, add more.
+                  ;; TODO: should we include these regardless of the `widening?` flag?
+                  ; (use-if
+                  ;   (and (not widening?) use-shifts?)
+                  ;   (list arm:shl))
+                ))]
          ;; TODO: stop using bad heuristics for this.
          [depth
           (cond
             [(and double-widening? (< (length weights) 5)) 2]
+            [(and double-widening? (< (length weights) 9)) 3]
             [double-widening? 4]
             [(and widening? (< (length weights) 3)) 3]
             [widening? 4]
@@ -98,6 +145,20 @@
                             (arm:visit expr extract-buffer)
                             live-bufs))])
 
+
+      (display
+        (format
+          "\nhandle-vs-mpy-add params:\nInput type: ~a\nOutput type: ~a\nWidening: ~a\nDouble widening: ~a\nUse shifts: ~a\nUse subs: ~a\nDepth: ~a\n"
+          input-type output-type widening? double-widening? use-shifts? use-subs? depth))
+
+      (display "ISA:\n")
+      (pretty-print isa)
+      (display "GSE:\n")
+      (pretty-print grouped-sub-exprs)
+      (display "DT:\n")
+      (pretty-print desired-types)
+
+
     ; (display "arm sub exprs!\n")
     ; (pretty-print arm-sub-exprs)
     ; (display "grouped sub exprs!\n")
@@ -111,7 +172,10 @@
     ; (display (format "Is double-widening? ~a" double-widening?))
     ; (pretty-print isa)
     (display (format "Before filtering reads: ~a\n" (length candidates)))
+    (pretty-print candidates)
+    (display (format "Outter dot-product: ~a\n" (length (filter (lambda (cand) (is-dot-product? (car cand))) candidates))))
     ; (pretty-print candidates)
+          (error "done")
     ;; TODO: should this really be eq?
     (set! candidates (time (filter (lambda (c) (>= (arm:max-unique-inputs (car c)) number-reads)) candidates)))
     (display (format "After filtering reads: ~a\n" (length candidates)))
@@ -122,6 +186,7 @@
     (set! candidates (time (filter (lambda (c) (equal? (live-buffers (car c)) load-buffers)) candidates)))
 
     (display (format "After filtering buffers: ~a\n" (length candidates)))
+    (display (format "Outter dot-product: ~a\n" (length (filter (lambda (cand) (is-dot-product? (car cand))) candidates))))
     ;(pretty-print (take candidates 50))
     ;(println (length candidates))
 
@@ -424,7 +489,7 @@
             [immediate-narrowing? (list arm:shrn arm:rshrn arm:sqrshrn arm:sqrshrun arm:sqshrn arm:sqshrun arm:uqrshrn arm:uqshrn)]
             ;; Doing a non-concrete shift, use regular shift patterns
             ;; TODO: do we need broadcasts? or simply vector-scalar versions?
-            [symbolic-narrowing? (append (list arm:xtn arm:uqxtn arm:sqxtn arm:sqxtun) (list arm:uqrshr-vs arm:sqrshr arm:srshr-vs arm:urshr arm:ushr-vs arm:sshr-vs))]
+            [symbolic-narrowing? (append (list arm:xtn arm:uqxtn arm:sqxtn arm:sqxtun) (list arm:uqrshr-vs arm:sqrshr-vs arm:srshr-vs arm:urshr-vs arm:ushr-vs arm:sshr-vs))]
             ; TODO: need ssra, ursra, usra
             [else (error (format "Regular shift right not yet supported:\n~a >> ~a |- ~a ~a ~a ~a\n" expr shift round? saturate? signed? output-type))])]
             ; [else (list arm:uqrshr arm:sqrshr arm:srshr arm:urshr arm:ushr arm:sshr)])]
@@ -489,7 +554,10 @@
 
       (define fill-arg-grammars (if (concrete? shift) fill-arg-grammars-imm fill-arg-grammars-sym))
 
-      (sort-and-uniquify (for/list ([candidate candidates]) (cons (arm:visit (car candidate) fill-arg-grammars) (cdr candidate))))))
+      (define cast-candidates (sort-and-uniquify (for/list ([candidate candidates]) (cons (arm:visit (car candidate) fill-arg-grammars) (cdr candidate)))))
+
+      (display (format "cast-candidates:\n~a" (pretty-format cast-candidates)))
+      cast-candidates))
 
 (define (handle-abs-diff expr0 expr1 widening? output-type arm-sub-exprs halide-expr)
   (let* ([isa (if widening?
@@ -861,9 +929,10 @@
   (if (empty? arg-types)
       '()
       (let* ([arg (first arg-types)]
+             [new-depth (if (eqv? instr arm:reinterpret) depth (sub1 depth))]
              [opts (if (basic-type? arg)
                       (list (cons arg 0))
-                      (enumerate-arm instr-set (set arg) base-exprs (sub1 depth) max-cost read-count instr arg-pos))])
+                      (enumerate-arm instr-set (set arg) base-exprs new-depth max-cost read-count instr arg-pos))])
           (append (list opts) (get-arg-opts (rest arg-types) instr instr-set base-exprs depth max-cost read-count (add1 arg-pos))))))
 
 
