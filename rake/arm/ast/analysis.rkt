@@ -104,6 +104,7 @@
     [(arm:sqrdmulh-vs Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
     [(arm:sqrshl Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
     [(arm:sqrshr Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
+    [(arm:sqrshr-vs Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
     [(arm:sqrshrn Vd Vn Vm Vb) (+ (max-unique-inputs Vd) (max-unique-inputs Vn) (max-unique-inputs Vm) (max-unique-inputs Vb))]
     [(arm:sqrshrun Vd Vn Vm Vb) (+ (max-unique-inputs Vd) (max-unique-inputs Vn) (max-unique-inputs Vm) (max-unique-inputs Vb))]
     [(arm:sqshl Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]

@@ -62,6 +62,7 @@
 (struct uqrshr (Vn Vm) #:transparent)                       ;; saturating_rounding_shift_right
 (struct uqrshr-vs (Vn Vm) #:transparent)                    ;; saturating_rounding_shift_right
 (struct sqrshr (Vn Vm) #:transparent)                       ;; saturating_rounding_shift_right
+(struct sqrshr-vs (Vn Vm) #:transparent)                    ;; saturating_rounding_shift_right
 (struct uqrshrn (Vd Vn Vm Vb) #:transparent)                ;; saturating_rounding_shift_right_narrow
 (struct sqrshrn (Vd Vn Vm Vb) #:transparent)                ;; saturating_rounding_shift_right_narrow
 (struct sqrshrun (Vd Vn Vm Vb) #:transparent)               ;; saturating_rounding_shift_right_narrow
@@ -1025,6 +1026,16 @@
                          (instr-sig 'i64x2 (list 'i64x2 'i64x2))
                          )]
 
+    [(eq? sqrshr-vs instr) (list
+                         (instr-sig 'i8x8 (list 'i8x8 'uint8))
+                         (instr-sig 'i8x16 (list 'i8x16 'uint8))
+                         (instr-sig 'i16x4 (list 'i16x4 'uint16))
+                         (instr-sig 'i16x8 (list 'i16x8 'uint16))
+                         (instr-sig 'i32x2 (list 'i32x2 'uint32))
+                         (instr-sig 'i32x4 (list 'i32x4 'uint32))
+                         (instr-sig 'i64x2 (list 'i64x2 'uint64))
+                         )]
+
     ;; Immediate.
     [(eq? sqrshrn instr) (list
                          (instr-sig 'i8x16 (list 'i16x8 'uint16_imm 'i16x8 'uint16_imm))
@@ -1151,13 +1162,13 @@
                          )]
 
     [(eq? srshr-vs instr) (list
-                         (instr-sig 'i8x8 (list 'i8x8 'int8))
-                         (instr-sig 'i8x16 (list 'i8x16 'int8))
-                         (instr-sig 'i16x4 (list 'i16x4 'int16))
-                         (instr-sig 'i16x8 (list 'i16x8 'int16))
-                         (instr-sig 'i32x2 (list 'i32x2 'int32))
-                         (instr-sig 'i32x4 (list 'i32x4 'int32))
-                         (instr-sig 'i64x2 (list 'i64x2 'int32))
+                         (instr-sig 'i8x8 (list 'i8x8 'uint8))
+                         (instr-sig 'i8x16 (list 'i8x16 'uint8))
+                         (instr-sig 'i16x4 (list 'i16x4 'uint16))
+                         (instr-sig 'i16x8 (list 'i16x8 'uint16))
+                         (instr-sig 'i32x2 (list 'i32x2 'uint32))
+                         (instr-sig 'i32x4 (list 'i32x4 'uint32))
+                         (instr-sig 'i64x2 (list 'i64x2 'uint32))
                          )]
 
     [(eq? srshl instr) (list
@@ -1518,13 +1529,13 @@
                          )]
 
     [(eq? uqrshr-vs instr) (list
-                         (instr-sig 'u8x8 (list 'u8x8 'int8))
-                         (instr-sig 'u8x16 (list 'u8x16 'int8))
-                         (instr-sig 'u16x4 (list 'u16x4 'int16))
-                         (instr-sig 'u16x8 (list 'u16x8 'int16))
-                         (instr-sig 'u32x2 (list 'u32x2 'int32))
-                         (instr-sig 'u32x4 (list 'u32x4 'int32))
-                         (instr-sig 'u64x2 (list 'u64x2 'int64))
+                         (instr-sig 'u8x8 (list 'u8x8 'uint8))
+                         (instr-sig 'u8x16 (list 'u8x16 'uint8))
+                         (instr-sig 'u16x4 (list 'u16x4 'uint16))
+                         (instr-sig 'u16x8 (list 'u16x8 'uint16))
+                         (instr-sig 'u32x2 (list 'u32x2 'uint32))
+                         (instr-sig 'u32x4 (list 'u32x4 'uint32))
+                         (instr-sig 'u64x2 (list 'u64x2 'uint64))
                          )]
 
     ;; Immediate.

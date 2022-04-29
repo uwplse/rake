@@ -175,6 +175,7 @@
 
     [(eq? arm:sqrshl instr) 3]
     [(eq? arm:sqrshr instr) 3]
+    [(eq? arm:sqrshr-vs instr) 3]
 
     [(eq? arm:sqrshrn instr) 6] ;; is a double instruction
 

@@ -30,6 +30,8 @@
  (prefix-out halide: extract-minmax-scalars)
  (prefix-out halide: cast-op?)
  (prefix-out halide: make-scalar-log2s)
+ (prefix-out halide: is-power-of-2?)
+ (prefix-out halide: is-signed-negative?)
 )
 
 (define (extract-live-buffers expr)
@@ -410,3 +412,10 @@
 
 (define (make-scalar-log2s scalars)
   (map log-2 (filter is-power-of-2? scalars)))
+
+(define (is-signed-negative? value)
+  (and
+   ;; It cannot be a symbolic value
+   (empty? (symbolics value))
+   (let ([zero (cpp:cast (int8_t (bv 0 8)) (cpp:type value))])
+    (bvsgt (cpp:eval zero) (cpp:eval value)))))

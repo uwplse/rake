@@ -71,10 +71,12 @@
               (if (arm-ir:combine? expr)
                 (list
                   (arm-ir:add-sat (get-node-id) (arm-ir:combine-expr0 expr) (arm-ir:combine-expr1 expr) wider-type)
-                  (arm-ir:sub-sat (get-node-id) (arm-ir:combine-expr0 expr) (arm-ir:combine-expr1 expr) wider-type))
+                  ; (arm-ir:sub-sat (get-node-id) (arm-ir:combine-expr0 expr) (arm-ir:combine-expr1 expr) wider-type)
+                  )
                 (list
                   (arm-ir:add-sat (get-node-id) expr expr wider-type)
-                  (arm-ir:sub-sat (get-node-id) expr expr wider-type)))))]
+                  ; (arm-ir:sub-sat (get-node-id) expr expr wider-type)
+                  ))))]
          [(or (vec-mul? halide-expr) (vec-shl? halide-expr))
           ;; Try folding the mul by updating the weight-matrix
           (define castfn (match outT ['int8 int8x1] ['int16 int16x1] ['int32 int32x1] ['uint8 uint8x1] ['uint16 uint16x1] ['uint32 uint32x1]))
@@ -140,6 +142,7 @@
        (list (arm-ir:vs-dmpy-add-hh-sat (get-node-id) expr weight (choose* #t #f) (choose* #t #f) (halide:elem-type halide-expr)))]
 
       [(arm-ir:add-sat expr0 expr1 outT) '()]
+      [(arm-ir:sub-sat expr0 expr1 outT) '()]
 
       [(arm-ir:vs-shift-right sub-expr shift round? saturate? signed? outT)
        (define shr-scalars (halide:extract-shr-scalars halide-expr))
@@ -186,6 +189,8 @@
           ;; Check if the new node is an identity func. Ex: saturation where its not needed etc.
           (list lifted-sub-expr)])]
 
+      [(arm-ir:vs-divide sub-expr div) '()]
+
       [_ (error "NYI: Please define a (fold) grammar for IR Expr:" lifted-sub-expr halide-expr)]))
 
   (cond
@@ -222,6 +227,7 @@
             (if (<= (length weights) 2)
                 (arm-ir:vs-dmpy-add-hh-sat (get-node-id) sub-expr (apply choose* weights) (choose* #t #f) (choose* #t #f) (halide:elem-type halide-expr))
                 '())
+            ; (arm-ir:vs-mpy-add (get-node-id) sub-expr weights (halide:narrower-elem-type halide-expr))
         ))]
 
       [(arm-ir:vv-mpy-add expr width outT)
@@ -233,6 +239,7 @@
       [(arm-ir:vs-dmpy-add-hh-sat expr weight round? accumulate? outT) '()]
 
       [(arm-ir:add-sat expr0 expr1 outT) '()]
+      [(arm-ir:sub-sat expr0 expr1 outT) '()]
 
       [(arm-ir:vs-shift-right sub-expr const-val round? saturate? signed? output-type) '()]
 
@@ -266,6 +273,8 @@
 
       ; TODO: can we replace reductions...?
       [(arm-ir:reduce expr width reduce-op outT) '()]
+
+      [(arm-ir:vs-divide sub-expr div) '()]
 
       [_ (error "NYI: Please define a (repl) grammar for IR Expr:" lifted-sub-expr halide-expr)]))
 
@@ -313,6 +322,9 @@
           (arm-ir:vv-mpy-add (get-node-id) (arm-ir:load-data (get-load-id) live-reads gather-tbl) (list 1) (halide:elem-type halide-expr))
           ;; Extend both of the sub-exprs (combine them)
           (mk-vv-mpy-add-combine-subexprs lifted-sub-exprs (list 1) (halide:elem-type halide-expr))
+          ;; TODO: understand this.
+          ;; Extend sub-sub-exprs (combine them)
+          ; (mk-vv-mpy-add-combine-subsubexprs lifted-sub-exprs (list 1) (halide:elem-type halide-expr))
       ))]
 
     ;; Addition
@@ -488,6 +500,13 @@
       (arm-ir:combine (get-load-id) (list-ref lifted-sub-exprs 0) (list-ref lifted-sub-exprs 1) read-tbl)]
     [else '()]))
 
+; (define (mk-combine-instr2 lifted-sub-exprs0 lifted-sub-exprs1)
+;   (cond
+;     [(and (not (empty? lifted-sub-exprs0)) (not (empty? lifted-sub-exprs1)))
+;       (define read-tbl (map (lambda (i) (define-symbolic* idx integer?) (define-symbolic* c boolean?) (cons idx c)) (range SYMBOL_TBL_SIZE)))
+;       (arm-ir:combine (get-load-id) (first lifted-sub-exprs0) (first lifted-sub-exprs1) read-tbl)]
+;     [else '()]))
+
 (define (mk-vs-mpy-add-combine-subsubexprs lifted-sub-exprs weights output-type)
   (cond
     [(eq? (length lifted-sub-exprs) 2)
@@ -548,3 +567,17 @@
     [(eq? (length lifted-sub-exprs) 2)
      (arm-ir:vv-mpy-add (get-node-id) (mk-combine-instr lifted-sub-exprs) width output-type)]
     [else '()]))
+
+; (define (mk-vv-mpy-add-combine-subsubexprs lifted-sub-exprs width output-type)
+;   (cond
+;     [(eq? (length lifted-sub-exprs) 2)
+;      (let ([sub-exprs0 (arm-ir:get-subexprs (list-ref lifted-sub-exprs 0))])
+;        (let ([sub-exprs1 (arm-ir:get-subexprs (list-ref lifted-sub-exprs 1))])
+;          (define s
+;           (list
+;             (arm-ir:vv-mpy-add (get-node-id) (mk-combine-instr2 sub-exprs0 sub-exprs1) width output-type)
+;             (arm-ir:vv-mpy-add (get-node-id) (mk-combine-instr2 sub-exprs0 (list (second lifted-sub-exprs))) width output-type)
+;             (arm-ir:vv-mpy-add (get-node-id) (mk-combine-instr2 (list (first lifted-sub-exprs)) sub-exprs1) width output-type)))
+;           (display (format "S: ~a\n" (pretty-format s)))
+;           s))]
+;     [else '()]))

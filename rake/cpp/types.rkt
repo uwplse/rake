@@ -235,3 +235,18 @@
 
 (define (cpp:narrow-type a b)
   (if (<= (cpp:type-bw a) (cpp:type-bw b)) a b))
+
+(define (cpp:narrower-type e)
+  (destruct e
+    [(int8_t v) 'int8]
+    [(int16_t v) 'int8]
+    [(int32_t v) 'int16]
+    [(int64_t v) 'int32]
+    [(int128_t v) 'int64]
+    [(uint1_t v) 'uint1]
+    [(uint8_t v) 'uint8]
+    [(uint16_t v) 'uint8]
+    [(uint32_t v) 'uint16]
+    [(uint64_t v) 'uint32]
+    [(uint128_t v) 'uint64]
+    [_ (error (format "(cpp:narrower-type) Cannot infer type: ~a" e))]))

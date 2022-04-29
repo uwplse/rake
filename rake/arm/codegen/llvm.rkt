@@ -219,21 +219,21 @@
       ;; TODO: we want llvm.aarch64.neon.umull.v* variants, but need the second type to be broadcast.
       (destruct* ((arm:interpret Vd) (arm:interpret Vn) (arm:interpret Vm))
         [((arm:u8x16 v0) (uint8_t v1) (uint1_t v2))
-            (handle-wide-slice-binary-broadcast generate-rake arm-expr `umull.v8i16 Vd Vn v2 `halide.ir.x8)]
+            (handle-wide-slice-binary-broadcast generate-rake arm-expr `umull_u8x16 Vd Vn v2 `halide.ir.x16)]
         [((arm:u16x8 v0) (uint16_t v1) (uint1_t v2))
-            (handle-wide-slice-binary-broadcast generate-rake arm-expr `umull.v4i32 Vd Vn v2 `halide.ir.x4)]
+            (handle-wide-slice-binary-broadcast generate-rake arm-expr `umull_u16x8 Vd Vn v2 `halide.ir.x8)]
         [((arm:u32x4 v0) (uint32_t v1) (uint1_t v2))
-            (handle-wide-slice-binary-broadcast generate-rake arm-expr `umull.v2i64 Vd Vn v2 `halide.ir.x2)]
+            (handle-wide-slice-binary-broadcast generate-rake arm-expr `umull_u32x4 Vd Vn v2 `halide.ir.x4)]
         [(_ _ _) (error (format "arm:umull-vs variant not understood:\n~a\n" (pretty-format arm-expr)))])]
 
     [(arm:umull-vv Vd Vn Vm)
       (destruct* ((arm:interpret Vd) (arm:interpret Vn) (arm:interpret Vm))
         [((arm:u8x16 v0) (arm:u8x16 v1) (uint1_t v2))
-            (handle-wide-slice-binary2 arm-expr `umull.v8i16 Vd Vn v2)]
+            (handle-wide-slice-binary2 arm-expr `umull_u8x16 Vd Vn v2)]
         [((arm:u16x8 v0) (arm:u16x8 v1) (uint1_t v2))
-            (handle-wide-slice-binary2 arm-expr `umull.v4i32 Vd Vn v2)]
+            (handle-wide-slice-binary2 arm-expr `umull_u16x8 Vd Vn v2)]
         [((arm:u32x4 v0) (arm:u32x4 v1) (uint1_t v2))
-            (handle-wide-slice-binary2 arm-expr `umull.v2i64 Vd Vn v2)]
+            (handle-wide-slice-binary2 arm-expr `umull_u32x4 Vd Vn v2)]
         [(_ _ _) (error (format "arm:umull-vv variant not understood:\n~a\n" (pretty-format arm-expr)))])]
 
     [(arm:rshrn Vd Vn Vm Vb)
@@ -549,6 +549,34 @@
            (handle-wide-slice-binary-broadcast generate-rake arm-expr `sshll_i32x4 Vd Vn v2 `halide.ir.x4))]
         [(_ _ _) (error (format "arm:sshll variant not understood:\n~a\n" (pretty-format arm-expr)))])]
 
+    [(arm:sqxtn Vn Vm)
+      (destruct* ((arm:interpret Vn) (arm:interpret Vm))
+        [((arm:i16x8 v0) (arm:i16x8 v1))
+          (generate-rake `sqxtn_i16x16 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
+        [((arm:i32x4 v0) (arm:i32x4 v1))
+          (generate-rake `sqxtn_i32x8 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
+        [((arm:i64x2 v0) (arm:i64x2 v1))
+          (generate-rake `sqxtn_i64x4 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
+        [(_ _) (error (format "arm:sqxtn variant not understood:\n~a\n" (pretty-format arm-expr)))])]
+
+    [(arm:srshr-vs Vn Vm)
+      (destruct* ((arm:interpret Vn) (arm:interpret Vm))
+        [((arm:i8x8 v0) (uint8_t v1))
+           (generate `srshl.v8i8 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg (negate-and-dup (uint8_t v1) 'int8))))]
+        [((arm:i8x16 v0) (uint8_t v1))
+           (generate `srshl.v16i8 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg (negate-and-dupw (uint8_t v1) 'int8))))]
+        [((arm:i16x4 v0) (uint16_t v1))
+           (generate `srshl.v4i16 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg (negate-and-dup (uint16_t v1) 'int16))))]
+        [((arm:i16x8 v0) (uint16_t v1))
+           (generate `srshl.v8i16 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg (negate-and-dupw (uint16_t v1) 'int16))))]
+        [((arm:i32x2 v0) (uint32_t v1))
+           (generate `srshl.v2i32 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg (negate-and-dup (uint32_t v1) 'int32))))]
+        [((arm:i32x4 v0) (uint32_t v1))
+           (generate `srshl.v4i32 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg (negate-and-dupw (uint32_t v1) 'int32))))]
+        [((arm:i64x2 v0) (uint32_t v1))
+           (generate `srshl.v2i64 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg (negate-and-dup (uint32_t v1) 'int64))))]
+        [(_ _)  (error (format "arm:srshr-vs variant not understood:\n~a\n" (pretty-format arm-expr)))])]
+
     [_ (string->sexp (format "~a" arm-expr))]))
 
 (define (generate instruction output-type inputs)
@@ -832,3 +860,12 @@
       (values v0 v1 v2 v3)]
 
     [_ (error (format "get-dot_product-values failed on expression: ~a" dp))]))
+
+(define (const-zero type)
+  (cpp:cast (int8_t (bv 0 8)) type))
+
+(define (negate-and-dup shift type)
+  (arm:dup (sca-sub (const-zero type) (sca-cast shift type))))
+
+(define (negate-and-dupw shift type)
+  (arm:dupw (sca-sub (const-zero type) (sca-cast shift type))))
