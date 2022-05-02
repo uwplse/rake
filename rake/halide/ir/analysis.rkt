@@ -32,6 +32,8 @@
  (prefix-out halide: make-scalar-log2s)
  (prefix-out halide: is-power-of-2?)
  (prefix-out halide: is-signed-negative?)
+ (prefix-out halide: is-one?)
+ (prefix-out halide: is-concrete-positive?)
 )
 
 (define (extract-live-buffers expr)
@@ -378,7 +380,9 @@
    ;; It cannot be a symbolic value
    (empty? (symbolics val))
    ;; Is a power of 2
-   (and (bveq (bvand (cpp:eval val) (bvsub (cpp:eval val) (bv 1 (cpp:expr-bw val)))) (bv 0 (cpp:expr-bw val))) (not (bveq (cpp:eval val) (bv 0 (cpp:expr-bw val)))))))
+   (let* ([value (halide:interpret val)]
+          [bits (cpp:expr-bw value)])
+    (and (bveq (bvand (cpp:eval value) (bvsub (cpp:eval value) (bv 1 bits))) (bv 0 bits)) (not (bveq (cpp:eval value) (bv 0 bits)))))))
 
 (define (log-2 val)
   (mk-cpp-expr (bv (exact-round (log (cpp:eval-to-int val) 2)) (cpp:expr-bw val)) (cpp:type val)))
@@ -413,9 +417,26 @@
 (define (make-scalar-log2s scalars)
   (map log-2 (filter is-power-of-2? scalars)))
 
-(define (is-signed-negative? value)
+(define (is-signed-negative? val)
   (and
    ;; It cannot be a symbolic value
-   (empty? (symbolics value))
-   (let ([zero (cpp:cast (int8_t (bv 0 8)) (cpp:type value))])
+   (empty? (symbolics val))
+   (let* ([value (halide:interpret val)]
+          [zero (cpp:cast (int8_t (bv 0 8)) (cpp:type value))])
     (bvsgt (cpp:eval zero) (cpp:eval value)))))
+
+(define (is-one? val)
+  (and
+   ;; It cannot be a symbolic value
+   (empty? (symbolics val))
+   (let* ([value (halide:interpret val)]
+          [one (cpp:cast (int8_t (bv 1 8)) (cpp:type value))])
+    (bveq (cpp:eval one) (cpp:eval value)))))
+
+(define (is-concrete-positive? val)
+  (and
+   ;; It cannot be a symbolic value
+   (empty? (symbolics val))
+   (let* ([value (halide:interpret val)]
+          [zero (cpp:cast (int8_t (bv 0 8)) (cpp:type value))])
+    (bvslt (cpp:eval zero) (cpp:eval value)))))
