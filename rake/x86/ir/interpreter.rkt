@@ -561,8 +561,34 @@
        ; TODO: HVX has a saturation flag, do we need that?
        (vv-mpy-add-impl input i weights sat? round? half? outT))]
 
-    [(x86-ir:vs-shift-left expr shift round? saturate? signed?)
-        (error "vs-shift-left Not yet implemented\n")]
+    [(x86-ir:vs-shift-left expr shift round? saturate? output-type)
+      (if (or round? saturate?)
+        (error "vs-shift-left round or saturate not yet implemented\n")
+        (begin
+          (define input (interpret expr))
+          (define s (interpret shift))
+          ;; TODO: is this correct?
+          (lambda (i)
+            (define lhs (cpp:cast (input i) output-type))
+            (define rhs (cpp:cast s output-type))
+            (destruct* (lhs rhs)
+              [((uint8_t v0) (uint8_t v1)) (uint8_t (bvshl v0 v1))]
+              [((uint16_t v0) (uint16_t v1)) (uint16_t (bvshl v0 v1))]
+              [((uint32_t v0) (uint32_t v1)) (uint32_t (bvshl v0 v1))]
+              [((uint64_t v0) (uint64_t v1)) (uint64_t (bvshl v0 v1))]
+              ; [((uint8_t v0) (int8_t v1)) (uint8_t (bvshl v0 v1))]
+              ; [((uint16_t v0) (int16_t v1)) (uint16_t (bvshl v0 v1))]
+              ; [((uint32_t v0) (int32_t v1)) (uint32_t (bvshl v0 v1))]
+              [((int8_t v0) (int8_t v1)) (int8_t (bvshl v0 v1))]
+              [((int16_t v0) (int16_t v1)) (int16_t (bvshl v0 v1))]
+              [((int32_t v0) (int32_t v1)) (int32_t (bvshl v0 v1))]
+              [((int64_t v0) (int64_t v1)) (int64_t (bvshl v0 v1))]
+              ; [((int8_t v0) (uint8_t v1)) (int8_t (bvshl v0 v1))]
+              ; [((int16_t v0) (uint16_t v1)) (int16_t (bvshl v0 v1))]
+              ; [((int32_t v0) (uint32_t v1)) (int32_t (bvshl v0 v1))]
+
+              [(_ _ ) (error (format "vs-shift-left doesn't recognize types:\n~a\n~a\n" lhs rhs))]))))]
+
     [(x86-ir:vv-shift-left expr0 expr1 round? saturate? signed?)
         (error "vv-shift-left Not yet implemented\n")]
 
@@ -682,7 +708,7 @@
     [(x86-ir:vs-mpy-add expr weights saturating? rounding? halving? outT) (+ (instr-count expr) 1)]
     [(x86-ir:vv-mpy-add expr weights saturating? rounding? halving? outT) (+ (instr-count expr) 1)]
 
-    [(x86-ir:vs-shift-left expr shift round? saturate? signed?) (+ (instr-count expr) (instr-count shift) 1)]
+    [(x86-ir:vs-shift-left expr shift round? saturate? output-type) (+ (instr-count expr) 1)]
     [(x86-ir:vv-shift-left expr0 expr1 round? saturate? signed?) (+ (instr-count expr0) (instr-count expr1) 1)]
     [(x86-ir:vs-shift-right expr shift round? saturate? signed?) (+ (instr-count expr) 1)]
     [(x86-ir:vv-shift-right expr0 expr1 round? saturate? signed?) (+ (instr-count expr0) (instr-count expr1) 1)]
@@ -712,7 +738,7 @@
       [(x86-ir:vs-mpy-add expr weights saturating? rounding? halving? outT) (handler (x86-ir:vs-mpy-add (x86-ir:ast-node-id ir-expr) (visit expr handler) weights saturating? rounding? halving? outT))]
       [(x86-ir:vv-mpy-add expr weights saturating? rounding? halving? outT) (handler (x86-ir:vv-mpy-add (x86-ir:ast-node-id ir-expr) (visit expr handler) weights saturating? rounding? halving? outT))]
 
-      [(x86-ir:vs-shift-left expr shift round? saturate? signed?) (handler (x86-ir:vs-shift-left (x86-ir:ast-node-id ir-expr) (visit expr handler) (visit shift handler) round? saturate? signed?))]
+      [(x86-ir:vs-shift-left expr shift round? saturate? output-type) (handler (x86-ir:vs-shift-left (x86-ir:ast-node-id ir-expr) (visit expr handler) shift round? saturate? output-type))]
       [(x86-ir:vv-shift-left expr0 expr1 round? saturate? signed?) (handler (x86-ir:vv-shift-left (x86-ir:ast-node-id ir-expr) (visit expr0 handler) (visit expr1 handler) round? saturate? signed?))]
       [(x86-ir:vs-shift-right expr shift round? saturate? signed?) (handler (x86-ir:vs-shift-right (x86-ir:ast-node-id ir-expr) (visit expr handler) shift round? saturate? signed?))]
       [(x86-ir:vv-shift-right expr0 expr1 round? saturate? signed?) (handler (x86-ir:vv-shift-right (x86-ir:ast-node-id ir-expr) (visit expr0 handler) (visit expr1 handler) round? saturate? signed?))]
@@ -747,11 +773,10 @@
     [(x86-ir:vv-mpy-add expr weights saturating? rounding? halving? outT) (list expr)]
     [(x86-ir:mul-hh expr0 expr1 rounding?) (list expr0 expr1)]
 
-    [(x86-ir:vs-shift-left expr shift round? saturate? signed?) (list expr)]
+    [(x86-ir:vs-shift-left expr shift round? saturate? output-type) (list expr)]
     [(x86-ir:vv-shift-left expr0 expr1 round? saturate? signed?) (list expr0 expr1)]
     [(x86-ir:vs-shift-right expr shift round? saturate? signed?) (list expr)]
     [(x86-ir:vv-shift-right expr0 expr1 round? saturate? signed?) (list expr0 expr1)]
-
 
     [(x86-ir:bitwise-op op expr0 expr1) (list expr0 expr1)]
 

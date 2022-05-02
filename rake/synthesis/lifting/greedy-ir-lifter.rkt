@@ -141,9 +141,13 @@
          (hash-set! annotations (get-node-id ir-equiv) sub-expr)
          ir-equiv))
 
+    ; (display (format "Halide Expr:\n~a\n\n\n" (pretty-format halide-expr)))
+
      ;; Step 1: Folding.
      ;; Can we fold the new node into the **existing** sequence of IR instructions?
      (define fold-templates (fold-into-subexprs lifted-sub-exprs lifted-sub-exprs halide-expr uber-instrs))
+
+    ;  (display (format "fold-templates:\n~a\n\n\n" (pretty-format fold-templates)))
 
      ;; Can we fold the new node into a **modified** version of the existing IR
      ;; instruction sequence? We restrict modifications such that:
@@ -151,6 +155,8 @@
      ;; - 0 or more IR instructions may be removed
      ;; - We only explore changing or removing the last N instructions in the sequence (N=3 atm)
      (define repl-templates (repl-subexprs lifted-sub-exprs halide-expr uber-instrs))
+
+      ; (display (format "repl-templates:\n~a\n\n\n" (pretty-format repl-templates)))
 
      ;; Explore folding templates in increasing cost (cost is defined as the number if IR instructions)
      (define sorted-templates

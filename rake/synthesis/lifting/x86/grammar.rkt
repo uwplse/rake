@@ -137,6 +137,16 @@
         ;; Try updating the rounding flag / saturation flag / output-type
         (x86-ir:vs-shift-right (get-node-id) sub-expr shift (choose* #t #f) (choose* #t #f) (choose* #t #f)))]
 
+      [(x86-ir:vs-shift-left sub-expr shift round? saturate? output-type) '()]
+      ;  (define shl-scalars (halide:extract-shl-scalars halide-expr))
+      ;  (define e-type (halide:elem-type halide-expr))
+      ; ;  (define current-signed? (cpp:signed-type? e-type))
+      ;  (list
+      ;   ;; Try updating the shift value
+      ;   (mk-shl-instr sub-expr shl-scalars round? saturate? e-type)
+      ;   ;; Try updating the rounding flag / saturation flag / output-type
+      ;   (x86-ir:vs-shift-left (get-node-id) sub-expr shift (choose* #t #f) (choose* #t #f) e-type))]
+
       [(x86-ir:maximum expr0 expr1) '()]
       [(x86-ir:minimum expr0 expr1) '()]
       
@@ -206,7 +216,7 @@
         ))]
 
       [(x86-ir:vs-shift-right sub-expr const-val round? saturate? signed?) '()]
-      [(x86-ir:vs-shift-left sub-expr const-val round? saturate? signed?) '()]
+      [(x86-ir:vs-shift-left sub-expr const-val round? saturate? output-type) '()]
       [(x86-ir:vv-shift-right sub-expr0 sub-expr1 round? saturate? signed?) '()]
       [(x86-ir:vv-shift-left sub-expr0 sub-expr1 round? saturate? signed?) '()]
 
@@ -270,16 +280,20 @@
 
     ;; Casts
     [(vec-cast vec type lanes) (list (x86-ir:cast (get-node-id) (list-ref lifted-sub-exprs 0) type #f))]
-    
+
     ;; Multiplication
     [(vec-mul v1 v2)
       ; TODO: understand these (ask Maaz)
       (define mul-scalars (halide:extract-mul-scalars halide-expr))
+      (define shl-scalars (halide:make-scalar-log2s mul-scalars))
       (define live-reads (halide:extract-buffer-reads halide-expr))
       (define gather-tbl (map (lambda (i) (define-symbolic* idx integer?) idx) (range SYMBOL_TBL_SIZE)))
       (define read-tbl (map (lambda (i) (define-symbolic* idx integer?) (define-symbolic* c boolean?) (cons idx c)) (range SYMBOL_TBL_SIZE)))
+      (define output-type (halide:elem-type halide-expr))
       (define a (flatten
         (list
+          ;; on x86 we prefer shifts, due to limited vs-mpy-add options.
+          ; (x86-ir:vs-shift-left (get-node-id) (apply choose* lifted-sub-exprs) (apply choose* shl-scalars) #f #f output-type)
           ;; We can extend using either vector-scalar multiply-add
           (mk-vs-mpy-add-instr (apply choose* lifted-sub-exprs) mul-scalars (halide:elem-type halide-expr))
           (mk-vs-mpy-add-instr (x86-ir:load-data (get-load-id) live-reads gather-tbl) mul-scalars (halide:elem-type halide-expr))
@@ -350,6 +364,7 @@
      (flatten
       (list
        ;; We can extend using either vector-scalar multiply-add
+      ;  (error "implement x86 vec-shl extending")
        (mk-vs-mpy-add-instr (first lifted-sub-exprs) mul-scalars (halide:elem-type halide-expr))
        ;; or shift-left
        ;(mk-vs-shift-left-instr (first lifted-sub-exprs) shl-scalars)
@@ -485,6 +500,11 @@
   (cond
     [(empty? shr-scalars) '()]
     [else (x86-ir:vs-shift-right (get-node-id) sub-expr (apply choose* shr-scalars) round? saturate? signed?)]))
+
+(define (mk-shl-instr sub-expr shl-scalars round? saturate? output-type)
+  (cond
+    [(empty? shl-scalars) '()]
+    [else (x86-ir:vs-shift-left (get-node-id) sub-expr (apply choose* shl-scalars) round? saturate? output-type)]))
 
 (define (mk-vs-div-instr sub-expr div-scalars)
   (cond

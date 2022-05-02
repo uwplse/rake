@@ -5209,6 +5209,854 @@
 
         [(_ _) (assert #f "infeasible in interpreting pxor")])]
 
+    [(x86:reinterpret_to_i16x16 a)
+      (destruct* ((interpret a))
+        [((x86:i8x32 a))
+            (x86:i16x16
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'int16 16)))]
+        [((x86:u8x32 a))
+            (x86:i16x16
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'int16 16)))]
+        [((x86:i16x16 a))
+            (x86:i16x16
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'int16 16)))]
+        [((x86:u16x16 a))
+            (x86:i16x16
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'int16 16)))]
+        [((x86:i32x8 a))
+            (x86:i16x16
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'int16 16)))]
+        [((x86:u32x8 a))
+            (x86:i16x16
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'int16 16)))]
+        [((x86:i64x4 a))
+            (x86:i16x16
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'int16 16)))]
+        [((x86:u64x4 a))
+            (x86:i16x16
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'int16 16)))]
+
+        [(_) (assert #f "infeasible in interpreting reinterpret_to_i16x16")])]
+
+    [(x86:reinterpret_to_i16x8 a)
+      (destruct* ((interpret a))
+        [((x86:i8x16 a))
+            (x86:i16x8
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'int16 8)))]
+        [((x86:u8x16 a))
+            (x86:i16x8
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'int16 8)))]
+        [((x86:i16x8 a))
+            (x86:i16x8
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'int16 8)))]
+        [((x86:u16x8 a))
+            (x86:i16x8
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'int16 8)))]
+        [((x86:i32x4 a))
+            (x86:i16x8
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'int16 8)))]
+        [((x86:u32x4 a))
+            (x86:i16x8
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'int16 8)))]
+        [((x86:i64x2 a))
+            (x86:i16x8
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'int16 8)))]
+        [((x86:u64x2 a))
+            (x86:i16x8
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'int16 8)))]
+
+        [(_) (assert #f "infeasible in interpreting reinterpret_to_i16x8")])]
+
+    [(x86:reinterpret_to_i32x4 a)
+      (destruct* ((interpret a))
+        [((x86:i8x16 a))
+            (x86:i32x4
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'int32 4)))]
+        [((x86:u8x16 a))
+            (x86:i32x4
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'int32 4)))]
+        [((x86:i16x8 a))
+            (x86:i32x4
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'int32 4)))]
+        [((x86:u16x8 a))
+            (x86:i32x4
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'int32 4)))]
+        [((x86:i32x4 a))
+            (x86:i32x4
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'int32 4)))]
+        [((x86:u32x4 a))
+            (x86:i32x4
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'int32 4)))]
+        [((x86:i64x2 a))
+            (x86:i32x4
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'int32 4)))]
+        [((x86:u64x2 a))
+            (x86:i32x4
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'int32 4)))]
+
+        [(_) (assert #f "infeasible in interpreting reinterpret_to_i32x4")])]
+
+    [(x86:reinterpret_to_i32x8 a)
+      (destruct* ((interpret a))
+        [((x86:i8x32 a))
+            (x86:i32x8
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'int32 8)))]
+        [((x86:u8x32 a))
+            (x86:i32x8
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'int32 8)))]
+        [((x86:i16x16 a))
+            (x86:i32x8
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'int32 8)))]
+        [((x86:u16x16 a))
+            (x86:i32x8
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'int32 8)))]
+        [((x86:i32x8 a))
+            (x86:i32x8
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'int32 8)))]
+        [((x86:u32x8 a))
+            (x86:i32x8
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'int32 8)))]
+        [((x86:i64x4 a))
+            (x86:i32x8
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'int32 8)))]
+        [((x86:u64x4 a))
+            (x86:i32x8
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'int32 8)))]
+
+        [(_) (assert #f "infeasible in interpreting reinterpret_to_i32x8")])]
+
+    [(x86:reinterpret_to_i64x2 a)
+      (destruct* ((interpret a))
+        [((x86:i8x16 a))
+            (x86:i64x2
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'int64 2)))]
+        [((x86:u8x16 a))
+            (x86:i64x2
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'int64 2)))]
+        [((x86:i16x8 a))
+            (x86:i64x2
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'int64 2)))]
+        [((x86:u16x8 a))
+            (x86:i64x2
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'int64 2)))]
+        [((x86:i32x4 a))
+            (x86:i64x2
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'int64 2)))]
+        [((x86:u32x4 a))
+            (x86:i64x2
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'int64 2)))]
+        [((x86:i64x2 a))
+            (x86:i64x2
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'int64 2)))]
+        [((x86:u64x2 a))
+            (x86:i64x2
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'int64 2)))]
+
+        [(_) (assert #f "infeasible in interpreting reinterpret_to_i64x2")])]
+
+    [(x86:reinterpret_to_i64x4 a)
+      (destruct* ((interpret a))
+        [((x86:i8x32 a))
+            (x86:i64x4
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'int64 4)))]
+        [((x86:u8x32 a))
+            (x86:i64x4
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'int64 4)))]
+        [((x86:i16x16 a))
+            (x86:i64x4
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'int64 4)))]
+        [((x86:u16x16 a))
+            (x86:i64x4
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'int64 4)))]
+        [((x86:i32x8 a))
+            (x86:i64x4
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'int64 4)))]
+        [((x86:u32x8 a))
+            (x86:i64x4
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'int64 4)))]
+        [((x86:i64x4 a))
+            (x86:i64x4
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'int64 4)))]
+        [((x86:u64x4 a))
+            (x86:i64x4
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'int64 4)))]
+
+        [(_) (assert #f "infeasible in interpreting reinterpret_to_i64x4")])]
+
+    [(x86:reinterpret_to_i8x16 a)
+      (destruct* ((interpret a))
+        [((x86:i8x16 a))
+            (x86:i8x16
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'int8 16)))]
+        [((x86:u8x16 a))
+            (x86:i8x16
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'int8 16)))]
+        [((x86:i16x8 a))
+            (x86:i8x16
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'int8 16)))]
+        [((x86:u16x8 a))
+            (x86:i8x16
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'int8 16)))]
+        [((x86:i32x4 a))
+            (x86:i8x16
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'int8 16)))]
+        [((x86:u32x4 a))
+            (x86:i8x16
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'int8 16)))]
+        [((x86:i64x2 a))
+            (x86:i8x16
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'int8 16)))]
+        [((x86:u64x2 a))
+            (x86:i8x16
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'int8 16)))]
+
+        [(_) (assert #f "infeasible in interpreting reinterpret_to_i8x16")])]
+
+    [(x86:reinterpret_to_i8x32 a)
+      (destruct* ((interpret a))
+        [((x86:i8x32 a))
+            (x86:i8x32
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'int8 32)))]
+        [((x86:u8x32 a))
+            (x86:i8x32
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'int8 32)))]
+        [((x86:i16x16 a))
+            (x86:i8x32
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'int8 32)))]
+        [((x86:u16x16 a))
+            (x86:i8x32
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'int8 32)))]
+        [((x86:i32x8 a))
+            (x86:i8x32
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'int8 32)))]
+        [((x86:u32x8 a))
+            (x86:i8x32
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'int8 32)))]
+        [((x86:i64x4 a))
+            (x86:i8x32
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'int8 32)))]
+        [((x86:u64x4 a))
+            (x86:i8x32
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'int8 32)))]
+
+        [(_) (assert #f "infeasible in interpreting reinterpret_to_i8x32")])]
+
+    [(x86:reinterpret_to_u16x16 a)
+      (destruct* ((interpret a))
+        [((x86:i8x32 a))
+            (x86:u16x16
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'uint16 16)))]
+        [((x86:u8x32 a))
+            (x86:u16x16
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'uint16 16)))]
+        [((x86:i16x16 a))
+            (x86:u16x16
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'uint16 16)))]
+        [((x86:u16x16 a))
+            (x86:u16x16
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'uint16 16)))]
+        [((x86:i32x8 a))
+            (x86:u16x16
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'uint16 16)))]
+        [((x86:u32x8 a))
+            (x86:u16x16
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'uint16 16)))]
+        [((x86:i64x4 a))
+            (x86:u16x16
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'uint16 16)))]
+        [((x86:u64x4 a))
+            (x86:u16x16
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'uint16 16)))]
+
+        [(_) (assert #f "infeasible in interpreting reinterpret_to_u16x16")])]
+
+    [(x86:reinterpret_to_u16x8 a)
+      (destruct* ((interpret a))
+        [((x86:i8x16 a))
+            (x86:u16x8
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'uint16 8)))]
+        [((x86:u8x16 a))
+            (x86:u16x8
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'uint16 8)))]
+        [((x86:i16x8 a))
+            (x86:u16x8
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'uint16 8)))]
+        [((x86:u16x8 a))
+            (x86:u16x8
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'uint16 8)))]
+        [((x86:i32x4 a))
+            (x86:u16x8
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'uint16 8)))]
+        [((x86:u32x4 a))
+            (x86:u16x8
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'uint16 8)))]
+        [((x86:i64x2 a))
+            (x86:u16x8
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'uint16 8)))]
+        [((x86:u64x2 a))
+            (x86:u16x8
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'uint16 8)))]
+
+        [(_) (assert #f "infeasible in interpreting reinterpret_to_u16x8")])]
+
+    [(x86:reinterpret_to_u32x4 a)
+      (destruct* ((interpret a))
+        [((x86:i8x16 a))
+            (x86:u32x4
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'uint32 4)))]
+        [((x86:u8x16 a))
+            (x86:u32x4
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'uint32 4)))]
+        [((x86:i16x8 a))
+            (x86:u32x4
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'uint32 4)))]
+        [((x86:u16x8 a))
+            (x86:u32x4
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'uint32 4)))]
+        [((x86:i32x4 a))
+            (x86:u32x4
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'uint32 4)))]
+        [((x86:u32x4 a))
+            (x86:u32x4
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'uint32 4)))]
+        [((x86:i64x2 a))
+            (x86:u32x4
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'uint32 4)))]
+        [((x86:u64x2 a))
+            (x86:u32x4
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'uint32 4)))]
+
+        [(_) (assert #f "infeasible in interpreting reinterpret_to_u32x4")])]
+
+    [(x86:reinterpret_to_u32x8 a)
+      (destruct* ((interpret a))
+        [((x86:i8x32 a))
+            (x86:u32x8
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'uint32 8)))]
+        [((x86:u8x32 a))
+            (x86:u32x8
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'uint32 8)))]
+        [((x86:i16x16 a))
+            (x86:u32x8
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'uint32 8)))]
+        [((x86:u16x16 a))
+            (x86:u32x8
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'uint32 8)))]
+        [((x86:i32x8 a))
+            (x86:u32x8
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'uint32 8)))]
+        [((x86:u32x8 a))
+            (x86:u32x8
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'uint32 8)))]
+        [((x86:i64x4 a))
+            (x86:u32x8
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'uint32 8)))]
+        [((x86:u64x4 a))
+            (x86:u32x8
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'uint32 8)))]
+
+        [(_) (assert #f "infeasible in interpreting reinterpret_to_u32x8")])]
+
+    [(x86:reinterpret_to_u64x2 a)
+      (destruct* ((interpret a))
+        [((x86:i8x16 a))
+            (x86:u64x2
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'uint64 2)))]
+        [((x86:u8x16 a))
+            (x86:u64x2
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'uint64 2)))]
+        [((x86:i16x8 a))
+            (x86:u64x2
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'uint64 2)))]
+        [((x86:u16x8 a))
+            (x86:u64x2
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'uint64 2)))]
+        [((x86:i32x4 a))
+            (x86:u64x2
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'uint64 2)))]
+        [((x86:u32x4 a))
+            (x86:u64x2
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'uint64 2)))]
+        [((x86:i64x2 a))
+            (x86:u64x2
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'uint64 2)))]
+        [((x86:u64x2 a))
+            (x86:u64x2
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'uint64 2)))]
+
+        [(_) (assert #f "infeasible in interpreting reinterpret_to_u64x2")])]
+
+    [(x86:reinterpret_to_u64x4 a)
+      (destruct* ((interpret a))
+        [((x86:i8x32 a))
+            (x86:u64x4
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'uint64 4)))]
+        [((x86:u8x32 a))
+            (x86:u64x4
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'uint64 4)))]
+        [((x86:i16x16 a))
+            (x86:u64x4
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'uint64 4)))]
+        [((x86:u16x16 a))
+            (x86:u64x4
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'uint64 4)))]
+        [((x86:i32x8 a))
+            (x86:u64x4
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'uint64 4)))]
+        [((x86:u32x8 a))
+            (x86:u64x4
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'uint64 4)))]
+        [((x86:i64x4 a))
+            (x86:u64x4
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'uint64 4)))]
+        [((x86:u64x4 a))
+            (x86:u64x4
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'uint64 4)))]
+
+        [(_) (assert #f "infeasible in interpreting reinterpret_to_u64x4")])]
+
+    [(x86:reinterpret_to_u8x16 a)
+      (destruct* ((interpret a))
+        [((x86:i8x16 a))
+            (x86:u8x16
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'uint8 16)))]
+        [((x86:u8x16 a))
+            (x86:u8x16
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'uint8 16)))]
+        [((x86:i16x8 a))
+            (x86:u8x16
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'uint8 16)))]
+        [((x86:u16x8 a))
+            (x86:u8x16
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'uint8 16)))]
+        [((x86:i32x4 a))
+            (x86:u8x16
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'uint8 16)))]
+        [((x86:u32x4 a))
+            (x86:u8x16
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'uint8 16)))]
+        [((x86:i64x2 a))
+            (x86:u8x16
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'uint8 16)))]
+        [((x86:u64x2 a))
+            (x86:u8x16
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'uint8 16)))]
+
+        [(_) (assert #f "infeasible in interpreting reinterpret_to_u8x16")])]
+
+    [(x86:reinterpret_to_u8x32 a)
+      (destruct* ((interpret a))
+        [((x86:i8x32 a))
+            (x86:u8x32
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'uint8 32)))]
+        [((x86:u8x32 a))
+            (x86:u8x32
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'uint8 32)))]
+        [((x86:i16x16 a))
+            (x86:u8x32
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'uint8 32)))]
+        [((x86:u16x16 a))
+            (x86:u8x32
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'uint8 32)))]
+        [((x86:i32x8 a))
+            (x86:u8x32
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'uint8 32)))]
+        [((x86:u32x8 a))
+            (x86:u8x32
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'uint8 32)))]
+        [((x86:i64x4 a))
+            (x86:u8x32
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'uint8 32)))]
+        [((x86:u64x4 a))
+            (x86:u8x32
+             (halide:interpret
+              (vec-reinterpret
+               a
+               'uint8 32)))]
+
+        [(_) (assert #f "infeasible in interpreting reinterpret_to_u8x32")])]
+
     [(x86:resize a)
       (destruct* ((interpret a))
         [((x86:u8x16 a))
@@ -17082,6 +17930,17 @@
               (uint32x8
                (slice_vectors
                 a 0 1 8))))]
+        [((x86:i8x16 a))
+            (x86:i8x32
+             (halide:interpret
+              (interleave
+               (interleave
+                (slice_vectors
+                 a 0 1 8)
+                (x8 (int8_t (bv 0 8))))
+               (interleave
+                (x8 (int8_t (bv 0 8)))
+                (x8 (int8_t (bv 0 8)))))))]
 
         [(_) (assert #f "infeasible in interpreting vpmovzxbd")])]
 
@@ -17103,6 +17962,12 @@
              (halide:interpret
               (uint16x16
                a)))]
+        [((x86:i8x16 a))
+            (x86:i8x32
+             (halide:interpret
+              (interleave
+               a
+               (x16 (int8_t (bv 0 8))))))]
 
         [(_) (assert #f "infeasible in interpreting vpmovzxbw")])]
 
@@ -17111,7 +17976,7 @@
         [((x86:u8x16 a))
             (x86:i16x16
              (halide:interpret
-              (uint16x16
+              (int16x16
                a)))]
 
         [(_) (assert #f "infeasible in interpreting vpmovzxbw")])]
@@ -17123,6 +17988,12 @@
              (halide:interpret
               (uint64x4
                a)))]
+        [((x86:i32x4 a))
+            (x86:i32x8
+             (halide:interpret
+              (interleave
+               a
+               (x4 (int32_t (bv 0 32))))))]
 
         [(_) (assert #f "infeasible in interpreting vpmovzxdq")])]
 
@@ -17133,6 +18004,12 @@
              (halide:interpret
               (uint32x8
                a)))]
+        [((x86:i16x8 a))
+            (x86:i16x16
+             (halide:interpret
+              (interleave
+               a
+               (x8 (int16_t (bv 0 16))))))]
 
         [(_) (assert #f "infeasible in interpreting vpmovzxwd")])]
 
@@ -17144,6 +18021,17 @@
               (uint64x4
                (slice_vectors
                 a 0 1 4))))]
+        [((x86:i16x8 a))
+            (x86:i16x16
+             (halide:interpret
+              (interleave
+               (interleave
+                (slice_vectors
+                 a 0 1 4)
+                (x4 (int16_t (bv 0 16))))
+               (interleave
+                (x4 (int16_t (bv 0 16)))
+                (x4 (int16_t (bv 0 16)))))))]
 
         [(_) (assert #f "infeasible in interpreting vpmovzxwq")])]
 
@@ -30954,6 +31842,42 @@
     [(ramp base stride len)
       ;; TODO: change this if handle-build-vec changes base type
       (x86:i32x8 (halide:interpret p))]
+    
+    [(x86:lo vec)
+      (destruct (interpret vec)
+        ;; TODO: is this the right lowering....?
+        [(x86:i8x32 v0) (x86:i8x16 (lambda (i) (v0 i)))]
+        [(x86:u8x32 v0) (x86:u8x16 (lambda (i) (v0 i)))]
+
+        [(x86:i16x16 v0) (x86:i16x8 (lambda (i) (v0 i)))]
+        [(x86:u16x16 v0) (x86:u16x8 (lambda (i) (v0 i)))]
+
+        [(x86:i32x8 v0) (x86:i32x4 (lambda (i) (v0 i)))]
+        [(x86:u32x8 v0) (x86:u32x4 (lambda (i) (v0 i)))]
+
+        [(x86:i64x4 v0) (x86:i64x2 (lambda (i) (v0 i)))]
+        [(x86:u64x4 v0) (x86:u64x2 (lambda (i) (v0 i)))]
+
+        [_ (error "x86:lo interpreter does not recognize instruction: " p)]
+      )]
+    
+    [(x86:hi vec)
+      (destruct (interpret vec)
+        ;; TODO: is this the right lowering....?
+        [(x86:i8x32 v0) (x86:i8x16 (lambda (i) (v0 (+ i 16))))]
+        [(x86:u8x32 v0) (x86:u8x16 (lambda (i) (v0 (+ i 16))))]
+
+        [(x86:i16x16 v0) (x86:i16x8 (lambda (i) (v0 (+ i 8))))]
+        [(x86:u16x16 v0) (x86:u16x8 (lambda (i) (v0 (+ i 8))))]
+
+        [(x86:i32x8 v0) (x86:i32x4 (lambda (i) (v0 (+ i 4))))]
+        [(x86:u32x8 v0) (x86:u32x4 (lambda (i) (v0 (+ i 4))))]
+
+        [(x86:i64x4 v0) (x86:i64x2 (lambda (i) (v0 (+ i 2))))]
+        [(x86:u64x4 v0) (x86:u64x2 (lambda (i) (v0 (+ i 2))))]
+
+        [_ (error "x86:hi interpreter does not recognize instruction: " p)]
+      )]
 
     ;; TODO: check that it is a scalar value, not a forgotten instruction.
     [_ p]

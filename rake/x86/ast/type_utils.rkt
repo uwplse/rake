@@ -1,7 +1,7 @@
 #lang rosette/safe
 
 (require
-  (only-in racket/base error)
+  (only-in racket/base error eqv?)
   rosette/lib/destruct
   rake/cpp/types
   rake/x86/ast/types
@@ -77,3 +77,25 @@
       [(eq? 'u32x4 type) #f]
       [(eq? 'u64x2 type) #f]
       [else (error (format "x86:is-256-expr? failed on type: ~a\n" type))])))
+
+(define (is-reinterpret-instr? x86-instr)
+  ;; TODO: get rid of regular reinterpret...
+  (or (eqv? x86-instr x86:reinterpret)
+      ;; 256 bit conversions
+      (eqv? x86-instr x86:reinterpret_to_u8x32)
+      (eqv? x86-instr x86:reinterpret_to_i8x32)
+      (eqv? x86-instr x86:reinterpret_to_u16x16)
+      (eqv? x86-instr x86:reinterpret_to_i16x16)
+      (eqv? x86-instr x86:reinterpret_to_u32x8)
+      (eqv? x86-instr x86:reinterpret_to_i32x8)
+      (eqv? x86-instr x86:reinterpret_to_u64x4)
+      (eqv? x86-instr x86:reinterpret_to_i64x4)
+      ;; 128-bit conversions
+      (eqv? x86-instr x86:reinterpret_to_u8x16)
+      (eqv? x86-instr x86:reinterpret_to_i8x16)
+      (eqv? x86-instr x86:reinterpret_to_u16x8)
+      (eqv? x86-instr x86:reinterpret_to_i16x8)
+      (eqv? x86-instr x86:reinterpret_to_u32x4)
+      (eqv? x86-instr x86:reinterpret_to_i32x4)
+      (eqv? x86-instr x86:reinterpret_to_u64x2)
+      (eqv? x86-instr x86:reinterpret_to_i64x2)))

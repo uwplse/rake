@@ -97,9 +97,19 @@
         x86:vpbroadcastb_128 x86:vpbroadcastw_128 x86:vpbroadcastd_128 x86:vpbroadcastq_128
   ))
 
+;; TODO: including these can be dangerous...
+(define (get-reinterpret-isa)
+  (list
+    x86:reinterpret
+    ; x86:reinterpret_to_i8x32 x86:reinterpret_to_i16x16 x86:reinterpret_to_i32x8 x86:reinterpret_to_i64x4
+    ; x86:reinterpret_to_i8x16 x86:reinterpret_to_i16x8 x86:reinterpret_to_i32x4 x86:reinterpret_to_i64x2
+    ; x86:reinterpret_to_u8x32 x86:reinterpret_to_u16x16 x86:reinterpret_to_u32x8 x86:reinterpret_to_u64x4
+    ; x86:reinterpret_to_u8x16 x86:reinterpret_to_u16x8 x86:reinterpret_to_u32x4 x86:reinterpret_to_u64x2
+))
+
 (define (make-fill-arg-grammars scalars)
-  (display "make-fill-arg-grammars\n")
-  (pretty-print scalars)
+  ; (display "make-fill-arg-grammars\n")
+  ; (pretty-print scalars)
   (define (bool-const) (define-symbolic* b boolean?) b)
   (define (int8-const) (int8x1 (apply choose* scalars)))
   (define (uint8-const) (uint8x1 (apply choose* scalars)))
@@ -133,8 +143,9 @@
          [isa
           (flatten
             (list
-              ;; always allow reinterpretation
-              x86:reinterpret
+              ;; TODO: always allow reinterpretation?
+              ; (get-reinterpret-isa)
+              (get-broadcast-isa)
               ;; TODO: verify these pruning techniques...
               ;; zext/sext
               (if widening? (get-widen-isa) '())
@@ -142,11 +153,13 @@
               (if (or half? round?) (list x86:vpavgw x86:vpavgb x86:pavgb x86:pavgw) '())
               ;; regular adds/subs (and horizontal adds/subs)
               (list x86:vpaddb x86:vpaddw x86:vpaddd x86:vpaddq
-                    x86:vphaddw x86:vphaddd x86:vphsubw x86:vphsubd
-                    x86:vpsubb x86:vpsubw x86:vpsubd x86:vpsubq
+                    x86:vphaddw x86:vphaddd
+                    ;; TODO: re-add the sub methods.
+                    ; x86:vphsubw x86:vphsubd
+                    ; x86:vpsubb x86:vpsubw x86:vpsubd x86:vpsubq
                     ;; SSE2 versions:
                     x86:paddb x86:paddw x86:paddd x86:paddq
-                    x86:psubb x86:psubw x86:psubd x86:psubq
+                    ; x86:psubb x86:psubw x86:psubd x86:psubq
               )
               ;; TODO: should we have conditions on including dot_products?
               (list x86:vpmaddwd x86:vpmaddubsw)
@@ -154,9 +167,9 @@
               (list x86:vpmuldq-vs x86:vpmuludq-vs x86:vpmullw-vs x86:vpmulld-vs
                     x86:pmuludq-vs x86:pmullw-vs)
               ;; TODO: should we include the shift-left variants? I think we need to.
-              (list x86:vpsllw x86:vpslld x86:vpsllq)
+              ; (list x86:vpsllw x86:vpslld x86:vpsllq)
               ;; TODO: are these useful?
-              (list x86:resize x86:vinserti128)
+              (list x86:resize x86:vinserti128 x86:lo x86:hi)
               ;; TODO: should we include saturating adds even if not sat?
               (if sat?
                 (list x86:vpaddsb x86:vpaddsw x86:vpaddusb x86:vpaddusw
@@ -169,8 +182,8 @@
                 '())))]
          ; TODO: better pruning and more isa options
          ; TODO: are there better depth/cost combos?
-         [depth 4]
-         [max-cost 10]
+         [depth (if (< (length weights) 2) 3 3)]
+         [max-cost (* (length weights) 5)]
          [grouped-sub-exprs (prepare-sub-exprs x86-sub-exprs)]
          [number-reads (length weights)]
          [desired-types (x86:get-vector-types output-type)]
@@ -191,6 +204,8 @@
                             (x86:visit expr extract-buffer)
                             live-bufs))])
 
+    ; (println (length candidates))
+    ; (error "handle-vs-mpy-add")
     ; (display "x86 vs-mpy-add sub exprs!\n")
     ; (pretty-print x86-sub-exprs)
     ; (display "grouped sub exprs!\n")
@@ -322,6 +337,39 @@
     ;; TODO: how do we handle conditionals?
     (time (for/list ([candidate candidates]) (cons (uniquify-swizzles (x86:visit (car candidate) fill-arg-grammars)) (cdr candidate))))))
 
+(define (handle-vs-shift-left expr shift round? saturate? output-type x86-sub-exprs halide-expr)
+  (let* ([input-type (x86-ir:elem-type expr)]
+         [widening? (> (cpp:type-bw output-type) (cpp:type-bw input-type))]
+         [desired-types (x86:get-vector-types output-type)]
+         [grouped-sub-exprs (prepare-sub-exprs x86-sub-exprs)]
+         [isa (flatten
+                (list
+                  ; TODO: use saturating / rounding information
+                  (if widening?
+                    (get-widen-isa)
+                    '())
+                  ;; AVX2
+                  (list x86:vpsllw x86:vpslld x86:vpsllq)
+                  ;; SSE2
+                  (list x86:psllw x86:pslld x86:psllq)
+                  ;; TODO: is there more?
+                ))] 
+         ; TODO: how to decide depth/cost
+         [depth 2]
+         [max-cost 4]
+         [candidates (enumerate-x86 isa desired-types grouped-sub-exprs depth max-cost)]
+         [sorted (sort candidates (lambda (v1 v2) (<= (cdr v1) (cdr v2))))])
+
+    ; (display (format "handle-vs-shift-left recieved:\n~a\n\n" (pretty-format sorted)))
+
+    (let* ([mul-scalars (halide:extract-mul-scalars halide-expr)]
+           [shl-scalars (halide:extract-shl-scalars halide-expr)]
+           [mul-shl-scalars (halide:make-scalar-log2s mul-scalars)]
+           [int-consts (set->list (list->set (append shl-scalars mul-shl-scalars)))])
+      ; (display (format "handle-vs-shift-left got scalars :\n~a\n\n" (pretty-format int-consts)))
+      (define fill-arg-grammars (make-fill-arg-grammars int-consts))
+
+      (time (for/list ([candidate sorted]) (cons (uniquify-swizzles (x86:visit (car candidate) fill-arg-grammars)) (cdr candidate)))))))
 
 (define (get-x86-grammar-helper halide-expr ir-expr x86-sub-exprs output-layout)
   ;; TODO: figure out which operations should use output-layout...
@@ -364,6 +412,9 @@
     [(x86-ir:maximum expr0 expr1)
       (handle-maximum expr0 expr1 x86-sub-exprs halide-expr)]
 
+    [(x86-ir:vs-shift-left expr shift round? saturate? output-type)
+      (handle-vs-shift-left expr shift round? saturate? output-type x86-sub-exprs halide-expr)]
+
     ;; TODO: load-data, broadcast, build-vec
     ;; TODO: cast, abs, abs-diff,
     ;; TODO: minimum, maximum
@@ -377,8 +428,17 @@
 (define enumeration-cache (make-hash))
 
 (define (not-dbl-reinterpret parent-instr child-instr)
-  ; (display (format "(not-dbl-reinterpret ~a ~a) -> ~a\n\n" parent-instr child-instr (not (and (eqv? parent-instr x86:reinterpret) (eqv? child-instr x86:reinterpret)))))
-  (not (and (eqv? parent-instr x86:reinterpret) (eqv? child-instr x86:reinterpret))))
+  (not (and (x86:is-reinterpret-instr? parent-instr) (x86:is-reinterpret-instr? child-instr))))
+
+(define (not-resize-reverse parent-instr child-instr)
+  (not (and (x86:resize? parent-instr) (or (x86:lo? child-instr) (x86:hi? child-instr)))))
+
+(define (instr-filter parent-instr child-instr)
+  (and
+    (not-dbl-reinterpret parent-instr child-instr)
+    (not-resize-reverse parent-instr child-instr)
+    ;; TODO: add more filters
+  ))
 
 (define (enumerate-x86 instr-set output-types base-exprs depth max-cost [read-count -1] [parent-instr (void)] [arg-pos -1])
   (let ([key (list instr-set output-types base-exprs depth max-cost read-count parent-instr arg-pos)])
@@ -399,7 +459,7 @@
         (let* ([sub-candidates (enumerate-x86 instr-set output-types base-exprs (- depth 1) max-cost read-count parent-instr arg-pos)]
                [curried-builder (curryr build-instr-exprs instr-set output-types base-exprs depth max-cost read-count)]
                ; TODO: HVX does more filtering here, we do not for now.
-               [kept-instrs (filter (curry not-dbl-reinterpret parent-instr) instr-set)]
+               [kept-instrs (filter (curry instr-filter parent-instr) instr-set)]
                [candidates (foldr append sub-candidates (map curried-builder kept-instrs))]
                [candidates-cost (filter (lambda (expr) (<= (cdr expr) max-cost)) candidates)]
                [candidates-read (if (eq? read-count -1) candidates-cost (filter (lambda (expr) (<= (x86:max-unique-inputs (car expr)) read-count)) candidates-cost))]

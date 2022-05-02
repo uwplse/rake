@@ -10,6 +10,7 @@
   rake/synthesis/hvx
   rake/synthesis/arm
   rake/synthesis/x86
+  rake/synthesis/fpir
   rake/synthesis/verify)
 
 (provide synthesize-hvx synthesize-arm synthesize-x86)
@@ -51,6 +52,8 @@
      (define-values (lifting-success? ir-expr ir-annotations ir-bounds)
        (synthesize-ir-expr spec 'arm-uberinstrs lifting-algo))
 
+      ; (display (format "IR annotations: ~a\n\n" (pretty-format ir-annotations)))
+
      (cond
        [lifting-success?
         ;; Lower the super-instructions to an expression template (in ARM ISA)
@@ -91,28 +94,41 @@
         (pretty-print (spec-expr spec))
         (newline)
         (newline)
-        (define-values (lowering-success? x86-exprs)
-          (synthesize-x86-expr ir-expr ir-annotations ir-bounds lowering-algo swizzling-algo))
+        ;; TODO: switch back to x86 lowering after thesis deadline.
+        ; (define-values (lowering-success? x86-exprs)
+        ;   (synthesize-x86-expr ir-expr ir-annotations ir-bounds lowering-algo swizzling-algo))
+
+        (define-values (lowering-success? fpir-exprs)
+          (synthesize-fpir-expr ir-expr ir-annotations ir-bounds lowering-algo swizzling-algo))
 
         ; (display "synthesize-x86 output:\n")
         ; (pretty-print x86-exprs)
-        ; (display lowering-success?)
-        ; (newline)
+        (display "synthesize-fpir output:\n")
+        (pretty-print fpir-exprs)
+        (display lowering-success?)
+        (newline)
+        (error "done\n")
 
-        (define x86-expr (if lowering-success? (list-ref x86-exprs 0) void))
+        ; (define x86-expr (if lowering-success? (list-ref x86-exprs 0) void))
+        (define fpir-expr (if lowering-success? (list-ref fpir-exprs 0) void))
 
         ;; Full verification of the synthesized expression
         ;(define correct? (verify-equivalence-x86 (spec-expr spec) x86-expr (spec-axioms spec)))
 
         (cond
           [lowering-success?
-            (pretty-print x86-expr)
+            ; (pretty-print x86-expr)
+            (pretty-print fpir-expr)
             (display "(x86) Synthesized solution is correct.\n\n")
-            x86-expr]
+            ; x86-expr]
+            fpir-expr]
           [else
-            (pretty-print x86-expr)
+            ; (pretty-print x86-expr)
+            (pretty-print fpir-expr)
             (display "(x86) Synthesized solution is incorrect.\n\n")
-            x86-expr])]
+            ; x86-expr]
+            fpir-expr]
+          )]
        
        [else (error (format "Could not lift Halide expression to x86 IR."))])]
 

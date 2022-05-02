@@ -7,16 +7,16 @@
   rake/internal/counter
   rake/internal/log
   rake/halide
-  rake/x86/ast/types
-  rake/x86/ast/interpreter
-  rake/x86/ast/analysis
-  rake/x86/ast/type_utils
-  rake/x86/ast/utils
-  rake/synthesis/lowering/x86/utils)
+  rake/fpir/ast/types
+  rake/fpir/ast/interpreter
+  rake/fpir/ast/analysis
+  rake/fpir/ast/type_utils
+  rake/fpir/ast/utils
+  rake/synthesis/lowering/fpir/utils)
 
 (provide (rename-out
-          [synthesize-translation x86:synthesize-translation]
-          [lowering:synthesizer:reset-db x86:lowering:synthesizer:reset-db]
+          [synthesize-translation fpir:synthesize-translation]
+          [lowering:synthesizer:reset-db fpir:lowering:synthesizer:reset-db]
         ))
 
 (define (incorrect? sol)
@@ -56,46 +56,46 @@
     [(eq? type 'u32x8) '(0 1 6 7)]
     [(eq? type 'u64x4) '(0 1 2 3)]))
 
-(define (synthesize-translation templates halide-expr x86-sub-exprs value-bounds translation-history)
+(define (synthesize-translation templates halide-expr fpir-sub-exprs value-bounds translation-history)
   (cond
     [(empty? templates) (values #f (void))]
     [(hash-has-key? synthesis-db (cons (first templates) halide-expr))
-     (synthesize-translation (rest templates) halide-expr x86-sub-exprs value-bounds translation-history)]
+     (synthesize-translation (rest templates) halide-expr fpir-sub-exprs value-bounds translation-history)]
     [else
      (define template (first templates))
-     (define sol (run-synthesizer (car template) halide-expr x86-sub-exprs value-bounds translation-history))
+     (define sol (run-synthesizer (car template) halide-expr fpir-sub-exprs value-bounds translation-history))
      (hash-set! synthesis-db (cons (first templates) halide-expr) (correct? sol))
      (cond
        [(correct? sol)
         (values #t (evaluate template sol))]
        [else
-        (synthesize-translation (rest templates) halide-expr x86-sub-exprs value-bounds translation-history)])]))
+        (synthesize-translation (rest templates) halide-expr fpir-sub-exprs value-bounds translation-history)])]))
 
-(define (run-synthesizer template halide-expr x86-sub-exprs value-bounds translation-history)
+(define (run-synthesizer template halide-expr fpir-sub-exprs value-bounds translation-history)
   ;(pretty-print halide-expr)
   ;(pretty-print template)
 
   ;(pretty-print translation-history)
-  ;(pretty-print x86-sub-exprs)
+  ;(pretty-print fpir-sub-exprs)
 
-  (println "(x86) Calling optimize-query...")
+  ; (println "(fpir) Calling optimize-query...")
 
   (define-values (optimized-halide-expr optimized-template inferred-axioms)
-    (x86:optimize-query halide-expr template x86-sub-exprs value-bounds translation-history))
+    (fpir:optimize-query halide-expr template fpir-sub-exprs value-bounds translation-history))
 
-  (println "x86 Optimized Expressions:")
-  (pretty-print optimized-halide-expr)
-  (pretty-print optimized-template)
+  ; (println "fpir Optimized Expressions:")
+  ; (pretty-print optimized-halide-expr)
+  ; (pretty-print optimized-template)
 
-  (println "(x86) Calling synthesize-incremental...")
+  ; (println "(fpir) Calling synthesize-incremental...")
   ;; Incrementally checks the template for more and more lanes
   ;(display "interpreting for lane verification\n")
   ;(pretty-print optimized-template)
   ;(pretty-print template)
-  ;(display (x86:??shuffle? template))
+  ;(display (fpir:??shuffle? template))
   ;(newline)
-  (define lanes-to-verify (verification-lanes (x86:get-interpreted-type optimized-template)))
-  (println (format "Verifying lanes: ~a" lanes-to-verify))
+  (define lanes-to-verify (verification-lanes (fpir:get-interpreted-type optimized-template)))
+  ; (println (format "Verifying lanes: ~a" lanes-to-verify))
   (synthesize-incremental optimized-halide-expr optimized-template inferred-axioms lanes-to-verify '()))
 
 (define (synthesize-incremental optimized-halide-expr optimized-template inferred-axioms lanes-to-verify discarded-sols)
@@ -104,20 +104,20 @@
     [else
      (define curr-lane (first lanes-to-verify))
 
-     (display (format "Verifying lane: ~a\n" curr-lane))
-     (display (format "Count of discarded sols: ~a\n" (length discarded-sols)))
-     (println inferred-axioms)
+    ;  (display (format "Verifying lane: ~a\n" curr-lane))
+    ;  (display (format "Count of discarded sols: ~a\n" (length discarded-sols)))
+    ;  (println inferred-axioms)
      (set-curr-cn! curr-lane)
-     (define h (halide:interpret optimized-halide-expr))
-     (display (format "halide-expr:\n~a\n" (pretty-format h)))
-     (define h_elem (h curr-lane))
-     (display (format "halide-elem:\n~a\n" (pretty-format h_elem)))
-     (define i (x86:interpret optimized-template))
-     (display (format "rake-expr:\n~a\n" (pretty-format i)))
-     (define i_elem (x86:get-element i curr-lane))
-     (display (format "rake-elem:\n~a\n" (pretty-format i_elem)))
+    ;  (define h (halide:interpret optimized-halide-expr))
+    ;  (display (format "halide-expr:\n~a\n" (pretty-format h)))
+    ;  (define h_elem (h curr-lane))
+    ;  (display (format "halide-elem:\n~a\n" (pretty-format h_elem)))
+    ;  (define i (fpir:interpret optimized-template))
+    ;  (display (format "rake-expr:\n~a\n" (pretty-format i)))
+    ;  (define i_elem (fpir:get-element i curr-lane))
+    ;  (display (format "rake-elem:\n~a\n" (pretty-format i_elem)))
 
-     (display (format "eq?:\n~a\n" (eq? h_elem i_elem)))
+    ;  (display (format "eq?:\n~a\n" (eq? h_elem i_elem)))
 
      (define st (current-milliseconds))
      (clear-vc!)
@@ -126,10 +126,10 @@
      ;(display "Halide Expr: ")
      ;(pretty-print optimized-halide-expr)
      (define ihalide (halide:interpret optimized-halide-expr))
-     (define irake (x86:interpret optimized-template))
+     (define irake (fpir:interpret optimized-template))
     ;  (set-curr-cn! curr-lane)
     ;  (pretty-print (ihalide curr-lane))
-    ;  (pretty-print (x86:get-element irake curr-lane))
+    ;  (pretty-print (fpir:get-element irake curr-lane))
 
      (define sol (synthesize #:forall (symbolics optimized-halide-expr)
                              #:guarantee (begin
@@ -157,4 +157,4 @@
 
 (define (lane-eq? oe se lane)
   (set-curr-cn! lane)
-  (assert (eq? (oe lane) (x86:get-element se lane))))
+  (assert (eq? (oe lane) (fpir:get-element se lane))))

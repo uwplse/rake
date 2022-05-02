@@ -53,10 +53,10 @@
   (display "optimized-template:\n")
   (pretty-print optimized-template)
 
-  ; (display "optimized Halide 0:\n ")
-  ; (pretty-print ((halide:interpret optimized-halide-expr) 0))
-  ; (display "optimized x86 0:\n")
-  ; (pretty-print ((x86-ir:interpret optimized-template) 0))
+  (display "optimized Halide 0:\n ")
+  (pretty-print ((halide:interpret optimized-halide-expr) 0))
+  (display "optimized x86 0:\n")
+  (pretty-print ((x86-ir:interpret optimized-template) 0))
 
   (cond
     [(subset? (symbolics optimized-halide-expr) (symbolics optimized-template))

@@ -72,7 +72,7 @@ add, sadd, mul, min, max, and, or
 ; (struct reduce (expr width reduce-op outT) #:super struct:ast-node #:transparent)
 
 ;; Instructions: vpsllw, vpslld, vpsllq
-(struct vs-shift-left (expr shift round? saturate? signed?) #:super struct:ast-node #:transparent)
+(struct vs-shift-left (expr shift round? saturate? output-type) #:super struct:ast-node #:transparent)
 ;; Instructions: vpsllvd, vpsllvq
 (struct vv-shift-left (expr0 expr1 round? saturate? signed?) #:super struct:ast-node #:transparent)
 ;; Instructions: vpsraw, vpsrad, vpsrlw, vpsrld, vpsrlq

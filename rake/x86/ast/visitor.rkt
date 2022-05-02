@@ -19,6 +19,8 @@
     [(x86:??shuffle id lds output-type) (transform (x86:??shuffle id (for/list ([ld lds]) (visit ld transform)) output-type))]
     [(x86:??swizzle id live-data exprs idx-tbl output-type) (transform (x86:??swizzle id live-data (for/list ([expr exprs]) (visit expr transform)) idx-tbl output-type))]
     [(x86:reinterpret Vn) (transform (x86:reinterpret (visit Vn transform)))]
+    [(x86:lo vec) (transform (x86:lo (visit vec transform)))]
+    [(x86:hi vec) (transform (x86:hi (visit vec transform)))]
     [(x86:concat-tiles exprs) (transform (x86:concat-tiles (for/list ([expr exprs]) (visit expr transform))))]
 
     [(x86:packssdw a b)
@@ -149,6 +151,38 @@
       (transform (x86:punpcklwd (visit a transform) (visit b transform)))]
     [(x86:pxor a b)
       (transform (x86:pxor (visit a transform) (visit b transform)))]
+    [(x86:reinterpret_to_i16x16 a)
+      (transform (x86:reinterpret_to_i16x16 (visit a transform)))]
+    [(x86:reinterpret_to_i16x8 a)
+      (transform (x86:reinterpret_to_i16x8 (visit a transform)))]
+    [(x86:reinterpret_to_i32x4 a)
+      (transform (x86:reinterpret_to_i32x4 (visit a transform)))]
+    [(x86:reinterpret_to_i32x8 a)
+      (transform (x86:reinterpret_to_i32x8 (visit a transform)))]
+    [(x86:reinterpret_to_i64x2 a)
+      (transform (x86:reinterpret_to_i64x2 (visit a transform)))]
+    [(x86:reinterpret_to_i64x4 a)
+      (transform (x86:reinterpret_to_i64x4 (visit a transform)))]
+    [(x86:reinterpret_to_i8x16 a)
+      (transform (x86:reinterpret_to_i8x16 (visit a transform)))]
+    [(x86:reinterpret_to_i8x32 a)
+      (transform (x86:reinterpret_to_i8x32 (visit a transform)))]
+    [(x86:reinterpret_to_u16x16 a)
+      (transform (x86:reinterpret_to_u16x16 (visit a transform)))]
+    [(x86:reinterpret_to_u16x8 a)
+      (transform (x86:reinterpret_to_u16x8 (visit a transform)))]
+    [(x86:reinterpret_to_u32x4 a)
+      (transform (x86:reinterpret_to_u32x4 (visit a transform)))]
+    [(x86:reinterpret_to_u32x8 a)
+      (transform (x86:reinterpret_to_u32x8 (visit a transform)))]
+    [(x86:reinterpret_to_u64x2 a)
+      (transform (x86:reinterpret_to_u64x2 (visit a transform)))]
+    [(x86:reinterpret_to_u64x4 a)
+      (transform (x86:reinterpret_to_u64x4 (visit a transform)))]
+    [(x86:reinterpret_to_u8x16 a)
+      (transform (x86:reinterpret_to_u8x16 (visit a transform)))]
+    [(x86:reinterpret_to_u8x32 a)
+      (transform (x86:reinterpret_to_u8x32 (visit a transform)))]
     [(x86:resize a)
       (transform (x86:resize (visit a transform)))]
     [(x86:vbroadcasti128 a)
@@ -423,6 +457,8 @@
     [(x86:??shuffle id lds output-type) (transform expr)]
     [(x86:??swizzle id live-data exprs idx-tbl output-type) (transform expr)]
     [(x86:reinterpret Vn) (transform (x86:reinterpret (visit-shallow Vn transform)))]
+    [(x86:lo vec) (transform (x86:lo (visit-shallow vec transform)))]
+    [(x86:hi vec) (transform (x86:hi (visit-shallow vec transform)))]
     [(x86:concat-tiles exprs) (transform (x86:concat-tiles (for/list ([expr exprs]) (visit expr transform))))]
 
     [(x86:packssdw a b)
@@ -553,6 +589,38 @@
       (transform (x86:punpcklwd (visit a transform) (visit b transform)))]
     [(x86:pxor a b)
       (transform (x86:pxor (visit a transform) (visit b transform)))]
+    [(x86:reinterpret_to_i16x16 a)
+      (transform (x86:reinterpret_to_i16x16 (visit a transform)))]
+    [(x86:reinterpret_to_i16x8 a)
+      (transform (x86:reinterpret_to_i16x8 (visit a transform)))]
+    [(x86:reinterpret_to_i32x4 a)
+      (transform (x86:reinterpret_to_i32x4 (visit a transform)))]
+    [(x86:reinterpret_to_i32x8 a)
+      (transform (x86:reinterpret_to_i32x8 (visit a transform)))]
+    [(x86:reinterpret_to_i64x2 a)
+      (transform (x86:reinterpret_to_i64x2 (visit a transform)))]
+    [(x86:reinterpret_to_i64x4 a)
+      (transform (x86:reinterpret_to_i64x4 (visit a transform)))]
+    [(x86:reinterpret_to_i8x16 a)
+      (transform (x86:reinterpret_to_i8x16 (visit a transform)))]
+    [(x86:reinterpret_to_i8x32 a)
+      (transform (x86:reinterpret_to_i8x32 (visit a transform)))]
+    [(x86:reinterpret_to_u16x16 a)
+      (transform (x86:reinterpret_to_u16x16 (visit a transform)))]
+    [(x86:reinterpret_to_u16x8 a)
+      (transform (x86:reinterpret_to_u16x8 (visit a transform)))]
+    [(x86:reinterpret_to_u32x4 a)
+      (transform (x86:reinterpret_to_u32x4 (visit a transform)))]
+    [(x86:reinterpret_to_u32x8 a)
+      (transform (x86:reinterpret_to_u32x8 (visit a transform)))]
+    [(x86:reinterpret_to_u64x2 a)
+      (transform (x86:reinterpret_to_u64x2 (visit a transform)))]
+    [(x86:reinterpret_to_u64x4 a)
+      (transform (x86:reinterpret_to_u64x4 (visit a transform)))]
+    [(x86:reinterpret_to_u8x16 a)
+      (transform (x86:reinterpret_to_u8x16 (visit a transform)))]
+    [(x86:reinterpret_to_u8x32 a)
+      (transform (x86:reinterpret_to_u8x32 (visit a transform)))]
     [(x86:resize a)
       (transform (x86:resize (visit a transform)))]
     [(x86:vbroadcasti128 a)

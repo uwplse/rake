@@ -13,6 +13,9 @@
 ;; Auto-generated cost model of Skylake throughput (CPI).
 (define (instr-cost instr)
   (cond
+    ;; TODO: what should the lo/hi cost be?
+    [(eq? instr x86:lo) 0]
+    [(eq? instr x86:hi) 0]
     [(eq? instr x86:reinterpret) 0]
     [(eq? instr x86:packssdw) 1]
     [(eq? instr x86:packsswb) 1]
@@ -78,6 +81,22 @@
     [(eq? instr x86:punpcklqdq) 1]
     [(eq? instr x86:punpcklwd) 1]
     [(eq? instr x86:pxor) 0.33]
+    [(eq? instr x86:reinterpret_to_i16x16) 0]
+    [(eq? instr x86:reinterpret_to_i16x8) 0]
+    [(eq? instr x86:reinterpret_to_i32x4) 0]
+    [(eq? instr x86:reinterpret_to_i32x8) 0]
+    [(eq? instr x86:reinterpret_to_i64x2) 0]
+    [(eq? instr x86:reinterpret_to_i64x4) 0]
+    [(eq? instr x86:reinterpret_to_i8x16) 0]
+    [(eq? instr x86:reinterpret_to_i8x32) 0]
+    [(eq? instr x86:reinterpret_to_u16x16) 0]
+    [(eq? instr x86:reinterpret_to_u16x8) 0]
+    [(eq? instr x86:reinterpret_to_u32x4) 0]
+    [(eq? instr x86:reinterpret_to_u32x8) 0]
+    [(eq? instr x86:reinterpret_to_u64x2) 0]
+    [(eq? instr x86:reinterpret_to_u64x4) 0]
+    [(eq? instr x86:reinterpret_to_u8x16) 0]
+    [(eq? instr x86:reinterpret_to_u8x32) 0]
     [(eq? instr x86:resize) 0]
     [(eq? instr x86:vbroadcasti128) 0.5]
     [(eq? instr x86:vinserti128) 1]
