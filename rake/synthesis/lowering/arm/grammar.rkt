@@ -62,25 +62,76 @@
     (arm:sdot.v4i32.v16i4? expr)
     (arm:udot.v4i32.v16i4? expr)))
 
+(define (scalar-count arm-expr)
+  (define count 0)
+  (define (count-scalars node [pos -1])
+    (match node
+      ['int8 (set! count (+ 1 count))]
+      ['uint8 (set! count (+ 1 count))]
+      ['int16 (set! count (+ 1 count))]
+      ['uint16 (set! count (+ 1 count))]
+      ['int32 (set! count (+ 1 count))]
+      ['uint32 (set! count (+ 1 count))]
+      ['int64 (set! count (+ 1 count))]
+      ['uint64 (set! count (+ 1 count))]
+
+      ; For dot products.
+      ['int8x4 (set! count (+ 4 count))]
+      ['uint8x4 (set! count (+ 4 count))]
+
+      ;; For immediates (shifts)
+      ['int8_imm (set! count (+ 1 count))]
+      ['uint8_imm (set! count (+ 1 count))]
+      ['int16_imm (set! count (+ 1 count))]
+      ['uint16_imm (set! count (+ 1 count))]
+      ['int32_imm (set! count (+ 1 count))]
+      ['uint32_imm (set! count (+ 1 count))]
+      ['int64_imm (set! count (+ 1 count))]
+      ['uint64_imm (set! count (+ 1 count))]
+
+      [_ node]))
+  (arm:visit-shallow arm-expr count-scalars)
+  count)
+
+(define (unique-list l)
+  (set->list (list->set l)))
+
 (define (handle-vs-mpy-add expr weights output-type arm-sub-exprs halide-expr)
   (let* ([input-type (get-input-type expr)]
          [widening? (>= (cpp:type-bw output-type) (* 2 (cpp:type-bw input-type)))]
          [double-widening? (>= (cpp:type-bw output-type) (* 4 (cpp:type-bw input-type)))]
-         [use-shifts? (not (null? (filter halide:is-power-of-2? weights)))]
+         [use-shifts? (not (null? (filter (lambda (weight) (not (halide:is-one? weight))) (filter halide:is-power-of-2? weights))))]
          ;; TODO: should we require that the output type is signed?
          [use-subs? (not (null? (filter halide:is-signed-negative? weights)))]
+         ;; If the input type is unsigned and the weights are strictly positive, but the output type is signed, ddo all math in unsigned.
+         [as-unsigned? (and
+                          (not (cpp:signed-type? input-type)) ;; unsigned input-type
+                          (eq? (length weights) (length (filter halide:is-concrete-positive? weights))) ;; all weights are concrete positives.
+                          (cpp:signed-type? output-type))] ;; output type is signed.
+         [use-reinterpret? (and (not as-unsigned?) (not (eqv? input-type output-type)))]
+         [min-scalars (length (filter (lambda (weight) (not (halide:is-one? weight))) (unique-list weights)))]
          ; TODO: better pruning and more isa options
          [isa (flatten
                 (list
-                  ; (list arm:udot.v2i32.v8i4 arm:uaddl arm:umull-vs arm:udot.v4i32.v16i4 arm:reinterpret)
-                  (list arm:reinterpret arm:add arm:addp arm:mla-vs arm:mul-vs)
-                  ; (list arm:add arm:addp arm:mla-vs arm:mul-vs)
+                  (use-if
+                    use-reinterpret?
+                    (list arm:reinterpret))
 
                   (use-if
-                    widening?
-                    (list arm:sxtl arm:uxtl
-                          arm:saddl arm:saddw arm:saddlp arm:sadalp arm:smlal-vs arm:smull-vs
-                          arm:uaddl arm:uaddw arm:uaddlp arm:uadalp arm:umlal-vs arm:umull-vs))
+                    (not double-widening?)
+                    (list arm:add arm:addp arm:mla-vs arm:mul-vs))
+
+                  ;; Only allow signed widening variants if:
+                  ;; (1) not doing strictly unsigned computation (not `as-unsigned?`) and
+                  ;; (2) either the input or output type is signed.
+                  (use-if
+                    (and widening? (not as-unsigned?) (or (cpp:signed-type? input-type) (cpp:signed-type? output-type)))
+                    (list arm:sxtl arm:saddl arm:saddw arm:saddlp arm:sadalp arm:smlal-vs arm:smull-vs))
+
+                  ;; TODO: do we want stronger pruning on unsigned ops?
+                  (use-if
+                    (and widening? (not (and (cpp:signed-type? input-type) (cpp:signed-type? output-type))))
+                    (list arm:uxtl arm:uaddl arm:uaddw arm:uaddlp arm:uadalp arm:umlal-vs arm:umull-vs))
 
                   ;; TODO: when do we want reductions?
                   ; (use-if
@@ -100,9 +151,10 @@
                     (and (not widening?) use-subs?)
                     (list arm:sub arm:mls-vs arm:neg))
 
-                  (use-if
-                    (and widening? use-shifts?)
-                    (list arm:ushll arm:sshll))
+                  ;; TODO: are these ever useful? I don't think so... Can always use mlal variants.
+                  ; (use-if
+                  ;   (and widening? use-shifts?)
+                  ;   (list arm:ushll arm:sshll))
 
                   ;; TODO: debug this, add more.
                   ;; TODO: should we include these regardless of the `widening?` flag?
@@ -116,7 +168,8 @@
             [(and double-widening? (< (length weights) 5)) 2]
             [(and double-widening? (< (length weights) 9)) 3]
             [double-widening? 4]
-            [(and widening? (< (length weights) 3)) 3]
+            [(and widening? (< (length weights) 3)) 2]
+            [(and widening? (< (length weights) 7)) 3]
             [widening? 4]
             [(< (length weights) 3) 2]
             [else 3])]
@@ -130,7 +183,8 @@
           ;   arm-sub-exprs)]
          [grouped-sub-exprs (prepare-sub-exprs sub-exprs)]
          [number-reads (length weights)]
-         [desired-types (arm:get-vector-types output-type)]
+         ;; If we're doing math as unsigned, make the output unsigned (we add a reinterpret later).
+         [desired-types (if as-unsigned? (arm:get-unsigned-vector-types output-type) (arm:get-vector-types output-type))]
          ; Enumerate those with the correct output type
          ; TODO: do the pruning somehow...
          [candidates (time (enumerate-arm isa desired-types grouped-sub-exprs depth max-cost number-reads))]
@@ -148,8 +202,8 @@
 
       (display
         (format
-          "\nhandle-vs-mpy-add params:\nInput type: ~a\nOutput type: ~a\nWidening: ~a\nDouble widening: ~a\nUse shifts: ~a\nUse subs: ~a\nDepth: ~a\n"
-          input-type output-type widening? double-widening? use-shifts? use-subs? depth))
+          "\nhandle-vs-mpy-add params:\nInput type: ~a\nOutput type: ~a\nWidening: ~a\nDouble widening: ~a\nUse shifts: ~a\nUse subs: ~a\nUse reinterpret: ~a\nAs unsigned: ~a\nMin scalars: ~a\nDepth: ~a\n"
+          input-type output-type widening? double-widening? use-shifts? use-subs? use-reinterpret? as-unsigned? min-scalars depth))
 
       (display "ISA:\n")
       (pretty-print isa)
@@ -172,10 +226,10 @@
     ; (display (format "Is double-widening? ~a" double-widening?))
     ; (pretty-print isa)
     (display (format "Before filtering reads: ~a\n" (length candidates)))
-    (pretty-print candidates)
-    (display (format "Outter dot-product: ~a\n" (length (filter (lambda (cand) (is-dot-product? (car cand))) candidates))))
     ; (pretty-print candidates)
-          (error "done")
+    ; (display (format "Outter dot-product: ~a\n" (length (filter (lambda (cand) (is-dot-product? (car cand))) candidates))))
+    ; (pretty-print candidates)
+
     ;; TODO: should this really be eq?
     (set! candidates (time (filter (lambda (c) (>= (arm:max-unique-inputs (car c)) number-reads)) candidates)))
     (display (format "After filtering reads: ~a\n" (length candidates)))
@@ -186,9 +240,17 @@
     (set! candidates (time (filter (lambda (c) (equal? (live-buffers (car c)) load-buffers)) candidates)))
 
     (display (format "After filtering buffers: ~a\n" (length candidates)))
-    (display (format "Outter dot-product: ~a\n" (length (filter (lambda (cand) (is-dot-product? (car cand))) candidates))))
+    ; (define f (filter (lambda (cand) (is-dot-product? (car cand))) candidates))
+    ; (pretty-print f)
+    ; (display (format "Outter dot-product: ~a\n" (length f)))
     ;(pretty-print (take candidates 50))
     ;(println (length candidates))
+
+    (display (format "Before filtering scalars: ~a\n" (length candidates)))
+    ;; TODO: should this be strict equality?
+    (set! candidates (time (filter (lambda (c) (>= (scalar-count (car c)) min-scalars)) candidates)))
+    (display (format "After filtering scalars: ~a\n" (length candidates)))
+    ; (pretty-print candidates)
 
     ;; Compute read counts
     (set! candidates (time (map (lambda (c) (cons (car c) (cons (cdr c) (count-reads (car c))))) candidates)))
@@ -198,7 +260,11 @@
 
     (let* ([add-scalars (halide:extract-add-scalars halide-expr)]
            [shl-scalars (halide:extract-shl-scalars halide-expr)]
-           [int-scalars (set->list (list->set (append weights add-scalars shl-scalars)))]
+           [weights-without1 (filter (lambda (weight) (not (halide:is-one? weight))) weights)]
+            ;; for dot products:
+           [int-scalars-with1 (unique-list (append weights add-scalars shl-scalars))]
+           ;; We don't want 1 as an available constant, except for dot products.
+           [int-scalars (unique-list (append weights-without1 add-scalars shl-scalars))]
            [int-consts (append (filter concrete? int-scalars) (list (int8_t (bv 0 8))))])
       (define (bool-const) (define-symbolic* b boolean?) b)
       (define (uint1-const) (define-symbolic* b boolean?) (uint1_t b))
@@ -220,6 +286,9 @@
       (define (int64-const-imm) (int64x1 (apply choose* int-consts)))
       (define (uint64-const-imm) (uint64x1 (apply choose* int-consts)))
 
+      (define (int8-const-dp) (int8x1 (apply choose* int-scalars-with1)))
+      (define (uint8-const-dp) (uint8x1 (apply choose* int-scalars-with1)))
+
       (define (fill-arg-grammars node [pos -1])
        (match node
          [#t #t]
@@ -236,8 +305,8 @@
          ['uint64 (uint64-const)]
 
          ; For dot products.
-         ['int8x4 (arm:Ri8x4 (int8-const) (int8-const) (int8-const) (int8-const))]
-         ['uint8x4 (arm:Ru8x4 (uint8-const) (uint8-const) (uint8-const) (uint8-const))]
+         ['int8x4 (arm:Ri8x4 (int8-const-dp) (int8-const-dp) (int8-const-dp) (int8-const-dp))]
+         ['uint8x4 (arm:Ru8x4 (uint8-const-dp) (uint8-const-dp) (uint8-const) (uint8-const-dp))]
 
          ;; For immediates (shifts)
          ['int8_imm (int8-const-imm)]
@@ -251,7 +320,13 @@
 
          [_ node]))
 
-      (time (for/list ([candidate candidates]) (cons (uniquify-swizzles (arm:visit (car candidate) fill-arg-grammars)) (car (cdr candidate))))))))
+      ;; TODO: can there be more cases like this?
+      (define (wrapper expr)
+        (cond
+          [as-unsigned? (arm:reinterpret expr)]
+          [else expr]))
+
+      (time (for/list ([candidate candidates]) (cons (wrapper (uniquify-swizzles (arm:visit (car candidate) fill-arg-grammars))) (car (cdr candidate))))))))
 
 (define (handle-cast expr output-type saturate? arm-sub-exprs halide-expr)
   (let* ([input-type (get-input-type expr)]
@@ -334,16 +409,18 @@
 (define (handle-vv-mpy-add expr weights output-type arm-sub-exprs halide-expr)
   (let* ([input-type (get-input-type expr)]
          [widening? (eq? (cpp:type-bw output-type) (* 2 (cpp:type-bw input-type)))]
+         ;; TODO: better pruning.
          [isa (if widening?
-                  (list arm:reinterpret arm:smlal-vv arm:umlal-vv arm:smlsl-vv arm:umlsl-vv arm:smull-vv arm:umull-vv)
+                  (list arm:reinterpret arm:smlal-vv arm:umlal-vv arm:smlsl-vv arm:umlsl-vv arm:smull-vv arm:umull-vv
+                        arm:udot.v4i32.v16i8 arm:udot.v2i32.v8i8 arm:sdot.v2i32.v8i8 arm:sdot.v4i32.v16i8)
                   (list arm:reinterpret arm:addv arm:addp arm:mla-vv arm:mls-vv arm:mul-vv arm:sub))]
          [grouped-sub-exprs (prepare-sub-exprs arm-sub-exprs)]
          [desired-types (arm:get-vector-types output-type)]
          ; TODO: why is this the number of reads? formula taken from hvx.rkt
          [width (length weights)]
          [number-reads (- (* width 2) (if (eq? width 5) 1 0))]
-         [depth 4]
-         [max-cost 20]
+         [depth 3]
+         [max-cost 15]
          [candidates (enumerate-arm isa desired-types grouped-sub-exprs depth max-cost number-reads)])
 
     (define (uint1-const) (define-symbolic* b boolean?) (uint1_t b))
@@ -491,8 +568,9 @@
             ;; TODO: do we need broadcasts? or simply vector-scalar versions?
             [symbolic-narrowing? (append (list arm:xtn arm:uqxtn arm:sqxtn arm:sqxtun) (list arm:uqrshr-vs arm:sqrshr-vs arm:srshr-vs arm:urshr-vs arm:ushr-vs arm:sshr-vs))]
             ; TODO: need ssra, ursra, usra
-            [else (error (format "Regular shift right not yet supported:\n~a >> ~a |- ~a ~a ~a ~a\n" expr shift round? saturate? signed? output-type))])]
+            ; [else (error (format "Regular shift right not yet supported:\n~a >> ~a |- ~a ~a ~a ~a\n" expr shift round? saturate? signed? output-type))])]
             ; [else (list arm:uqrshr arm:sqrshr arm:srshr arm:urshr arm:ushr arm:sshr)])]
+            [else (list arm:uqrshr-vs arm:sqrshr-vs arm:srshr-vs arm:urshr-vs arm:ushr-vs arm:sshr-vs)])]
          [depth
           (cond
             [immediate-narrowing? 1]
@@ -552,7 +630,11 @@
          ;; TODO: only fill if shift is concrete?
          [_ node]))
 
-      (define fill-arg-grammars (if (concrete? shift) fill-arg-grammars-imm fill-arg-grammars-sym))
+      (define fill-arg-grammars
+        (cond
+          [immediate-narrowing? fill-arg-grammars-imm]
+          ;; TODO: is it more complicated than this?
+          [else fill-arg-grammars-sym]))
 
       (define cast-candidates (sort-and-uniquify (for/list ([candidate candidates]) (cons (arm:visit (car candidate) fill-arg-grammars) (cdr candidate)))))
 
@@ -660,6 +742,18 @@
         (list (cons (arm:??swizzle 0 (for/list ([i (range 8)]) (list (ihal i))) exprs tbl output-type) 1)))]
     [else (error "Unimplemented: handle-build-vec base stride len arm-sub-exprs halide-expr")]))
 
+(define (handle-halving-add expr round? arm-sub-exprs halide-expr)
+  (let* ([input-type (arm-ir:elem-type expr)]
+         [isa (list arm:shadd arm:srhadd arm:uhadd)]
+         [grouped-sub-exprs (prepare-sub-exprs arm-sub-exprs)]
+         [desired-types (arm:get-vector-types input-type)]
+         ; TODO: is this a good depth / cost??
+         [depth 2]
+         [max-cost 12]
+         [candidates (enumerate-arm isa desired-types grouped-sub-exprs depth max-cost)])
+    (display (format "handle-halving-add\n~a\n~a\n~a\n~a\n"  expr round? arm-sub-exprs halide-expr))
+    (sort-and-uniquify candidates)))
+
 (define (get-arm-grammar-helper halide-expr ir-expr arm-sub-exprs)
   ; TODO: what is the enumeration-database?
   (destruct ir-expr
@@ -743,6 +837,9 @@
     
     [(arm-ir:build-vec base stride len)
       (handle-build-vec base stride len arm-sub-exprs halide-expr)]
+
+    [(arm-ir:halving-add expr round?)
+      (handle-halving-add expr round? arm-sub-exprs halide-expr)]
 
     [_ (error "Not implemented yet ~a" ir-expr)]))
 

@@ -151,19 +151,19 @@
 
     [(arm:mla-vs Vd Vn Vm)
       ;; TODO: no LLVM intrinsics, make SExpParser construct the correct code.
-      `(halide.ir.mla, (to-llvm-type arm-expr), `(list, `(list ,(input-arg Vd) ,(input-arg Vn) ,(compile-scalar Vm))))]
+      `(halide.ir.mla, (to-llvm-type arm-expr), `(list ,(input-arg Vd) ,(input-arg Vn) ,(compile-scalar Vm)))]
 
     [(arm:mla-vv Vd Vn Vm)
       ;; TODO: no LLVM intrinsics, make SExpParser construct the correct code.
-      `(halide.ir.mla, (to-llvm-type arm-expr), `(list, `(list ,(input-arg Vd) ,(input-arg Vn) ,(input-arg Vm))))]
+      `(halide.ir.mla, (to-llvm-type arm-expr), `(list ,(input-arg Vd) ,(input-arg Vn) ,(input-arg Vm)))]
 
     [(arm:mls-vs Vd Vn Vm)
       ;; TODO: no LLVM intrinsics, make SExpParser construct the correct code.
-      `(halide.ir.mls, (to-llvm-type arm-expr), `(list, `(list ,(input-arg Vd) ,(input-arg Vn) ,(compile-scalar Vm))))]
+      `(halide.ir.mls, (to-llvm-type arm-expr), `(list ,(input-arg Vd) ,(input-arg Vn) ,(compile-scalar Vm)))]
 
     [(arm:mls-vv Vd Vn Vm)
       ;; TODO: no LLVM intrinsics, make SExpParser construct the correct code.
-      `(halide.ir.mls, (to-llvm-type arm-expr), `(list, `(list ,(input-arg Vd) ,(input-arg Vn) ,(input-arg Vm))))]
+      `(halide.ir.mls, (to-llvm-type arm-expr), `(list ,(input-arg Vd) ,(input-arg Vn) ,(input-arg Vm)))]
 
     [(arm:mul-vs Vn Vm)
       ;; TODO: no LLVM intrinsics, make SExpParser construct the correct code.
@@ -307,6 +307,16 @@
            (handle-wide-slice-unary arm-expr `sext Vn v1)]
         [(_ _) (error (format "arm:sxtl variant not understood:\n~a\n" (pretty-format arm-expr)))])]
 
+    [(arm:uxtl Vn Vm)
+      (destruct* ((arm:interpret Vn) (arm:interpret Vm))
+        [((arm:u8x16 v0) (uint1_t v1))
+           (handle-wide-slice-unary arm-expr `zext Vn v1)]
+        [((arm:u16x8 v0) (uint1_t v1))
+            (handle-wide-slice-unary arm-expr `zext Vn v1)]
+        [((arm:u32x4 v0) (uint1_t v1))
+            (handle-wide-slice-unary arm-expr `zext Vn v1)]
+        [(_ _) (error (format "arm:uxtl variant not understood:\n~a\n" (pretty-format arm-expr)))])]
+
     ;;;;;;;;;;;;;;;;;;;;;;; Concatenate Tiles ;;;;;;;;;;;;;;;;;;;;;;;;
 
     [(arm:concat-tiles tiles)
@@ -390,6 +400,16 @@
         [((arm:i64x2 v0) (uint64_t v1) (arm:i64x2 v2) (uint64_t v3))
           (generate-rake `sqrshrn_i64x4 (to-llvm-type arm-expr) `(list ,(input-arg Vd) ,(compile-scalar (uint32x1 Vn)) ,(input-arg Vm) ,(compile-scalar (uint32x1 Vb))))]
         [(_ _ _ _) (error (format "arm:sqrshrn variant not understood:\n~a\n" (pretty-format arm-expr)))])]
+
+    [(arm:sqshrn Vd Vn Vm Vb)
+      (destruct* ((arm:interpret Vd) (arm:interpret Vn) (arm:interpret Vm) (arm:interpret Vb))
+        [((arm:i16x8 v0) (uint16_t v1) (arm:i16x8 v2) (uint16_t v3))
+          (generate-rake `sqshrn_i16x16 (to-llvm-type arm-expr) `(list ,(input-arg Vd) ,(compile-scalar (uint32x1 Vn)) ,(input-arg Vm) ,(compile-scalar (uint32x1 Vb))))]
+        [((arm:i32x4 v0) (uint32_t v1) (arm:i32x4 v2) (uint32_t v3))
+          (generate-rake `sqshrn_i32x8 (to-llvm-type arm-expr) `(list ,(input-arg Vd) ,(compile-scalar (uint32x1 Vn)) ,(input-arg Vm) ,(compile-scalar (uint32x1 Vb))))]
+        [((arm:i64x2 v0) (uint64_t v1) (arm:i64x2 v2) (uint64_t v3))
+          (generate-rake `sqshrn_i64x4 (to-llvm-type arm-expr) `(list ,(input-arg Vd) ,(compile-scalar (uint32x1 Vn)) ,(input-arg Vm) ,(compile-scalar (uint32x1 Vb))))]
+        [(_ _ _ _) (error (format "arm:sqshrn variant not understood:\n~a\n" (pretty-format arm-expr)))])]
 
     [(arm:saddl Vd Vn Vm)
       (destruct* ((arm:interpret Vd) (arm:interpret Vn) (arm:interpret Vm))
@@ -576,6 +596,42 @@
         [((arm:i64x2 v0) (uint32_t v1))
            (generate `srshl.v2i64 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg (negate-and-dup (uint32_t v1) 'int64))))]
         [(_ _)  (error (format "arm:srshr-vs variant not understood:\n~a\n" (pretty-format arm-expr)))])]
+
+    [(arm:sshr-vs Vn Vm)
+      (destruct* ((arm:interpret Vn) (arm:interpret Vm))
+        [((arm:i8x8 v0) (uint8_t v1))
+          (generate `sshl.v8i8 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg (negate-and-dup (uint8_t v1) 'int8))))]
+        [((arm:i8x16 v0) (uint8_t v1))
+          (generate `sshl.v8i16 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg (negate-and-dupw (uint8_t v1) 'int8))))]
+        [((arm:i16x4 v0) (uint8_t v1))
+          (generate `sshl.v4i16 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg (negate-and-dup (uint16x1 (uint8_t v1)) 'int16))))]
+        [((arm:i16x8 v0) (uint8_t v1))
+          (generate `sshl.v8i16 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg (negate-and-dupw (uint16x1 (uint8_t v1)) 'int16))))]
+        [((arm:i32x2 v0) (uint8_t v1))
+          (generate `sshl.v2i32 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg (negate-and-dup (uint32x1 (uint8_t v1)) 'int32))))]
+        [((arm:i32x4 v0) (uint8_t v1))
+          (generate `sshl.v4i32 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg (negate-and-dupw (uint32x1 (uint8_t v1)) 'int32))))]
+        [((arm:i64x2 v0) (uint8_t v1))
+          (generate `sshl.v2i64 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg (negate-and-dup (uint64x1 (uint8_t v1)) 'int64))))]
+        [(_ _) (error (format "arm:sshr-vs variant not understood:\n~a\n" (pretty-format arm-expr)))])]
+
+    [(arm:sqrshr-vs Vn Vm)
+      (destruct* ((arm:interpret Vn) (arm:interpret Vm))
+        [((arm:i8x8 v0) (uint8_t v1))
+          (generate `sqrshl.v8i8 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg (negate-and-dup (uint8_t v1) 'int8))))]
+        [((arm:i8x16 v0) (uint8_t v1))
+          (generate `sqrshl.v16i8 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg (negate-and-dupw (uint8_t v1) 'int8))))]
+        [((arm:i16x4 v0) (uint16_t v1))
+          (generate `sqrshl.v4i16 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg (negate-and-dup (uint16_t v1) 'int16))))]
+        [((arm:i16x8 v0) (uint16_t v1))
+          (generate `sqrshl.v8i16 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg (negate-and-dupw (uint16_t v1) 'int16))))]
+        [((arm:i32x2 v0) (uint32_t v1))
+          (generate `sqrshl.v2i32 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg (negate-and-dup (uint32_t v1) 'int32))))]
+        [((arm:i32x4 v0) (uint32_t v1))
+          (generate `sqrshl.v4i32 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg (negate-and-dupw (uint32_t v1) 'int32))))]
+        [((arm:i64x2 v0) (uint64_t v1))
+          (generate `sqrshl.v2i64 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg (negate-and-dup (uint64_t v1) 'int64))))]
+        [(_ _) (error (format "arm:sqrshr-vs variant not understood:\n~a\n" (pretty-format arm-expr)))])]
 
     [_ (string->sexp (format "~a" arm-expr))]))
 

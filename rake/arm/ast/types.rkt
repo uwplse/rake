@@ -600,6 +600,13 @@
                          (instr-sig 'u16x8 (list 'u16x8 'u16x8 'uint16))
                          (instr-sig 'u32x2 (list 'u32x2 'u32x2 'uint32))
                          (instr-sig 'u32x4 (list 'u32x4 'u32x4 'uint32))
+                         ;; This can be signed too.
+                         (instr-sig 'i8x8 (list 'i8x8 'i8x8 'int8))
+                         (instr-sig 'i8x16 (list 'i8x16 'i8x16 'int8))
+                         (instr-sig 'i16x4 (list 'i16x4 'i16x4 'int16))
+                         (instr-sig 'i16x8 (list 'i16x8 'i16x8 'int16))
+                         (instr-sig 'i32x2 (list 'i32x2 'i32x2 'int32))
+                         (instr-sig 'i32x4 (list 'i32x4 'i32x4 'int32))
                          )]
 
     [(eq? mla-vv instr) (list
@@ -1339,7 +1346,7 @@
 
     [(eq? uaddl instr) (list
                          (instr-sig 'u16x8 (list 'u8x16 'u8x16 'uint1))
-                         (instr-sig 'u32x4 (list 'i16x8 'u16x8 'uint1))
+                         (instr-sig 'u32x4 (list 'u16x8 'u16x8 'uint1))
                          (instr-sig 'u64x2 (list 'u32x4 'u32x4 'uint1))
                          )]
 
@@ -1843,7 +1850,6 @@
 
     [else (error "(arm:instr-forms) Unknown instruction:" instr)]))
 
-
 (define (get-vector-types type)
   (cond
     [(eq? type 'int8) (list 'i8x8 'i8x16)]   ;'i8x32
@@ -1854,7 +1860,15 @@
     [(eq? type 'uint16) (list 'u16x4 'u16x8)]; 'u16x16
     [(eq? type 'uint32) (list 'u32x2 'u32x4)]; 'u32x8
     [(eq? type 'uint64) (list 'u64x1 'u64x2)]; 'u64x4
-    [else (error "Unrecognized type (get-vector-types) ~a" type)]))
+    [else (error (format "Unrecognized type (arm:get-vector-types) ~a" type))]))
+
+(define (get-unsigned-vector-types type)
+  (cond
+    [(eq? type 'int8) (list 'u8x8 'u8x16)]
+    [(eq? type 'int16) (list 'u16x4 'u16x8)]
+    [(eq? type 'int32) (list 'u32x2 'u32x4)]
+    [(eq? type 'int64) (list 'u64x1 'u64x2)]
+    [else (error (format "Unrecognized type (arm:get-unsigned-vector-types) ~a" type))]))
 
 (define (simplify-shuffle shuffle)
   (let ([type (??shuffle-output-type shuffle)]

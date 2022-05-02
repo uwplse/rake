@@ -998,6 +998,54 @@
              (vec-mul
               v1
               (x4 (uint32_t v2))))))]
+        [((arm:i8x8 v0) (arm:i8x8 v1) (int8_t v2))
+          (arm:i8x8
+           (halide:interpret
+            (vec-add
+             v0
+             (vec-mul
+              v1
+              (x8 (int8_t v2))))))]
+        [((arm:i8x16 v0) (arm:i8x16 v1) (int8_t v2))
+          (arm:i8x16
+           (halide:interpret
+            (vec-add
+             v0
+             (vec-mul
+              v1
+              (x16 (int8_t v2))))))]
+        [((arm:i16x4 v0) (arm:i16x4 v1) (int16_t v2))
+          (arm:i16x4
+           (halide:interpret
+            (vec-add
+             v0
+             (vec-mul
+              v1
+              (x4 (int16_t v2))))))]
+        [((arm:i16x8 v0) (arm:i16x8 v1) (int16_t v2))
+          (arm:i16x8
+           (halide:interpret
+            (vec-add
+             v0
+             (vec-mul
+              v1
+              (x8 (int16_t v2))))))]
+        [((arm:i32x2 v0) (arm:i32x2 v1) (int32_t v2))
+          (arm:i32x2
+           (halide:interpret
+            (vec-add
+             v0
+             (vec-mul
+              v1
+              (x2 (int32_t v2))))))]
+        [((arm:i32x4 v0) (arm:i32x4 v1) (int32_t v2))
+          (arm:i32x4
+           (halide:interpret
+            (vec-add
+             v0
+             (vec-mul
+              v1
+              (x4 (int32_t v2))))))]
         [(_ _ _) (assert #f (format "infeasible in mla-vs\n~a\n" (pretty-format p)))])]
 
     [(arm:mla-vv Vd Vn Vm)
@@ -7993,24 +8041,24 @@
               (uint16x8
                (slice_vectors
                 v1 0 1 8))))))]
-        [((arm:i16x8 v0) (arm:u16x8 v1) (uint1_t v2))
+        [((arm:u16x8 v0) (arm:u16x8 v1) (uint1_t v2))
            (arm:u32x4
             (halide:interpret
              (vec-if
              (x4 (uint1_t v2))
              (vec-add
-              (int32x4
+              (uint32x4
                (slice_vectors
                 v0 4 1 4))
-              (int32x4
+              (uint32x4
                (uint32x4
                 (slice_vectors
                  v1 4 1 4))))
              (vec-add
-              (int32x4
+              (uint32x4
                (slice_vectors
                 v0 0 1 4))
-              (int32x4
+              (uint32x4
                (uint32x4
                 (slice_vectors
                  v1 0 1 4)))))))]
