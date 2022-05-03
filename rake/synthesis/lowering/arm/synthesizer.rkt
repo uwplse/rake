@@ -147,7 +147,6 @@
         (define-values (sub-sol sub-template)
           (synthesize-incremental optimized-halide-expr updated-template inferred-axioms (rest lanes-to-verify) '()))
         
-        ; (define sub-sol (synthesize-incremental optimized-halide-expr updated-template inferred-axioms (rest lanes-to-verify) '()))
         (cond
           ;; TODO: does it really matter which sol we pass, sub-sol or regular, as long as we update the template appropriately?
           [(correct? sub-sol) (values sol sub-template)]

@@ -252,6 +252,22 @@
           (generate-rake `rshrn_i64x4 (to-llvm-type arm-expr) `(list ,(input-arg Vd) ,(compile-scalar (uint32x1 Vn)) ,(input-arg Vm) ,(compile-scalar (uint32x1 Vb))))]
         [(_ _ _ _) (error (format "arm:rshrn variant not understood:\n~a\n" (pretty-format arm-expr)))])]
 
+    [(arm:shrn Vd Vn Vm Vb)
+      (destruct* ((arm:interpret Vd) (arm:interpret Vn) (arm:interpret Vm) (arm:interpret Vb))
+        [((arm:i16x8 v0) (uint16_t v1) (arm:i16x8 v2) (uint16_t v3))
+          (generate-rake `shrn_i16x16 (to-llvm-type arm-expr) `(list ,(input-arg Vd) ,(compile-scalar (uint32x1 Vn)) ,(input-arg Vm) ,(compile-scalar (uint32x1 Vb))))]
+        [((arm:i32x4 v0) (uint32_t v1) (arm:i32x4 v2) (uint32_t v3))
+          (generate-rake `shrn_i32x8 (to-llvm-type arm-expr) `(list ,(input-arg Vd) ,(compile-scalar (uint32x1 Vn)) ,(input-arg Vm) ,(compile-scalar (uint32x1 Vb))))]
+        [((arm:i64x2 v0) (uint64_t v1) (arm:i64x2 v2) (uint64_t v3))
+          (generate-rake `shrn_i64x4 (to-llvm-type arm-expr) `(list ,(input-arg Vd) ,(compile-scalar (uint32x1 Vn)) ,(input-arg Vm) ,(compile-scalar (uint32x1 Vb))))]
+        [((arm:u16x8 v0) (uint16_t v1) (arm:u16x8 v2) (uint16_t v3))
+          (generate-rake `shrn_i16x16 (to-llvm-type arm-expr) `(list ,(input-arg Vd) ,(compile-scalar (uint32x1 Vn)) ,(input-arg Vm) ,(compile-scalar (uint32x1 Vb))))]
+        [((arm:u32x4 v0) (uint32_t v1) (arm:u32x4 v2) (uint32_t v3))
+          (generate-rake `shrn_i32x8 (to-llvm-type arm-expr) `(list ,(input-arg Vd) ,(compile-scalar (uint32x1 Vn)) ,(input-arg Vm) ,(compile-scalar (uint32x1 Vb))))]
+        [((arm:u64x2 v0) (uint64_t v1) (arm:u64x2 v2) (uint64_t v3))
+          (generate-rake `shrn_i64x4 (to-llvm-type arm-expr) `(list ,(input-arg Vd) ,(compile-scalar (uint32x1 Vn)) ,(input-arg Vm) ,(compile-scalar (uint32x1 Vb))))]
+        [(_ _ _ _) (error (format "arm:shrn variant not understood:\n~a\n" (pretty-format arm-expr)))])]
+
     [(arm:uqxtn Vn Vm)
       (destruct* ((arm:interpret Vn) (arm:interpret Vm))
         [((arm:u16x8 v0) (arm:u16x8 v1))

@@ -264,8 +264,11 @@
             ;; for dot products:
            [int-scalars-with1 (unique-list (append weights add-scalars shl-scalars))]
            ;; We don't want 1 as an available constant, except for dot products.
-           [int-scalars (unique-list (append weights-without1 add-scalars shl-scalars))]
-           [int-consts (append (filter concrete? int-scalars) (list (int8_t (bv 0 8))))])
+           [int-scalars-temp (unique-list (append weights-without1 add-scalars shl-scalars))]
+           [int-consts-temp (filter concrete? int-scalars-temp)]
+           ;; Safeguard against complete filtering
+           [int-scalars (if (null? int-scalars-temp) (list (int8_t (bv 1 8))) int-scalars-temp)]
+           [int-consts (if (null? int-consts-temp) (list (int8_t (bv 0 8))) int-consts-temp)])
       (define (bool-const) (define-symbolic* b boolean?) b)
       (define (uint1-const) (define-symbolic* b boolean?) (uint1_t b))
       (define (int8-const) (int8x1 (apply choose* int-scalars)))

@@ -82,7 +82,7 @@
          [(??sub-expr exprs c) (list-ref exprs (if (concrete? c) c (evaluate c (complete-solution (sat) (list c)))))]
          [_ node]))
      (set! updated-template (cons (hvx:visit (car updated-template) inline-subexprs) (cdr updated-template)))
-     
+
      (display "\nSuccessfully found a swizzle implementation.\n\n")
      (display (format "~a\n\n" (pretty-format (car updated-template))))
      (display (format "Synthesis time: 0 seconds\n\n"))

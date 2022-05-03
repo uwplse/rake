@@ -273,13 +273,13 @@
 
   (set! arm-template (arm:visit-shallow arm-template reset-lo/hi-flags))
 
-  ;(display (format "Reset arm template: ~a\n" arm-template))
+  ; (display (format "Reset arm template: ~a\n" arm-template))
   
   ;; Get swizzle grammar
   (define candidates (get-arm-swizzle-grammar halide-expr arm-template swizzle-budget swizzle-node starting-vecs arm-sub-exprs translation-history))
 
-  ;(display "Swizzling candidates\n")
-  ;(pretty-print candidates)
+  ; (display "Swizzling candidates\n")
+  ; (pretty-print candidates)
   ;; Run synthesizer
   (define-values (successful? updated-template) (synthesize-arm-translation candidates halide-expr arm-sub-exprs value-bounds translation-history))
   
@@ -291,13 +291,16 @@
          [(arm:??sub-expr exprs c) (list-ref exprs (if (concrete? c) c (evaluate c (complete-solution (sat) (list c)))))]
          [_ node]))
      (set! updated-template (cons (arm:visit (car updated-template) inline-subexprs) (cdr updated-template)))
-     
-     (display "\nSuccessfully found a swizzle implementation.\n\n")
+
+     ;; Need to unpack arm:abstr-exprs
+     (set! updated-template (cons (arm:unpack-abstr-exprs (car updated-template)) (cdr updated-template)))
+
+     (display "\n(ARM) Successfully found a swizzle implementation.\n\n")
      (display (format "~a\n\n" (pretty-format (car updated-template))))
      (display (format "Synthesis time: 0 seconds\n\n"))
      (values #t (car updated-template) (cdr updated-template))]
     [else
-     (display (format "\nFailed to synthesize implementation for swizzle node ~a\n\n" swizzle-node))
+     (display (format "\n(ARM) Failed to synthesize implementation for swizzle node ~a\n\n" swizzle-node))
     ;  (error "done")
      (values #f updated-template 0)]))
 
@@ -316,11 +319,12 @@
      (synthesize-arm-translation (rest templates) halide-expr arm-sub-exprs value-bounds translation-history)]
     [else
      (define template (first templates))
-     (define sol (run-synthesizer (car template) halide-expr arm-sub-exprs value-bounds translation-history))
+     (define-values (sol updated-template)
+      (run-synthesizer (car template) halide-expr arm-sub-exprs value-bounds translation-history))
      (hash-set! synthesis-db (list (first templates) halide-expr) #t)
      (cond
        [(correct? sol)
-        (values #t (evaluate template sol))]
+        (values #t (cons updated-template (cdr template)))]
        [else
         (synthesize-arm-translation (rest templates) halide-expr arm-sub-exprs value-bounds translation-history)])]))
 
@@ -396,6 +400,8 @@
        (if (not (equal? id target-node-id)) (update-swizzle-data node halide-expr arm-sub-exprs translation-history) node)]
       [(arm:??swizzle id live-data expr gather-tbl output-type)
        (if (not (equal? id target-node-id)) (update-swizzle-data node halide-expr arm-sub-exprs translation-history) node)]
+      [(arm:??shuffle id lds output-type)
+        (if (not (equal? id target-node-id)) (update-swizzle-data node halide-expr arm-sub-exprs translation-history) node)]
       [_ node]))
     (define updated-template (arm:visit arm-template update-swizzle-nodes))
 
@@ -415,8 +421,14 @@
   (define (update-swizzle-node node [pos -1])
     (destruct node
       [(arm:??load id live-data buffer gather-tbl output-type)
-        (define tbl (map (lambda (i) (define-symbolic* idx integer?) idx) (range 64)))
+        (define tbl (map (lambda (i) (define-symbolic* idx integer?) idx) (range 256)))
         (arm:??load id (halide:extract-buffer-reads halide-expr) buffer tbl output-type)]
+      [(arm:??shuffle id lds output-type)
+        (arm:??shuffle id
+         (for/list ([ld lds])
+           (define tbl (map (lambda (i) (define-symbolic* idx integer?) idx) (range 256)))
+           (arm:??load (arm:??load-id ld) (halide:extract-buffer-reads halide-expr) (arm:??load-buffer ld) tbl output-type))
+         output-type)]
       [(arm:??swizzle id live-data exprs gather-tbl output-type)
         ;; Abstract out common sub-expressions
         (define-values (abstr-halide-expr abstr-template _) (arm:optimize-query halide-expr node arm-sub-exprs (make-hash) translation-history))
@@ -519,7 +531,7 @@
 (define (synthesize-incremental halide-expr template sym-consts lanes-to-verify inferred-axioms discarded-sols)
   ; (display "\n\nsynthesize-incremental\n\n")
   (cond
-    [(empty? lanes-to-verify) (model)]
+    [(empty? lanes-to-verify) (values (model) template)]
     [else
      (define curr-lane (first lanes-to-verify))
      
@@ -542,17 +554,18 @@
 
      (cond
        [(correct? sol)
-        (define c-sol sol);(complete-solution sol sym-consts))
-        (define updated-template (evaluate template c-sol))
-        ;(pretty-print updated-template)
-        (define sub-sol (synthesize-incremental halide-expr updated-template sym-consts (rest lanes-to-verify) inferred-axioms '()))
+        (define updated-template (evaluate template sol))
+
+        (define-values (sub-sol sub-template)
+          (synthesize-incremental halide-expr updated-template sym-consts (rest lanes-to-verify) inferred-axioms '()))
+
         (cond
-          [(correct? sub-sol) c-sol]
+          [(correct? sub-sol) (values sol sub-template)]
           [else
-           (define discarded-sol (evaluate template c-sol))
+           (define discarded-sol updated-template)
            (synthesize-incremental halide-expr template sym-consts lanes-to-verify inferred-axioms (append (list discarded-sol) discarded-sols))])]
        [else
-        (unsat)])]))
+        (values (unsat) template)])]))
 
 (define (lane-eq? oe se lane)
   ;; TODO: do we even need output-layout?
@@ -565,6 +578,7 @@
       [(hash-has-key? enumeration-database key) (hash-ref enumeration-database key)]
 
       [(<= depth 0)
+        ;; TODO: HVX backend has special cases for hi/lo.
         ; TODO: what is this doing?
         (hash-ref! base-exprs output-type '())]
 
