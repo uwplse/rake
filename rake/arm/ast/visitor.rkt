@@ -28,6 +28,7 @@
     [(arm:bl Vn) (transform (arm:bl (visit Vn transform)))]
 
     [(arm:bsl Vd Vn Vm) (transform (arm:bsl (visit Vd transform) (visit Vn transform) (visit Vm transform)))]
+    [(arm:select Vd Vn Vm) (transform (arm:select (visit Vd transform) (visit Vn transform) (visit Vm transform)))]
 
     [(arm:cmeq Vn Vm) (transform (arm:cmeq (visit Vn transform) (visit Vm transform)))]
 
@@ -398,6 +399,7 @@
     [(arm:bl Vn) (transform (arm:bl (visit-shallow Vn transform)))]
 
     [(arm:bsl Vd Vn Vm) (transform (arm:bsl (visit-shallow Vd transform) (visit-shallow Vn transform) (visit-shallow Vm transform)))]
+    [(arm:select Vd Vn Vm) (transform (arm:select (visit-shallow Vd transform) (visit-shallow Vn transform) (visit-shallow Vm transform)))]
 
     [(arm:cmeq Vn Vm) (transform (arm:cmeq (visit-shallow Vn transform) (visit-shallow Vm transform)))]
 
