@@ -78,6 +78,7 @@
 
 (struct vec-if (v1 v2 v3) #:transparent)
 (struct vec-eq (v1 v2) #:transparent)
+(struct vec-ne (v1 v2) #:transparent)
 (struct vec-lt (v1 v2) #:transparent)
 (struct vec-le (v1 v2) #:transparent)
 (struct vec-gt (v1 v2) #:transparent)

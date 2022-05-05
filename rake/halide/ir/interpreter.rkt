@@ -43,6 +43,7 @@
 
     [(vec-if v1 v2 v3) (vec-len v2)]
     [(vec-eq v1 v2) (vec-len v1)]
+    [(vec-ne v1 v2) (vec-len v1)]
     [(vec-lt v1 v2) (vec-len v1)]
     [(vec-le v1 v2) (vec-len v1)]
     [(vec-gt v1 v2) (vec-len v1)]
@@ -97,6 +98,7 @@
     
     [(vec-if v1 v2 v3) (list v1 v2 v3)]
     [(vec-eq v1 v2) (list v1 v2)]
+    [(vec-ne v1 v2) (list v1 v2)]
     [(vec-lt v1 v2) (list v1 v2)]
     [(vec-le v1 v2) (list v1 v2)]
     [(vec-gt v1 v2) (list v1 v2)]
@@ -194,6 +196,7 @@
 
     [(vec-if v1 v2 v3) (lambda (i) (do-if ((interpret v1) i) ((interpret v2) i) ((interpret v3) i)))]
     [(vec-eq v1 v2) (lambda (i) (do-eq ((interpret v1) i) ((interpret v2) i)))]
+    [(vec-ne v1 v2) (lambda (i) (do-neq ((interpret v1) i) ((interpret v2) i)))]
     [(vec-lt v1 v2) (lambda (i) (do-lt ((interpret v1) i) ((interpret v2) i)))]
     [(vec-le v1 v2) (lambda (i) (do-le ((interpret v1) i) ((interpret v2) i)))]
     [(vec-gt v1 v2) (lambda (i) (do-gt ((interpret v1) i) ((interpret v2) i)))]
@@ -396,6 +399,13 @@
      (mk-cpp-expr (bveq (cpp:eval lhs) (cpp:eval rhs)) 'uint1)]
     [else
      (mk-cpp-expr (bveq (cpp:eval lhs) (cpp:eval rhs)) 'uint1)]))
+
+(define (do-neq lhs rhs)
+  (cond
+    [(and (integer? lhs) (integer? rhs))
+     (not (eq? lhs rhs))]
+    [else
+     (mk-cpp-expr (not (bveq (cpp:eval lhs) (cpp:eval rhs))) 'uint1)]))
 
 (define (do-lt lhs rhs)
   (cond

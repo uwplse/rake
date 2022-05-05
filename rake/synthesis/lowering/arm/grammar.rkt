@@ -777,6 +777,20 @@
     ; (display (format "candidates: ~a\n" (pretty-format candidates)))
     (sort-and-uniquify candidates)))
 
+(define (handle-less-than expr0 expr1 arm-sub-exprs halide-expr)
+  (let* ([output-type (halide:elem-type halide-expr)]
+         ; TODO: do we need reinterpret?
+         [isa
+          (list arm:bl arm:cmeq arm:cmeqz arm:cmhi arm:cmhs arm:cmlez arm:cmltz arm:cmqe arm:cmqez arm:cmqt arm:cmqtz arm:cmtst)]
+         [grouped-sub-exprs (prepare-sub-exprs arm-sub-exprs)]
+         [desired-types (arm:get-vector-types output-type)]
+         ; TODO: is this a good depth / cost?
+         [depth 2]
+         [max-cost 10]
+         [candidates (enumerate-arm isa desired-types grouped-sub-exprs depth max-cost)])
+    (display (format "handle-less-than:\noutput-type: ~a\ndesired-types: ~a\ncandidates:\n~a\n" output-type desired-types (pretty-format candidates)))
+    (sort-and-uniquify candidates)))
+
 (define (get-arm-grammar-helper halide-expr ir-expr arm-sub-exprs)
   ; TODO: what is the enumeration-database?
   (destruct ir-expr
@@ -870,6 +884,8 @@
     ; (struct abs-diff-acc (acc expr0 expr1 widening?) #:super struct:ast-node #:transparent)      ;; Instructions: saba, sabal, uaba, uabal
 
     ; TODO: abs-diff-acc, select, is-equal, less-than, less-than-eq, bitwise-and, vs-divide
+    [(arm-ir:less-than expr0 expr1)
+      (handle-less-than expr0 expr1 arm-sub-exprs halide-expr)]
 
     [(arm-ir:vs-divide expr divisor)
       (handle-vs-divide expr divisor arm-sub-exprs halide-expr)]

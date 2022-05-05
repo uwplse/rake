@@ -526,6 +526,11 @@
     ; [(eq? type 'u16x16) (range 16)]
     ; [(eq? type 'u32x8) (range 8)]
     ; [(eq? type 'u64x4) (range 4)]
+    [(eq? type 'u1x2) '(0 1)]
+    [(eq? type 'u1x4) '(0 1 2 3)]
+    [(eq? type 'u1x8) '(0 1 6 7)]
+    [(eq? type 'u1x16) '(0 7 12 15)]
+    [else (error (format "failed in verification-lanes: ~a\n" type))]
 ))
 
 (define (synthesize-incremental halide-expr template sym-consts lanes-to-verify inferred-axioms discarded-sols)
@@ -534,11 +539,16 @@
     [(empty? lanes-to-verify) (values (model) template)]
     [else
      (define curr-lane (first lanes-to-verify))
-     
-      ; (display (format "Verifying lane: ~a\n" curr-lane))
-      ; (set-curr-cn! curr-lane)
-      ; (println ((halide:interpret halide-expr) curr-lane))
-      ; (println (arm:get-element (arm:interpret template) curr-lane))
+
+    ; (display (format "\n\nVerifying lane: ~a\n" curr-lane))
+    ;  (when (eq? 0 curr-lane)
+    ;    (pretty-print template))
+    ;  (println inferred-axioms)
+    ;  (newline)
+    ;  (set-curr-cn! curr-lane)
+    ;  (println ((halide:interpret halide-expr) curr-lane))
+    ;  (println (arm:get-element (arm:interpret template) curr-lane))
+    ;  (newline)
 
      (define st (current-milliseconds))
      (clear-vc!)

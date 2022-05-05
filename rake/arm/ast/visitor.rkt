@@ -25,6 +25,32 @@
 
     [(arm:addv Vn) (transform (arm:addv (visit Vn transform)))]
 
+    [(arm:bl Vn) (transform (arm:bl (visit Vn transform)))]
+
+    [(arm:bsl Vd Vn Vm) (transform (arm:bsl (visit Vd transform) (visit Vn transform) (visit Vm transform)))]
+
+    [(arm:cmeq Vn Vm) (transform (arm:cmeq (visit Vn transform) (visit Vm transform)))]
+
+    [(arm:cmeqz Vn) (transform (arm:cmeqz (visit Vn transform)))]
+
+    [(arm:cmhi Vn Vm) (transform (arm:cmhi (visit Vn transform) (visit Vm transform)))]
+
+    [(arm:cmhs Vn Vm) (transform (arm:cmhs (visit Vn transform) (visit Vm transform)))]
+
+    [(arm:cmlez Vn) (transform (arm:cmlez (visit Vn transform)))]
+
+    [(arm:cmltz Vn) (transform (arm:cmltz (visit Vn transform)))]
+
+    [(arm:cmqe Vn Vm) (transform (arm:cmqe (visit Vn transform) (visit Vm transform)))]
+
+    [(arm:cmqez Vn) (transform (arm:cmqez (visit Vn transform)))]
+
+    [(arm:cmqt Vn Vm) (transform (arm:cmqt (visit Vn transform) (visit Vm transform)))]
+
+    [(arm:cmqtz Vn) (transform (arm:cmqtz (visit Vn transform)))]
+
+    [(arm:cmtst Vn Vm) (transform (arm:cmtst (visit Vn transform) (visit Vm transform)))]
+
     [(arm:dup Vn) (transform (arm:dup (visit Vn transform)))]
 
     [(arm:dupn Vn) (transform (arm:dupn (visit Vn transform)))]
@@ -368,6 +394,32 @@
     [(arm:addp Vn Vm) (transform (arm:addp (visit-shallow Vn transform) (visit-shallow Vm transform)))]
 
     [(arm:addv Vn) (transform (arm:addv (visit-shallow Vn transform)))]
+
+    [(arm:bl Vn) (transform (arm:bl (visit-shallow Vn transform)))]
+
+    [(arm:bsl Vd Vn Vm) (transform (arm:bsl (visit-shallow Vd transform) (visit-shallow Vn transform) (visit-shallow Vm transform)))]
+
+    [(arm:cmeq Vn Vm) (transform (arm:cmeq (visit-shallow Vn transform) (visit-shallow Vm transform)))]
+
+    [(arm:cmeqz Vn) (transform (arm:cmeqz (visit-shallow Vn transform)))]
+
+    [(arm:cmhi Vn Vm) (transform (arm:cmhi (visit-shallow Vn transform) (visit-shallow Vm transform)))]
+
+    [(arm:cmhs Vn Vm) (transform (arm:cmhs (visit-shallow Vn transform) (visit-shallow Vm transform)))]
+
+    [(arm:cmlez Vn) (transform (arm:cmlez (visit-shallow Vn transform)))]
+
+    [(arm:cmltz Vn) (transform (arm:cmltz (visit-shallow Vn transform)))]
+
+    [(arm:cmqe Vn Vm) (transform (arm:cmqe (visit-shallow Vn transform) (visit-shallow Vm transform)))]
+
+    [(arm:cmqez Vn) (transform (arm:cmqez (visit-shallow Vn transform)))]
+
+    [(arm:cmqt Vn Vm) (transform (arm:cmqt (visit-shallow Vn transform) (visit-shallow Vm transform)))]
+
+    [(arm:cmqtz Vn) (transform (arm:cmqtz (visit-shallow Vn transform)))]
+
+    [(arm:cmtst Vn Vm) (transform (arm:cmtst (visit-shallow Vn transform) (visit-shallow Vm transform)))]
 
     [(arm:dup Vn) (transform (arm:dup (visit-shallow Vn transform)))]
 

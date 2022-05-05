@@ -58,8 +58,11 @@
     [(arm:dupw? arm-sub-expr) (values spec template)]
     [(arm:dupn? arm-sub-expr) (values spec template)]
     [else
+      (display (format "(abstr-equiv-subexprs\nspec =\n~a\ntemplate =\n~a\narm-sub-expr =\n~a\nhalide-sub-expr =\n~a\nabstracted-halide-subexpr =\n~a\noffset =\n~a\n sub-expr-bounds =\n~a\n)"
+       (pretty-format spec) (pretty-format template) (pretty-format arm-sub-expr) (pretty-format halide-sub-expr) (pretty-format abstracted-halide-subexpr) (pretty-format offset) (pretty-format sub-expr-bounds)))
+
       (define abstracted-arm-subexpr (make-arm-abstr-sub-expr arm-sub-expr abstracted-halide-subexpr offset sub-expr-bounds))
-       
+
       (define (abstract-sub-expr-halide node)
         (cond
           [(rkt-equal? (unpack-abstr-exprs node) halide-sub-expr) abstracted-halide-subexpr]

@@ -1,7 +1,7 @@
 #lang rosette/safe
 
 (require
-  (only-in racket/base exit values for make-hash hash-set! hash-has-key?)
+  (only-in racket/base exit values for make-hash hash-set! hash-has-key? error)
   (only-in racket/set set-subtract list->set set->list)
   rosette/lib/destruct
   rosette/lib/synthax
@@ -61,6 +61,11 @@
     ; [(eq? type 'u16x16) '(0 7 12 15)]
     ; [(eq? type 'u32x8) '(0 1 6 7)]
     ; [(eq? type 'u64x4) '(0 1 2 3)]
+    [(eq? type 'u1x2) '(0 1)]
+    [(eq? type 'u1x4) '(0 1 2 3)]
+    [(eq? type 'u1x8) '(0 1 6 7)]
+    [(eq? type 'u1x16) '(0 7 12 15)]
+    [else (error (format "failed in verification-lanes: ~a\n" type))]
 ))
 
 (define (synthesize-translation templates halide-expr arm-sub-exprs value-bounds translation-history)
@@ -117,6 +122,7 @@
     ;  (when (eq? 0 curr-lane)
     ;    (pretty-print optimized-template))
     ;  (println inferred-axioms)
+    ;  (newline)
     ;  (set-curr-cn! curr-lane)
     ;  (println ((halide:interpret optimized-halide-expr) curr-lane))
     ;  (println (arm:get-element (arm:interpret optimized-template) curr-lane))

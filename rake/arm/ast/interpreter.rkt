@@ -432,6 +432,1206 @@
              v0)))]
         [(_) (assert #f (format "infeasible in addv\n~a\n" (pretty-format p)))])]
 
+    [(arm:bl Vn)
+      (destruct* ((interpret Vn))
+        [((arm:u8x8 v0))
+          (arm:u1x8
+           (halide:interpret
+            (vec-ne
+             v0
+             (x8 (uint8_t (bv 0 8))))))]
+        [((arm:u8x16 v0))
+          (arm:u1x16
+           (halide:interpret
+            (vec-ne
+             v0
+             (x16 (uint8_t (bv 0 8))))))]
+        [((arm:u16x4 v0))
+          (arm:u1x4
+           (halide:interpret
+            (vec-ne
+             v0
+             (x4 (uint16_t (bv 0 16))))))]
+        [((arm:u16x8 v0))
+          (arm:u1x8
+           (halide:interpret
+            (vec-ne
+             v0
+             (x8 (uint16_t (bv 0 16))))))]
+        [((arm:u32x2 v0))
+          (arm:u1x2
+           (halide:interpret
+            (vec-ne
+             v0
+             (x2 (uint32_t (bv 0 32))))))]
+        [((arm:u32x4 v0))
+          (arm:u1x4
+           (halide:interpret
+            (vec-ne
+             v0
+             (x4 (uint32_t (bv 0 32))))))]
+        [((arm:u64x2 v0))
+          (arm:u1x2
+           (halide:interpret
+            (vec-ne
+             v0
+             (x2 (uint64_t (bv 0 64))))))]
+        [((arm:i8x8 v0))
+          (arm:u1x8
+           (halide:interpret
+            (vec-ne
+             v0
+             (x8 (int8_t (bv 0 8))))))]
+        [((arm:i8x16 v0))
+          (arm:u1x16
+           (halide:interpret
+            (vec-ne
+             v0
+             (x16 (int8_t (bv 0 8))))))]
+        [((arm:i16x4 v0))
+          (arm:u1x4
+           (halide:interpret
+            (vec-ne
+             v0
+             (x4 (int16_t (bv 0 16))))))]
+        [((arm:i16x8 v0))
+          (arm:u1x8
+           (halide:interpret
+            (vec-ne
+             v0
+             (x8 (int16_t (bv 0 16))))))]
+        [((arm:i32x2 v0))
+          (arm:u1x2
+           (halide:interpret
+            (vec-ne
+             v0
+             (x2 (int32_t (bv 0 32))))))]
+        [((arm:i32x4 v0))
+          (arm:u1x4
+           (halide:interpret
+            (vec-ne
+             v0
+             (x4 (int32_t (bv 0 32))))))]
+        [((arm:i64x2 v0))
+          (arm:u1x2
+           (halide:interpret
+            (vec-ne
+             v0
+             (x2 (int64_t (bv 0 64))))))]
+        [(_) (assert #f (format "infeasible in bl\n~a\n" (pretty-format p)))])]
+
+    [(arm:bsl Vd Vn Vm)
+      (destruct* ((interpret Vd) (interpret Vn) (interpret Vm))
+        [((arm:u8x8 v0) (arm:u8x8 v1) (arm:u8x8 v2))
+          (arm:u8x8
+           (halide:interpret
+            (vec-bwor
+             (vec-bwand
+              v0
+              v1)
+             (vec-bwand
+              (vec-bwnot
+               v0)
+              v2))))]
+        [((arm:u8x16 v0) (arm:u8x16 v1) (arm:u8x16 v2))
+          (arm:u8x16
+           (halide:interpret
+            (vec-bwor
+             (vec-bwand
+              v0
+              v1)
+             (vec-bwand
+              (vec-bwnot
+               v0)
+              v2))))]
+        [((arm:u16x4 v0) (arm:u16x4 v1) (arm:u16x4 v2))
+          (arm:u16x4
+           (halide:interpret
+            (vec-bwor
+             (vec-bwand
+              v0
+              v1)
+             (vec-bwand
+              (vec-bwnot
+               v0)
+              v2))))]
+        [((arm:u16x8 v0) (arm:u16x8 v1) (arm:u16x8 v2))
+          (arm:u16x8
+           (halide:interpret
+            (vec-bwor
+             (vec-bwand
+              v0
+              v1)
+             (vec-bwand
+              (vec-bwnot
+               v0)
+              v2))))]
+        [((arm:u32x2 v0) (arm:u32x2 v1) (arm:u32x2 v2))
+          (arm:u32x2
+           (halide:interpret
+            (vec-bwor
+             (vec-bwand
+              v0
+              v1)
+             (vec-bwand
+              (vec-bwnot
+               v0)
+              v2))))]
+        [((arm:u32x4 v0) (arm:u32x4 v1) (arm:u32x4 v2))
+          (arm:u32x4
+           (halide:interpret
+            (vec-bwor
+             (vec-bwand
+              v0
+              v1)
+             (vec-bwand
+              (vec-bwnot
+               v0)
+              v2))))]
+        [((arm:u64x2 v0) (arm:u64x2 v1) (arm:u64x2 v2))
+          (arm:u64x2
+           (halide:interpret
+            (vec-bwor
+             (vec-bwand
+              v0
+              v1)
+             (vec-bwand
+              (vec-bwnot
+               v0)
+              v2))))]
+        [((arm:i8x8 v0) (arm:i8x8 v1) (arm:i8x8 v2))
+          (arm:i8x8
+           (halide:interpret
+            (vec-bwor
+             (vec-bwand
+              v0
+              v1)
+             (vec-bwand
+              (vec-bwnot
+               v0)
+              v2))))]
+        [((arm:i8x16 v0) (arm:i8x16 v1) (arm:i8x16 v2))
+          (arm:i8x16
+           (halide:interpret
+            (vec-bwor
+             (vec-bwand
+              v0
+              v1)
+             (vec-bwand
+              (vec-bwnot
+               v0)
+              v2))))]
+        [((arm:i16x4 v0) (arm:i16x4 v1) (arm:i16x4 v2))
+          (arm:i16x4
+           (halide:interpret
+            (vec-bwor
+             (vec-bwand
+              v0
+              v1)
+             (vec-bwand
+              (vec-bwnot
+               v0)
+              v2))))]
+        [((arm:i16x8 v0) (arm:i16x8 v1) (arm:i16x8 v2))
+          (arm:i16x8
+           (halide:interpret
+            (vec-bwor
+             (vec-bwand
+              v0
+              v1)
+             (vec-bwand
+              (vec-bwnot
+               v0)
+              v2))))]
+        [((arm:i32x2 v0) (arm:i32x2 v1) (arm:i32x2 v2))
+          (arm:i32x2
+           (halide:interpret
+            (vec-bwor
+             (vec-bwand
+              v0
+              v1)
+             (vec-bwand
+              (vec-bwnot
+               v0)
+              v2))))]
+        [((arm:i32x4 v0) (arm:i32x4 v1) (arm:i32x4 v2))
+          (arm:i32x4
+           (halide:interpret
+            (vec-bwor
+             (vec-bwand
+              v0
+              v1)
+             (vec-bwand
+              (vec-bwnot
+               v0)
+              v2))))]
+        [((arm:i64x2 v0) (arm:i64x2 v1) (arm:i64x2 v2))
+          (arm:i64x2
+           (halide:interpret
+            (vec-bwor
+             (vec-bwand
+              v0
+              v1)
+             (vec-bwand
+              (vec-bwnot
+               v0)
+              v2))))]
+        [(_ _ _) (assert #f (format "infeasible in bsl\n~a\n" (pretty-format p)))])]
+
+    [(arm:cmeq Vn Vm)
+      (destruct* ((interpret Vn) (interpret Vm))
+        [((arm:u8x8 v0) (arm:u8x8 v1))
+           (arm:u8x8
+            (halide:interpret
+             (vec-if
+             (vec-eq
+              v0
+              v1)
+             (x8 (uint8_t (bv 255 8)))
+             (x8 (uint8_t (bv 0 8))))))]
+        [((arm:u8x16 v0) (arm:u8x16 v1))
+           (arm:u8x16
+            (halide:interpret
+             (vec-if
+             (vec-eq
+              v0
+              v1)
+             (x16 (uint8_t (bv 255 8)))
+             (x16 (uint8_t (bv 0 8))))))]
+        [((arm:u16x4 v0) (arm:u16x4 v1))
+           (arm:u16x4
+            (halide:interpret
+             (vec-if
+             (vec-eq
+              v0
+              v1)
+             (x4 (uint16_t (bv 65535 16)))
+             (x4 (uint16_t (bv 0 16))))))]
+        [((arm:u16x8 v0) (arm:u16x8 v1))
+           (arm:u16x8
+            (halide:interpret
+             (vec-if
+             (vec-eq
+              v0
+              v1)
+             (x8 (uint16_t (bv 65535 16)))
+             (x8 (uint16_t (bv 0 16))))))]
+        [((arm:u32x2 v0) (arm:u32x2 v1))
+           (arm:u32x2
+            (halide:interpret
+             (vec-if
+             (vec-eq
+              v0
+              v1)
+             (x2 (uint32_t (bv 4294967295 32)))
+             (x2 (uint32_t (bv 0 32))))))]
+        [((arm:u32x4 v0) (arm:u32x4 v1))
+           (arm:u32x4
+            (halide:interpret
+             (vec-if
+             (vec-eq
+              v0
+              v1)
+             (x4 (uint32_t (bv 4294967295 32)))
+             (x4 (uint32_t (bv 0 32))))))]
+        [((arm:u64x2 v0) (arm:u64x2 v1))
+           (arm:u64x2
+            (halide:interpret
+             (vec-if
+             (vec-eq
+              v0
+              v1)
+             (x2 (uint64_t (bv 18446744073709551615 64)))
+             (x2 (uint64_t (bv 0 64))))))]
+        [((arm:i8x8 v0) (arm:i8x8 v1))
+           (arm:i8x8
+            (halide:interpret
+             (vec-if
+             (vec-eq
+              v0
+              v1)
+             (x8 (int8_t (bv -1 8)))
+             (x8 (int8_t (bv 0 8))))))]
+        [((arm:i8x16 v0) (arm:i8x16 v1))
+           (arm:i8x16
+            (halide:interpret
+             (vec-if
+             (vec-eq
+              v0
+              v1)
+             (x16 (int8_t (bv -1 8)))
+             (x16 (int8_t (bv 0 8))))))]
+        [((arm:i16x4 v0) (arm:i16x4 v1))
+           (arm:i16x4
+            (halide:interpret
+             (vec-if
+             (vec-eq
+              v0
+              v1)
+             (x4 (int16_t (bv -1 16)))
+             (x4 (int16_t (bv 0 16))))))]
+        [((arm:i16x8 v0) (arm:i16x8 v1))
+           (arm:i16x8
+            (halide:interpret
+             (vec-if
+             (vec-eq
+              v0
+              v1)
+             (x8 (int16_t (bv -1 16)))
+             (x8 (int16_t (bv 0 16))))))]
+        [((arm:i32x2 v0) (arm:i32x2 v1))
+           (arm:i32x2
+            (halide:interpret
+             (vec-if
+             (vec-eq
+              v0
+              v1)
+             (x2 (int32_t (bv -1 32)))
+             (x2 (int32_t (bv 0 32))))))]
+        [((arm:i32x4 v0) (arm:i32x4 v1))
+           (arm:i32x4
+            (halide:interpret
+             (vec-if
+             (vec-eq
+              v0
+              v1)
+             (x4 (int32_t (bv -1 32)))
+             (x4 (int32_t (bv 0 32))))))]
+        [((arm:i64x2 v0) (arm:i64x2 v1))
+           (arm:i64x2
+            (halide:interpret
+             (vec-if
+             (vec-eq
+              v0
+              v1)
+             (x2 (int64_t (bv -1 64)))
+             (x2 (int64_t (bv 0 64))))))]
+        [(_ _) (assert #f (format "infeasible in cmeq\n~a\n" (pretty-format p)))])]
+
+    [(arm:cmeqz Vn)
+      (destruct* ((interpret Vn))
+        [((arm:u8x8 v0))
+           (arm:u8x8
+            (halide:interpret
+             (vec-if
+             (vec-eq
+              v0
+              (x8 (uint8_t (bv 0 8))))
+             (x8 (uint8_t (bv 255 8)))
+             (x8 (uint8_t (bv 0 8))))))]
+        [((arm:u8x16 v0))
+           (arm:u8x16
+            (halide:interpret
+             (vec-if
+             (vec-eq
+              v0
+              (x16 (uint8_t (bv 0 8))))
+             (x16 (uint8_t (bv 255 8)))
+             (x16 (uint8_t (bv 0 8))))))]
+        [((arm:u16x4 v0))
+           (arm:u16x4
+            (halide:interpret
+             (vec-if
+             (vec-eq
+              v0
+              (x4 (uint16_t (bv 0 16))))
+             (x4 (uint16_t (bv 65535 16)))
+             (x4 (uint16_t (bv 0 16))))))]
+        [((arm:u16x8 v0))
+           (arm:u16x8
+            (halide:interpret
+             (vec-if
+             (vec-eq
+              v0
+              (x8 (uint16_t (bv 0 16))))
+             (x8 (uint16_t (bv 65535 16)))
+             (x8 (uint16_t (bv 0 16))))))]
+        [((arm:u32x2 v0))
+           (arm:u32x2
+            (halide:interpret
+             (vec-if
+             (vec-eq
+              v0
+              (x2 (uint32_t (bv 0 32))))
+             (x2 (uint32_t (bv 4294967295 32)))
+             (x2 (uint32_t (bv 0 32))))))]
+        [((arm:u32x4 v0))
+           (arm:u32x4
+            (halide:interpret
+             (vec-if
+             (vec-eq
+              v0
+              (x4 (uint32_t (bv 0 32))))
+             (x4 (uint32_t (bv 4294967295 32)))
+             (x4 (uint32_t (bv 0 32))))))]
+        [((arm:u64x2 v0))
+           (arm:u64x2
+            (halide:interpret
+             (vec-if
+             (vec-eq
+              v0
+              (x2 (uint64_t (bv 0 64))))
+             (x2 (uint64_t (bv 18446744073709551615 64)))
+             (x2 (uint64_t (bv 0 64))))))]
+        [((arm:i8x8 v0))
+           (arm:i8x8
+            (halide:interpret
+             (vec-if
+             (vec-eq
+              v0
+              (x8 (int8_t (bv 0 8))))
+             (x8 (int8_t (bv -1 8)))
+             (x8 (int8_t (bv 0 8))))))]
+        [((arm:i8x16 v0))
+           (arm:i8x16
+            (halide:interpret
+             (vec-if
+             (vec-eq
+              v0
+              (x16 (int8_t (bv 0 8))))
+             (x16 (int8_t (bv -1 8)))
+             (x16 (int8_t (bv 0 8))))))]
+        [((arm:i16x4 v0))
+           (arm:i16x4
+            (halide:interpret
+             (vec-if
+             (vec-eq
+              v0
+              (x4 (int16_t (bv 0 16))))
+             (x4 (int16_t (bv -1 16)))
+             (x4 (int16_t (bv 0 16))))))]
+        [((arm:i16x8 v0))
+           (arm:i16x8
+            (halide:interpret
+             (vec-if
+             (vec-eq
+              v0
+              (x8 (int16_t (bv 0 16))))
+             (x8 (int16_t (bv -1 16)))
+             (x8 (int16_t (bv 0 16))))))]
+        [((arm:i32x2 v0))
+           (arm:i32x2
+            (halide:interpret
+             (vec-if
+             (vec-eq
+              v0
+              (x2 (int32_t (bv 0 32))))
+             (x2 (int32_t (bv -1 32)))
+             (x2 (int32_t (bv 0 32))))))]
+        [((arm:i32x4 v0))
+           (arm:i32x4
+            (halide:interpret
+             (vec-if
+             (vec-eq
+              v0
+              (x4 (int32_t (bv 0 32))))
+             (x4 (int32_t (bv -1 32)))
+             (x4 (int32_t (bv 0 32))))))]
+        [((arm:i64x2 v0))
+           (arm:i64x2
+            (halide:interpret
+             (vec-if
+             (vec-eq
+              v0
+              (x2 (int64_t (bv 0 64))))
+             (x2 (int64_t (bv -1 64)))
+             (x2 (int64_t (bv 0 64))))))]
+        [(_) (assert #f (format "infeasible in cmeqz\n~a\n" (pretty-format p)))])]
+
+    [(arm:cmhi Vn Vm)
+      (destruct* ((interpret Vn) (interpret Vm))
+        [((arm:u8x8 v0) (arm:u8x8 v1))
+           (arm:u8x8
+            (halide:interpret
+             (vec-if
+             (vec-gt
+              v0
+              v1)
+             (x8 (uint8_t (bv 255 8)))
+             (x8 (uint8_t (bv 0 8))))))]
+        [((arm:u8x16 v0) (arm:u8x16 v1))
+           (arm:u8x16
+            (halide:interpret
+             (vec-if
+             (vec-gt
+              v0
+              v1)
+             (x16 (uint8_t (bv 255 8)))
+             (x16 (uint8_t (bv 0 8))))))]
+        [((arm:u16x4 v0) (arm:u16x4 v1))
+           (arm:u16x4
+            (halide:interpret
+             (vec-if
+             (vec-gt
+              v0
+              v1)
+             (x4 (uint16_t (bv 65535 16)))
+             (x4 (uint16_t (bv 0 16))))))]
+        [((arm:u16x8 v0) (arm:u16x8 v1))
+           (arm:u16x8
+            (halide:interpret
+             (vec-if
+             (vec-gt
+              v0
+              v1)
+             (x8 (uint16_t (bv 65535 16)))
+             (x8 (uint16_t (bv 0 16))))))]
+        [((arm:u32x2 v0) (arm:u32x2 v1))
+           (arm:u32x2
+            (halide:interpret
+             (vec-if
+             (vec-gt
+              v0
+              v1)
+             (x2 (uint32_t (bv 4294967295 32)))
+             (x2 (uint32_t (bv 0 32))))))]
+        [((arm:u32x4 v0) (arm:u32x4 v1))
+           (arm:u32x4
+            (halide:interpret
+             (vec-if
+             (vec-gt
+              v0
+              v1)
+             (x4 (uint32_t (bv 4294967295 32)))
+             (x4 (uint32_t (bv 0 32))))))]
+        [((arm:u64x2 v0) (arm:u64x2 v1))
+           (arm:u64x2
+            (halide:interpret
+             (vec-if
+             (vec-gt
+              v0
+              v1)
+             (x2 (uint64_t (bv 18446744073709551615 64)))
+             (x2 (uint64_t (bv 0 64))))))]
+        [(_ _) (assert #f (format "infeasible in cmhi\n~a\n" (pretty-format p)))])]
+
+    [(arm:cmhs Vn Vm)
+      (destruct* ((interpret Vn) (interpret Vm))
+        [((arm:u8x8 v0) (arm:u8x8 v1))
+           (arm:u8x8
+            (halide:interpret
+             (vec-if
+             (vec-ge
+              v0
+              v1)
+             (x8 (uint8_t (bv 255 8)))
+             (x8 (uint8_t (bv 0 8))))))]
+        [((arm:u8x16 v0) (arm:u8x16 v1))
+           (arm:u8x16
+            (halide:interpret
+             (vec-if
+             (vec-ge
+              v0
+              v1)
+             (x16 (uint8_t (bv 255 8)))
+             (x16 (uint8_t (bv 0 8))))))]
+        [((arm:u16x4 v0) (arm:u16x4 v1))
+           (arm:u16x4
+            (halide:interpret
+             (vec-if
+             (vec-ge
+              v0
+              v1)
+             (x4 (uint16_t (bv 65535 16)))
+             (x4 (uint16_t (bv 0 16))))))]
+        [((arm:u16x8 v0) (arm:u16x8 v1))
+           (arm:u16x8
+            (halide:interpret
+             (vec-if
+             (vec-ge
+              v0
+              v1)
+             (x8 (uint16_t (bv 65535 16)))
+             (x8 (uint16_t (bv 0 16))))))]
+        [((arm:u32x2 v0) (arm:u32x2 v1))
+           (arm:u32x2
+            (halide:interpret
+             (vec-if
+             (vec-ge
+              v0
+              v1)
+             (x2 (uint32_t (bv 4294967295 32)))
+             (x2 (uint32_t (bv 0 32))))))]
+        [((arm:u32x4 v0) (arm:u32x4 v1))
+           (arm:u32x4
+            (halide:interpret
+             (vec-if
+             (vec-ge
+              v0
+              v1)
+             (x4 (uint32_t (bv 4294967295 32)))
+             (x4 (uint32_t (bv 0 32))))))]
+        [((arm:u64x2 v0) (arm:u64x2 v1))
+           (arm:u64x2
+            (halide:interpret
+             (vec-if
+             (vec-ge
+              v0
+              v1)
+             (x2 (uint64_t (bv 18446744073709551615 64)))
+             (x2 (uint64_t (bv 0 64))))))]
+        [(_ _) (assert #f (format "infeasible in cmhs\n~a\n" (pretty-format p)))])]
+
+    [(arm:cmlez Vn)
+      (destruct* ((interpret Vn))
+        [((arm:i8x8 v0))
+           (arm:i8x8
+            (halide:interpret
+             (vec-if
+             (vec-ge
+              (x8 (int8_t (bv 0 8)))
+              v0)
+             (x8 (int8_t (bv -1 8)))
+             (x8 (int8_t (bv 0 8))))))]
+        [((arm:i8x16 v0))
+           (arm:i8x16
+            (halide:interpret
+             (vec-if
+             (vec-ge
+              (x16 (int8_t (bv 0 8)))
+              v0)
+             (x16 (int8_t (bv -1 8)))
+             (x16 (int8_t (bv 0 8))))))]
+        [((arm:i16x4 v0))
+           (arm:i16x4
+            (halide:interpret
+             (vec-if
+             (vec-ge
+              (x4 (int16_t (bv 0 16)))
+              v0)
+             (x4 (int16_t (bv -1 16)))
+             (x4 (int16_t (bv 0 16))))))]
+        [((arm:i16x8 v0))
+           (arm:i16x8
+            (halide:interpret
+             (vec-if
+             (vec-ge
+              (x8 (int16_t (bv 0 16)))
+              v0)
+             (x8 (int16_t (bv -1 16)))
+             (x8 (int16_t (bv 0 16))))))]
+        [((arm:i32x2 v0))
+           (arm:i32x2
+            (halide:interpret
+             (vec-if
+             (vec-ge
+              (x2 (int32_t (bv 0 32)))
+              v0)
+             (x2 (int32_t (bv -1 32)))
+             (x2 (int32_t (bv 0 32))))))]
+        [((arm:i32x4 v0))
+           (arm:i32x4
+            (halide:interpret
+             (vec-if
+             (vec-ge
+              (x4 (int32_t (bv 0 32)))
+              v0)
+             (x4 (int32_t (bv -1 32)))
+             (x4 (int32_t (bv 0 32))))))]
+        [((arm:i64x2 v0))
+           (arm:i64x2
+            (halide:interpret
+             (vec-if
+             (vec-ge
+              (x2 (int64_t (bv 0 64)))
+              v0)
+             (x2 (int64_t (bv -1 64)))
+             (x2 (int64_t (bv 0 64))))))]
+        [(_) (assert #f (format "infeasible in cmlez\n~a\n" (pretty-format p)))])]
+
+    [(arm:cmltz Vn)
+      (destruct* ((interpret Vn))
+        [((arm:i8x8 v0))
+           (arm:i8x8
+            (halide:interpret
+             (vec-if
+             (vec-gt
+              (x8 (int8_t (bv 0 8)))
+              v0)
+             (x8 (int8_t (bv -1 8)))
+             (x8 (int8_t (bv 0 8))))))]
+        [((arm:i8x16 v0))
+           (arm:i8x16
+            (halide:interpret
+             (vec-if
+             (vec-gt
+              (x16 (int8_t (bv 0 8)))
+              v0)
+             (x16 (int8_t (bv -1 8)))
+             (x16 (int8_t (bv 0 8))))))]
+        [((arm:i16x4 v0))
+           (arm:i16x4
+            (halide:interpret
+             (vec-if
+             (vec-gt
+              (x4 (int16_t (bv 0 16)))
+              v0)
+             (x4 (int16_t (bv -1 16)))
+             (x4 (int16_t (bv 0 16))))))]
+        [((arm:i16x8 v0))
+           (arm:i16x8
+            (halide:interpret
+             (vec-if
+             (vec-gt
+              (x8 (int16_t (bv 0 16)))
+              v0)
+             (x8 (int16_t (bv -1 16)))
+             (x8 (int16_t (bv 0 16))))))]
+        [((arm:i32x2 v0))
+           (arm:i32x2
+            (halide:interpret
+             (vec-if
+             (vec-gt
+              (x2 (int32_t (bv 0 32)))
+              v0)
+             (x2 (int32_t (bv -1 32)))
+             (x2 (int32_t (bv 0 32))))))]
+        [((arm:i32x4 v0))
+           (arm:i32x4
+            (halide:interpret
+             (vec-if
+             (vec-gt
+              (x4 (int32_t (bv 0 32)))
+              v0)
+             (x4 (int32_t (bv -1 32)))
+             (x4 (int32_t (bv 0 32))))))]
+        [((arm:i64x2 v0))
+           (arm:i64x2
+            (halide:interpret
+             (vec-if
+             (vec-gt
+              (x2 (int64_t (bv 0 64)))
+              v0)
+             (x2 (int64_t (bv -1 64)))
+             (x2 (int64_t (bv 0 64))))))]
+        [(_) (assert #f (format "infeasible in cmltz\n~a\n" (pretty-format p)))])]
+
+    [(arm:cmqe Vn Vm)
+      (destruct* ((interpret Vn) (interpret Vm))
+        [((arm:i8x8 v0) (arm:i8x8 v1))
+           (arm:i8x8
+            (halide:interpret
+             (vec-if
+             (vec-ge
+              v0
+              v1)
+             (x8 (int8_t (bv -1 8)))
+             (x8 (int8_t (bv 0 8))))))]
+        [((arm:i8x16 v0) (arm:i8x16 v1))
+           (arm:i8x16
+            (halide:interpret
+             (vec-if
+             (vec-ge
+              v0
+              v1)
+             (x16 (int8_t (bv -1 8)))
+             (x16 (int8_t (bv 0 8))))))]
+        [((arm:i16x4 v0) (arm:i16x4 v1))
+           (arm:i16x4
+            (halide:interpret
+             (vec-if
+             (vec-ge
+              v0
+              v1)
+             (x4 (int16_t (bv -1 16)))
+             (x4 (int16_t (bv 0 16))))))]
+        [((arm:i16x8 v0) (arm:i16x8 v1))
+           (arm:i16x8
+            (halide:interpret
+             (vec-if
+             (vec-ge
+              v0
+              v1)
+             (x8 (int16_t (bv -1 16)))
+             (x8 (int16_t (bv 0 16))))))]
+        [((arm:i32x2 v0) (arm:i32x2 v1))
+           (arm:i32x2
+            (halide:interpret
+             (vec-if
+             (vec-ge
+              v0
+              v1)
+             (x2 (int32_t (bv -1 32)))
+             (x2 (int32_t (bv 0 32))))))]
+        [((arm:i32x4 v0) (arm:i32x4 v1))
+           (arm:i32x4
+            (halide:interpret
+             (vec-if
+             (vec-ge
+              v0
+              v1)
+             (x4 (int32_t (bv -1 32)))
+             (x4 (int32_t (bv 0 32))))))]
+        [((arm:i64x2 v0) (arm:i64x2 v1))
+           (arm:i64x2
+            (halide:interpret
+             (vec-if
+             (vec-ge
+              v0
+              v1)
+             (x2 (int64_t (bv -1 64)))
+             (x2 (int64_t (bv 0 64))))))]
+        [(_ _) (assert #f (format "infeasible in cmqe\n~a\n" (pretty-format p)))])]
+
+    [(arm:cmqez Vn)
+      (destruct* ((interpret Vn))
+        [((arm:i8x8 v0))
+           (arm:i8x8
+            (halide:interpret
+             (vec-if
+             (vec-ge
+              v0
+              (x8 (int8_t (bv 0 8))))
+             (x8 (int8_t (bv -1 8)))
+             (x8 (int8_t (bv 0 8))))))]
+        [((arm:i8x16 v0))
+           (arm:i8x16
+            (halide:interpret
+             (vec-if
+             (vec-ge
+              v0
+              (x16 (int8_t (bv 0 8))))
+             (x16 (int8_t (bv -1 8)))
+             (x16 (int8_t (bv 0 8))))))]
+        [((arm:i16x4 v0))
+           (arm:i16x4
+            (halide:interpret
+             (vec-if
+             (vec-ge
+              v0
+              (x4 (int16_t (bv 0 16))))
+             (x4 (int16_t (bv -1 16)))
+             (x4 (int16_t (bv 0 16))))))]
+        [((arm:i16x8 v0))
+           (arm:i16x8
+            (halide:interpret
+             (vec-if
+             (vec-ge
+              v0
+              (x8 (int16_t (bv 0 16))))
+             (x8 (int16_t (bv -1 16)))
+             (x8 (int16_t (bv 0 16))))))]
+        [((arm:i32x2 v0))
+           (arm:i32x2
+            (halide:interpret
+             (vec-if
+             (vec-ge
+              v0
+              (x2 (int32_t (bv 0 32))))
+             (x2 (int32_t (bv -1 32)))
+             (x2 (int32_t (bv 0 32))))))]
+        [((arm:i32x4 v0))
+           (arm:i32x4
+            (halide:interpret
+             (vec-if
+             (vec-ge
+              v0
+              (x4 (int32_t (bv 0 32))))
+             (x4 (int32_t (bv -1 32)))
+             (x4 (int32_t (bv 0 32))))))]
+        [((arm:i64x2 v0))
+           (arm:i64x2
+            (halide:interpret
+             (vec-if
+             (vec-ge
+              v0
+              (x2 (int64_t (bv 0 64))))
+             (x2 (int64_t (bv -1 64)))
+             (x2 (int64_t (bv 0 64))))))]
+        [(_) (assert #f (format "infeasible in cmqez\n~a\n" (pretty-format p)))])]
+
+    [(arm:cmqt Vn Vm)
+      (destruct* ((interpret Vn) (interpret Vm))
+        [((arm:i8x8 v0) (arm:i8x8 v1))
+           (arm:i8x8
+            (halide:interpret
+             (vec-if
+             (vec-gt
+              v0
+              v1)
+             (x8 (int8_t (bv -1 8)))
+             (x8 (int8_t (bv 0 8))))))]
+        [((arm:i8x16 v0) (arm:i8x16 v1))
+           (arm:i8x16
+            (halide:interpret
+             (vec-if
+             (vec-gt
+              v0
+              v1)
+             (x16 (int8_t (bv -1 8)))
+             (x16 (int8_t (bv 0 8))))))]
+        [((arm:i16x4 v0) (arm:i16x4 v1))
+           (arm:i16x4
+            (halide:interpret
+             (vec-if
+             (vec-gt
+              v0
+              v1)
+             (x4 (int16_t (bv -1 16)))
+             (x4 (int16_t (bv 0 16))))))]
+        [((arm:i16x8 v0) (arm:i16x8 v1))
+           (arm:i16x8
+            (halide:interpret
+             (vec-if
+             (vec-gt
+              v0
+              v1)
+             (x8 (int16_t (bv -1 16)))
+             (x8 (int16_t (bv 0 16))))))]
+        [((arm:i32x2 v0) (arm:i32x2 v1))
+           (arm:i32x2
+            (halide:interpret
+             (vec-if
+             (vec-gt
+              v0
+              v1)
+             (x2 (int32_t (bv -1 32)))
+             (x2 (int32_t (bv 0 32))))))]
+        [((arm:i32x4 v0) (arm:i32x4 v1))
+           (arm:i32x4
+            (halide:interpret
+             (vec-if
+             (vec-gt
+              v0
+              v1)
+             (x4 (int32_t (bv -1 32)))
+             (x4 (int32_t (bv 0 32))))))]
+        [((arm:i64x2 v0) (arm:i64x2 v1))
+           (arm:i64x2
+            (halide:interpret
+             (vec-if
+             (vec-gt
+              v0
+              v1)
+             (x2 (int64_t (bv -1 64)))
+             (x2 (int64_t (bv 0 64))))))]
+        [(_ _) (assert #f (format "infeasible in cmqt\n~a\n" (pretty-format p)))])]
+
+    [(arm:cmqtz Vn)
+      (destruct* ((interpret Vn))
+        [((arm:i8x8 v0))
+           (arm:i8x8
+            (halide:interpret
+             (vec-if
+             (vec-gt
+              v0
+              (x8 (int8_t (bv 0 8))))
+             (x8 (int8_t (bv -1 8)))
+             (x8 (int8_t (bv 0 8))))))]
+        [((arm:i8x16 v0))
+           (arm:i8x16
+            (halide:interpret
+             (vec-if
+             (vec-gt
+              v0
+              (x16 (int8_t (bv 0 8))))
+             (x16 (int8_t (bv -1 8)))
+             (x16 (int8_t (bv 0 8))))))]
+        [((arm:i16x4 v0))
+           (arm:i16x4
+            (halide:interpret
+             (vec-if
+             (vec-gt
+              v0
+              (x4 (int16_t (bv 0 16))))
+             (x4 (int16_t (bv -1 16)))
+             (x4 (int16_t (bv 0 16))))))]
+        [((arm:i16x8 v0))
+           (arm:i16x8
+            (halide:interpret
+             (vec-if
+             (vec-gt
+              v0
+              (x8 (int16_t (bv 0 16))))
+             (x8 (int16_t (bv -1 16)))
+             (x8 (int16_t (bv 0 16))))))]
+        [((arm:i32x2 v0))
+           (arm:i32x2
+            (halide:interpret
+             (vec-if
+             (vec-gt
+              v0
+              (x2 (int32_t (bv 0 32))))
+             (x2 (int32_t (bv -1 32)))
+             (x2 (int32_t (bv 0 32))))))]
+        [((arm:i32x4 v0))
+           (arm:i32x4
+            (halide:interpret
+             (vec-if
+             (vec-gt
+              v0
+              (x4 (int32_t (bv 0 32))))
+             (x4 (int32_t (bv -1 32)))
+             (x4 (int32_t (bv 0 32))))))]
+        [((arm:i64x2 v0))
+           (arm:i64x2
+            (halide:interpret
+             (vec-if
+             (vec-gt
+              v0
+              (x2 (int64_t (bv 0 64))))
+             (x2 (int64_t (bv -1 64)))
+             (x2 (int64_t (bv 0 64))))))]
+        [(_) (assert #f (format "infeasible in cmqtz\n~a\n" (pretty-format p)))])]
+
+    [(arm:cmtst Vn Vm)
+      (destruct* ((interpret Vn) (interpret Vm))
+        [((arm:u8x8 v0) (arm:u8x8 v1))
+           (arm:u8x8
+            (halide:interpret
+             (vec-if
+             (vec-ne
+              (vec-bwand
+               v0
+               v1)
+              (x8 (uint8_t (bv 0 8))))
+             (x8 (uint8_t (bv 255 8)))
+             (x8 (uint8_t (bv 0 8))))))]
+        [((arm:u8x16 v0) (arm:u8x16 v1))
+           (arm:u8x16
+            (halide:interpret
+             (vec-if
+             (vec-ne
+              (vec-bwand
+               v0
+               v1)
+              (x16 (uint8_t (bv 0 8))))
+             (x16 (uint8_t (bv 255 8)))
+             (x16 (uint8_t (bv 0 8))))))]
+        [((arm:u16x4 v0) (arm:u16x4 v1))
+           (arm:u16x4
+            (halide:interpret
+             (vec-if
+             (vec-ne
+              (vec-bwand
+               v0
+               v1)
+              (x4 (uint16_t (bv 0 16))))
+             (x4 (uint16_t (bv 65535 16)))
+             (x4 (uint16_t (bv 0 16))))))]
+        [((arm:u16x8 v0) (arm:u16x8 v1))
+           (arm:u16x8
+            (halide:interpret
+             (vec-if
+             (vec-ne
+              (vec-bwand
+               v0
+               v1)
+              (x8 (uint16_t (bv 0 16))))
+             (x8 (uint16_t (bv 65535 16)))
+             (x8 (uint16_t (bv 0 16))))))]
+        [((arm:u32x2 v0) (arm:u32x2 v1))
+           (arm:u32x2
+            (halide:interpret
+             (vec-if
+             (vec-ne
+              (vec-bwand
+               v0
+               v1)
+              (x2 (uint32_t (bv 0 32))))
+             (x2 (uint32_t (bv 4294967295 32)))
+             (x2 (uint32_t (bv 0 32))))))]
+        [((arm:u32x4 v0) (arm:u32x4 v1))
+           (arm:u32x4
+            (halide:interpret
+             (vec-if
+             (vec-ne
+              (vec-bwand
+               v0
+               v1)
+              (x4 (uint32_t (bv 0 32))))
+             (x4 (uint32_t (bv 4294967295 32)))
+             (x4 (uint32_t (bv 0 32))))))]
+        [((arm:u64x2 v0) (arm:u64x2 v1))
+           (arm:u64x2
+            (halide:interpret
+             (vec-if
+             (vec-ne
+              (vec-bwand
+               v0
+               v1)
+              (x2 (uint64_t (bv 0 64))))
+             (x2 (uint64_t (bv 18446744073709551615 64)))
+             (x2 (uint64_t (bv 0 64))))))]
+        [((arm:i8x8 v0) (arm:i8x8 v1))
+           (arm:i8x8
+            (halide:interpret
+             (vec-if
+             (vec-ne
+              (vec-bwand
+               v0
+               v1)
+              (x8 (int8_t (bv 0 8))))
+             (x8 (int8_t (bv -1 8)))
+             (x8 (int8_t (bv 0 8))))))]
+        [((arm:i8x16 v0) (arm:i8x16 v1))
+           (arm:i8x16
+            (halide:interpret
+             (vec-if
+             (vec-ne
+              (vec-bwand
+               v0
+               v1)
+              (x16 (int8_t (bv 0 8))))
+             (x16 (int8_t (bv -1 8)))
+             (x16 (int8_t (bv 0 8))))))]
+        [((arm:i16x4 v0) (arm:i16x4 v1))
+           (arm:i16x4
+            (halide:interpret
+             (vec-if
+             (vec-ne
+              (vec-bwand
+               v0
+               v1)
+              (x4 (int16_t (bv 0 16))))
+             (x4 (int16_t (bv -1 16)))
+             (x4 (int16_t (bv 0 16))))))]
+        [((arm:i16x8 v0) (arm:i16x8 v1))
+           (arm:i16x8
+            (halide:interpret
+             (vec-if
+             (vec-ne
+              (vec-bwand
+               v0
+               v1)
+              (x8 (int16_t (bv 0 16))))
+             (x8 (int16_t (bv -1 16)))
+             (x8 (int16_t (bv 0 16))))))]
+        [((arm:i32x2 v0) (arm:i32x2 v1))
+           (arm:i32x2
+            (halide:interpret
+             (vec-if
+             (vec-ne
+              (vec-bwand
+               v0
+               v1)
+              (x2 (int32_t (bv 0 32))))
+             (x2 (int32_t (bv -1 32)))
+             (x2 (int32_t (bv 0 32))))))]
+        [((arm:i32x4 v0) (arm:i32x4 v1))
+           (arm:i32x4
+            (halide:interpret
+             (vec-if
+             (vec-ne
+              (vec-bwand
+               v0
+               v1)
+              (x4 (int32_t (bv 0 32))))
+             (x4 (int32_t (bv -1 32)))
+             (x4 (int32_t (bv 0 32))))))]
+        [((arm:i64x2 v0) (arm:i64x2 v1))
+           (arm:i64x2
+            (halide:interpret
+             (vec-if
+             (vec-ne
+              (vec-bwand
+               v0
+               v1)
+              (x2 (int64_t (bv 0 64))))
+             (x2 (int64_t (bv -1 64)))
+             (x2 (int64_t (bv 0 64))))))]
+        [(_ _) (assert #f (format "infeasible in cmtst\n~a\n" (pretty-format p)))])]
+
     [(arm:dup Vn)
       (destruct* ((interpret Vn))
         [((int8_t v0))
