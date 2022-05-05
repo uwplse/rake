@@ -811,10 +811,10 @@
          (append
           (for/list ([i (arm:num-elems v0)])
            (list
-            (arm:elem v0 i)))
+            (arm:get-element v0 i)))
           (for/list ([i (arm:num-elems v1)])
            (list
-            (arm:elem v1 i))))))
+            (arm:get-element v1 i))))))
       ;; TODO: what is the output type???
       (error (format "Unsure how to get output type of expr:\n~a\n" (pretty-format ir-expr)))
       (list (cons (arm:??swizzle 0 live-data arm-sub-exprs tbl) 1))]
