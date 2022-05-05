@@ -18,6 +18,8 @@
   (rename-out [elem-type^ arm-ir:elem-type^])
   (rename-out [interpret arm-ir:interpret]))
 
+(define VS_MPY_ADD_MAX 7)
+
 (define (elem-type expr)
   (define e (interpret expr))
   (define a (cpp:type (e 0)))
@@ -578,6 +580,8 @@
      (define input (interpret expr))
      (define int-weights (map interpret weights))
      (lambda (i)
+      ;  ;; TODO: maybe this isn't the best way...
+       (assert (<= (length weights) VS_MPY_ADD_MAX))
        ; TODO: HVX has a saturation flag, do we need that?
        (vs-mpy-add-impl input i int-weights outT))]
 

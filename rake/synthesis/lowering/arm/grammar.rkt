@@ -103,12 +103,15 @@
          [use-shifts? (not (null? (filter (lambda (weight) (not (halide:is-one? weight))) (filter halide:is-power-of-2? weights))))]
          ;; TODO: should we require that the output type is signed?
          [use-subs? (not (null? (filter halide:is-signed-negative? weights)))]
-         ;; If the input type is unsigned and the weights are strictly positive, but the output type is signed, ddo all math in unsigned.
+         ;; If the input type is unsigned and the weights are strictly positive, but the output type is signed, do all math in unsigned.
+         ;; Also need: none of the sub-exprs are signed.
          [as-unsigned? (and
                           (not (cpp:signed-type? input-type)) ;; unsigned input-type
                           (eq? (length weights) (length (filter halide:is-concrete-positive? weights))) ;; all weights are concrete positives.
-                          (cpp:signed-type? output-type))] ;; output type is signed.
-         [use-reinterpret? (and (not as-unsigned?) (not (eqv? input-type output-type)))]
+                          (cpp:signed-type? output-type))]
+         [use-reinterpret?
+          (and (or (not as-unsigned?) (not (null? (filter (lambda (sub-expr) (cpp:signed-type? (arm:get-interpreted-elem-type sub-expr))) arm-sub-exprs))))
+               (not (eqv? input-type output-type)))]
          [min-scalars (length (filter (lambda (weight) (not (halide:is-one? weight))) (unique-list weights)))]
          ; TODO: better pruning and more isa options
          [isa (flatten
@@ -120,6 +123,7 @@
                   (use-if
                     (not double-widening?)
                     (list arm:add arm:addp arm:mla-vs arm:mul-vs))
+                    ; (list arm:add arm:mla-vs arm:mul-vs))
 
                   ;; Only allow signed widening variants if:
                   ;; (1) not doing strictly unsigned computation (not `as-unsigned?`) and
@@ -132,6 +136,7 @@
                   (use-if
                     (and widening? (not (and (cpp:signed-type? input-type) (cpp:signed-type? output-type))))
                     (list arm:uxtl arm:uaddl arm:uaddw arm:uaddlp arm:uadalp arm:umlal-vs arm:umull-vs))
+                    ; (list arm:uxtl arm:uaddl arm:uaddw arm:umlal-vs arm:umull-vs))
 
                   ;; TODO: when do we want reductions?
                   ; (use-if
@@ -168,8 +173,9 @@
             [(and double-widening? (< (length weights) 5)) 2]
             [(and double-widening? (< (length weights) 9)) 3]
             [double-widening? 4]
-            [(and widening? (< (length weights) 3)) 2]
-            [(and widening? (< (length weights) 7)) 3]
+            [(and widening? (< (length weights) 4)) 2] ;; TODO: should be < 3 if weights are non-1...
+            [(and widening? (< (length weights) 8)) 3]
+            ;; TODO: change this back.
             [widening? 4]
             [(< (length weights) 3) 2]
             [else 3])]
@@ -187,6 +193,20 @@
          [desired-types (if as-unsigned? (arm:get-unsigned-vector-types output-type) (arm:get-vector-types output-type))]
          ; Enumerate those with the correct output type
          ; TODO: do the pruning somehow...
+        ;  [temp
+        ;   (begin
+        ;     (display
+        ;       (format
+        ;         "\nhandle-vs-mpy-add params:\nInput type: ~a\nOutput type: ~a\nWidening: ~a\nDouble widening: ~a\nUse shifts: ~a\nUse subs: ~a\nUse reinterpret: ~a\nAs unsigned: ~a\nMin scalars: ~a\nDepth: ~a\n"
+        ;         input-type output-type widening? double-widening? use-shifts? use-subs? use-reinterpret? as-unsigned? min-scalars depth))
+
+        ;     (display "ISA:\n")
+        ;     (pretty-print isa)
+        ;     (display "GSE:\n")
+        ;     (pretty-print grouped-sub-exprs)
+        ;     (display "DT:\n")
+        ;     (pretty-print desired-types)
+        ;   )]
          [candidates (time (enumerate-arm isa desired-types grouped-sub-exprs depth max-cost number-reads))]
          [load-buffers (halide:extract-live-buffers halide-expr)]
          [live-buffers (lambda (expr)
@@ -200,18 +220,17 @@
                             live-bufs))])
 
 
-      (display
-        (format
-          "\nhandle-vs-mpy-add params:\nInput type: ~a\nOutput type: ~a\nWidening: ~a\nDouble widening: ~a\nUse shifts: ~a\nUse subs: ~a\nUse reinterpret: ~a\nAs unsigned: ~a\nMin scalars: ~a\nDepth: ~a\n"
-          input-type output-type widening? double-widening? use-shifts? use-subs? use-reinterpret? as-unsigned? min-scalars depth))
+      ; (display
+      ;   (format
+      ;     "\nhandle-vs-mpy-add params:\nInput type: ~a\nOutput type: ~a\nWidening: ~a\nDouble widening: ~a\nUse shifts: ~a\nUse subs: ~a\nUse reinterpret: ~a\nAs unsigned: ~a\nMin scalars: ~a\nDepth: ~a\n"
+      ;     input-type output-type widening? double-widening? use-shifts? use-subs? use-reinterpret? as-unsigned? min-scalars depth))
 
-      (display "ISA:\n")
-      (pretty-print isa)
-      (display "GSE:\n")
-      (pretty-print grouped-sub-exprs)
-      (display "DT:\n")
-      (pretty-print desired-types)
-
+      ; (display "ISA:\n")
+      ; (pretty-print isa)
+      ; (display "GSE:\n")
+      ; (pretty-print grouped-sub-exprs)
+      ; (display "DT:\n")
+      ; (pretty-print desired-types)
 
     ; (display "arm sub exprs!\n")
     ; (pretty-print arm-sub-exprs)
@@ -566,7 +585,7 @@
          [isa
           (cond
             ; TODO: use saturating / rounding / signedness information
-            [immediate-narrowing? (list arm:shrn arm:rshrn arm:sqrshrn arm:sqrshrun arm:sqshrn arm:sqshrun arm:uqrshrn arm:uqshrn)]
+            [immediate-narrowing? (list arm:reinterpret arm:shrn arm:rshrn arm:sqrshrn arm:sqrshrun arm:sqshrn arm:sqshrun arm:uqrshrn arm:uqshrn)]
             ;; Doing a non-concrete shift, use regular shift patterns
             ;; TODO: do we need broadcasts? or simply vector-scalar versions?
             [symbolic-narrowing? (append (list arm:xtn arm:uqxtn arm:sqxtn arm:sqxtun) (list arm:uqrshr-vs arm:sqrshr-vs arm:srshr-vs arm:urshr-vs arm:ushr-vs arm:sshr-vs))]
@@ -664,7 +683,7 @@
          [grouped-sub-exprs (prepare-sub-exprs arm-sub-exprs)]
          [desired-types (arm:get-vector-types output-type)]
          ; TODO: is this a good depth / cost??
-         [depth 4]
+         [depth 3]
          [max-cost 20]
          [candidates (enumerate-arm isa desired-types grouped-sub-exprs depth max-cost)])
 
@@ -693,7 +712,7 @@
          node)
        (arm:visit-shallow candidate check-instr)
        keep?)
-     (set! candidates (filter (lambda (c) (instr-repeat? (car c))) candidates))
+    ;  (set! candidates (filter (lambda (c) (instr-repeat? (car c))) candidates))
 
      ;; Fill in param grammars
      (define-symbolic bvc8 (bitvector 8))
@@ -754,7 +773,8 @@
          [depth 2]
          [max-cost 12]
          [candidates (enumerate-arm isa desired-types grouped-sub-exprs depth max-cost)])
-    (display (format "handle-halving-add\n~a\n~a\n~a\n~a\n"  expr round? arm-sub-exprs halide-expr))
+    ; (display (format "handle-halving-add\n~a\n~a\n~a\n~a\n"  expr round? arm-sub-exprs halide-expr))
+    ; (display (format "candidates: ~a\n" (pretty-format candidates)))
     (sort-and-uniquify candidates)))
 
 (define (get-arm-grammar-helper halide-expr ir-expr arm-sub-exprs)
@@ -782,6 +802,22 @@
     [(arm-ir:broadcast scalar-expr)
       ; TODO: do type pruning
       (list (cons (arm:dupw scalar-expr) 1) (cons (arm:dup scalar-expr) 1.2))]
+
+    ;; Data broadcasting
+    [(arm-ir:combine ir-expr-0 ir-expr-1 gather-tbl)
+     (define tbl (map (lambda (i) (define-symbolic* idx integer?) idx) (range 256)))
+     (define live-data
+       (let* ([v0 (arm:interpret (first arm-sub-exprs))] [v1 (arm:interpret (second arm-sub-exprs))])
+         (append
+          (for/list ([i (arm:num-elems v0)])
+           (list
+            (arm:elem v0 i)))
+          (for/list ([i (arm:num-elems v1)])
+           (list
+            (arm:elem v1 i))))))
+      ;; TODO: what is the output type???
+      (error (format "Unsure how to get output type of expr:\n~a\n" (pretty-format ir-expr)))
+      (list (cons (arm:??swizzle 0 live-data arm-sub-exprs tbl) 1))]
 
     [(arm-ir:cast expr type saturate?)
       (handle-cast expr type saturate? arm-sub-exprs halide-expr)]

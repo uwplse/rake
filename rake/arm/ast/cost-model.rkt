@@ -10,7 +10,8 @@
 
 ; cost model is latencies from: https://dougallj.github.io/applecpu/firestorm-simd.html
 (define (instr-cost instr sig)
-  (cond
+  (let ([multiplier (if (arm:half-width-type? (arm:instr-sig-ret-val sig)) 2 1)]
+        [base (cond
     [(eq? arm:abs instr) 3]
 
     [(eq? arm:add instr) 2]
@@ -197,8 +198,6 @@
 
     [(eq? arm:srhadd instr) 2]
 
-    ; [(eq? arm:srhsub instr) (error "arm:srhsub cost unknown")] ;; TODO: does this exist?
-
     [(eq? arm:srshl instr) 3]
 
     [(eq? arm:sshl instr) 2]
@@ -291,8 +290,6 @@
 
     [(eq? arm:urhadd instr) 2]
 
-    ; [(eq? arm:urhsub instr) (error "arm:urhsub cost unknown")] ;; TODO: does this exist?
-
     [(eq? arm:urshl instr) 3]
 
     [(eq? arm:ushl instr) 2]
@@ -333,4 +330,6 @@
     [(eq? arm:zip2 instr) 2]
 
     [(eq? arm:reinterpret instr) 0.001]
-    [else 1]))
+    [else 1])])
+
+  (* base multiplier)))

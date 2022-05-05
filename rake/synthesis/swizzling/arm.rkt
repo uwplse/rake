@@ -602,7 +602,7 @@
   (let ([sig-exprs
     (let ([arg-opts (get-arg-opts (arm:instr-sig-args sig) instr-set base-exprs depth max-cost instr)])
       (apply cartesian-product arg-opts))])
-    (map (curry build-ast instr) sig-exprs)))
+    (map (curry build-ast instr sig) sig-exprs)))
 
 (define (get-arg-opts args instr-set base-exprs depth max-cost instr)
   (cond
@@ -615,8 +615,8 @@
                      [_ (enumerate-arm instr-set arg base-exprs (sub1 depth) max-cost instr)])])
          (append (list opts) (get-arg-opts (rest args) instr-set base-exprs depth max-cost instr))))]))
 
-(define (build-ast instr sig-expr)
-  (define cost (foldr + (arm:instr-cost instr sig-expr) (map cdr sig-expr)))
+(define (build-ast instr sig sig-expr)
+  (define cost (foldr + (arm:instr-cost instr sig) (map cdr sig-expr)))
   (define expr (apply instr (map car sig-expr)))
   (cons expr cost))
 

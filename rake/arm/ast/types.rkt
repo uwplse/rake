@@ -2019,7 +2019,28 @@
     [(u16x8 data) #f]
     [(u32x4 data) #f]
     [(u64x2 data) #f]
-    [_ (error "Unrecognized type ~" expr)]))
+    [_ (error (format "(arm:half-width?) Unrecognized type ~a" expr))]))
+
+(define (half-width-type? type)
+  (cond
+    [(eq? type 'i8x8) #t]
+    [(eq? type 'i8x16) #f]
+    [(eq? type 'u8x8) #t]
+    [(eq? type 'u8x16) #f]
+
+    [(eq? type 'i16x4) #t]
+    [(eq? type 'i16x8) #f]
+    [(eq? type 'u16x4) #t]
+    [(eq? type 'u16x8) #f]
+
+    [(eq? type 'i32x2) #t]
+    [(eq? type 'i32x4) #f]
+    [(eq? type 'u32x2) #t]
+    [(eq? type 'u32x4) #f]
+
+    [(eq? type 'i64x1) #t]
+    [(eq? type 'i64x2) #f]
+    [else (error (format "(arm:half-width-type?) Unrecognized type ~a" type))]))
 
 (define (vec-length expr)
   (destruct expr

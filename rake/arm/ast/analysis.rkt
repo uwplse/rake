@@ -224,5 +224,8 @@
 
 (define (get-interpreted-elem-type arm-expr)
   (destruct arm-expr
-    [(arm:concat-tiles exprs) (error "Fail on get-interpreted-elem-type for concat-tiles ~a\n" arm-expr)]
+    [(arm:concat-tiles exprs)
+      (cond
+        [(null? exprs) (error "Fail on get-interpreted-elem-type for concat-tiles ~a\n" arm-expr)]
+        [else (get-interpreted-elem-type (list-ref exprs 0))])]
     [_ (arm:elem-type (arm:interpret arm-expr))]))

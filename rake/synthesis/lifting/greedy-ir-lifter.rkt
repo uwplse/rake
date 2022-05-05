@@ -19,7 +19,8 @@
   rake/synthesis/lifting/hvx/grammar
   rake/synthesis/lifting/hvx/synthesizer
   rake/synthesis/lifting/x86/grammar
-  rake/synthesis/lifting/x86/synthesizer)
+  rake/synthesis/lifting/x86/synthesizer
+)
 
 (provide synthesize-ir-expr-greedy)
 
@@ -77,7 +78,7 @@
       (define runtime (- (current-seconds) st))
 
       (hash-set! annotations (arm-ir:ast-node-id res) halide-expr)
-      
+
       (if (eq? res (unsat))
           (begin
             (display "Failed to find an equivalent IR expression.\n\n")

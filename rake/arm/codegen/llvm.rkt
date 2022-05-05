@@ -649,6 +649,22 @@
           (generate `sqrshl.v2i64 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg (negate-and-dup (uint64_t v1) 'int64))))]
         [(_ _) (error (format "arm:sqrshr-vs variant not understood:\n~a\n" (pretty-format arm-expr)))])]
 
+    [(arm:srhadd Vn Vm)
+      (destruct* ((arm:interpret Vn) (arm:interpret Vm))
+        [((arm:i8x8 v0) (arm:i8x8 v1))
+          (generate `srhadd.v8i8 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
+        [((arm:i8x16 v0) (arm:i8x16 v1))
+          (generate `srhadd.v16i8 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
+        [((arm:i16x4 v0) (arm:i16x4 v1))
+          (generate `srhadd.v4i16 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
+        [((arm:i16x8 v0) (arm:i16x8 v1))
+          (generate `srhadd.v8i16 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
+        [((arm:i32x2 v0) (arm:i32x2 v1))
+          (generate `srhadd.v2i32 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
+        [((arm:i32x4 v0) (arm:i32x4 v1))
+          (generate `srhadd.v4i32 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
+        [(_ _) (error (format "arm:srhadd variant not understood:\n~a\n" (pretty-format arm-expr)))])]
+
     [_ (string->sexp (format "~a" arm-expr))]))
 
 (define (generate instruction output-type inputs)

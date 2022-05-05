@@ -13,7 +13,9 @@
   rake/arm/ir/interpreter
   rake/synthesis/lifting/ir)
 
-(provide arm-uber-instructions)
+(provide
+  arm-uber-instructions)
+
 
 (define SYMBOL_TBL_SIZE 25)
 
@@ -87,6 +89,11 @@
           (list
            ;; Try folding the add by expanding the weight-matrix
            (arm-ir:vs-mpy-add (get-node-id) updated-sub-expr (append weights (list f)) (halide:elem-type halide-expr))
+           (arm-ir:vs-mpy-add
+            (get-node-id)
+            (mk-combine-instr-pair updated-sub-expr lifted-sub-expr)
+            (list f (int8_t (bv 1 8)))
+            (halide:elem-type halide-expr))
            ;; Fold sibling node into sub-exprs (combine them)
            (arm-ir:vs-mpy-add
             (get-node-id)
@@ -499,6 +506,10 @@
       (define read-tbl (map (lambda (i) (define-symbolic* idx integer?) (define-symbolic* c boolean?) (cons idx c)) (range SYMBOL_TBL_SIZE)))
       (arm-ir:combine (get-load-id) (list-ref lifted-sub-exprs 0) (list-ref lifted-sub-exprs 1) read-tbl)]
     [else '()]))
+
+(define (mk-combine-instr-pair expr0 expr1)
+  (define read-tbl (map (lambda (i) (define-symbolic* idx integer?) (define-symbolic* c boolean?) (cons idx c)) (range SYMBOL_TBL_SIZE)))
+  (arm-ir:combine (get-load-id) expr0 expr1 read-tbl))
 
 ; (define (mk-combine-instr2 lifted-sub-exprs0 lifted-sub-exprs1)
 ;   (cond

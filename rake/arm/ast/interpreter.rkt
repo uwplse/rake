@@ -2689,6 +2689,7 @@
     [(arm:shrn Vd Vn Vm Vb)
       (destruct* ((interpret Vd) (interpret Vn) (interpret Vm) (interpret Vb))
         [((arm:i16x8 v0) (uint16_t v1) (arm:i16x8 v2) (uint16_t v3))
+          (assert (and (bvule v1 (bv 8 16)) (bvule v3 (bv 8 16))))
           (arm:i8x16
            (halide:interpret
             (concat_vectors
@@ -2701,6 +2702,7 @@
                v2
                (x8 (uint16_t v3)))) 8)))]
         [((arm:i32x4 v0) (uint32_t v1) (arm:i32x4 v2) (uint32_t v3))
+          (assert (and (bvule v1 (bv 16 32)) (bvule v3 (bv 16 32))))
           (arm:i16x8
            (halide:interpret
             (concat_vectors
@@ -2713,6 +2715,7 @@
                v2
                (x4 (uint32_t v3)))) 4)))]
         [((arm:i64x2 v0) (uint64_t v1) (arm:i64x2 v2) (uint64_t v3))
+          (assert (and (bvule v1 (bv 32 64)) (bvule v3 (bv 32 64))))
           (arm:i32x4
            (halide:interpret
             (concat_vectors
@@ -2725,6 +2728,7 @@
                v2
                (x2 (uint64_t v3)))) 2)))]
         [((arm:u16x8 v0) (uint16_t v1) (arm:u16x8 v2) (uint16_t v3))
+          (assert (and (bvule v1 (bv 8 16)) (bvule v3 (bv 8 16))))
           (arm:u8x16
            (halide:interpret
             (concat_vectors
@@ -2737,6 +2741,7 @@
                v2
                (x8 (uint16_t v3)))) 8)))]
         [((arm:u32x4 v0) (uint32_t v1) (arm:u32x4 v2) (uint32_t v3))
+          (assert (and (bvule v1 (bv 16 32)) (bvule v3 (bv 16 32))))
           (arm:u16x8
            (halide:interpret
             (concat_vectors
@@ -2749,6 +2754,7 @@
                v2
                (x4 (uint32_t v3)))) 4)))]
         [((arm:u64x2 v0) (uint64_t v1) (arm:u64x2 v2) (uint64_t v3))
+          (assert (and (bvule v1 (bv 32 64)) (bvule v3 (bv 32 64))))
           (arm:u32x4
            (halide:interpret
             (concat_vectors
