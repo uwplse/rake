@@ -791,6 +791,33 @@
     (display (format "handle-less-than:\noutput-type: ~a\ndesired-types: ~a\ncandidates:\n~a\n" output-type desired-types (pretty-format candidates)))
     (sort-and-uniquify candidates)))
 
+; (define (remove-to-bool arm-expr)
+;   (define (remove-bl node [pos -1])
+;     (destruct node
+;       [(arm:bl Vn) Vn]
+;       [else node]))
+;   (arm:visit-shallow arm-expr remove-bl))
+
+(define (handle-select c t f arm-sub-exprs halide-expr)
+  (let* ([output-type (halide:elem-type halide-expr)]
+         ; TODO: do we need reinterpret?
+         [isa
+          ; (list arm:bsl)] ;; todo: BIF/BIT
+          (list arm:select)]
+         ;; TODO: is there a better way?
+        ;  [sub-exprs (map remove-to-bool arm-sub-exprs)]
+        [sub-exprs arm-sub-exprs]
+        ;  [d (display (format "original sub-exprs:\n~a\nnew sub-exprs:\n~a\n" (pretty-format arm-sub-exprs) (pretty-format sub-exprs)))]
+         [grouped-sub-exprs (prepare-sub-exprs sub-exprs)]
+         [desired-types (arm:get-vector-types output-type)]
+         ; TODO: is this a good depth / cost?
+         [depth 1]
+         [max-cost 10]
+         [candidates (enumerate-arm isa desired-types grouped-sub-exprs depth max-cost)])
+    ; (display (format "handle-select:\noutput-type: ~a\ndesired-types: ~a\ncandidates:\n~a\n" output-type desired-types (pretty-format candidates)))
+    ; (display (format "grouped sub-exprs:\n~a\n" (pretty-format grouped-sub-exprs)))
+    (sort-and-uniquify candidates)))
+
 (define (get-arm-grammar-helper halide-expr ir-expr arm-sub-exprs)
   ; TODO: what is the enumeration-database?
   (destruct ir-expr
@@ -820,6 +847,11 @@
     ;; Data broadcasting
     [(arm-ir:combine ir-expr-0 ir-expr-1 gather-tbl)
      (define tbl (map (lambda (i) (define-symbolic* idx integer?) idx) (range 256)))
+     (define t0 (arm:get-interpreted-type (first arm-sub-exprs)))
+     (define t1 (arm:get-interpreted-type (second arm-sub-exprs)))
+     ;; TODO: what do we do if they don't match?
+     (when (not (eq? t0 t1))
+      (error (format "Can't support combine of non-equal types:\n~a\n~a\n" (pretty-format ir-expr-0)  (pretty-format ir-expr-1))))
      (define live-data
        (let* ([v0 (arm:interpret (first arm-sub-exprs))] [v1 (arm:interpret (second arm-sub-exprs))])
          (append
@@ -829,9 +861,9 @@
           (for/list ([i (arm:num-elems v1)])
            (list
             (arm:get-element v1 i))))))
-      ;; TODO: what is the output type???
-      (error (format "Unsure how to get output type of expr:\n~a\n" (pretty-format ir-expr)))
-      (list (cons (arm:??swizzle 0 live-data arm-sub-exprs tbl) 1))]
+    ;   ;; TODO: what is the output type???
+    ;   (error (format "Unsure how to get output type of expr:\n~a\n" (pretty-format ir-expr)))
+      (list (cons (arm:??swizzle 0 live-data arm-sub-exprs tbl t0) 1))]
 
     [(arm-ir:cast expr type saturate?)
       (handle-cast expr type saturate? arm-sub-exprs halide-expr)]
@@ -886,6 +918,9 @@
     ; TODO: abs-diff-acc, select, is-equal, less-than, less-than-eq, bitwise-and, vs-divide
     [(arm-ir:less-than expr0 expr1)
       (handle-less-than expr0 expr1 arm-sub-exprs halide-expr)]
+
+    [(arm-ir:select c t f)
+      (handle-select c t f arm-sub-exprs halide-expr)]
 
     [(arm-ir:vs-divide expr divisor)
       (handle-vs-divide expr divisor arm-sub-exprs halide-expr)]

@@ -330,6 +330,7 @@
     [(eq? arm:zip2 instr) 2]
 
     [(eq? arm:bsl instr) 2]
+    [(eq? arm:select instr) 2] ;; compiles to bsl
     [(eq? arm:bl instr) 0]
 
     [(eq? arm:cmeq instr) 2]

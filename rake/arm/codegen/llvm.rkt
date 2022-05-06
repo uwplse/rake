@@ -665,6 +665,26 @@
           (generate `srhadd.v4i32 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
         [(_ _) (error (format "arm:srhadd variant not understood:\n~a\n" (pretty-format arm-expr)))])]
 
+    [(arm:select Vd Vn Vm)
+      ;; No intrinsics for selects or comparisons.
+      `(halide.ir.select, (to-llvm-type arm-expr), `(list ,(compile-boolean Vd) ,(input-arg Vn) ,(input-arg Vm)))]
+
+    [(arm:sabd Vn Vm)
+      (destruct* ((arm:interpret Vn) (arm:interpret Vm))
+        [((arm:i8x8 v0) (arm:i8x8 v1))
+          (generate `sabd.v8i8 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
+        [((arm:i8x16 v0) (arm:i8x16 v1))
+          (generate `sabd.v16i8 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
+        [((arm:i16x4 v0) (arm:i16x4 v1))
+          (generate `sabd.v4i16 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
+        [((arm:i16x8 v0) (arm:i16x8 v1))
+          (generate `sabd.v8i16 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
+        [((arm:i32x2 v0) (arm:i32x2 v1))
+          (generate `sabd.v2i32 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
+        [((arm:i32x4 v0) (arm:i32x4 v1))
+          (generate `sabd.v4i32 (to-llvm-type arm-expr) `(list ,(input-arg Vn) ,(input-arg Vm)))]
+        [(_ _) (error (format "arm:sabd variant not understood:\n~a\n" (pretty-format arm-expr)))])]
+
     [_ (string->sexp (format "~a" arm-expr))]))
 
 (define (generate instruction output-type inputs)
@@ -745,6 +765,10 @@
     [(arm:u64x1 data) (string->sexp "uint64")]
     [(arm:i64x2 data) (string->sexp "int64x2")]
     [(arm:u64x2 data) (string->sexp "uint64x2")]
+    [(arm:u1x2 data) (string->sexp "uint1x2")]
+    [(arm:u1x4 data) (string->sexp "uint1x4")]
+    [(arm:u1x8 data) (string->sexp "uint1x8")]
+    [(arm:u1x16 data) (string->sexp "uint1x16")]
     [_ (error (format "(arm:to-llvm-type) implement the rest of the arm types: ~a" arm-expr))]))
 
 ;; Useful helper function for ARM's weird narrowing instruction patterns.
@@ -957,3 +981,27 @@
 
 (define (negate-and-dupw shift type)
   (arm:dupw (sca-sub (const-zero type) (sca-cast shift type))))
+
+(define (compile-boolean arm-expr)
+  `(,(to-llvm-type arm-expr) ,(compile-boolean-helper arm-expr)))
+
+(define (compile-boolean-helper arm-expr)
+  (destruct (strip-to-bool arm-expr)
+    ; [(arm:cmeq Vn Vm) TODO]
+    ; [(arm:cmeqz Vn) TODO]
+    [(arm:cmhi Vn Vm)
+      `(halide.ir.gt, (to-llvm-type arm-expr), `(list ,(input-arg Vn) ,(input-arg Vm)))]
+    ; [(arm:cmhs Vn Vm)  TODO]
+    ; [(arm:cmlez Vn) TODO]
+    ; [(arm:cmltz Vn) TODO]
+    ; [(arm:cmqe Vn Vm) TODO]
+    ; [(arm:cmqez Vn) TODO]
+    ; [(arm:cmqt Vn Vm) TODO]
+    ; [(arm:cmqtz Vn) TODO]
+    ; [(arm:cmtst Vn Vm) TODO]
+    [_ (error (format "compile-boolean failed with expr:\n~a\n" (pretty-format arm-expr)))]))
+
+(define (strip-to-bool arm-expr)
+  (destruct arm-expr
+    [(arm:bl Vn) Vn]
+    [else (error (format "strip-to-bool failed with expr:\n~a\n" (pretty-format arm-expr)))]))

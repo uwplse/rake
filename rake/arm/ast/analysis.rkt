@@ -27,6 +27,7 @@
     [(arm:addv Vn) (max-unique-inputs Vn)]
     [(arm:bl Vn) (max-unique-inputs Vn)]
     [(arm:bsl Vd Vn Vm) (+ (max-unique-inputs Vd) (max-unique-inputs Vn) (max-unique-inputs Vm))]
+    [(arm:select Vd Vn Vm) (+ (max-unique-inputs Vd) (max-unique-inputs Vn) (max-unique-inputs Vm))]
     [(arm:cmeq Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]
     [(arm:cmeqz Vn) (max-unique-inputs Vn)]
     [(arm:cmhi Vn Vm) (+ (max-unique-inputs Vn) (max-unique-inputs Vm))]

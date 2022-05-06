@@ -204,6 +204,7 @@
 
 (struct bl (Vn) #:transparent)                              ;; bitwise_to_bool
 (struct bsl (Vd Vn Vm) #:transparent)                       ;; bitwise_select
+(struct select (Vd Vn Vm) #:transparent)                    ;; select (compile to bsl, helper method)
 (struct cmeq (Vn Vm) #:transparent)                         ;; compare_equal
 (struct cmeqz (Vn) #:transparent)                           ;; compare_equal_zero
 (struct cmqe (Vn Vm) #:transparent)                         ;; compare_signed_ge
@@ -386,6 +387,7 @@
     [(u1x4? expr) 'uint1]
     [(u1x8? expr) 'uint1]
     [(u1x16? expr) 'uint1]
+    [else (error (format "(arm:elem-type) unrecognized type:\n~a\n" (pretty-format expr)))]
 ))
 
 (define (type expr)
@@ -512,6 +514,23 @@
                          (instr-sig 'u1x2 (list 'i64x2))
                          )]
 
+    [(eq? select instr) (list
+                         (instr-sig 'u8x8 (list 'u1x8 'u8x8 'u8x8))
+                         (instr-sig 'u8x16 (list 'u1x16 'u8x16 'u8x16))
+                         (instr-sig 'u16x4 (list 'u1x4 'u16x4 'u16x4))
+                         (instr-sig 'u16x8 (list 'u1x8 'u16x8 'u16x8))
+                         (instr-sig 'u32x2 (list 'u1x2 'u32x2 'u32x2))
+                         (instr-sig 'u32x4 (list 'u1x4 'u32x4 'u32x4))
+                         (instr-sig 'u64x2 (list 'u1x2 'u64x2 'u64x2))
+                         (instr-sig 'i8x8 (list 'u1x8 'i8x8 'i8x8))
+                         (instr-sig 'i8x16 (list 'u1x16 'i8x16 'i8x16))
+                         (instr-sig 'i16x4 (list 'u1x4 'i16x4 'i16x4))
+                         (instr-sig 'i16x8 (list 'u1x8 'i16x8 'i16x8))
+                         (instr-sig 'i32x2 (list 'u1x2 'i32x2 'i32x2))
+                         (instr-sig 'i32x4 (list 'u1x4 'i32x4 'i32x4))
+                         (instr-sig 'i64x2 (list 'u1x2 'i64x2 'i64x2))
+                      )]
+
     [(eq? bsl instr) (list
                          (instr-sig 'u8x8 (list 'u8x8 'u8x8 'u8x8))
                          (instr-sig 'u8x16 (list 'u8x16 'u8x16 'u8x16))
@@ -527,6 +546,20 @@
                          (instr-sig 'i32x2 (list 'i32x2 'i32x2 'i32x2))
                          (instr-sig 'i32x4 (list 'i32x4 'i32x4 'i32x4))
                          (instr-sig 'i64x2 (list 'i64x2 'i64x2 'i64x2))
+                         (instr-sig 'u8x8 (list 'i8x8 'u8x8 'u8x8))
+                         (instr-sig 'u8x16 (list 'i8x16 'u8x16 'u8x16))
+                         (instr-sig 'u16x4 (list 'i16x4 'u16x4 'u16x4))
+                         (instr-sig 'u16x8 (list 'i16x8 'u16x8 'u16x8))
+                         (instr-sig 'u32x2 (list 'i32x2 'u32x2 'u32x2))
+                         (instr-sig 'u32x4 (list 'i32x4 'u32x4 'u32x4))
+                         (instr-sig 'u64x2 (list 'i64x2 'u64x2 'u64x2))
+                         (instr-sig 'i8x8 (list 'u8x8 'i8x8 'i8x8))
+                         (instr-sig 'i8x16 (list 'u8x16 'i8x16 'i8x16))
+                         (instr-sig 'i16x4 (list 'u16x4 'i16x4 'i16x4))
+                         (instr-sig 'i16x8 (list 'u16x8 'i16x8 'i16x8))
+                         (instr-sig 'i32x2 (list 'u32x2 'i32x2 'i32x2))
+                         (instr-sig 'i32x4 (list 'u32x4 'i32x4 'i32x4))
+                         (instr-sig 'i64x2 (list 'u64x2 'i64x2 'i64x2))
                          )]
 
     [(eq? cmeq instr) (list
