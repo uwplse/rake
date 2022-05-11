@@ -118,7 +118,7 @@
     [else
      (define curr-lane (first lanes-to-verify))
 
-    (display (format "\n\nVerifying lane: ~a\n" curr-lane))
+    (display (format "\n\n(lower) Verifying lane: ~a\n" curr-lane))
     ;  (when (eq? 0 curr-lane)
     ;    (pretty-print optimized-template))
     ;  (println inferred-axioms)

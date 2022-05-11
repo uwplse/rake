@@ -885,6 +885,8 @@
       [(uint16_t val) (format "(uint16 ~a)" (compile-scalar val))]
       [(int32_t val) (format "(int32 ~a)" (compile-scalar val))]
       [(uint32_t val) (format "(uint32 ~a)" (compile-scalar val))]
+      [(int64_t val) (format "(int64 ~a)" (compile-scalar val))]
+      [(uint64_t val) (format "(uint64 ~a)" (compile-scalar val))]
 
       [(sca-cast val type) (format "(~a (~ax1 ~a (list ~a)))" type type type (compile-scalar val))]
 

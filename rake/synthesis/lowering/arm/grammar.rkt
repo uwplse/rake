@@ -206,6 +206,8 @@
         ;     (pretty-print grouped-sub-exprs)
         ;     (display "DT:\n")
         ;     (pretty-print desired-types)
+        ;     (display "SE:\n")
+        ;     (pretty-print arm-sub-exprs)
         ;   )]
          [candidates (time (enumerate-arm isa desired-types grouped-sub-exprs depth max-cost number-reads))]
          [load-buffers (halide:extract-live-buffers halide-expr)]
@@ -841,8 +843,10 @@
 
     ;; Data broadcasting
     [(arm-ir:broadcast scalar-expr)
-      ; TODO: do type pruning
-      (list (cons (arm:dupw scalar-expr) 1) (cons (arm:dup scalar-expr) 1.2))]
+      (if (eq? (cpp:type-bw (cpp:type (arm:interpret scalar-expr))) 64)
+        ;; No dupw for 64 bits
+        (list (cons (arm:dup scalar-expr) 1.2))
+        (list (cons (arm:dupw scalar-expr) 1) (cons (arm:dup scalar-expr) 1.2)))]
 
     ;; Data broadcasting
     [(arm-ir:combine ir-expr-0 ir-expr-1 gather-tbl)
@@ -971,14 +975,18 @@
          (define exprs (hash-ref! grouped-sub-exprs out-type (set)))
          (hash-set! grouped-sub-exprs out-type (set-add exprs base-load-expr)))]
       [(arm:is-broadcast? arm-sub-expr)
-       (define (gen-broadcasts expr)
-         (define br-expr (arm:dupw expr))
-         (define sub-expr-type (arm:get-interpreted-type br-expr))
-         (define exprs (hash-ref! grouped-sub-exprs sub-expr-type (set)))
-         (hash-set! grouped-sub-exprs sub-expr-type (set-add exprs br-expr))
-         (when (sca-cast? expr)
+        (define (add-element expr)
+          (define expr-type (arm:get-interpreted-type expr))
+          (define exprs (hash-ref! grouped-sub-exprs expr-type (set)))
+          (hash-set! grouped-sub-exprs expr-type (set-add exprs expr)))
+
+        (define (gen-broadcasts expr)
+          (add-element (arm:dup expr))
+          (when (not (eq? (cpp:type-bw (cpp:type (arm:interpret expr))) 64))
+            (add-element (arm:dupw expr)))
+          (when (sca-cast? expr)
            (gen-broadcasts (sca-cast-sca expr))))
-       
+
        (gen-broadcasts (arm:get-broadcasted-val arm-sub-expr))]
       [else
        (define sub-expr-type (arm:get-interpreted-type arm-sub-expr))

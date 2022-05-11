@@ -89,16 +89,17 @@
           (list
            ;; Try folding the add by expanding the weight-matrix
            (arm-ir:vs-mpy-add (get-node-id) updated-sub-expr (append weights (list f)) (halide:elem-type halide-expr))
-           (arm-ir:vs-mpy-add
-            (get-node-id)
-            (mk-combine-instr-pair updated-sub-expr lifted-sub-expr)
-            (list f (int8_t (bv 1 8)))
-            (halide:elem-type halide-expr))
            ;; Fold sibling node into sub-exprs (combine them)
            (arm-ir:vs-mpy-add
             (get-node-id)
             (mk-combine-instr (list lifted-sub-expr (apply choose* lifted-sibling-exprs)))
             (append weights (list (int8_t (bv 1 8))))
+            (halide:elem-type halide-expr))
+           ;; Combine sub-exprs and add them.
+           (arm-ir:vs-mpy-add
+            (get-node-id)
+            (mk-combine-instr-pair updated-sub-expr lifted-sub-expr)
+            (list f (int8_t (bv 1 8)))
             (halide:elem-type halide-expr))
            )]
          [(vec-sub? halide-expr)

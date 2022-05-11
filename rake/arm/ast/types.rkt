@@ -2318,6 +2318,8 @@
 
     [(eq? type 'i64x1) #t]
     [(eq? type 'i64x2) #f]
+    [(eq? type 'u64x1) #t]
+    [(eq? type 'u64x2) #f]
 
     ;; We don't know?
     [else (error (format "(arm:half-width-type?) Unrecognized type ~a" type))]))
