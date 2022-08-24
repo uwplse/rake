@@ -103,6 +103,8 @@
          (if (equal? id target-node-id) (set! found #t) node)]
         [(arm:??swizzle id live-data expr gather-tbl output-type)
          (if (equal? id target-node-id) (set! found #t) node)]
+        [(arm:??shuffle id loads output-type)
+         (if (equal? id target-node-id) (set! found #t) node)]
         [_ node]))
     (arm:visit-shallow expr sw-nd-srch)
     found)

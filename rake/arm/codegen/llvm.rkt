@@ -566,6 +566,14 @@
       ;; There are no intrinsics for zips
       `(halide.ir.interleave_hi, (to-llvm-type arm-expr), `(list ,(input-arg Vn) ,(input-arg Vm)))]
 
+    [(arm:uzip1 Vn Vm)
+      ;; There are no intrinsics for zips
+      `(halide.ir.deinterleave_lo, (to-llvm-type arm-expr), `(list ,(input-arg Vn) ,(input-arg Vm)))]
+
+    [(arm:uzip2 Vn Vm)
+      ;; There are no intrinsics for zips
+      `(halide.ir.deinterleave_hi, (to-llvm-type arm-expr), `(list ,(input-arg Vn) ,(input-arg Vm)))]
+
     [(arm:sshll Vd Vn Vm)
       (destruct* ((arm:interpret Vd) (arm:interpret Vn) (arm:interpret Vm))
         [((arm:i8x16 v0) (uint8_t v1) (uint1_t v2))
