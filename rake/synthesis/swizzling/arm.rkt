@@ -366,7 +366,7 @@
   ; (pretty-print swizzle-node)
   ; (display "hello?\n")
   (define-values (target-node-id base-exprs)
-    (extract-swizzle-information swizzle-node starting-vecs))
+    (extract-swizzle-information swizzle-node starting-vecs halide-expr))
   ; (display (format "\n\nget-arm-swizzle-grammar-gen ~a\n" target-node-id))
   ;(pretty-print base-exprs)
   ; (display "here?\n\n")
@@ -480,7 +480,7 @@
       (define cost (cdr candidate-swizzle))
       (list (cons updated-candidate cost)))))
 
-(define (extract-swizzle-information swizzle-node starting-vecs)
+(define (extract-swizzle-information swizzle-node starting-vecs halide-expr)
   (destruct swizzle-node
     [(arm:??load id live-data buffer gather-tbl output-type)
       (let ([base-exprs
@@ -491,12 +491,23 @@
         (values id base-exprs))]
     [(arm:??swizzle id live-data expr gather-tbl output-type) (values id expr)]
     ;; TODO: handle other swizzle nodes!!
+    [(arm:??shuffle id lds output-type)
+       (define buffers (halide:extract-live-buffers halide-expr))
+       (define base-exprs
+         (flatten
+          (map
+           (lambda (base-expr)
+             (list
+              (arm:ld (list-ref base-expr 0) (list-ref base-expr 1) (list-ref base-expr 2) output-type)))
+           (filter (lambda (vec) (set-member? buffers (list-ref vec 0))) starting-vecs))))
+       (values id base-exprs)]
     [_ (error "Unknown swizzle node ~a" swizzle-node)]))
 
 (define (get-output-type swizzle-node)
   (destruct swizzle-node
     [(arm:??load id live-data buffer gather-tbl output-type) output-type]
     [(arm:??swizzle id live-data expr gather-tbl output-type) output-type]
+    [(arm:??shuffle id loads output-type) output-type]
     ;; TODO: handle other swizzle nodes!!
     [_ (error "Unknown swizzle node for get-output-type ~a" swizzle-node)]))
 

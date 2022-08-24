@@ -13321,7 +13321,7 @@
       (let ([vecType (arm:get-type-struct output-type)]
             [interpreted-loads (map interpret loads)])
         (define (shuffle-body i)
-          (apply choose* (filter (lambda (r) (not (void? r)) (map (curryr arm:get-element i) interpreted-loads)))))
+          (apply choose* (filter (lambda (r) (not (void? r))) (map (curryr arm:get-element i) interpreted-loads))))
         (vecType shuffle-body))]
 
     [(arm:??load id live-data buffer idx-tbl output-type)
