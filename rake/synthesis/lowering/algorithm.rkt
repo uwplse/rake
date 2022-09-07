@@ -19,7 +19,7 @@
 
 (provide synthesize-hvx-template synthesize-arm-template synthesize-x86-template)
 
-(define (synthesize-hvx-template halide-expr ir-expr hvx-sub-exprs output-layout value-bounds translation-history lowering-algo cost-ub)
+(define (synthesize-hvx-template spec halide-expr ir-expr hvx-sub-exprs output-layout value-bounds translation-history lowering-algo cost-ub)
   (cond
     [(eq? lowering-algo 'enumerative)
       (display "Lowering IR to HVX...\n")
@@ -29,7 +29,7 @@
       (define candidates (get-hvx-grammar halide-expr ir-expr hvx-sub-exprs output-layout cost-ub))
       
       (define-values (successful? hvx-template)
-        (hvx:synthesize-translation candidates halide-expr hvx-sub-exprs value-bounds translation-history))
+        (hvx:synthesize-translation spec candidates halide-expr hvx-sub-exprs value-bounds translation-history))
       
       (cond
         [successful?

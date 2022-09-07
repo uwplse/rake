@@ -28,7 +28,7 @@
 (define value-bounds (make-hash))
 (define trace (list))
 
-(define (synthesize-hvx-expr ir-expr ir-annotations ir-bounds lowering-algo swizzling-algo [sub-expr? #f] [output-layout 'in-order])
+(define (synthesize-hvx-expr spec ir-expr ir-annotations ir-bounds lowering-algo swizzling-algo [sub-expr? #f] [output-layout 'in-order])
   ;; Reset the state of synthesis database
   (hvx:lowering:synthesizer:reset-db)
 
@@ -47,17 +47,17 @@
         
   ;; Lower sub-expressions to HVX
   (define-values (successful? hvx-sub-exprs)
-    (lower-sub-exprs (hvx-ir:get-subexprs ir-expr) ir-expr ir-annotations ir-bounds lowering-algo swizzling-algo #t output-layout))
+    (lower-sub-exprs spec (hvx-ir:get-subexprs ir-expr) ir-expr ir-annotations ir-bounds lowering-algo swizzling-algo #t output-layout))
 
   ;; Pop node from trace
   (set! trace (rest trace))
 
   (cond
     ;; If we were able to lower the sub-exprs, use them to construct the lowered expression
-    [successful? (lower-expr ir-expr ir-annotations lowering-algo swizzling-algo sub-expr? output-layout hvx-sub-exprs)]
+    [successful? (lower-expr spec ir-expr ir-annotations lowering-algo swizzling-algo sub-expr? output-layout hvx-sub-exprs)]
     [else #f]))
 
-(define (lower-sub-exprs ir-sub-exprs ir-expr ir-annotations ir-bounds lowering-algo swizzling-algo sub-expr? output-layout)
+(define (lower-sub-exprs spec ir-sub-exprs ir-expr ir-annotations ir-bounds lowering-algo swizzling-algo sub-expr? output-layout)
   (cond
     [(empty? ir-sub-exprs) (values #t '())]
     [else
@@ -69,7 +69,7 @@
 
      ;; Lower sub-expr for each data-layout
      (define lowered-sub-expr-impl
-       (synthesize-hvx-expr ir-sub-expr ir-annotations ir-bounds lowering-algo swizzling-algo sub-expr? ideal-subexpr-layout))
+       (synthesize-hvx-expr spec ir-sub-expr ir-annotations ir-bounds lowering-algo swizzling-algo sub-expr? ideal-subexpr-layout))
      
      (cond
        [(empty? lowered-sub-expr-impl) (values #f lowered-sub-expr-impl)]
@@ -80,13 +80,13 @@
 
         ;; Lower remaining subexprs
         (define-values (successful? lowered-exprs)
-          (lower-sub-exprs (rest ir-sub-exprs) ir-expr ir-annotations ir-bounds lowering-algo swizzling-algo sub-expr? output-layout))
+          (lower-sub-exprs spec (rest ir-sub-exprs) ir-expr ir-annotations ir-bounds lowering-algo swizzling-algo sub-expr? output-layout))
         
         (cond
           [successful? (values #t (flatten (append (list lowered-sub-expr-impl) lowered-exprs)))]
           [else (values #f '())])])]))
 
-(define (lower-expr ir-expr ir-annotations lowering-algo swizzling-algo sub-expr? output-layout hvx-sub-exprs)
+(define (lower-expr spec ir-expr ir-annotations lowering-algo swizzling-algo sub-expr? output-layout hvx-sub-exprs)
   (cond
     ;; For combine nodes (data shuffle), unless we are the root node just pass the sub-expressions to the parent.
     ;; If we are, however, the root node then we must synthesize the shuffles now.
@@ -96,7 +96,7 @@
     [(hash-has-key? ir-annotations (ir-node-id ir-expr))
      (define halide-spec (hash-ref ir-annotations (ir-node-id ir-expr)))
      (define-values (successful? hvx-expr _)
-       (lower-to-optimal-hvx halide-spec ir-expr hvx-sub-exprs lowering-algo swizzling-algo sub-expr? output-layout))
+       (lower-to-optimal-hvx spec halide-spec ir-expr hvx-sub-exprs lowering-algo swizzling-algo sub-expr? output-layout))
      (when successful? (hash-set! translation-history hvx-expr halide-spec))
      (cond
        [successful? hvx-expr]
@@ -124,9 +124,9 @@
     [else
      (error "Unexpected: Did not find Halide IR mapping for expression ~a" ir-expr)]))
 
-(define (lower-to-optimal-hvx halide-expr ir-expr hvx-sub-exprs lowering-algo swizzling-algo sub-expr? output-layout [cost-ub 99999])
+(define (lower-to-optimal-hvx spec halide-expr ir-expr hvx-sub-exprs lowering-algo swizzling-algo sub-expr? output-layout [cost-ub 99999])
   (define-values (successful? hvx-expr expr-cost template-cost swizzle-cost)
-    (lower-to-hvx halide-expr ir-expr hvx-sub-exprs lowering-algo swizzling-algo sub-expr? output-layout cost-ub))
+    (lower-to-hvx spec halide-expr ir-expr hvx-sub-exprs lowering-algo swizzling-algo sub-expr? output-layout cost-ub))
 
   (cond
     [(and successful? (load-data? ir-expr)) (values #t hvx-expr 1)]
@@ -136,7 +136,7 @@
         [(or (<= template-cost 2) (>= swizzle-cost template-cost))
          (display "Searching for a more optimal implementation...\n\n")
          (define-values (successful? better-hvx-expr new-cost)
-           (lower-to-optimal-hvx halide-expr ir-expr hvx-sub-exprs lowering-algo swizzling-algo sub-expr? output-layout expr-cost))
+           (lower-to-optimal-hvx spec halide-expr ir-expr hvx-sub-exprs lowering-algo swizzling-algo sub-expr? output-layout expr-cost))
          (cond
            [successful? (values #t better-hvx-expr new-cost)]
            [else (values #t hvx-expr expr-cost)])]
@@ -147,10 +147,10 @@
     [else
      (values #f (void) 0)]))
 
-(define (lower-to-hvx halide-expr ir-expr hvx-sub-exprs lowering-algo swizzling-algo sub-expr? output-layout cost-ub)
+(define (lower-to-hvx spec halide-expr ir-expr hvx-sub-exprs lowering-algo swizzling-algo sub-expr? output-layout cost-ub)
   ;; Synthesize equivalent HVX template (compute instructions)
   (define-values (successful? hvx-template template-cost)
-    (synthesize-hvx-template halide-expr ir-expr hvx-sub-exprs output-layout value-bounds translation-history lowering-algo cost-ub))
+    (synthesize-hvx-template spec halide-expr ir-expr hvx-sub-exprs output-layout value-bounds translation-history lowering-algo cost-ub))
   
   (cond
     [successful?
@@ -172,7 +172,7 @@
                 (define tile (first tiles))
                 ;; Synthesize data-movement to complete the template
                 (define-values (successful? hvx-expr swizzle-cost)
-                  (synthesize-hvx-swizzles ir-expr tile hvx-template output-layout swizzle-budget swizzling-algo hvx-sub-exprs value-bounds translation-history tile-id num-tiles))
+                  (synthesize-hvx-swizzles spec ir-expr tile hvx-template output-layout swizzle-budget swizzling-algo hvx-sub-exprs value-bounds translation-history tile-id num-tiles))
 
                 (cond
                   [successful?
@@ -195,11 +195,11 @@
            (cond
              [successful? (values #t (concat-tiles hvx-tiles) (+ template-cost swizzle-cost -0.01) template-cost swizzle-cost)]
              [else
-              (lower-to-hvx halide-expr ir-expr hvx-sub-exprs lowering-algo swizzling-algo sub-expr? output-layout cost-ub)])]
+              (lower-to-hvx spec halide-expr ir-expr hvx-sub-exprs lowering-algo swizzling-algo sub-expr? output-layout cost-ub)])]
           [else
            ;; Synthesize data-movement to complete the template
            (define-values (successful? hvx-expr swizzle-cost)
-             (synthesize-hvx-swizzles ir-expr halide-expr hvx-template output-layout swizzle-budget swizzling-algo hvx-sub-exprs value-bounds translation-history))
+             (synthesize-hvx-swizzles spec ir-expr halide-expr hvx-template output-layout swizzle-budget swizzling-algo hvx-sub-exprs value-bounds translation-history))
 
            (display (format "Template Cost: ~a\n" template-cost))
            (display (format "Swizzle Cost: ~a\n\n" swizzle-cost))
@@ -207,7 +207,7 @@
            (cond
              [successful? (values #t hvx-expr (+ template-cost swizzle-cost -0.01) template-cost swizzle-cost)]
              [else
-              (lower-to-hvx halide-expr ir-expr hvx-sub-exprs lowering-algo swizzling-algo sub-expr? output-layout cost-ub)])])])]
+              (lower-to-hvx spec halide-expr ir-expr hvx-sub-exprs lowering-algo swizzling-algo sub-expr? output-layout cost-ub)])])])]
     [else
       (values #f (void) 0 0 0)]))
 
@@ -274,19 +274,19 @@
 ;;--------------------------
 
 
-(define (synthesize-lowered-impl ir-expr ir-annotations ir-bounds lowering-algo swizzling-algo sub-expr? output-layout subexpr-layout)
+(define (synthesize-lowered-impl spec ir-expr ir-annotations ir-bounds lowering-algo swizzling-algo sub-expr? output-layout subexpr-layout)
   ;; Push node to trace
   (set! trace (append (list ir-expr) trace))
         
   ;; Generate HVX sub-expressions that produce output in subexpr-layout
-  (define-values (successful? hvx-sub-exprs) (lower-sub-exprs ir-expr (hvx-ir:get-subexprs ir-expr) ir-annotations ir-bounds lowering-algo swizzling-algo sub-expr? subexpr-layout))
+  (define-values (successful? hvx-sub-exprs) (lower-sub-exprs spec ir-expr (hvx-ir:get-subexprs ir-expr) ir-annotations ir-bounds lowering-algo swizzling-algo sub-expr? subexpr-layout))
 
   ;; Pop node from trace
   (set! trace (rest trace))
 
   (cond
     ;; If we were able to lower the sub-exprs, use them to construct the lowered expression
-    [successful? (lower-expr ir-expr ir-annotations lowering-algo swizzling-algo sub-expr? output-layout hvx-sub-exprs)]
+    [successful? (lower-expr spec ir-expr ir-annotations lowering-algo swizzling-algo sub-expr? output-layout hvx-sub-exprs)]
     [else #f]))
 
 ;(define (lower-sub-exprs ir-expr ir-sub-exprs ir-annotations ir-bounds lowering-algo swizzling-algo sub-expr? subexpr-layout)
@@ -295,7 +295,7 @@
 ;      [else
 ;       ;; Lower current subexpr
 ;       (define ir-sub-expr (first ir-sub-exprs))
-;       (define hvx-sub-expr-impls (synthesize-hvx-expr ir-sub-expr ir-annotations ir-bounds lowering-algo swizzling-algo (or sub-expr? (not (combine? ir-expr))) subexpr-layout))
+;       (define hvx-sub-expr-impls (synthesize-hvx-expr spec ir-sub-expr ir-annotations ir-bounds lowering-algo swizzling-algo (or sub-expr? (not (combine? ir-expr))) subexpr-layout))
 ;       (cond
 ;         [(empty? hvx-sub-expr-impls) (values #f '())]
 ;         [else
@@ -305,7 +305,7 @@
 ;              (hash-set! value-bounds impl (hash-ref ir-bounds (ir-node-id ir-sub-expr)))))
 ;
 ;          ;; Lower remaining subexprs
-;          (define-values (successful? lowered-exprs) (lower-sub-exprs ir-expr (rest ir-sub-exprs) ir-annotations ir-bounds lowering-algo swizzling-algo sub-expr? subexpr-layout))
+;          (define-values (successful? lowered-exprs) (lower-sub-exprs spec ir-expr (rest ir-sub-exprs) ir-annotations ir-bounds lowering-algo swizzling-algo sub-expr? subexpr-layout))
 ;          (cond
 ;            [successful? (values #t (flatten (append hvx-sub-expr-impls lowered-exprs)))]
 ;            [else (values #f '())])])]))

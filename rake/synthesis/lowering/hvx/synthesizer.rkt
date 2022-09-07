@@ -9,6 +9,7 @@
   rake/halide
   rake/hvx/ast/types
   rake/hvx/interpreter
+  rake/synthesis/spec
   rake/synthesis/lowering/hvx/util)
 
 (provide
@@ -49,22 +50,22 @@
     [(eq? type 'i32x32x2) '(0 15 16 31 32 47 48 63)]
     [(eq? type 'u32x32x2) '(0 15 16 31 32 47 48 63)]))
 
-(define (synthesize-translation templates halide-expr hvx-sub-exprs value-bounds translation-history)
+(define (synthesize-translation spec templates halide-expr hvx-sub-exprs value-bounds translation-history)
   (cond
     [(empty? templates) (values #f (void))]
     [(hash-has-key? synthesis-db (cons (first templates) halide-expr))
-     (synthesize-translation (rest templates) halide-expr hvx-sub-exprs value-bounds translation-history)]
+     (synthesize-translation spec (rest templates) halide-expr hvx-sub-exprs value-bounds translation-history)]
     [else
      (define template (first templates))
-     (define sol (run-synthesizer (car template) halide-expr hvx-sub-exprs value-bounds translation-history))
+     (define sol (run-synthesizer spec (car template) halide-expr hvx-sub-exprs value-bounds translation-history))
      (hash-set! synthesis-db (cons (first templates) halide-expr) (correct? sol))
      (cond
        [(correct? sol)
         (values #t (evaluate template sol))]
        [else
-        (synthesize-translation (rest templates) halide-expr hvx-sub-exprs value-bounds translation-history)])]))
+        (synthesize-translation spec (rest templates) halide-expr hvx-sub-exprs value-bounds translation-history)])]))
 
-(define (run-synthesizer template halide-expr hvx-sub-exprs value-bounds translation-history)
+(define (run-synthesizer spec template halide-expr hvx-sub-exprs value-bounds translation-history)
   ;(pretty-print halide-expr)
   ;(pretty-print template)
 
@@ -79,9 +80,9 @@
 
   ;; Incrementally checks the template for more and more lanes
   (define lanes-to-verify (verification-lanes (hvx:type (hvx:interpret optimized-template))))
-  (synthesize-incremental optimized-halide-expr optimized-template inferred-axioms lanes-to-verify '()))
+  (synthesize-incremental spec optimized-halide-expr optimized-template inferred-axioms lanes-to-verify '()))
 
-(define (synthesize-incremental optimized-halide-expr optimized-template inferred-axioms lanes-to-verify discarded-sols)
+(define (synthesize-incremental spec optimized-halide-expr optimized-template inferred-axioms lanes-to-verify discarded-sols)
   (cond
     [(empty? lanes-to-verify) (model)]
     [else
@@ -93,8 +94,11 @@
 ;     (hvx:set-curr-cn curr-lane)
 ;     (println (let ([x (hvx:interpret optimized-template)]) (let ([offset (quotient (hvx:num-elems x) 2)]) (if (hvx:vec-pair? x) (if (< curr-lane offset) (hvx:v0-elem x curr-lane) (hvx:v1-elem x (- curr-lane offset))) (hvx:elem x curr-lane)))))
 
+     (define base-axioms (spec-axioms spec))
+
      (define st (current-milliseconds))
      (clear-vc!)
+     (for-each (lambda (axiom) (assume axiom)) base-axioms)
      (for-each (lambda (axiom) (assume axiom)) inferred-axioms)
      (define sol (synthesize #:forall (symbolics optimized-halide-expr)
                              #:guarantee (begin
@@ -109,12 +113,12 @@
        [(correct? sol)
         (define updated-template (evaluate optimized-template sol))
         
-        (define sub-sol (synthesize-incremental optimized-halide-expr updated-template inferred-axioms (rest lanes-to-verify) '()))
+        (define sub-sol (synthesize-incremental spec optimized-halide-expr updated-template inferred-axioms (rest lanes-to-verify) '()))
         (cond
           [(correct? sub-sol) sol]
           [else
            (define discarded-sol (evaluate optimized-template sol))
-           (synthesize-incremental optimized-halide-expr optimized-template inferred-axioms lanes-to-verify (append (list discarded-sol) discarded-sols))])]
+           (synthesize-incremental spec optimized-halide-expr optimized-template inferred-axioms lanes-to-verify (append (list discarded-sol) discarded-sols))])]
        [else
         (unsat)])]))
 

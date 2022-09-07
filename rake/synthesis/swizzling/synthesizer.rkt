@@ -10,6 +10,7 @@
   rake/halide
   rake/hvx/ast/types
   rake/hvx/interpreter
+  rake/synthesis/spec
   rake/synthesis/lowering/hvx/util)
 
 (provide synthesize-translation)
@@ -58,22 +59,22 @@
     [(eq? type 'i32x32x2) '(0 1 2 15 16 31 32 33 47 48 63)]
     [(eq? type 'u32x32x2) '(0 1 2 15 16 31 32 33 47 48 63)]))
 
-(define (synthesize-translation templates halide-expr hvx-sub-exprs value-bounds translation-history output-layout)
+(define (synthesize-translation spec templates halide-expr hvx-sub-exprs value-bounds translation-history output-layout)
   (cond
     [(empty? templates) (values #f (void))]
     [(hash-has-key? synthesis-db (list (first templates) halide-expr output-layout))
-     (synthesize-translation (rest templates) halide-expr hvx-sub-exprs value-bounds translation-history output-layout)]
+     (synthesize-translation spec (rest templates) halide-expr hvx-sub-exprs value-bounds translation-history output-layout)]
     [else
      (define template (first templates))
-     (define sol (run-synthesizer (car template) halide-expr hvx-sub-exprs value-bounds translation-history output-layout))
+     (define sol (run-synthesizer spec (car template) halide-expr hvx-sub-exprs value-bounds translation-history output-layout))
      (hash-set! synthesis-db (list (first templates) halide-expr output-layout) #t)
      (cond
        [(correct? sol)
         (values #t (evaluate template sol))]
        [else
-        (synthesize-translation (rest templates) halide-expr hvx-sub-exprs value-bounds translation-history output-layout)])]))
+        (synthesize-translation spec (rest templates) halide-expr hvx-sub-exprs value-bounds translation-history output-layout)])]))
 
-(define (run-synthesizer template halide-expr hvx-sub-exprs value-bounds translation-history output-layout)
+(define (run-synthesizer spec template halide-expr hvx-sub-exprs value-bounds translation-history output-layout)
   ;(println halide-expr)
   ;(pretty-print template)
 
@@ -86,9 +87,9 @@
   ;; Incrementally checks the template for more and more lanes
   (define sym-consts (set->list (set-subtract (list->set (symbolics template)) (list->set (symbolics halide-expr)))))
   (define lanes-to-verify (verification-lanes (hvx:type (hvx:interpret template))))
-  (synthesize-incremental halide-expr template output-layout sym-consts lanes-to-verify '()))
+  (synthesize-incremental spec halide-expr template output-layout sym-consts lanes-to-verify '()))
 
-(define (synthesize-incremental halide-expr template output-layout sym-consts lanes-to-verify discarded-sols)
+(define (synthesize-incremental spec halide-expr template output-layout sym-consts lanes-to-verify discarded-sols)
   (cond
     [(empty? lanes-to-verify) (model)]
     [else
@@ -98,9 +99,12 @@
      ;(set-curr-cn! curr-lane)
      ;(println ((halide:interpret halide-expr) curr-lane))
      ;(println (let ([x (hvx:interpret template)]) (if (hvx:vec-pair? x) (hvx:v0-elem x curr-lane) (hvx:elem x curr-lane))))
-     
+
+     (define base-axioms (spec-axioms spec))
+
      (define st (current-milliseconds))
      (clear-vc!)
+     (for-each (lambda (axiom) (assume axiom)) base-axioms)
      (define sol (synthesize #:forall (symbolics halide-expr)
                              #:guarantee (begin
                                            (assert (not (ormap (lambda (discarded-sol) (equal? template discarded-sol)) discarded-sols)))
@@ -115,12 +119,12 @@
         (define c-sol sol);(complete-solution sol sym-consts))
         (define updated-template (evaluate template c-sol))
         ;(pretty-print updated-template)
-        (define sub-sol (synthesize-incremental halide-expr updated-template output-layout sym-consts (rest lanes-to-verify) '()))
+        (define sub-sol (synthesize-incremental spec halide-expr updated-template output-layout sym-consts (rest lanes-to-verify) '()))
         (cond
           [(correct? sub-sol) c-sol]
           [else
            (define discarded-sol (evaluate template c-sol))
-           (synthesize-incremental halide-expr template output-layout sym-consts lanes-to-verify (append (list discarded-sol) discarded-sols))])]
+           (synthesize-incremental spec halide-expr template output-layout sym-consts lanes-to-verify (append (list discarded-sol) discarded-sols))])]
        [else
         (unsat)])]))
 

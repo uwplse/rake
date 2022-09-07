@@ -25,7 +25,7 @@
      (cond
        [lifting-success?
         ;; Lower the uber-instructions to an expression template (in HVX ISA)
-        (define hvx-expr (synthesize-hvx-expr ir-expr ir-annotations ir-bounds lowering-algo swizzling-algo))
+        (define hvx-expr (synthesize-hvx-expr spec ir-expr ir-annotations ir-bounds lowering-algo swizzling-algo))
 
         ;; Full verification of the synthesized expression
         (define correct? (verify-equivalence (spec-expr spec) hvx-expr (spec-axioms spec)))
