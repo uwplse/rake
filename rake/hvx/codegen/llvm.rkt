@@ -19,6 +19,7 @@
   (close-output-port out))
 
 (define (compile hvx-expr)
+  ; (display (format "Compiling: ~a\n" (pretty-format hvx-expr)))
   (match hvx-expr
 
     ;;;;;;;;;;;;;;;;;;;;;;; Concatenate Tiles ;;;;;;;;;;;;;;;;;;;;;;;;
@@ -649,8 +650,8 @@
     
     [(vsxt Vu)
      (destruct (hvx:interpret Vu)
-       [(u8x128 v0) (generate `vsb (to-llvm-type hvx-expr) `(list ,(input-arg Vu)))]
-       [(u16x64 v0) (generate `vsh (to-llvm-type hvx-expr) `(list ,(input-arg Vu)))])]
+       [(i8x128 v0) (generate `vsb (to-llvm-type hvx-expr) `(list ,(input-arg Vu)))]
+       [(i16x64 v0) (generate `vsh (to-llvm-type hvx-expr) `(list ,(input-arg Vu)))])]
     
     [(vunpack Vu)
      (destruct (hvx:interpret Vu)
