@@ -328,11 +328,10 @@
           ;; or vector-vector multiply-add
           (arm-ir:vv-mpy-add (get-node-id) (apply choose* lifted-sub-exprs) (list 1) (halide:elem-type halide-expr))
           (arm-ir:vv-mpy-add (get-node-id) (arm-ir:load-data (get-load-id) live-reads gather-tbl) (list 1) (halide:elem-type halide-expr))
+          ;; Extend sub-sub-exprs (combine them)
+          (mk-vv-mpy-add-combine-subsubexprs lifted-sub-exprs (list 1) (halide:elem-type halide-expr))
           ;; Extend both of the sub-exprs (combine them)
           (mk-vv-mpy-add-combine-subexprs lifted-sub-exprs (list 1) (halide:elem-type halide-expr))
-          ;; TODO: understand this.
-          ;; Extend sub-sub-exprs (combine them)
-          ; (mk-vv-mpy-add-combine-subsubexprs lifted-sub-exprs (list 1) (halide:elem-type halide-expr))
       ))]
 
     ;; Addition
@@ -512,12 +511,12 @@
   (define read-tbl (map (lambda (i) (define-symbolic* idx integer?) (define-symbolic* c boolean?) (cons idx c)) (range SYMBOL_TBL_SIZE)))
   (arm-ir:combine (get-load-id) expr0 expr1 read-tbl))
 
-; (define (mk-combine-instr2 lifted-sub-exprs0 lifted-sub-exprs1)
-;   (cond
-;     [(and (not (empty? lifted-sub-exprs0)) (not (empty? lifted-sub-exprs1)))
-;       (define read-tbl (map (lambda (i) (define-symbolic* idx integer?) (define-symbolic* c boolean?) (cons idx c)) (range SYMBOL_TBL_SIZE)))
-;       (arm-ir:combine (get-load-id) (first lifted-sub-exprs0) (first lifted-sub-exprs1) read-tbl)]
-;     [else '()]))
+ (define (mk-combine-instr2 lifted-sub-exprs0 lifted-sub-exprs1)
+   (cond
+     [(and (not (empty? lifted-sub-exprs0)) (not (empty? lifted-sub-exprs1)))
+       (define read-tbl (map (lambda (i) (define-symbolic* idx integer?) (define-symbolic* c boolean?) (cons idx c)) (range SYMBOL_TBL_SIZE)))
+       (arm-ir:combine (get-load-id) (first lifted-sub-exprs0) (first lifted-sub-exprs1) read-tbl)]
+     [else '()]))
 
 (define (mk-vs-mpy-add-combine-subsubexprs lifted-sub-exprs weights output-type)
   (cond
@@ -580,16 +579,16 @@
      (arm-ir:vv-mpy-add (get-node-id) (mk-combine-instr lifted-sub-exprs) width output-type)]
     [else '()]))
 
-; (define (mk-vv-mpy-add-combine-subsubexprs lifted-sub-exprs width output-type)
-;   (cond
-;     [(eq? (length lifted-sub-exprs) 2)
-;      (let ([sub-exprs0 (arm-ir:get-subexprs (list-ref lifted-sub-exprs 0))])
-;        (let ([sub-exprs1 (arm-ir:get-subexprs (list-ref lifted-sub-exprs 1))])
-;          (define s
-;           (list
-;             (arm-ir:vv-mpy-add (get-node-id) (mk-combine-instr2 sub-exprs0 sub-exprs1) width output-type)
-;             (arm-ir:vv-mpy-add (get-node-id) (mk-combine-instr2 sub-exprs0 (list (second lifted-sub-exprs))) width output-type)
-;             (arm-ir:vv-mpy-add (get-node-id) (mk-combine-instr2 (list (first lifted-sub-exprs)) sub-exprs1) width output-type)))
-;           (display (format "S: ~a\n" (pretty-format s)))
-;           s))]
-;     [else '()]))
+ (define (mk-vv-mpy-add-combine-subsubexprs lifted-sub-exprs width output-type)
+   (cond
+     [(eq? (length lifted-sub-exprs) 2)
+      (let ([sub-exprs0 (arm-ir:get-subexprs (list-ref lifted-sub-exprs 0))])
+        (let ([sub-exprs1 (arm-ir:get-subexprs (list-ref lifted-sub-exprs 1))])
+          (define s
+           (list
+             (arm-ir:vv-mpy-add (get-node-id) (mk-combine-instr2 sub-exprs0 sub-exprs1) width output-type)
+             (arm-ir:vv-mpy-add (get-node-id) (mk-combine-instr2 sub-exprs0 (list (second lifted-sub-exprs))) width output-type)
+             (arm-ir:vv-mpy-add (get-node-id) (mk-combine-instr2 (list (first lifted-sub-exprs)) sub-exprs1) width output-type)))
+           (display (format "S: ~a\n" (pretty-format s)))
+           s))]
+     [else '()]))
