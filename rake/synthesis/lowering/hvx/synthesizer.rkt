@@ -57,11 +57,14 @@
      (synthesize-translation spec (rest templates) halide-expr hvx-sub-exprs value-bounds translation-history)]
     [else
      (define template (first templates))
-     (define sol (run-synthesizer spec (car template) halide-expr hvx-sub-exprs value-bounds translation-history))
+
+     (define-values (sol updated-template)
+      (run-synthesizer spec (car template) halide-expr hvx-sub-exprs value-bounds translation-history))
+
      (hash-set! synthesis-db (cons (first templates) halide-expr) (correct? sol))
      (cond
        [(correct? sol)
-        (values #t (evaluate template sol))]
+        (values #t (cons updated-template (cdr template)))]
        [else
         (synthesize-translation spec (rest templates) halide-expr hvx-sub-exprs value-bounds translation-history)])]))
 
@@ -84,7 +87,7 @@
 
 (define (synthesize-incremental spec optimized-halide-expr optimized-template inferred-axioms lanes-to-verify discarded-sols)
   (cond
-    [(empty? lanes-to-verify) (model)]
+    [(empty? lanes-to-verify) (values (model) optimized-template)]
     [else
      (define curr-lane (first lanes-to-verify))
 
@@ -112,15 +115,17 @@
      (cond
        [(correct? sol)
         (define updated-template (evaluate optimized-template sol))
-        
-        (define sub-sol (synthesize-incremental spec optimized-halide-expr updated-template inferred-axioms (rest lanes-to-verify) '()))
+
+        (define-values (sub-sol sub-template)
+          (synthesize-incremental spec optimized-halide-expr updated-template inferred-axioms (rest lanes-to-verify) '()))
+
         (cond
-          [(correct? sub-sol) sol]
+          [(correct? sub-sol) (values sol sub-template)]
           [else
-           (define discarded-sol (evaluate optimized-template sol))
+           (define discarded-sol updated-template)
            (synthesize-incremental spec optimized-halide-expr optimized-template inferred-axioms lanes-to-verify (append (list discarded-sol) discarded-sols))])]
        [else
-        (unsat)])]))
+        (values (unsat) optimized-template)])]))
 
 (define (lane-eq? oe se lane)
   (define offset (quotient (hvx:num-elems se) 2))

@@ -66,11 +66,12 @@
      (synthesize-translation spec (rest templates) halide-expr hvx-sub-exprs value-bounds translation-history output-layout)]
     [else
      (define template (first templates))
-     (define sol (run-synthesizer spec (car template) halide-expr hvx-sub-exprs value-bounds translation-history output-layout))
+     (define-values (sol updated-template)
+      (run-synthesizer spec (car template) halide-expr hvx-sub-exprs value-bounds translation-history output-layout))
      (hash-set! synthesis-db (list (first templates) halide-expr output-layout) #t)
      (cond
        [(correct? sol)
-        (values #t (evaluate template sol))]
+        (values #t (cons updated-template (cdr template)))]
        [else
         (synthesize-translation spec (rest templates) halide-expr hvx-sub-exprs value-bounds translation-history output-layout)])]))
 
@@ -91,7 +92,7 @@
 
 (define (synthesize-incremental spec halide-expr template output-layout sym-consts lanes-to-verify discarded-sols)
   (cond
-    [(empty? lanes-to-verify) (model)]
+    [(empty? lanes-to-verify) (values (model) template)]
     [else
      (define curr-lane (first lanes-to-verify))
      
@@ -119,14 +120,15 @@
         (define c-sol sol);(complete-solution sol sym-consts))
         (define updated-template (evaluate template c-sol))
         ;(pretty-print updated-template)
-        (define sub-sol (synthesize-incremental spec halide-expr updated-template output-layout sym-consts (rest lanes-to-verify) '()))
+        (define-values (sub-sol sub-template)
+          (synthesize-incremental spec halide-expr updated-template output-layout sym-consts (rest lanes-to-verify) '()))
         (cond
-          [(correct? sub-sol) c-sol]
+          [(correct? sub-sol) (values sol sub-template)]
           [else
-           (define discarded-sol (evaluate template c-sol))
+           (define discarded-sol updated-template)
            (synthesize-incremental spec halide-expr template output-layout sym-consts lanes-to-verify (append (list discarded-sol) discarded-sols))])]
        [else
-        (unsat)])]))
+        (values (unsat) template)])]))
 
 ;(define (lane-eq? oe se output-layout lane)
 ;  (define offset (quotient (hvx:num-elems se) 2))
