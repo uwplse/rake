@@ -567,7 +567,14 @@
        [(u8x128 v0) (generate `vlsrb (to-llvm-type hvx-expr) `(list ,(input-arg Vu) (,t_i32 ,(compile-scalar (cpp:eval (hvx:interpret Rt))))))]
        [(u16x64 v0) (generate `vlsrh (to-llvm-type hvx-expr) `(list ,(input-arg Vu) (,t_i32 ,(compile-scalar (cpp:eval (hvx:interpret Rt))))))]
        [(u32x32 v0) (generate `vlsrw (to-llvm-type hvx-expr) `(list ,(input-arg Vu) (,t_i32 ,(compile-scalar (cpp:eval (hvx:interpret Rt))))))])]
-    
+
+    [(vshuffe-n Vu Vv signed?)
+     (destruct* ((hvx:interpret Vu) (hvx:interpret Vv))
+       [((i16x64 v0) (i16x64 v1)) (generate `vshuffeb (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv)))]
+       [((u16x64 v0) (u16x64 v1)) (generate `vshuffeb (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv)))]
+       [((i32x32 v0) (i32x32 v1)) (generate `vshufeh (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv)))]
+       [((u32x32 v0) (u32x32 v1)) (generate `vshufeh (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv)))])]
+
     [(vshuffo-n Vu Vv signed?)
      (destruct* ((hvx:interpret Vu) (hvx:interpret Vv))
        [((i16x64 v0) (i16x64 v1)) (generate `vshufob (to-llvm-type hvx-expr) `(list ,(input-arg Vu) ,(input-arg Vv)))]
